@@ -66,7 +66,9 @@ def git_identity() -> dict:
     def git(*args):
         return subprocess.run(['git', *args], cwd=ROOT, capture_output=True, text=True)
     commit = git('rev-parse', 'HEAD')
-    status = git('status', '--porcelain')
+    # dirty 只看已跟踪文件的修改：未跟踪的验收产物（verify 报告、日志）不是
+    # 源码身份的一部分，否则验证过程自身会产生 dirty。
+    status = git('status', '--porcelain', '--untracked-files=no')
     if commit.returncode != 0:
         raise SystemExit('git 不可用或仓库未初始化；构建身份需要提交信息')
     dirty = bool(status.stdout.strip())

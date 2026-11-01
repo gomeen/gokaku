@@ -193,7 +193,7 @@ def check_clean_build(ctx):
         return FAIL, '构建未产出 dist/build-identity.json', evidence
     data = json.loads(identity.read_text())
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip()
-    dirty = bool(sh(['git', 'status', '--porcelain']).stdout.strip())
+    dirty = bool(sh(['git', 'status', '--porcelain', '--untracked-files=no']).stdout.strip())
     if data['commit'] != head:
         return FAIL, f"身份提交 {data['commit'][:12]} ≠ 当前 HEAD {head[:12]}（报告指向旧产物）", evidence
     if data['dirty']:
@@ -464,7 +464,7 @@ def main():
     required_bad = [r for r in results if r['required'] and r['status'] != PASS]
     gate = not required_bad
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip() or 'no-git'
-    dirty = bool(sh(['git', 'status', '--porcelain']).stdout.strip())
+    dirty = bool(sh(['git', 'status', '--porcelain', '--untracked-files=no']).stdout.strip())
     report = {
         'profile': args.profile, 'startedAt': started,
         'finishedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
