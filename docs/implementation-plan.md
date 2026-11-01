@@ -179,3 +179,4 @@ Mac 输入源使用一个隔离翻译进程；Windows 多个宿主中的 TSF 实
 | G3 模型与学习交互 | 阻塞 | Mac 模型质量门槛不通过，生产学习辅助保持关闭 |
 | G4 记录设置安装与最终验收 | 未通过 | Mac 安装恢复脚本已有；双端验收矩阵未执行 |
 | 本阶段：普通模式规格对齐与试用前收尾（G1 子阶段） | 性能未通过，停止交付试用 | 修复已以 Release 构建安装并核对哈希；核心 ctest 4/4、Swift 49 项、渲染 51 项、40 轮可靠性通过，质量 109/120 与 112/120 未下降。最终 10,035 事件 IMK 主线程 p95 10.35ms／p99 15.38ms，超过 5ms／10ms；候选首次显示、AppKit 收字与回调内隐藏通过。最终全宿主连续两轮、十万序列插桩、内存／两小时稳定性／冷启动未完成。旧 16k 事件 0.4µs 与“条件性达标”作废，见[收尾复测报告](validation/pre-user-test.md)。Windows 未开始 |
+| 工程化与版本管理（2026-11-02） | 工程侧阻塞清零；验收门槛未变 | Git 基线＋单一版本来源（`version.json`，[版本管理](versioning.md)）＋统一验证入口 `scripts/verify.py`（fast/release/host）。修复 Shift 提交不更新最近上屏字符（Terminal 半角句号根因，事件轨迹 265 断言）；释义精简落地（[审阅](validation/gloss-simplification-review.md)）。工程检查与阻塞分列见[工程化检查](validation/engineering-readiness.md)。性能与宿主矩阵门槛未变 |
