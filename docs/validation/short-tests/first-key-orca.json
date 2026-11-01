@@ -1,0 +1,1896 @@
+{
+  "schema": "gogaku.first-key-matrix.v1",
+  "checkedAt": "2026-11-01T14:18:20.605745+00:00",
+  "runId": "17935421750675",
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "installedPath": "/Users/gomeen/Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput",
+    "installedSHA256": "f508cc430de6ed3c1b596317decfa5845d656b87c88c4cfd32287c5044771568"
+  },
+  "driver": {
+    "probeSHA256": "446fe97377b1573e2e7449a4719031845259fc435bd580e3da3de51a410a24b0",
+    "axReaderSHA256": "3b2804debf6e0912fea4bad24e1d76332e66140ba9ed8dd8b549166c41ba6adf",
+    "pageSHA256": "6b965f6d06249192fde7833c94b7b26d7b8b481a1b06180c0090a3dc29463284",
+    "planSHA256": "ddf270afc13811fecf759a84f0b6d7c9c3bad8f777bef70e09cb556ea3a5dbfe"
+  },
+  "panelState": {
+    "enabled": true,
+    "socket": "/Users/gomeen/Library/Logs/Gogaku/validation.sock",
+    "protocol": {
+      "transport": "AF_UNIX/SOCK_STREAM",
+      "request": "state\\n | metrics\\n | reset\\n | scenario <name>\\n",
+      "stateFields": [
+        "visible",
+        "generation",
+        "hideCount",
+        "staleRenderCount",
+        "renderCount",
+        "confirmationCount",
+        "confirmationHideFailures",
+        "scenario"
+      ],
+      "metricsExtra": [
+        "samples"
+      ],
+      "samplesFields": [
+        "callbackNs",
+        "coreNs",
+        "queueWaitNs",
+        "coreExecNs",
+        "hostReadNs",
+        "markedWriteNs",
+        "anchorReadNs",
+        "commitCallNs",
+        "commitCount",
+        "hostSelection",
+        "renderNs",
+        "firstDisplayNs",
+        "confirmationHidden",
+        "visibleAtReturn",
+        "firstDisplay",
+        "scenario"
+      ],
+      "containsText": false
+    },
+    "enableProcedure": {
+      "marker": "/Users/gomeen/Library/Logs/Gogaku/validation-enabled",
+      "markerMode": "0600",
+      "logDirectory": "/Users/gomeen/Library/Logs/Gogaku",
+      "logDirectoryMode": "0700",
+      "socketMode": "0600",
+      "requires": "验收构建（scripts/build.py --validation）＋重启输入法进程"
+    }
+  },
+  "plan": {
+    "schema": "gogaku.first-key-plan.v1",
+    "createdAt": "2026-11-01T14:09:35.312817+00:00",
+    "composition": "nihc",
+    "iterations": 10,
+    "hosts": [
+      "orca-pty"
+    ],
+    "confirmations": [
+      {
+        "id": "space",
+        "label": "空格确认首选候选",
+        "committed": "你好"
+      },
+      {
+        "id": "enter",
+        "label": "Enter 上屏原编码",
+        "committed": "nihc"
+      },
+      {
+        "id": "digit1",
+        "label": "数字 1 选当前页首个候选",
+        "committed": "你好"
+      },
+      {
+        "id": "semicolon",
+        "label": "组合中分号一次上屏",
+        "committed": "你好；"
+      },
+      {
+        "id": "shift",
+        "label": "组合中 Shift 单击上屏原编码",
+        "committed": "nihc"
+      }
+    ],
+    "postKeys": [
+      {
+        "id": "letter",
+        "label": "字母 n（后键首字）",
+        "kind": "composition"
+      },
+      {
+        "id": "comma",
+        "label": "逗号（无组合标点表）",
+        "kind": "punctuation"
+      },
+      {
+        "id": "period",
+        "label": "句号（无组合标点表）",
+        "kind": "punctuation"
+      },
+      {
+        "id": "stop",
+        "label": "停止（不发任何键）",
+        "kind": "stop"
+      }
+    ],
+    "sha256": "ddf270afc13811fecf759a84f0b6d7c9c3bad8f777bef70e09cb556ea3a5dbfe"
+  },
+  "inputLettersEnabled": true,
+  "groups": [
+    {
+      "id": "orca-pty/default/space/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "n",
+        "value": "你好",
+        "caret": 2,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/space/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好，",
+        "marked": "",
+        "value": "你好，",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/space/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好。",
+        "marked": "",
+        "value": "你好。",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/space/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "",
+        "value": "你好",
+        "caret": 2,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/enter/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc",
+        "marked": "n",
+        "value": "nihc",
+        "caret": 4,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/enter/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc，",
+        "marked": "",
+        "value": "nihc，",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/enter/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc。",
+        "marked": "",
+        "value": "nihc。",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/enter/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc",
+        "marked": "",
+        "value": "nihc",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/digit1/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "n",
+        "value": "你好",
+        "caret": 2,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/digit1/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好，",
+        "marked": "",
+        "value": "你好，",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/digit1/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好。",
+        "marked": "",
+        "value": "你好。",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/digit1/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "",
+        "value": "你好",
+        "caret": 2,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/semicolon/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；",
+        "marked": "n",
+        "value": "你好；",
+        "caret": 3,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/semicolon/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；，",
+        "marked": "",
+        "value": "你好；，",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/semicolon/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；。",
+        "marked": "",
+        "value": "你好；。",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/semicolon/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；",
+        "marked": "",
+        "value": "你好；",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "orca-pty/default/shift/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 1,
+      "passed": 0,
+      "failed": 1,
+      "expected": {
+        "committed": "nihc",
+        "marked": "n",
+        "value": "nihc",
+        "caret": 4,
+        "panel": true
+      },
+      "caretUnverified": 1,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": [
+        {
+          "iteration": 0,
+          "reason": "mismatch",
+          "detail": {
+            "ok": false,
+            "value": "",
+            "caret": null,
+            "caretStatus": "unverified-pty-selection-not-readable",
+            "committed": null,
+            "marked": null,
+            "panel": {
+              "confirmationCount": 0,
+              "confirmationHideFailures": 0,
+              "events": 11,
+              "generation": 11303,
+              "hideCount": 7323,
+              "panelFrame": [
+                539,
+                621,
+                439,
+                335
+              ],
+              "panelPreeditCaret": [
+                9,
+                9
+              ],
+              "panelWindowNumber": 5041,
+              "renderCount": 3980,
+              "scenario": "",
+              "staleRenderCount": 0,
+              "visible": true
+            },
+            "panelWaitMs": 0,
+            "continuation": {
+              "value": "",
+              "committed": null,
+              "caret": null,
+              "caretStatus": "unverified-pty-selection-not-readable",
+              "marked": null
+            },
+            "inserts": {
+              "expected": 1,
+              "counted": 0
+            },
+            "caretProbe": null,
+            "problems": [
+              "正文不符：期望 'nihc'，实际 ''",
+              "第二字母后正文不符：''",
+              "第 1 轮：插字次数不符（漏字）：期望 1，实际 0"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "orca-pty/default/shift/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 1,
+      "passed": 0,
+      "failed": 1,
+      "expected": {
+        "committed": "nihc，",
+        "marked": "",
+        "value": "nihc，",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 1,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": [
+        {
+          "iteration": 0,
+          "reason": "mismatch",
+          "detail": {
+            "ok": false,
+            "value": "",
+            "caret": null,
+            "caretStatus": "unverified-pty-selection-not-readable",
+            "committed": null,
+            "marked": null,
+            "panel": {
+              "confirmationCount": 1,
+              "confirmationHideFailures": 0,
+              "events": 11,
+              "generation": 11312,
+              "hideCount": 7327,
+              "panelFrame": [
+                -10000,
+                -10000,
+                439,
+                335
+              ],
+              "panelPreeditCaret": [
+                6,
+                6
+              ],
+              "panelWindowNumber": 5041,
+              "renderCount": 3985,
+              "scenario": "",
+              "staleRenderCount": 0,
+              "visible": false
+            },
+            "panelWaitMs": 0,
+            "continuation": null,
+            "inserts": {
+              "expected": 2,
+              "counted": 1
+            },
+            "caretProbe": {
+              "session": "orca-pty",
+              "markers": [
+                {
+                  "marker": "7",
+                  "value": "你豪"
+                }
+              ],
+              "problems": [
+                "插入位置行为学核对：数字 7 未落在已确认正文之后——期望 'nihc，7'，实际 '你豪'"
+              ]
+            },
+            "problems": [
+              "正文不符：期望 'nihc，'，实际 ''",
+              "插入位置行为学核对：数字 7 未落在已确认正文之后——期望 'nihc，7'，实际 '你豪'",
+              "第 1 轮：插字次数不符（漏字）：期望 2，实际 1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "orca-pty/default/shift/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 1,
+      "passed": 0,
+      "failed": 1,
+      "expected": {
+        "committed": "nihc。",
+        "marked": "",
+        "value": "nihc。",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 1,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": [
+        {
+          "iteration": 0,
+          "reason": "mismatch",
+          "detail": {
+            "ok": false,
+            "value": "",
+            "caret": null,
+            "caretStatus": "unverified-pty-selection-not-readable",
+            "committed": null,
+            "marked": null,
+            "panel": {
+              "confirmationCount": 1,
+              "confirmationHideFailures": 0,
+              "events": 11,
+              "generation": 11322,
+              "hideCount": 7332,
+              "panelFrame": [
+                -10000,
+                -10000,
+                180,
+                335
+              ],
+              "panelPreeditCaret": [
+                6,
+                6
+              ],
+              "panelWindowNumber": 5041,
+              "renderCount": 3990,
+              "scenario": "",
+              "staleRenderCount": 0,
+              "visible": false
+            },
+            "panelWaitMs": 0,
+            "continuation": null,
+            "inserts": {
+              "expected": 2,
+              "counted": 1
+            },
+            "caretProbe": {
+              "session": "orca-pty",
+              "markers": [
+                {
+                  "marker": "7",
+                  "value": "你皓"
+                }
+              ],
+              "problems": [
+                "插入位置行为学核对：数字 7 未落在已确认正文之后——期望 'nihc。7'，实际 '你皓'"
+              ]
+            },
+            "problems": [
+              "正文不符：期望 'nihc。'，实际 ''",
+              "插入位置行为学核对：数字 7 未落在已确认正文之后——期望 'nihc。7'，实际 '你皓'",
+              "第 1 轮：插字次数不符（漏字）：期望 2，实际 1"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "orca-pty/default/shift/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 1,
+      "passed": 0,
+      "failed": 1,
+      "expected": {
+        "committed": "nihc",
+        "marked": "",
+        "value": "nihc",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 1,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": [
+        {
+          "iteration": 0,
+          "reason": "mismatch",
+          "detail": {
+            "ok": false,
+            "value": "",
+            "caret": null,
+            "caretStatus": "unverified-pty-selection-not-readable",
+            "committed": null,
+            "marked": null,
+            "panel": {
+              "confirmationCount": 1,
+              "confirmationHideFailures": 0,
+              "events": 10,
+              "generation": 11331,
+              "hideCount": 7337,
+              "panelFrame": [
+                -10000,
+                -10000,
+                439,
+                335
+              ],
+              "panelPreeditCaret": [
+                6,
+                6
+              ],
+              "panelWindowNumber": 5041,
+              "renderCount": 3994,
+              "scenario": "",
+              "staleRenderCount": 0,
+              "visible": false
+            },
+            "panelWaitMs": 0,
+            "continuation": null,
+            "inserts": {
+              "expected": 1,
+              "counted": 1
+            },
+            "caretProbe": {
+              "session": "orca-pty",
+              "markers": [
+                {
+                  "marker": "7",
+                  "value": "你豪"
+                }
+              ],
+              "problems": [
+                "插入位置行为学核对：数字 7 未落在已确认正文之后——期望 'nihc7'，实际 '你豪'"
+              ]
+            },
+            "problems": [
+              "正文不符：期望 'nihc'，实际 ''",
+              "插入位置行为学核对：数字 7 未落在已确认正文之后——期望 'nihc7'，实际 '你豪'"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "panelReports": [
+    {
+      "confirm": "space",
+      "summary": {
+        "count": 6,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 6,
+          "p50": 2848164,
+          "p95": 5592599,
+          "p99": 5592599,
+          "max": 5592599
+        },
+        "coreNs": {
+          "count": 6,
+          "p50": 595235,
+          "p95": 2413948,
+          "p99": 2413948,
+          "max": 2413948
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 257497,
+          "p95": 257497,
+          "p99": 257497,
+          "max": 257497
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 6556844,
+          "p95": 9769289,
+          "p99": 9769289,
+          "max": 9769289
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 9769289,
+          "p95": 9769289,
+          "p99": 9769289,
+          "max": 9769289
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "enter",
+      "summary": {
+        "count": 6,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 6,
+          "p50": 2832600,
+          "p95": 6169015,
+          "p99": 6169015,
+          "max": 6169015
+        },
+        "coreNs": {
+          "count": 6,
+          "p50": 615393,
+          "p95": 2207126,
+          "p99": 2207126,
+          "max": 2207126
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 219638,
+          "p95": 219638,
+          "p99": 219638,
+          "max": 219638
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 6880909,
+          "p95": 10814071,
+          "p99": 10814071,
+          "max": 10814071
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 10814071,
+          "p95": 10814071,
+          "p99": 10814071,
+          "max": 10814071
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "digit1",
+      "summary": {
+        "count": 6,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 6,
+          "p50": 2556919,
+          "p95": 5277011,
+          "p99": 5277011,
+          "max": 5277011
+        },
+        "coreNs": {
+          "count": 6,
+          "p50": 584281,
+          "p95": 2263440,
+          "p99": 2263440,
+          "max": 2263440
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 223166,
+          "p95": 223166,
+          "p99": 223166,
+          "max": 223166
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 6462401,
+          "p95": 9482697,
+          "p99": 9482697,
+          "max": 9482697
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 9482697,
+          "p95": 9482697,
+          "p99": 9482697,
+          "max": 9482697
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "semicolon",
+      "summary": {
+        "count": 6,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 6,
+          "p50": 3188031,
+          "p95": 5361089,
+          "p99": 5361089,
+          "max": 5361089
+        },
+        "coreNs": {
+          "count": 6,
+          "p50": 664086,
+          "p95": 2224002,
+          "p99": 2224002,
+          "max": 2224002
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 237327,
+          "p95": 237327,
+          "p99": 237327,
+          "max": 237327
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 6989976,
+          "p95": 9576599,
+          "p99": 9576599,
+          "max": 9576599
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 9576599,
+          "p95": 9576599,
+          "p99": 9576599,
+          "max": 9576599
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "shift",
+      "summary": {
+        "count": 9,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 9,
+          "p50": 2641417,
+          "p95": 5238944,
+          "p99": 5238944,
+          "max": 5238944
+        },
+        "coreNs": {
+          "count": 5,
+          "p50": 650434,
+          "p95": 2275415,
+          "p99": 2275415,
+          "max": 2275415
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 7127683,
+          "p95": 9594643,
+          "p99": 9594643,
+          "max": 9594643
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 9594643,
+          "p95": 9594643,
+          "p99": 9594643,
+          "max": 9594643
+        },
+        "confirmationSamples": 0,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    }
+  ],
+  "skipped": [],
+  "checks": [
+    {
+      "check": "orca-pty/default/space/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/space/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:10:15.894902+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/space/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:10:15.894978+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/space/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:10:15.895149+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/space/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:10:46.086058+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/space/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:10:46.086122+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/space/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:10:46.086258+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/space/period",
+      "iteration": null,
+      "at": "2026-11-01T14:11:16.315827+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/space/period",
+      "iteration": null,
+      "at": "2026-11-01T14:11:16.315894+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/space/period",
+      "iteration": null,
+      "at": "2026-11-01T14:11:16.316039+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/space/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:11:46.513714+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/space/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:11:46.513765+00:00"
+    },
+    {
+      "check": "orca-pty/default/space/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/space/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:11:46.513878+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:12:16.746412+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:12:16.746477+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:12:16.746588+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:12:46.956088+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:12:46.956146+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:12:46.956279+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/period",
+      "iteration": null,
+      "at": "2026-11-01T14:13:17.158795+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/period",
+      "iteration": null,
+      "at": "2026-11-01T14:13:17.158854+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/period",
+      "iteration": null,
+      "at": "2026-11-01T14:13:17.158976+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:13:47.384477+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:13:47.384536+00:00"
+    },
+    {
+      "check": "orca-pty/default/enter/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/enter/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:13:47.384660+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:14:17.584611+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:14:17.584672+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:14:17.584801+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:14:47.793154+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:14:47.793218+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:14:47.793353+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/period",
+      "iteration": null,
+      "at": "2026-11-01T14:15:17.973933+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/period",
+      "iteration": null,
+      "at": "2026-11-01T14:15:17.973991+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/period",
+      "iteration": null,
+      "at": "2026-11-01T14:15:17.974144+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:15:48.214983+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:15:48.215045+00:00"
+    },
+    {
+      "check": "orca-pty/default/digit1/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/digit1/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:15:48.215170+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:16:18.450465+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:16:18.450542+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:16:18.450663+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:16:48.672170+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:16:48.672223+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:16:48.672339+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/period",
+      "iteration": null,
+      "at": "2026-11-01T14:17:18.882454+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/period",
+      "iteration": null,
+      "at": "2026-11-01T14:17:18.882513+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/period",
+      "iteration": null,
+      "at": "2026-11-01T14:17:18.882634+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:17:49.101884+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:17:49.101960+00:00"
+    },
+    {
+      "check": "orca-pty/default/semicolon/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "orca-pty/default/semicolon/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:17:49.102085+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/letter：第 1 次结果不符",
+      "ok": false,
+      "detail": "{\"ok\": false, \"value\": \"\", \"caret\": null, \"caretStatus\": \"unverified-pty-selection-not-readable\", \"committed\": null, \"marked\": null, \"panel\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 11, \"generation\": 11303, \"hideCount\": 7323, \"panelFrame\": [539, 621, 439, 335], \"panelPreedi",
+      "phase": "warmup",
+      "group": "orca-pty/default/shift/letter",
+      "iteration": 0,
+      "at": "2026-11-01T14:17:51.675615+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/letter：插字次数按确认与后键分别匹配",
+      "ok": false,
+      "detail": "发出 1 轮，期望插字 1 次（每轮确认 1 次＋标点后键 0 次），实际 0 次",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:17:51.677137+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:17:51.677211+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/letter：样本流插字归属与隐藏状态",
+      "ok": false,
+      "detail": "第 1 轮：Shift 释放事件插字次数不符：期望 1，实际 0；第 1 轮：字母后键事件缺失或类型不符（期望 10，实际 12）；第 1 轮：续输字母事件缺失或类型不符（期望 10，实际 12）；第 1 轮：样本流结构不符：消费 6 个样本，本轮共 10 个（疑似额外事件或残缺）",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/letter",
+      "iteration": null,
+      "at": "2026-11-01T14:17:51.677296+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/comma：第 1 次结果不符",
+      "ok": false,
+      "detail": "{\"ok\": false, \"value\": \"\", \"caret\": null, \"caretStatus\": \"unverified-pty-selection-not-readable\", \"committed\": null, \"marked\": null, \"panel\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 11, \"generation\": 11312, \"hideCount\": 7327, \"panelFrame\": [-10000, -10000, 439, 335], \"panel",
+      "phase": "warmup",
+      "group": "orca-pty/default/shift/comma",
+      "iteration": 0,
+      "at": "2026-11-01T14:17:54.251093+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/comma：插字次数按确认与后键分别匹配",
+      "ok": false,
+      "detail": "发出 1 轮，期望插字 2 次（每轮确认 1 次＋标点后键 1 次），实际 1 次",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:17:54.252644+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:17:54.252719+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/comma：样本流插字归属与隐藏状态",
+      "ok": false,
+      "detail": "第 1 轮：Shift 释放事件插字次数不符：期望 1，实际 0；第 1 轮：标点后键事件缺失或类型不符（期望 10，实际 12）；第 1 轮：样本流结构不符：消费 6 个样本，本轮共 9 个（疑似额外事件或残缺）",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/comma",
+      "iteration": null,
+      "at": "2026-11-01T14:17:54.252796+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/period：第 1 次结果不符",
+      "ok": false,
+      "detail": "{\"ok\": false, \"value\": \"\", \"caret\": null, \"caretStatus\": \"unverified-pty-selection-not-readable\", \"committed\": null, \"marked\": null, \"panel\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 11, \"generation\": 11322, \"hideCount\": 7332, \"panelFrame\": [-10000, -10000, 180, 335], \"panel",
+      "phase": "warmup",
+      "group": "orca-pty/default/shift/period",
+      "iteration": 0,
+      "at": "2026-11-01T14:17:56.826224+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/period：插字次数按确认与后键分别匹配",
+      "ok": false,
+      "detail": "发出 1 轮，期望插字 2 次（每轮确认 1 次＋标点后键 1 次），实际 1 次",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/period",
+      "iteration": null,
+      "at": "2026-11-01T14:17:56.827667+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/period",
+      "iteration": null,
+      "at": "2026-11-01T14:17:56.827790+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/period：样本流插字归属与隐藏状态",
+      "ok": false,
+      "detail": "第 1 轮：Shift 释放事件插字次数不符：期望 1，实际 0；第 1 轮：标点后键事件缺失或类型不符（期望 10，实际 12）；第 1 轮：样本流结构不符：消费 6 个样本，本轮共 9 个（疑似额外事件或残缺）",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/period",
+      "iteration": null,
+      "at": "2026-11-01T14:17:56.827865+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/stop：第 1 次结果不符",
+      "ok": false,
+      "detail": "{\"ok\": false, \"value\": \"\", \"caret\": null, \"caretStatus\": \"unverified-pty-selection-not-readable\", \"committed\": null, \"marked\": null, \"panel\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 10, \"generation\": 11331, \"hideCount\": 7337, \"panelFrame\": [-10000, -10000, 439, 335], \"panel",
+      "phase": "warmup",
+      "group": "orca-pty/default/shift/stop",
+      "iteration": 0,
+      "at": "2026-11-01T14:17:59.403980+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 1 轮，期望插字 1 次（每轮确认 1 次＋标点后键 0 次），实际 1 次",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:17:59.405134+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:17:59.405185+00:00"
+    },
+    {
+      "check": "orca-pty/default/shift/stop：样本流插字归属与隐藏状态",
+      "ok": false,
+      "detail": "第 1 轮：Shift 释放事件插字次数不符：期望 1，实际 0；第 1 轮：样本流结构不符：消费 6 个样本，本轮共 8 个（疑似额外事件或残缺）",
+      "phase": "panel",
+      "group": "orca-pty/default/shift/stop",
+      "iteration": null,
+      "at": "2026-11-01T14:17:59.405239+00:00"
+    },
+    {
+      "check": "caret/orca-pty：组合后光标在末尾插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:00.017976+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Left（声母后）插入点＝[6, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:00.705525+00:00"
+    },
+    {
+      "check": "caret/orca-pty：再 Left（音节边界）插入点＝[6, 2]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 2], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:01.186558+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Right插入点＝[6, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:01.669430+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Home插入点＝[6, 0]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 0], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:02.152890+00:00"
+    },
+    {
+      "check": "caret/orca-pty：End插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:02.819826+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Ctrl＋A插入点＝[6, 0]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 0], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:03.299938+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Ctrl＋E插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:03.779912+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Ctrl＋B（声母后）插入点＝[6, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:04.263567+00:00"
+    },
+    {
+      "check": "caret/orca-pty：Ctrl＋F（回末尾）插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:04.747761+00:00"
+    },
+    {
+      "check": "caret/orca-pty：原码显示插入点在末尾＝[4, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [4, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:06.868064+00:00"
+    },
+    {
+      "check": "caret/orca-pty：原码显示 Left 后插入点＝[4, 3]",
+      "ok": true,
+      "detail": "{\"caret\": [4, 3], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/orca-pty",
+      "iteration": null,
+      "at": "2026-11-01T14:18:07.347987+00:00"
+    },
+    {
+      "check": "panel/space：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11407, \"hideCount\": 7391, \"panelFrame\": [521, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4016, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T14:18:08.475403+00:00"
+    },
+    {
+      "check": "panel/space：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11407, \"hideCount\": 7391, \"panelFrame\": [521, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4016, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11409, \"hideCount\"",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T14:18:08.602309+00:00"
+    },
+    {
+      "check": "panel/space：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 6, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 6, \"p50\": 2848164, \"p95\": 5592599, \"p99\": 5592599, \"max\": 5592599}, \"coreNs\": {\"count\": 6, \"p50\": 595235, \"p95\": 2413948, \"p99\": 2413948, \"max\": 2413948}, ",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T14:18:08.603204+00:00"
+    },
+    {
+      "check": "panel/space：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11409, \"hideCount\": 7393, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4016, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11409, \"hid",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T14:18:10.605591+00:00"
+    },
+    {
+      "check": "panel/enter：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11416, \"hideCount\": 7396, \"panelFrame\": [539, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4020, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T14:18:10.865958+00:00"
+    },
+    {
+      "check": "panel/enter：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11416, \"hideCount\": 7396, \"panelFrame\": [539, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4020, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11418, \"hideCount\"",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T14:18:10.992846+00:00"
+    },
+    {
+      "check": "panel/enter：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 6, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 6, \"p50\": 2832600, \"p95\": 6169015, \"p99\": 6169015, \"max\": 6169015}, \"coreNs\": {\"count\": 6, \"p50\": 615393, \"p95\": 2207126, \"p99\": 2207126, \"max\": 2207126}, ",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T14:18:10.993418+00:00"
+    },
+    {
+      "check": "panel/enter：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11418, \"hideCount\": 7398, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4020, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11418, \"hid",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T14:18:12.996432+00:00"
+    },
+    {
+      "check": "panel/digit1：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11425, \"hideCount\": 7401, \"panelFrame\": [538, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4024, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T14:18:13.255115+00:00"
+    },
+    {
+      "check": "panel/digit1：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11425, \"hideCount\": 7401, \"panelFrame\": [538, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4024, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11427, \"hideCount\"",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T14:18:13.381320+00:00"
+    },
+    {
+      "check": "panel/digit1：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 6, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 6, \"p50\": 2556919, \"p95\": 5277011, \"p99\": 5277011, \"max\": 5277011}, \"coreNs\": {\"count\": 6, \"p50\": 584281, \"p95\": 2263440, \"p99\": 2263440, \"max\": 2263440}, ",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T14:18:13.382346+00:00"
+    },
+    {
+      "check": "panel/digit1：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11427, \"hideCount\": 7403, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4024, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11427, \"hid",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T14:18:15.388686+00:00"
+    },
+    {
+      "check": "panel/semicolon：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11434, \"hideCount\": 7406, \"panelFrame\": [538, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4028, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T14:18:15.649690+00:00"
+    },
+    {
+      "check": "panel/semicolon：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11434, \"hideCount\": 7406, \"panelFrame\": [538, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4028, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11436, \"hideCount\"",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T14:18:15.781058+00:00"
+    },
+    {
+      "check": "panel/semicolon：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 6, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 6, \"p50\": 3188031, \"p95\": 5361089, \"p99\": 5361089, \"max\": 5361089}, \"coreNs\": {\"count\": 6, \"p50\": 664086, \"p95\": 2224002, \"p99\": 2224002, \"max\": 2224002}, ",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T14:18:15.782045+00:00"
+    },
+    {
+      "check": "panel/semicolon：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11436, \"hideCount\": 7408, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4028, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 6, \"generation\": 11436, \"hid",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T14:18:17.787511+00:00"
+    },
+    {
+      "check": "panel/shift：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11443, \"hideCount\": 7411, \"panelFrame\": [539, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4032, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T14:18:18.043936+00:00"
+    },
+    {
+      "check": "panel/shift：确认后候选窗在回调内隐藏",
+      "ok": false,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 5, \"generation\": 11443, \"hideCount\": 7411, \"panelFrame\": [539, 621, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4032, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 11443, \"hideCount\"",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T14:18:18.221430+00:00"
+    },
+    {
+      "check": "panel/shift：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": false,
+      "detail": "{\"count\": 9, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 9, \"p50\": 2641417, \"p95\": 5238944, \"p99\": 5238944, \"max\": 5238944}, \"coreNs\": {\"count\": 5, \"p50\": 650434, \"p95\": 2275415, \"p99\": 2275415, \"max\": 2275415}, ",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T14:18:18.222219+00:00"
+    },
+    {
+      "check": "panel/shift：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 10, \"generation\": 11445, \"hideCount\": 7413, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 4032, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 10, \"generation\": 11445, \"h",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T14:18:20.605632+00:00"
+    }
+  ],
+  "failures": 13,
+  "evidence": "docs/validation/first-key-orca.evidence.jsonl"
+}

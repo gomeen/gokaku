@@ -1,0 +1,57 @@
+TEST xiaohe_commit
+  ok
+TEST enter_raw
+  ok
+TEST punct_table
+  ok
+TEST in_composition_punct
+  FAIL: 中间光标标点后组合结束
+  FAIL: 中间光标标点后无候选
+  FAIL: 中间光标标点后无宿主字母
+    got:  ni'hao
+    want: 
+  FAIL: 中间光标标点后无原编码
+  FAILED
+TEST digits
+  ok
+TEST paging
+  ok
+TEST shift
+  ok
+TEST per_app_english
+  ok
+TEST english_candidates
+  ok
+TEST uppercase
+  ok
+TEST segments
+  ok
+TEST editor_keys
+  ok
+TEST preedit_display
+  ok
+TEST copy_raw
+  ok
+TEST marked_matches_preedit
+  ok
+TEST full_pinyin
+  ok
+TEST fuzzy
+  ok
+TEST custom_words
+  ok
+TEST quick_add
+  ok
+TEST delete_word
+  ok
+TEST flush_persistence
+  ok
+TEST corrupt_userlm
+  ok
+TEST delete_not_resurrected
+  ok
+TEST custom_store
+  ok
+TEST esc_misc
+  ok
+248 checks, 4 failures

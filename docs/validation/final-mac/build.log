@@ -1,0 +1,45 @@
+PASS: 22x16pt page, ink=16078, holes=3110, bounds=(3,124)-(172,124)
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/native
+ninja: no work to do.
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/core
+ninja: no work to do.
+Test project /Users/gomeen/code/gomeen/gogaku/.build/core
+    Start 1: abi_version
+1/4 Test #1: abi_version ......................   Passed    0.02 sec
+    Start 2: normal_session
+2/4 Test #2: normal_session ...................   Passed    0.35 sec
+    Start 3: quality_regression
+3/4 Test #3: quality_regression ...............   Passed    7.94 sec
+    Start 4: fuzz_smoke
+4/4 Test #4: fuzz_smoke .......................   Passed   19.29 sec
+
+100% tests passed out of 4
+
+Total Test time (real) =  27.60 sec
+[0/1] Planning build
+Building for production...
+[0/7] Write swift-version--58304C5D6DBC2206.txt
+[2/8] Compiling GogakuCore Composition.swift
+[3/10] Compiling GogakuTranslator GogakuTranslatorApp.swift
+[4/11] Compiling GogakuSettings GogakuSettingsApp.swift
+[4/11] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[6/11] Linking GogakuTranslator
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[7/11] Linking GogakuSettings
+[9/11] Compiling GogakuInput CandidatePanel.swift
+[9/11] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[10/11] Linking GogakuInput
+Build complete! (16.13s)
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku.app: replacing existing signature
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Settings.app: replacing existing signature
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku.app
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Settings.app

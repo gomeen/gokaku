@@ -1,0 +1,30 @@
+{
+  "frozen_case_sha256": "9fe6a73fdfb18165b3b2fd202365925307d3132a6c8381ada2f24e0d67cb3c2b",
+  "targets_unchanged": true,
+  "not_a_new_score": true,
+  "notes": [
+    {
+      "case": "ambiguous-experience-energy",
+      "frozen_targets": [
+        "经历",
+        "精力"
+      ],
+      "other_valid_homophones": [
+        "经理"
+      ],
+      "effect": "An unlisted valid top1 is counted as a frozen-target miss, not proved a spelling error."
+    },
+    {
+      "case": "ambiguous-machine-or",
+      "frozen_targets": [
+        "机器",
+        "及其"
+      ],
+      "other_valid_homophones": [
+        "极其"
+      ],
+      "effect": "Same limitation; do not silently expand labels after viewing outputs."
+    }
+  ],
+  "scope": "Post-test label audit, not rescoring or changing the frozen holdout."
+}

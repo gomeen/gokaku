@@ -1,0 +1,19 @@
+{
+  "recorded_at": "2026-10-30T03:36:14.655379+00:00",
+  "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+  "cpu": "Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+  "physical_cores": 8,
+  "memory_bytes": 68719476736,
+  "runtimes": {
+    "venv": {
+      "python": "/tmp/gogaku-benchmark/venv/bin/python",
+      "version": "Python 3.9.6",
+      "requirements": "venv-requirements.txt"
+    },
+    "venv-ct2": {
+      "python": "/tmp/gogaku-benchmark/venv-ct2/bin/python",
+      "version": "Python 3.9.6",
+      "requirements": "venv-ct2-requirements.txt"
+    }
+  }
+}

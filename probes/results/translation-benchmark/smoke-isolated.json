@@ -1,0 +1,643 @@
+{
+  "parameters": {
+    "phase": "smoke",
+    "configs": [
+      "opus-ct2-int8-t1",
+      "opus-torch-cpu-t1",
+      "m2m100-ct2-int8-t1"
+    ],
+    "rounds": 1,
+    "beam": 1,
+    "case_ids": [
+      "en-word",
+      "en-sentence",
+      "zh-word",
+      "zh-sentence"
+    ],
+    "dataset_sha256": "39b1dde0ecce1feda88765ddc8574bcd5a89be002967b0fda18552f51a1b5e6a",
+    "root": "/private/tmp/gogaku-benchmark/models"
+  },
+  "passes": [
+    {
+      "config": {
+        "id": "m2m100-ct2-int8-t1",
+        "model": "m2m100",
+        "backend": "ct2",
+        "device": "cpu",
+        "precision": "int8",
+        "threads": 1,
+        "beam": 1,
+        "python_executable": "/tmp/gogaku-benchmark/venv-ct2/bin/python"
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:33:18.154564+00:00",
+      "system_before": {
+        "uptime": "11:33  up 19:45, 10 users, load averages: 287.47 324.36 343.85",
+        "load_average": [
+          287.46533203125,
+          324.36376953125,
+          343.845703125
+        ],
+        "cpu_processes": [
+          " 6220  97.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/StreamingExtractor.framework/XPCServices/STExtractionService.xpc/STExtractionService",
+          " 6801  96.3 /System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor",
+          " 5933  58.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreServices/SpringBoard.app/SpringBoard",
+          " 5917  55.4 launchd_sim",
+          " 6024  52.8 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "16624  47.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/ExtensionKit/Extensions/CollectionsPoster.appex/CollectionsPoster",
+          "16743  45.3 (ps)",
+          "16729  45.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/Photos.app/PlugIns/PhotosReliveWidget.appex/PhotosReliveWidget",
+          "43522  44.4 /usr/libexec/diagnosticd",
+          "16755  43.5 (ps)"
+        ]
+      },
+      "rows": [
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "zh-sentence",
+          "direction": "zh-en",
+          "kind": "sentence",
+          "source": "我明天有个会。",
+          "output": "I have a meeting tomorrow.",
+          "input_tokens": 9,
+          "output_tokens": 7,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.611483,
+          "generate_ms": 2072.389894,
+          "decode_ms": 6.876732,
+          "total_ms": 2079.878109,
+          "cpu_ms": 1874.339,
+          "peak_rss_bytes": 667373568
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "en-word",
+          "direction": "en-zh",
+          "kind": "word",
+          "source": "meeting",
+          "output": "會議",
+          "input_tokens": 3,
+          "output_tokens": 3,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.418824,
+          "generate_ms": 1197.602719,
+          "decode_ms": 3.777785,
+          "total_ms": 1201.799328,
+          "cpu_ms": 1079.796,
+          "peak_rss_bytes": 667533312
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "en-sentence",
+          "direction": "en-zh",
+          "kind": "sentence",
+          "source": "I have a meeting tomorrow.",
+          "output": "明天我会见。",
+          "input_tokens": 9,
+          "output_tokens": 7,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.580337,
+          "generate_ms": 2065.230014,
+          "decode_ms": 11.687732,
+          "total_ms": 2077.498083,
+          "cpu_ms": 1925.398,
+          "peak_rss_bytes": 668864512
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "kind": "word",
+          "source": "会议",
+          "output": "Meeting",
+          "input_tokens": 4,
+          "output_tokens": 2,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.634888,
+          "generate_ms": 1067.736411,
+          "decode_ms": 4.55061,
+          "total_ms": 1072.921909,
+          "cpu_ms": 976.989,
+          "peak_rss_bytes": 668897280
+        }
+      ],
+      "warmup_rows": [
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "en-word",
+          "direction": "en-zh",
+          "kind": "word",
+          "source": "meeting",
+          "output": "會議",
+          "input_tokens": 3,
+          "output_tokens": 3,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.61596,
+          "generate_ms": 991.117589,
+          "decode_ms": 3.43694,
+          "total_ms": 995.170489,
+          "cpu_ms": 964.236,
+          "peak_rss_bytes": 665149440
+        },
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "kind": "word",
+          "source": "会议",
+          "output": "Meeting",
+          "input_tokens": 4,
+          "output_tokens": 2,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.587214,
+          "generate_ms": 800.495295,
+          "decode_ms": 3.880686,
+          "total_ms": 804.963195,
+          "cpu_ms": 778.064,
+          "peak_rss_bytes": 665890816
+        }
+      ],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-m2m100-ct2-int8-t1.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 16765,
+        "config": {
+          "id": "m2m100-ct2-int8-t1",
+          "model": "m2m100",
+          "backend": "ct2",
+          "device": "cpu",
+          "precision": "int8",
+          "threads": 1,
+          "beam": 1,
+          "python_executable": "/tmp/gogaku-benchmark/venv-ct2/bin/python"
+        },
+        "model_load_ms": 4016.907205,
+        "peak_rss_bytes": 661610496,
+        "versions": {
+          "ctranslate2": "4.6.0"
+        },
+        "parent_ready_ms": 56668.943614
+      },
+      "status": "completed",
+      "shutdown": {
+        "event": "stopped",
+        "peak_rss_bytes": 668897280
+      },
+      "system_after": {
+        "uptime": "11:34  up 19:46, 10 users, load averages: 352.69 351.86 353.68",
+        "load_average": [
+          352.68603515625,
+          351.8583984375,
+          353.6806640625
+        ],
+        "cpu_processes": [
+          "17639 100.7 /Users/gomeen/Library/Developer/CoreSimulator/Devices/0E42F05B-A1C1-42EC-867D-916361CDA85F/data/Containers/Bundle/Application/CABE4817-F5DC-4D7B-8E31-012A2A5D4E30/Zakki.app/Zakki",
+          " 9698  71.1 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/MapKit.framework/XPCServices/com.apple.MapKit.SnapshotService.xpc/com.apple.MapKit.SnapshotService",
+          "  196  60.8 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "43025  45.0 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          " 4918  41.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "37184  37.8 /Applications/WeChat.app/Contents/MacOS/WeChat",
+          "42879  33.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+          "46206  32.1 pi",
+          "42868  29.7 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "43522  19.7 /usr/libexec/diagnosticd"
+        ]
+      },
+      "errors": 0,
+      "worker_failures": 0
+    },
+    {
+      "config": {
+        "id": "opus-ct2-int8-t1",
+        "model": "opus",
+        "backend": "ct2",
+        "device": "cpu",
+        "precision": "int8",
+        "threads": 1,
+        "beam": 1,
+        "python_executable": "/tmp/gogaku-benchmark/venv-ct2/bin/python"
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:34:26.002576+00:00",
+      "system_before": {
+        "uptime": "11:34  up 19:46, 10 users, load averages: 352.69 351.86 353.68",
+        "load_average": [
+          352.68603515625,
+          351.8583984375,
+          353.6806640625
+        ],
+        "cpu_processes": [
+          " 9698 102.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/MapKit.framework/XPCServices/com.apple.MapKit.SnapshotService.xpc/com.apple.MapKit.SnapshotService",
+          "17639 100.6 /Users/gomeen/Library/Developer/CoreSimulator/Devices/0E42F05B-A1C1-42EC-867D-916361CDA85F/data/Containers/Bundle/Application/CABE4817-F5DC-4D7B-8E31-012A2A5D4E30/Zakki.app/Zakki",
+          " 4982  83.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/GeoServices.framework/geod",
+          "17705  80.8 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/ManagedAppDistribution.framework/Support/managedappdistributiond",
+          "43025  42.0 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          "  196  39.5 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "37184  33.1 /Applications/WeChat.app/Contents/MacOS/WeChat",
+          "42879  31.9 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+          "46206  30.1 pi",
+          "42868  29.7 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)"
+        ]
+      },
+      "rows": [
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "zh-sentence",
+          "direction": "zh-en",
+          "kind": "sentence",
+          "source": "我明天有个会。",
+          "output": "I have a meeting tomorrow.",
+          "input_tokens": 6,
+          "output_tokens": 6,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.40215,
+          "generate_ms": 221.508817,
+          "decode_ms": 1.785903,
+          "total_ms": 223.69687,
+          "cpu_ms": 219.575,
+          "peak_rss_bytes": 305229824
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "en-word",
+          "direction": "en-zh",
+          "kind": "word",
+          "source": "meeting",
+          "output": "会议",
+          "input_tokens": 3,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.747591,
+          "generate_ms": 84.372576,
+          "decode_ms": 0.360156,
+          "total_ms": 85.480323,
+          "cpu_ms": 83.866,
+          "peak_rss_bytes": 305373184
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "en-sentence",
+          "direction": "en-zh",
+          "kind": "sentence",
+          "source": "I have a meeting tomorrow.",
+          "output": "我明天有个会议",
+          "input_tokens": 8,
+          "output_tokens": 4,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.780447,
+          "generate_ms": 188.562652,
+          "decode_ms": 3.019166,
+          "total_ms": 192.362265,
+          "cpu_ms": 185.598,
+          "peak_rss_bytes": 305631232
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "kind": "word",
+          "source": "会议",
+          "output": "Meetings",
+          "input_tokens": 2,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 1.584975,
+          "generate_ms": 76.831011,
+          "decode_ms": 0.319407,
+          "total_ms": 78.735393,
+          "cpu_ms": 77.348,
+          "peak_rss_bytes": 305631232
+        }
+      ],
+      "warmup_rows": [
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "en-word",
+          "direction": "en-zh",
+          "kind": "word",
+          "source": "meeting",
+          "output": "会议",
+          "input_tokens": 3,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.591277,
+          "generate_ms": 80.155828,
+          "decode_ms": 0.725006,
+          "total_ms": 81.472111,
+          "cpu_ms": 79.855,
+          "peak_rss_bytes": 304062464
+        },
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "kind": "word",
+          "source": "会议",
+          "output": "Meetings",
+          "input_tokens": 2,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.350297,
+          "generate_ms": 60.439757,
+          "decode_ms": 0.422399,
+          "total_ms": 61.212453,
+          "cpu_ms": 60.573,
+          "peak_rss_bytes": 304656384
+        }
+      ],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-opus-ct2-int8-t1.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 17728,
+        "config": {
+          "id": "opus-ct2-int8-t1",
+          "model": "opus",
+          "backend": "ct2",
+          "device": "cpu",
+          "precision": "int8",
+          "threads": 1,
+          "beam": 1,
+          "python_executable": "/tmp/gogaku-benchmark/venv-ct2/bin/python"
+        },
+        "model_load_ms": 5316.505045,
+        "peak_rss_bytes": 301649920,
+        "versions": {
+          "ctranslate2": "4.6.0"
+        },
+        "parent_ready_ms": 9560.785698000003
+      },
+      "status": "completed",
+      "shutdown": {
+        "event": "stopped",
+        "peak_rss_bytes": 305631232
+      },
+      "system_after": {
+        "uptime": "11:34  up 19:46, 10 users, load averages: 276.29 335.00 347.63",
+        "load_average": [
+          276.29052734375,
+          334.99951171875,
+          347.63330078125
+        ],
+        "cpu_processes": [
+          "83766 108.5 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine",
+          "17639 100.0 /Users/gomeen/Library/Developer/CoreSimulator/Devices/0E42F05B-A1C1-42EC-867D-916361CDA85F/data/Containers/Bundle/Application/CABE4817-F5DC-4D7B-8E31-012A2A5D4E30/Zakki.app/Zakki",
+          "17935  71.8 (managedappdistri)",
+          " 5462  59.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd",
+          "43025  34.6 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          " 4918  33.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "  196  31.6 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "42879  31.2 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+          "42868  30.8 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "46206  28.4 pi"
+        ]
+      },
+      "errors": 0,
+      "worker_failures": 0
+    },
+    {
+      "config": {
+        "id": "opus-torch-cpu-t1",
+        "model": "opus",
+        "backend": "torch",
+        "device": "cpu",
+        "precision": "float32",
+        "threads": 1,
+        "beam": 1,
+        "python_executable": "/private/tmp/gogaku-benchmark/venv/bin/python"
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:34:37.987800+00:00",
+      "system_before": {
+        "uptime": "11:34  up 19:46, 10 users, load averages: 276.29 335.00 347.63",
+        "load_average": [
+          276.29052734375,
+          334.99951171875,
+          347.63330078125
+        ],
+        "cpu_processes": [
+          "17639  97.9 /Users/gomeen/Library/Developer/CoreSimulator/Devices/0E42F05B-A1C1-42EC-867D-916361CDA85F/data/Containers/Bundle/Application/CABE4817-F5DC-4D7B-8E31-012A2A5D4E30/Zakki.app/Zakki",
+          "42804  64.0 /Applications/Orca.app/Contents/MacOS/Orca",
+          " 5462  59.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd",
+          "43025  48.7 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          " 4918  39.8 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "42879  33.2 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+          "42868  31.2 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          " 5039  31.1 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/SyncedDefaults.framework/Support/syncdefaultsd",
+          "46206  30.6 pi",
+          "  204  25.5 /System/Library/PrivateFrameworks/BackgroundTaskManagement.framework/Resources/backgroundtaskmanagementd"
+        ]
+      },
+      "rows": [
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "zh-sentence",
+          "direction": "zh-en",
+          "kind": "sentence",
+          "source": "我明天有个会。",
+          "output": "I have a meeting tomorrow.",
+          "input_tokens": 6,
+          "output_tokens": 6,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.598085,
+          "generate_ms": 552.652643,
+          "decode_ms": 0.890721,
+          "total_ms": 554.141449,
+          "cpu_ms": 545.409,
+          "peak_rss_bytes": 946229248
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "en-word",
+          "direction": "en-zh",
+          "kind": "word",
+          "source": "meeting",
+          "output": "会议",
+          "input_tokens": 3,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.596318,
+          "generate_ms": 177.983745,
+          "decode_ms": 0.623713,
+          "total_ms": 179.203776,
+          "cpu_ms": 176.588,
+          "peak_rss_bytes": 947073024
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "en-sentence",
+          "direction": "en-zh",
+          "kind": "sentence",
+          "source": "I have a meeting tomorrow.",
+          "output": "我明天有个会议",
+          "input_tokens": 8,
+          "output_tokens": 4,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.582911,
+          "generate_ms": 380.332586,
+          "decode_ms": 0.703813,
+          "total_ms": 381.61931,
+          "cpu_ms": 376.662,
+          "peak_rss_bytes": 947642368
+        },
+        {
+          "event": "result",
+          "phase": "smoke",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "kind": "word",
+          "source": "会议",
+          "output": "Meetings",
+          "input_tokens": 2,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.36876,
+          "generate_ms": 176.463252,
+          "decode_ms": 0.397415,
+          "total_ms": 177.229427,
+          "cpu_ms": 175.645,
+          "peak_rss_bytes": 947695616
+        }
+      ],
+      "warmup_rows": [
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "en-word",
+          "direction": "en-zh",
+          "kind": "word",
+          "source": "meeting",
+          "output": "会议",
+          "input_tokens": 3,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.789186,
+          "generate_ms": 3097.550869,
+          "decode_ms": 0.489688,
+          "total_ms": 3098.829743,
+          "cpu_ms": 2936.995,
+          "peak_rss_bytes": 944459776
+        },
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "kind": "word",
+          "source": "会议",
+          "output": "Meetings",
+          "input_tokens": 2,
+          "output_tokens": 1,
+          "source_unknown_tokens": 0,
+          "truncated": false,
+          "generated": true,
+          "encode_ms": 0.426087,
+          "generate_ms": 184.267322,
+          "decode_ms": 0.438509,
+          "total_ms": 185.131918,
+          "cpu_ms": 181.597,
+          "peak_rss_bytes": 945291264
+        }
+      ],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-opus-torch-cpu-t1.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 17971,
+        "config": {
+          "id": "opus-torch-cpu-t1",
+          "model": "opus",
+          "backend": "torch",
+          "device": "cpu",
+          "precision": "float32",
+          "threads": 1,
+          "beam": 1,
+          "python_executable": "/private/tmp/gogaku-benchmark/venv/bin/python"
+        },
+        "model_load_ms": 11588.597387,
+        "peak_rss_bytes": 910172160,
+        "versions": {
+          "torch": "2.2.2"
+        },
+        "parent_ready_ms": 20227.575947000005
+      },
+      "status": "completed",
+      "shutdown": {
+        "event": "stopped",
+        "peak_rss_bytes": 947695616
+      },
+      "system_after": {
+        "uptime": "11:35  up 19:47, 10 users, load averages: 184.35 308.65 337.76",
+        "load_average": [
+          184.34619140625,
+          308.6455078125,
+          337.76318359375
+        ],
+        "cpu_processes": [
+          " 5462  88.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd",
+          "18355  76.5 /usr/libexec/mlhostd",
+          " 4946  67.8 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/nsurlsessiond",
+          " 4918  62.8 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "46206  48.5 pi",
+          " 8257  41.2 /usr/libexec/biomesyncd",
+          "43025  39.1 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          "43522  32.0 /usr/libexec/diagnosticd",
+          "42868  28.8 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "42879  28.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper"
+        ]
+      },
+      "errors": 0,
+      "worker_failures": 0
+    }
+  ]
+}

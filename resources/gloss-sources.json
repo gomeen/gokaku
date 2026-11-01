@@ -1,0 +1,17 @@
+{
+  "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义）",
+  "license": {
+    "wiktionary": "CC BY-SA 4.0（双许可取 CC 一支）；署名 Wiktionary contributors，声明修改，逐词条原文 URI",
+    "wiktextract": "MIT（提取工具，不覆盖输出数据许可）"
+  },
+  "sources": {
+    "kaikki": {
+      "file": "kaikki.org-dictionary-Chinese.jsonl.gz",
+      "bytes": 155996266,
+      "sha256": "4e54d7a3d2974b5efb6bf80ec0a6d8c71d916b90b30a350bdd71bdfda0dce36b",
+      "url": "https://kaikki.org/dictionary/Chinese/"
+    }
+  },
+  "entry_count": 161839,
+  "output_sha256": "c364ff27433f95c2cb8db1309ccc8ea5f799477513c687528b72c536f51f61c5"
+}

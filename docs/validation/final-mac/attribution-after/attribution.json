@@ -1,0 +1,441 @@
+{
+  "schema": "gogaku.imk-attribution.v1",
+  "checkedAt": "2026-11-01T15:40:09.848550+00:00",
+  "runId": "17935475780868",
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "bundle": "/Users/gomeen/Library/Input Methods/Gogaku.app",
+    "artifacts": [
+      {
+        "path": "Contents/Frameworks/libFcitx5Utils.2.dylib",
+        "size": 628736,
+        "sha256": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62"
+      },
+      {
+        "path": "Contents/Frameworks/libGogakuEngine.dylib",
+        "size": 41888,
+        "sha256": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1"
+      },
+      {
+        "path": "Contents/Frameworks/libIMECore.0.dylib",
+        "size": 1196944,
+        "sha256": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5"
+      },
+      {
+        "path": "Contents/Frameworks/libIMEPinyin.0.dylib",
+        "size": 797024,
+        "sha256": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35"
+      },
+      {
+        "path": "Contents/Frameworks/libboost_iostreams.dylib",
+        "size": 135120,
+        "sha256": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b"
+      },
+      {
+        "path": "Contents/Frameworks/libboost_random.dylib",
+        "size": 52000,
+        "sha256": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013"
+      },
+      {
+        "path": "Contents/Frameworks/libgogaku_core.dylib",
+        "size": 208208,
+        "sha256": "a38fee2f8f6ecd89f704fc3fe974d74c993808f3e8ed7cdb96d183c474160a11"
+      },
+      {
+        "path": "Contents/Frameworks/libintl.8.dylib",
+        "size": 209600,
+        "sha256": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb"
+      },
+      {
+        "path": "Contents/Frameworks/liblzma.5.dylib",
+        "size": 164896,
+        "sha256": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259"
+      },
+      {
+        "path": "Contents/Frameworks/libzstd.1.dylib",
+        "size": 766304,
+        "sha256": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a"
+      },
+      {
+        "path": "Contents/MacOS/GogakuInput",
+        "size": 975392,
+        "sha256": "b51543985226bc8a44d5618ecf7ee10fd1afdc37813717a5de0e6a203840743d"
+      }
+    ]
+  },
+  "driver": {
+    "probeSHA256": "446fe97377b1573e2e7449a4719031845259fc435bd580e3da3de51a410a24b0"
+  },
+  "sequences": [
+    {
+      "id": "short",
+      "label": "短组合：nihc＋空格",
+      "keys": [
+        "n",
+        "i",
+        "h",
+        "c",
+        "space"
+      ]
+    },
+    {
+      "id": "long",
+      "label": "长句：我想每天花一点时间学习英语（冻结用例 long-learning）",
+      "keys": [
+        "w",
+        "o",
+        "x",
+        "l",
+        "m",
+        "w",
+        "t",
+        "m",
+        "h",
+        "x",
+        "y",
+        "i",
+        "d",
+        "m",
+        "u",
+        "i",
+        "j",
+        "m",
+        "x",
+        "t",
+        "x",
+        "i",
+        "y",
+        "k",
+        "y",
+        "u",
+        "space"
+      ]
+    },
+    {
+      "id": "paging",
+      "label": "翻页：zhong 小鹤编码 vs＋四次 . ＋一次 , ＋空格",
+      "keys": [
+        "v",
+        "s",
+        ".",
+        ".",
+        ".",
+        ".",
+        ",",
+        "space"
+      ]
+    },
+    {
+      "id": "punct",
+      "label": "组合中标点：nihc＋; 一次上屏",
+      "keys": [
+        "n",
+        "i",
+        "h",
+        "c",
+        ";"
+      ]
+    }
+  ],
+  "eventsPerScenario": 540,
+  "intervalMs": 15.0,
+  "scenarios": [
+    {
+      "scenario": "L0-base",
+      "at": "2026-11-01T15:39:52.344799+00:00",
+      "elapsedSeconds": 10.596,
+      "actualEvents": 540,
+      "cycles": 12,
+      "compositions": 48,
+      "hostTextLengthAfter": 228,
+      "hostFlags": {
+        "allowsUndo": false,
+        "automaticSpellingCorrection": false,
+        "automaticTextCompletion": false,
+        "automaticTextReplacement": false,
+        "continuousSpellChecking": false
+      },
+      "settingsApplied": {},
+      "summary": {
+        "count": 540,
+        "callbackNs": {
+          "count": 540,
+          "p50": 5556969,
+          "p95": 8432444,
+          "p99": 10043519,
+          "max": 20847535
+        },
+        "coreNs": {
+          "count": 540,
+          "p50": 1231075,
+          "p95": 3370773,
+          "p99": 3882007,
+          "max": 4045601
+        },
+        "queueWaitNs": {
+          "count": 540,
+          "p50": 3489,
+          "p95": 5273,
+          "p99": 5983,
+          "max": 27504
+        },
+        "coreExecNs": {
+          "count": 540,
+          "p50": 1220179,
+          "p95": 3361786,
+          "p99": 3861083,
+          "max": 4028369
+        },
+        "hostReadNs": {
+          "count": 540,
+          "p50": 1362900,
+          "p95": 2080224,
+          "p99": 2345188,
+          "max": 2690353
+        },
+        "markedWriteNs": {
+          "count": 432,
+          "p50": 2854216,
+          "p95": 3529866,
+          "p99": 4539894,
+          "max": 14709740
+        },
+        "anchorReadNs": {
+          "count": 432,
+          "p50": 77,
+          "p95": 500624,
+          "p99": 646720,
+          "max": 816659
+        },
+        "commitCallNs": {
+          "count": 48,
+          "p50": 1994834,
+          "p95": 2362523,
+          "p99": 11481261,
+          "max": 11481261
+        },
+        "renderNs": {
+          "count": 492,
+          "p50": 7604701,
+          "p95": 11206956,
+          "p99": 13875293,
+          "max": 30663671
+        },
+        "firstDisplayNs": {
+          "count": 48,
+          "p50": 10779570,
+          "p95": 18666181,
+          "p99": 30663671,
+          "max": 30663671
+        },
+        "commitEvents": 48,
+        "commitHiddenFalse": 0,
+        "firstDisplayEvents": 48
+      },
+      "hostMarkedWrites": {
+        "count": 432,
+        "durationNs": {
+          "count": 432,
+          "p50": 2512684,
+          "p95": 3070897,
+          "p99": 3394568,
+          "max": 13815984
+        }
+      },
+      "hostInsertions": {
+        "count": 48,
+        "durationNs": {
+          "count": 48,
+          "p50": 1724116,
+          "p95": 2023218,
+          "p99": 11120454,
+          "max": 11120454
+        },
+        "latencyNs": {
+          "count": 48,
+          "p50": 5783004,
+          "p95": 19343012,
+          "p99": 22921237,
+          "max": 22921237
+        }
+      },
+      "markedWritePairing": {
+        "paired": 432,
+        "imeP95": {
+          "count": 432,
+          "p50": 2854216,
+          "p95": 3529866,
+          "p99": 4539894,
+          "max": 14709740
+        },
+        "hostP95": {
+          "count": 432,
+          "p50": 2512684,
+          "p95": 3070897,
+          "p99": 3394568,
+          "max": 13815984
+        }
+      },
+      "samplesFile": "docs/validation/final-mac/attribution-after/L0-base-samples.json",
+      "environment": {
+        "at": "2026-11-01T15:39:52.433800+00:00",
+        "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 23:39:52 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+        "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+        "loadavg": "{ 3.78 2.89 2.75 }",
+        "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t81%; charging; 1:03 remaining present: true",
+        "displayAwake": true,
+        "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)",
+        "caffeinateProcesses": "9956 /usr/bin/caffeinate -i -s -w 1295\n21218 /usr/bin/caffeinate -di -w 21194\n80941 caffeinate -d -i -w 80920"
+      }
+    },
+    {
+      "scenario": "L4500",
+      "at": "2026-11-01T15:40:09.741743+00:00",
+      "elapsedSeconds": 16.096,
+      "actualEvents": 540,
+      "cycles": 12,
+      "compositions": 48,
+      "hostTextLengthAfter": 4728,
+      "hostFlags": {
+        "allowsUndo": false,
+        "automaticSpellingCorrection": false,
+        "automaticTextCompletion": false,
+        "automaticTextReplacement": false,
+        "continuousSpellChecking": false
+      },
+      "settingsApplied": {},
+      "summary": {
+        "count": 540,
+        "callbackNs": {
+          "count": 540,
+          "p50": 11680815,
+          "p95": 14818868,
+          "p99": 16351886,
+          "max": 17603162
+        },
+        "coreNs": {
+          "count": 540,
+          "p50": 1126647,
+          "p95": 3149213,
+          "p99": 3404546,
+          "max": 3746373
+        },
+        "queueWaitNs": {
+          "count": 540,
+          "p50": 3237,
+          "p95": 4884,
+          "p99": 5774,
+          "max": 18201
+        },
+        "coreExecNs": {
+          "count": 540,
+          "p50": 1118811,
+          "p95": 3132786,
+          "p99": 3392054,
+          "max": 3734979
+        },
+        "hostReadNs": {
+          "count": 540,
+          "p50": 1203108,
+          "p95": 1903844,
+          "p99": 2317979,
+          "max": 2761519
+        },
+        "markedWriteNs": {
+          "count": 432,
+          "p50": 9168658,
+          "p95": 10836692,
+          "p99": 12019007,
+          "max": 12890429
+        },
+        "anchorReadNs": {
+          "count": 432,
+          "p50": 72,
+          "p95": 602024,
+          "p99": 704132,
+          "max": 748770
+        },
+        "commitCallNs": {
+          "count": 48,
+          "p50": 5133946,
+          "p95": 6609003,
+          "p99": 6750178,
+          "max": 6750178
+        },
+        "renderNs": {
+          "count": 492,
+          "p50": 13596077,
+          "p95": 16950906,
+          "p99": 19888169,
+          "max": 22734432
+        },
+        "firstDisplayNs": {
+          "count": 48,
+          "p50": 16056594,
+          "p95": 19888169,
+          "p99": 20321839,
+          "max": 20321839
+        },
+        "commitEvents": 48,
+        "commitHiddenFalse": 0,
+        "firstDisplayEvents": 48
+      },
+      "hostMarkedWrites": {
+        "count": 432,
+        "durationNs": {
+          "count": 432,
+          "p50": 8861127,
+          "p95": 10442936,
+          "p99": 11481341,
+          "max": 12476665
+        }
+      },
+      "hostInsertions": {
+        "count": 48,
+        "durationNs": {
+          "count": 48,
+          "p50": 4876458,
+          "p95": 6208466,
+          "p99": 6373821,
+          "max": 6373821
+        },
+        "latencyNs": {
+          "count": 48,
+          "p50": 8799989,
+          "p95": 27271818,
+          "p99": 29032897,
+          "max": 29032897
+        }
+      },
+      "markedWritePairing": {
+        "paired": 432,
+        "imeP95": {
+          "count": 432,
+          "p50": 9168658,
+          "p95": 10836692,
+          "p99": 12019007,
+          "max": 12890429
+        },
+        "hostP95": {
+          "count": 432,
+          "p50": 8861127,
+          "p95": 10442936,
+          "p99": 11481341,
+          "max": 12476665
+        }
+      },
+      "samplesFile": "docs/validation/final-mac/attribution-after/L4500-samples.json",
+      "environment": {
+        "at": "2026-11-01T15:40:09.765755+00:00",
+        "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 23:40:09 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+        "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+        "loadavg": "{ 3.70 2.93 2.76 }",
+        "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t81%; charging; (no estimate) present: true",
+        "displayAwake": true,
+        "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)",
+        "caffeinateProcesses": "9956 /usr/bin/caffeinate -i -s -w 1295\n21218 /usr/bin/caffeinate -di -w 21194\n80941 caffeinate -d -i -w 80920"
+      }
+    }
+  ],
+  "note": "归因对照不替代 10,035 事件正式报告；正式门槛仍以最终连续测量为准。"
+}

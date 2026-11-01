@@ -1,0 +1,4 @@
+2026-11-01 14:01:42.153 Probe[86960:3163199] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+2026-11-01 14:01:44.014 Probe[86960:3163199] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+开始计时：目标 540 个按键事件，键间隔 15ms
+IMK 延迟测量：540 个事件，12 轮，样本 540 条，用时 17.6s → docs/validation/final-mac/imk-phase-before.json

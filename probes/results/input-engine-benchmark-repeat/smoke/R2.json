@@ -1,0 +1,738 @@
+{
+  "cases": [
+    {
+      "input": "nihc",
+      "steps": [
+        {
+          "key": "n",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "你",
+              "年",
+              "呢",
+              "能",
+              "那",
+              "念",
+              "哪",
+              "内",
+              "拿",
+              "您"
+            ],
+            "preedit": "n",
+            "raw_input": "n",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9678000,
+            "collect_ns": 39000,
+            "total_ns": 9717000
+          },
+          "parent_rtt_ns": 9831599
+        },
+        {
+          "key": "i",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "你",
+              "泥",
+              "拟",
+              "腻",
+              "逆",
+              "奶茶",
+              "尼",
+              "妮",
+              "匿",
+              "倪"
+            ],
+            "preedit": "ni",
+            "raw_input": "ni",
+            "composing": true,
+            "commit": "",
+            "process_ns": 8955000,
+            "collect_ns": 35000,
+            "total_ns": 8990000
+          },
+          "parent_rtt_ns": 9112424
+        },
+        {
+          "key": "h",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "你好",
+              "你会",
+              "你还",
+              "你和",
+              "你花",
+              "霓虹",
+              "你很",
+              "你狠",
+              "腻害",
+              "腻滑"
+            ],
+            "preedit": "ni h",
+            "raw_input": "nih",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9635000,
+            "collect_ns": 35000,
+            "total_ns": 9670000
+          },
+          "parent_rtt_ns": 9774381
+        },
+        {
+          "key": "c",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "你好",
+              "拟好",
+              "泥蒿",
+              "你",
+              "泥",
+              "拟",
+              "腻",
+              "逆",
+              "尼",
+              "妮"
+            ],
+            "preedit": "ni hc",
+            "raw_input": "nihc",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9269000,
+            "collect_ns": 34000,
+            "total_ns": 9303000
+          },
+          "parent_rtt_ns": 9414232
+        }
+      ],
+      "peek": {
+        "ok": true,
+        "handled": true,
+        "candidates": [
+          "你好",
+          "拟好",
+          "泥蒿",
+          "你",
+          "泥",
+          "拟",
+          "腻",
+          "逆",
+          "尼",
+          "妮"
+        ],
+        "preedit": "ni hc",
+        "raw_input": "nihc",
+        "composing": true,
+        "commit": "",
+        "process_ns": 0,
+        "collect_ns": 22000,
+        "total_ns": 22000
+      },
+      "select_first": {
+        "ok": true,
+        "handled": true,
+        "candidates": [],
+        "preedit": "",
+        "raw_input": "",
+        "composing": false,
+        "commit": "你好",
+        "process_ns": 932000,
+        "collect_ns": 6000,
+        "total_ns": 938000
+      }
+    },
+    {
+      "input": "kdhv",
+      "steps": [
+        {
+          "key": "k",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "看",
+              "可",
+              "靠",
+              "开",
+              "快",
+              "考",
+              "款",
+              "卡",
+              "烤",
+              "坑"
+            ],
+            "preedit": "k",
+            "raw_input": "k",
+            "composing": true,
+            "commit": "",
+            "process_ns": 8270000,
+            "collect_ns": 37000,
+            "total_ns": 8307000
+          },
+          "parent_rtt_ns": 8423494
+        },
+        {
+          "key": "d",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "开",
+              "凯",
+              "慨",
+              "嘅",
+              "楷",
+              "肯定",
+              "恺",
+              "铠",
+              "揩",
+              "锴"
+            ],
+            "preedit": "kd",
+            "raw_input": "kd",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9535000,
+            "collect_ns": 36000,
+            "total_ns": 9571000
+          },
+          "parent_rtt_ns": 9679895
+        },
+        {
+          "key": "h",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "开会",
+              "开户",
+              "开花",
+              "开荒",
+              "开火",
+              "肯定会",
+              "开黑",
+              "开后",
+              "开盒",
+              "开好"
+            ],
+            "preedit": "kd h",
+            "raw_input": "kdh",
+            "composing": true,
+            "commit": "",
+            "process_ns": 10350000,
+            "collect_ns": 33000,
+            "total_ns": 10383000
+          },
+          "parent_rtt_ns": 10471063
+        },
+        {
+          "key": "v",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "开会",
+              "开回",
+              "开慧",
+              "开",
+              "凯",
+              "慨",
+              "嘅",
+              "楷",
+              "恺",
+              "铠"
+            ],
+            "preedit": "kd hv",
+            "raw_input": "kdhv",
+            "composing": true,
+            "commit": "",
+            "process_ns": 10063000,
+            "collect_ns": 34000,
+            "total_ns": 10097000
+          },
+          "parent_rtt_ns": 10193877
+        }
+      ],
+      "peek": {
+        "ok": true,
+        "handled": true,
+        "candidates": [
+          "开会",
+          "开回",
+          "开慧",
+          "开",
+          "凯",
+          "慨",
+          "嘅",
+          "楷",
+          "恺",
+          "铠"
+        ],
+        "preedit": "kd hv",
+        "raw_input": "kdhv",
+        "composing": true,
+        "commit": "",
+        "process_ns": 0,
+        "collect_ns": 23000,
+        "total_ns": 23000
+      },
+      "select_first": {
+        "ok": true,
+        "handled": true,
+        "candidates": [],
+        "preedit": "",
+        "raw_input": "",
+        "composing": false,
+        "commit": "开会",
+        "process_ns": 910000,
+        "collect_ns": 6000,
+        "total_ns": 916000
+      }
+    },
+    {
+      "input": "woxlxtykyu",
+      "steps": [
+        {
+          "key": "w",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我",
+              "为",
+              "握",
+              "万",
+              "问",
+              "外",
+              "未",
+              "位",
+              "无",
+              "往"
+            ],
+            "preedit": "w",
+            "raw_input": "w",
+            "composing": true,
+            "commit": "",
+            "process_ns": 8040000,
+            "collect_ns": 32000,
+            "total_ns": 8072000
+          },
+          "parent_rtt_ns": 8152278
+        },
+        {
+          "key": "o",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我",
+              "握",
+              "沃",
+              "卧",
+              "窝",
+              "涡",
+              "蜗",
+              "挝",
+              "渥",
+              "斡"
+            ],
+            "preedit": "wo",
+            "raw_input": "wo",
+            "composing": true,
+            "commit": "",
+            "process_ns": 8819000,
+            "collect_ns": 36000,
+            "total_ns": 8855000
+          },
+          "parent_rtt_ns": 8953357
+        },
+        {
+          "key": "x",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想",
+              "我先",
+              "我写",
+              "我县",
+              "我校",
+              "我选",
+              "我学",
+              "卧雪",
+              "我心",
+              "我乡"
+            ],
+            "preedit": "wo x",
+            "raw_input": "wox",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9961000,
+            "collect_ns": 39000,
+            "total_ns": 10000000
+          },
+          "parent_rtt_ns": 10105162
+        },
+        {
+          "key": "l",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想",
+              "我乡",
+              "我向",
+              "我像",
+              "我",
+              "握",
+              "沃",
+              "卧",
+              "窝",
+              "涡"
+            ],
+            "preedit": "wo xl",
+            "raw_input": "woxl",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9229000,
+            "collect_ns": 35000,
+            "total_ns": 9264000
+          },
+          "parent_rtt_ns": 9374792
+        },
+        {
+          "key": "x",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我相信",
+              "我想先",
+              "我想想",
+              "我想写",
+              "我详细",
+              "我想下",
+              "我想选",
+              "我想笑",
+              "我想新",
+              "我想学"
+            ],
+            "preedit": "wo xl x",
+            "raw_input": "woxlx",
+            "composing": true,
+            "commit": "",
+            "process_ns": 10065000,
+            "collect_ns": 36000,
+            "total_ns": 10101000
+          },
+          "parent_rtt_ns": 10235554
+        },
+        {
+          "key": "t",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想学",
+              "我想",
+              "我乡",
+              "我向",
+              "我像",
+              "我",
+              "握",
+              "沃",
+              "卧",
+              "窝"
+            ],
+            "preedit": "wo xl xt",
+            "raw_input": "woxlxt",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9450000,
+            "collect_ns": 34000,
+            "total_ns": 9484000
+          },
+          "parent_rtt_ns": 9591615
+        },
+        {
+          "key": "y",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想学院",
+              "我想学",
+              "我想",
+              "我乡",
+              "我向",
+              "我像",
+              "我",
+              "握",
+              "沃",
+              "卧"
+            ],
+            "preedit": "wo xl xt y",
+            "raw_input": "woxlxty",
+            "composing": true,
+            "commit": "",
+            "process_ns": 10041000,
+            "collect_ns": 34000,
+            "total_ns": 10075000
+          },
+          "parent_rtt_ns": 10212859
+        },
+        {
+          "key": "k",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想雪鹰",
+              "我想学",
+              "我想",
+              "我乡",
+              "我向",
+              "我像",
+              "我",
+              "握",
+              "沃",
+              "卧"
+            ],
+            "preedit": "wo xl xt yk",
+            "raw_input": "woxlxtyk",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9581000,
+            "collect_ns": 35000,
+            "total_ns": 9616000
+          },
+          "parent_rtt_ns": 9719866
+        },
+        {
+          "key": "y",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想学英语",
+              "我想学",
+              "我想",
+              "我乡",
+              "我向",
+              "我像",
+              "我",
+              "握",
+              "沃",
+              "卧"
+            ],
+            "preedit": "wo xl xt yk y",
+            "raw_input": "woxlxtyky",
+            "composing": true,
+            "commit": "",
+            "process_ns": 11128000,
+            "collect_ns": 34000,
+            "total_ns": 11162000
+          },
+          "parent_rtt_ns": 11263690
+        },
+        {
+          "key": "u",
+          "response": {
+            "ok": true,
+            "handled": true,
+            "candidates": [
+              "我想学英语",
+              "我想学",
+              "我想",
+              "我乡",
+              "我向",
+              "我像",
+              "我",
+              "握",
+              "沃",
+              "卧"
+            ],
+            "preedit": "wo xl xt yk yu",
+            "raw_input": "woxlxtykyu",
+            "composing": true,
+            "commit": "",
+            "process_ns": 9102000,
+            "collect_ns": 32000,
+            "total_ns": 9134000
+          },
+          "parent_rtt_ns": 9249767
+        }
+      ],
+      "peek": {
+        "ok": true,
+        "handled": true,
+        "candidates": [
+          "我想学英语",
+          "我想学",
+          "我想",
+          "我乡",
+          "我向",
+          "我像",
+          "我",
+          "握",
+          "沃",
+          "卧"
+        ],
+        "preedit": "wo xl xt yk yu",
+        "raw_input": "woxlxtykyu",
+        "composing": true,
+        "commit": "",
+        "process_ns": 0,
+        "collect_ns": 23000,
+        "total_ns": 23000
+      },
+      "select_first": {
+        "ok": true,
+        "handled": true,
+        "candidates": [],
+        "preedit": "",
+        "raw_input": "",
+        "composing": false,
+        "commit": "我想学英语",
+        "process_ns": 883000,
+        "collect_ns": 7000,
+        "total_ns": 890000
+      }
+    }
+  ],
+  "backspace": {
+    "ok": true,
+    "handled": true,
+    "candidates": [
+      "你好",
+      "你会",
+      "你还",
+      "你和",
+      "你花",
+      "霓虹",
+      "你很",
+      "你狠",
+      "腻害",
+      "腻滑"
+    ],
+    "preedit": "ni h",
+    "raw_input": "nih",
+    "composing": true,
+    "commit": "",
+    "process_ns": 8745000,
+    "collect_ns": 34000,
+    "total_ns": 8779000
+  },
+  "retyped": {
+    "ok": true,
+    "handled": true,
+    "candidates": [
+      "你好",
+      "拟好",
+      "泥蒿",
+      "你",
+      "泥",
+      "拟",
+      "腻",
+      "逆",
+      "尼",
+      "妮"
+    ],
+    "preedit": "ni hc",
+    "raw_input": "nihc",
+    "composing": true,
+    "commit": "",
+    "process_ns": 9542000,
+    "collect_ns": 34000,
+    "total_ns": 9576000
+  },
+  "space": {
+    "ok": true,
+    "handled": true,
+    "candidates": [],
+    "preedit": "",
+    "raw_input": "",
+    "composing": false,
+    "commit": "你好",
+    "process_ns": 957000,
+    "collect_ns": 6000,
+    "total_ns": 963000
+  },
+  "cancelled": {
+    "ok": true,
+    "handled": true,
+    "candidates": [],
+    "preedit": "",
+    "raw_input": "",
+    "composing": false,
+    "commit": "",
+    "process_ns": 1058000,
+    "collect_ns": 6000,
+    "total_ns": 1064000
+  },
+  "explicit_second": {
+    "displayed": "回忆",
+    "state": {
+      "ok": true,
+      "handled": true,
+      "candidates": [],
+      "preedit": "",
+      "raw_input": "",
+      "composing": false,
+      "commit": "回忆",
+      "process_ns": 1019000,
+      "collect_ns": 8000,
+      "total_ns": 1027000
+    }
+  },
+  "partial_selection": {
+    "available_in_first_ten": true,
+    "displayed_prefix": "我想学",
+    "trajectory": [
+      {
+        "ok": true,
+        "handled": true,
+        "candidates": [
+          "英语",
+          "盈余",
+          "应与",
+          "应于",
+          "应予",
+          "婴语",
+          "硬玉",
+          "莺语",
+          "蘡薁",
+          "应"
+        ],
+        "preedit": "我想学yk yu",
+        "raw_input": "woxlxtykyu",
+        "composing": true,
+        "commit": "",
+        "process_ns": 9066000,
+        "collect_ns": 39000,
+        "total_ns": 9105000
+      },
+      {
+        "ok": true,
+        "handled": true,
+        "candidates": [],
+        "preedit": "",
+        "raw_input": "",
+        "composing": false,
+        "commit": "我想学英语",
+        "process_ns": 1817000,
+        "collect_ns": 7000,
+        "total_ns": 1824000
+      }
+    ],
+    "committed": "我想学英语",
+    "complete_target": true
+  }
+}

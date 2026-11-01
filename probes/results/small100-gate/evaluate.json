@@ -1,0 +1,2375 @@
+{
+ "revision": "8ab680e26a596d2e3d2d2d17ae0f68df1037328c",
+ "threads": 2,
+ "beam": 1,
+ "batch": 1,
+ "risk": [
+  {
+   "id": "en-word",
+   "kind": "word",
+   "source": "meeting",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "会议",
+   "ms": 57.9,
+   "availability": "available",
+   "hf_greedy": "会议"
+  },
+  {
+   "id": "en-ambiguous",
+   "kind": "word",
+   "source": "bank",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "银行",
+   "ms": 57.4,
+   "availability": "available",
+   "hf_greedy": "银行"
+  },
+  {
+   "id": "en-tomorrow",
+   "kind": "word",
+   "source": "tomorrow",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "明天",
+   "ms": 63.2,
+   "availability": "available"
+  },
+  {
+   "id": "en-phrase",
+   "kind": "phrase",
+   "source": "attend a meeting",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "參加會議",
+   "ms": 86.2,
+   "availability": "available"
+  },
+  {
+   "id": "en-greeting",
+   "kind": "phrase",
+   "source": "good morning",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "早上好",
+   "ms": 71.7,
+   "availability": "available"
+  },
+  {
+   "id": "en-sentence",
+   "kind": "sentence",
+   "source": "I have a meeting tomorrow.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "我明天会见。",
+   "ms": 95.3,
+   "availability": "available"
+  },
+  {
+   "id": "en-negation",
+   "kind": "sentence",
+   "source": "Do not send the email.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "不要发送电子邮件。",
+   "ms": 113.1,
+   "availability": "available"
+  },
+  {
+   "id": "en-time",
+   "kind": "sentence",
+   "source": "The meeting is at 3 p.m. tomorrow.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "会议是明天下午3点。",
+   "ms": 136.4,
+   "availability": "available"
+  },
+  {
+   "id": "en-names",
+   "kind": "sentence",
+   "source": "Alice will meet Bob in Beijing on Friday.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "艾丽丝星期五将在北京见面。",
+   "ms": 154.9,
+   "availability": "available",
+   "hf_greedy": "艾丽丝星期五将在北京见到鲍勃。"
+  },
+  {
+   "id": "en-typo-sentence",
+   "kind": "typo",
+   "source": "I have a metting tomorrow.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "我明天有一个聚会。",
+   "ms": 112.9,
+   "availability": "available"
+  },
+  {
+   "id": "en-typo-word",
+   "kind": "typo",
+   "source": "metting",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "充足",
+   "ms": 67.6,
+   "availability": "available"
+  },
+  {
+   "id": "en-unknown",
+   "kind": "unknown",
+   "source": "meeetingg",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "同行",
+   "ms": 64.6,
+   "availability": "available"
+  },
+  {
+   "id": "en-url",
+   "kind": "protected",
+   "source": "Open https://example.com/a?x=1.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "打开 https://example.com/a?x=1。",
+   "ms": 187.4,
+   "availability": "available"
+  },
+  {
+   "id": "en-mixed",
+   "kind": "protected",
+   "source": "Please review Gogaku v2.1 before Friday.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "请在星期五之前查看Gogaku v2.1。",
+   "ms": 176.9,
+   "availability": "available"
+  },
+  {
+   "id": "en-past",
+   "kind": "sentence",
+   "source": "I went to the bank yesterday.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "我昨天去银行。",
+   "ms": 95.0,
+   "availability": "available"
+  },
+  {
+   "id": "en-long",
+   "kind": "sentence",
+   "source": "The meeting has been moved to next Tuesday at 10:30 a.m. Please do not invite Alice.",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "会议将于下周二下午10点30点,请不要邀请艾丽丝。",
+   "ms": 260.6,
+   "availability": "available"
+  },
+  {
+   "id": "zh-word",
+   "kind": "word",
+   "source": "会议",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Meeting",
+   "ms": 55.6,
+   "availability": "available",
+   "hf_greedy": "Meeting"
+  },
+  {
+   "id": "zh-tomorrow",
+   "kind": "word",
+   "source": "明天",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "tomorrow",
+   "ms": 53.3,
+   "availability": "available",
+   "hf_greedy": "tomorrow"
+  },
+  {
+   "id": "zh-bank",
+   "kind": "word",
+   "source": "银行",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Banking",
+   "ms": 60.5,
+   "availability": "available"
+  },
+  {
+   "id": "zh-phrase",
+   "kind": "phrase",
+   "source": "开会",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "The Meeting",
+   "ms": 67.2,
+   "availability": "available"
+  },
+  {
+   "id": "zh-greeting",
+   "kind": "phrase",
+   "source": "早上好",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Good morning",
+   "ms": 56.6,
+   "availability": "available"
+  },
+  {
+   "id": "zh-sentence",
+   "kind": "sentence",
+   "source": "我明天有个会。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "I have a meeting tomorrow.",
+   "ms": 109.8,
+   "availability": "available"
+  },
+  {
+   "id": "zh-negation",
+   "kind": "sentence",
+   "source": "不要发送邮件。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Do not send mail.",
+   "ms": 86.9,
+   "availability": "available"
+  },
+  {
+   "id": "zh-time",
+   "kind": "sentence",
+   "source": "明天下午三点开会。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Meeting tomorrow at 3 pm.",
+   "ms": 123.1,
+   "availability": "available"
+  },
+  {
+   "id": "zh-names",
+   "kind": "sentence",
+   "source": "爱丽丝星期五在北京见鲍勃。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Alice will meet Bob in Beijing on Friday.",
+   "ms": 125.5,
+   "availability": "available",
+   "hf_greedy": "Alice will meet Bob in Beijing on Friday."
+  },
+  {
+   "id": "zh-past",
+   "kind": "sentence",
+   "source": "我昨天去了银行。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "I went to the bank yesterday.",
+   "ms": 116.9,
+   "availability": "available"
+  },
+  {
+   "id": "zh-url",
+   "kind": "protected",
+   "source": "请打开 https://example.com/a?x=1。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Please open https://example.com/a?x=1",
+   "ms": 185.0,
+   "availability": "available"
+  },
+  {
+   "id": "zh-mixed",
+   "kind": "protected",
+   "source": "请在星期五之前检查 Gogaku v2.1。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "Please check Gogaku v2.1 before Friday.",
+   "ms": 150.9,
+   "availability": "available"
+  },
+  {
+   "id": "zh-condition",
+   "kind": "sentence",
+   "source": "如果下雨，我们就取消会议。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "If it rains, we cancell the meeting.",
+   "ms": 146.3,
+   "availability": "available"
+  },
+  {
+   "id": "zh-not-yet",
+   "kind": "sentence",
+   "source": "我还没吃饭。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "I have not eaten yet.",
+   "ms": 107.0,
+   "availability": "available"
+  },
+  {
+   "id": "zh-long",
+   "kind": "sentence",
+   "source": "会议改到下周二上午十点半，请不要邀请爱丽丝。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "The meeting will be changed to 10 a.m. next Tuesday, please don’t invite Alice.",
+   "ms": 266.5,
+   "availability": "available"
+  },
+  {
+   "id": "zh-contrast",
+   "kind": "sentence",
+   "source": "他不在上海，在北京。",
+   "reference": null,
+   "expectedAction": "translate",
+   "output": "He is not in Shanghai, but in Beijing.",
+   "ms": 136.4,
+   "availability": "available"
+  }
+ ],
+ "holdout": [
+  {
+   "id": "enToZh-001",
+   "kind": "word",
+   "source": "appointment",
+   "reference": "预约",
+   "expectedAction": "translate",
+   "output": "任命",
+   "ms": 64.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-002",
+   "kind": "word",
+   "source": "receipt",
+   "reference": "收据",
+   "expectedAction": "translate",
+   "output": "接收",
+   "ms": 68.9,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-003",
+   "kind": "word",
+   "source": "refund",
+   "reference": "退款",
+   "expectedAction": "translate",
+   "output": "退款",
+   "ms": 70.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-004",
+   "kind": "word",
+   "source": "deadline",
+   "reference": "截止日期",
+   "expectedAction": "translate",
+   "output": "期限",
+   "ms": 70.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-005",
+   "kind": "word",
+   "source": "umbrella",
+   "reference": "雨伞",
+   "expectedAction": "translate",
+   "output": "伞",
+   "ms": 64.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-006",
+   "kind": "word",
+   "source": "platform",
+   "reference": "站台",
+   "expectedAction": "translate",
+   "output": "平台",
+   "ms": 59.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-007",
+   "kind": "word",
+   "source": "battery",
+   "reference": "电池",
+   "expectedAction": "translate",
+   "output": "电池",
+   "ms": 69.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-008",
+   "kind": "word",
+   "source": "medicine",
+   "reference": "药",
+   "expectedAction": "translate",
+   "output": "药物",
+   "ms": 68.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-009",
+   "kind": "word",
+   "source": "address",
+   "reference": "地址",
+   "expectedAction": "translate",
+   "output": "地址",
+   "ms": 58.7,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-010",
+   "kind": "word",
+   "source": "invoice",
+   "reference": "发票",
+   "expectedAction": "translate",
+   "output": "账单",
+   "ms": 68.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-011",
+   "kind": "word",
+   "source": "luggage",
+   "reference": "行李",
+   "expectedAction": "translate",
+   "output": "行李",
+   "ms": 69.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-012",
+   "kind": "word",
+   "source": "temperature",
+   "reference": "温度",
+   "expectedAction": "translate",
+   "output": "温度",
+   "ms": 70.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-013",
+   "kind": "word",
+   "source": "password",
+   "reference": "密码",
+   "expectedAction": "translate",
+   "output": "密码",
+   "ms": 69.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-014",
+   "kind": "word",
+   "source": "reservation",
+   "reference": "预订",
+   "expectedAction": "translate",
+   "output": "预订",
+   "ms": 70.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-015",
+   "kind": "word",
+   "source": "elevator",
+   "reference": "电梯",
+   "expectedAction": "translate",
+   "output": "电梯",
+   "ms": 71.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-016",
+   "kind": "word",
+   "source": "allergy",
+   "reference": "过敏",
+   "expectedAction": "translate",
+   "output": "过敏",
+   "ms": 66.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-017",
+   "kind": "word",
+   "source": "subscription",
+   "reference": "订阅",
+   "expectedAction": "translate",
+   "output": "订阅",
+   "ms": 71.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-018",
+   "kind": "word",
+   "source": "intersection",
+   "reference": "十字路口",
+   "expectedAction": "translate",
+   "output": "跨越",
+   "ms": 73.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-019",
+   "kind": "word",
+   "source": "discount",
+   "reference": "折扣",
+   "expectedAction": "translate",
+   "output": "折扣",
+   "ms": 69.7,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-020",
+   "kind": "word",
+   "source": "permission",
+   "reference": "许可",
+   "expectedAction": "translate",
+   "output": "许可",
+   "ms": 69.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-021",
+   "kind": "phrase",
+   "source": "cancel an order",
+   "reference": "取消订单",
+   "expectedAction": "translate",
+   "output": "取消订单",
+   "ms": 90.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-022",
+   "kind": "phrase",
+   "source": "make a reservation",
+   "reference": "预订座位",
+   "expectedAction": "translate",
+   "output": "做预订",
+   "ms": 80.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-023",
+   "kind": "phrase",
+   "source": "miss the train",
+   "reference": "错过火车",
+   "expectedAction": "translate",
+   "output": "错过火车",
+   "ms": 91.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-024",
+   "kind": "phrase",
+   "source": "take a break",
+   "reference": "休息一下",
+   "expectedAction": "translate",
+   "output": "做一个休息",
+   "ms": 80.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-025",
+   "kind": "phrase",
+   "source": "on the second floor",
+   "reference": "在二楼",
+   "expectedAction": "translate",
+   "output": "在第二层",
+   "ms": 70.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-026",
+   "kind": "phrase",
+   "source": "without sugar",
+   "reference": "不加糖",
+   "expectedAction": "translate",
+   "output": "没有糖",
+   "ms": 69.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-027",
+   "kind": "phrase",
+   "source": "a return ticket",
+   "reference": "往返票",
+   "expectedAction": "translate",
+   "output": "返回票",
+   "ms": 79.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-028",
+   "kind": "phrase",
+   "source": "out of stock",
+   "reference": "缺货",
+   "expectedAction": "translate",
+   "output": "出库",
+   "ms": 70.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-029",
+   "kind": "phrase",
+   "source": "by the end of this week",
+   "reference": "在本周结束前",
+   "expectedAction": "translate",
+   "output": "到本周末",
+   "ms": 98.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-030",
+   "kind": "phrase",
+   "source": "as soon as possible",
+   "reference": "尽快",
+   "expectedAction": "translate",
+   "output": "尽快",
+   "ms": 71.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-031",
+   "kind": "phrase",
+   "source": "leave a message",
+   "reference": "留言",
+   "expectedAction": "translate",
+   "output": "留下一个消息",
+   "ms": 90.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-032",
+   "kind": "phrase",
+   "source": "pay in cash",
+   "reference": "用现金支付",
+   "expectedAction": "translate",
+   "output": "现金付款",
+   "ms": 83.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-033",
+   "kind": "phrase",
+   "source": "turn down the volume",
+   "reference": "调低音量",
+   "expectedAction": "translate",
+   "output": "放下音量",
+   "ms": 86.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-034",
+   "kind": "phrase",
+   "source": "at least twice",
+   "reference": "至少两次",
+   "expectedAction": "translate",
+   "output": "至少两次",
+   "ms": 76.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-035",
+   "kind": "phrase",
+   "source": "no later than Thursday",
+   "reference": "最迟星期四",
+   "expectedAction": "translate",
+   "output": "不是星期四以后",
+   "ms": 87.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-036",
+   "kind": "phrase",
+   "source": "keep the original file",
+   "reference": "保留原文件",
+   "expectedAction": "translate",
+   "output": "保持原始文件",
+   "ms": 84.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-037",
+   "kind": "phrase",
+   "source": "an empty folder",
+   "reference": "空文件夹",
+   "expectedAction": "translate",
+   "output": "空的文件夹",
+   "ms": 84.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-038",
+   "kind": "phrase",
+   "source": "a delayed flight",
+   "reference": "延误的航班",
+   "expectedAction": "translate",
+   "output": "延迟航班",
+   "ms": 83.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-039",
+   "kind": "phrase",
+   "source": "for personal use",
+   "reference": "供个人使用",
+   "expectedAction": "translate",
+   "output": "个人使用",
+   "ms": 68.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-040",
+   "kind": "phrase",
+   "source": "a one-way street",
+   "reference": "单行道",
+   "expectedAction": "translate",
+   "output": "一个单方向街道",
+   "ms": 100.7,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-041",
+   "kind": "sentence",
+   "source": "I cannot open the attachment.",
+   "reference": "我打不开附件。",
+   "expectedAction": "translate",
+   "output": "我不能打开附件。",
+   "ms": 101.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-042",
+   "kind": "sentence",
+   "source": "Please keep the door closed.",
+   "reference": "请保持门关闭。",
+   "expectedAction": "translate",
+   "output": "请把门关闭。",
+   "ms": 117.9,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-043",
+   "kind": "sentence",
+   "source": "The package arrived yesterday.",
+   "reference": "包裹昨天到了。",
+   "expectedAction": "translate",
+   "output": "包装昨天到达。",
+   "ms": 127.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-044",
+   "kind": "sentence",
+   "source": "We have not received the payment yet.",
+   "reference": "我们还没有收到付款。",
+   "expectedAction": "translate",
+   "output": "我们还没有收到付款。",
+   "ms": 116.9,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-045",
+   "kind": "sentence",
+   "source": "Is this seat taken?",
+   "reference": "这个座位有人吗？",
+   "expectedAction": "translate",
+   "output": "这个座位是否被取了?",
+   "ms": 138.9,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-046",
+   "kind": "sentence",
+   "source": "I need two tickets, not three.",
+   "reference": "我需要两张票，不是三张。",
+   "expectedAction": "translate",
+   "output": "我需要两张票,而不是三张。",
+   "ms": 156.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-047",
+   "kind": "sentence",
+   "source": "She works from home on Mondays.",
+   "reference": "她星期一在家办公。",
+   "expectedAction": "translate",
+   "output": "她星期一从家工作。",
+   "ms": 127.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-048",
+   "kind": "sentence",
+   "source": "Could you speak more slowly?",
+   "reference": "你能说慢一点吗？",
+   "expectedAction": "translate",
+   "output": "你能说话慢吗?",
+   "ms": 117.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-049",
+   "kind": "sentence",
+   "source": "The shop closes at half past eight.",
+   "reference": "商店八点半关门。",
+   "expectedAction": "translate",
+   "output": "店铺在8点半关闭。",
+   "ms": 149.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-050",
+   "kind": "sentence",
+   "source": "I left my keys on the table.",
+   "reference": "我把钥匙落在桌子上了。",
+   "expectedAction": "translate",
+   "output": "我把钥匙放在桌子上。",
+   "ms": 136.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-051",
+   "kind": "sentence",
+   "source": "You do not need to reply today.",
+   "reference": "你今天不必回复。",
+   "expectedAction": "translate",
+   "output": "你今天不必回答。",
+   "ms": 99.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-052",
+   "kind": "sentence",
+   "source": "Do not delete the backup.",
+   "reference": "不要删除备份。",
+   "expectedAction": "translate",
+   "output": "不要删除备份。",
+   "ms": 112.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-053",
+   "kind": "sentence",
+   "source": "Only the first item is free.",
+   "reference": "只有第一项免费。",
+   "expectedAction": "translate",
+   "output": "只有第一条是免费的。",
+   "ms": 120.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-054",
+   "kind": "sentence",
+   "source": "The price includes breakfast.",
+   "reference": "价格包含早餐。",
+   "expectedAction": "translate",
+   "output": "价格包括早餐。",
+   "ms": 93.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-055",
+   "kind": "sentence",
+   "source": "There are no trains after midnight.",
+   "reference": "午夜后没有火车。",
+   "expectedAction": "translate",
+   "output": "午夜后没有火车。",
+   "ms": 120.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-056",
+   "kind": "sentence",
+   "source": "I used to live near the station.",
+   "reference": "我以前住在车站附近。",
+   "expectedAction": "translate",
+   "output": "我住在火车站附近。",
+   "ms": 115.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-057",
+   "kind": "sentence",
+   "source": "Please send it to Chen, not Wang.",
+   "reference": "请把它发给陈，不要发给王。",
+   "expectedAction": "translate",
+   "output": "请把它送给陈,而不是陈。",
+   "ms": 157.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-058",
+   "kind": "sentence",
+   "source": "The total is 128.50 yuan.",
+   "reference": "总共是128.50元。",
+   "expectedAction": "translate",
+   "output": "总额为128.50元。",
+   "ms": 133.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-059",
+   "kind": "sentence",
+   "source": "My flight leaves on June 12.",
+   "reference": "我的航班6月12日出发。",
+   "expectedAction": "translate",
+   "output": "我的航班于6月12日出发。",
+   "ms": 158.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-060",
+   "kind": "sentence",
+   "source": "The room number is 406.",
+   "reference": "房间号是406。",
+   "expectedAction": "translate",
+   "output": "房间号码是406。",
+   "ms": 127.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-061",
+   "kind": "sentence",
+   "source": "I will wait until 7:15.",
+   "reference": "我会等到7点15分。",
+   "expectedAction": "translate",
+   "output": "我会等到7:15。",
+   "ms": 103.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-062",
+   "kind": "sentence",
+   "source": "We moved the appointment from Tuesday to Wednesday.",
+   "reference": "我们把预约从星期二改到了星期三。",
+   "expectedAction": "translate",
+   "output": "我们将任命从星期二转移到周三。",
+   "ms": 170.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-063",
+   "kind": "sentence",
+   "source": "The blue one is cheaper than the red one.",
+   "reference": "蓝色的比红色的便宜。",
+   "expectedAction": "translate",
+   "output": "蓝色比红色更便宜。",
+   "ms": 129.7,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-064",
+   "kind": "sentence",
+   "source": "I am allergic to peanuts.",
+   "reference": "我对花生过敏。",
+   "expectedAction": "translate",
+   "output": "我对豆类过敏。",
+   "ms": 112.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-065",
+   "kind": "sentence",
+   "source": "This is not the latest version.",
+   "reference": "这不是最新版本。",
+   "expectedAction": "translate",
+   "output": "不过,这不是最新版本。",
+   "ms": 126.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-066",
+   "kind": "sentence",
+   "source": "If you are busy, we can talk later.",
+   "reference": "如果你忙，我们可以晚点再谈。",
+   "expectedAction": "translate",
+   "output": "如果你忙碌,我们可以以后再说话。",
+   "ms": 171.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-067",
+   "kind": "sentence",
+   "source": "It may rain this evening.",
+   "reference": "今天傍晚可能下雨。",
+   "expectedAction": "translate",
+   "output": "今晚可能下雨。",
+   "ms": 105.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-068",
+   "kind": "sentence",
+   "source": "I have already submitted the form.",
+   "reference": "我已经提交了表格。",
+   "expectedAction": "translate",
+   "output": "我已经提交了表格。",
+   "ms": 127.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-069",
+   "kind": "sentence",
+   "source": "He has never been to London.",
+   "reference": "他从没去过伦敦。",
+   "expectedAction": "translate",
+   "output": "他从来没有去伦敦。",
+   "ms": 128.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-070",
+   "kind": "sentence",
+   "source": "We need at least five chairs.",
+   "reference": "我们至少需要五把椅子。",
+   "expectedAction": "translate",
+   "output": "至少需要5个椅子。",
+   "ms": 124.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-071",
+   "kind": "sentence",
+   "source": "Please reduce the amount by ten percent.",
+   "reference": "请把金额减少百分之十。",
+   "expectedAction": "translate",
+   "output": "请减少10%的数量。",
+   "ms": 125.5,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-072",
+   "kind": "sentence",
+   "source": "Do I have to book in advance?",
+   "reference": "我必须提前预约吗？",
+   "expectedAction": "translate",
+   "output": "我需要提前预订吗?",
+   "ms": 130.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-073",
+   "kind": "sentence",
+   "source": "The bus stop is across the street.",
+   "reference": "公交车站在街对面。",
+   "expectedAction": "translate",
+   "output": "巴士站在街上。",
+   "ms": 130.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-074",
+   "kind": "sentence",
+   "source": "I would rather walk than take a taxi.",
+   "reference": "我宁愿步行，也不愿打车。",
+   "expectedAction": "translate",
+   "output": "我宁愿走路,而不是乘坐出租车。",
+   "ms": 178.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-075",
+   "kind": "sentence",
+   "source": "Please return the book before Friday.",
+   "reference": "请在星期五之前还书。",
+   "expectedAction": "translate",
+   "output": "请在星期五之前返回书。",
+   "ms": 135.9,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-076",
+   "kind": "sentence",
+   "source": "Neither answer is correct.",
+   "reference": "两个答案都不正确。",
+   "expectedAction": "translate",
+   "output": "没有一个答案是正确的。",
+   "ms": 135.1,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-077",
+   "kind": "sentence",
+   "source": "I need a copy of the contract.",
+   "reference": "我需要一份合同副本。",
+   "expectedAction": "translate",
+   "output": "我需要合同的副本。",
+   "ms": 108.0,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-078",
+   "kind": "sentence",
+   "source": "The test failed only on the first attempt.",
+   "reference": "测试只有第一次尝试失败了。",
+   "expectedAction": "translate",
+   "output": "测试只在第一次尝试时失败。",
+   "ms": 147.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-079",
+   "kind": "sentence",
+   "source": "Could we move this call to the afternoon?",
+   "reference": "我们能把这次通话改到下午吗？",
+   "expectedAction": "translate",
+   "output": "这个电话可以转移到下午吗?",
+   "ms": 145.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-080",
+   "kind": "sentence",
+   "source": "I forgot whether I locked the door.",
+   "reference": "我忘了是否锁了门。",
+   "expectedAction": "translate",
+   "output": "我忘了我是否关上门。",
+   "ms": 136.3,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-081",
+   "kind": "long",
+   "source": "If the delivery does not arrive by Friday, please cancel the order and refund the full amount to my original payment method.",
+   "reference": "如果星期五之前还没送到，请取消订单，并通过原支付方式全额退款。",
+   "expectedAction": "translate",
+   "output": "如果发货未到周五到达,请取消订单并返回我的原始付款方式。",
+   "ms": 297.7,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-082",
+   "kind": "long",
+   "source": "The old entrance will be closed from 9 a.m. to 4 p.m. tomorrow, so please use the side door during that time.",
+   "reference": "明天上午9点到下午4点旧入口将关闭，请在这段时间使用侧门。",
+   "expectedAction": "translate",
+   "output": "旧入口将于明天下午9点至下午4点关闭,所以请在那时使用侧门。",
+   "ms": 321.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-083",
+   "kind": "long",
+   "source": "Although the first test passed, we should not publish the update until the remaining two tests are complete.",
+   "reference": "虽然第一项测试通过了，但在其余两项测试完成之前，我们不应该发布更新。",
+   "expectedAction": "translate",
+   "output": "尽管第一次测试已经过去,但我们不应该发布更新,直到剩下的两个测试完成。",
+   "ms": 258.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-084",
+   "kind": "long",
+   "source": "Please tell Maria that the appointment has been moved to August 3, and remind her to bring the original document rather than a copy.",
+   "reference": "请告诉玛丽亚，预约已改到8月3日，并提醒她带原件而不是复印件。",
+   "expectedAction": "translate",
+   "output": "请告诉玛丽亚,任命已被移到8月3日,并提醒她带回原文本而不是副本。",
+   "ms": 362.7,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-085",
+   "kind": "long",
+   "source": "I ordered three small boxes and two large ones, but the package contained only two small boxes and one large box.",
+   "reference": "我订了三个小盒子和两个大盒子，但包裹里只有两个小盒子和一个大盒子。",
+   "expectedAction": "translate",
+   "output": "我订购了三只小盒子和两只大盒子,但包装只包含了两只小盒子和一个大盒子。",
+   "ms": 400.4,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-086",
+   "kind": "long",
+   "source": "If you have already paid, ignore this reminder; otherwise, please complete the payment before 6 p.m. next Monday.",
+   "reference": "如果你已经付款，请忽略这条提醒；否则，请在下星期一下午6点之前完成付款。",
+   "expectedAction": "translate",
+   "output": "如果您已经付款,请忽略此提醒;否则请在下周一下午6点之前完成付款。",
+   "ms": 333.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-087",
+   "kind": "long",
+   "source": "The hotel is a ten-minute walk from the station, but the road is being repaired, so allow an extra fifteen minutes.",
+   "reference": "酒店离车站步行十分钟，但道路正在维修，所以请额外预留十五分钟。",
+   "expectedAction": "translate",
+   "output": "酒店距离火车站步行10分钟,但道路正在修复,所以允许额外15分钟。",
+   "ms": 297.9,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-088",
+   "kind": "long",
+   "source": "We do not need to translate the product names, but every warning and instruction must be available in both Chinese and English.",
+   "reference": "我们不需要翻译产品名称，但每一条警告和说明都必须同时提供中文和英文。",
+   "expectedAction": "translate",
+   "output": "我们不需要翻译产品名称,但所有警告和指示都必须在中文和英语中提供。",
+   "ms": 302.6,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-089",
+   "kind": "long",
+   "source": "Please do not overwrite the original spreadsheet; save your changes in a new file and send only that file to the team.",
+   "reference": "请不要覆盖原电子表格；把修改保存到新文件中，并且只把那个文件发给团队。",
+   "expectedAction": "translate",
+   "output": "请不要重写原始表格;保存您的更改在新文件中,并只将该文件发送给团队。",
+   "ms": 361.2,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-090",
+   "kind": "long",
+   "source": "I am available on Tuesday morning and Thursday afternoon, but I cannot attend any meetings on Wednesday because I will be traveling.",
+   "reference": "我星期二上午和星期四下午有空，但星期三要出行，无法参加任何会议。",
+   "expectedAction": "translate",
+   "output": "我在星期二早上和星期四下午可以访问,但我不能参加任何会议,因为我将旅行。",
+   "ms": 296.8,
+   "availability": "available"
+  },
+  {
+   "id": "enToZh-091",
+   "kind": "protected",
+   "source": "https://example.org/path?q=42",
+   "reference": "https://example.org/path?q=42",
+   "expectedAction": "preserve",
+   "output": "正確的網站: https://example.org/path?q=42",
+   "ms": 220.7,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-092",
+   "kind": "protected",
+   "source": "user+test@example.org",
+   "reference": "user+test@example.org",
+   "expectedAction": "preserve",
+   "output": "用户+测试@example.org",
+   "ms": 127.1,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-093",
+   "kind": "protected",
+   "source": "let count = 42;",
+   "reference": "let count = 42;",
+   "expectedAction": "preserve",
+   "output": "以数为42;",
+   "ms": 97.3,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-094",
+   "kind": "protected",
+   "source": "Gogaku v3.2.1",
+   "reference": "Gogaku v3.2.1",
+   "expectedAction": "preserve",
+   "output": "古巴 v3.2.1",
+   "ms": 112.6,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-095",
+   "kind": "protected",
+   "source": "AB-2048-X",
+   "reference": "AB-2048-X",
+   "expectedAction": "preserve",
+   "output": "AB-2048-X",
+   "ms": 86.4,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-096",
+   "kind": "typo",
+   "source": "recievee",
+   "reference": "recievee",
+   "expectedAction": "preserve",
+   "output": "收藏",
+   "ms": 69.4,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-097",
+   "kind": "typo",
+   "source": "definatelyy",
+   "reference": "definatelyy",
+   "expectedAction": "preserve",
+   "output": "定义",
+   "ms": 66.1,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-098",
+   "kind": "typo",
+   "source": "adresss",
+   "reference": "adresss",
+   "expectedAction": "preserve",
+   "output": "地址",
+   "ms": 52.6,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-099",
+   "kind": "typo",
+   "source": "tomoroww",
+   "reference": "tomoroww",
+   "expectedAction": "preserve",
+   "output": "明日",
+   "ms": 66.9,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "enToZh-100",
+   "kind": "typo",
+   "source": "unkn0wnzz",
+   "reference": "unkn0wnzz",
+   "expectedAction": "preserve",
+   "output": "无奈",
+   "ms": 66.9,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-001",
+   "kind": "word",
+   "source": "预约",
+   "reference": "appointment",
+   "expectedAction": "translate",
+   "output": "The appointment",
+   "ms": 66.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-002",
+   "kind": "word",
+   "source": "收据",
+   "reference": "receipt",
+   "expectedAction": "translate",
+   "output": "Acceptance",
+   "ms": 70.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-003",
+   "kind": "word",
+   "source": "退款",
+   "reference": "refund",
+   "expectedAction": "translate",
+   "output": "Return",
+   "ms": 56.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-004",
+   "kind": "word",
+   "source": "截止日期",
+   "reference": "deadline",
+   "expectedAction": "translate",
+   "output": "Date of End",
+   "ms": 70.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-005",
+   "kind": "word",
+   "source": "雨伞",
+   "reference": "umbrella",
+   "expectedAction": "translate",
+   "output": "The umbrella",
+   "ms": 84.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-006",
+   "kind": "word",
+   "source": "站台",
+   "reference": "platform",
+   "expectedAction": "translate",
+   "output": "The station",
+   "ms": 55.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-007",
+   "kind": "word",
+   "source": "电池",
+   "reference": "battery",
+   "expectedAction": "translate",
+   "output": "Battery",
+   "ms": 57.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-008",
+   "kind": "word",
+   "source": "药",
+   "reference": "medicine",
+   "expectedAction": "translate",
+   "output": "Medicine",
+   "ms": 54.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-009",
+   "kind": "word",
+   "source": "地址",
+   "reference": "address",
+   "expectedAction": "translate",
+   "output": "Address",
+   "ms": 46.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-010",
+   "kind": "word",
+   "source": "发票",
+   "reference": "invoice",
+   "expectedAction": "translate",
+   "output": "The Billing",
+   "ms": 65.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-011",
+   "kind": "word",
+   "source": "行李",
+   "reference": "luggage",
+   "expectedAction": "translate",
+   "output": "The Baggage",
+   "ms": 81.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-012",
+   "kind": "word",
+   "source": "温度",
+   "reference": "temperature",
+   "expectedAction": "translate",
+   "output": "Temperature",
+   "ms": 60.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-013",
+   "kind": "word",
+   "source": "密码",
+   "reference": "password",
+   "expectedAction": "translate",
+   "output": "The Password",
+   "ms": 64.9,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-014",
+   "kind": "word",
+   "source": "预订",
+   "reference": "reservation",
+   "expectedAction": "translate",
+   "output": "The reservation",
+   "ms": 65.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-015",
+   "kind": "word",
+   "source": "电梯",
+   "reference": "elevator",
+   "expectedAction": "translate",
+   "output": "The Elevator",
+   "ms": 74.9,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-016",
+   "kind": "word",
+   "source": "过敏",
+   "reference": "allergy",
+   "expectedAction": "translate",
+   "output": "Allergy",
+   "ms": 65.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-017",
+   "kind": "word",
+   "source": "订阅",
+   "reference": "subscription",
+   "expectedAction": "translate",
+   "output": "Subscribe",
+   "ms": 53.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-018",
+   "kind": "word",
+   "source": "十字路口",
+   "reference": "intersection",
+   "expectedAction": "translate",
+   "output": "The crossroads",
+   "ms": 77.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-019",
+   "kind": "word",
+   "source": "折扣",
+   "reference": "discount",
+   "expectedAction": "translate",
+   "output": "Discount",
+   "ms": 54.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-020",
+   "kind": "word",
+   "source": "许可",
+   "reference": "permission",
+   "expectedAction": "translate",
+   "output": "license",
+   "ms": 58.9,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-021",
+   "kind": "phrase",
+   "source": "取消订单",
+   "reference": "cancel an order",
+   "expectedAction": "translate",
+   "output": "Cancel order",
+   "ms": 69.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-022",
+   "kind": "phrase",
+   "source": "预订座位",
+   "reference": "make a reservation",
+   "expectedAction": "translate",
+   "output": "Seats reservation",
+   "ms": 76.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-023",
+   "kind": "phrase",
+   "source": "错过火车",
+   "reference": "miss the train",
+   "expectedAction": "translate",
+   "output": "missing the train.",
+   "ms": 88.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-024",
+   "kind": "phrase",
+   "source": "休息一下",
+   "reference": "take a break",
+   "expectedAction": "translate",
+   "output": "Rest",
+   "ms": 44.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-025",
+   "kind": "phrase",
+   "source": "在二楼",
+   "reference": "on the second floor",
+   "expectedAction": "translate",
+   "output": "on the second floor.",
+   "ms": 84.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-026",
+   "kind": "phrase",
+   "source": "不加糖",
+   "reference": "without sugar",
+   "expectedAction": "translate",
+   "output": "No Added Sugar",
+   "ms": 87.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-027",
+   "kind": "phrase",
+   "source": "往返票",
+   "reference": "a return ticket",
+   "expectedAction": "translate",
+   "output": "Return Tickets",
+   "ms": 76.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-028",
+   "kind": "phrase",
+   "source": "缺货",
+   "reference": "out of stock",
+   "expectedAction": "translate",
+   "output": "The lack of",
+   "ms": 65.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-029",
+   "kind": "phrase",
+   "source": "在本周结束前",
+   "reference": "by the end of this week",
+   "expectedAction": "translate",
+   "output": "Before the end of this week.",
+   "ms": 105.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-030",
+   "kind": "phrase",
+   "source": "尽快",
+   "reference": "as soon as possible",
+   "expectedAction": "translate",
+   "output": "as soon as possible",
+   "ms": 77.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-031",
+   "kind": "phrase",
+   "source": "留言",
+   "reference": "leave a message",
+   "expectedAction": "translate",
+   "output": "Message",
+   "ms": 55.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-032",
+   "kind": "phrase",
+   "source": "用现金支付",
+   "reference": "pay in cash",
+   "expectedAction": "translate",
+   "output": "Payment with Cash",
+   "ms": 79.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-033",
+   "kind": "phrase",
+   "source": "调低音量",
+   "reference": "turn down the volume",
+   "expectedAction": "translate",
+   "output": "Low Noise",
+   "ms": 65.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-034",
+   "kind": "phrase",
+   "source": "至少两次",
+   "reference": "at least twice",
+   "expectedAction": "translate",
+   "output": "At least twice.",
+   "ms": 88.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-035",
+   "kind": "phrase",
+   "source": "最迟星期四",
+   "reference": "no later than Thursday",
+   "expectedAction": "translate",
+   "output": "at least Thursday",
+   "ms": 66.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-036",
+   "kind": "phrase",
+   "source": "保留原文件",
+   "reference": "keep the original file",
+   "expectedAction": "translate",
+   "output": "Keep original documents",
+   "ms": 67.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-037",
+   "kind": "phrase",
+   "source": "空文件夹",
+   "reference": "an empty folder",
+   "expectedAction": "translate",
+   "output": "The Empty File",
+   "ms": 90.9,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-038",
+   "kind": "phrase",
+   "source": "延误的航班",
+   "reference": "a delayed flight",
+   "expectedAction": "translate",
+   "output": "Delayed flight",
+   "ms": 89.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-039",
+   "kind": "phrase",
+   "source": "供个人使用",
+   "reference": "for personal use",
+   "expectedAction": "translate",
+   "output": "For Personal Use",
+   "ms": 67.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-040",
+   "kind": "phrase",
+   "source": "单行道",
+   "reference": "a one-way street",
+   "expectedAction": "translate",
+   "output": "Single path",
+   "ms": 54.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-041",
+   "kind": "sentence",
+   "source": "我打不开附件。",
+   "reference": "I cannot open the attachment.",
+   "expectedAction": "translate",
+   "output": "I can’t open an attachment.",
+   "ms": 126.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-042",
+   "kind": "sentence",
+   "source": "请保持门关闭。",
+   "reference": "Please keep the door closed.",
+   "expectedAction": "translate",
+   "output": "Please keep the door closed.",
+   "ms": 105.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-043",
+   "kind": "sentence",
+   "source": "包裹昨天到了。",
+   "reference": "The package arrived yesterday.",
+   "expectedAction": "translate",
+   "output": "The package arrived yesterday.",
+   "ms": 120.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-044",
+   "kind": "sentence",
+   "source": "我们还没有收到付款。",
+   "reference": "We have not received the payment yet.",
+   "expectedAction": "translate",
+   "output": "We have not received a payment yet.",
+   "ms": 128.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-045",
+   "kind": "sentence",
+   "source": "这个座位有人吗？",
+   "reference": "Is this seat taken?",
+   "expectedAction": "translate",
+   "output": "Is there anyone in that seat?",
+   "ms": 128.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-046",
+   "kind": "sentence",
+   "source": "我需要两张票，不是三张。",
+   "reference": "I need two tickets, not three.",
+   "expectedAction": "translate",
+   "output": "I need two tickets, not three.",
+   "ms": 123.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-047",
+   "kind": "sentence",
+   "source": "她星期一在家办公。",
+   "reference": "She works from home on Mondays.",
+   "expectedAction": "translate",
+   "output": "She was at home on Monday.",
+   "ms": 107.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-048",
+   "kind": "sentence",
+   "source": "你能说慢一点吗？",
+   "reference": "Could you speak more slowly?",
+   "expectedAction": "translate",
+   "output": "Can you say a little slowly?",
+   "ms": 119.9,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-049",
+   "kind": "sentence",
+   "source": "商店八点半关门。",
+   "reference": "The shop closes at half past eight.",
+   "expectedAction": "translate",
+   "output": "The store is closed at 8:30.",
+   "ms": 127.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-050",
+   "kind": "sentence",
+   "source": "我把钥匙落在桌子上了。",
+   "reference": "I left my keys on the table.",
+   "expectedAction": "translate",
+   "output": "I put the key on the table.",
+   "ms": 117.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-051",
+   "kind": "sentence",
+   "source": "你今天不必回复。",
+   "reference": "You do not need to reply today.",
+   "expectedAction": "translate",
+   "output": "You don’t need to answer today.",
+   "ms": 125.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-052",
+   "kind": "sentence",
+   "source": "不要删除备份。",
+   "reference": "Do not delete the backup.",
+   "expectedAction": "translate",
+   "output": "Do not delete backup.",
+   "ms": 107.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-053",
+   "kind": "sentence",
+   "source": "只有第一项免费。",
+   "reference": "Only the first item is free.",
+   "expectedAction": "translate",
+   "output": "Only the first is free.",
+   "ms": 96.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-054",
+   "kind": "sentence",
+   "source": "价格包含早餐。",
+   "reference": "The price includes breakfast.",
+   "expectedAction": "translate",
+   "output": "The price includes breakfast.",
+   "ms": 88.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-055",
+   "kind": "sentence",
+   "source": "午夜后没有火车。",
+   "reference": "There are no trains after midnight.",
+   "expectedAction": "translate",
+   "output": "There is no train at midnight.",
+   "ms": 116.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-056",
+   "kind": "sentence",
+   "source": "我以前住在车站附近。",
+   "reference": "I used to live near the station.",
+   "expectedAction": "translate",
+   "output": "I lived near the station.",
+   "ms": 107.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-057",
+   "kind": "sentence",
+   "source": "请把它发给陈，不要发给王。",
+   "reference": "Please send it to Chen, not Wang.",
+   "expectedAction": "translate",
+   "output": "Send it to Chen, and don’t send it to the king.",
+   "ms": 203.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-058",
+   "kind": "sentence",
+   "source": "总共是128.50元。",
+   "reference": "The total is 128.50 yuan.",
+   "expectedAction": "translate",
+   "output": "Total is $128.50",
+   "ms": 96.9,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-059",
+   "kind": "sentence",
+   "source": "我的航班6月12日出发。",
+   "reference": "My flight leaves on June 12.",
+   "expectedAction": "translate",
+   "output": "My flight departs on June 12.",
+   "ms": 117.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-060",
+   "kind": "sentence",
+   "source": "房间号是406。",
+   "reference": "The room number is 406.",
+   "expectedAction": "translate",
+   "output": "The room number is 406.",
+   "ms": 101.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-061",
+   "kind": "sentence",
+   "source": "我会等到7点15分。",
+   "reference": "I will wait until 7:15.",
+   "expectedAction": "translate",
+   "output": "I will wait until 7:15 pm.",
+   "ms": 118.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-062",
+   "kind": "sentence",
+   "source": "我们把预约从星期二改到了星期三。",
+   "reference": "We moved the appointment from Tuesday to Wednesday.",
+   "expectedAction": "translate",
+   "output": "We changed our schedule from Tuesday to Wednesday.",
+   "ms": 134.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-063",
+   "kind": "sentence",
+   "source": "蓝色的比红色的便宜。",
+   "reference": "The blue one is cheaper than the red one.",
+   "expectedAction": "translate",
+   "output": "Blue is cheaper than red.",
+   "ms": 110.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-064",
+   "kind": "sentence",
+   "source": "我对花生过敏。",
+   "reference": "I am allergic to peanuts.",
+   "expectedAction": "translate",
+   "output": "I am allergic to flower.",
+   "ms": 138.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-065",
+   "kind": "sentence",
+   "source": "这不是最新版本。",
+   "reference": "This is not the latest version.",
+   "expectedAction": "translate",
+   "output": "This is not the latest version.",
+   "ms": 113.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-066",
+   "kind": "sentence",
+   "source": "如果你忙，我们可以晚点再谈。",
+   "reference": "If you are busy, we can talk later.",
+   "expectedAction": "translate",
+   "output": "If you’re busy, we’ll talk later.",
+   "ms": 157.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-067",
+   "kind": "sentence",
+   "source": "今天傍晚可能下雨。",
+   "reference": "It may rain this evening.",
+   "expectedAction": "translate",
+   "output": "It may rain tonight.",
+   "ms": 95.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-068",
+   "kind": "sentence",
+   "source": "我已经提交了表格。",
+   "reference": "I have already submitted the form.",
+   "expectedAction": "translate",
+   "output": "I have already submitted the form.",
+   "ms": 144.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-069",
+   "kind": "sentence",
+   "source": "他从没去过伦敦。",
+   "reference": "He has never been to London.",
+   "expectedAction": "translate",
+   "output": "He never went to London.",
+   "ms": 107.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-070",
+   "kind": "sentence",
+   "source": "我们至少需要五把椅子。",
+   "reference": "We need at least five chairs.",
+   "expectedAction": "translate",
+   "output": "We need at least five chairs.",
+   "ms": 124.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-071",
+   "kind": "sentence",
+   "source": "请把金额减少百分之十。",
+   "reference": "Please reduce the amount by ten percent.",
+   "expectedAction": "translate",
+   "output": "Please reduce the amount by 10%.",
+   "ms": 114.5,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-072",
+   "kind": "sentence",
+   "source": "我必须提前预约吗？",
+   "reference": "Do I have to book in advance?",
+   "expectedAction": "translate",
+   "output": "Do I have to get a booking in advance?",
+   "ms": 150.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-073",
+   "kind": "sentence",
+   "source": "公交车站在街对面。",
+   "reference": "The bus stop is across the street.",
+   "expectedAction": "translate",
+   "output": "The bus stands on the street.",
+   "ms": 117.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-074",
+   "kind": "sentence",
+   "source": "我宁愿步行，也不愿打车。",
+   "reference": "I would rather walk than take a taxi.",
+   "expectedAction": "translate",
+   "output": "I prefer to walk rather than ride.",
+   "ms": 119.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-075",
+   "kind": "sentence",
+   "source": "请在星期五之前还书。",
+   "reference": "Please return the book before Friday.",
+   "expectedAction": "translate",
+   "output": "Please return before Friday.",
+   "ms": 89.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-076",
+   "kind": "sentence",
+   "source": "两个答案都不正确。",
+   "reference": "Neither answer is correct.",
+   "expectedAction": "translate",
+   "output": "Both answers are wrong.",
+   "ms": 110.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-077",
+   "kind": "sentence",
+   "source": "我需要一份合同副本。",
+   "reference": "I need a copy of the contract.",
+   "expectedAction": "translate",
+   "output": "I need a copy of the contract.",
+   "ms": 115.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-078",
+   "kind": "sentence",
+   "source": "测试只有第一次尝试失败了。",
+   "reference": "The test failed only on the first attempt.",
+   "expectedAction": "translate",
+   "output": "The first attempt failed.",
+   "ms": 108.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-079",
+   "kind": "sentence",
+   "source": "我们能把这次通话改到下午吗？",
+   "reference": "Could we move this call to the afternoon?",
+   "expectedAction": "translate",
+   "output": "Can we change this call to afternoon?",
+   "ms": 129.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-080",
+   "kind": "sentence",
+   "source": "我忘了是否锁了门。",
+   "reference": "I forgot whether I locked the door.",
+   "expectedAction": "translate",
+   "output": "I forgot if I closed the door.",
+   "ms": 144.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-081",
+   "kind": "long",
+   "source": "如果星期五之前还没送到，请取消订单，并通过原支付方式全额退款。",
+   "reference": "If the delivery does not arrive by Friday, please cancel the order and refund the full amount to my original payment method.",
+   "expectedAction": "translate",
+   "output": "If you have not been sent before Friday, cancel the order and refund the full amount through the original payment method.",
+   "ms": 286.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-082",
+   "kind": "long",
+   "source": "明天上午9点到下午4点旧入口将关闭，请在这段时间使用侧门。",
+   "reference": "The old entrance will be closed from 9 a.m. to 4 p.m. tomorrow, so please use the side door during that time.",
+   "expectedAction": "translate",
+   "output": "Tomorrow from 9 am to 4 pm, the old entrance will be closed, please use side door during this time.",
+   "ms": 306.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-083",
+   "kind": "long",
+   "source": "虽然第一项测试通过了，但在其余两项测试完成之前，我们不应该发布更新。",
+   "reference": "Although the first test passed, we should not publish the update until the remaining two tests are complete.",
+   "expectedAction": "translate",
+   "output": "Although the first test has been passed, we should not release updates before the remaining two tests are complete.",
+   "ms": 273.4,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-084",
+   "kind": "long",
+   "source": "请告诉玛丽亚，预约已改到8月3日，并提醒她带原件而不是复印件。",
+   "reference": "Please tell Maria that the appointment has been moved to August 3, and remind her to bring the original document rather than a copy.",
+   "expectedAction": "translate",
+   "output": "Please tell Mary that the appointment was changed to August 3 and remind her to bring the original instead of a copy.",
+   "ms": 307.3,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-085",
+   "kind": "long",
+   "source": "我订了三个小盒子和两个大盒子，但包裹里只有两个小盒子和一个大盒子。",
+   "reference": "I ordered three small boxes and two large ones, but the package contained only two small boxes and one large box.",
+   "expectedAction": "translate",
+   "output": "I ordered three small boxes and two large boxes, but only two small boxes and one large box in the package.",
+   "ms": 325.2,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-086",
+   "kind": "long",
+   "source": "如果你已经付款，请忽略这条提醒；否则，请在下星期一下午6点之前完成付款。",
+   "reference": "If you have already paid, ignore this reminder; otherwise, please complete the payment before 6 p.m. next Monday.",
+   "expectedAction": "translate",
+   "output": "If you have already paid, ignore this warning; otherwise, complete the payment before 6 pm next week.",
+   "ms": 298.7,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-087",
+   "kind": "long",
+   "source": "酒店离车站步行十分钟，但道路正在维修，所以请额外预留十五分钟。",
+   "reference": "The hotel is a ten-minute walk from the station, but the road is being repaired, so allow an extra fifteen minutes.",
+   "expectedAction": "translate",
+   "output": "The hotel is a 10-minute walk from the station, but the road is being repaid, so please book an extra fifteen minutes.",
+   "ms": 360.1,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-088",
+   "kind": "long",
+   "source": "我们不需要翻译产品名称，但每一条警告和说明都必须同时提供中文和英文。",
+   "reference": "We do not need to translate the product names, but every warning and instruction must be available in both Chinese and English.",
+   "expectedAction": "translate",
+   "output": "We do not need to translate the product name, but every warning and instructions must be provided in Chinese and English at the same time.",
+   "ms": 344.0,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-089",
+   "kind": "long",
+   "source": "请不要覆盖原电子表格；把修改保存到新文件中，并且只把那个文件发给团队。",
+   "reference": "Please do not overwrite the original spreadsheet; save your changes in a new file and send only that file to the team.",
+   "expectedAction": "translate",
+   "output": "Please do not cover the original form; save the modification in the new file and only send that file to the team.",
+   "ms": 295.6,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-090",
+   "kind": "long",
+   "source": "我星期二上午和星期四下午有空，但星期三要出行，无法参加任何会议。",
+   "reference": "I am available on Tuesday morning and Thursday afternoon, but I cannot attend any meetings on Wednesday because I will be traveling.",
+   "expectedAction": "translate",
+   "output": "I was empty on Tuesday morning and Thursday afternoon, but on Wednesday I was going to go and I couldn’t attend any meeting.",
+   "ms": 350.8,
+   "availability": "available"
+  },
+  {
+   "id": "zhToEn-091",
+   "kind": "protected",
+   "source": "https://example.org/path?q=42",
+   "reference": "https://example.org/path?q=42",
+   "expectedAction": "preserve",
+   "output": "https://example.org/path?q=42",
+   "ms": 159.1,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-092",
+   "kind": "protected",
+   "source": "user+test@example.org",
+   "reference": "user+test@example.org",
+   "expectedAction": "preserve",
+   "output": "User+test@example.org",
+   "ms": 123.3,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-093",
+   "kind": "protected",
+   "source": "let count = 42;",
+   "reference": "let count = 42;",
+   "expectedAction": "preserve",
+   "output": "let count = 42;",
+   "ms": 84.7,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-094",
+   "kind": "protected",
+   "source": "Gogaku v3.2.1",
+   "reference": "Gogaku v3.2.1",
+   "expectedAction": "preserve",
+   "output": "Gogaku v3.2.1",
+   "ms": 105.5,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-095",
+   "kind": "protected",
+   "source": "AB-2048-X",
+   "reference": "AB-2048-X",
+   "expectedAction": "preserve",
+   "output": "AB-2048-X",
+   "ms": 84.2,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-096",
+   "kind": "typo",
+   "source": "qxvzzz",
+   "reference": "qxvzzz",
+   "expectedAction": "preserve",
+   "output": "Qxvzz",
+   "ms": 77.0,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-097",
+   "kind": "typo",
+   "source": "zzqvvv",
+   "reference": "zzqvvv",
+   "expectedAction": "preserve",
+   "output": "Zzqvvv",
+   "ms": 88.4,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-098",
+   "kind": "typo",
+   "source": "qqxzzv",
+   "reference": "qqxzzv",
+   "expectedAction": "preserve",
+   "output": "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ",
+   "ms": 2708.9,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-099",
+   "kind": "typo",
+   "source": "vvzzqq",
+   "reference": "vvzzqq",
+   "expectedAction": "preserve",
+   "output": "Vvzzq",
+   "ms": 68.2,
+   "availability": "preserve-expected"
+  },
+  {
+   "id": "zhToEn-100",
+   "kind": "typo",
+   "source": "zzvvxx",
+   "reference": "zzvvxx",
+   "expectedAction": "preserve",
+   "output": "ZZVxx",
+   "ms": 72.9,
+   "availability": "preserve-expected"
+  }
+ ],
+ "latency": {
+  "enToZh": {
+   "short-expression": {
+    "n": 24,
+    "min": 82.5,
+    "p50": 103.4,
+    "p95": 125.5,
+    "max": 129.4
+   },
+   "short-sentence": {
+    "n": 24,
+    "min": 145.5,
+    "p50": 191.5,
+    "p95": 218.7,
+    "max": 227.2
+   }
+  },
+  "zhToEn": {
+   "short-expression": {
+    "n": 24,
+    "min": 62.4,
+    "p50": 86.7,
+    "p95": 111.2,
+    "max": 111.3
+   },
+   "short-sentence": {
+    "n": 24,
+    "min": 177.7,
+    "p50": 187.8,
+    "p95": 198.9,
+    "max": 202.7
+   }
+  }
+ },
+ "environment": {
+  "platform": "darwin",
+  "machine": "x86_64",
+  "ctranslate2": "4.6.0"
+ }
+}

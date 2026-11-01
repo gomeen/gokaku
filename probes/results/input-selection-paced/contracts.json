@@ -1,0 +1,371 @@
+{
+  "Q0": [
+    {
+      "operation": "full_commit",
+      "keys": "nihc",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 你好",
+        "marked_length": 0,
+        "marked_location": 9,
+        "native_ns": 155498817,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "full_commit",
+      "keys": "woxlxtykyu",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 我想学英语",
+        "marked_length": 0,
+        "marked_location": 12,
+        "native_ns": 4256473,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "backspace_then_cancel",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 ",
+        "marked_length": 0,
+        "marked_location": 7,
+        "native_ns": 3534846,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "second",
+      "displayed": "回忆",
+      "trajectory": [
+        {
+          "candidates": [],
+          "collect_ns": 20589,
+          "commit": "回忆",
+          "composing": false,
+          "handled": true,
+          "held": "",
+          "ok": true,
+          "preedit": "",
+          "process_ns": 687629,
+          "raw_input": "",
+          "total_ns": 708669
+        }
+      ],
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 回忆",
+        "marked_length": 0,
+        "marked_location": 9,
+        "native_ns": 1377967,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "partial",
+      "displayed": "我想学",
+      "trajectory": [
+        {
+          "candidates": [
+            "英语",
+            "盈余",
+            "应于",
+            "英羽",
+            "赢余",
+            "莺语",
+            "英",
+            "应",
+            "硬",
+            "营"
+          ],
+          "collect_ns": 400534,
+          "commit": "",
+          "composing": true,
+          "handled": true,
+          "held": "我想学",
+          "ok": true,
+          "preedit": "我想学ying'yu",
+          "process_ns": 5382293,
+          "raw_input": "ykyu",
+          "total_ns": 5783385
+        },
+        {
+          "candidates": [],
+          "collect_ns": 20815,
+          "commit": "我想学英语",
+          "composing": false,
+          "handled": true,
+          "held": "",
+          "ok": true,
+          "preedit": "",
+          "process_ns": 307158,
+          "raw_input": "",
+          "total_ns": 328443
+        }
+      ],
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 我想学英语",
+        "marked_length": 0,
+        "marked_location": 12,
+        "native_ns": 809989,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    }
+  ],
+  "R1": [
+    {
+      "operation": "full_commit",
+      "keys": "nihc",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 你好",
+        "marked_length": 0,
+        "marked_location": 9,
+        "native_ns": 4682782,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "full_commit",
+      "keys": "woxlxtykyu",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 我想学英语",
+        "marked_length": 0,
+        "marked_location": 12,
+        "native_ns": 3509308,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "backspace_then_cancel",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 ",
+        "marked_length": 0,
+        "marked_location": 7,
+        "native_ns": 3906785,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "second",
+      "displayed": "回忆",
+      "trajectory": [
+        {
+          "ok": true,
+          "handled": true,
+          "candidates": [],
+          "preedit": "",
+          "raw_input": "",
+          "composing": false,
+          "commit": "回忆",
+          "process_ns": 1033000,
+          "collect_ns": 22000,
+          "total_ns": 1055000
+        }
+      ],
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 回忆",
+        "marked_length": 0,
+        "marked_location": 9,
+        "native_ns": 784847,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "partial",
+      "displayed": "我想学",
+      "trajectory": [
+        {
+          "ok": true,
+          "handled": true,
+          "candidates": [
+            "英语",
+            "🔠",
+            "🔡",
+            "应与",
+            "应予",
+            "应于",
+            "盈余",
+            "硬玉",
+            "萦纡",
+            "𮐨薁"
+          ],
+          "preedit": "我想学ying yu",
+          "raw_input": "woxlxtykyu",
+          "composing": true,
+          "commit": "",
+          "process_ns": 8483000,
+          "collect_ns": 5447000,
+          "total_ns": 13930000
+        },
+        {
+          "ok": true,
+          "handled": true,
+          "candidates": [],
+          "preedit": "",
+          "raw_input": "",
+          "composing": false,
+          "commit": "我想学英语",
+          "process_ns": 1631000,
+          "collect_ns": 25000,
+          "total_ns": 1656000
+        }
+      ],
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 我想学英语",
+        "marked_length": 0,
+        "marked_location": 12,
+        "native_ns": 7616038,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    }
+  ],
+  "I0": [
+    {
+      "operation": "full_commit",
+      "keys": "nihc",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 你好",
+        "marked_length": 0,
+        "marked_location": 9,
+        "native_ns": 5422185,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "full_commit",
+      "keys": "woxlxtykyu",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 我想学英语",
+        "marked_length": 0,
+        "marked_location": 12,
+        "native_ns": 6598354,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "backspace_then_cancel",
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 ",
+        "marked_length": 0,
+        "marked_location": 7,
+        "native_ns": 5195056,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "second",
+      "displayed": "回忆",
+      "trajectory": [
+        {
+          "ok": true,
+          "handled": true,
+          "preedit": "",
+          "raw_input": "",
+          "commit": "回忆",
+          "composing": false,
+          "candidates": [],
+          "process_ns": 907987,
+          "collect_ns": 2057,
+          "total_ns": 910044
+        }
+      ],
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 回忆",
+        "marked_length": 0,
+        "marked_location": 9,
+        "native_ns": 2355729,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    },
+    {
+      "operation": "partial",
+      "displayed": "我想",
+      "trajectory": [
+        {
+          "ok": true,
+          "handled": true,
+          "preedit": "我想xue ying yu",
+          "raw_input": "xtykyu",
+          "commit": "",
+          "composing": true,
+          "candidates": [
+            "学英语",
+            "学应",
+            "学",
+            "血影",
+            "雪影",
+            "血",
+            "雪",
+            "穴",
+            "薛",
+            "靴"
+          ],
+          "process_ns": 5925952,
+          "collect_ns": 31179,
+          "total_ns": 5957131
+        },
+        {
+          "ok": true,
+          "handled": true,
+          "preedit": "",
+          "raw_input": "",
+          "commit": "我想学英语",
+          "composing": false,
+          "candidates": [],
+          "process_ns": 1311651,
+          "collect_ns": 3320,
+          "total_ns": 1314971
+        }
+      ],
+      "view": {
+        "candidate_text": "",
+        "has_marked_text": false,
+        "host_text": "既有文字🙂 我想学英语",
+        "marked_length": 0,
+        "marked_location": 12,
+        "native_ns": 865116,
+        "ok": true,
+        "scope": "Controlled NSTextView + offscreen AppKit candidate rasterization; no IMK/external host/display"
+      }
+    }
+  ]
+}

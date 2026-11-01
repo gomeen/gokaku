@@ -1,0 +1,114 @@
+{
+  "cases" : [
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "meeting"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+        "metting"
+      ],
+      "text" : "metting"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+        "meeetingg"
+      ],
+      "text" : "meeetingg"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "tomorrow"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+        "Gogaku"
+      ],
+      "text" : "Gogaku"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "OpenAI"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "I have a meeting tomorrow."
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+        "metting"
+      ],
+      "text" : "I have a metting tomorrow."
+    },
+    {
+      "grammarDetails" : "(\n        {\n        NSGrammarRange = \"NSRange: {3, 2}\";\n        NSGrammarUserDescription = \"The word \\U2018go\\U2019 may not agree with the rest of the sentence.\";\n    }\n)",
+      "grammarSentence" : "He go to work.",
+      "spellingFlags" : [
+
+      ],
+      "text" : "He go to work."
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "He goes to work."
+    },
+    {
+      "grammarDetails" : "(\n        {\n        NSGrammarRange = \"NSRange: {4, 4}\";\n        NSGrammarUserDescription = \"The word \\U2018have\\U2019 may not agree with the rest of the sentence.\";\n    }\n)",
+      "grammarSentence" : "She have a meeting.",
+      "spellingFlags" : [
+
+      ],
+      "text" : "She have a meeting."
+    },
+    {
+      "grammarDetails" : "(\n        {\n        NSGrammarRange = \"NSRange: {2, 3}\";\n        NSGrammarUserDescription = \"The word \\U2018has\\U2019 may not agree with the rest of the sentence.\";\n    }\n)",
+      "grammarSentence" : "I has an apple.",
+      "spellingFlags" : [
+
+      ],
+      "text" : "I has an apple."
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "https:\/\/example.com"
+    },
+    {
+      "grammarDetails" : "none",
+      "spellingFlags" : [
+
+      ],
+      "text" : "foo@example.com"
+    }
+  ],
+  "language" : "en_US",
+  "limitations" : [
+    "Uses synthetic text only; does not learn words or edit input-method settings.",
+    "No whole-machine network disconnection was performed; this is not proof of an offline distribution contract.",
+    "The text-view probe verifies the spelling attribute, not on-screen rendering or host-application compatibility.",
+    "Spelling and grammar flags do not establish translation quality."
+  ],
+  "nativeSpellingAttributeVerified" : true,
+  "platform" : "Version 26.7.2 (Build 25G332)"
+}

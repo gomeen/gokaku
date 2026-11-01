@@ -1,0 +1,54 @@
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:84:38: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 82 | for (title, action, key) in [("Undo", Selector(("undo:")), "z"),
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+    |                                      `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:85:39: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+    |                                       `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:86:40: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+    |                                        `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:87:45: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+    |                                             `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+ 89 | }
+== 归因场景 L0-base (text=0 字) ==
+2026-11-01 23:04:32.452 Probe[69544:3988979] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+2026-11-01 23:04:32.471 Probe[69544:3988979] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+   540 事件；callback p95 8.19ms p99 9.50ms；markedWrite p95 3.49ms；宿主 setMarkedText p95 3.11ms
+== 归因场景 L1000 (text=1000 字) ==
+   540 事件；callback p95 9.11ms p99 10.12ms；markedWrite p95 5.00ms；宿主 setMarkedText p95 4.60ms
+== 归因场景 L4500 (text=4500 字) ==
+   540 事件；callback p95 14.62ms p99 15.96ms；markedWrite p95 10.92ms；宿主 setMarkedText p95 10.41ms
+== 归因场景 L0-repeat (text=0 字) ==
+   540 事件；callback p95 8.35ms p99 9.26ms；markedWrite p95 3.60ms；宿主 setMarkedText p95 3.18ms
+== 归因场景 L4500-segmented (text=4549 字) ==
+   540 事件；callback p95 8.89ms p99 10.24ms；markedWrite p95 4.06ms；宿主 setMarkedText p95 3.62ms
+== 归因场景 L4500-undo-on (text=4500 字) ==
+   540 事件；callback p95 14.97ms p99 17.01ms；markedWrite p95 10.78ms；宿主 setMarkedText p95 10.31ms
+== 归因场景 L4500-spellcheck-on (text=4500 字) ==
+   540 事件；callback p95 20.24ms p99 23.13ms；markedWrite p95 16.63ms；宿主 setMarkedText p95 15.96ms
+== 归因场景 L4500-raw-preedit (text=4500 字) ==
+   540 事件；callback p95 14.26ms p99 15.80ms；markedWrite p95 10.69ms；宿主 setMarkedText p95 10.26ms
+== 归因场景 L4500-letters-off (text=4500 字) ==
+   540 事件；callback p95 8.00ms p99 9.16ms；markedWrite p95 0.00ms；宿主 setMarkedText p95 0.00ms
+== 归因场景 L0-letters-off-repeat (text=0 字) ==
+   540 事件；callback p95 5.55ms p99 6.10ms；markedWrite p95 0.00ms；宿主 setMarkedText p95 0.00ms
+归因完成：10 个场景 → /Users/gomeen/code/gomeen/gogaku/docs/validation/final-mac/attribution/attribution.json

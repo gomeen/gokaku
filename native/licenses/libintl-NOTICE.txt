@@ -1,0 +1,21 @@
+GNU gettext libintl
+Copyright (C) 1995-2026 Free Software Foundation, Inc.
+Written by Ulrich Drepper and Bruno Haible.
+
+This library is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation; either version 2.1 of the License, or
+(at your option) any later version.
+
+This library is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Lesser General Public License for more details.
+
+The bundled libintl.8.dylib is a shared library. Its LGPL-2.1 text is included
+alongside this notice. Source and rebuild obligations must be fulfilled
+before public redistribution; this build is for local development only.
+
+Notice checked against the installed gettext 1.0 libintl.h. Upstream source:
+https://www.gnu.org/software/gettext/
+https://ftp.gnu.org/gnu/gettext/gettext-1.0.tar.xz

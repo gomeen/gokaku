@@ -1,0 +1,119 @@
+{
+ "inputBinarySHA256": "b51543985226bc8a44d5618ecf7ee10fd1afdc37813717a5de0e6a203840743d",
+ "sourceManifestSHA256": "cbf512490a067ae6219b6ebb9d8826441559c8bab9d089a302c3277ba065f8a8",
+ "swiftConfiguration": "release",
+ "coreConfiguration": "Release",
+ "validationBuild": true,
+ "builtAt": "2026-11-01T16:37:27Z",
+ "sources": {
+  "Sources/GogakuTranslator/GogakuTranslatorApp.swift": "c5bab176049e6f7ae3ff3609e58e93e39d4f42019ae0c7c32a297a290d0b6f9f",
+  "Sources/GogakuSettings/GogakuSettingsPages.swift": "9e1896a4b7be9e396af8b412fc5b8138dbc3d298da283b695081f2fd51e6a318",
+  "Sources/GogakuSettings/GogakuSettingsApp.swift": "114fa095e89abbb66e4fd302d781131352771e7ebe48ab96aae722251ec4459b",
+  "Sources/GogakuCore/Translation.swift": "f14417d3294b7345ae68673e26d53b0d50cd8817fbbdaa29e8a3be209a665866",
+  "Sources/GogakuCore/Engine.swift": "11b27be3db809684d3979b16b7dcd602429e894a81f32da0876570bd77226ffb",
+  "Sources/GogakuCore/Composition.swift": "21e64800b6c29ec9e8b4cd69dfcbe9971d1d7d0cf49da66fd1a9e5d668c5c0e9",
+  "Sources/GogakuCore/NormalEngine.swift": "0ff83815f5438911137a26dbd5dec6794e46dd25f567bc19dc852d3975fc4c1c",
+  "Sources/GogakuCore/Settings.swift": "e93f82270258a5ad6b239fbe5442c1032e4b4b4edbe3bfef9357ff9786e68353",
+  "Sources/GogakuCore/FocusRule.swift": "17a9015ad38f70d71d893727744918acee16a9830e1cbd57f097ae4fffab9471",
+  "Sources/GogakuCore/PreeditCaret.swift": "86f4c424c17f8ab53274d41713f1d74999bcf482c01fbd500497b62dafce27f2",
+  "Sources/GogakuCore/LearningStore.swift": "0ae3a2c538ac7119b0f19943652ddf3ddd5929526ef325957d53ec7c47ffbedf",
+  "Sources/GogakuInput/GogakuInputApp.swift": "8dcff2ced6bd97a980fdd946fa2d6ef3bd140bdfd46a631eb795f6d6f45a0aa0",
+  "Sources/GogakuInput/InputController.swift": "5465aec499166f201750aea722e403a89705124f8cdb9985932b9ba37e366ee2",
+  "Sources/GogakuInput/CandidatePanel.swift": "560aea2e649a37b9b4aebbf4bd3d7972b5fbe8d4ed9314fdc1f6b356a6fe50d9",
+  "Sources/GogakuInput/CandidatePanelTheme.swift": "8db7ff05f4137247b491110a91a7ff7bb3c09d9a81fa46317b4fd3a4f784ccbd",
+  "Sources/GogakuInput/ValidationMonitor.swift": "756e8917d9174a465972bb5f6f97c17bcac5dfe8d921e809af87de9aac7a773e",
+  "Sources/GogakuInput/EngineHub.swift": "cb5fa1daab41110c48838678d234b05d658459e5bfca56e9b29f202c38b356bf",
+  "Sources/GogakuHost/Host.m": "1df7835cde1b7e04adcf1a56493aa9591fcedc4d49b2dc859a54d014bfd08214",
+  "Sources/CSQLite/shim.h": "b052d8e561e942f97b503033ecd2eaa2b35213bdbf374983efe9e68eabdfc024",
+  "Sources/GogakuHost/include/GogakuHost.h": "d96ff499d722ed2c0413a2da970c13db67380ca17204a686135c6eaca895c284",
+  "native/GogakuCore/normal_session.cpp": "41f5dde6f35d9c9242836a50af197f0f63121f6861c23f0fd74fea3660e3da3d",
+  "native/GogakuCore/core.cpp": "6cabccacfc1a600c491e073072aa18186510cbce4e67289cad934f69c5cea415",
+  "native/GogakuCore/custom_words.cpp": "7214037f6862284b70d7f208016399927a973bcc610fb1b5f4c9824e8cd88b13",
+  "native/GogakuCore/include/gogaku_core.h": "4f419d9ab0218a557a863294cfbc04d2e477582a59828f14caa024db172348aa",
+  "native/EngineBridge/CMakeLists.txt": "8fdbb90249374ff3e4abff00ceda7844ec9502f6c192461d7340d045afc512ca",
+  "native/EngineBridge/engine.cpp": "46d41f210f3fc3549695f09f34f876e463ea60a2ce81b4503ad6d8f6c5bde993",
+  "probes/prepare-rime-input.py": "7baeaf8d8efb7267418b7bfa9709114d30c8f0918c766503b1080d4984292b56",
+  "probes/validate-real-hosts.py": "9d9d452f7240d0cfea48eba1c233ace5d71ddafaeaf8ee986a928bd1ab4bff90",
+  "probes/prepare-qingjian-input.py": "49ae1102cebbcede7a7f6e0745ee25ef57b640bd530c8d11de940904eb008b0b",
+  "probes/prepare-libime-input.py": "a0b842fa4cbef72dde528796b86a71b6795671938c3df1d2427bb2f6a9469bfd",
+  "probes/prepare-translation-models.py": "a346a72e04d0c3bc5b15c6b805f5c648268d43cda3020830bb8f2c808d1809fe",
+  "probes/measure-imk-latency.py": "d0726cf64562b4dd354c9247f8d58f0e62dacd504c5ca041075960187f15b2a2",
+  "probes/validate-engine-data.py": "6e66c615169d3d843ea6ed025ad353a66fe39fe2bbb7d51273e39670a1ae3c17",
+  "probes/summarize-input-engine-benchmark.py": "2d14f7c3ea40794f85a454928358cf5647fa6551a3f44cf3855513b51e504c3a",
+  "probes/prepare-input-engine-cases.py": "14ef4783a8ce636dfa29fb660affddfae38c455d595966b0bda6e33201d26548",
+  "probes/attribute-imk-latency.py": "0ae28b89b38b35a64a183e97a2ca85ba9ef879a1f1dd8668812382cd7532fee2",
+  "probes/benchmark-translations.py": "03634edcb840b2cca58cf153b59ca1e542c42ee225a0ef82a186e70fb18498f9",
+  "probes/translation-worker.py": "dd31e2c729c7780f2122e874d34de397401984188760519c06efd2143d212acf",
+  "probes/summarize-translation-benchmark.py": "c26ba4a4f6171b340a49df2a85dc03d12c21f58a8119ad98471fe788d38873de",
+  "probes/validate-data-reliability.py": "5c606caac0406cf937acac3f56cd6d9895fbbac04e030234e0fd35cced774fa7",
+  "probes/first_key_regression.py": "c27d7b93bf50b187d9a4571ad9c093ae360810894af92f8e70c60cf25bf8e586",
+  "probes/validate-imk-host.py": "fe7ac5d5dbab667725dd06caebb1d1070bcaa79650c21f28166dc621750476df",
+  "probes/benchmark-input-decision.py": "b04c1e4770fb75e331a47a1bf9b0e0fd4f69da869156aaac5d0a502740ab86f4",
+  "probes/imk-terminal-receiver.py": "68d2a5b431619e4d43357a82140ec20a724bd516c1742d591b6224a6f7d38beb",
+  "probes/benchmark-input-engines.py": "9a0517a6ed804523874ee86ed987698bbf77009846847fa1346050e10d40c82c",
+  "probes/validate-translation-runtime.py": "6c4e98085a782bbb9a499a10b29dc1408dfcb81161df7f84fb3a242471a4c369",
+  "probes/macos-text-check.swift": "9e9c7782d4c0aeac547f4bb0713a23a871f756ffd99bd6542fb6f14f30b0fab9",
+  "probes/post-notification.swift": "bf03698e0c20f0020fce7e4dad4c17925b71f661cddadec35ce88301f60ce38e",
+  "probes/ax-reader.swift": "f5da8f932d50e55e56308d3617b2f3e30353fc34de10178173009d0399eef8b1",
+  "probes/render-candidate-panel.swift": "096a4be4612967c1f48e9ed4f33636f9aaff944eb7655e95266636b62c9fb228",
+  "probes/imk-regression-host.swift": "c56270d9dc800cab5456fce1681c9f19c08adc5de04c7af64dfc4e517c3f51db",
+  "probes/apple-translation.swift": "54c31d81709eec18af87d6b744464958bd596d8e74fa9063757c230278d9a1bb",
+  "probes/native-text-client.swift": "0983fb1cc0279bb1a323186e37887c94039304dc79942598d4bf9470b1a9c52a",
+  "probes/latency-matrix.swift": "5666099da3c0b3b199b3b019e1828bceb256ba7242c4ae40b92adf82dfb21293",
+  "Tests/GogakuCoreTests/ServiceTests.swift": "d03217ee58ec1311e842e59f4f01822878ba0c47b3d071623407f4f63544a8f0",
+  "Tests/GogakuCoreTests/CoreTests.swift": "91119a1f8b7bd86bd6f92c8f51c1f191af6254c354db74059edefb8a9b721703",
+  "Tests/GogakuCoreTests/FocusRuleTests.swift": "eb87c66d7cd62ef852d12b69b44e03ca13732fe0267dab5dc27f0eb9578f86bf",
+  "Tests/GogakuCoreTests/NormalEngineTests.swift": "e68664ad295b2d943800a9856645d86c804f0c66d665029527afe1668b82d2c0",
+  "Tests/GogakuCoreTests/HostTests.swift": "45ea6c6a990243b1b989ba472dbb1a2750e6cff2ce3dae5a9ea3a295e8f6fa2f",
+  "scripts/build.py": "8e63bd853816551a33f62d24095b15dd784bf1b33d7a8f6b9f5d8a8e95753827",
+  "scripts/manage-install.py": "a28fd52cbebfcc4eb9832669d320467d3acb984b046df9fe25ab4f6db089ffb1"
+ },
+ "artifacts": [
+  {
+   "path": "Contents/Frameworks/libFcitx5Utils.2.dylib",
+   "sha256": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62"
+  },
+  {
+   "path": "Contents/Frameworks/libGogakuEngine.dylib",
+   "sha256": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1"
+  },
+  {
+   "path": "Contents/Frameworks/libIMECore.0.dylib",
+   "sha256": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5"
+  },
+  {
+   "path": "Contents/Frameworks/libIMEPinyin.0.dylib",
+   "sha256": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35"
+  },
+  {
+   "path": "Contents/Frameworks/libboost_iostreams.dylib",
+   "sha256": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b"
+  },
+  {
+   "path": "Contents/Frameworks/libboost_random.dylib",
+   "sha256": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013"
+  },
+  {
+   "path": "Contents/Frameworks/libgogaku_core.dylib",
+   "sha256": "a38fee2f8f6ecd89f704fc3fe974d74c993808f3e8ed7cdb96d183c474160a11"
+  },
+  {
+   "path": "Contents/Frameworks/libintl.8.dylib",
+   "sha256": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb"
+  },
+  {
+   "path": "Contents/Frameworks/liblzma.5.dylib",
+   "sha256": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259"
+  },
+  {
+   "path": "Contents/Frameworks/libzstd.1.dylib",
+   "sha256": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a"
+  },
+  {
+   "path": "Contents/MacOS/GogakuInput",
+   "sha256": "b51543985226bc8a44d5618ecf7ee10fd1afdc37813717a5de0e6a203840743d"
+  }
+ ],
+ "notes": "本轮验收接口扩展（场景标识/commitCount/hostSelection/queueWait 拆分/宿主回执）＋NSAttributedString marked 写入修复＋写入阶段读取合并；e554be2f 旧回滚备份已误删，其身份与源哈希仍见 identity.json。",
+ "testsNote": "49 项 Swift 测试、核心 ctest 4/4、渲染 51 项、驱动合成回归全部通过（含 HostTests 测试替身适配 NSAttributedString）。"
+}

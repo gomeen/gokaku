@@ -1,0 +1,14 @@
+分项基准：英文词 50000 条，释义 161839 条
+分项基准：1118 个字母事件，原始样本写入 bench/results/normal-session-profile-samples.csv
+  decode           n=1118   mean=  1328.1µs p50=  1110.1µs p95=  2863.9µs p99=   3674.0µs max=   4975.7µs
+  fetch            n=1118   mean=     0.2µs p50=     0.2µs p95=     0.4µs p99=      0.6µs max=      0.8µs
+  convert200       n=1118   mean=     2.9µs p50=     2.6µs p95=     4.8µs p99=      6.8µs max=     25.6µs
+  lookup200        n=1118   mean=    25.5µs p50=    18.7µs p95=    65.9µs p99=     77.4µs max=    119.6µs
+  merge_identity   n=1118   mean=     1.4µs p50=     1.1µs p95=     2.5µs p99=      3.7µs max=      7.1µs
+  materialize18    n=1118   mean=     2.3µs p50=     2.3µs p95=     3.0µs p99=      3.4µs max=      5.2µs
+  snapshot9        n=1118   mean=     2.4µs p50=     2.3µs p95=     2.8µs p99=      3.1µs max=      5.0µs
+  english_index    n=1118   mean=     1.8µs p50=     0.9µs p95=     5.3µs p99=     30.5µs max=     72.8µs
+端到端消融（公开 C ABI，纯字母序列 1200 事件）：
+  英文开+释义在 n=1198   mean=  1206.7µs p50=   947.2µs p95=  2934.9µs p99=   3705.7µs max=   7217.8µs
+  英文关+释义在 n=1198   mean=  1183.8µs p50=   897.9µs p95=  2797.2µs p99=   3515.0µs max=   5111.2µs
+  英文关+释义无 n=1198   mean=  1197.5µs p50=   929.8µs p95=  2854.0µs p99=   3415.9µs max=   4708.3µs

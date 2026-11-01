@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/sandbox-exec",
+    "-p",
+    "(version 1)(allow default)(deny network*)",
+    "/usr/local/opt/python@3.15/bin/python3.15",
+    "-c",
+    "import socket; socket.create_connection(('1.1.1.1',443),timeout=2)"
+  ],
+  "returncode": 1,
+  "stdout": "",
+  "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import socket; socket.create_connection(('1.1.1.1',443),timeout=2)\n                   ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socket.py\", line 883, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socket.py\", line 868, in create_connection\n    sock.connect(sa)\n    ~~~~~~~~~~~~^^^^\nPermissionError: [Errno 1] Operation not permitted"
+}

@@ -1,0 +1,4754 @@
+{
+  "schema": "gogaku.imk-latency.v1",
+  "checkedAt": "2026-11-01T06:20:43.623505+00:00",
+  "runId": "17935136702972",
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "bundle": "/Users/gomeen/Library/Input Methods/Gogaku.app",
+    "artifacts": [
+      {
+        "path": "Contents/Frameworks/libFcitx5Utils.2.dylib",
+        "size": 628736,
+        "sha256": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62"
+      },
+      {
+        "path": "Contents/Frameworks/libGogakuEngine.dylib",
+        "size": 41888,
+        "sha256": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1"
+      },
+      {
+        "path": "Contents/Frameworks/libIMECore.0.dylib",
+        "size": 1196944,
+        "sha256": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5"
+      },
+      {
+        "path": "Contents/Frameworks/libIMEPinyin.0.dylib",
+        "size": 797024,
+        "sha256": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35"
+      },
+      {
+        "path": "Contents/Frameworks/libboost_iostreams.dylib",
+        "size": 135120,
+        "sha256": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b"
+      },
+      {
+        "path": "Contents/Frameworks/libboost_random.dylib",
+        "size": 52000,
+        "sha256": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013"
+      },
+      {
+        "path": "Contents/Frameworks/libgogaku_core.dylib",
+        "size": 208208,
+        "sha256": "a38fee2f8f6ecd89f704fc3fe974d74c993808f3e8ed7cdb96d183c474160a11"
+      },
+      {
+        "path": "Contents/Frameworks/libintl.8.dylib",
+        "size": 209600,
+        "sha256": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb"
+      },
+      {
+        "path": "Contents/Frameworks/liblzma.5.dylib",
+        "size": 164896,
+        "sha256": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259"
+      },
+      {
+        "path": "Contents/Frameworks/libzstd.1.dylib",
+        "size": 766304,
+        "sha256": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a"
+      },
+      {
+        "path": "Contents/MacOS/GogakuInput",
+        "size": 959824,
+        "sha256": "e554be2fcb3f3e25c61179fc0d596e4fc07b0f3ceb6576c2ac928e689d6b62e0"
+      }
+    ]
+  },
+  "driver": {
+    "probeSHA256": "3e2bd8709a9bb29f051e25c806b9b3ee6d596c648b2e7bf7122e37adad47e901",
+    "sequencesSHA256": "d9259637e3d3d4824cb73ca5d9c748004adfa55a78c8b3a16d2a3bf149254374",
+    "socket": "/Users/gomeen/Library/Logs/Gogaku/validation.sock"
+  },
+  "sequences": [
+    {
+      "id": "short",
+      "label": "短组合：nihc＋空格",
+      "keys": [
+        "n",
+        "i",
+        "h",
+        "c",
+        "space"
+      ]
+    },
+    {
+      "id": "long",
+      "label": "长句：我想每天花一点时间学习英语（冻结用例 long-learning）",
+      "keys": [
+        "w",
+        "o",
+        "x",
+        "l",
+        "m",
+        "w",
+        "t",
+        "m",
+        "h",
+        "x",
+        "y",
+        "i",
+        "d",
+        "m",
+        "u",
+        "i",
+        "j",
+        "m",
+        "x",
+        "t",
+        "x",
+        "i",
+        "y",
+        "k",
+        "y",
+        "u",
+        "space"
+      ]
+    },
+    {
+      "id": "paging",
+      "label": "翻页：zhong 小鹤编码 vs＋四次 . ＋一次 , ＋空格",
+      "keys": [
+        "v",
+        "s",
+        ".",
+        ".",
+        ".",
+        ".",
+        ",",
+        "space"
+      ]
+    },
+    {
+      "id": "punct",
+      "label": "组合中标点：nihc＋; 一次上屏",
+      "keys": [
+        "n",
+        "i",
+        "h",
+        "c",
+        ";"
+      ]
+    }
+  ],
+  "loop": {
+    "targetEvents": 10000,
+    "actualEvents": 10035,
+    "cycles": 223,
+    "compositions": 892,
+    "intervalMs": 15.0,
+    "elapsedSeconds": 369.585,
+    "eventsPerSecond": 27.2,
+    "warmupCompositions": 2
+  },
+  "environment": {
+    "before": {
+      "at": "2026-11-01T06:14:33.462602+00:00",
+      "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 14:14:33 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+      "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate, mds_stores)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+      "loadavg": "{ 2.26 2.30 2.45 }",
+      "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+      "displayAwake": true,
+      "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate, mds_stores)",
+      "caffeinateProcesses": "21218 /usr/bin/caffeinate -di -w 21194\n57192 /usr/bin/caffeinate -i -s -w 1295\n93029 caffeinate -d -i -w 92999"
+    },
+    "after": {
+      "at": "2026-11-01T06:20:43.157190+00:00",
+      "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 14:20:43 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+      "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+      "loadavg": "{ 2.93 2.72 2.60 }",
+      "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+      "displayAwake": true,
+      "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)",
+      "caffeinateProcesses": "21218 /usr/bin/caffeinate -di -w 21194\n57192 /usr/bin/caffeinate -i -s -w 1295\n93029 caffeinate -d -i -w 92999"
+    },
+    "parallelBuildsAtStart": []
+  },
+  "limitations": {
+    "selectionToHostLatency": {
+      "verifiable": true,
+      "status": "measured",
+      "metric": "确认键事件时间戳 → 探针宿主 insertText 完成",
+      "expected": 892,
+      "received": 892,
+      "paired": 892,
+      "scope": "真实 IMK 路径的 AppKit 探针宿主；不外推其他宿主",
+      "reason": "仅当所有确认均与宿主 keyDown 时间戳配对时可判定",
+      "p95Ns": 23257512,
+      "maxNs": 33403642
+    }
+  },
+  "hostInsertionReceipts": [
+    {
+      "eventNs": 115413211081308,
+      "latencyNs": 6162514,
+      "receivedNs": 115413217243822
+    },
+    {
+      "eventNs": 115413898119974,
+      "latencyNs": 6007583,
+      "receivedNs": 115413904127557
+    },
+    {
+      "eventNs": 115414188274641,
+      "latencyNs": 15417972,
+      "receivedNs": 115414203692613
+    },
+    {
+      "eventNs": 115414438796533,
+      "latencyNs": 14224363,
+      "receivedNs": 115414453020896
+    },
+    {
+      "eventNs": 115414699107669,
+      "latencyNs": 5392334,
+      "receivedNs": 115414704500003
+    },
+    {
+      "eventNs": 115415348759047,
+      "latencyNs": 5581287,
+      "receivedNs": 115415354340334
+    },
+    {
+      "eventNs": 115415634540306,
+      "latencyNs": 6264403,
+      "receivedNs": 115415640804709
+    },
+    {
+      "eventNs": 115415899621222,
+      "latencyNs": 6662357,
+      "receivedNs": 115415906283579
+    },
+    {
+      "eventNs": 115416149248335,
+      "latencyNs": 5638044,
+      "receivedNs": 115416154886379
+    },
+    {
+      "eventNs": 115416827379882,
+      "latencyNs": 4961775,
+      "receivedNs": 115416832341657
+    },
+    {
+      "eventNs": 115417120595949,
+      "latencyNs": 8028316,
+      "receivedNs": 115417128624265
+    },
+    {
+      "eventNs": 115417366245278,
+      "latencyNs": 5611526,
+      "receivedNs": 115417371856804
+    },
+    {
+      "eventNs": 115417602907677,
+      "latencyNs": 4681451,
+      "receivedNs": 115417607589128
+    },
+    {
+      "eventNs": 115418260961293,
+      "latencyNs": 23961094,
+      "receivedNs": 115418284922387
+    },
+    {
+      "eventNs": 115418566139236,
+      "latencyNs": 5865369,
+      "receivedNs": 115418572004605
+    },
+    {
+      "eventNs": 115418811082925,
+      "latencyNs": 4969058,
+      "receivedNs": 115418816051983
+    },
+    {
+      "eventNs": 115419050496446,
+      "latencyNs": 5091971,
+      "receivedNs": 115419055588417
+    },
+    {
+      "eventNs": 115419727223387,
+      "latencyNs": 5349302,
+      "receivedNs": 115419732572689
+    },
+    {
+      "eventNs": 115420020223089,
+      "latencyNs": 11415621,
+      "receivedNs": 115420031638710
+    },
+    {
+      "eventNs": 115420260615140,
+      "latencyNs": 4902604,
+      "receivedNs": 115420265517744
+    },
+    {
+      "eventNs": 115420521465023,
+      "latencyNs": 9675146,
+      "receivedNs": 115420531140169
+    },
+    {
+      "eventNs": 115421194301116,
+      "latencyNs": 28668073,
+      "receivedNs": 115421222969189
+    },
+    {
+      "eventNs": 115421505042064,
+      "latencyNs": 9590678,
+      "receivedNs": 115421514632742
+    },
+    {
+      "eventNs": 115421743970538,
+      "latencyNs": 20639806,
+      "receivedNs": 115421764610344
+    },
+    {
+      "eventNs": 115421994357768,
+      "latencyNs": 26075904,
+      "receivedNs": 115422020433672
+    },
+    {
+      "eventNs": 115422654041490,
+      "latencyNs": 16048732,
+      "receivedNs": 115422670090222
+    },
+    {
+      "eventNs": 115422960471071,
+      "latencyNs": 5711182,
+      "receivedNs": 115422966182253
+    },
+    {
+      "eventNs": 115423218898001,
+      "latencyNs": 18686777,
+      "receivedNs": 115423237584778
+    },
+    {
+      "eventNs": 115423481550646,
+      "latencyNs": 16686511,
+      "receivedNs": 115423498237157
+    },
+    {
+      "eventNs": 115424165211889,
+      "latencyNs": 6129943,
+      "receivedNs": 115424171341832
+    },
+    {
+      "eventNs": 115424453856590,
+      "latencyNs": 12220222,
+      "receivedNs": 115424466076812
+    },
+    {
+      "eventNs": 115424700159177,
+      "latencyNs": 4818722,
+      "receivedNs": 115424704977899
+    },
+    {
+      "eventNs": 115424951916036,
+      "latencyNs": 5062887,
+      "receivedNs": 115424956978923
+    },
+    {
+      "eventNs": 115425634400262,
+      "latencyNs": 5792030,
+      "receivedNs": 115425640192292
+    },
+    {
+      "eventNs": 115425933940151,
+      "latencyNs": 5367673,
+      "receivedNs": 115425939307824
+    },
+    {
+      "eventNs": 115426194726976,
+      "latencyNs": 5331358,
+      "receivedNs": 115426200058334
+    },
+    {
+      "eventNs": 115426464744439,
+      "latencyNs": 5620645,
+      "receivedNs": 115426470365084
+    },
+    {
+      "eventNs": 115427143830916,
+      "latencyNs": 5599567,
+      "receivedNs": 115427149430483
+    },
+    {
+      "eventNs": 115427447594754,
+      "latencyNs": 18389393,
+      "receivedNs": 115427465984147
+    },
+    {
+      "eventNs": 115427717005845,
+      "latencyNs": 5336393,
+      "receivedNs": 115427722342238
+    },
+    {
+      "eventNs": 115427971533982,
+      "latencyNs": 16134747,
+      "receivedNs": 115427987668729
+    },
+    {
+      "eventNs": 115428643974868,
+      "latencyNs": 5424471,
+      "receivedNs": 115428649399339
+    },
+    {
+      "eventNs": 115428949137954,
+      "latencyNs": 5501524,
+      "receivedNs": 115428954639478
+    },
+    {
+      "eventNs": 115429211200982,
+      "latencyNs": 23444762,
+      "receivedNs": 115429234645744
+    },
+    {
+      "eventNs": 115429471385250,
+      "latencyNs": 10243509,
+      "receivedNs": 115429481628759
+    },
+    {
+      "eventNs": 115430137963223,
+      "latencyNs": 16031105,
+      "receivedNs": 115430153994328
+    },
+    {
+      "eventNs": 115430444171595,
+      "latencyNs": 5699675,
+      "receivedNs": 115430449871270
+    },
+    {
+      "eventNs": 115430703515292,
+      "latencyNs": 16977271,
+      "receivedNs": 115430720492563
+    },
+    {
+      "eventNs": 115430954972330,
+      "latencyNs": 14983161,
+      "receivedNs": 115430969955491
+    },
+    {
+      "eventNs": 115431615339012,
+      "latencyNs": 6000250,
+      "receivedNs": 115431621339262
+    },
+    {
+      "eventNs": 115431917099577,
+      "latencyNs": 20699764,
+      "receivedNs": 115431937799341
+    },
+    {
+      "eventNs": 115432167398886,
+      "latencyNs": 5472337,
+      "receivedNs": 115432172871223
+    },
+    {
+      "eventNs": 115432426617836,
+      "latencyNs": 5200835,
+      "receivedNs": 115432431818671
+    },
+    {
+      "eventNs": 115433105953512,
+      "latencyNs": 8859434,
+      "receivedNs": 115433114812946
+    },
+    {
+      "eventNs": 115433430864123,
+      "latencyNs": 16512237,
+      "receivedNs": 115433447376360
+    },
+    {
+      "eventNs": 115433709845361,
+      "latencyNs": 5404413,
+      "receivedNs": 115433715249774
+    },
+    {
+      "eventNs": 115433959928645,
+      "latencyNs": 23173077,
+      "receivedNs": 115433983101722
+    },
+    {
+      "eventNs": 115434627026924,
+      "latencyNs": 5465255,
+      "receivedNs": 115434632492179
+    },
+    {
+      "eventNs": 115434926376394,
+      "latencyNs": 5157100,
+      "receivedNs": 115434931533494
+    },
+    {
+      "eventNs": 115435182282386,
+      "latencyNs": 5276687,
+      "receivedNs": 115435187559073
+    },
+    {
+      "eventNs": 115435443848766,
+      "latencyNs": 5504466,
+      "receivedNs": 115435449353232
+    },
+    {
+      "eventNs": 115436094410146,
+      "latencyNs": 29502351,
+      "receivedNs": 115436123912497
+    },
+    {
+      "eventNs": 115436421437129,
+      "latencyNs": 9165830,
+      "receivedNs": 115436430602959
+    },
+    {
+      "eventNs": 115436671499682,
+      "latencyNs": 15144002,
+      "receivedNs": 115436686643684
+    },
+    {
+      "eventNs": 115436920906556,
+      "latencyNs": 6096779,
+      "receivedNs": 115436927003335
+    },
+    {
+      "eventNs": 115437610461601,
+      "latencyNs": 23415067,
+      "receivedNs": 115437633876668
+    },
+    {
+      "eventNs": 115437927702323,
+      "latencyNs": 6591026,
+      "receivedNs": 115437934293349
+    },
+    {
+      "eventNs": 115438182354834,
+      "latencyNs": 6034852,
+      "receivedNs": 115438188389686
+    },
+    {
+      "eventNs": 115438448860959,
+      "latencyNs": 25091294,
+      "receivedNs": 115438473952253
+    },
+    {
+      "eventNs": 115439198277915,
+      "latencyNs": 5527015,
+      "receivedNs": 115439203804930
+    },
+    {
+      "eventNs": 115439519420595,
+      "latencyNs": 11001926,
+      "receivedNs": 115439530422521
+    },
+    {
+      "eventNs": 115439765573011,
+      "latencyNs": 5020291,
+      "receivedNs": 115439770593302
+    },
+    {
+      "eventNs": 115440027345238,
+      "latencyNs": 5328063,
+      "receivedNs": 115440032673301
+    },
+    {
+      "eventNs": 115440715703622,
+      "latencyNs": 6822543,
+      "receivedNs": 115440722526165
+    },
+    {
+      "eventNs": 115441031576796,
+      "latencyNs": 6821225,
+      "receivedNs": 115441038398021
+    },
+    {
+      "eventNs": 115441297978179,
+      "latencyNs": 5759368,
+      "receivedNs": 115441303737547
+    },
+    {
+      "eventNs": 115441537391513,
+      "latencyNs": 7794776,
+      "receivedNs": 115441545186289
+    },
+    {
+      "eventNs": 115442213509868,
+      "latencyNs": 5762486,
+      "receivedNs": 115442219272354
+    },
+    {
+      "eventNs": 115442526956149,
+      "latencyNs": 6552970,
+      "receivedNs": 115442533509119
+    },
+    {
+      "eventNs": 115442771414063,
+      "latencyNs": 10788553,
+      "receivedNs": 115442782202616
+    },
+    {
+      "eventNs": 115443027149597,
+      "latencyNs": 5579355,
+      "receivedNs": 115443032728952
+    },
+    {
+      "eventNs": 115443732320392,
+      "latencyNs": 5421093,
+      "receivedNs": 115443737741485
+    },
+    {
+      "eventNs": 115444055340343,
+      "latencyNs": 10290002,
+      "receivedNs": 115444065630345
+    },
+    {
+      "eventNs": 115444305009720,
+      "latencyNs": 11908478,
+      "receivedNs": 115444316918198
+    },
+    {
+      "eventNs": 115444556354515,
+      "latencyNs": 8911946,
+      "receivedNs": 115444565266461
+    },
+    {
+      "eventNs": 115445260894801,
+      "latencyNs": 22184632,
+      "receivedNs": 115445283079433
+    },
+    {
+      "eventNs": 115445577221708,
+      "latencyNs": 5901652,
+      "receivedNs": 115445583123360
+    },
+    {
+      "eventNs": 115445827183287,
+      "latencyNs": 5280438,
+      "receivedNs": 115445832463725
+    },
+    {
+      "eventNs": 115446083009098,
+      "latencyNs": 5202059,
+      "receivedNs": 115446088211157
+    },
+    {
+      "eventNs": 115446786303226,
+      "latencyNs": 5479416,
+      "receivedNs": 115446791782642
+    },
+    {
+      "eventNs": 115447102035953,
+      "latencyNs": 5312229,
+      "receivedNs": 115447107348182
+    },
+    {
+      "eventNs": 115447353526046,
+      "latencyNs": 11349301,
+      "receivedNs": 115447364875347
+    },
+    {
+      "eventNs": 115447615636981,
+      "latencyNs": 5490398,
+      "receivedNs": 115447621127379
+    },
+    {
+      "eventNs": 115448284221972,
+      "latencyNs": 6207115,
+      "receivedNs": 115448290429087
+    },
+    {
+      "eventNs": 115448598051643,
+      "latencyNs": 23852639,
+      "receivedNs": 115448621904282
+    },
+    {
+      "eventNs": 115448850005868,
+      "latencyNs": 5916163,
+      "receivedNs": 115448855922031
+    },
+    {
+      "eventNs": 115449099672402,
+      "latencyNs": 7443492,
+      "receivedNs": 115449107115894
+    },
+    {
+      "eventNs": 115449787479414,
+      "latencyNs": 5881245,
+      "receivedNs": 115449793360659
+    },
+    {
+      "eventNs": 115450100363601,
+      "latencyNs": 16059201,
+      "receivedNs": 115450116422802
+    },
+    {
+      "eventNs": 115450348913607,
+      "latencyNs": 5165513,
+      "receivedNs": 115450354079120
+    },
+    {
+      "eventNs": 115450606751597,
+      "latencyNs": 7803822,
+      "receivedNs": 115450614555419
+    },
+    {
+      "eventNs": 115451293929767,
+      "latencyNs": 5739180,
+      "receivedNs": 115451299668947
+    },
+    {
+      "eventNs": 115451599946259,
+      "latencyNs": 20952020,
+      "receivedNs": 115451620898279
+    },
+    {
+      "eventNs": 115451859653249,
+      "latencyNs": 21999438,
+      "receivedNs": 115451881652687
+    },
+    {
+      "eventNs": 115452115549652,
+      "latencyNs": 15587262,
+      "receivedNs": 115452131136914
+    },
+    {
+      "eventNs": 115452770997206,
+      "latencyNs": 7918489,
+      "receivedNs": 115452778915695
+    },
+    {
+      "eventNs": 115453067544272,
+      "latencyNs": 5143165,
+      "receivedNs": 115453072687437
+    },
+    {
+      "eventNs": 115453317847154,
+      "latencyNs": 13774178,
+      "receivedNs": 115453331621332
+    },
+    {
+      "eventNs": 115453562170989,
+      "latencyNs": 19963764,
+      "receivedNs": 115453582134753
+    },
+    {
+      "eventNs": 115454213849060,
+      "latencyNs": 5661264,
+      "receivedNs": 115454219510324
+    },
+    {
+      "eventNs": 115454515125502,
+      "latencyNs": 5957891,
+      "receivedNs": 115454521083393
+    },
+    {
+      "eventNs": 115454764940780,
+      "latencyNs": 5400633,
+      "receivedNs": 115454770341413
+    },
+    {
+      "eventNs": 115455009743559,
+      "latencyNs": 5236221,
+      "receivedNs": 115455014979780
+    },
+    {
+      "eventNs": 115455693419479,
+      "latencyNs": 5658262,
+      "receivedNs": 115455699077741
+    },
+    {
+      "eventNs": 115456000011335,
+      "latencyNs": 15697823,
+      "receivedNs": 115456015709158
+    },
+    {
+      "eventNs": 115456257162353,
+      "latencyNs": 8745172,
+      "receivedNs": 115456265907525
+    },
+    {
+      "eventNs": 115456510377511,
+      "latencyNs": 5160313,
+      "receivedNs": 115456515537824
+    },
+    {
+      "eventNs": 115457181775981,
+      "latencyNs": 5777268,
+      "receivedNs": 115457187553249
+    },
+    {
+      "eventNs": 115457477423652,
+      "latencyNs": 5774463,
+      "receivedNs": 115457483198115
+    },
+    {
+      "eventNs": 115457743812562,
+      "latencyNs": 5331934,
+      "receivedNs": 115457749144496
+    },
+    {
+      "eventNs": 115457993063116,
+      "latencyNs": 5169534,
+      "receivedNs": 115457998232650
+    },
+    {
+      "eventNs": 115458648896385,
+      "latencyNs": 5668326,
+      "receivedNs": 115458654564711
+    },
+    {
+      "eventNs": 115458952834886,
+      "latencyNs": 10801553,
+      "receivedNs": 115458963636439
+    },
+    {
+      "eventNs": 115459205647006,
+      "latencyNs": 9219996,
+      "receivedNs": 115459214867002
+    },
+    {
+      "eventNs": 115459455942136,
+      "latencyNs": 8645924,
+      "receivedNs": 115459464588060
+    },
+    {
+      "eventNs": 115460115581460,
+      "latencyNs": 5541552,
+      "receivedNs": 115460121123012
+    },
+    {
+      "eventNs": 115460421343210,
+      "latencyNs": 9391405,
+      "receivedNs": 115460430734615
+    },
+    {
+      "eventNs": 115460671413611,
+      "latencyNs": 9747971,
+      "receivedNs": 115460681161582
+    },
+    {
+      "eventNs": 115460917833016,
+      "latencyNs": 5155387,
+      "receivedNs": 115460922988403
+    },
+    {
+      "eventNs": 115461590082009,
+      "latencyNs": 13324731,
+      "receivedNs": 115461603406740
+    },
+    {
+      "eventNs": 115461893767416,
+      "latencyNs": 6609576,
+      "receivedNs": 115461900376992
+    },
+    {
+      "eventNs": 115462136932492,
+      "latencyNs": 11362386,
+      "receivedNs": 115462148294878
+    },
+    {
+      "eventNs": 115462378935786,
+      "latencyNs": 5200675,
+      "receivedNs": 115462384136461
+    },
+    {
+      "eventNs": 115463095139834,
+      "latencyNs": 5927137,
+      "receivedNs": 115463101066971
+    },
+    {
+      "eventNs": 115463398900714,
+      "latencyNs": 5135262,
+      "receivedNs": 115463404035976
+    },
+    {
+      "eventNs": 115463666067093,
+      "latencyNs": 5171812,
+      "receivedNs": 115463671238905
+    },
+    {
+      "eventNs": 115463910732945,
+      "latencyNs": 22432841,
+      "receivedNs": 115463933165786
+    },
+    {
+      "eventNs": 115464588021383,
+      "latencyNs": 16468924,
+      "receivedNs": 115464604490307
+    },
+    {
+      "eventNs": 115464884343990,
+      "latencyNs": 7449488,
+      "receivedNs": 115464891793478
+    },
+    {
+      "eventNs": 115465148174962,
+      "latencyNs": 6186543,
+      "receivedNs": 115465154361505
+    },
+    {
+      "eventNs": 115465388111392,
+      "latencyNs": 15349543,
+      "receivedNs": 115465403460935
+    },
+    {
+      "eventNs": 115466071406780,
+      "latencyNs": 10593414,
+      "receivedNs": 115466082000194
+    },
+    {
+      "eventNs": 115466379698470,
+      "latencyNs": 5495770,
+      "receivedNs": 115466385194240
+    },
+    {
+      "eventNs": 115466637337864,
+      "latencyNs": 10931882,
+      "receivedNs": 115466648269746
+    },
+    {
+      "eventNs": 115466879515083,
+      "latencyNs": 5596395,
+      "receivedNs": 115466885111478
+    },
+    {
+      "eventNs": 115467544003048,
+      "latencyNs": 5947119,
+      "receivedNs": 115467549950167
+    },
+    {
+      "eventNs": 115467852330847,
+      "latencyNs": 12445531,
+      "receivedNs": 115467864776378
+    },
+    {
+      "eventNs": 115468116322045,
+      "latencyNs": 5782060,
+      "receivedNs": 115468122104105
+    },
+    {
+      "eventNs": 115468382051053,
+      "latencyNs": 6236417,
+      "receivedNs": 115468388287470
+    },
+    {
+      "eventNs": 115469072974204,
+      "latencyNs": 8880746,
+      "receivedNs": 115469081854950
+    },
+    {
+      "eventNs": 115469394770060,
+      "latencyNs": 29030469,
+      "receivedNs": 115469423800529
+    },
+    {
+      "eventNs": 115469676280339,
+      "latencyNs": 5242032,
+      "receivedNs": 115469681522371
+    },
+    {
+      "eventNs": 115469937414831,
+      "latencyNs": 11093024,
+      "receivedNs": 115469948507855
+    },
+    {
+      "eventNs": 115470594112667,
+      "latencyNs": 6171633,
+      "receivedNs": 115470600284300
+    },
+    {
+      "eventNs": 115470909963600,
+      "latencyNs": 6080005,
+      "receivedNs": 115470916043605
+    },
+    {
+      "eventNs": 115471160375139,
+      "latencyNs": 5529158,
+      "receivedNs": 115471165904297
+    },
+    {
+      "eventNs": 115471415786359,
+      "latencyNs": 6090374,
+      "receivedNs": 115471421876733
+    },
+    {
+      "eventNs": 115472121896258,
+      "latencyNs": 9801266,
+      "receivedNs": 115472131697524
+    },
+    {
+      "eventNs": 115472432413978,
+      "latencyNs": 5257965,
+      "receivedNs": 115472437671943
+    },
+    {
+      "eventNs": 115472687933207,
+      "latencyNs": 10740076,
+      "receivedNs": 115472698673283
+    },
+    {
+      "eventNs": 115472944808416,
+      "latencyNs": 25666337,
+      "receivedNs": 115472970474753
+    },
+    {
+      "eventNs": 115473648054146,
+      "latencyNs": 5821193,
+      "receivedNs": 115473653875339
+    },
+    {
+      "eventNs": 115473954123457,
+      "latencyNs": 11470486,
+      "receivedNs": 115473965593943
+    },
+    {
+      "eventNs": 115474222357788,
+      "latencyNs": 9647474,
+      "receivedNs": 115474232005262
+    },
+    {
+      "eventNs": 115474482312651,
+      "latencyNs": 5759188,
+      "receivedNs": 115474488071839
+    },
+    {
+      "eventNs": 115475173057309,
+      "latencyNs": 8642298,
+      "receivedNs": 115475181699607
+    },
+    {
+      "eventNs": 115475482496390,
+      "latencyNs": 5375788,
+      "receivedNs": 115475487872178
+    },
+    {
+      "eventNs": 115475743608133,
+      "latencyNs": 5214478,
+      "receivedNs": 115475748822611
+    },
+    {
+      "eventNs": 115476004370046,
+      "latencyNs": 10506895,
+      "receivedNs": 115476014876941
+    },
+    {
+      "eventNs": 115476665430248,
+      "latencyNs": 5834093,
+      "receivedNs": 115476671264341
+    },
+    {
+      "eventNs": 115476967547392,
+      "latencyNs": 15433944,
+      "receivedNs": 115476982981336
+    },
+    {
+      "eventNs": 115477233143898,
+      "latencyNs": 5240218,
+      "receivedNs": 115477238384116
+    },
+    {
+      "eventNs": 115477492877154,
+      "latencyNs": 23666568,
+      "receivedNs": 115477516543722
+    },
+    {
+      "eventNs": 115478198598766,
+      "latencyNs": 6036888,
+      "receivedNs": 115478204635654
+    },
+    {
+      "eventNs": 115478500151751,
+      "latencyNs": 6431635,
+      "receivedNs": 115478506583386
+    },
+    {
+      "eventNs": 115478765563826,
+      "latencyNs": 5444319,
+      "receivedNs": 115478771008145
+    },
+    {
+      "eventNs": 115479015518588,
+      "latencyNs": 5871495,
+      "receivedNs": 115479021390083
+    },
+    {
+      "eventNs": 115479694021665,
+      "latencyNs": 21859681,
+      "receivedNs": 115479715881346
+    },
+    {
+      "eventNs": 115480003357572,
+      "latencyNs": 13444023,
+      "receivedNs": 115480016801595
+    },
+    {
+      "eventNs": 115480272739517,
+      "latencyNs": 8605968,
+      "receivedNs": 115480281345485
+    },
+    {
+      "eventNs": 115480543334462,
+      "latencyNs": 5510711,
+      "receivedNs": 115480548845173
+    },
+    {
+      "eventNs": 115481198474477,
+      "latencyNs": 18145265,
+      "receivedNs": 115481216619742
+    },
+    {
+      "eventNs": 115481506790674,
+      "latencyNs": 15533856,
+      "receivedNs": 115481522324530
+    },
+    {
+      "eventNs": 115481761732882,
+      "latencyNs": 5523435,
+      "receivedNs": 115481767256317
+    },
+    {
+      "eventNs": 115482016132285,
+      "latencyNs": 5817418,
+      "receivedNs": 115482021949703
+    },
+    {
+      "eventNs": 115482693490817,
+      "latencyNs": 5818937,
+      "receivedNs": 115482699309754
+    },
+    {
+      "eventNs": 115483015521489,
+      "latencyNs": 22866935,
+      "receivedNs": 115483038388424
+    },
+    {
+      "eventNs": 115483281152201,
+      "latencyNs": 5447420,
+      "receivedNs": 115483286599621
+    },
+    {
+      "eventNs": 115483527023080,
+      "latencyNs": 5211411,
+      "receivedNs": 115483532234491
+    },
+    {
+      "eventNs": 115484211562487,
+      "latencyNs": 5822509,
+      "receivedNs": 115484217384996
+    },
+    {
+      "eventNs": 115484515891319,
+      "latencyNs": 7347208,
+      "receivedNs": 115484523238527
+    },
+    {
+      "eventNs": 115484776790977,
+      "latencyNs": 6082399,
+      "receivedNs": 115484782873376
+    },
+    {
+      "eventNs": 115485027514607,
+      "latencyNs": 5436050,
+      "receivedNs": 115485032950657
+    },
+    {
+      "eventNs": 115485711500427,
+      "latencyNs": 22550623,
+      "receivedNs": 115485734051050
+    },
+    {
+      "eventNs": 115486021161858,
+      "latencyNs": 12842356,
+      "receivedNs": 115486034004214
+    },
+    {
+      "eventNs": 115486281461009,
+      "latencyNs": 19179612,
+      "receivedNs": 115486300640621
+    },
+    {
+      "eventNs": 115486533251917,
+      "latencyNs": 16627329,
+      "receivedNs": 115486549879246
+    },
+    {
+      "eventNs": 115487231916516,
+      "latencyNs": 15504258,
+      "receivedNs": 115487247420774
+    },
+    {
+      "eventNs": 115487553701456,
+      "latencyNs": 18792959,
+      "receivedNs": 115487572494415
+    },
+    {
+      "eventNs": 115487815464858,
+      "latencyNs": 17472174,
+      "receivedNs": 115487832937032
+    },
+    {
+      "eventNs": 115488093577195,
+      "latencyNs": 31338420,
+      "receivedNs": 115488124915615
+    },
+    {
+      "eventNs": 115488831689801,
+      "latencyNs": 6706897,
+      "receivedNs": 115488838396698
+    },
+    {
+      "eventNs": 115489148716960,
+      "latencyNs": 23377355,
+      "receivedNs": 115489172094315
+    },
+    {
+      "eventNs": 115489414888766,
+      "latencyNs": 5724503,
+      "receivedNs": 115489420613269
+    },
+    {
+      "eventNs": 115489665434477,
+      "latencyNs": 18722616,
+      "receivedNs": 115489684157093
+    },
+    {
+      "eventNs": 115490343684340,
+      "latencyNs": 6197711,
+      "receivedNs": 115490349882051
+    },
+    {
+      "eventNs": 115490659715388,
+      "latencyNs": 6501384,
+      "receivedNs": 115490666216772
+    },
+    {
+      "eventNs": 115490923156171,
+      "latencyNs": 14178333,
+      "receivedNs": 115490937334504
+    },
+    {
+      "eventNs": 115491182106844,
+      "latencyNs": 6349426,
+      "receivedNs": 115491188456270
+    },
+    {
+      "eventNs": 115491865418539,
+      "latencyNs": 5845339,
+      "receivedNs": 115491871263878
+    },
+    {
+      "eventNs": 115492168638502,
+      "latencyNs": 6207870,
+      "receivedNs": 115492174846372
+    },
+    {
+      "eventNs": 115492415435396,
+      "latencyNs": 19271623,
+      "receivedNs": 115492434707019
+    },
+    {
+      "eventNs": 115492688755090,
+      "latencyNs": 14786169,
+      "receivedNs": 115492703541259
+    },
+    {
+      "eventNs": 115493409899110,
+      "latencyNs": 6120513,
+      "receivedNs": 115493416019623
+    },
+    {
+      "eventNs": 115493726999833,
+      "latencyNs": 6498744,
+      "receivedNs": 115493733498577
+    },
+    {
+      "eventNs": 115493989221195,
+      "latencyNs": 14549136,
+      "receivedNs": 115494003770331
+    },
+    {
+      "eventNs": 115494271935768,
+      "latencyNs": 9633006,
+      "receivedNs": 115494281568774
+    },
+    {
+      "eventNs": 115494998833493,
+      "latencyNs": 6281636,
+      "receivedNs": 115495005115129
+    },
+    {
+      "eventNs": 115495304352414,
+      "latencyNs": 10307436,
+      "receivedNs": 115495314659850
+    },
+    {
+      "eventNs": 115495571957771,
+      "latencyNs": 10021766,
+      "receivedNs": 115495581979537
+    },
+    {
+      "eventNs": 115495834826200,
+      "latencyNs": 20653889,
+      "receivedNs": 115495855480089
+    },
+    {
+      "eventNs": 115496539584730,
+      "latencyNs": 9895792,
+      "receivedNs": 115496549480522
+    },
+    {
+      "eventNs": 115496836395408,
+      "latencyNs": 12425352,
+      "receivedNs": 115496848820760
+    },
+    {
+      "eventNs": 115497082311088,
+      "latencyNs": 17743347,
+      "receivedNs": 115497100054435
+    },
+    {
+      "eventNs": 115497343223264,
+      "latencyNs": 5605421,
+      "receivedNs": 115497348828685
+    },
+    {
+      "eventNs": 115498047970488,
+      "latencyNs": 17765740,
+      "receivedNs": 115498065736228
+    },
+    {
+      "eventNs": 115498355883824,
+      "latencyNs": 15498261,
+      "receivedNs": 115498371382085
+    },
+    {
+      "eventNs": 115498615228838,
+      "latencyNs": 5910659,
+      "receivedNs": 115498621139497
+    },
+    {
+      "eventNs": 115498881230356,
+      "latencyNs": 5928579,
+      "receivedNs": 115498887158935
+    },
+    {
+      "eventNs": 115499588725018,
+      "latencyNs": 10179202,
+      "receivedNs": 115499598904220
+    },
+    {
+      "eventNs": 115499885910338,
+      "latencyNs": 20816938,
+      "receivedNs": 115499906727276
+    },
+    {
+      "eventNs": 115500182077126,
+      "latencyNs": 6558225,
+      "receivedNs": 115500188635351
+    },
+    {
+      "eventNs": 115500448394777,
+      "latencyNs": 6401132,
+      "receivedNs": 115500454795909
+    },
+    {
+      "eventNs": 115501164731948,
+      "latencyNs": 6814480,
+      "receivedNs": 115501171546428
+    },
+    {
+      "eventNs": 115501476120034,
+      "latencyNs": 5761378,
+      "receivedNs": 115501481881412
+    },
+    {
+      "eventNs": 115501731826078,
+      "latencyNs": 23808204,
+      "receivedNs": 115501755634282
+    },
+    {
+      "eventNs": 115502014466751,
+      "latencyNs": 5598411,
+      "receivedNs": 115502020065162
+    },
+    {
+      "eventNs": 115502714847687,
+      "latencyNs": 6993989,
+      "receivedNs": 115502721841676
+    },
+    {
+      "eventNs": 115503015408862,
+      "latencyNs": 22548128,
+      "receivedNs": 115503037956990
+    },
+    {
+      "eventNs": 115503313582679,
+      "latencyNs": 19259983,
+      "receivedNs": 115503332842662
+    },
+    {
+      "eventNs": 115503582799112,
+      "latencyNs": 6109294,
+      "receivedNs": 115503588908406
+    },
+    {
+      "eventNs": 115504314961193,
+      "latencyNs": 7220471,
+      "receivedNs": 115504322181664
+    },
+    {
+      "eventNs": 115504610697700,
+      "latencyNs": 6544607,
+      "receivedNs": 115504617242307
+    },
+    {
+      "eventNs": 115504881176809,
+      "latencyNs": 6141652,
+      "receivedNs": 115504887318461
+    },
+    {
+      "eventNs": 115505147922849,
+      "latencyNs": 17984886,
+      "receivedNs": 115505165907735
+    },
+    {
+      "eventNs": 115505864950906,
+      "latencyNs": 17093430,
+      "receivedNs": 115505882044336
+    },
+    {
+      "eventNs": 115506169793275,
+      "latencyNs": 11773444,
+      "receivedNs": 115506181566719
+    },
+    {
+      "eventNs": 115506417173359,
+      "latencyNs": 6261564,
+      "receivedNs": 115506423434923
+    },
+    {
+      "eventNs": 115506697337569,
+      "latencyNs": 17870189,
+      "receivedNs": 115506715207758
+    },
+    {
+      "eventNs": 115507411883926,
+      "latencyNs": 5927268,
+      "receivedNs": 115507417811194
+    },
+    {
+      "eventNs": 115507720298943,
+      "latencyNs": 11751483,
+      "receivedNs": 115507732050426
+    },
+    {
+      "eventNs": 115507978127721,
+      "latencyNs": 5675041,
+      "receivedNs": 115507983802762
+    },
+    {
+      "eventNs": 115508249874738,
+      "latencyNs": 22112277,
+      "receivedNs": 115508271987015
+    },
+    {
+      "eventNs": 115508956504632,
+      "latencyNs": 8891498,
+      "receivedNs": 115508965396130
+    },
+    {
+      "eventNs": 115509268765121,
+      "latencyNs": 6276041,
+      "receivedNs": 115509275041162
+    },
+    {
+      "eventNs": 115509532102786,
+      "latencyNs": 6293079,
+      "receivedNs": 115509538395865
+    },
+    {
+      "eventNs": 115509790510323,
+      "latencyNs": 33403642,
+      "receivedNs": 115509823913965
+    },
+    {
+      "eventNs": 115510500381593,
+      "latencyNs": 6227660,
+      "receivedNs": 115510506609253
+    },
+    {
+      "eventNs": 115510815392144,
+      "latencyNs": 5889664,
+      "receivedNs": 115510821281808
+    },
+    {
+      "eventNs": 115511068178928,
+      "latencyNs": 6028992,
+      "receivedNs": 115511074207920
+    },
+    {
+      "eventNs": 115511331616703,
+      "latencyNs": 6784726,
+      "receivedNs": 115511338401429
+    },
+    {
+      "eventNs": 115512065138563,
+      "latencyNs": 6681540,
+      "receivedNs": 115512071820103
+    },
+    {
+      "eventNs": 115512380914785,
+      "latencyNs": 6413766,
+      "receivedNs": 115512387328551
+    },
+    {
+      "eventNs": 115512631875829,
+      "latencyNs": 16885582,
+      "receivedNs": 115512648761411
+    },
+    {
+      "eventNs": 115512881832666,
+      "latencyNs": 6011652,
+      "receivedNs": 115512887844318
+    },
+    {
+      "eventNs": 115513614237568,
+      "latencyNs": 6442595,
+      "receivedNs": 115513620680163
+    },
+    {
+      "eventNs": 115513920775350,
+      "latencyNs": 16242939,
+      "receivedNs": 115513937018289
+    },
+    {
+      "eventNs": 115514178110311,
+      "latencyNs": 5763708,
+      "receivedNs": 115514183874019
+    },
+    {
+      "eventNs": 115514448785686,
+      "latencyNs": 5860795,
+      "receivedNs": 115514454646481
+    },
+    {
+      "eventNs": 115515159990611,
+      "latencyNs": 21585463,
+      "receivedNs": 115515181576074
+    },
+    {
+      "eventNs": 115515476158936,
+      "latencyNs": 5861801,
+      "receivedNs": 115515482020737
+    },
+    {
+      "eventNs": 115515743485340,
+      "latencyNs": 6116941,
+      "receivedNs": 115515749602281
+    },
+    {
+      "eventNs": 115515993446349,
+      "latencyNs": 5915902,
+      "receivedNs": 115515999362251
+    },
+    {
+      "eventNs": 115516684297063,
+      "latencyNs": 6407662,
+      "receivedNs": 115516690704725
+    },
+    {
+      "eventNs": 115516981319314,
+      "latencyNs": 6171603,
+      "receivedNs": 115516987490917
+    },
+    {
+      "eventNs": 115517236204628,
+      "latencyNs": 6657797,
+      "receivedNs": 115517242862425
+    },
+    {
+      "eventNs": 115517498351793,
+      "latencyNs": 6137605,
+      "receivedNs": 115517504489398
+    },
+    {
+      "eventNs": 115518206235850,
+      "latencyNs": 9137329,
+      "receivedNs": 115518215373179
+    },
+    {
+      "eventNs": 115518521901305,
+      "latencyNs": 15971736,
+      "receivedNs": 115518537873041
+    },
+    {
+      "eventNs": 115518773293856,
+      "latencyNs": 9163319,
+      "receivedNs": 115518782457175
+    },
+    {
+      "eventNs": 115519028111869,
+      "latencyNs": 5715303,
+      "receivedNs": 115519033827172
+    },
+    {
+      "eventNs": 115519709926358,
+      "latencyNs": 6412930,
+      "receivedNs": 115519716339288
+    },
+    {
+      "eventNs": 115520027361139,
+      "latencyNs": 29646143,
+      "receivedNs": 115520057007282
+    },
+    {
+      "eventNs": 115520313104297,
+      "latencyNs": 21355212,
+      "receivedNs": 115520334459509
+    },
+    {
+      "eventNs": 115520582985324,
+      "latencyNs": 5959031,
+      "receivedNs": 115520588944355
+    },
+    {
+      "eventNs": 115521264624017,
+      "latencyNs": 6525115,
+      "receivedNs": 115521271149132
+    },
+    {
+      "eventNs": 115521571686678,
+      "latencyNs": 15602169,
+      "receivedNs": 115521587288847
+    },
+    {
+      "eventNs": 115521845440121,
+      "latencyNs": 21975516,
+      "receivedNs": 115521867415637
+    },
+    {
+      "eventNs": 115522110871701,
+      "latencyNs": 6016043,
+      "receivedNs": 115522116887744
+    },
+    {
+      "eventNs": 115522798432457,
+      "latencyNs": 6929076,
+      "receivedNs": 115522805361533
+    },
+    {
+      "eventNs": 115523116527237,
+      "latencyNs": 8287819,
+      "receivedNs": 115523124815056
+    },
+    {
+      "eventNs": 115523362647387,
+      "latencyNs": 19386323,
+      "receivedNs": 115523382033710
+    },
+    {
+      "eventNs": 115523640210633,
+      "latencyNs": 9015348,
+      "receivedNs": 115523649225981
+    },
+    {
+      "eventNs": 115524360212668,
+      "latencyNs": 6444435,
+      "receivedNs": 115524366657103
+    },
+    {
+      "eventNs": 115524677377292,
+      "latencyNs": 7125157,
+      "receivedNs": 115524684502449
+    },
+    {
+      "eventNs": 115524932229305,
+      "latencyNs": 5799965,
+      "receivedNs": 115524938029270
+    },
+    {
+      "eventNs": 115525190547003,
+      "latencyNs": 9665651,
+      "receivedNs": 115525200212654
+    },
+    {
+      "eventNs": 115525901509773,
+      "latencyNs": 6425003,
+      "receivedNs": 115525907934776
+    },
+    {
+      "eventNs": 115526200286397,
+      "latencyNs": 15321436,
+      "receivedNs": 115526215607833
+    },
+    {
+      "eventNs": 115526452347203,
+      "latencyNs": 6217317,
+      "receivedNs": 115526458564520
+    },
+    {
+      "eventNs": 115526731512078,
+      "latencyNs": 25888123,
+      "receivedNs": 115526757400201
+    },
+    {
+      "eventNs": 115527443357528,
+      "latencyNs": 6170615,
+      "receivedNs": 115527449528143
+    },
+    {
+      "eventNs": 115527750147172,
+      "latencyNs": 9045527,
+      "receivedNs": 115527759192699
+    },
+    {
+      "eventNs": 115527999652298,
+      "latencyNs": 6319395,
+      "receivedNs": 115528005971693
+    },
+    {
+      "eventNs": 115528264971359,
+      "latencyNs": 6544425,
+      "receivedNs": 115528271515784
+    },
+    {
+      "eventNs": 115528985175877,
+      "latencyNs": 21650452,
+      "receivedNs": 115529006826329
+    },
+    {
+      "eventNs": 115529298702055,
+      "latencyNs": 6970915,
+      "receivedNs": 115529305672970
+    },
+    {
+      "eventNs": 115529565346882,
+      "latencyNs": 6052296,
+      "receivedNs": 115529571399178
+    },
+    {
+      "eventNs": 115529815272643,
+      "latencyNs": 6144990,
+      "receivedNs": 115529821417633
+    },
+    {
+      "eventNs": 115530480324468,
+      "latencyNs": 6238377,
+      "receivedNs": 115530486562845
+    },
+    {
+      "eventNs": 115530782018933,
+      "latencyNs": 6162970,
+      "receivedNs": 115530788181903
+    },
+    {
+      "eventNs": 115531048611921,
+      "latencyNs": 18761145,
+      "receivedNs": 115531067373066
+    },
+    {
+      "eventNs": 115531310564272,
+      "latencyNs": 5981923,
+      "receivedNs": 115531316546195
+    },
+    {
+      "eventNs": 115531996809915,
+      "latencyNs": 20830246,
+      "receivedNs": 115532017640161
+    },
+    {
+      "eventNs": 115532329855021,
+      "latencyNs": 8228170,
+      "receivedNs": 115532338083191
+    },
+    {
+      "eventNs": 115532583131257,
+      "latencyNs": 5678880,
+      "receivedNs": 115532588810137
+    },
+    {
+      "eventNs": 115532828669834,
+      "latencyNs": 27118027,
+      "receivedNs": 115532855787861
+    },
+    {
+      "eventNs": 115533581883382,
+      "latencyNs": 23453861,
+      "receivedNs": 115533605337243
+    },
+    {
+      "eventNs": 115533936272055,
+      "latencyNs": 12892109,
+      "receivedNs": 115533949164164
+    },
+    {
+      "eventNs": 115534207126986,
+      "latencyNs": 9191863,
+      "receivedNs": 115534216318849
+    },
+    {
+      "eventNs": 115534468283613,
+      "latencyNs": 19642750,
+      "receivedNs": 115534487926363
+    },
+    {
+      "eventNs": 115535160086586,
+      "latencyNs": 6364410,
+      "receivedNs": 115535166450996
+    },
+    {
+      "eventNs": 115535476425259,
+      "latencyNs": 6513111,
+      "receivedNs": 115535482938370
+    },
+    {
+      "eventNs": 115535732044928,
+      "latencyNs": 5840490,
+      "receivedNs": 115535737885418
+    },
+    {
+      "eventNs": 115536001752750,
+      "latencyNs": 6725757,
+      "receivedNs": 115536008478507
+    },
+    {
+      "eventNs": 115536701396064,
+      "latencyNs": 6852340,
+      "receivedNs": 115536708248404
+    },
+    {
+      "eventNs": 115537027289475,
+      "latencyNs": 8086908,
+      "receivedNs": 115537035376383
+    },
+    {
+      "eventNs": 115537307037503,
+      "latencyNs": 14212824,
+      "receivedNs": 115537321250327
+    },
+    {
+      "eventNs": 115537562669750,
+      "latencyNs": 19788373,
+      "receivedNs": 115537582458123
+    },
+    {
+      "eventNs": 115538282011694,
+      "latencyNs": 17424385,
+      "receivedNs": 115538299436079
+    },
+    {
+      "eventNs": 115538599053716,
+      "latencyNs": 16828177,
+      "receivedNs": 115538615881893
+    },
+    {
+      "eventNs": 115538865893493,
+      "latencyNs": 6179932,
+      "receivedNs": 115538872073425
+    },
+    {
+      "eventNs": 115539118896613,
+      "latencyNs": 13576473,
+      "receivedNs": 115539132473086
+    },
+    {
+      "eventNs": 115539859989126,
+      "latencyNs": 7138778,
+      "receivedNs": 115539867127904
+    },
+    {
+      "eventNs": 115540171680181,
+      "latencyNs": 12138556,
+      "receivedNs": 115540183818737
+    },
+    {
+      "eventNs": 115540431926660,
+      "latencyNs": 6435067,
+      "receivedNs": 115540438361727
+    },
+    {
+      "eventNs": 115540690257884,
+      "latencyNs": 9780374,
+      "receivedNs": 115540700038258
+    },
+    {
+      "eventNs": 115541415496539,
+      "latencyNs": 6575243,
+      "receivedNs": 115541422071782
+    },
+    {
+      "eventNs": 115541736956285,
+      "latencyNs": 10633011,
+      "receivedNs": 115541747589296
+    },
+    {
+      "eventNs": 115541998675544,
+      "latencyNs": 5972632,
+      "receivedNs": 115542004648176
+    },
+    {
+      "eventNs": 115542255044619,
+      "latencyNs": 16146701,
+      "receivedNs": 115542271191320
+    },
+    {
+      "eventNs": 115542993570033,
+      "latencyNs": 7106541,
+      "receivedNs": 115543000676574
+    },
+    {
+      "eventNs": 115543310715930,
+      "latencyNs": 8073057,
+      "receivedNs": 115543318788987
+    },
+    {
+      "eventNs": 115543562933196,
+      "latencyNs": 24729288,
+      "receivedNs": 115543587662484
+    },
+    {
+      "eventNs": 115543831847639,
+      "latencyNs": 6584739,
+      "receivedNs": 115543838432378
+    },
+    {
+      "eventNs": 115544576349887,
+      "latencyNs": 6555890,
+      "receivedNs": 115544582905777
+    },
+    {
+      "eventNs": 115544887566550,
+      "latencyNs": 9184026,
+      "receivedNs": 115544896750576
+    },
+    {
+      "eventNs": 115545148737044,
+      "latencyNs": 6289354,
+      "receivedNs": 115545155026398
+    },
+    {
+      "eventNs": 115545410410566,
+      "latencyNs": 28905737,
+      "receivedNs": 115545439316303
+    },
+    {
+      "eventNs": 115546152281638,
+      "latencyNs": 7028519,
+      "receivedNs": 115546159310157
+    },
+    {
+      "eventNs": 115546462393949,
+      "latencyNs": 6466925,
+      "receivedNs": 115546468860874
+    },
+    {
+      "eventNs": 115546747106342,
+      "latencyNs": 6108370,
+      "receivedNs": 115546753214712
+    },
+    {
+      "eventNs": 115547010438281,
+      "latencyNs": 23257512,
+      "receivedNs": 115547033695793
+    },
+    {
+      "eventNs": 115547714022471,
+      "latencyNs": 7182253,
+      "receivedNs": 115547721204724
+    },
+    {
+      "eventNs": 115548044161930,
+      "latencyNs": 7716590,
+      "receivedNs": 115548051878520
+    },
+    {
+      "eventNs": 115548310141804,
+      "latencyNs": 6502715,
+      "receivedNs": 115548316644519
+    },
+    {
+      "eventNs": 115548560456682,
+      "latencyNs": 28988587,
+      "receivedNs": 115548589445269
+    },
+    {
+      "eventNs": 115549315870223,
+      "latencyNs": 6915719,
+      "receivedNs": 115549322785942
+    },
+    {
+      "eventNs": 115549615459310,
+      "latencyNs": 8247477,
+      "receivedNs": 115549623706787
+    },
+    {
+      "eventNs": 115549896224365,
+      "latencyNs": 6096701,
+      "receivedNs": 115549902321066
+    },
+    {
+      "eventNs": 115550165256760,
+      "latencyNs": 6145060,
+      "receivedNs": 115550171401820
+    },
+    {
+      "eventNs": 115550849418830,
+      "latencyNs": 17566889,
+      "receivedNs": 115550866985719
+    },
+    {
+      "eventNs": 115551170189429,
+      "latencyNs": 11238023,
+      "receivedNs": 115551181427452
+    },
+    {
+      "eventNs": 115551426457151,
+      "latencyNs": 6189603,
+      "receivedNs": 115551432646754
+    },
+    {
+      "eventNs": 115551685915563,
+      "latencyNs": 6136673,
+      "receivedNs": 115551692052236
+    },
+    {
+      "eventNs": 115552427401155,
+      "latencyNs": 6748894,
+      "receivedNs": 115552434150049
+    },
+    {
+      "eventNs": 115552739658403,
+      "latencyNs": 10052370,
+      "receivedNs": 115552749710773
+    },
+    {
+      "eventNs": 115552986878993,
+      "latencyNs": 6541533,
+      "receivedNs": 115552993420526
+    },
+    {
+      "eventNs": 115553248167425,
+      "latencyNs": 6718049,
+      "receivedNs": 115553254885474
+    },
+    {
+      "eventNs": 115553936643315,
+      "latencyNs": 6766341,
+      "receivedNs": 115553943409656
+    },
+    {
+      "eventNs": 115554265566505,
+      "latencyNs": 9033590,
+      "receivedNs": 115554274600095
+    },
+    {
+      "eventNs": 115554528533274,
+      "latencyNs": 6125749,
+      "receivedNs": 115554534659023
+    },
+    {
+      "eventNs": 115554798063610,
+      "latencyNs": 6762206,
+      "receivedNs": 115554804825816
+    },
+    {
+      "eventNs": 115555485408582,
+      "latencyNs": 6856708,
+      "receivedNs": 115555492265290
+    },
+    {
+      "eventNs": 115555797393708,
+      "latencyNs": 6765652,
+      "receivedNs": 115555804159360
+    },
+    {
+      "eventNs": 115556048306149,
+      "latencyNs": 6570039,
+      "receivedNs": 115556054876188
+    },
+    {
+      "eventNs": 115556316221945,
+      "latencyNs": 15962848,
+      "receivedNs": 115556332184793
+    },
+    {
+      "eventNs": 115557036714771,
+      "latencyNs": 7554756,
+      "receivedNs": 115557044269527
+    },
+    {
+      "eventNs": 115557352972953,
+      "latencyNs": 19783550,
+      "receivedNs": 115557372756503
+    },
+    {
+      "eventNs": 115557615023006,
+      "latencyNs": 6346669,
+      "receivedNs": 115557621369675
+    },
+    {
+      "eventNs": 115557881907384,
+      "latencyNs": 17326364,
+      "receivedNs": 115557899233748
+    },
+    {
+      "eventNs": 115558619174518,
+      "latencyNs": 6515094,
+      "receivedNs": 115558625689612
+    },
+    {
+      "eventNs": 115558946954284,
+      "latencyNs": 18285933,
+      "receivedNs": 115558965240217
+    },
+    {
+      "eventNs": 115559215084836,
+      "latencyNs": 20144297,
+      "receivedNs": 115559235229133
+    },
+    {
+      "eventNs": 115559510091166,
+      "latencyNs": 6505455,
+      "receivedNs": 115559516596621
+    },
+    {
+      "eventNs": 115560235887114,
+      "latencyNs": 7620261,
+      "receivedNs": 115560243507375
+    },
+    {
+      "eventNs": 115560551535810,
+      "latencyNs": 13643072,
+      "receivedNs": 115560565178882
+    },
+    {
+      "eventNs": 115560832216102,
+      "latencyNs": 6791652,
+      "receivedNs": 115560839007754
+    },
+    {
+      "eventNs": 115561097479926,
+      "latencyNs": 6222564,
+      "receivedNs": 115561103702490
+    },
+    {
+      "eventNs": 115561814755681,
+      "latencyNs": 6765438,
+      "receivedNs": 115561821521119
+    },
+    {
+      "eventNs": 115562137319312,
+      "latencyNs": 11062582,
+      "receivedNs": 115562148381894
+    },
+    {
+      "eventNs": 115562398124115,
+      "latencyNs": 6108299,
+      "receivedNs": 115562404232414
+    },
+    {
+      "eventNs": 115562660275944,
+      "latencyNs": 6163987,
+      "receivedNs": 115562666439931
+    },
+    {
+      "eventNs": 115563399115431,
+      "latencyNs": 6887910,
+      "receivedNs": 115563406003341
+    },
+    {
+      "eventNs": 115563696668690,
+      "latencyNs": 23844303,
+      "receivedNs": 115563720512993
+    },
+    {
+      "eventNs": 115563980386733,
+      "latencyNs": 6260252,
+      "receivedNs": 115563986646985
+    },
+    {
+      "eventNs": 115564281727154,
+      "latencyNs": 7002230,
+      "receivedNs": 115564288729384
+    },
+    {
+      "eventNs": 115565014987165,
+      "latencyNs": 23348230,
+      "receivedNs": 115565038335395
+    },
+    {
+      "eventNs": 115565337776139,
+      "latencyNs": 16546323,
+      "receivedNs": 115565354322462
+    },
+    {
+      "eventNs": 115565599618321,
+      "latencyNs": 6261514,
+      "receivedNs": 115565605879835
+    },
+    {
+      "eventNs": 115565864298476,
+      "latencyNs": 17964427,
+      "receivedNs": 115565882262903
+    },
+    {
+      "eventNs": 115566631955389,
+      "latencyNs": 6787870,
+      "receivedNs": 115566638743259
+    },
+    {
+      "eventNs": 115566937148515,
+      "latencyNs": 17902134,
+      "receivedNs": 115566955050649
+    },
+    {
+      "eventNs": 115567200146459,
+      "latencyNs": 16146764,
+      "receivedNs": 115567216293223
+    },
+    {
+      "eventNs": 115567476683643,
+      "latencyNs": 6456275,
+      "receivedNs": 115567483139918
+    },
+    {
+      "eventNs": 115568249868611,
+      "latencyNs": 7295237,
+      "receivedNs": 115568257163848
+    },
+    {
+      "eventNs": 115568554015211,
+      "latencyNs": 17928674,
+      "receivedNs": 115568571943885
+    },
+    {
+      "eventNs": 115568843688649,
+      "latencyNs": 6965112,
+      "receivedNs": 115568850653761
+    },
+    {
+      "eventNs": 115569132114374,
+      "latencyNs": 17080006,
+      "receivedNs": 115569149194380
+    },
+    {
+      "eventNs": 115569894790697,
+      "latencyNs": 6834766,
+      "receivedNs": 115569901625463
+    },
+    {
+      "eventNs": 115570210530850,
+      "latencyNs": 6692511,
+      "receivedNs": 115570217223361
+    },
+    {
+      "eventNs": 115570464189129,
+      "latencyNs": 6637104,
+      "receivedNs": 115570470826233
+    },
+    {
+      "eventNs": 115570732741147,
+      "latencyNs": 7242262,
+      "receivedNs": 115570739983409
+    },
+    {
+      "eventNs": 115571511962615,
+      "latencyNs": 7056537,
+      "receivedNs": 115571519019152
+    },
+    {
+      "eventNs": 115571826577893,
+      "latencyNs": 29140056,
+      "receivedNs": 115571855717949
+    },
+    {
+      "eventNs": 115572114670674,
+      "latencyNs": 6471022,
+      "receivedNs": 115572121141696
+    },
+    {
+      "eventNs": 115572376477831,
+      "latencyNs": 6382790,
+      "receivedNs": 115572382860621
+    },
+    {
+      "eventNs": 115573149360523,
+      "latencyNs": 7654499,
+      "receivedNs": 115573157015022
+    },
+    {
+      "eventNs": 115573464537397,
+      "latencyNs": 7327259,
+      "receivedNs": 115573471864656
+    },
+    {
+      "eventNs": 115573715343349,
+      "latencyNs": 6648744,
+      "receivedNs": 115573721992093
+    },
+    {
+      "eventNs": 115573993180303,
+      "latencyNs": 6376703,
+      "receivedNs": 115573999557006
+    },
+    {
+      "eventNs": 115574728533819,
+      "latencyNs": 6879209,
+      "receivedNs": 115574735413028
+    },
+    {
+      "eventNs": 115575042549390,
+      "latencyNs": 6814593,
+      "receivedNs": 115575049363983
+    },
+    {
+      "eventNs": 115575333086783,
+      "latencyNs": 6326853,
+      "receivedNs": 115575339413636
+    },
+    {
+      "eventNs": 115575609750248,
+      "latencyNs": 6864744,
+      "receivedNs": 115575616614992
+    },
+    {
+      "eventNs": 115576310640366,
+      "latencyNs": 6849752,
+      "receivedNs": 115576317490118
+    },
+    {
+      "eventNs": 115576626013317,
+      "latencyNs": 6579538,
+      "receivedNs": 115576632592855
+    },
+    {
+      "eventNs": 115576902298318,
+      "latencyNs": 6223767,
+      "receivedNs": 115576908522085
+    },
+    {
+      "eventNs": 115577181359434,
+      "latencyNs": 6399608,
+      "receivedNs": 115577187759042
+    },
+    {
+      "eventNs": 115577898751874,
+      "latencyNs": 6953677,
+      "receivedNs": 115577905705551
+    },
+    {
+      "eventNs": 115578214118920,
+      "latencyNs": 7793466,
+      "receivedNs": 115578221912386
+    },
+    {
+      "eventNs": 115578492995476,
+      "latencyNs": 6943095,
+      "receivedNs": 115578499938571
+    },
+    {
+      "eventNs": 115578760060625,
+      "latencyNs": 6323518,
+      "receivedNs": 115578766384143
+    },
+    {
+      "eventNs": 115579497839882,
+      "latencyNs": 7359762,
+      "receivedNs": 115579505199644
+    },
+    {
+      "eventNs": 115579799747121,
+      "latencyNs": 22350953,
+      "receivedNs": 115579822098074
+    },
+    {
+      "eventNs": 115580098580828,
+      "latencyNs": 6954057,
+      "receivedNs": 115580105534885
+    },
+    {
+      "eventNs": 115580371237636,
+      "latencyNs": 16317872,
+      "receivedNs": 115580387555508
+    },
+    {
+      "eventNs": 115581116117080,
+      "latencyNs": 16269849,
+      "receivedNs": 115581132386929
+    },
+    {
+      "eventNs": 115581421677761,
+      "latencyNs": 17320316,
+      "receivedNs": 115581438998077
+    },
+    {
+      "eventNs": 115581709807800,
+      "latencyNs": 6523440,
+      "receivedNs": 115581716331240
+    },
+    {
+      "eventNs": 115581976772446,
+      "latencyNs": 6620491,
+      "receivedNs": 115581983392937
+    },
+    {
+      "eventNs": 115582732484503,
+      "latencyNs": 7456940,
+      "receivedNs": 115582739941443
+    },
+    {
+      "eventNs": 115583048825787,
+      "latencyNs": 8255000,
+      "receivedNs": 115583057080787
+    },
+    {
+      "eventNs": 115583316187464,
+      "latencyNs": 15930381,
+      "receivedNs": 115583332117845
+    },
+    {
+      "eventNs": 115583577632865,
+      "latencyNs": 6688339,
+      "receivedNs": 115583584321204
+    },
+    {
+      "eventNs": 115584343168920,
+      "latencyNs": 7719856,
+      "receivedNs": 115584350888776
+    },
+    {
+      "eventNs": 115584655678628,
+      "latencyNs": 14404393,
+      "receivedNs": 115584670083021
+    },
+    {
+      "eventNs": 115584943136811,
+      "latencyNs": 6639989,
+      "receivedNs": 115584949776800
+    },
+    {
+      "eventNs": 115585214331164,
+      "latencyNs": 6853989,
+      "receivedNs": 115585221185153
+    },
+    {
+      "eventNs": 115585930616415,
+      "latencyNs": 7378025,
+      "receivedNs": 115585937994440
+    },
+    {
+      "eventNs": 115586264311766,
+      "latencyNs": 9086883,
+      "receivedNs": 115586273398649
+    },
+    {
+      "eventNs": 115586531906297,
+      "latencyNs": 6643091,
+      "receivedNs": 115586538549388
+    },
+    {
+      "eventNs": 115586809920204,
+      "latencyNs": 6751539,
+      "receivedNs": 115586816671743
+    },
+    {
+      "eventNs": 115587565030337,
+      "latencyNs": 17666227,
+      "receivedNs": 115587582696564
+    },
+    {
+      "eventNs": 115587881471654,
+      "latencyNs": 8468451,
+      "receivedNs": 115587889940105
+    },
+    {
+      "eventNs": 115588153101019,
+      "latencyNs": 6597094,
+      "receivedNs": 115588159698113
+    },
+    {
+      "eventNs": 115588428772471,
+      "latencyNs": 6549402,
+      "receivedNs": 115588435321873
+    },
+    {
+      "eventNs": 115589166052108,
+      "latencyNs": 16670452,
+      "receivedNs": 115589182722560
+    },
+    {
+      "eventNs": 115589482802771,
+      "latencyNs": 7183054,
+      "receivedNs": 115589489985825
+    },
+    {
+      "eventNs": 115589748527576,
+      "latencyNs": 6554490,
+      "receivedNs": 115589755082066
+    },
+    {
+      "eventNs": 115590016305007,
+      "latencyNs": 6353824,
+      "receivedNs": 115590022658831
+    },
+    {
+      "eventNs": 115590737663211,
+      "latencyNs": 11259448,
+      "receivedNs": 115590748922659
+    },
+    {
+      "eventNs": 115591054955422,
+      "latencyNs": 9876380,
+      "receivedNs": 115591064831802
+    },
+    {
+      "eventNs": 115591332907853,
+      "latencyNs": 24840663,
+      "receivedNs": 115591357748516
+    },
+    {
+      "eventNs": 115591609983630,
+      "latencyNs": 7054630,
+      "receivedNs": 115591617038260
+    },
+    {
+      "eventNs": 115592362355343,
+      "latencyNs": 7914091,
+      "receivedNs": 115592370269434
+    },
+    {
+      "eventNs": 115592678259861,
+      "latencyNs": 7047033,
+      "receivedNs": 115592685306894
+    },
+    {
+      "eventNs": 115592966832308,
+      "latencyNs": 15976337,
+      "receivedNs": 115592982808645
+    },
+    {
+      "eventNs": 115593246996933,
+      "latencyNs": 6872829,
+      "receivedNs": 115593253869762
+    },
+    {
+      "eventNs": 115594020280375,
+      "latencyNs": 8183755,
+      "receivedNs": 115594028464130
+    },
+    {
+      "eventNs": 115594332873871,
+      "latencyNs": 7001947,
+      "receivedNs": 115594339875818
+    },
+    {
+      "eventNs": 115594587423165,
+      "latencyNs": 7109919,
+      "receivedNs": 115594594533084
+    },
+    {
+      "eventNs": 115594854793518,
+      "latencyNs": 11326826,
+      "receivedNs": 115594866120344
+    },
+    {
+      "eventNs": 115595655389264,
+      "latencyNs": 11377892,
+      "receivedNs": 115595666767156
+    },
+    {
+      "eventNs": 115595976997001,
+      "latencyNs": 6638545,
+      "receivedNs": 115595983635546
+    },
+    {
+      "eventNs": 115596230355139,
+      "latencyNs": 7332223,
+      "receivedNs": 115596237687362
+    },
+    {
+      "eventNs": 115596498504530,
+      "latencyNs": 7354290,
+      "receivedNs": 115596505858820
+    },
+    {
+      "eventNs": 115597253426654,
+      "latencyNs": 8135430,
+      "receivedNs": 115597261562084
+    },
+    {
+      "eventNs": 115597559445146,
+      "latencyNs": 7146726,
+      "receivedNs": 115597566591872
+    },
+    {
+      "eventNs": 115597820818257,
+      "latencyNs": 11851097,
+      "receivedNs": 115597832669354
+    },
+    {
+      "eventNs": 115598087740599,
+      "latencyNs": 16855325,
+      "receivedNs": 115598104595924
+    },
+    {
+      "eventNs": 115598862008123,
+      "latencyNs": 7206301,
+      "receivedNs": 115598869214424
+    },
+    {
+      "eventNs": 115599178414894,
+      "latencyNs": 7509162,
+      "receivedNs": 115599185924056
+    },
+    {
+      "eventNs": 115599465451898,
+      "latencyNs": 7600846,
+      "receivedNs": 115599473052744
+    },
+    {
+      "eventNs": 115599746259532,
+      "latencyNs": 6910685,
+      "receivedNs": 115599753170217
+    },
+    {
+      "eventNs": 115600542327218,
+      "latencyNs": 7296206,
+      "receivedNs": 115600549623424
+    },
+    {
+      "eventNs": 115600883231679,
+      "latencyNs": 8120941,
+      "receivedNs": 115600891352620
+    },
+    {
+      "eventNs": 115601163986896,
+      "latencyNs": 7205496,
+      "receivedNs": 115601171192392
+    },
+    {
+      "eventNs": 115601443995659,
+      "latencyNs": 6613553,
+      "receivedNs": 115601450609212
+    },
+    {
+      "eventNs": 115602231326054,
+      "latencyNs": 7170213,
+      "receivedNs": 115602238496267
+    },
+    {
+      "eventNs": 115602549471416,
+      "latencyNs": 8319281,
+      "receivedNs": 115602557790697
+    },
+    {
+      "eventNs": 115602837184735,
+      "latencyNs": 7240158,
+      "receivedNs": 115602844424893
+    },
+    {
+      "eventNs": 115603109728700,
+      "latencyNs": 6621238,
+      "receivedNs": 115603116349938
+    },
+    {
+      "eventNs": 115603864643548,
+      "latencyNs": 7365023,
+      "receivedNs": 115603872008571
+    },
+    {
+      "eventNs": 115604183547044,
+      "latencyNs": 8616360,
+      "receivedNs": 115604192163404
+    },
+    {
+      "eventNs": 115604451137097,
+      "latencyNs": 7325445,
+      "receivedNs": 115604458462542
+    },
+    {
+      "eventNs": 115604737689487,
+      "latencyNs": 11839934,
+      "receivedNs": 115604749529421
+    },
+    {
+      "eventNs": 115605472468052,
+      "latencyNs": 10368759,
+      "receivedNs": 115605482836811
+    },
+    {
+      "eventNs": 115605794021075,
+      "latencyNs": 8835482,
+      "receivedNs": 115605802856557
+    },
+    {
+      "eventNs": 115606060530168,
+      "latencyNs": 6548167,
+      "receivedNs": 115606067078335
+    },
+    {
+      "eventNs": 115606344524516,
+      "latencyNs": 6667019,
+      "receivedNs": 115606351191535
+    },
+    {
+      "eventNs": 115607120504815,
+      "latencyNs": 7701651,
+      "receivedNs": 115607128206466
+    },
+    {
+      "eventNs": 115607427536322,
+      "latencyNs": 6833362,
+      "receivedNs": 115607434369684
+    },
+    {
+      "eventNs": 115607698829472,
+      "latencyNs": 6782220,
+      "receivedNs": 115607705611692
+    },
+    {
+      "eventNs": 115607970293354,
+      "latencyNs": 7148686,
+      "receivedNs": 115607977442040
+    },
+    {
+      "eventNs": 115608777810689,
+      "latencyNs": 7238875,
+      "receivedNs": 115608785049564
+    },
+    {
+      "eventNs": 115609093830702,
+      "latencyNs": 7392510,
+      "receivedNs": 115609101223212
+    },
+    {
+      "eventNs": 115609364431052,
+      "latencyNs": 6993953,
+      "receivedNs": 115609371425005
+    },
+    {
+      "eventNs": 115609660205705,
+      "latencyNs": 6522677,
+      "receivedNs": 115609666728382
+    },
+    {
+      "eventNs": 115610414092945,
+      "latencyNs": 7855131,
+      "receivedNs": 115610421948076
+    },
+    {
+      "eventNs": 115610732785062,
+      "latencyNs": 7273511,
+      "receivedNs": 115610740058573
+    },
+    {
+      "eventNs": 115611000740887,
+      "latencyNs": 6902121,
+      "receivedNs": 115611007643008
+    },
+    {
+      "eventNs": 115611270994116,
+      "latencyNs": 11675211,
+      "receivedNs": 115611282669327
+    },
+    {
+      "eventNs": 115612078279266,
+      "latencyNs": 7187924,
+      "receivedNs": 115612085467190
+    },
+    {
+      "eventNs": 115612398674495,
+      "latencyNs": 7825705,
+      "receivedNs": 115612406500200
+    },
+    {
+      "eventNs": 115612664893991,
+      "latencyNs": 7171351,
+      "receivedNs": 115612672065342
+    },
+    {
+      "eventNs": 115612949568583,
+      "latencyNs": 7126720,
+      "receivedNs": 115612956695303
+    },
+    {
+      "eventNs": 115613733026029,
+      "latencyNs": 9927526,
+      "receivedNs": 115613742953555
+    },
+    {
+      "eventNs": 115614050133878,
+      "latencyNs": 15380331,
+      "receivedNs": 115614065514209
+    },
+    {
+      "eventNs": 115614316405795,
+      "latencyNs": 6507105,
+      "receivedNs": 115614322912900
+    },
+    {
+      "eventNs": 115614594039545,
+      "latencyNs": 6951854,
+      "receivedNs": 115614600991399
+    },
+    {
+      "eventNs": 115615406362785,
+      "latencyNs": 15109634,
+      "receivedNs": 115615421472419
+    },
+    {
+      "eventNs": 115615735592210,
+      "latencyNs": 20836436,
+      "receivedNs": 115615756428646
+    },
+    {
+      "eventNs": 115616011373125,
+      "latencyNs": 22256527,
+      "receivedNs": 115616033629652
+    },
+    {
+      "eventNs": 115616297264044,
+      "latencyNs": 7279816,
+      "receivedNs": 115616304543860
+    },
+    {
+      "eventNs": 115617049889386,
+      "latencyNs": 7934463,
+      "receivedNs": 115617057823849
+    },
+    {
+      "eventNs": 115617356705228,
+      "latencyNs": 18797182,
+      "receivedNs": 115617375502410
+    },
+    {
+      "eventNs": 115617637249857,
+      "latencyNs": 6774571,
+      "receivedNs": 115617644024428
+    },
+    {
+      "eventNs": 115617915347071,
+      "latencyNs": 6959641,
+      "receivedNs": 115617922306712
+    },
+    {
+      "eventNs": 115618671933753,
+      "latencyNs": 10596983,
+      "receivedNs": 115618682530736
+    },
+    {
+      "eventNs": 115618993417323,
+      "latencyNs": 7809954,
+      "receivedNs": 115619001227277
+    },
+    {
+      "eventNs": 115619264567420,
+      "latencyNs": 7680586,
+      "receivedNs": 115619272248006
+    },
+    {
+      "eventNs": 115619549154502,
+      "latencyNs": 6781326,
+      "receivedNs": 115619555935828
+    },
+    {
+      "eventNs": 115620363141858,
+      "latencyNs": 7208446,
+      "receivedNs": 115620370350304
+    },
+    {
+      "eventNs": 115620692428282,
+      "latencyNs": 6897710,
+      "receivedNs": 115620699325992
+    },
+    {
+      "eventNs": 115620961621778,
+      "latencyNs": 6778991,
+      "receivedNs": 115620968400769
+    },
+    {
+      "eventNs": 115621233984536,
+      "latencyNs": 6685776,
+      "receivedNs": 115621240670312
+    },
+    {
+      "eventNs": 115622021513626,
+      "latencyNs": 17586089,
+      "receivedNs": 115622039099715
+    },
+    {
+      "eventNs": 115622354749942,
+      "latencyNs": 11166712,
+      "receivedNs": 115622365916654
+    },
+    {
+      "eventNs": 115622620707907,
+      "latencyNs": 7202052,
+      "receivedNs": 115622627909959
+    },
+    {
+      "eventNs": 115622888047729,
+      "latencyNs": 11094857,
+      "receivedNs": 115622899142586
+    },
+    {
+      "eventNs": 115623670451038,
+      "latencyNs": 7374825,
+      "receivedNs": 115623677825863
+    },
+    {
+      "eventNs": 115623993814060,
+      "latencyNs": 8808027,
+      "receivedNs": 115624002622087
+    },
+    {
+      "eventNs": 115624263202772,
+      "latencyNs": 7341775,
+      "receivedNs": 115624270544547
+    },
+    {
+      "eventNs": 115624550762462,
+      "latencyNs": 6942106,
+      "receivedNs": 115624557704568
+    },
+    {
+      "eventNs": 115625372782495,
+      "latencyNs": 9931759,
+      "receivedNs": 115625382714254
+    },
+    {
+      "eventNs": 115625692415708,
+      "latencyNs": 7042871,
+      "receivedNs": 115625699458579
+    },
+    {
+      "eventNs": 115625964607125,
+      "latencyNs": 7849520,
+      "receivedNs": 115625972456645
+    },
+    {
+      "eventNs": 115626227109816,
+      "latencyNs": 7268326,
+      "receivedNs": 115626234378142
+    },
+    {
+      "eventNs": 115627031277310,
+      "latencyNs": 7679282,
+      "receivedNs": 115627038956592
+    },
+    {
+      "eventNs": 115627337222043,
+      "latencyNs": 18476217,
+      "receivedNs": 115627355698260
+    },
+    {
+      "eventNs": 115627617795733,
+      "latencyNs": 6578763,
+      "receivedNs": 115627624374496
+    },
+    {
+      "eventNs": 115627897655259,
+      "latencyNs": 7613463,
+      "receivedNs": 115627905268722
+    },
+    {
+      "eventNs": 115628734020971,
+      "latencyNs": 7295572,
+      "receivedNs": 115628741316543
+    },
+    {
+      "eventNs": 115629060338310,
+      "latencyNs": 7950812,
+      "receivedNs": 115629068289122
+    },
+    {
+      "eventNs": 115629333143823,
+      "latencyNs": 8048945,
+      "receivedNs": 115629341192768
+    },
+    {
+      "eventNs": 115629626766090,
+      "latencyNs": 25880039,
+      "receivedNs": 115629652646129
+    },
+    {
+      "eventNs": 115630481354843,
+      "latencyNs": 8093964,
+      "receivedNs": 115630489448807
+    },
+    {
+      "eventNs": 115630798695019,
+      "latencyNs": 9027509,
+      "receivedNs": 115630807722528
+    },
+    {
+      "eventNs": 115631076270868,
+      "latencyNs": 6916850,
+      "receivedNs": 115631083187718
+    },
+    {
+      "eventNs": 115631364675345,
+      "latencyNs": 8643340,
+      "receivedNs": 115631373318685
+    },
+    {
+      "eventNs": 115632212386871,
+      "latencyNs": 7694666,
+      "receivedNs": 115632220081537
+    },
+    {
+      "eventNs": 115632521942757,
+      "latencyNs": 11733860,
+      "receivedNs": 115632533676617
+    },
+    {
+      "eventNs": 115632800083269,
+      "latencyNs": 8356774,
+      "receivedNs": 115632808440043
+    },
+    {
+      "eventNs": 115633094667220,
+      "latencyNs": 7034930,
+      "receivedNs": 115633101702150
+    },
+    {
+      "eventNs": 115633931189220,
+      "latencyNs": 8227037,
+      "receivedNs": 115633939416257
+    },
+    {
+      "eventNs": 115634265213467,
+      "latencyNs": 9668213,
+      "receivedNs": 115634274881680
+    },
+    {
+      "eventNs": 115634560351726,
+      "latencyNs": 7006582,
+      "receivedNs": 115634567358308
+    },
+    {
+      "eventNs": 115634860760650,
+      "latencyNs": 6838940,
+      "receivedNs": 115634867599590
+    },
+    {
+      "eventNs": 115635697607749,
+      "latencyNs": 8258490,
+      "receivedNs": 115635705866239
+    },
+    {
+      "eventNs": 115636032923909,
+      "latencyNs": 7937184,
+      "receivedNs": 115636040861093
+    },
+    {
+      "eventNs": 115636314553660,
+      "latencyNs": 7456709,
+      "receivedNs": 115636322010369
+    },
+    {
+      "eventNs": 115636583748065,
+      "latencyNs": 7705068,
+      "receivedNs": 115636591453133
+    },
+    {
+      "eventNs": 115637434091751,
+      "latencyNs": 7221671,
+      "receivedNs": 115637441313422
+    },
+    {
+      "eventNs": 115637759100871,
+      "latencyNs": 7454966,
+      "receivedNs": 115637766555837
+    },
+    {
+      "eventNs": 115638031053149,
+      "latencyNs": 7453850,
+      "receivedNs": 115638038506999
+    },
+    {
+      "eventNs": 115638327376165,
+      "latencyNs": 7197746,
+      "receivedNs": 115638334573911
+    },
+    {
+      "eventNs": 115639145779471,
+      "latencyNs": 7674648,
+      "receivedNs": 115639153454119
+    },
+    {
+      "eventNs": 115639465242652,
+      "latencyNs": 8440575,
+      "receivedNs": 115639473683227
+    },
+    {
+      "eventNs": 115639750481659,
+      "latencyNs": 6755197,
+      "receivedNs": 115639757236856
+    },
+    {
+      "eventNs": 115640034182571,
+      "latencyNs": 7401568,
+      "receivedNs": 115640041584139
+    },
+    {
+      "eventNs": 115640829188702,
+      "latencyNs": 7811248,
+      "receivedNs": 115640836999950
+    },
+    {
+      "eventNs": 115641159923146,
+      "latencyNs": 7787488,
+      "receivedNs": 115641167710634
+    },
+    {
+      "eventNs": 115641433982613,
+      "latencyNs": 15501101,
+      "receivedNs": 115641449483714
+    },
+    {
+      "eventNs": 115641714279823,
+      "latencyNs": 7177455,
+      "receivedNs": 115641721457278
+    },
+    {
+      "eventNs": 115642530547518,
+      "latencyNs": 8011084,
+      "receivedNs": 115642538558602
+    },
+    {
+      "eventNs": 115642850882309,
+      "latencyNs": 16659665,
+      "receivedNs": 115642867541974
+    },
+    {
+      "eventNs": 115643146719220,
+      "latencyNs": 7212170,
+      "receivedNs": 115643153931390
+    },
+    {
+      "eventNs": 115643418229301,
+      "latencyNs": 7794043,
+      "receivedNs": 115643426023344
+    },
+    {
+      "eventNs": 115644247796852,
+      "latencyNs": 7463530,
+      "receivedNs": 115644255260382
+    },
+    {
+      "eventNs": 115644564319056,
+      "latencyNs": 8534360,
+      "receivedNs": 115644572853416
+    },
+    {
+      "eventNs": 115644826649221,
+      "latencyNs": 7526433,
+      "receivedNs": 115644834175654
+    },
+    {
+      "eventNs": 115645110131293,
+      "latencyNs": 7486658,
+      "receivedNs": 115645117617951
+    },
+    {
+      "eventNs": 115645942979142,
+      "latencyNs": 7488570,
+      "receivedNs": 115645950467712
+    },
+    {
+      "eventNs": 115646265649823,
+      "latencyNs": 9523041,
+      "receivedNs": 115646275172864
+    },
+    {
+      "eventNs": 115646537681711,
+      "latencyNs": 11212210,
+      "receivedNs": 115646548893921
+    },
+    {
+      "eventNs": 115646815953386,
+      "latencyNs": 7499095,
+      "receivedNs": 115646823452481
+    },
+    {
+      "eventNs": 115647613783256,
+      "latencyNs": 8684943,
+      "receivedNs": 115647622468199
+    },
+    {
+      "eventNs": 115647930912777,
+      "latencyNs": 28626917,
+      "receivedNs": 115647959539694
+    },
+    {
+      "eventNs": 115648217381683,
+      "latencyNs": 7070581,
+      "receivedNs": 115648224452264
+    },
+    {
+      "eventNs": 115648500460290,
+      "latencyNs": 7498624,
+      "receivedNs": 115648507958914
+    },
+    {
+      "eventNs": 115649314242384,
+      "latencyNs": 8571593,
+      "receivedNs": 115649322813977
+    },
+    {
+      "eventNs": 115649633406217,
+      "latencyNs": 22073484,
+      "receivedNs": 115649655479701
+    },
+    {
+      "eventNs": 115649921374429,
+      "latencyNs": 11148073,
+      "receivedNs": 115649932522502
+    },
+    {
+      "eventNs": 115650198561906,
+      "latencyNs": 7828099,
+      "receivedNs": 115650206390005
+    },
+    {
+      "eventNs": 115650997404090,
+      "latencyNs": 8047667,
+      "receivedNs": 115651005451757
+    },
+    {
+      "eventNs": 115651314980355,
+      "latencyNs": 7946139,
+      "receivedNs": 115651322926494
+    },
+    {
+      "eventNs": 115651593435872,
+      "latencyNs": 6883514,
+      "receivedNs": 115651600319386
+    },
+    {
+      "eventNs": 115651872901842,
+      "latencyNs": 9813013,
+      "receivedNs": 115651882714855
+    },
+    {
+      "eventNs": 115652731016825,
+      "latencyNs": 8919257,
+      "receivedNs": 115652739936082
+    },
+    {
+      "eventNs": 115653049671633,
+      "latencyNs": 6869727,
+      "receivedNs": 115653056541360
+    },
+    {
+      "eventNs": 115653331064019,
+      "latencyNs": 7618535,
+      "receivedNs": 115653338682554
+    },
+    {
+      "eventNs": 115653628599568,
+      "latencyNs": 7040586,
+      "receivedNs": 115653635640154
+    },
+    {
+      "eventNs": 115654446711899,
+      "latencyNs": 8504365,
+      "receivedNs": 115654455216264
+    },
+    {
+      "eventNs": 115654775902945,
+      "latencyNs": 8505923,
+      "receivedNs": 115654784408868
+    },
+    {
+      "eventNs": 115655050632346,
+      "latencyNs": 16283818,
+      "receivedNs": 115655066916164
+    },
+    {
+      "eventNs": 115655360389681,
+      "latencyNs": 23837065,
+      "receivedNs": 115655384226746
+    },
+    {
+      "eventNs": 115656218570479,
+      "latencyNs": 7476959,
+      "receivedNs": 115656226047438
+    },
+    {
+      "eventNs": 115656548831595,
+      "latencyNs": 26366754,
+      "receivedNs": 115656575198349
+    },
+    {
+      "eventNs": 115656835116345,
+      "latencyNs": 7231105,
+      "receivedNs": 115656842347450
+    },
+    {
+      "eventNs": 115657130927584,
+      "latencyNs": 7341535,
+      "receivedNs": 115657138269119
+    },
+    {
+      "eventNs": 115657971269435,
+      "latencyNs": 11858501,
+      "receivedNs": 115657983127936
+    },
+    {
+      "eventNs": 115658315667532,
+      "latencyNs": 9891424,
+      "receivedNs": 115658325558956
+    },
+    {
+      "eventNs": 115658601050074,
+      "latencyNs": 7309700,
+      "receivedNs": 115658608359774
+    },
+    {
+      "eventNs": 115658871730258,
+      "latencyNs": 11116259,
+      "receivedNs": 115658882846517
+    },
+    {
+      "eventNs": 115659766889853,
+      "latencyNs": 8208517,
+      "receivedNs": 115659775098370
+    },
+    {
+      "eventNs": 115660099045471,
+      "latencyNs": 10322463,
+      "receivedNs": 115660109367934
+    },
+    {
+      "eventNs": 115660394908041,
+      "latencyNs": 7976839,
+      "receivedNs": 115660402884880
+    },
+    {
+      "eventNs": 115660668269996,
+      "latencyNs": 9111401,
+      "receivedNs": 115660677381397
+    },
+    {
+      "eventNs": 115661542696250,
+      "latencyNs": 7570915,
+      "receivedNs": 115661550267165
+    },
+    {
+      "eventNs": 115661855081450,
+      "latencyNs": 10848336,
+      "receivedNs": 115661865929786
+    },
+    {
+      "eventNs": 115662131067198,
+      "latencyNs": 7581112,
+      "receivedNs": 115662138648310
+    },
+    {
+      "eventNs": 115662411874717,
+      "latencyNs": 7236426,
+      "receivedNs": 115662419111143
+    },
+    {
+      "eventNs": 115663272157102,
+      "latencyNs": 10540237,
+      "receivedNs": 115663282697339
+    },
+    {
+      "eventNs": 115663599193021,
+      "latencyNs": 11290416,
+      "receivedNs": 115663610483437
+    },
+    {
+      "eventNs": 115663872133756,
+      "latencyNs": 10341263,
+      "receivedNs": 115663882475019
+    },
+    {
+      "eventNs": 115664162645097,
+      "latencyNs": 7407544,
+      "receivedNs": 115664170052641
+    },
+    {
+      "eventNs": 115664980702715,
+      "latencyNs": 20648673,
+      "receivedNs": 115665001351388
+    },
+    {
+      "eventNs": 115665310446023,
+      "latencyNs": 31262546,
+      "receivedNs": 115665341708569
+    },
+    {
+      "eventNs": 115665613807303,
+      "latencyNs": 6961915,
+      "receivedNs": 115665620769218
+    },
+    {
+      "eventNs": 115665900279116,
+      "latencyNs": 8555879,
+      "receivedNs": 115665908834995
+    },
+    {
+      "eventNs": 115666749102545,
+      "latencyNs": 7525378,
+      "receivedNs": 115666756627923
+    },
+    {
+      "eventNs": 115667077156673,
+      "latencyNs": 9561515,
+      "receivedNs": 115667086718188
+    },
+    {
+      "eventNs": 115667369242446,
+      "latencyNs": 13191697,
+      "receivedNs": 115667382434143
+    },
+    {
+      "eventNs": 115667646681761,
+      "latencyNs": 8089414,
+      "receivedNs": 115667654771175
+    },
+    {
+      "eventNs": 115668533149405,
+      "latencyNs": 17215199,
+      "receivedNs": 115668550364604
+    },
+    {
+      "eventNs": 115668881142034,
+      "latencyNs": 9265829,
+      "receivedNs": 115668890407863
+    },
+    {
+      "eventNs": 115669164028316,
+      "latencyNs": 7370346,
+      "receivedNs": 115669171398662
+    },
+    {
+      "eventNs": 115669433799626,
+      "latencyNs": 7830779,
+      "receivedNs": 115669441630405
+    },
+    {
+      "eventNs": 115670305108172,
+      "latencyNs": 11140351,
+      "receivedNs": 115670316248523
+    },
+    {
+      "eventNs": 115670633792368,
+      "latencyNs": 8241767,
+      "receivedNs": 115670642034135
+    },
+    {
+      "eventNs": 115670917539577,
+      "latencyNs": 7398599,
+      "receivedNs": 115670924938176
+    },
+    {
+      "eventNs": 115671201068352,
+      "latencyNs": 7885094,
+      "receivedNs": 115671208953446
+    },
+    {
+      "eventNs": 115672053092333,
+      "latencyNs": 7797403,
+      "receivedNs": 115672060889736
+    },
+    {
+      "eventNs": 115672364840188,
+      "latencyNs": 20482133,
+      "receivedNs": 115672385322321
+    },
+    {
+      "eventNs": 115672650218236,
+      "latencyNs": 7817726,
+      "receivedNs": 115672658035962
+    },
+    {
+      "eventNs": 115672938687406,
+      "latencyNs": 11094459,
+      "receivedNs": 115672949781865
+    },
+    {
+      "eventNs": 115673797498791,
+      "latencyNs": 8132478,
+      "receivedNs": 115673805631269
+    },
+    {
+      "eventNs": 115674116167259,
+      "latencyNs": 8264539,
+      "receivedNs": 115674124431798
+    },
+    {
+      "eventNs": 115674389159818,
+      "latencyNs": 10336253,
+      "receivedNs": 115674399496071
+    },
+    {
+      "eventNs": 115674672839578,
+      "latencyNs": 15740010,
+      "receivedNs": 115674688579588
+    },
+    {
+      "eventNs": 115675530360310,
+      "latencyNs": 8841497,
+      "receivedNs": 115675539201807
+    },
+    {
+      "eventNs": 115675856523070,
+      "latencyNs": 13649024,
+      "receivedNs": 115675870172094
+    },
+    {
+      "eventNs": 115676143651590,
+      "latencyNs": 7550889,
+      "receivedNs": 115676151202479
+    },
+    {
+      "eventNs": 115676435399842,
+      "latencyNs": 7914828,
+      "receivedNs": 115676443314670
+    },
+    {
+      "eventNs": 115677315292747,
+      "latencyNs": 8140452,
+      "receivedNs": 115677323433199
+    },
+    {
+      "eventNs": 115677632289625,
+      "latencyNs": 7471737,
+      "receivedNs": 115677639761362
+    },
+    {
+      "eventNs": 115677922862660,
+      "latencyNs": 10754419,
+      "receivedNs": 115677933617079
+    },
+    {
+      "eventNs": 115678200504758,
+      "latencyNs": 8234444,
+      "receivedNs": 115678208739202
+    },
+    {
+      "eventNs": 115679081136273,
+      "latencyNs": 7870842,
+      "receivedNs": 115679089007115
+    },
+    {
+      "eventNs": 115679410344183,
+      "latencyNs": 9114618,
+      "receivedNs": 115679419458801
+    },
+    {
+      "eventNs": 115679705698619,
+      "latencyNs": 10240017,
+      "receivedNs": 115679715938636
+    },
+    {
+      "eventNs": 115679986312720,
+      "latencyNs": 8462463,
+      "receivedNs": 115679994775183
+    },
+    {
+      "eventNs": 115680835950439,
+      "latencyNs": 7748230,
+      "receivedNs": 115680843698669
+    },
+    {
+      "eventNs": 115681171587385,
+      "latencyNs": 11179441,
+      "receivedNs": 115681182766826
+    },
+    {
+      "eventNs": 115681448665050,
+      "latencyNs": 8133969,
+      "receivedNs": 115681456799019
+    },
+    {
+      "eventNs": 115681749532125,
+      "latencyNs": 21976113,
+      "receivedNs": 115681771508238
+    },
+    {
+      "eventNs": 115682632057157,
+      "latencyNs": 8744339,
+      "receivedNs": 115682640801496
+    },
+    {
+      "eventNs": 115682966732640,
+      "latencyNs": 25314061,
+      "receivedNs": 115682992046701
+    },
+    {
+      "eventNs": 115683280028598,
+      "latencyNs": 7989272,
+      "receivedNs": 115683288017870
+    },
+    {
+      "eventNs": 115683577355103,
+      "latencyNs": 7483779,
+      "receivedNs": 115683584838882
+    },
+    {
+      "eventNs": 115684431061828,
+      "latencyNs": 8793363,
+      "receivedNs": 115684439855191
+    },
+    {
+      "eventNs": 115684749085215,
+      "latencyNs": 8393347,
+      "receivedNs": 115684757478562
+    },
+    {
+      "eventNs": 115685035391346,
+      "latencyNs": 7197295,
+      "receivedNs": 115685042588641
+    },
+    {
+      "eventNs": 115685314547562,
+      "latencyNs": 9126442,
+      "receivedNs": 115685323674004
+    },
+    {
+      "eventNs": 115686214042782,
+      "latencyNs": 8546076,
+      "receivedNs": 115686222588858
+    },
+    {
+      "eventNs": 115686547670747,
+      "latencyNs": 21629803,
+      "receivedNs": 115686569300550
+    },
+    {
+      "eventNs": 115686851818325,
+      "latencyNs": 7926875,
+      "receivedNs": 115686859745200
+    },
+    {
+      "eventNs": 115687136176906,
+      "latencyNs": 14032279,
+      "receivedNs": 115687150209185
+    },
+    {
+      "eventNs": 115688022363006,
+      "latencyNs": 11668674,
+      "receivedNs": 115688034031680
+    },
+    {
+      "eventNs": 115688356200788,
+      "latencyNs": 11345036,
+      "receivedNs": 115688367545824
+    },
+    {
+      "eventNs": 115688643899851,
+      "latencyNs": 7733949,
+      "receivedNs": 115688651633800
+    },
+    {
+      "eventNs": 115688948420621,
+      "latencyNs": 8369994,
+      "receivedNs": 115688956790615
+    },
+    {
+      "eventNs": 115689847563310,
+      "latencyNs": 7684894,
+      "receivedNs": 115689855248204
+    },
+    {
+      "eventNs": 115690181173183,
+      "latencyNs": 19346182,
+      "receivedNs": 115690200519365
+    },
+    {
+      "eventNs": 115690497697560,
+      "latencyNs": 7849184,
+      "receivedNs": 115690505546744
+    },
+    {
+      "eventNs": 115690815704083,
+      "latencyNs": 7679832,
+      "receivedNs": 115690823383915
+    },
+    {
+      "eventNs": 115691734061433,
+      "latencyNs": 8328987,
+      "receivedNs": 115691742390420
+    },
+    {
+      "eventNs": 115692060516329,
+      "latencyNs": 7476951,
+      "receivedNs": 115692067993280
+    },
+    {
+      "eventNs": 115692372312106,
+      "latencyNs": 11249981,
+      "receivedNs": 115692383562087
+    },
+    {
+      "eventNs": 115692664127575,
+      "latencyNs": 7883620,
+      "receivedNs": 115692672011195
+    },
+    {
+      "eventNs": 115693583257012,
+      "latencyNs": 8804585,
+      "receivedNs": 115693592061597
+    },
+    {
+      "eventNs": 115693916538893,
+      "latencyNs": 8460371,
+      "receivedNs": 115693924999264
+    },
+    {
+      "eventNs": 115694221469109,
+      "latencyNs": 12354268,
+      "receivedNs": 115694233823377
+    },
+    {
+      "eventNs": 115694514214014,
+      "latencyNs": 7965778,
+      "receivedNs": 115694522179792
+    },
+    {
+      "eventNs": 115695422240046,
+      "latencyNs": 11125574,
+      "receivedNs": 115695433365620
+    },
+    {
+      "eventNs": 115695748818061,
+      "latencyNs": 7734872,
+      "receivedNs": 115695756552933
+    },
+    {
+      "eventNs": 115696047397756,
+      "latencyNs": 8258402,
+      "receivedNs": 115696055656158
+    },
+    {
+      "eventNs": 115696335872777,
+      "latencyNs": 8321467,
+      "receivedNs": 115696344194244
+    },
+    {
+      "eventNs": 115697198387972,
+      "latencyNs": 18382650,
+      "receivedNs": 115697216770622
+    },
+    {
+      "eventNs": 115697547045958,
+      "latencyNs": 9129769,
+      "receivedNs": 115697556175727
+    },
+    {
+      "eventNs": 115697822303589,
+      "latencyNs": 10761321,
+      "receivedNs": 115697833064910
+    },
+    {
+      "eventNs": 115698102817553,
+      "latencyNs": 8152983,
+      "receivedNs": 115698110970536
+    },
+    {
+      "eventNs": 115698976028997,
+      "latencyNs": 8000968,
+      "receivedNs": 115698984029965
+    },
+    {
+      "eventNs": 115699298976414,
+      "latencyNs": 8197431,
+      "receivedNs": 115699307173845
+    },
+    {
+      "eventNs": 115699593919379,
+      "latencyNs": 7421465,
+      "receivedNs": 115699601340844
+    },
+    {
+      "eventNs": 115699882454063,
+      "latencyNs": 8475884,
+      "receivedNs": 115699890929947
+    },
+    {
+      "eventNs": 115700794686648,
+      "latencyNs": 8144480,
+      "receivedNs": 115700802831128
+    },
+    {
+      "eventNs": 115701137729908,
+      "latencyNs": 11521286,
+      "receivedNs": 115701149251194
+    },
+    {
+      "eventNs": 115701443817475,
+      "latencyNs": 7471963,
+      "receivedNs": 115701451289438
+    },
+    {
+      "eventNs": 115701760894377,
+      "latencyNs": 7439148,
+      "receivedNs": 115701768333525
+    },
+    {
+      "eventNs": 115702656160035,
+      "latencyNs": 27914425,
+      "receivedNs": 115702684074460
+    },
+    {
+      "eventNs": 115702992547132,
+      "latencyNs": 8431015,
+      "receivedNs": 115703000978147
+    },
+    {
+      "eventNs": 115703280809123,
+      "latencyNs": 8827807,
+      "receivedNs": 115703289636930
+    },
+    {
+      "eventNs": 115703581031689,
+      "latencyNs": 8997889,
+      "receivedNs": 115703590029578
+    },
+    {
+      "eventNs": 115704579131757,
+      "latencyNs": 8696179,
+      "receivedNs": 115704587827936
+    },
+    {
+      "eventNs": 115704915174430,
+      "latencyNs": 24176269,
+      "receivedNs": 115704939350699
+    },
+    {
+      "eventNs": 115705227786634,
+      "latencyNs": 8584323,
+      "receivedNs": 115705236370957
+    },
+    {
+      "eventNs": 115705530958048,
+      "latencyNs": 9245749,
+      "receivedNs": 115705540203797
+    },
+    {
+      "eventNs": 115706530739092,
+      "latencyNs": 7851912,
+      "receivedNs": 115706538591004
+    },
+    {
+      "eventNs": 115706880773256,
+      "latencyNs": 9798487,
+      "receivedNs": 115706890571743
+    },
+    {
+      "eventNs": 115707164790026,
+      "latencyNs": 7459840,
+      "receivedNs": 115707172249866
+    },
+    {
+      "eventNs": 115707479106890,
+      "latencyNs": 7852926,
+      "receivedNs": 115707486959816
+    },
+    {
+      "eventNs": 115708462003565,
+      "latencyNs": 21693987,
+      "receivedNs": 115708483697552
+    },
+    {
+      "eventNs": 115708831040583,
+      "latencyNs": 9349364,
+      "receivedNs": 115708840389947
+    },
+    {
+      "eventNs": 115709131223324,
+      "latencyNs": 8526975,
+      "receivedNs": 115709139750299
+    },
+    {
+      "eventNs": 115709435553977,
+      "latencyNs": 19777286,
+      "receivedNs": 115709455331263
+    },
+    {
+      "eventNs": 115710349183618,
+      "latencyNs": 9128954,
+      "receivedNs": 115710358312572
+    },
+    {
+      "eventNs": 115710686502104,
+      "latencyNs": 13992606,
+      "receivedNs": 115710700494710
+    },
+    {
+      "eventNs": 115710981999455,
+      "latencyNs": 8243314,
+      "receivedNs": 115710990242769
+    },
+    {
+      "eventNs": 115711284372797,
+      "latencyNs": 7588545,
+      "receivedNs": 115711291961342
+    },
+    {
+      "eventNs": 115712237641627,
+      "latencyNs": 17581009,
+      "receivedNs": 115712255222636
+    },
+    {
+      "eventNs": 115712597078390,
+      "latencyNs": 10017799,
+      "receivedNs": 115712607096189
+    },
+    {
+      "eventNs": 115712886867140,
+      "latencyNs": 12955280,
+      "receivedNs": 115712899822420
+    },
+    {
+      "eventNs": 115713198177730,
+      "latencyNs": 9918372,
+      "receivedNs": 115713208096102
+    },
+    {
+      "eventNs": 115714159156790,
+      "latencyNs": 8177905,
+      "receivedNs": 115714167334695
+    },
+    {
+      "eventNs": 115714497591069,
+      "latencyNs": 9899470,
+      "receivedNs": 115714507490539
+    },
+    {
+      "eventNs": 115714780632664,
+      "latencyNs": 7892523,
+      "receivedNs": 115714788525187
+    },
+    {
+      "eventNs": 115715077894996,
+      "latencyNs": 7878194,
+      "receivedNs": 115715085773190
+    },
+    {
+      "eventNs": 115716014285628,
+      "latencyNs": 9342924,
+      "receivedNs": 115716023628552
+    },
+    {
+      "eventNs": 115716348190902,
+      "latencyNs": 27130567,
+      "receivedNs": 115716375321469
+    },
+    {
+      "eventNs": 115716678298456,
+      "latencyNs": 7621773,
+      "receivedNs": 115716685920229
+    },
+    {
+      "eventNs": 115716985789744,
+      "latencyNs": 8080289,
+      "receivedNs": 115716993870033
+    },
+    {
+      "eventNs": 115717909270749,
+      "latencyNs": 8046358,
+      "receivedNs": 115717917317107
+    },
+    {
+      "eventNs": 115718228069963,
+      "latencyNs": 10347449,
+      "receivedNs": 115718238417412
+    },
+    {
+      "eventNs": 115718528251050,
+      "latencyNs": 7916914,
+      "receivedNs": 115718536167964
+    },
+    {
+      "eventNs": 115718814767574,
+      "latencyNs": 7958141,
+      "receivedNs": 115718822725715
+    },
+    {
+      "eventNs": 115719734096326,
+      "latencyNs": 8681937,
+      "receivedNs": 115719742778263
+    },
+    {
+      "eventNs": 115720052923274,
+      "latencyNs": 20661641,
+      "receivedNs": 115720073584915
+    },
+    {
+      "eventNs": 115720364553300,
+      "latencyNs": 9294707,
+      "receivedNs": 115720373848007
+    },
+    {
+      "eventNs": 115720650117016,
+      "latencyNs": 7571570,
+      "receivedNs": 115720657688586
+    },
+    {
+      "eventNs": 115721580581095,
+      "latencyNs": 9618715,
+      "receivedNs": 115721590199810
+    },
+    {
+      "eventNs": 115721915201448,
+      "latencyNs": 8632497,
+      "receivedNs": 115721923833945
+    },
+    {
+      "eventNs": 115722209352900,
+      "latencyNs": 30104952,
+      "receivedNs": 115722239457852
+    },
+    {
+      "eventNs": 115722514622215,
+      "latencyNs": 7861363,
+      "receivedNs": 115722522483578
+    },
+    {
+      "eventNs": 115723416459002,
+      "latencyNs": 8827294,
+      "receivedNs": 115723425286296
+    },
+    {
+      "eventNs": 115723742143863,
+      "latencyNs": 32626279,
+      "receivedNs": 115723774770142
+    },
+    {
+      "eventNs": 115724048439032,
+      "latencyNs": 8298401,
+      "receivedNs": 115724056737433
+    },
+    {
+      "eventNs": 115724345287132,
+      "latencyNs": 8251426,
+      "receivedNs": 115724353538558
+    },
+    {
+      "eventNs": 115725266493275,
+      "latencyNs": 8920271,
+      "receivedNs": 115725275413546
+    },
+    {
+      "eventNs": 115725602973167,
+      "latencyNs": 19911310,
+      "receivedNs": 115725622884477
+    },
+    {
+      "eventNs": 115725916436557,
+      "latencyNs": 8398526,
+      "receivedNs": 115725924835083
+    },
+    {
+      "eventNs": 115726206209086,
+      "latencyNs": 11333492,
+      "receivedNs": 115726217542578
+    },
+    {
+      "eventNs": 115727118860437,
+      "latencyNs": 8614984,
+      "receivedNs": 115727127475421
+    },
+    {
+      "eventNs": 115727446644669,
+      "latencyNs": 30309133,
+      "receivedNs": 115727476953802
+    },
+    {
+      "eventNs": 115727797524228,
+      "latencyNs": 8309046,
+      "receivedNs": 115727805833274
+    },
+    {
+      "eventNs": 115728081508164,
+      "latencyNs": 7863794,
+      "receivedNs": 115728089371958
+    },
+    {
+      "eventNs": 115728983880193,
+      "latencyNs": 8964518,
+      "receivedNs": 115728992844711
+    },
+    {
+      "eventNs": 115729309790319,
+      "latencyNs": 32349630,
+      "receivedNs": 115729342139949
+    },
+    {
+      "eventNs": 115729615243116,
+      "latencyNs": 8498685,
+      "receivedNs": 115729623741801
+    },
+    {
+      "eventNs": 115729927253191,
+      "latencyNs": 7579944,
+      "receivedNs": 115729934833135
+    },
+    {
+      "eventNs": 115730863929863,
+      "latencyNs": 9922938,
+      "receivedNs": 115730873852801
+    },
+    {
+      "eventNs": 115731210385982,
+      "latencyNs": 9965145,
+      "receivedNs": 115731220351127
+    },
+    {
+      "eventNs": 115731513976369,
+      "latencyNs": 8259169,
+      "receivedNs": 115731522235538
+    },
+    {
+      "eventNs": 115731798800003,
+      "latencyNs": 8082259,
+      "receivedNs": 115731806882262
+    },
+    {
+      "eventNs": 115732716913603,
+      "latencyNs": 8636500,
+      "receivedNs": 115732725550103
+    },
+    {
+      "eventNs": 115733048624248,
+      "latencyNs": 7612346,
+      "receivedNs": 115733056236594
+    },
+    {
+      "eventNs": 115733337140585,
+      "latencyNs": 20218636,
+      "receivedNs": 115733357359221
+    },
+    {
+      "eventNs": 115733651370079,
+      "latencyNs": 10748915,
+      "receivedNs": 115733662118994
+    },
+    {
+      "eventNs": 115734582969807,
+      "latencyNs": 8545594,
+      "receivedNs": 115734591515401
+    },
+    {
+      "eventNs": 115734910069244,
+      "latencyNs": 8212142,
+      "receivedNs": 115734918281386
+    },
+    {
+      "eventNs": 115735229646555,
+      "latencyNs": 7850343,
+      "receivedNs": 115735237496898
+    },
+    {
+      "eventNs": 115735516267579,
+      "latencyNs": 8257057,
+      "receivedNs": 115735524524636
+    },
+    {
+      "eventNs": 115736447171465,
+      "latencyNs": 8611619,
+      "receivedNs": 115736455783084
+    },
+    {
+      "eventNs": 115736793867824,
+      "latencyNs": 10458100,
+      "receivedNs": 115736804325924
+    },
+    {
+      "eventNs": 115737082908202,
+      "latencyNs": 7740460,
+      "receivedNs": 115737090648662
+    },
+    {
+      "eventNs": 115737365987217,
+      "latencyNs": 23383565,
+      "receivedNs": 115737389370782
+    },
+    {
+      "eventNs": 115738296763006,
+      "latencyNs": 8588308,
+      "receivedNs": 115738305351314
+    },
+    {
+      "eventNs": 115738619858834,
+      "latencyNs": 12140113,
+      "receivedNs": 115738631998947
+    },
+    {
+      "eventNs": 115738904751551,
+      "latencyNs": 13059461,
+      "receivedNs": 115738917811012
+    },
+    {
+      "eventNs": 115739217513919,
+      "latencyNs": 9515314,
+      "receivedNs": 115739227029233
+    },
+    {
+      "eventNs": 115740159407487,
+      "latencyNs": 8546894,
+      "receivedNs": 115740167954381
+    },
+    {
+      "eventNs": 115740496013954,
+      "latencyNs": 11216487,
+      "receivedNs": 115740507230441
+    },
+    {
+      "eventNs": 115740796247800,
+      "latencyNs": 8214818,
+      "receivedNs": 115740804462618
+    },
+    {
+      "eventNs": 115741100776879,
+      "latencyNs": 20672226,
+      "receivedNs": 115741121449105
+    },
+    {
+      "eventNs": 115742051339720,
+      "latencyNs": 23404946,
+      "receivedNs": 115742074744666
+    },
+    {
+      "eventNs": 115742388572201,
+      "latencyNs": 11889642,
+      "receivedNs": 115742400461843
+    },
+    {
+      "eventNs": 115742682088422,
+      "latencyNs": 8324045,
+      "receivedNs": 115742690412467
+    },
+    {
+      "eventNs": 115742976372039,
+      "latencyNs": 9334351,
+      "receivedNs": 115742985706390
+    },
+    {
+      "eventNs": 115743860287470,
+      "latencyNs": 9684764,
+      "receivedNs": 115743869972234
+    },
+    {
+      "eventNs": 115744198138110,
+      "latencyNs": 21350166,
+      "receivedNs": 115744219488276
+    },
+    {
+      "eventNs": 115744504915003,
+      "latencyNs": 11809862,
+      "receivedNs": 115744516724865
+    },
+    {
+      "eventNs": 115744800585750,
+      "latencyNs": 8122831,
+      "receivedNs": 115744808708581
+    },
+    {
+      "eventNs": 115745709393481,
+      "latencyNs": 8587893,
+      "receivedNs": 115745717981374
+    },
+    {
+      "eventNs": 115746032626245,
+      "latencyNs": 20042504,
+      "receivedNs": 115746052668749
+    },
+    {
+      "eventNs": 115746360509397,
+      "latencyNs": 8242732,
+      "receivedNs": 115746368752129
+    },
+    {
+      "eventNs": 115746664168540,
+      "latencyNs": 9028352,
+      "receivedNs": 115746673196892
+    },
+    {
+      "eventNs": 115747575833804,
+      "latencyNs": 8310704,
+      "receivedNs": 115747584144508
+    },
+    {
+      "eventNs": 115747911257712,
+      "latencyNs": 10676309,
+      "receivedNs": 115747921934021
+    },
+    {
+      "eventNs": 115748218587489,
+      "latencyNs": 7912871,
+      "receivedNs": 115748226500360
+    },
+    {
+      "eventNs": 115748514072317,
+      "latencyNs": 8317555,
+      "receivedNs": 115748522389872
+    },
+    {
+      "eventNs": 115749450453632,
+      "latencyNs": 9259645,
+      "receivedNs": 115749459713277
+    },
+    {
+      "eventNs": 115749777239681,
+      "latencyNs": 8750681,
+      "receivedNs": 115749785990362
+    },
+    {
+      "eventNs": 115750086501842,
+      "latencyNs": 14032363,
+      "receivedNs": 115750100534205
+    },
+    {
+      "eventNs": 115750395203900,
+      "latencyNs": 8527897,
+      "receivedNs": 115750403731797
+    },
+    {
+      "eventNs": 115751344882480,
+      "latencyNs": 8442191,
+      "receivedNs": 115751353324671
+    },
+    {
+      "eventNs": 115751693551785,
+      "latencyNs": 10049600,
+      "receivedNs": 115751703601385
+    },
+    {
+      "eventNs": 115751992544946,
+      "latencyNs": 8369871,
+      "receivedNs": 115752000914817
+    },
+    {
+      "eventNs": 115752297417981,
+      "latencyNs": 8355845,
+      "receivedNs": 115752305773826
+    },
+    {
+      "eventNs": 115753216323346,
+      "latencyNs": 8203783,
+      "receivedNs": 115753224527129
+    },
+    {
+      "eventNs": 115753549512775,
+      "latencyNs": 9403571,
+      "receivedNs": 115753558916346
+    },
+    {
+      "eventNs": 115753830276577,
+      "latencyNs": 8037278,
+      "receivedNs": 115753838313855
+    },
+    {
+      "eventNs": 115754118543899,
+      "latencyNs": 8552387,
+      "receivedNs": 115754127096286
+    },
+    {
+      "eventNs": 115755045689184,
+      "latencyNs": 8382379,
+      "receivedNs": 115755054071563
+    },
+    {
+      "eventNs": 115755381425604,
+      "latencyNs": 9379486,
+      "receivedNs": 115755390805090
+    },
+    {
+      "eventNs": 115755695190769,
+      "latencyNs": 7970757,
+      "receivedNs": 115755703161526
+    },
+    {
+      "eventNs": 115756013179542,
+      "latencyNs": 8288337,
+      "receivedNs": 115756021467879
+    },
+    {
+      "eventNs": 115756992390879,
+      "latencyNs": 28609264,
+      "receivedNs": 115757021000143
+    },
+    {
+      "eventNs": 115757370465273,
+      "latencyNs": 19710959,
+      "receivedNs": 115757390176232
+    },
+    {
+      "eventNs": 115757680895644,
+      "latencyNs": 8455897,
+      "receivedNs": 115757689351541
+    },
+    {
+      "eventNs": 115757983260410,
+      "latencyNs": 8743267,
+      "receivedNs": 115757992003677
+    },
+    {
+      "eventNs": 115758925590674,
+      "latencyNs": 8708717,
+      "receivedNs": 115758934299391
+    },
+    {
+      "eventNs": 115759276434093,
+      "latencyNs": 9056909,
+      "receivedNs": 115759285491002
+    },
+    {
+      "eventNs": 115759583700833,
+      "latencyNs": 8631444,
+      "receivedNs": 115759592332277
+    },
+    {
+      "eventNs": 115759879726811,
+      "latencyNs": 8282479,
+      "receivedNs": 115759888009290
+    },
+    {
+      "eventNs": 115760830569436,
+      "latencyNs": 21199983,
+      "receivedNs": 115760851769419
+    },
+    {
+      "eventNs": 115761182600284,
+      "latencyNs": 19503358,
+      "receivedNs": 115761202103642
+    },
+    {
+      "eventNs": 115761487896816,
+      "latencyNs": 12215244,
+      "receivedNs": 115761500112060
+    },
+    {
+      "eventNs": 115761783912341,
+      "latencyNs": 9034220,
+      "receivedNs": 115761792946561
+    },
+    {
+      "eventNs": 115762751326117,
+      "latencyNs": 8340135,
+      "receivedNs": 115762759666252
+    },
+    {
+      "eventNs": 115763072112185,
+      "latencyNs": 19674428,
+      "receivedNs": 115763091786613
+    },
+    {
+      "eventNs": 115763367819837,
+      "latencyNs": 8939869,
+      "receivedNs": 115763376759706
+    },
+    {
+      "eventNs": 115763699781837,
+      "latencyNs": 8982848,
+      "receivedNs": 115763708764685
+    },
+    {
+      "eventNs": 115764642718262,
+      "latencyNs": 8356510,
+      "receivedNs": 115764651074772
+    },
+    {
+      "eventNs": 115764968696013,
+      "latencyNs": 15667632,
+      "receivedNs": 115764984363645
+    },
+    {
+      "eventNs": 115765282871750,
+      "latencyNs": 8314050,
+      "receivedNs": 115765291185800
+    },
+    {
+      "eventNs": 115765593833553,
+      "latencyNs": 25991566,
+      "receivedNs": 115765619825119
+    },
+    {
+      "eventNs": 115766563663381,
+      "latencyNs": 8304719,
+      "receivedNs": 115766571968100
+    },
+    {
+      "eventNs": 115766910364966,
+      "latencyNs": 10684612,
+      "receivedNs": 115766921049578
+    },
+    {
+      "eventNs": 115767204795434,
+      "latencyNs": 12977086,
+      "receivedNs": 115767217772520
+    },
+    {
+      "eventNs": 115767521175018,
+      "latencyNs": 12281899,
+      "receivedNs": 115767533456917
+    },
+    {
+      "eventNs": 115768492105904,
+      "latencyNs": 8725161,
+      "receivedNs": 115768500831065
+    },
+    {
+      "eventNs": 115768826620907,
+      "latencyNs": 9132837,
+      "receivedNs": 115768835753744
+    },
+    {
+      "eventNs": 115769129472491,
+      "latencyNs": 8210030,
+      "receivedNs": 115769137682521
+    },
+    {
+      "eventNs": 115769434591399,
+      "latencyNs": 8362531,
+      "receivedNs": 115769442953930
+    },
+    {
+      "eventNs": 115770346316294,
+      "latencyNs": 8506616,
+      "receivedNs": 115770354822910
+    },
+    {
+      "eventNs": 115770693789959,
+      "latencyNs": 10719957,
+      "receivedNs": 115770704509916
+    },
+    {
+      "eventNs": 115771002109605,
+      "latencyNs": 8730403,
+      "receivedNs": 115771010840008
+    },
+    {
+      "eventNs": 115771304403642,
+      "latencyNs": 12382558,
+      "receivedNs": 115771316786200
+    },
+    {
+      "eventNs": 115772283848053,
+      "latencyNs": 8848703,
+      "receivedNs": 115772292696756
+    },
+    {
+      "eventNs": 115772627259475,
+      "latencyNs": 9981922,
+      "receivedNs": 115772637241397
+    },
+    {
+      "eventNs": 115772925706666,
+      "latencyNs": 8377241,
+      "receivedNs": 115772934083907
+    },
+    {
+      "eventNs": 115773230961743,
+      "latencyNs": 9023374,
+      "receivedNs": 115773239985117
+    },
+    {
+      "eventNs": 115774154753271,
+      "latencyNs": 12309244,
+      "receivedNs": 115774167062515
+    },
+    {
+      "eventNs": 115774499096803,
+      "latencyNs": 29495901,
+      "receivedNs": 115774528592704
+    },
+    {
+      "eventNs": 115774817696315,
+      "latencyNs": 8952102,
+      "receivedNs": 115774826648417
+    },
+    {
+      "eventNs": 115775134530795,
+      "latencyNs": 8989089,
+      "receivedNs": 115775143519884
+    },
+    {
+      "eventNs": 115776130609114,
+      "latencyNs": 8708276,
+      "receivedNs": 115776139317390
+    },
+    {
+      "eventNs": 115776464720192,
+      "latencyNs": 10185211,
+      "receivedNs": 115776474905403
+    },
+    {
+      "eventNs": 115776781972870,
+      "latencyNs": 8154081,
+      "receivedNs": 115776790126951
+    },
+    {
+      "eventNs": 115777086959632,
+      "latencyNs": 18595512,
+      "receivedNs": 115777105555144
+    },
+    {
+      "eventNs": 115778092103481,
+      "latencyNs": 9108769,
+      "receivedNs": 115778101212250
+    },
+    {
+      "eventNs": 115778438233534,
+      "latencyNs": 19662372,
+      "receivedNs": 115778457895906
+    },
+    {
+      "eventNs": 115778754835563,
+      "latencyNs": 17633615,
+      "receivedNs": 115778772469178
+    },
+    {
+      "eventNs": 115779067577342,
+      "latencyNs": 8561869,
+      "receivedNs": 115779076139211
+    },
+    {
+      "eventNs": 115780020396074,
+      "latencyNs": 13128768,
+      "receivedNs": 115780033524842
+    },
+    {
+      "eventNs": 115780352120692,
+      "latencyNs": 9020920,
+      "receivedNs": 115780361141612
+    },
+    {
+      "eventNs": 115780635378437,
+      "latencyNs": 15076418,
+      "receivedNs": 115780650454855
+    },
+    {
+      "eventNs": 115780934341273,
+      "latencyNs": 8962298,
+      "receivedNs": 115780943303571
+    },
+    {
+      "eventNs": 115781870060121,
+      "latencyNs": 13031042,
+      "receivedNs": 115781883091163
+    },
+    {
+      "eventNs": 115782202513131,
+      "latencyNs": 9036842,
+      "receivedNs": 115782211549973
+    },
+    {
+      "eventNs": 115782534910454,
+      "latencyNs": 8641725,
+      "receivedNs": 115782543552179
+    }
+  ],
+  "guardFailures": [],
+  "summary": {
+    "count": 10035,
+    "metricScope": {
+      "hostReadNs": "写入前的宿主身份、选区和 marked range 读取（每回调累计）",
+      "markedWriteNs": "同步写入宿主 marked text",
+      "anchorReadNs": "marked text 写入后的重锚读取",
+      "callbackNs": "IMK handle 回调总时长（主线程实测）",
+      "coreNs": "共享核心同步处理时长",
+      "renderNs": "按键到候选渲染完成（含排队）",
+      "firstDisplayNs": "组合首键到候选首次显示",
+      "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为「选中候选到宿主收到文字」门槛的证据"
+    },
+    "callbackNs": {
+      "count": 10035,
+      "p50": 6550000,
+      "p95": 10351158,
+      "p99": 15383232,
+      "max": 26738531
+    },
+    "coreNs": {
+      "count": 10035,
+      "p50": 1253027,
+      "p95": 3581807,
+      "p99": 4002036,
+      "max": 4869645
+    },
+    "hostReadNs": {
+      "count": 10035,
+      "p50": 1208503,
+      "p95": 2115833,
+      "p99": 2480411,
+      "max": 3336411
+    },
+    "markedWriteNs": {
+      "count": 8028,
+      "p50": 3846622,
+      "p95": 6053941,
+      "p99": 10466005,
+      "max": 24051474
+    },
+    "anchorReadNs": {
+      "count": 8028,
+      "p50": 68,
+      "p95": 582229,
+      "p99": 740413,
+      "max": 1204131
+    },
+    "commitCallNs": {
+      "count": 892,
+      "p50": 3559036,
+      "p95": 5488759,
+      "p99": 6023601,
+      "max": 7854257
+    },
+    "renderNs": {
+      "count": 9143,
+      "p50": 8499119,
+      "p95": 13799548,
+      "p99": 19416471,
+      "max": 28218700
+    },
+    "firstDisplayNs": {
+      "count": 892,
+      "p50": 13733420,
+      "p95": 21925996,
+      "p99": 24437604,
+      "max": 26074413
+    },
+    "firstDisplaySamples": 892,
+    "confirmationSamples": 892,
+    "confirmationHiddenFalse": 0,
+    "visibleAtReturnTrue": 0,
+    "invalidClockSamples": 0
+  },
+  "samplesFile": "docs/validation/final-mac/imk-samples-final.json",
+  "cyclesFile": "docs/validation/final-mac/imk-cycles-final.jsonl",
+  "sampleCount": 10035,
+  "coverage": {
+    "callbacksComplete": true,
+    "expectedFirstDisplays": 892,
+    "measuredFirstDisplays": 892
+  },
+  "acceptance": {
+    "passed": false,
+    "checks": {
+      "atLeast10000Events": true,
+      "allCallbacksCaptured": true,
+      "allFirstDisplaysCaptured": true,
+      "validClocks": true,
+      "frontGuard": true,
+      "hiddenInConfirmationCallback": true,
+      "hostReceiptsPaired": true,
+      "callbackNs.p95": false,
+      "callbackNs.p99": false,
+      "renderNs.p95": true,
+      "renderNs.p99": true,
+      "firstDisplayNs.p95": true,
+      "firstDisplayNs.p99": true,
+      "selectionToHost.p95": true
+    },
+    "scope": "热态 AppKit 探针；不包含其他宿主、冷启动、内存或两小时稳定性验收"
+  }
+}

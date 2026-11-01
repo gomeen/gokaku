@@ -1,0 +1,510 @@
+{
+  "schema": "gogaku.imk-latency.v1",
+  "checkedAt": "2026-11-01T06:02:02.907460+00:00",
+  "runId": "17935129016932",
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "bundle": "/Users/gomeen/Library/Input Methods/Gogaku.app",
+    "artifacts": [
+      {
+        "path": "Contents/Frameworks/libFcitx5Utils.2.dylib",
+        "size": 628736,
+        "sha256": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62"
+      },
+      {
+        "path": "Contents/Frameworks/libGogakuEngine.dylib",
+        "size": 41888,
+        "sha256": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1"
+      },
+      {
+        "path": "Contents/Frameworks/libIMECore.0.dylib",
+        "size": 1196944,
+        "sha256": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5"
+      },
+      {
+        "path": "Contents/Frameworks/libIMEPinyin.0.dylib",
+        "size": 797024,
+        "sha256": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35"
+      },
+      {
+        "path": "Contents/Frameworks/libboost_iostreams.dylib",
+        "size": 135120,
+        "sha256": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b"
+      },
+      {
+        "path": "Contents/Frameworks/libboost_random.dylib",
+        "size": 52000,
+        "sha256": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013"
+      },
+      {
+        "path": "Contents/Frameworks/libgogaku_core.dylib",
+        "size": 208208,
+        "sha256": "a38fee2f8f6ecd89f704fc3fe974d74c993808f3e8ed7cdb96d183c474160a11"
+      },
+      {
+        "path": "Contents/Frameworks/libintl.8.dylib",
+        "size": 209600,
+        "sha256": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb"
+      },
+      {
+        "path": "Contents/Frameworks/liblzma.5.dylib",
+        "size": 164896,
+        "sha256": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259"
+      },
+      {
+        "path": "Contents/Frameworks/libzstd.1.dylib",
+        "size": 766304,
+        "sha256": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a"
+      },
+      {
+        "path": "Contents/MacOS/GogakuInput",
+        "size": 1540496,
+        "sha256": "f8b0d6a4b0c3ca242cb5961c39bb5a2f4f685b6f4a2e17be93bfcde68ed5110d"
+      }
+    ]
+  },
+  "driver": {
+    "probeSHA256": "3e2bd8709a9bb29f051e25c806b9b3ee6d596c648b2e7bf7122e37adad47e901",
+    "sequencesSHA256": "d9259637e3d3d4824cb73ca5d9c748004adfa55a78c8b3a16d2a3bf149254374",
+    "socket": "/Users/gomeen/Library/Logs/Gogaku/validation.sock"
+  },
+  "sequences": [
+    {
+      "id": "short",
+      "label": "短组合：nihc＋空格",
+      "keys": [
+        "n",
+        "i",
+        "h",
+        "c",
+        "space"
+      ]
+    },
+    {
+      "id": "long",
+      "label": "长句：我想每天花一点时间学习英语（冻结用例 long-learning）",
+      "keys": [
+        "w",
+        "o",
+        "x",
+        "l",
+        "m",
+        "w",
+        "t",
+        "m",
+        "h",
+        "x",
+        "y",
+        "i",
+        "d",
+        "m",
+        "u",
+        "i",
+        "j",
+        "m",
+        "x",
+        "t",
+        "x",
+        "i",
+        "y",
+        "k",
+        "y",
+        "u",
+        "space"
+      ]
+    },
+    {
+      "id": "paging",
+      "label": "翻页：zhong 小鹤编码 vs＋四次 . ＋一次 , ＋空格",
+      "keys": [
+        "v",
+        "s",
+        ".",
+        ".",
+        ".",
+        ".",
+        ",",
+        "space"
+      ]
+    },
+    {
+      "id": "punct",
+      "label": "组合中标点：nihc＋; 一次上屏",
+      "keys": [
+        "n",
+        "i",
+        "h",
+        "c",
+        ";"
+      ]
+    }
+  ],
+  "loop": {
+    "targetEvents": 540,
+    "actualEvents": 540,
+    "cycles": 12,
+    "compositions": 48,
+    "intervalMs": 15.0,
+    "elapsedSeconds": 17.621,
+    "eventsPerSecond": 30.6,
+    "warmupCompositions": 2
+  },
+  "environment": {
+    "before": {
+      "at": "2026-11-01T06:01:44.941272+00:00",
+      "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 14:01:44 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+      "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+      "loadavg": "{ 2.05 2.26 2.50 }",
+      "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+      "displayAwake": true,
+      "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)",
+      "caffeinateProcesses": "21218 /usr/bin/caffeinate -di -w 21194\n57192 /usr/bin/caffeinate -i -s -w 1295\n86973 caffeinate -d -i -w 86960"
+    },
+    "after": {
+      "at": "2026-11-01T06:02:02.658040+00:00",
+      "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 14:02:02 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+      "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+      "loadavg": "{ 3.10 2.49 2.58 }",
+      "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+      "displayAwake": true,
+      "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)",
+      "caffeinateProcesses": "21218 /usr/bin/caffeinate -di -w 21194\n57192 /usr/bin/caffeinate -i -s -w 1295\n86973 caffeinate -d -i -w 86960"
+    },
+    "parallelBuildsAtStart": []
+  },
+  "limitations": {
+    "selectionToHostLatency": {
+      "verifiable": true,
+      "status": "measured",
+      "metric": "确认键事件时间戳 → 探针宿主 insertText 完成",
+      "expected": 48,
+      "received": 48,
+      "paired": 48,
+      "scope": "真实 IMK 路径的 AppKit 探针宿主；不外推其他宿主",
+      "reason": "仅当所有确认均与宿主 keyDown 时间戳配对时可判定",
+      "p95Ns": 16144206,
+      "maxNs": 23859387
+    }
+  },
+  "hostInsertionReceipts": [
+    {
+      "eventNs": 114644687892954,
+      "latencyNs": 4321140,
+      "receivedNs": 114644692214094
+    },
+    {
+      "eventNs": 114645334878156,
+      "latencyNs": 5791847,
+      "receivedNs": 114645340670003
+    },
+    {
+      "eventNs": 114645646443452,
+      "latencyNs": 5672725,
+      "receivedNs": 114645652116177
+    },
+    {
+      "eventNs": 114645888759393,
+      "latencyNs": 4882683,
+      "receivedNs": 114645893642076
+    },
+    {
+      "eventNs": 114646139402132,
+      "latencyNs": 11037740,
+      "receivedNs": 114646150439872
+    },
+    {
+      "eventNs": 114646781373420,
+      "latencyNs": 5386691,
+      "receivedNs": 114646786760111
+    },
+    {
+      "eventNs": 114647096153320,
+      "latencyNs": 5772952,
+      "receivedNs": 114647101926272
+    },
+    {
+      "eventNs": 114647338930452,
+      "latencyNs": 5110608,
+      "receivedNs": 114647344041060
+    },
+    {
+      "eventNs": 114647584813488,
+      "latencyNs": 5020390,
+      "receivedNs": 114647589833878
+    },
+    {
+      "eventNs": 114648213174585,
+      "latencyNs": 23859387,
+      "receivedNs": 114648237033972
+    },
+    {
+      "eventNs": 114648521572189,
+      "latencyNs": 6195454,
+      "receivedNs": 114648527767643
+    },
+    {
+      "eventNs": 114648768353848,
+      "latencyNs": 5460728,
+      "receivedNs": 114648773814576
+    },
+    {
+      "eventNs": 114649018047947,
+      "latencyNs": 5194778,
+      "receivedNs": 114649023242725
+    },
+    {
+      "eventNs": 114649681387390,
+      "latencyNs": 5379829,
+      "receivedNs": 114649686767219
+    },
+    {
+      "eventNs": 114649975621129,
+      "latencyNs": 9028626,
+      "receivedNs": 114649984649755
+    },
+    {
+      "eventNs": 114650222630537,
+      "latencyNs": 4743093,
+      "receivedNs": 114650227373630
+    },
+    {
+      "eventNs": 114650468766277,
+      "latencyNs": 5109589,
+      "receivedNs": 114650473875866
+    },
+    {
+      "eventNs": 114651140591020,
+      "latencyNs": 10267727,
+      "receivedNs": 114651150858747
+    },
+    {
+      "eventNs": 114651435569149,
+      "latencyNs": 6074366,
+      "receivedNs": 114651441643515
+    },
+    {
+      "eventNs": 114651679967572,
+      "latencyNs": 5009671,
+      "receivedNs": 114651684977243
+    },
+    {
+      "eventNs": 114651929645194,
+      "latencyNs": 4815679,
+      "receivedNs": 114651934460873
+    },
+    {
+      "eventNs": 114652612576828,
+      "latencyNs": 5558377,
+      "receivedNs": 114652618135205
+    },
+    {
+      "eventNs": 114652930652864,
+      "latencyNs": 5196342,
+      "receivedNs": 114652935849206
+    },
+    {
+      "eventNs": 114653192368935,
+      "latencyNs": 15295527,
+      "receivedNs": 114653207664462
+    },
+    {
+      "eventNs": 114653446167940,
+      "latencyNs": 5135481,
+      "receivedNs": 114653451303421
+    },
+    {
+      "eventNs": 114654114899291,
+      "latencyNs": 5381912,
+      "receivedNs": 114654120281203
+    },
+    {
+      "eventNs": 114654407847092,
+      "latencyNs": 8733302,
+      "receivedNs": 114654416580394
+    },
+    {
+      "eventNs": 114654662165981,
+      "latencyNs": 4991830,
+      "receivedNs": 114654667157811
+    },
+    {
+      "eventNs": 114654918618868,
+      "latencyNs": 5303338,
+      "receivedNs": 114654923922206
+    },
+    {
+      "eventNs": 114655579719606,
+      "latencyNs": 6375989,
+      "receivedNs": 114655586095595
+    },
+    {
+      "eventNs": 114655896369246,
+      "latencyNs": 6060515,
+      "receivedNs": 114655902429761
+    },
+    {
+      "eventNs": 114656139701913,
+      "latencyNs": 10764863,
+      "receivedNs": 114656150466776
+    },
+    {
+      "eventNs": 114656386101298,
+      "latencyNs": 4827592,
+      "receivedNs": 114656390928890
+    },
+    {
+      "eventNs": 114657054068782,
+      "latencyNs": 6106425,
+      "receivedNs": 114657060175207
+    },
+    {
+      "eventNs": 114657356610542,
+      "latencyNs": 5583999,
+      "receivedNs": 114657362194541
+    },
+    {
+      "eventNs": 114657602428198,
+      "latencyNs": 5575156,
+      "receivedNs": 114657608003354
+    },
+    {
+      "eventNs": 114657852414962,
+      "latencyNs": 5706786,
+      "receivedNs": 114657858121748
+    },
+    {
+      "eventNs": 114658520765761,
+      "latencyNs": 16144206,
+      "receivedNs": 114658536909967
+    },
+    {
+      "eventNs": 114658835408682,
+      "latencyNs": 17799067,
+      "receivedNs": 114658853207749
+    },
+    {
+      "eventNs": 114659087872777,
+      "latencyNs": 5424102,
+      "receivedNs": 114659093296879
+    },
+    {
+      "eventNs": 114659342606053,
+      "latencyNs": 8796163,
+      "receivedNs": 114659351402216
+    },
+    {
+      "eventNs": 114660034827760,
+      "latencyNs": 5605443,
+      "receivedNs": 114660040433203
+    },
+    {
+      "eventNs": 114660336015022,
+      "latencyNs": 6657057,
+      "receivedNs": 114660342672079
+    },
+    {
+      "eventNs": 114660591867519,
+      "latencyNs": 14730753,
+      "receivedNs": 114660606598272
+    },
+    {
+      "eventNs": 114660839326116,
+      "latencyNs": 5650121,
+      "receivedNs": 114660844976237
+    },
+    {
+      "eventNs": 114661506447809,
+      "latencyNs": 11237946,
+      "receivedNs": 114661517685755
+    },
+    {
+      "eventNs": 114661803026196,
+      "latencyNs": 5168709,
+      "receivedNs": 114661808194905
+    },
+    {
+      "eventNs": 114662064159744,
+      "latencyNs": 5597083,
+      "receivedNs": 114662069756827
+    }
+  ],
+  "guardFailures": [],
+  "summary": {
+    "count": 540,
+    "metricScope": {
+      "callbackNs": "IMK handle 回调总时长（主线程实测）",
+      "coreNs": "共享核心同步处理时长",
+      "renderNs": "按键到候选渲染完成（含排队）",
+      "firstDisplayNs": "组合首键到候选首次显示",
+      "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为「选中候选到宿主收到文字」门槛的证据"
+    },
+    "callbackNs": {
+      "count": 540,
+      "p50": 5143471,
+      "p95": 7930171,
+      "p99": 9775528,
+      "max": 17403368
+    },
+    "coreNs": {
+      "count": 540,
+      "p50": 1266006,
+      "p95": 3638149,
+      "p99": 4059001,
+      "max": 4301943
+    },
+    "hostReadNs": {
+      "count": 540,
+      "p50": 1256326,
+      "p95": 2221085,
+      "p99": 2627471,
+      "max": 2825064
+    },
+    "markedWriteNs": {
+      "count": 432,
+      "p50": 2042627,
+      "p95": 2539780,
+      "p99": 3835881,
+      "max": 11783021
+    },
+    "anchorReadNs": {
+      "count": 432,
+      "p50": 445340,
+      "p95": 615029,
+      "p99": 722729,
+      "max": 799857
+    },
+    "commitCallNs": {
+      "count": 48,
+      "p50": 1821585,
+      "p95": 2125692,
+      "p99": 2277016,
+      "max": 2277016
+    },
+    "renderNs": {
+      "count": 492,
+      "p50": 7542454,
+      "p95": 11844783,
+      "p99": 15694107,
+      "max": 22088209
+    },
+    "firstDisplayNs": {
+      "count": 48,
+      "p50": 11443590,
+      "p95": 20118187,
+      "p99": 22088209,
+      "max": 22088209
+    },
+    "firstDisplaySamples": 48,
+    "confirmationSamples": 48,
+    "confirmationHiddenFalse": 0,
+    "visibleAtReturnTrue": 0
+  },
+  "samplesFile": "docs/validation/final-mac/imk-phase-before-samples.json",
+  "cyclesFile": "docs/validation/final-mac/imk-phase-before-cycles.jsonl",
+  "sampleCount": 540,
+  "coverage": {
+    "callbacksComplete": true,
+    "expectedFirstDisplays": 48,
+    "measuredFirstDisplays": 48
+  }
+}

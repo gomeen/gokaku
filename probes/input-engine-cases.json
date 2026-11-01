@@ -1,0 +1,409 @@
+{
+  "version": 1,
+  "scope": "Handwritten synthetic regression set, not a general quality benchmark",
+  "created_before_measurement": true,
+  "layout": "Xiaohe pinyin (not shape codes)",
+  "cases": [
+    {
+      "id": "hello",
+      "stratum": "daily",
+      "targets": [
+        "你好"
+      ],
+      "pinyin": "ni hao",
+      "keys": "nihc",
+      "syllables": 2
+    },
+    {
+      "id": "thanks",
+      "stratum": "daily",
+      "targets": [
+        "谢谢"
+      ],
+      "pinyin": "xie xie",
+      "keys": "xpxp",
+      "syllables": 2
+    },
+    {
+      "id": "goodbye",
+      "stratum": "daily",
+      "targets": [
+        "再见"
+      ],
+      "pinyin": "zai jian",
+      "keys": "zdjm",
+      "syllables": 2
+    },
+    {
+      "id": "morning",
+      "stratum": "daily",
+      "targets": [
+        "早上好"
+      ],
+      "pinyin": "zao shang hao",
+      "keys": "zcuhhc",
+      "syllables": 3
+    },
+    {
+      "id": "no-problem",
+      "stratum": "daily",
+      "targets": [
+        "没关系"
+      ],
+      "pinyin": "mei guan xi",
+      "keys": "mwgrxi",
+      "syllables": 3
+    },
+    {
+      "id": "i-know",
+      "stratum": "daily",
+      "targets": [
+        "我知道"
+      ],
+      "pinyin": "wo zhi dao",
+      "keys": "wovidc",
+      "syllables": 3
+    },
+    {
+      "id": "think",
+      "stratum": "daily",
+      "targets": [
+        "想一想"
+      ],
+      "pinyin": "xiang yi xiang",
+      "keys": "xlyixl",
+      "syllables": 3
+    },
+    {
+      "id": "available",
+      "stratum": "daily",
+      "targets": [
+        "今天晚上有空"
+      ],
+      "pinyin": "jin tian wan shang you kong",
+      "keys": "jbtmwjuhyzks",
+      "syllables": 6
+    },
+    {
+      "id": "eat",
+      "stratum": "daily",
+      "targets": [
+        "你吃饭了吗"
+      ],
+      "pinyin": "ni chi fan le ma",
+      "keys": "niiifjlema",
+      "syllables": 5
+    },
+    {
+      "id": "learn",
+      "stratum": "learning",
+      "targets": [
+        "学习英语"
+      ],
+      "pinyin": "xue xi ying yu",
+      "keys": "xtxiykyu",
+      "syllables": 4
+    },
+    {
+      "id": "want-learn",
+      "stratum": "learning",
+      "targets": [
+        "我想学英语"
+      ],
+      "pinyin": "wo xiang xue ying yu",
+      "keys": "woxlxtykyu",
+      "syllables": 5
+    },
+    {
+      "id": "no-understanding",
+      "stratum": "learning",
+      "targets": [
+        "我没有听懂"
+      ],
+      "pinyin": "wo mei you ting dong",
+      "keys": "womwyztkds",
+      "syllables": 5
+    },
+    {
+      "id": "repeat",
+      "stratum": "learning",
+      "targets": [
+        "请再说一遍"
+      ],
+      "pinyin": "qing zai shuo yi bian",
+      "keys": "qkzduoyibm",
+      "syllables": 5
+    },
+    {
+      "id": "meeting",
+      "stratum": "work",
+      "targets": [
+        "开会"
+      ],
+      "pinyin": "kai hui",
+      "keys": "kdhv",
+      "syllables": 2
+    },
+    {
+      "id": "tomorrow-meeting",
+      "stratum": "work",
+      "targets": [
+        "明天下午开会"
+      ],
+      "pinyin": "ming tian xia wu kai hui",
+      "keys": "mktmxxwukdhv",
+      "syllables": 6
+    },
+    {
+      "id": "send-file",
+      "stratum": "work",
+      "targets": [
+        "请把文件发给我"
+      ],
+      "pinyin": "qing ba wen jian fa gei wo",
+      "keys": "qkbawfjmfagwwo",
+      "syllables": 7
+    },
+    {
+      "id": "next-week",
+      "stratum": "work",
+      "targets": [
+        "我们下周再讨论"
+      ],
+      "pinyin": "wo men xia zhou zai tao lun",
+      "keys": "womfxxvzzdtcly",
+      "syllables": 7
+    },
+    {
+      "id": "plan",
+      "stratum": "work",
+      "targets": [
+        "这个方案可以"
+      ],
+      "pinyin": "zhe ge fang an ke yi",
+      "keys": "vegefhankeyi",
+      "syllables": 6
+    },
+    {
+      "id": "send-email",
+      "stratum": "work",
+      "targets": [
+        "发送邮件"
+      ],
+      "pinyin": "fa song you jian",
+      "keys": "fassyzjm",
+      "syllables": 4
+    },
+    {
+      "id": "negation",
+      "stratum": "work",
+      "targets": [
+        "不要发送邮件"
+      ],
+      "pinyin": "bu yao fa song you jian",
+      "keys": "buycfassyzjm",
+      "syllables": 6
+    },
+    {
+      "id": "long-work",
+      "stratum": "long",
+      "targets": [
+        "请把明天下午开会的时间发给我"
+      ],
+      "pinyin": "qing ba ming tian xia wu kai hui de shi jian fa gei wo",
+      "keys": "qkbamktmxxwukdhvdeuijmfagwwo",
+      "syllables": 14
+    },
+    {
+      "id": "long-learning",
+      "stratum": "long",
+      "targets": [
+        "我想每天花一点时间学习英语"
+      ],
+      "pinyin": "wo xiang mei tian hua yi dian shi jian xue xi ying yu",
+      "keys": "woxlmwtmhxyidmuijmxtxiykyu",
+      "syllables": 13
+    },
+    {
+      "id": "database",
+      "stratum": "technical",
+      "targets": [
+        "数据库"
+      ],
+      "pinyin": "shu ju ku",
+      "keys": "uujuku",
+      "syllables": 3
+    },
+    {
+      "id": "ai",
+      "stratum": "technical",
+      "targets": [
+        "人工智能"
+      ],
+      "pinyin": "ren gong zhi neng",
+      "keys": "rfgsving",
+      "syllables": 4
+    },
+    {
+      "id": "quantum",
+      "stratum": "technical",
+      "targets": [
+        "量子计算"
+      ],
+      "pinyin": "liang zi ji suan",
+      "keys": "llzijisr",
+      "syllables": 4
+    },
+    {
+      "id": "xiaohe",
+      "stratum": "technical",
+      "targets": [
+        "小鹤双拼"
+      ],
+      "pinyin": "xiao he shuang pin",
+      "keys": "xnheulpb",
+      "syllables": 4
+    },
+    {
+      "id": "nvidia",
+      "stratum": "entity",
+      "targets": [
+        "英伟达"
+      ],
+      "pinyin": "ying wei da",
+      "keys": "ykwwda",
+      "syllables": 3
+    },
+    {
+      "id": "tsmc",
+      "stratum": "entity",
+      "targets": [
+        "台积电"
+      ],
+      "pinyin": "tai ji dian",
+      "keys": "tdjidm",
+      "syllables": 3
+    },
+    {
+      "id": "lark",
+      "stratum": "entity",
+      "targets": [
+        "飞书"
+      ],
+      "pinyin": "fei shu",
+      "keys": "fwuu",
+      "syllables": 2
+    },
+    {
+      "id": "deepseek",
+      "stratum": "entity",
+      "targets": [
+        "深度求索"
+      ],
+      "pinyin": "shen du qiu suo",
+      "keys": "ufduqqso",
+      "syllables": 4
+    },
+    {
+      "id": "meituan",
+      "stratum": "entity",
+      "targets": [
+        "美团"
+      ],
+      "pinyin": "mei tuan",
+      "keys": "mwtr",
+      "syllables": 2
+    },
+    {
+      "id": "unconstrained-huiyi",
+      "stratum": "ambiguous",
+      "targets": [
+        "会议",
+        "回忆"
+      ],
+      "pinyin": "hui yi",
+      "keys": "hvyi",
+      "syllables": 2
+    },
+    {
+      "id": "bank",
+      "stratum": "polyphone",
+      "targets": [
+        "银行"
+      ],
+      "pinyin": "yin hang",
+      "keys": "ybhh",
+      "syllables": 2
+    },
+    {
+      "id": "walk",
+      "stratum": "polyphone",
+      "targets": [
+        "行走"
+      ],
+      "pinyin": "xing zou",
+      "keys": "xkzz",
+      "syllables": 2
+    },
+    {
+      "id": "chongqing",
+      "stratum": "polyphone",
+      "targets": [
+        "重庆"
+      ],
+      "pinyin": "chong qing",
+      "keys": "isqk",
+      "syllables": 2
+    },
+    {
+      "id": "music",
+      "stratum": "polyphone",
+      "targets": [
+        "音乐"
+      ],
+      "pinyin": "yin yue",
+      "keys": "ybyt",
+      "syllables": 2
+    },
+    {
+      "id": "safety",
+      "stratum": "zero-initial",
+      "targets": [
+        "安全"
+      ],
+      "pinyin": "an quan",
+      "keys": "anqr",
+      "syllables": 2
+    },
+    {
+      "id": "occasionally",
+      "stratum": "zero-initial",
+      "targets": [
+        "偶尔"
+      ],
+      "pinyin": "ou er",
+      "keys": "ouer",
+      "syllables": 2
+    },
+    {
+      "id": "scheme",
+      "stratum": "zero-initial",
+      "targets": [
+        "方案"
+      ],
+      "pinyin": "fang an",
+      "keys": "fhan",
+      "syllables": 2
+    },
+    {
+      "id": "love",
+      "stratum": "zero-initial",
+      "targets": [
+        "爱好"
+      ],
+      "pinyin": "ai hao",
+      "keys": "aihc",
+      "syllables": 2
+    }
+  ]
+}

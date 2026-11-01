@@ -1,0 +1,822 @@
+{
+  "version": 1,
+  "scope": "Handwritten synthetic holdout set for input-engine candidate screening; independent of input-engine-cases.json; not a general quality benchmark",
+  "created_before_measurement": true,
+  "layout": "Xiaohe pinyin (not shape codes)",
+  "cases": [
+    {
+      "id": "daily-long-time-no-see",
+      "stratum": "daily",
+      "targets": [
+        "好久不见"
+      ],
+      "pinyin": "hao jiu bu jian",
+      "keys": "hcjqbujm",
+      "syllables": 4
+    },
+    {
+      "id": "daily-many-thanks",
+      "stratum": "daily",
+      "targets": [
+        "太感谢了"
+      ],
+      "pinyin": "tai gan xie le",
+      "keys": "tdgjxple",
+      "syllables": 4
+    },
+    {
+      "id": "daily-see-you-tomorrow",
+      "stratum": "daily",
+      "targets": [
+        "明天见"
+      ],
+      "pinyin": "ming tian jian",
+      "keys": "mktmjm",
+      "syllables": 3
+    },
+    {
+      "id": "daily-how-are-you-recently",
+      "stratum": "daily",
+      "targets": [
+        "你最近怎么样"
+      ],
+      "pinyin": "ni zui jin zen me yang",
+      "keys": "nizvjbzfmeyh",
+      "syllables": 6
+    },
+    {
+      "id": "daily-i-am-a-bit-tired",
+      "stratum": "daily",
+      "targets": [
+        "我有点累"
+      ],
+      "pinyin": "wo you dian lei",
+      "keys": "woyzdmlw",
+      "syllables": 4
+    },
+    {
+      "id": "daily-take-care-of-yourself",
+      "stratum": "daily",
+      "targets": [
+        "保重"
+      ],
+      "pinyin": "bao zhong",
+      "keys": "bcvs",
+      "syllables": 2
+    },
+    {
+      "id": "daily-congratulations",
+      "stratum": "daily",
+      "targets": [
+        "恭喜你"
+      ],
+      "pinyin": "gong xi ni",
+      "keys": "gsxini",
+      "syllables": 3
+    },
+    {
+      "id": "daily-sorry-im-late",
+      "stratum": "daily",
+      "targets": [
+        "抱歉来晚了"
+      ],
+      "pinyin": "bao qian lai wan le",
+      "keys": "bcqmldwjle",
+      "syllables": 5
+    },
+    {
+      "id": "daily-wanna-eat-together",
+      "stratum": "daily",
+      "targets": [
+        "要不要一起吃个饭"
+      ],
+      "pinyin": "yao bu yao yi qi chi ge fan",
+      "keys": "ycbuycyiqiiigefj",
+      "syllables": 8
+    },
+    {
+      "id": "daily-nice-weather-today",
+      "stratum": "daily",
+      "targets": [
+        "今天天气真不错"
+      ],
+      "pinyin": "jin tian tian qi zhen bu cuo",
+      "keys": "jbtmtmqivfbuco",
+      "syllables": 7
+    },
+    {
+      "id": "work-move-to-monday",
+      "stratum": "work",
+      "targets": [
+        "改到下周一可以吗"
+      ],
+      "pinyin": "gai dao xia zhou yi ke yi ma",
+      "keys": "gddcxxvzyikeyima",
+      "syllables": 8
+    },
+    {
+      "id": "work-weekly-report-done",
+      "stratum": "work",
+      "targets": [
+        "周报我写好了"
+      ],
+      "pinyin": "zhou bao wo xie hao le",
+      "keys": "vzbcwoxphcle",
+      "syllables": 6
+    },
+    {
+      "id": "work-need-this-dataset",
+      "stratum": "work",
+      "targets": [
+        "我需要这份数据"
+      ],
+      "pinyin": "wo xu yao zhe fen shu ju",
+      "keys": "woxuycveffuuju",
+      "syllables": 7
+    },
+    {
+      "id": "work-too-much-overtime",
+      "stratum": "work",
+      "targets": [
+        "这周加班有点多"
+      ],
+      "pinyin": "zhe zhou jia ban you dian duo",
+      "keys": "vevzjxbjyzdmdo",
+      "syllables": 7
+    },
+    {
+      "id": "work-please-help-review",
+      "stratum": "work",
+      "targets": [
+        "麻烦你帮我看一下"
+      ],
+      "pinyin": "ma fan ni bang wo kan yi xia",
+      "keys": "mafjnibhwokjyixx",
+      "syllables": 8
+    },
+    {
+      "id": "work-plan-approved",
+      "stratum": "work",
+      "targets": [
+        "这个方案通过了"
+      ],
+      "pinyin": "zhe ge fang an tong guo le",
+      "keys": "vegefhantsgole",
+      "syllables": 7
+    },
+    {
+      "id": "work-three-days-leave",
+      "stratum": "work",
+      "targets": [
+        "我请三天假"
+      ],
+      "pinyin": "wo qing san tian jia",
+      "keys": "woqksjtmjx",
+      "syllables": 5
+    },
+    {
+      "id": "work-client-calls-afternoon",
+      "stratum": "work",
+      "targets": [
+        "客户下午来电"
+      ],
+      "pinyin": "ke hu xia wu lai dian",
+      "keys": "kehuxxwulddm",
+      "syllables": 6
+    },
+    {
+      "id": "work-delivery-postponed",
+      "stratum": "work",
+      "targets": [
+        "交付时间往后延一周"
+      ],
+      "pinyin": "jiao fu shi jian wang hou yan yi zhou",
+      "keys": "jnfuuijmwhhzyjyivz",
+      "syllables": 9
+    },
+    {
+      "id": "work-expense-filed",
+      "stratum": "work",
+      "targets": [
+        "报销单我已经提交了"
+      ],
+      "pinyin": "bao xiao dan wo yi jing ti jiao le",
+      "keys": "bcxndjwoyijktijnle",
+      "syllables": 9
+    },
+    {
+      "id": "tech-container-orchestration",
+      "stratum": "technical",
+      "targets": [
+        "容器编排"
+      ],
+      "pinyin": "rong qi bian pai",
+      "keys": "rsqibmpd",
+      "syllables": 4
+    },
+    {
+      "id": "tech-frontend-framework",
+      "stratum": "technical",
+      "targets": [
+        "前端框架"
+      ],
+      "pinyin": "qian duan kuang jia",
+      "keys": "qmdrkljx",
+      "syllables": 4
+    },
+    {
+      "id": "tech-microservice-architecture",
+      "stratum": "technical",
+      "targets": [
+        "微服务架构"
+      ],
+      "pinyin": "wei fu wu jia gou",
+      "keys": "wwfuwujxgz",
+      "syllables": 5
+    },
+    {
+      "id": "tech-tokenizer",
+      "stratum": "technical",
+      "targets": [
+        "分词器"
+      ],
+      "pinyin": "fen ci qi",
+      "keys": "ffciqi",
+      "syllables": 3
+    },
+    {
+      "id": "tech-vector-database",
+      "stratum": "technical",
+      "targets": [
+        "向量数据库"
+      ],
+      "pinyin": "xiang liang shu ju ku",
+      "keys": "xllluujuku",
+      "syllables": 5
+    },
+    {
+      "id": "tech-inference-speedup",
+      "stratum": "technical",
+      "targets": [
+        "推理加速"
+      ],
+      "pinyin": "tui li jia su",
+      "keys": "tvlijxsu",
+      "syllables": 4
+    },
+    {
+      "id": "tech-fine-tuned-model",
+      "stratum": "technical",
+      "targets": [
+        "微调模型"
+      ],
+      "pinyin": "wei tiao mo xing",
+      "keys": "wwtnmoxk",
+      "syllables": 4
+    },
+    {
+      "id": "tech-canary-release",
+      "stratum": "technical",
+      "targets": [
+        "灰度发布"
+      ],
+      "pinyin": "hui du fa bu",
+      "keys": "hvdufabu",
+      "syllables": 4
+    },
+    {
+      "id": "tech-load-balancing",
+      "stratum": "technical",
+      "targets": [
+        "负载均衡"
+      ],
+      "pinyin": "fu zai jun heng",
+      "keys": "fuzdjyhg",
+      "syllables": 4
+    },
+    {
+      "id": "tech-container-image",
+      "stratum": "technical",
+      "targets": [
+        "容器镜像"
+      ],
+      "pinyin": "rong qi jing xiang",
+      "keys": "rsqijkxl",
+      "syllables": 4
+    },
+    {
+      "id": "entity-huawei",
+      "stratum": "entity",
+      "targets": [
+        "华为"
+      ],
+      "pinyin": "hua wei",
+      "keys": "hxww",
+      "syllables": 2
+    },
+    {
+      "id": "entity-tencent",
+      "stratum": "entity",
+      "targets": [
+        "腾讯"
+      ],
+      "pinyin": "teng xun",
+      "keys": "tgxy",
+      "syllables": 2
+    },
+    {
+      "id": "entity-xiaomi",
+      "stratum": "entity",
+      "targets": [
+        "小米"
+      ],
+      "pinyin": "xiao mi",
+      "keys": "xnmi",
+      "syllables": 2
+    },
+    {
+      "id": "entity-baidu",
+      "stratum": "entity",
+      "targets": [
+        "百度"
+      ],
+      "pinyin": "bai du",
+      "keys": "bddu",
+      "syllables": 2
+    },
+    {
+      "id": "entity-jingdong",
+      "stratum": "entity",
+      "targets": [
+        "京东"
+      ],
+      "pinyin": "jing dong",
+      "keys": "jkds",
+      "syllables": 2
+    },
+    {
+      "id": "entity-wechat",
+      "stratum": "entity",
+      "targets": [
+        "微信"
+      ],
+      "pinyin": "wei xin",
+      "keys": "wwxb",
+      "syllables": 2
+    },
+    {
+      "id": "entity-shanghai",
+      "stratum": "entity",
+      "targets": [
+        "上海"
+      ],
+      "pinyin": "shang hai",
+      "keys": "uhhd",
+      "syllables": 2
+    },
+    {
+      "id": "entity-zhihu",
+      "stratum": "entity",
+      "targets": [
+        "知乎"
+      ],
+      "pinyin": "zhi hu",
+      "keys": "vihu",
+      "syllables": 2
+    },
+    {
+      "id": "entity-graphics-processor",
+      "stratum": "entity",
+      "targets": [
+        "图形处理器"
+      ],
+      "pinyin": "tu xing chu li qi",
+      "keys": "tuxkiuliqi",
+      "syllables": 5
+    },
+    {
+      "id": "entity-instruction-set-arch",
+      "stratum": "entity",
+      "targets": [
+        "指令集架构"
+      ],
+      "pinyin": "zhi ling ji jia gou",
+      "keys": "vilkjijxgz",
+      "syllables": 5
+    },
+    {
+      "id": "long-meeting-notes-to-group",
+      "stratum": "long",
+      "targets": [
+        "会议结束后请把纪要发到项目群里"
+      ],
+      "pinyin": "hui yi jie shu hou qing ba ji yao fa dao xiang mu qun li",
+      "keys": "hvyijpuuhzqkbajiycfadcxlmuqyli",
+      "syllables": 15
+    },
+    {
+      "id": "long-flight-delay",
+      "stratum": "long",
+      "targets": [
+        "航班延误了两个小时我们才能登机"
+      ],
+      "pinyin": "hang ban yan wu le liang ge xiao shi wo men cai neng deng ji",
+      "keys": "hhbjyjwulellgexnuiwomfcdngdgji",
+      "syllables": 15
+    },
+    {
+      "id": "long-parcel-signed-confirm",
+      "stratum": "long",
+      "targets": [
+        "快递显示已经签收麻烦你确认一下"
+      ],
+      "pinyin": "kuai di xian shi yi jing qian shou ma fan ni que ren yi xia",
+      "keys": "kkdixmuiyijkqmuzmafjniqtrfyixx",
+      "syllables": 15
+    },
+    {
+      "id": "long-interview-preparation",
+      "stratum": "long",
+      "targets": [
+        "明天上午的面试需要准备两个项目案例"
+      ],
+      "pinyin": "ming tian shang wu de mian shi xu yao zhun bei liang ge xiang mu an li",
+      "keys": "mktmuhwudemmuixuycvybwllgexlmuanli",
+      "syllables": 17
+    },
+    {
+      "id": "long-rainy-drive",
+      "stratum": "long",
+      "targets": [
+        "外面下着大雨我开车可能晚一点到"
+      ],
+      "pinyin": "wai mian xia zhe da yu wo kai che ke neng wan yi dian dao",
+      "keys": "wdmmxxvedayuwokdiekengwjyidmdc",
+      "syllables": 15
+    },
+    {
+      "id": "long-deliver-on-time",
+      "stratum": "long",
+      "targets": [
+        "这个项目我们要按时交付"
+      ],
+      "pinyin": "zhe ge xiang mu wo men yao an shi jiao fu",
+      "keys": "vegexlmuwomfycanuijnfu",
+      "syllables": 11
+    },
+    {
+      "id": "long-book-meeting-room",
+      "stratum": "long",
+      "targets": [
+        "麻烦帮我订一间明天下午的会议室",
+        "麻烦帮我定一间明天下午的会议室"
+      ],
+      "pinyin": "ma fan bang wo ding yi jian ming tian xia wu de hui yi shi",
+      "keys": "mafjbhwodkyijmmktmxxwudehvyiui",
+      "syllables": 15
+    },
+    {
+      "id": "long-match-record-variant",
+      "stratum": "long",
+      "targets": [
+        "我看了一下比赛记录",
+        "我看了一下比赛纪录"
+      ],
+      "pinyin": "wo kan le yi xia bi sai ji lu",
+      "keys": "wokjleyixxbisdjilu",
+      "syllables": 9
+    },
+    {
+      "id": "long-made-report-variant",
+      "stratum": "long",
+      "targets": [
+        "他做了份详细的报告",
+        "他作了份详细的报告"
+      ],
+      "pinyin": "ta zuo le fen xiang xi de bao gao",
+      "keys": "tazoleffxlxidebcgc",
+      "syllables": 9
+    },
+    {
+      "id": "long-look-busier-variant",
+      "stratum": "long",
+      "targets": [
+        "他看起来比我们想象的要忙",
+        "他看起来比我们想像的要忙"
+      ],
+      "pinyin": "ta kan qi lai bi wo men xiang xiang de yao mang",
+      "keys": "takjqildbiwomfxlxldeycmh",
+      "syllables": 12
+    },
+    {
+      "id": "ambiguous-matter-truth",
+      "stratum": "ambiguous",
+      "targets": [
+        "事情",
+        "实情"
+      ],
+      "pinyin": "shi qing",
+      "keys": "uiqk",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-mind-psyche",
+      "stratum": "ambiguous",
+      "targets": [
+        "心里",
+        "心理"
+      ],
+      "pinyin": "xin li",
+      "keys": "xbli",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-idea-notice",
+      "stratum": "ambiguous",
+      "targets": [
+        "主意",
+        "注意"
+      ],
+      "pinyin": "zhu yi",
+      "keys": "vuyi",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-century-actual",
+      "stratum": "ambiguous",
+      "targets": [
+        "世纪",
+        "实际"
+      ],
+      "pinyin": "shi ji",
+      "keys": "uiji",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-use-try",
+      "stratum": "ambiguous",
+      "targets": [
+        "使用",
+        "试用"
+      ],
+      "pinyin": "shi yong",
+      "keys": "uiys",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-know-guide",
+      "stratum": "ambiguous",
+      "targets": [
+        "知道",
+        "指导"
+      ],
+      "pinyin": "zhi dao",
+      "keys": "vidc",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-experience-energy",
+      "stratum": "ambiguous",
+      "targets": [
+        "经历",
+        "精力"
+      ],
+      "pinyin": "jing li",
+      "keys": "jkli",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-machine-or",
+      "stratum": "ambiguous",
+      "targets": [
+        "机器",
+        "及其"
+      ],
+      "pinyin": "ji qi",
+      "keys": "jiqi",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-wronged-unjust",
+      "stratum": "ambiguous",
+      "targets": [
+        "委屈",
+        "委曲"
+      ],
+      "pinyin": "wei qu",
+      "keys": "wwqu",
+      "syllables": 2
+    },
+    {
+      "id": "ambiguous-inspect-examine",
+      "stratum": "ambiguous",
+      "targets": [
+        "考察",
+        "考查"
+      ],
+      "pinyin": "kao cha",
+      "keys": "kcia",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-husband",
+      "stratum": "polyphone",
+      "targets": [
+        "丈夫"
+      ],
+      "pinyin": "zhang fu",
+      "keys": "vhfu",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-biography",
+      "stratum": "polyphone",
+      "targets": [
+        "传记"
+      ],
+      "pinyin": "zhuan ji",
+      "keys": "vrji",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-accounting",
+      "stratum": "polyphone",
+      "targets": [
+        "会计"
+      ],
+      "pinyin": "kuai ji",
+      "keys": "kkji",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-discount",
+      "stratum": "polyphone",
+      "targets": [
+        "打折"
+      ],
+      "pinyin": "da zhe",
+      "keys": "dave",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-cheap",
+      "stratum": "polyphone",
+      "targets": [
+        "便宜"
+      ],
+      "pinyin": "pian yi",
+      "keys": "pmyi",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-indeed",
+      "stratum": "polyphone",
+      "targets": [
+        "的确"
+      ],
+      "pinyin": "di que",
+      "keys": "diqt",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-length",
+      "stratum": "polyphone",
+      "targets": [
+        "长度"
+      ],
+      "pinyin": "chang du",
+      "keys": "ihdu",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-weight",
+      "stratum": "polyphone",
+      "targets": [
+        "重量"
+      ],
+      "pinyin": "zhong liang",
+      "keys": "vsll",
+      "syllables": 2
+    },
+    {
+      "id": "polyphone-almost",
+      "stratum": "polyphone",
+      "targets": [
+        "差不多"
+      ],
+      "pinyin": "cha bu duo",
+      "keys": "iabudo",
+      "syllables": 3
+    },
+    {
+      "id": "polyphone-teenager",
+      "stratum": "polyphone",
+      "targets": [
+        "少年"
+      ],
+      "pinyin": "shao nian",
+      "keys": "ucnm",
+      "syllables": 2
+    },
+    {
+      "id": "zero-stay-up-late",
+      "stratum": "zero-initial",
+      "targets": [
+        "熬夜"
+      ],
+      "pinyin": "ao ye",
+      "keys": "aoye",
+      "syllables": 2
+    },
+    {
+      "id": "zero-europe",
+      "stratum": "zero-initial",
+      "targets": [
+        "欧洲"
+      ],
+      "pinyin": "ou zhou",
+      "keys": "ouvz",
+      "syllables": 2
+    },
+    {
+      "id": "zero-on-time",
+      "stratum": "zero-initial",
+      "targets": [
+        "按时"
+      ],
+      "pinyin": "an shi",
+      "keys": "anui",
+      "syllables": 2
+    },
+    {
+      "id": "zero-cherish",
+      "stratum": "zero-initial",
+      "targets": [
+        "爱惜"
+      ],
+      "pinyin": "ai xi",
+      "keys": "aixi",
+      "syllables": 2
+    },
+    {
+      "id": "zero-hungry",
+      "stratum": "zero-initial",
+      "targets": [
+        "饿了"
+      ],
+      "pinyin": "e le",
+      "keys": "eele",
+      "syllables": 2
+    },
+    {
+      "id": "zero-expensive",
+      "stratum": "zero-initial",
+      "targets": [
+        "昂贵"
+      ],
+      "pinyin": "ang gui",
+      "keys": "ahgv",
+      "syllables": 2
+    },
+    {
+      "id": "zero-children",
+      "stratum": "zero-initial",
+      "targets": [
+        "儿童"
+      ],
+      "pinyin": "er tong",
+      "keys": "erts",
+      "syllables": 2
+    },
+    {
+      "id": "zero-nausea",
+      "stratum": "zero-initial",
+      "targets": [
+        "恶心"
+      ],
+      "pinyin": "e xin",
+      "keys": "eexb",
+      "syllables": 2
+    },
+    {
+      "id": "zero-amount",
+      "stratum": "zero-initial",
+      "targets": [
+        "金额"
+      ],
+      "pinyin": "jin e",
+      "keys": "jbee",
+      "syllables": 2
+    },
+    {
+      "id": "zero-moreover",
+      "stratum": "zero-initial",
+      "targets": [
+        "而且"
+      ],
+      "pinyin": "er qie",
+      "keys": "erqp",
+      "syllables": 2
+    }
+  ]
+}

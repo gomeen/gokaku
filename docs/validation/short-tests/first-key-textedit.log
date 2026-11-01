@@ -1,0 +1,149 @@
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:84:38: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 82 | for (title, action, key) in [("Undo", Selector(("undo:")), "z"),
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+    |                                      `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:85:39: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+    |                                       `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:86:40: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+    |                                        `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:87:45: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+    |                                             `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+ 89 | }
+2026-11-01 17:11:43.104 Probe[60247:3522735] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+探针宿主已启动（pid 60247）
+候选窗状态 socket 已连接：/Users/gomeen/Library/Logs/Gogaku/validation.sock
+宿主就绪：textedit/default
+== textedit/default/space/letter × 10 次 ==
+  ok    textedit/default/space/letter：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/space/letter：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/space/letter：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/space/comma × 10 次 ==
+  ok    textedit/default/space/comma：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/space/comma：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/space/comma：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/space/period × 10 次 ==
+  ok    textedit/default/space/period：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/space/period：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/space/period：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/space/stop × 10 次 ==
+  ok    textedit/default/space/stop：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/space/stop：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/space/stop：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/enter/letter × 10 次 ==
+  ok    textedit/default/enter/letter：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/enter/letter：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/enter/letter：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/enter/comma × 10 次 ==
+  ok    textedit/default/enter/comma：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/enter/comma：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/enter/comma：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/enter/period × 10 次 ==
+  ok    textedit/default/enter/period：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/enter/period：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/enter/period：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/enter/stop × 10 次 ==
+  ok    textedit/default/enter/stop：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/enter/stop：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/enter/stop：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/digit1/letter × 10 次 ==
+  ok    textedit/default/digit1/letter：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/digit1/letter：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/digit1/letter：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/digit1/comma × 10 次 ==
+  ok    textedit/default/digit1/comma：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/digit1/comma：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/digit1/comma：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/digit1/period × 10 次 ==
+  ok    textedit/default/digit1/period：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/digit1/period：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/digit1/period：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/digit1/stop × 10 次 ==
+  ok    textedit/default/digit1/stop：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/digit1/stop：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/digit1/stop：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/semicolon/letter × 10 次 ==
+  ok    textedit/default/semicolon/letter：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/semicolon/letter：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/semicolon/letter：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/semicolon/comma × 10 次 ==
+  ok    textedit/default/semicolon/comma：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/semicolon/comma：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/semicolon/comma：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/semicolon/period × 10 次 ==
+  ok    textedit/default/semicolon/period：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/semicolon/period：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/semicolon/period：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/semicolon/stop × 10 次 ==
+  ok    textedit/default/semicolon/stop：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/semicolon/stop：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/semicolon/stop：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/shift/letter × 10 次 ==
+  ok    textedit/default/shift/letter：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/shift/letter：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/shift/letter：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/shift/comma × 10 次 ==
+  ok    textedit/default/shift/comma：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/shift/comma：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/shift/comma：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/shift/period × 10 次 ==
+  ok    textedit/default/shift/period：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次）
+  ok    textedit/default/shift/period：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/shift/period：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== textedit/default/shift/stop × 10 次 ==
+  ok    textedit/default/shift/stop：插字次数按确认与后键分别匹配（发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次）
+  ok    textedit/default/shift/stop：每次插字时候选窗均在回调内隐藏（confirmationHideFailures 增加 0）
+  ok    textedit/default/shift/stop：样本流插字归属与隐藏状态（12/12 轮逐事件核对通过）
+== 拼音光标真实窗口核对：textedit/default ==
+  ok    caret/textedit：组合后光标在末尾插入点＝[6, 6]（{"caret": [6, 6], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Left（声母后）插入点＝[6, 4]（{"caret": [6, 4], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：再 Left（音节边界）插入点＝[6, 2]（{"caret": [6, 2], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Right插入点＝[6, 4]（{"caret": [6, 4], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Home插入点＝[6, 0]（{"caret": [6, 0], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：End插入点＝[6, 6]（{"caret": [6, 6], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Ctrl＋A插入点＝[6, 0]（{"caret": [6, 0], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Ctrl＋E插入点＝[6, 6]（{"caret": [6, 6], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Ctrl＋B（声母后）插入点＝[6, 4]（{"caret": [6, 4], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：Ctrl＋F（回末尾）插入点＝[6, 6]（{"caret": [6, 6], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：原码显示插入点在末尾＝[4, 4]（{"caret": [4, 4], "visible": true, "windowNumber": 5041}）
+  ok    caret/textedit：原码显示 Left 后插入点＝[4, 3]（{"caret": [4, 3], "visible": true, "windowNumber": 5041}）
+  ok    panel/space：组合中候选窗可见（{"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4454, "hideCount": 2865, "panelFrame"）
+  ok    panel/space：确认后候选窗在回调内隐藏（{"before": {"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4454, "hideCount": 2865, "）
+  ok    panel/space：提交样本显示回调内已隐藏且回调结束时不可见（{"count": 9, "metricScope": {"callbackNs": "IMK handle 回调总时长（主线程实测）", "coreNs": "共享核心同步处理时长", "renderNs": "按键到候选渲染完成（含排队）
+  ok    panel/space：确认后 2 秒内候选窗未重弹（{"before": {"confirmationCount": 1, "confirmationHideFailures": 0, "events": 9, "generation": 4456, "hideCount": 2867, "）
+  ok    panel/enter：组合中候选窗可见（{"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4466, "hideCount": 2873, "panelFrame"）
+  ok    panel/enter：确认后候选窗在回调内隐藏（{"before": {"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4466, "hideCount": 2873, "）
+  ok    panel/enter：提交样本显示回调内已隐藏且回调结束时不可见（{"count": 9, "metricScope": {"callbackNs": "IMK handle 回调总时长（主线程实测）", "coreNs": "共享核心同步处理时长", "renderNs": "按键到候选渲染完成（含排队）
+  ok    panel/enter：确认后 2 秒内候选窗未重弹（{"before": {"confirmationCount": 1, "confirmationHideFailures": 0, "events": 9, "generation": 4468, "hideCount": 2875, "）
+  ok    panel/digit1：组合中候选窗可见（{"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4478, "hideCount": 2881, "panelFrame"）
+  ok    panel/digit1：确认后候选窗在回调内隐藏（{"before": {"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4478, "hideCount": 2881, "）
+  ok    panel/digit1：提交样本显示回调内已隐藏且回调结束时不可见（{"count": 9, "metricScope": {"callbackNs": "IMK handle 回调总时长（主线程实测）", "coreNs": "共享核心同步处理时长", "renderNs": "按键到候选渲染完成（含排队）
+  ok    panel/digit1：确认后 2 秒内候选窗未重弹（{"before": {"confirmationCount": 1, "confirmationHideFailures": 0, "events": 9, "generation": 4480, "hideCount": 2883, "）
+  ok    panel/semicolon：组合中候选窗可见（{"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4490, "hideCount": 2889, "panelFrame"）
+  ok    panel/semicolon：确认后候选窗在回调内隐藏（{"before": {"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4490, "hideCount": 2889, "）
+  ok    panel/semicolon：提交样本显示回调内已隐藏且回调结束时不可见（{"count": 9, "metricScope": {"callbackNs": "IMK handle 回调总时长（主线程实测）", "coreNs": "共享核心同步处理时长", "renderNs": "按键到候选渲染完成（含排队）
+  ok    panel/semicolon：确认后 2 秒内候选窗未重弹（{"before": {"confirmationCount": 1, "confirmationHideFailures": 0, "events": 9, "generation": 4492, "hideCount": 2891, "）
+  ok    panel/shift：组合中候选窗可见（{"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4502, "hideCount": 2897, "panelFrame"）
+  ok    panel/shift：确认后候选窗在回调内隐藏（{"before": {"confirmationCount": 0, "confirmationHideFailures": 0, "events": 8, "generation": 4502, "hideCount": 2897, "）
+  ok    panel/shift：提交样本显示回调内已隐藏且回调结束时不可见（{"count": 10, "metricScope": {"callbackNs": "IMK handle 回调总时长（主线程实测）", "coreNs": "共享核心同步处理时长", "renderNs": "按键到候选渲染完成（含排）
+  ok    panel/shift：确认后 2 秒内候选窗未重弹（{"before": {"confirmationCount": 1, "confirmationHideFailures": 0, "events": 10, "generation": 4504, "hideCount": 2899, ）
+首键回归：92 项检查，失败 0 → docs/validation/short-tests/first-key-textedit.json

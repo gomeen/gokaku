@@ -1,0 +1,289 @@
+{
+  "Q0": {
+    "ready": {
+      "config": {
+        "build": "release opt-level=3",
+        "candidate_limit": 10,
+        "candidate_order": "core eager query().candidates.items; no frontend reorder",
+        "cloud": false,
+        "data_tag": "data-v8",
+        "deviations": [
+          "Xiaohe instead of default full pinyin",
+          "No translators/glossaries, cloud, neural models or downloads",
+          "No personal learner, usage/vocabulary/panel meters, input logging, system text replacements or custom phrases",
+          "No native host/front-end layout, paging, highlight movement, aux-code or punctuation UI; only requested ASCII subset + Return",
+          "Ten core candidates exposed in stable order, independent of native page size"
+        ],
+        "dictionary_entries": 344841,
+        "emoji": "bundled zh+en; core default limits",
+        "english_entries": 94568,
+        "extra_dictionaries": {
+          "general": {
+            "entries": 1294011,
+            "secondary": true
+          },
+          "idioms": {
+            "entries": 3693
+          }
+        },
+        "frontend": "dispatch ASCII to push/backspace/clear/commit/take_raw; retain visible candidate objects; core owns buffer and held",
+        "held_selections": true,
+        "id": "Q0",
+        "learning": false,
+        "learning_control": "Engine::set_learning(false) + default NoLearner; no personal state loaded",
+        "load_boundary": "data open/mmap/validation, english+emoji parse and Engine assembly through configuration; excludes process startup and JSON",
+        "neural": false,
+        "preedit_fallback": "parse error: core held_text + actual composition.text",
+        "reset": "clear + break_chain + enter_input_box; static data not reloaded",
+        "scheme": "xiaohe",
+        "statistical_model": {
+          "bigrams": 4913987,
+          "words": 139174
+        },
+        "timing": "process includes key/state mutation and query/sort; collect includes top-ten materialization+copy and marked/state extraction; excludes JSON and IPC",
+        "translation": false,
+        "user_state": "none: no installed Qingjian paths read or written"
+      },
+      "engine": "qingjian-core",
+      "id": "Q0",
+      "load_ms": 481.546709,
+      "ready": true,
+      "version": "379139671d191a5c9dc21972a54e15bc1edd9e17"
+    },
+    "parent_ready_ms": 494.967181,
+    "resources": {
+      "pid": 84791,
+      "rss_bytes": 161742848,
+      "cpu_time": "0:00.49",
+      "pcpu": 0.0
+    },
+    "command": [
+      "/tmp/gogaku-ime-benchmark/qingjian/build/release/gogaku-qingjian-worker",
+      "/tmp/gogaku-ime-benchmark/qingjian"
+    ]
+  },
+  "R0": {
+    "ready": {
+      "ready": true,
+      "engine": "rime",
+      "version": "1.16.0",
+      "load_ms": 30.264,
+      "config": {
+        "id": "R0",
+        "schema": "double_pinyin_flypy",
+        "runtime_options": {
+          "ascii_mode": false,
+          "full_shape": false,
+          "ascii_punct": false,
+          "simplification": true
+        },
+        "candidate_limit": 10,
+        "raw_input_source": "RimeApi.get_input；部分选择后可保留已选部分的原始码，按 API 原样报告",
+        "options_modified": [
+          "menu.page_size=10；通过 get_context 一次实际生成并复制前十，避免再次枚举相同页面",
+          "每进程新用户目录链接公共Lua/词表和预部署文件；build内可写数据库独立，不读取私人配置",
+          "质量pass的reset(fresh=true)重新创建session以清除commit_history；计时pass只清composition且不提交",
+          "每进程新建临时用户目录；主翻译器及各辅助翻译器禁用用户词典/历史编码，不调用学习 API",
+          "仅加载本地 default/Lua/octagram，不加载 predict、云或神经重排插件",
+          "simplification=true；朙月繁体源词典经 OpenCC 转为简体；无 grammar/Lua 方案功能"
+        ],
+        "disabled_features": [
+          "云功能、神经重排、用户学习"
+        ],
+        "missing_plugins_or_features": [],
+        "session_user_dir": "/tmp/gogaku-ime-benchmark/rime/R0/users/user-IjkvPD",
+        "load_boundary": "main entry before dlopen through initialized session/schema/options; excludes deployment"
+      }
+    },
+    "parent_ready_ms": 40.061877,
+    "resources": {
+      "pid": 84795,
+      "rss_bytes": 4698112,
+      "cpu_time": "0:00.04",
+      "pcpu": 0.0
+    },
+    "command": [
+      "/tmp/gogaku-ime-benchmark/rime/rime-input-worker",
+      "--library",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/librime.1.dylib",
+      "--shared",
+      "/tmp/gogaku-ime-benchmark/rime/R0/shared",
+      "--build",
+      "/tmp/gogaku-ime-benchmark/rime/R0/build",
+      "--users",
+      "/tmp/gogaku-ime-benchmark/rime/R0/users",
+      "--schema",
+      "double_pinyin_flypy",
+      "--id",
+      "R0",
+      "--config",
+      "/tmp/gogaku-ime-benchmark/rime/R0/worker-config.json"
+    ]
+  },
+  "R1": {
+    "ready": {
+      "ready": true,
+      "engine": "rime",
+      "version": "1.16.0",
+      "load_ms": 63.058,
+      "config": {
+        "id": "R1",
+        "schema": "double_pinyin_flypy",
+        "runtime_options": {
+          "ascii_mode": false,
+          "full_shape": false,
+          "ascii_punct": false,
+          "traditionalization": false
+        },
+        "candidate_limit": 10,
+        "raw_input_source": "RimeApi.get_input；部分选择后可保留已选部分的原始码，按 API 原样报告",
+        "options_modified": [
+          "menu.page_size=10；通过 get_context 一次实际生成并复制前十，避免再次枚举相同页面",
+          "每进程新用户目录链接公共Lua/词表和预部署文件；build内可写数据库独立，不读取私人配置",
+          "质量pass的reset(fresh=true)重新创建session以清除commit_history；计时pass只清composition且不提交",
+          "每进程新建临时用户目录；主翻译器及各辅助翻译器禁用用户词典/历史编码，不调用学习 API",
+          "仅加载本地 default/Lua/octagram，不加载 predict、云或神经重排插件",
+          "traditionalization=false；保留上游 Emoji 开关默认、完整 Lua 处理链及中英混输；未加装可选 grammar"
+        ],
+        "disabled_features": [
+          "云功能、神经重排、用户学习"
+        ],
+        "missing_plugins_or_features": [],
+        "session_user_dir": "/tmp/gogaku-ime-benchmark/rime/R1/users/user-8Lpdbe",
+        "load_boundary": "main entry before dlopen through initialized session/schema/options; excludes deployment"
+      }
+    },
+    "parent_ready_ms": 72.399765,
+    "resources": {
+      "pid": 84799,
+      "rss_bytes": 8085504,
+      "cpu_time": "0:00.07",
+      "pcpu": 0.0
+    },
+    "command": [
+      "/tmp/gogaku-ime-benchmark/rime/rime-input-worker",
+      "--library",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/librime.1.dylib",
+      "--shared",
+      "/tmp/gogaku-ime-benchmark/rime/R1/shared",
+      "--build",
+      "/tmp/gogaku-ime-benchmark/rime/R1/build",
+      "--users",
+      "/tmp/gogaku-ime-benchmark/rime/R1/users",
+      "--schema",
+      "double_pinyin_flypy",
+      "--id",
+      "R1",
+      "--config",
+      "/tmp/gogaku-ime-benchmark/rime/R1/worker-config.json",
+      "--plugin",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/rime-plugins/librime-lua.dylib",
+      "--plugin",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/rime-plugins/librime-octagram.dylib"
+    ]
+  },
+  "R2": {
+    "ready": {
+      "ready": true,
+      "engine": "rime",
+      "version": "1.16.0",
+      "load_ms": 2248.343,
+      "config": {
+        "id": "R2",
+        "schema": "wanxiang",
+        "runtime_options": {
+          "ascii_mode": false,
+          "full_shape": false,
+          "ascii_punct": false,
+          "s2s": true,
+          "s2t": false,
+          "s2hk": false,
+          "s2tw": false,
+          "context_reorder": false
+        },
+        "candidate_limit": 10,
+        "raw_input_source": "RimeApi.get_input；部分选择后可保留已选部分的原始码，按 API 原样报告",
+        "options_modified": [
+          "menu.page_size=10；通过 get_context 一次实际生成并复制前十，避免再次枚举相同页面",
+          "每进程新用户目录链接公共Lua/词表和预部署文件；build内可写数据库独立，不读取私人配置",
+          "质量pass的reset(fresh=true)重新创建session以清除commit_history；计时pass只清composition且不提交",
+          "每进程新建临时用户目录；主翻译器及各辅助翻译器禁用用户词典/历史编码，不调用学习 API",
+          "仅加载本地 default/Lua/octagram，不加载 predict、云或神经重排插件",
+          "speller.algebra 选择上游 base/小鹤双拼；s2s=true、其余繁体开关 false",
+          "保留 grammar 与其余 Lua；禁用监听 commit 的学习/统计/持久手动排序组件: - lua_processor@*wanxiang.context_reorder*P, - lua_processor@*wanxiang.super_sequence*P, - lua_translator@*wanxiang.input_statistics, - lua_filter@*wanxiang.auto_phrase, - lua_filter@*wanxiang.context_reorder*F, - lua_filter@*wanxiang.super_sequence*F"
+        ],
+        "disabled_features": [
+          "云功能、神经重排、用户学习",
+          "Lua context_reorder、auto_phrase、input_statistics、super_sequence（测试隔离要求；不是完整默认体验）"
+        ],
+        "missing_plugins_or_features": [],
+        "session_user_dir": "/tmp/gogaku-ime-benchmark/rime/R2/users/user-l5Qf6F",
+        "load_boundary": "main entry before dlopen through initialized session/schema/options; excludes deployment"
+      }
+    },
+    "parent_ready_ms": 2258.319425,
+    "resources": {
+      "pid": 84801,
+      "rss_bytes": 30941184,
+      "cpu_time": "0:01.77",
+      "pcpu": 40.4
+    },
+    "command": [
+      "/tmp/gogaku-ime-benchmark/rime/rime-input-worker",
+      "--library",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/librime.1.dylib",
+      "--shared",
+      "/tmp/gogaku-ime-benchmark/rime/R2/shared",
+      "--build",
+      "/tmp/gogaku-ime-benchmark/rime/R2/build",
+      "--users",
+      "/tmp/gogaku-ime-benchmark/rime/R2/users",
+      "--schema",
+      "wanxiang",
+      "--id",
+      "R2",
+      "--config",
+      "/tmp/gogaku-ime-benchmark/rime/R2/worker-config.json",
+      "--plugin",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/rime-plugins/librime-lua.dylib",
+      "--plugin",
+      "/Library/Input Methods/Squirrel.app/Contents/Frameworks/rime-plugins/librime-octagram.dylib"
+    ]
+  },
+  "I0": {
+    "ready": {
+      "ready": true,
+      "engine": "libime",
+      "version": "1.1.17@5be1300ea00e899b3f2c46d1e9f6bca21139cdeb",
+      "load_ms": 69.790594,
+      "config": {
+        "id": "I0",
+        "profile": "Xiaohe",
+        "dictionary": "/tmp/gogaku-ime-benchmark/libime/data/sc.dict",
+        "language_model": "/tmp/gogaku-ime-benchmark/libime/data/zh_CN.lm",
+        "load_boundary": "main entry through profile, model, dictionary and context construction; excludes ready JSON serialization",
+        "raw_input": "userInput().substr(selectedLength()); selected prefix retained internally until full commit",
+        "selection": "candidatesToCursor/selectCandidatesToCursor; partial selection retains preedit; full selection commits selectedSentence and clears",
+        "learning": "no learn/load-user/history/context-word calls; fresh in-memory user model",
+        "settings": "libime API defaults except Xiaohe, useShuangpin=true and Pinyin preedit; not a complete fcitx frontend configuration",
+        "candidate_limit": 10,
+        "nbest": 1,
+        "beam_size": 20,
+        "frame_size": 40,
+        "word_candidate_limit": 15
+      }
+    },
+    "parent_ready_ms": 100.248025,
+    "resources": {
+      "pid": 84806,
+      "rss_bytes": 47460352,
+      "cpu_time": "0:00.09",
+      "pcpu": 21.5
+    },
+    "command": [
+      "/tmp/gogaku-ime-benchmark/libime/worker",
+      "/tmp/gogaku-ime-benchmark/libime/data/sc.dict",
+      "/tmp/gogaku-ime-benchmark/libime/data/zh_CN.lm"
+    ]
+  }
+}

@@ -1,0 +1,960 @@
+{
+  "scope": "Core-only hot generation with product data; synthetic exploratory sample, no UI or host validation",
+  "verified_complete": true,
+  "config_ids": [
+    "Q0",
+    "R0",
+    "R1",
+    "R2",
+    "I0"
+  ],
+  "cases_sha256": "68aa67d057b8ca1f95c604e7ccb3bf034736b4c8234199b3b577b56f36c9f5de",
+  "case_count": 40,
+  "rounds": 33,
+  "total_key_events": 52800,
+  "events_per_config": {
+    "Q0": 10560,
+    "R0": 10560,
+    "R1": 10560,
+    "R2": 10560,
+    "I0": 10560
+  },
+  "anomalies": {},
+  "quality": {
+    "Q0": {
+      "n": 40,
+      "top1": 37,
+      "top10": 38,
+      "single_selection_complete": 38,
+      "by_stratum": {
+        "ambiguous": {
+          "n": 1,
+          "top1": 1,
+          "top10": 1,
+          "single_selection_complete": 1
+        },
+        "daily": {
+          "n": 9,
+          "top1": 9,
+          "top10": 9,
+          "single_selection_complete": 9
+        },
+        "entity": {
+          "n": 5,
+          "top1": 4,
+          "top10": 5,
+          "single_selection_complete": 5
+        },
+        "learning": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "long": {
+          "n": 2,
+          "top1": 1,
+          "top10": 1,
+          "single_selection_complete": 1
+        },
+        "polyphone": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "technical": {
+          "n": 4,
+          "top1": 3,
+          "top10": 3,
+          "single_selection_complete": 3
+        },
+        "work": {
+          "n": 7,
+          "top1": 7,
+          "top10": 7,
+          "single_selection_complete": 7
+        },
+        "zero-initial": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        }
+      }
+    },
+    "R0": {
+      "n": 40,
+      "top1": 34,
+      "top10": 35,
+      "single_selection_complete": 35,
+      "by_stratum": {
+        "ambiguous": {
+          "n": 1,
+          "top1": 1,
+          "top10": 1,
+          "single_selection_complete": 1
+        },
+        "daily": {
+          "n": 9,
+          "top1": 9,
+          "top10": 9,
+          "single_selection_complete": 9
+        },
+        "entity": {
+          "n": 5,
+          "top1": 4,
+          "top10": 5,
+          "single_selection_complete": 5
+        },
+        "learning": {
+          "n": 4,
+          "top1": 3,
+          "top10": 3,
+          "single_selection_complete": 3
+        },
+        "long": {
+          "n": 2,
+          "top1": 0,
+          "top10": 0,
+          "single_selection_complete": 0
+        },
+        "polyphone": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "technical": {
+          "n": 4,
+          "top1": 3,
+          "top10": 3,
+          "single_selection_complete": 3
+        },
+        "work": {
+          "n": 7,
+          "top1": 6,
+          "top10": 6,
+          "single_selection_complete": 6
+        },
+        "zero-initial": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        }
+      }
+    },
+    "R1": {
+      "n": 40,
+      "top1": 39,
+      "top10": 39,
+      "single_selection_complete": 39,
+      "by_stratum": {
+        "ambiguous": {
+          "n": 1,
+          "top1": 1,
+          "top10": 1,
+          "single_selection_complete": 1
+        },
+        "daily": {
+          "n": 9,
+          "top1": 9,
+          "top10": 9,
+          "single_selection_complete": 9
+        },
+        "entity": {
+          "n": 5,
+          "top1": 5,
+          "top10": 5,
+          "single_selection_complete": 5
+        },
+        "learning": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "long": {
+          "n": 2,
+          "top1": 2,
+          "top10": 2,
+          "single_selection_complete": 2
+        },
+        "polyphone": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "technical": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "work": {
+          "n": 7,
+          "top1": 6,
+          "top10": 6,
+          "single_selection_complete": 6
+        },
+        "zero-initial": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        }
+      }
+    },
+    "R2": {
+      "n": 40,
+      "top1": 39,
+      "top10": 39,
+      "single_selection_complete": 39,
+      "by_stratum": {
+        "ambiguous": {
+          "n": 1,
+          "top1": 1,
+          "top10": 1,
+          "single_selection_complete": 1
+        },
+        "daily": {
+          "n": 9,
+          "top1": 9,
+          "top10": 9,
+          "single_selection_complete": 9
+        },
+        "entity": {
+          "n": 5,
+          "top1": 5,
+          "top10": 5,
+          "single_selection_complete": 5
+        },
+        "learning": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "long": {
+          "n": 2,
+          "top1": 2,
+          "top10": 2,
+          "single_selection_complete": 2
+        },
+        "polyphone": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "technical": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "work": {
+          "n": 7,
+          "top1": 6,
+          "top10": 6,
+          "single_selection_complete": 6
+        },
+        "zero-initial": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        }
+      }
+    },
+    "I0": {
+      "n": 40,
+      "top1": 38,
+      "top10": 39,
+      "single_selection_complete": 39,
+      "by_stratum": {
+        "ambiguous": {
+          "n": 1,
+          "top1": 1,
+          "top10": 1,
+          "single_selection_complete": 1
+        },
+        "daily": {
+          "n": 9,
+          "top1": 9,
+          "top10": 9,
+          "single_selection_complete": 9
+        },
+        "entity": {
+          "n": 5,
+          "top1": 4,
+          "top10": 5,
+          "single_selection_complete": 5
+        },
+        "learning": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "long": {
+          "n": 2,
+          "top1": 2,
+          "top10": 2,
+          "single_selection_complete": 2
+        },
+        "polyphone": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        },
+        "technical": {
+          "n": 4,
+          "top1": 3,
+          "top10": 3,
+          "single_selection_complete": 3
+        },
+        "work": {
+          "n": 7,
+          "top1": 7,
+          "top10": 7,
+          "single_selection_complete": 7
+        },
+        "zero-initial": {
+          "n": 4,
+          "top1": 4,
+          "top10": 4,
+          "single_selection_complete": 4
+        }
+      }
+    }
+  },
+  "measurement": {
+    "rounds": 33,
+    "keys_per_round": 320,
+    "configs": {
+      "Q0": {
+        "core": {
+          "n": 10560,
+          "p50_ms": 1.754962,
+          "p95_ms": 12.309260649999981,
+          "p99_ms": 24.57698105999998,
+          "max_ms": 60.646744,
+          "mean_ms": 3.4641782547348487
+        },
+        "process": {
+          "n": 10560,
+          "p50_ms": 1.574475,
+          "p95_ms": 11.834361099999988,
+          "p99_ms": 23.897466009999995,
+          "max_ms": 59.969323,
+          "mean_ms": 3.2233538984848487
+        },
+        "collect": {
+          "n": 10560,
+          "p50_ms": 0.14115,
+          "p95_ms": 0.7402831999999987,
+          "p99_ms": 1.4388202599999995,
+          "max_ms": 8.394824,
+          "mean_ms": 0.2405277959280303
+        },
+        "rtt": {
+          "n": 10560,
+          "p50_ms": 1.9283395,
+          "p95_ms": 12.58309269999999,
+          "p99_ms": 24.838761309999978,
+          "max_ms": 61.000507,
+          "mean_ms": 3.6453884365530302
+        },
+        "final": {
+          "n": 1320,
+          "p50_ms": 1.3079355,
+          "p95_ms": 4.354747699999997,
+          "p99_ms": 8.730594059999996,
+          "max_ms": 12.521593,
+          "mean_ms": 1.765247193181818
+        },
+        "strata": {
+          "daily": {
+            "n": 1914,
+            "p50_ms": 1.972785,
+            "p95_ms": 15.287236549999998,
+            "p99_ms": 32.463530099999986,
+            "max_ms": 60.646744,
+            "mean_ms": 4.251032202716823
+          },
+          "learning": {
+            "n": 1254,
+            "p50_ms": 1.4393865,
+            "p95_ms": 10.860374649999999,
+            "p99_ms": 19.880668059999998,
+            "max_ms": 28.070298,
+            "mean_ms": 2.9815847719298247
+          },
+          "work": {
+            "n": 2508,
+            "p50_ms": 1.4060515,
+            "p95_ms": 9.843239250000002,
+            "p99_ms": 19.634908699999983,
+            "max_ms": 51.555984,
+            "mean_ms": 2.795160999202552
+          },
+          "long": {
+            "n": 1782,
+            "p50_ms": 1.954963,
+            "p95_ms": 7.7596416499999945,
+            "p99_ms": 14.490187400000003,
+            "max_ms": 31.236592,
+            "mean_ms": 2.7700208058361393
+          },
+          "technical": {
+            "n": 990,
+            "p50_ms": 1.709429,
+            "p95_ms": 12.271550849999993,
+            "p99_ms": 23.438928620000013,
+            "max_ms": 41.360168,
+            "mean_ms": 3.527450270707071
+          },
+          "entity": {
+            "n": 924,
+            "p50_ms": 1.858873,
+            "p95_ms": 15.62159584999996,
+            "p99_ms": 27.587686209999994,
+            "max_ms": 41.911181,
+            "mean_ms": 4.194993196969698
+          },
+          "ambiguous": {
+            "n": 132,
+            "p50_ms": 3.632291,
+            "p95_ms": 17.555794549999998,
+            "p99_ms": 25.83422443999999,
+            "max_ms": 35.139643,
+            "mean_ms": 6.024500856060606
+          },
+          "polyphone": {
+            "n": 528,
+            "p50_ms": 3.101785,
+            "p95_ms": 21.129214199999982,
+            "p99_ms": 30.995508480000023,
+            "max_ms": 59.809575,
+            "mean_ms": 5.9940216553030305
+          },
+          "zero-initial": {
+            "n": 528,
+            "p50_ms": 1.6928635,
+            "p95_ms": 7.887419699999988,
+            "p99_ms": 13.71467008,
+            "max_ms": 33.56008,
+            "mean_ms": 2.7111203390151513
+          }
+        },
+        "round_p50_range_ms": [
+          1.065166,
+          3.4746835
+        ],
+        "sampled_peak_rss_bytes": 310804480
+      },
+      "R0": {
+        "core": {
+          "n": 10560,
+          "p50_ms": 1.006,
+          "p95_ms": 2.6010999999999984,
+          "p99_ms": 5.95669999999999,
+          "max_ms": 29.561,
+          "mean_ms": 1.281850946969697
+        },
+        "process": {
+          "n": 10560,
+          "p50_ms": 0.335,
+          "p95_ms": 1.048,
+          "p99_ms": 1.8175099999999984,
+          "max_ms": 27.824,
+          "mean_ms": 0.4536246212121212
+        },
+        "collect": {
+          "n": 10560,
+          "p50_ms": 0.637,
+          "p95_ms": 1.6800499999999994,
+          "p99_ms": 2.5591499999999976,
+          "max_ms": 9.221,
+          "mean_ms": 0.8282263257575758
+        },
+        "rtt": {
+          "n": 10560,
+          "p50_ms": 1.143381,
+          "p95_ms": 2.9454885499999968,
+          "p99_ms": 6.5534241999999985,
+          "max_ms": 30.005032,
+          "mean_ms": 1.4577547112689393
+        },
+        "final": {
+          "n": 1320,
+          "p50_ms": 1.016,
+          "p95_ms": 2.5431,
+          "p99_ms": 3.81079999999999,
+          "max_ms": 10.174,
+          "mean_ms": 1.2857037878787878
+        },
+        "strata": {
+          "daily": {
+            "n": 1914,
+            "p50_ms": 0.9255,
+            "p95_ms": 2.5630999999999995,
+            "p99_ms": 5.30093999999995,
+            "max_ms": 11.841,
+            "mean_ms": 1.2147345872518285
+          },
+          "learning": {
+            "n": 1254,
+            "p50_ms": 0.948,
+            "p95_ms": 2.658,
+            "p99_ms": 6.389520000000005,
+            "max_ms": 9.351,
+            "mean_ms": 1.265921052631579
+          },
+          "work": {
+            "n": 2508,
+            "p50_ms": 0.9815,
+            "p95_ms": 2.5293,
+            "p99_ms": 5.771419999999951,
+            "max_ms": 10.532,
+            "mean_ms": 1.2725929027113236
+          },
+          "long": {
+            "n": 1782,
+            "p50_ms": 1.2425,
+            "p95_ms": 3.1335999999999986,
+            "p99_ms": 7.0301300000000015,
+            "max_ms": 11.345,
+            "mean_ms": 1.5620634118967451
+          },
+          "technical": {
+            "n": 990,
+            "p50_ms": 0.968,
+            "p95_ms": 2.553449999999999,
+            "p99_ms": 4.4421300000000175,
+            "max_ms": 11.499,
+            "mean_ms": 1.2556232323232324
+          },
+          "entity": {
+            "n": 924,
+            "p50_ms": 0.926,
+            "p95_ms": 2.319649999999999,
+            "p99_ms": 5.124299999999991,
+            "max_ms": 9.063,
+            "mean_ms": 1.1932748917748919
+          },
+          "ambiguous": {
+            "n": 132,
+            "p50_ms": 0.857,
+            "p95_ms": 2.068399999999999,
+            "p99_ms": 2.49856,
+            "max_ms": 2.627,
+            "mean_ms": 1.048469696969697
+          },
+          "polyphone": {
+            "n": 528,
+            "p50_ms": 0.867,
+            "p95_ms": 2.0174999999999987,
+            "p99_ms": 5.86667000000002,
+            "max_ms": 9.375,
+            "mean_ms": 1.1244034090909092
+          },
+          "zero-initial": {
+            "n": 528,
+            "p50_ms": 0.817,
+            "p95_ms": 1.9218499999999998,
+            "p99_ms": 3.2079500000000167,
+            "max_ms": 29.561,
+            "mean_ms": 1.081217803030303
+          }
+        },
+        "round_p50_range_ms": [
+          0.747,
+          2.413
+        ],
+        "sampled_peak_rss_bytes": 37011456
+      },
+      "R1": {
+        "core": {
+          "n": 10560,
+          "p50_ms": 4.437,
+          "p95_ms": 13.853349999999994,
+          "p99_ms": 17.95905,
+          "max_ms": 79.308,
+          "mean_ms": 5.887507765151516
+        },
+        "process": {
+          "n": 10560,
+          "p50_ms": 3.5585,
+          "p95_ms": 10.773749999999989,
+          "p99_ms": 15.035529999999994,
+          "max_ms": 75.743,
+          "mean_ms": 4.705897632575758
+        },
+        "collect": {
+          "n": 10560,
+          "p50_ms": 0.89,
+          "p95_ms": 2.526,
+          "p99_ms": 5.813069999999996,
+          "max_ms": 12.925,
+          "mean_ms": 1.1816101325757575
+        },
+        "rtt": {
+          "n": 10560,
+          "p50_ms": 4.5953265,
+          "p95_ms": 14.217534749999981,
+          "p99_ms": 18.47243052,
+          "max_ms": 80.253685,
+          "mean_ms": 6.0975232139204545
+        },
+        "final": {
+          "n": 1320,
+          "p50_ms": 4.498,
+          "p95_ms": 14.558549999999984,
+          "p99_ms": 19.036359999999995,
+          "max_ms": 49.276,
+          "mean_ms": 6.09769696969697
+        },
+        "strata": {
+          "daily": {
+            "n": 1914,
+            "p50_ms": 4.264,
+            "p95_ms": 13.217749999999985,
+            "p99_ms": 17.860129999999987,
+            "max_ms": 36.452,
+            "mean_ms": 5.725539707419017
+          },
+          "learning": {
+            "n": 1254,
+            "p50_ms": 4.407,
+            "p95_ms": 13.633449999999998,
+            "p99_ms": 16.967890000000004,
+            "max_ms": 30.604,
+            "mean_ms": 5.7736403508771925
+          },
+          "work": {
+            "n": 2508,
+            "p50_ms": 4.5095,
+            "p95_ms": 14.004,
+            "p99_ms": 18.249719999999982,
+            "max_ms": 71.086,
+            "mean_ms": 5.956323763955343
+          },
+          "long": {
+            "n": 1782,
+            "p50_ms": 4.8365,
+            "p95_ms": 14.32139999999998,
+            "p99_ms": 18.2487,
+            "max_ms": 34.417,
+            "mean_ms": 6.2969921436588105
+          },
+          "technical": {
+            "n": 990,
+            "p50_ms": 4.437,
+            "p95_ms": 14.157849999999998,
+            "p99_ms": 19.4032,
+            "max_ms": 23.197,
+            "mean_ms": 5.815386868686868
+          },
+          "entity": {
+            "n": 924,
+            "p50_ms": 4.2545,
+            "p95_ms": 13.620499999999996,
+            "p99_ms": 17.16777,
+            "max_ms": 36.093,
+            "mean_ms": 5.7318777056277055
+          },
+          "ambiguous": {
+            "n": 132,
+            "p50_ms": 4.245,
+            "p95_ms": 13.81684999999999,
+            "p99_ms": 18.47674,
+            "max_ms": 20.957,
+            "mean_ms": 5.8675378787878785
+          },
+          "polyphone": {
+            "n": 528,
+            "p50_ms": 4.133,
+            "p95_ms": 13.134249999999994,
+            "p99_ms": 17.073680000000003,
+            "max_ms": 79.308,
+            "mean_ms": 5.734935606060606
+          },
+          "zero-initial": {
+            "n": 528,
+            "p50_ms": 4.053,
+            "p95_ms": 13.497299999999997,
+            "p99_ms": 16.78957000000001,
+            "max_ms": 49.276,
+            "mean_ms": 5.6013352272727275
+          }
+        },
+        "round_p50_range_ms": [
+          3.341,
+          12.6985
+        ],
+        "sampled_peak_rss_bytes": 44474368
+      },
+      "R2": {
+        "core": {
+          "n": 10560,
+          "p50_ms": 14.953,
+          "p95_ms": 39.89854999999999,
+          "p99_ms": 53.30379,
+          "max_ms": 172.923,
+          "mean_ms": 19.592220359848483
+        },
+        "process": {
+          "n": 10560,
+          "p50_ms": 14.901,
+          "p95_ms": 39.72564999999998,
+          "p99_ms": 53.086399999999976,
+          "max_ms": 172.788,
+          "mean_ms": 19.52231941287879
+        },
+        "collect": {
+          "n": 10560,
+          "p50_ms": 0.054,
+          "p95_ms": 0.117,
+          "p99_ms": 0.19640999999999986,
+          "max_ms": 6.9,
+          "mean_ms": 0.06990094696969698
+        },
+        "rtt": {
+          "n": 10560,
+          "p50_ms": 15.1211625,
+          "p95_ms": 40.31577605,
+          "p99_ms": 53.61522681999999,
+          "max_ms": 173.314525,
+          "mean_ms": 19.816950423295452
+        },
+        "final": {
+          "n": 1320,
+          "p50_ms": 14.791,
+          "p95_ms": 39.9627,
+          "p99_ms": 55.27849999999998,
+          "max_ms": 71.503,
+          "mean_ms": 19.641276515151514
+        },
+        "strata": {
+          "daily": {
+            "n": 1914,
+            "p50_ms": 15.151,
+            "p95_ms": 42.500699999999995,
+            "p99_ms": 61.20083999999998,
+            "max_ms": 172.923,
+            "mean_ms": 20.155510449320793
+          },
+          "learning": {
+            "n": 1254,
+            "p50_ms": 14.711,
+            "p95_ms": 39.278499999999994,
+            "p99_ms": 50.06618000000006,
+            "max_ms": 75.257,
+            "mean_ms": 19.63741387559809
+          },
+          "work": {
+            "n": 2508,
+            "p50_ms": 15.0185,
+            "p95_ms": 40.10045,
+            "p99_ms": 50.88078999999992,
+            "max_ms": 67.648,
+            "mean_ms": 19.587112041467304
+          },
+          "long": {
+            "n": 1782,
+            "p50_ms": 15.89,
+            "p95_ms": 41.99054999999999,
+            "p99_ms": 53.68276000000003,
+            "max_ms": 81.425,
+            "mean_ms": 20.538796857463524
+          },
+          "technical": {
+            "n": 990,
+            "p50_ms": 14.5085,
+            "p95_ms": 35.95944999999999,
+            "p99_ms": 45.64291,
+            "max_ms": 93.928,
+            "mean_ms": 18.73597575757576
+          },
+          "entity": {
+            "n": 924,
+            "p50_ms": 14.5905,
+            "p95_ms": 37.27424999999998,
+            "p99_ms": 55.572889999999994,
+            "max_ms": 84.447,
+            "mean_ms": 19.14913528138528
+          },
+          "ambiguous": {
+            "n": 132,
+            "p50_ms": 14.579,
+            "p95_ms": 35.01595,
+            "p99_ms": 49.13844999999998,
+            "max_ms": 54.176,
+            "mean_ms": 18.66153787878788
+          },
+          "polyphone": {
+            "n": 528,
+            "p50_ms": 14.478,
+            "p95_ms": 37.88804999999999,
+            "p99_ms": 52.73548000000004,
+            "max_ms": 61.656,
+            "mean_ms": 18.558755681818184
+          },
+          "zero-initial": {
+            "n": 528,
+            "p50_ms": 13.5025,
+            "p95_ms": 34.5297,
+            "p99_ms": 51.697300000000006,
+            "max_ms": 60.414,
+            "mean_ms": 17.919520833333333
+          }
+        },
+        "round_p50_range_ms": [
+          11.3855,
+          37.088
+        ],
+        "sampled_peak_rss_bytes": 86253568
+      },
+      "I0": {
+        "core": {
+          "n": 10560,
+          "p50_ms": 2.9293035,
+          "p95_ms": 10.975205949999998,
+          "p99_ms": 17.875547269999988,
+          "max_ms": 89.030185,
+          "mean_ms": 3.9443479421401517
+        },
+        "process": {
+          "n": 10560,
+          "p50_ms": 2.9151005,
+          "p95_ms": 10.949172899999999,
+          "p99_ms": 17.85096069999999,
+          "max_ms": 89.008086,
+          "mean_ms": 3.9279950387310603
+        },
+        "collect": {
+          "n": 10560,
+          "p50_ms": 0.0127025,
+          "p95_ms": 0.0350981,
+          "p99_ms": 0.06310758,
+          "max_ms": 0.941457,
+          "mean_ms": 0.01635290340909091
+        },
+        "rtt": {
+          "n": 10560,
+          "p50_ms": 3.113069,
+          "p95_ms": 11.384655849999998,
+          "p99_ms": 18.384087279999985,
+          "max_ms": 89.592067,
+          "mean_ms": 4.169313776325757
+        },
+        "final": {
+          "n": 1320,
+          "p50_ms": 1.638002,
+          "p95_ms": 4.603462749999999,
+          "p99_ms": 8.161017359999992,
+          "max_ms": 13.559447,
+          "mean_ms": 2.0149200060606063
+        },
+        "strata": {
+          "daily": {
+            "n": 1914,
+            "p50_ms": 2.992729,
+            "p95_ms": 10.79679474999999,
+            "p99_ms": 16.644766399999995,
+            "max_ms": 24.21174,
+            "mean_ms": 3.967318408568443
+          },
+          "learning": {
+            "n": 1254,
+            "p50_ms": 3.1759495,
+            "p95_ms": 12.150497949999993,
+            "p99_ms": 17.879678090000002,
+            "max_ms": 22.274975,
+            "mean_ms": 4.224623836523126
+          },
+          "work": {
+            "n": 2508,
+            "p50_ms": 2.642808,
+            "p95_ms": 9.91240975,
+            "p99_ms": 15.52710633,
+            "max_ms": 41.984691,
+            "mean_ms": 3.576975483652313
+          },
+          "long": {
+            "n": 1782,
+            "p50_ms": 3.2156865,
+            "p95_ms": 10.694404749999986,
+            "p99_ms": 16.22119007000001,
+            "max_ms": 22.968317,
+            "mean_ms": 4.051815039842873
+          },
+          "technical": {
+            "n": 990,
+            "p50_ms": 2.959376,
+            "p95_ms": 11.0964596,
+            "p99_ms": 17.55719288000002,
+            "max_ms": 57.879375,
+            "mean_ms": 4.081778395959597
+          },
+          "entity": {
+            "n": 924,
+            "p50_ms": 3.2066985,
+            "p95_ms": 11.74592714999999,
+            "p99_ms": 20.04957911999997,
+            "max_ms": 89.030185,
+            "mean_ms": 4.354868218614719
+          },
+          "ambiguous": {
+            "n": 132,
+            "p50_ms": 5.1705215,
+            "p95_ms": 14.037027949999983,
+            "p99_ms": 21.173960519999998,
+            "max_ms": 22.669772,
+            "mean_ms": 5.8656858106060605
+          },
+          "polyphone": {
+            "n": 528,
+            "p50_ms": 3.8579775,
+            "p95_ms": 16.2499665,
+            "p99_ms": 26.946107850000026,
+            "max_ms": 47.02341,
+            "mean_ms": 5.523286166666667
+          },
+          "zero-initial": {
+            "n": 528,
+            "p50_ms": 0.8312855,
+            "p95_ms": 5.431298649999999,
+            "p99_ms": 9.606546740000011,
+            "max_ms": 25.017736,
+            "mean_ms": 1.5423771988636366
+          }
+        },
+        "round_p50_range_ms": [
+          1.9950775,
+          6.296424
+        ],
+        "sampled_peak_rss_bytes": 105967616
+      }
+    },
+    "scope": "Hot serial key-to-ten-candidates in core; no UI/host/translation"
+  },
+  "network_control": {
+    "command": [
+      "/usr/bin/sandbox-exec",
+      "-p",
+      "(version 1)(allow default)(deny network*)",
+      "/usr/local/opt/python@3.15/bin/python3.15",
+      "-c",
+      "import socket; socket.create_connection(('1.1.1.1',443),timeout=2)"
+    ],
+    "returncode": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n    import socket; socket.create_connection(('1.1.1.1',443),timeout=2)\n                   ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/usr/local/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socket.py\", line 883, in create_connection\n    raise exceptions[0]\n  File \"/usr/local/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/lib/python3.15/socket.py\", line 868, in create_connection\n    sock.connect(sa)\n    ~~~~~~~~~~~~^^^^\nPermissionError: [Errno 1] Operation not permitted"
+  }
+}

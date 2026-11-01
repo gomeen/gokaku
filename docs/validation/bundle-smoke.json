@@ -1,0 +1,69 @@
+{
+  "checkedAt": "2026-11-01T01:32:48.617285+00:00",
+  "apps": [
+    {
+      "app": "/Users/gomeen/code/gomeen/gogaku/dist/Gogaku.app",
+      "signature": "valid_ad_hoc_local_only",
+      "dependencyClosure": "package_and_system_only",
+      "binaries": [
+        "Frameworks/libboost_iostreams.dylib",
+        "Frameworks/libboost_random.dylib",
+        "Frameworks/libgogaku_core.dylib",
+        "Frameworks/libintl.8.dylib",
+        "Frameworks/liblzma.5.dylib",
+        "Frameworks/libzstd.1.dylib",
+        "Frameworks/libIMECore.0.dylib",
+        "Frameworks/libIMEPinyin.0.dylib",
+        "Frameworks/libFcitx5Utils.2.dylib",
+        "Frameworks/libGogakuEngine.dylib",
+        "MacOS/GogakuInput",
+        "Helpers/GogakuTranslator"
+      ]
+    },
+    {
+      "app": "/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Settings.app",
+      "signature": "valid_ad_hoc_local_only",
+      "dependencyClosure": "package_and_system_only",
+      "binaries": [
+        "Frameworks/libboost_iostreams.dylib",
+        "Frameworks/libboost_random.dylib",
+        "Frameworks/libgogaku_core.dylib",
+        "Frameworks/libintl.8.dylib",
+        "Frameworks/liblzma.5.dylib",
+        "Frameworks/libzstd.1.dylib",
+        "Frameworks/libIMECore.0.dylib",
+        "Frameworks/libIMEPinyin.0.dylib",
+        "Frameworks/libFcitx5Utils.2.dylib",
+        "Frameworks/libGogakuEngine.dylib",
+        "MacOS/GogakuSettings"
+      ]
+    }
+  ],
+  "menuIcon": {
+    "gogaku-menu.pdf": "PASS: 22x16pt page, ink=16078, holes=3110, bounds=(3,124)-(172,124)"
+  },
+  "engine": "passed_factory_xiaohe_from_package",
+  "normalCore": "passed_normal_xiaohe_from_package_abi_v2",
+  "dataAndLicenses": {
+    "english-words.txt": {
+      "sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+      "lines": 50000
+    },
+    "gloss.tsv": {
+      "sha256": "c364ff27433f95c2cb8db1309ccc8ea5f799477513c687528b72c536f51f61c5",
+      "lines": 161842
+    },
+    "licenses": "data_licenses_present"
+  },
+  "spelling": "passed_utf16_from_package",
+  "systemResources": {
+    "enToZh": "supported",
+    "os": "Version 26.7.2 (Build 25G332)",
+    "quality": "unreviewed",
+    "strategy": "systemDefault",
+    "zhToEn": "supported"
+  },
+  "hostAcceptance": "not_tested",
+  "qualityAcceptance": "not_tested",
+  "performanceAcceptance": "not_tested"
+}

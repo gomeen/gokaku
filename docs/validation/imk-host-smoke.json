@@ -1,0 +1,152 @@
+{
+  "checkedAt": "2026-11-01T01:31:10.218554+00:00",
+  "checks": [
+    {
+      "name": "native_control_space_both_directions",
+      "passed": true,
+      "evidence": [
+        [
+          "com.apple.keylayout.ABC",
+          "org.gogaku.inputmethod.Hans"
+        ],
+        [
+          "com.apple.keylayout.ABC",
+          "org.gogaku.inputmethod.Hans"
+        ],
+        [
+          "com.apple.keylayout.ABC",
+          "org.gogaku.inputmethod.Hans"
+        ]
+      ]
+    },
+    {
+      "name": "native_preedit_stays_out_of_host",
+      "passed": true,
+      "evidence": "nihc"
+    },
+    {
+      "name": "input_source_ready",
+      "passed": true,
+      "evidence": "attempt 1"
+    },
+    {
+      "name": "native_space_commits_once",
+      "passed": true,
+      "evidence": {
+        "text": "你好 ",
+        "inserts": 3
+      }
+    },
+    {
+      "name": "native_enter_commits_original_once",
+      "passed": true,
+      "evidence": {
+        "text": "m",
+        "inserts": 2
+      }
+    },
+    {
+      "name": "native_field_change_revokes_old_commit",
+      "passed": true,
+      "evidence": {
+        "first": "m",
+        "second": " "
+      }
+    },
+    {
+      "name": "native_original_replaces_selected_text_once",
+      "passed": true,
+      "evidence": {
+        "text": "left m right",
+        "inserts": 1
+      }
+    },
+    {
+      "name": "native_rapid_original_preserves_accepted_keys",
+      "passed": true,
+      "evidence": {
+        "text": "ni",
+        "inserts": 2
+      }
+    },
+    {
+      "name": "native_rapid_single_original_commits_once",
+      "passed": true,
+      "evidence": {
+        "text": "m",
+        "inserts": 2
+      }
+    },
+    {
+      "name": "native_digit_selects_first_page_candidate",
+      "passed": true,
+      "evidence": "n出"
+    },
+    {
+      "name": "native_period_pages_down_before_digit",
+      "passed": true,
+      "evidence": "n种"
+    },
+    {
+      "name": "native_comma_pages_back_to_first",
+      "passed": true,
+      "evidence": "n出"
+    },
+    {
+      "name": "native_backspace_passes_through_without_composition",
+      "passed": true,
+      "evidence": {
+        "text": "abc",
+        "inserts": 0
+      }
+    },
+    {
+      "name": "native_backspace_edits_composition_then_commits",
+      "passed": true,
+      "evidence": {
+        "before": "",
+        "text": "你",
+        "inserts": 3
+      }
+    },
+    {
+      "name": "orca_terminal_control_space_both_directions",
+      "passed": true,
+      "evidence": [
+        [
+          "com.apple.keylayout.ABC",
+          "org.gogaku.inputmethod.Hans"
+        ],
+        [
+          "com.apple.keylayout.ABC",
+          "org.gogaku.inputmethod.Hans"
+        ],
+        [
+          "com.apple.keylayout.ABC",
+          "org.gogaku.inputmethod.Hans"
+        ]
+      ]
+    },
+    {
+      "name": "orca_preedit_stays_out_of_terminal",
+      "passed": true,
+      "evidence": "no PTY bytes before confirmation"
+    },
+    {
+      "name": "orca_space_commits_once",
+      "passed": true,
+      "evidence": "e4bda0e5a5bd"
+    },
+    {
+      "name": "orca_enter_commits_original_once",
+      "passed": true,
+      "evidence": "e4bda0e5a5bd6d0d"
+    },
+    {
+      "name": "orca_source_change_cancels_old_composition",
+      "passed": true,
+      "evidence": "e4bda0e5a5bd6d0de4bda0e5a5bd"
+    }
+  ],
+  "installedInputSHA256": "cd5012ebb7b36f18c4f1656f2c66f4d72fbaa8accf29a051edd812b585904f83"
+}

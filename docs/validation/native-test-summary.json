@@ -1,0 +1,127 @@
+{
+  "recordedAt": "2026-10-31T02:14:58.012936+00:00",
+  "command": "DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -j 2",
+  "nativePrerequisite": "cmake --build .build/native -j 2",
+  "tests": 25,
+  "failures": 0,
+  "wallSeconds": 14.601,
+  "hostAcceptance": "not_tested",
+  "qualityAcceptance": "not_tested",
+  "performanceAcceptance": "not_tested",
+  "cases": [
+    {
+      "suite": "EngineTests",
+      "name": "testCandidateAppendNeverRenumbersAndNavigationFreezes"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testDraftsNeverOverwriteAndExplicitTake"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testEnglishUnicodeAndCompletionAreIndependent"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testFactoryXiaoheCompleteAndNonFirst"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testFocusModeAndDirectionInvalidateCandidates"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testLiteralChineseSegmentsAndPartialLearningConsumption"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testOriginalOnlyOnceAndScalarLimit"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testPagingEditingAndInvalidCommandsPreserveState"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testPartialSelectionUsesGraphRange"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testSessionStaleCandidateAndNoAutomaticCommit"
+    },
+    {
+      "suite": "EngineTests",
+      "name": "testSettingsThemeDefaultPreservesLegacyFiles"
+    },
+    {
+      "suite": "HostTests",
+      "name": "testCommitUsesClientSelection"
+    },
+    {
+      "suite": "HostTests",
+      "name": "testConfirmedTextHandoffDoesNotCommitBeforeInsertion"
+    },
+    {
+      "suite": "HostTests",
+      "name": "testMissingClientDoesNotReportIssuedCommit"
+    },
+    {
+      "suite": "HostTests",
+      "name": "testNativeSelectedTextIsReplaced"
+    },
+    {
+      "suite": "SpellingTests",
+      "name": "testAsyncSpellRangesBelongToExactText"
+    },
+    {
+      "suite": "SpellingTests",
+      "name": "testFinishedWordUTF16AndExemptions"
+    },
+    {
+      "suite": "StoreTests",
+      "name": "testDedupExpiryAndPauseExclusion"
+    },
+    {
+      "suite": "StoreTests",
+      "name": "testDeleteTombstoneRejectsLateDuplicate"
+    },
+    {
+      "suite": "StoreTests",
+      "name": "testStorageFailureDoesNotThrowIntoInput"
+    },
+    {
+      "suite": "TranslationTests",
+      "name": "testHungHelperTimesOutThenRunsLatestAfterExit"
+    },
+    {
+      "suite": "TranslationTests",
+      "name": "testInputLimitPreservesOriginalRequest"
+    },
+    {
+      "suite": "TranslationTests",
+      "name": "testInvalidationPreventsSuccessfulLateResponse"
+    },
+    {
+      "suite": "TranslationTests",
+      "name": "testOneRunningAndOnlyLatestPendingAndNoStaleDelivery"
+    },
+    {
+      "suite": "TranslationTests",
+      "name": "testWrongResourceResponseIsRejected"
+    }
+  ],
+  "sourceSha256": {
+    "Sources/GogakuCore/Composition.swift": "21e64800b6c29ec9e8b4cd69dfcbe9971d1d7d0cf49da66fd1a9e5d668c5c0e9",
+    "Sources/GogakuCore/Engine.swift": "9b83185c2c761f3a6313715a70cb779a262341a72844faad681a6f905e75fc23",
+    "Sources/GogakuCore/LearningStore.swift": "0ae3a2c538ac7119b0f19943652ddf3ddd5929526ef325957d53ec7c47ffbedf",
+    "Sources/GogakuCore/Settings.swift": "97d42daf18c4e05a669fdd58de02976913974228f7ee1dd8c91f18ddcfab3b3d",
+    "Sources/GogakuCore/Translation.swift": "f14417d3294b7345ae68673e26d53b0d50cd8817fbbdaa29e8a3be209a665866",
+    "Tests/GogakuCoreTests/CoreTests.swift": "91119a1f8b7bd86bd6f92c8f51c1f191af6254c354db74059edefb8a9b721703",
+    "Tests/GogakuCoreTests/ServiceTests.swift": "14fce9433eebb0c7722f434f12666885f22224ec69cc5e9868e5dec8931e7180",
+    "native/EngineBridge/engine.cpp": "46d41f210f3fc3549695f09f34f876e463ea60a2ce81b4503ad6d8f6c5bde993",
+    "native/EngineBridge/include/gogaku_engine.h": "b068a4539ed4e6197e4dbce2bf3652b4d57e2e3b2012ad5d3b7d0abd5202c127",
+    "Sources/GogakuHost/Host.m": "a4a58f57b8d1fd939e477303e7d435b53f8547c17df1fef7263da6e8fd0ff860",
+    "Sources/GogakuHost/include/GogakuHost.h": "59115ca85275e31ee38f18fe69288828fe0d54ef5f78096f80e9e2fea34aaff5",
+    "Tests/GogakuCoreTests/HostTests.swift": "85ad2fafc65ca805555c756ec119408b237c38465c799b724b29c32059481f63"
+  }
+}

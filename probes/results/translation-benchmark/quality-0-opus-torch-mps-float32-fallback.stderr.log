@@ -1,0 +1,4 @@
+/private/tmp/gogaku-benchmark/venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+  warnings.warn(
+/private/tmp/gogaku-benchmark/venv/lib/python3.9/site-packages/transformers/generation/utils.py:1562: UserWarning: The operator 'aten::isin.Tensor_Tensor_out' is not currently supported on the MPS backend and will fall back to run on the CPU. This may have performance implications. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/aten/src/ATen/mps/MPSFallback.mm:13.)
+  and torch.isin(elements=eos_token_tensor, test_elements=pad_token_tensor).any()

@@ -1,0 +1,5 @@
+2026-11-01 14:14:30.681 Probe[92999:3193109] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+2026-11-01 14:14:32.549 Probe[92999:3193109] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+开始计时：目标 10000 个按键事件，键间隔 15ms
+IMK 延迟测量：10035 个事件，223 轮，样本 10035 条，用时 369.6s → docs/validation/final-mac/imk-latency-final.json
+{"passed": false, "checks": {"atLeast10000Events": true, "allCallbacksCaptured": true, "allFirstDisplaysCaptured": true, "validClocks": true, "frontGuard": true, "hiddenInConfirmationCallback": true, "hostReceiptsPaired": true, "callbackNs.p95": false, "callbackNs.p99": false, "renderNs.p95": true, "renderNs.p99": true, "firstDisplayNs.p95": true, "firstDisplayNs.p99": true, "selectionToHost.p95": true}, "scope": "热态 AppKit 探针；不包含其他宿主、冷启动、内存或两小时稳定性验收"}

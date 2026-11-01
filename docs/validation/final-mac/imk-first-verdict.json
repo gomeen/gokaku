@@ -1,0 +1,20 @@
+{
+  "passed": false,
+  "checks": {
+    "atLeast10000Events": true,
+    "allCallbacksCaptured": true,
+    "allFirstDisplaysCaptured": true,
+    "validClocks": true,
+    "frontGuard": true,
+    "hiddenInConfirmationCallback": true,
+    "hostReceiptsPaired": true,
+    "callbackNs.p95": false,
+    "callbackNs.p99": false,
+    "renderNs.p95": true,
+    "renderNs.p99": true,
+    "firstDisplayNs.p95": true,
+    "firstDisplayNs.p99": true,
+    "selectionToHost.p95": true
+  },
+  "scope": "热态 AppKit 探针；不包含其他宿主、冷启动、内存或两小时稳定性验收"
+}

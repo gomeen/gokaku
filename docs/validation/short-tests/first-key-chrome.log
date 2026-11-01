@@ -1,0 +1,93 @@
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:84:38: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 82 | for (title, action, key) in [("Undo", Selector(("undo:")), "z"),
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+    |                                      `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:85:39: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+    |                                       `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:86:40: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+    |                                        `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:87:45: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+    |                                             `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+ 89 | }
+2026-11-01 23:48:20.503 Probe[83402:4055257] error messaging the mach port for IMKCFRunLoopWakeUpReliable
+Trying to load the allocator multiple times. This is *not* supported.
+探针宿主已启动（pid 83402）
+候选窗状态 socket 已连接：/Users/gomeen/Library/Logs/Gogaku/validation.sock
+Traceback (most recent call last):
+  File "/Users/gomeen/code/gomeen/gogaku/probes/first_key_regression.py", line 2036, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/Users/gomeen/code/gomeen/gogaku/probes/first_key_regression.py", line 1933, in main
+    session.focus_target()
+    ~~~~~~~~~~~~~~~~~~~~^^
+TypeError: BrowserSession.focus_target() missing 1 required positional argument: 'target'
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[83816:4057328:1101/234842.101171:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[83816:4057328:1101/234842.101768:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.2, arch: x86_64, System uptime (seconds): 149861, parent pid: 83415
+[83816:4057328:1101/234842.105910:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 663288090624B (617.735GiB) / 1000240963584B (931.547GiB)
+[83816:4057328:1101/234842.105974:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 663288090624B (617.735GiB) / 1000240963584B (931.547GiB)
+[83816:4057328:1101/234842.106163:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[83818:4057339:1101/234842.123188:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[83818:4057339:1101/234842.123587:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.2, arch: x86_64, System uptime (seconds): 149861, parent pid: 1
+[83818:4057339:1101/234842.127535:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 663288082432B (617.735GiB) / 1000240963584B (931.547GiB)
+[83818:4057339:1101/234842.127593:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 663288082432B (617.735GiB) / 1000240963584B (931.547GiB)
+[83818:4057339:1101/234842.127752:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[83816:4057328:1101/234842.128534:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[83816:4057328:1101/234842.129819:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[83816:4057328:1101/234842.129987:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[83816:4057328:1101/234842.130163:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[83816:4057328:1101/234842.130205:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/Measurement/Crashpad/settings.dat: No such file or directory (2)
+[83816:4057328:1101/234842.130507:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[83816:4057347:1101/234842.131103:VERBOSE1:chrome/updater/app/app_wakeall.cc:58] Launching `/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake`
+[83819:4057353:1101/234842.145695:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[83819:4057353:1101/234842.146135:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.2, arch: x86_64, System uptime (seconds): 149861, parent pid: 83816
+[83819:4057353:1101/234842.149675:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 663288082432B (617.735GiB) / 1000240963584B (931.547GiB)
+[83819:4057353:1101/234842.149726:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 663288082432B (617.735GiB) / 1000240963584B (931.547GiB)
+[83819:4057353:1101/234842.149865:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[83821:4057357:1101/234842.164207:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[83821:4057357:1101/234842.164581:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.2, arch: x86_64, System uptime (seconds): 149861, parent pid: 1
+[83821:4057357:1101/234842.167933:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 663288078336B (617.735GiB) / 1000240963584B (931.547GiB)
+[83821:4057357:1101/234842.167983:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 663288078336B (617.735GiB) / 1000240963584B (931.547GiB)
+[83821:4057357:1101/234842.168201:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[83819:4057353:1101/234842.168959:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[83819:4057353:1101/234842.170275:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[83819:4057353:1101/234842.170437:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[83819:4057353:1101/234842.170594:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[83819:4057353:1101/234842.170635:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/Measurement/Crashpad/settings.dat: No such file or directory (2)
+[83819:4057353:1101/234842.170953:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[83819:4057353:1101/234842.171356:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run
+[83819:4057353:1101/234900.019921:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[83819:4057353:1101/234900.020662:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[83819:4057353:1101/234900.020694:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.
+[83816:4057347:1101/234900.234599:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0
+[83816:4057328:1101/234900.234830:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[83816:4057328:1101/234900.235909:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[83816:4057328:1101/234900.235958:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.
+[83821:4057357:1101/234910.035419:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[83821:4057357:1101/234910.035527:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+[83818:4057339:1101/234910.037398:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[83818:4057339:1101/234910.037711:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+Trying to load the allocator multiple times. This is *not* supported.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1793548283.105981 4060712 environment.cc:526] Selected adapter: AMD Radeon Pro 5500M, arch=rdna-1, vendor=amd, backend=Metal, adapterType=Discrete GPU
+I0000 00:00:1793548283.134699 4060727 environment.cc:526] Selected adapter: AMD Radeon Pro 5500M, arch=rdna-1, vendor=amd, backend=Metal, adapterType=Discrete GPU

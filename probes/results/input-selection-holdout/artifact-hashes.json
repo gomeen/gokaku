@@ -1,0 +1,70 @@
+{
+  "label-audit.json": {
+    "bytes": 814,
+    "sha256": "0f07acc11c063ab740c83492ae18513a5577c51a968ad3780839b50246caa741"
+  },
+  "quality/I0.json": {
+    "bytes": 608656,
+    "sha256": "54a45fb4003611ed517765178957ed585ab1947f72035b14e0924ebfce59f0ef"
+  },
+  "quality/I0.stderr.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "quality/Q0.json": {
+    "bytes": 645781,
+    "sha256": "b8d932559847ef77c0f24d185b44aa884048af4c5aa442f26e9501bc4ab14a47"
+  },
+  "quality/Q0.stderr.log": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "quality/R0.json": {
+    "bytes": 608764,
+    "sha256": "b7ca9e6830158184542dbb57daeff5ee95cd7a621f8bbf0c5691f63c75e0b406"
+  },
+  "quality/R0.stderr.log": {
+    "bytes": 503,
+    "sha256": "5733cf4c9cc75764530158122b09283f2031bbb3575125b5af14d87c47e5402b"
+  },
+  "quality/R1.json": {
+    "bytes": 610856,
+    "sha256": "12edb140a7a39f179d183daa8c6f51bd065381f4c3794430a87a9dbecb04a903"
+  },
+  "quality/R1.stderr.log": {
+    "bytes": 503,
+    "sha256": "ecd2f9897c6d285e511aff2dfb7de875f1a4899eb3a33e724c866dc6b95453d6"
+  },
+  "quality/R2.json": {
+    "bytes": 611537,
+    "sha256": "6983f2911b3bb7f0a5d86d8421034cad0755bc707901d7ffa6a24d14f45d9685"
+  },
+  "quality/R2.stderr.log": {
+    "bytes": 37507,
+    "sha256": "f87ee6d5ad5a3880508a0bfe6293d1ff07802d059e91096cb3a936b0ea87fabd"
+  },
+  "quality/environment.json": {
+    "bytes": 1316,
+    "sha256": "6e6daea8659f0c7f85b345ed131059f9aed7cb6a4f999bb130d0cd725759e88b"
+  },
+  "quality/inputs.json": {
+    "bytes": 476779,
+    "sha256": "04617c1d1d0752799e1fb8a9116f401af38aa99d01c744e92fc00be8ad43e488"
+  },
+  "quality/startup.json": {
+    "bytes": 12232,
+    "sha256": "6ef4c391a96b9177ac1aaadca6882102aed12973d012000328d5133f871dd539"
+  },
+  "quality/status.json": {
+    "bytes": 210,
+    "sha256": "30880c0c6a38be7905ee02185440993211f0f5cecf9685ceef1093459120a8f6"
+  },
+  "quality-outputs.md": {
+    "bytes": 56111,
+    "sha256": "1c74d426d2140cdaf8bafd328dd8e122841267531672146c85b7f07198642ab6"
+  },
+  "summary.json": {
+    "bytes": 7302,
+    "sha256": "05f91cea59435381c72d421c303dcb67a717b61290ae1c2582a971d2fa7d8566"
+  }
+}

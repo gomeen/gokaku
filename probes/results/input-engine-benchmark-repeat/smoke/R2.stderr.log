@@ -1,0 +1,12 @@
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I20261030 14:58:05.008697 0x7ff85a51dd00 modules.cc:96] registering components from module 'lua'.
+I20261030 14:58:05.011712 0x7ff85a51dd00 modules.cc:87] rime.lua info: rime.lua should be either in the rime user data directory or in the rime shared data directory
+WARNING: Logging before InitGoogleLogging() is written to STDERR
+I20261030 14:58:05.011817 0x7ff85a51dd00 grammar_module.cc:15] registering components from module 'grammar'.
+I20261030 14:58:05.333893 0x7ff85a51dd00 octagram.cc:29] use grammar: wanxiang-lts-zh-hans
+I20261030 14:58:05.334003 0x7ff85a51dd00 gram_db.cc:14] loading gram db: /tmp/gogaku-ime-benchmark/rime/R2/shared/wanxiang-lts-zh-hans.gram
+I20261030 14:58:05.334144 0x7ff85a51dd00 gram_db.cc:44] found double array image of size 104519680.
+I20261030 14:58:05.360427 0x7ff85a51dd00 octagram.cc:29] use grammar: wanxiang-lts-zh-hans
+I20261030 14:58:06.957239 0x7ff85a51dd00 octagram.cc:29] use grammar: wanxiang-lts-zh-hans
+I20261030 14:58:06.964003 0x7ff85a51dd00 octagram.cc:29] use grammar: wanxiang-lts-zh-hans
+I20261030 14:58:07.603327 0x7ff85a51dd00 octagram.cc:29] use grammar: wanxiang-lts-zh-hans

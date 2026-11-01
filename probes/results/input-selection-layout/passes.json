@@ -1,0 +1,992 @@
+[
+  {
+    "round": 0,
+    "config": "Q0",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:56:19+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        181.57470703125,
+        293.81298828125,
+        236.9375
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:56:20 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 33",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9688,
+      "rss_bytes": 200876032,
+      "cpu_time": "0:01.53",
+      "pcpu": 0.1
+    },
+    "resources_after": {
+      "pid": 9688,
+      "rss_bytes": 219942912,
+      "cpu_time": "0:01.79",
+      "pcpu": 4.4
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 1.939544,
+        "p95_ms": 13.066020749999984,
+        "p99_ms": 21.22184796,
+        "max_ms": 21.559148,
+        "mean_ms": 3.461017358974359
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 2.0971345,
+        "p95_ms": 13.217260949999984,
+        "p99_ms": 111.02981004000155,
+        "max_ms": 411.389214,
+        "mean_ms": 8.633856358974358
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 1.156511,
+        "p95_ms": 1.9291939,
+        "p99_ms": 2.36011237,
+        "max_ms": 2.387308,
+        "mean_ms": 1.2895974743589742
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 2.614606,
+        "p95_ms": 39.03560549999974,
+        "p99_ms": 277.20145767000037,
+        "max_ms": 349.417316,
+        "mean_ms": 13.188594564102564
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 6.74752,
+        "p95_ms": 84.44429424999919,
+        "p99_ms": 377.1380033300004,
+        "max_ms": 449.353355,
+        "mean_ms": 23.801379846153846
+      }
+    }
+  },
+  {
+    "round": 0,
+    "config": "R1",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:56:28+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        155.00341796875,
+        284.4326171875,
+        234.2734375
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:56:28 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 37",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9692,
+      "rss_bytes": 22986752,
+      "cpu_time": "0:01.56",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9692,
+      "rss_bytes": 23003136,
+      "cpu_time": "0:02.00",
+      "pcpu": 6.3
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 5.945,
+        "p95_ms": 7.311999999999995,
+        "p99_ms": 9.66356,
+        "max_ms": 9.796,
+        "mean_ms": 5.769512820512821
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 6.155632,
+        "p95_ms": 11.0220459,
+        "p99_ms": 14.247248970000001,
+        "max_ms": 14.392501,
+        "mean_ms": 6.328963474358974
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 1.274879,
+        "p95_ms": 1.5899999999999996,
+        "p99_ms": 1.7760498200000006,
+        "max_ms": 1.859005,
+        "mean_ms": 1.2755266794871796
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 1.836676,
+        "p95_ms": 4.667634849999999,
+        "p99_ms": 5.177552850000002,
+        "max_ms": 5.651099,
+        "mean_ms": 1.8608692307692307
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 9.803273,
+        "p95_ms": 17.87907069999996,
+        "p99_ms": 24.259217380000003,
+        "max_ms": 24.796682,
+        "mean_ms": 10.552673346153846
+      }
+    }
+  },
+  {
+    "round": 0,
+    "config": "I0",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:56:36+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        152.6005859375,
+        281.78564453125,
+        233.6328125
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:56:36 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 39",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9693,
+      "rss_bytes": 58826752,
+      "cpu_time": "0:00.76",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9693,
+      "rss_bytes": 62832640,
+      "cpu_time": "0:01.13",
+      "pcpu": 7.6
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 4.104723,
+        "p95_ms": 9.163832849999999,
+        "p99_ms": 13.13553378000002,
+        "max_ms": 17.011164,
+        "mean_ms": 4.660172102564103
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 4.4330015,
+        "p95_ms": 9.489811499999998,
+        "p99_ms": 13.377883050000019,
+        "max_ms": 17.26333,
+        "mean_ms": 4.956374448717949
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 1.3842995,
+        "p95_ms": 1.9346728499999997,
+        "p99_ms": 2.2449514700000006,
+        "max_ms": 2.375766,
+        "mean_ms": 1.4438097692307692
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 0.867319,
+        "p95_ms": 4.4409819499999985,
+        "p99_ms": 5.271151940000005,
+        "max_ms": 6.276909,
+        "mean_ms": 1.4110181923076923
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 8.5216885,
+        "p95_ms": 14.127810699999998,
+        "p99_ms": 18.32459150000001,
+        "max_ms": 20.24578,
+        "mean_ms": 8.657852474358974
+      }
+    }
+  },
+  {
+    "round": 1,
+    "config": "R1",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:56:44+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        169.66357421875,
+        281.1181640625,
+        233.9541015625
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:56:44 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 35",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9692,
+      "rss_bytes": 23003136,
+      "cpu_time": "0:02.00",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9692,
+      "rss_bytes": 23011328,
+      "cpu_time": "0:02.57",
+      "pcpu": 5.7
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 7.1725,
+        "p95_ms": 9.150299999999996,
+        "p99_ms": 10.621250000000005,
+        "max_ms": 11.757,
+        "mean_ms": 7.375730769230769
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 7.3966335,
+        "p95_ms": 10.98411165,
+        "p99_ms": 16.29506970000002,
+        "max_ms": 20.003074,
+        "mean_ms": 7.858928064102564
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 1.6458985,
+        "p95_ms": 2.2965664500000003,
+        "p99_ms": 2.48971162,
+        "max_ms": 2.516503,
+        "mean_ms": 1.7021591923076922
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 0.7464585,
+        "p95_ms": 4.8639008499999985,
+        "p99_ms": 5.980498950000005,
+        "max_ms": 6.98871,
+        "mean_ms": 1.5290823461538463
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 11.334266,
+        "p95_ms": 16.754397349999994,
+        "p99_ms": 29.11471838000002,
+        "max_ms": 33.14806,
+        "mean_ms": 12.217443935897435
+      }
+    }
+  },
+  {
+    "round": 1,
+    "config": "I0",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:56:52+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        198.33642578125,
+        283.63671875,
+        235.4013671875
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:56:52 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 31",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9693,
+      "rss_bytes": 62832640,
+      "cpu_time": "0:01.13",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9693,
+      "rss_bytes": 64434176,
+      "cpu_time": "0:01.49",
+      "pcpu": 7.5
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 3.9609685,
+        "p95_ms": 8.490395299999996,
+        "p99_ms": 13.506365700000012,
+        "max_ms": 15.977596,
+        "mean_ms": 4.501680602564103
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 4.2484105,
+        "p95_ms": 9.347613299999992,
+        "p99_ms": 13.792165620000013,
+        "max_ms": 16.240607,
+        "mean_ms": 4.806284871794872
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 1.6644095,
+        "p95_ms": 2.2362884999999992,
+        "p99_ms": 3.296679270000002,
+        "max_ms": 3.671245,
+        "mean_ms": 1.663857435897436
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 1.8618845,
+        "p95_ms": 4.874612449999999,
+        "p99_ms": 5.085355,
+        "max_ms": 5.134866,
+        "mean_ms": 2.1935388846153847
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 9.2850795,
+        "p95_ms": 15.666734149999998,
+        "p99_ms": 19.566594460000015,
+        "max_ms": 22.658531,
+        "mean_ms": 9.568129974358975
+      }
+    }
+  },
+  {
+    "round": 1,
+    "config": "Q0",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:57:00+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        193.50439453125,
+        281.21875,
+        234.83056640625
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:57:01 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 29",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9688,
+      "rss_bytes": 219942912,
+      "cpu_time": "0:01.79",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9688,
+      "rss_bytes": 226189312,
+      "cpu_time": "0:02.11",
+      "pcpu": 5.4
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 2.6665225,
+        "p95_ms": 13.072808349999997,
+        "p99_ms": 19.14104521000003,
+        "max_ms": 25.322395,
+        "mean_ms": 4.225854102564103
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 2.9183765,
+        "p95_ms": 13.306418949999998,
+        "p99_ms": 19.42671299000003,
+        "max_ms": 25.57371,
+        "mean_ms": 4.513113666666667
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 1.8083045,
+        "p95_ms": 2.5283171499999986,
+        "p99_ms": 2.8737793000000025,
+        "max_ms": 3.397618,
+        "mean_ms": 1.818010076923077
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 1.600372,
+        "p95_ms": 4.4033682999999995,
+        "p99_ms": 4.850449770000001,
+        "max_ms": 4.856378,
+        "mean_ms": 1.940794564102564
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 7.96007,
+        "p95_ms": 20.2828332,
+        "p99_ms": 23.588690730000046,
+        "max_ms": 32.494627,
+        "mean_ms": 9.234207141025642
+      }
+    }
+  },
+  {
+    "round": 2,
+    "config": "I0",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:57:08+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        175.17919921875,
+        274.41015625,
+        232.95654296875
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:57:09 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 27",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9693,
+      "rss_bytes": 64434176,
+      "cpu_time": "0:01.49",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9693,
+      "rss_bytes": 65384448,
+      "cpu_time": "0:01.97",
+      "pcpu": 10.2
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 5.401755,
+        "p95_ms": 13.66748445,
+        "p99_ms": 23.13676344000001,
+        "max_ms": 24.810226,
+        "mean_ms": 6.262754974358974
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 5.927033,
+        "p95_ms": 14.146163899999992,
+        "p99_ms": 24.705149170000016,
+        "max_ms": 28.282091,
+        "mean_ms": 6.752373487179487
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 2.0664425,
+        "p95_ms": 3.3086198499999924,
+        "p99_ms": 4.3717027800000015,
+        "max_ms": 4.553258,
+        "mean_ms": 2.1880715512820514
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 1.0512885,
+        "p95_ms": 4.418212399999997,
+        "p99_ms": 11.433088080000093,
+        "max_ms": 29.505524,
+        "mean_ms": 1.9129087692307694
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 10.3860495,
+        "p95_ms": 21.182761049999947,
+        "p99_ms": 47.149454950000035,
+        "max_ms": 52.854589,
+        "mean_ms": 12.298849884615384
+      }
+    }
+  },
+  {
+    "round": 2,
+    "config": "Q0",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:57:17+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        161.3173828125,
+        268.1865234375,
+        231.23291015625
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:57:17 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 25",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9688,
+      "rss_bytes": 226189312,
+      "cpu_time": "0:02.11",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9688,
+      "rss_bytes": 230871040,
+      "cpu_time": "0:02.51",
+      "pcpu": 13.2
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 3.201401,
+        "p95_ms": 13.783517449999994,
+        "p99_ms": 25.854177840000087,
+        "max_ms": 42.335803,
+        "mean_ms": 5.200150025641026
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 3.526675,
+        "p95_ms": 14.014340799999994,
+        "p99_ms": 26.215672050000087,
+        "max_ms": 42.819055,
+        "mean_ms": 5.502207653846154
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 2.197693,
+        "p95_ms": 3.0546994999999995,
+        "p99_ms": 3.2888672800000003,
+        "max_ms": 3.380756,
+        "mean_ms": 2.223674487179487
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 1.8664895,
+        "p95_ms": 4.670098199999998,
+        "p99_ms": 4.90590727,
+        "max_ms": 4.945677,
+        "mean_ms": 2.100985269230769
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 9.7886785,
+        "p95_ms": 18.21122599999999,
+        "p99_ms": 31.43127801000008,
+        "max_ms": 46.918509,
+        "mean_ms": 10.99116241025641
+      }
+    }
+  },
+  {
+    "round": 2,
+    "config": "R1",
+    "condition": "no_translation_materials",
+    "environment": {
+      "timestamp": "2026-10-30T15:57:25+0800",
+      "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+      "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+      "loadavg": [
+        152.24267578125,
+        264.53076171875,
+        230.1591796875
+      ],
+      "hardware": {
+        "command": [
+          "sysctl",
+          "-n",
+          "hw.model",
+          "hw.physicalcpu",
+          "hw.logicalcpu",
+          "hw.memsize"
+        ],
+        "returncode": 0,
+        "stdout": "MacBookPro16,1\n8\n16\n68719476736",
+        "stderr": ""
+      },
+      "system": {
+        "command": [
+          "sw_vers"
+        ],
+        "returncode": 0,
+        "stdout": "ProductName:\t\tmacOS\nProductVersion:\t\t26.7.2\nBuildVersion:\t\t25G332",
+        "stderr": ""
+      },
+      "power": {
+        "command": [
+          "pmset",
+          "-g",
+          "batt"
+        ],
+        "returncode": 0,
+        "stdout": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t100%; charged; 0:00 remaining present: true",
+        "stderr": ""
+      },
+      "thermal": {
+        "command": [
+          "pmset",
+          "-g",
+          "therm"
+        ],
+        "returncode": 0,
+        "stdout": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-10-30 15:57:25 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 22",
+        "stderr": ""
+      }
+    },
+    "resources_before": {
+      "pid": 9692,
+      "rss_bytes": 23011328,
+      "cpu_time": "0:02.57",
+      "pcpu": 0.0
+    },
+    "resources_after": {
+      "pid": 9692,
+      "rss_bytes": 23011328,
+      "cpu_time": "0:03.38",
+      "pcpu": 9.7
+    },
+    "metrics": {
+      "core_ns": {
+        "n": 78,
+        "p50_ms": 10.621,
+        "p95_ms": 13.492199999999995,
+        "p99_ms": 17.45965000000002,
+        "max_ms": 21.737,
+        "mean_ms": 10.63675641025641
+      },
+      "worker_rtt_ns": {
+        "n": 78,
+        "p50_ms": 10.93559,
+        "p95_ms": 13.913295749999994,
+        "p99_ms": 17.81680238000002,
+        "max_ms": 22.253701,
+        "mean_ms": 10.987627551282053
+      },
+      "native_ns": {
+        "n": 78,
+        "p50_ms": 2.2631545,
+        "p95_ms": 2.932113,
+        "p99_ms": 3.7940076300000003,
+        "max_ms": 3.831261,
+        "mean_ms": 2.284073564102564
+      },
+      "queue_ns": {
+        "n": 78,
+        "p50_ms": 0.919506,
+        "p95_ms": 4.6051397000000005,
+        "p99_ms": 4.87791504,
+        "max_ms": 4.91907,
+        "mean_ms": 1.5589933076923077
+      },
+      "pipeline_ns": {
+        "n": 78,
+        "p50_ms": 16.077453,
+        "p95_ms": 20.508540699999987,
+        "p99_ms": 23.777245540000017,
+        "max_ms": 27.402866,
+        "mean_ms": 16.113369628205128
+      }
+    }
+  }
+]

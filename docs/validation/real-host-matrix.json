@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-11-01T01:31:10.102200+00:00",
+  "source": "org.gogaku.inputmethod.Hans",
+  "failures": 1,
+  "checks": [
+    {
+      "check": "Chrome: 校准突发 你好 上屏",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: 组合中标点一次上屏（nihc＋;）（第 2 次尝试）",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: 逗号标点表（无组合逗号→，）",
+      "ok": false,
+      "detail": "' Gogaku Test [\"你好n场次；你好；n场次,你好,你好,\",\"\",0,\"\"] - Google Chrome'"
+    },
+    {
+      "check": "Chrome: 单独大写字母＋空格原样上屏",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: Esc 取消不残留",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: 无延迟连打提交一次",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: 组合中 Shift 单击上屏原编码",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: Shift 单击后中文输入不受影响",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "Chrome: 密码框值不进 AX 文本列表",
+      "ok": true,
+      "detail": "'rs/gomeen/code/gomeen/gogaku/probes/real-host-test-page.html'"
+    }
+  ]
+}

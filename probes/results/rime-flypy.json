@@ -1,0 +1,13 @@
+{
+  "librimeVersion": "1.16.0",
+  "schema": "double_pinyin_flypy",
+  "cases": [
+    {"input": "nihc", "preedit": "ni hao", "candidates": ["你好", "妳好", "逆号", "拟好", "你"], "committedBeforeSpace": "", "committedOnExplicitSecondCandidate": "", "committedOnSpace": "你好"},
+    {"input": "kdhv", "preedit": "kai hui", "candidates": ["开会", "开回", "开慧", "开", "𫔭"], "committedBeforeSpace": "", "committedOnExplicitSecondCandidate": "", "committedOnSpace": "开会"},
+    {"input": "hvyi", "preedit": "hui yi", "candidates": ["回忆", "会议", "会以", "会意", "悔意"], "committedBeforeSpace": "", "committedOnExplicitSecondCandidate": "会议", "committedOnSpace": ""},
+    {"input": "woxlxtykyu", "preedit": "wo xiang xue ying yu", "candidates": ["我想学英语", "我想学", "我想", "我向", "我像"], "committedBeforeSpace": "", "committedOnExplicitSecondCandidate": "", "committedOnSpace": "我想学英语"},
+    {"input": "wxqcf", "preedit": "wxqcf", "candidates": [], "committedBeforeSpace": "", "committedOnExplicitSecondCandidate": "", "committedOnSpace": "wxqcf"},
+    {"input": "meeting", "preedit": "meeting", "candidates": ["么", "麽", "尛", "嚜", "癦"], "committedBeforeSpace": "", "committedOnExplicitSecondCandidate": "", "committedOnSpace": ""}
+  ],
+  "scope": "Installed engine with scratch user data, no host input-method UI, no translation model"
+}

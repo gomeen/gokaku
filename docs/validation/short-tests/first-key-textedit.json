@@ -1,0 +1,1641 @@
+{
+  "schema": "gogaku.first-key-matrix.v1",
+  "checkedAt": "2026-11-01T09:24:17.857116+00:00",
+  "runId": "17935242980191",
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "installedPath": "/Users/gomeen/Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput",
+    "installedSHA256": "f508cc430de6ed3c1b596317decfa5845d656b87c88c4cfd32287c5044771568"
+  },
+  "driver": {
+    "probeSHA256": "446fe97377b1573e2e7449a4719031845259fc435bd580e3da3de51a410a24b0",
+    "axReaderSHA256": "3b2804debf6e0912fea4bad24e1d76332e66140ba9ed8dd8b549166c41ba6adf",
+    "pageSHA256": "6b965f6d06249192fde7833c94b7b26d7b8b481a1b06180c0090a3dc29463284",
+    "planSHA256": "482a4f8a1adb7ca04743a1abf02490cef808159f8dfe12309d98f8072e307305"
+  },
+  "panelState": {
+    "enabled": true,
+    "socket": "/Users/gomeen/Library/Logs/Gogaku/validation.sock",
+    "protocol": {
+      "transport": "AF_UNIX/SOCK_STREAM",
+      "request": "state\\n | metrics\\n | reset\\n | scenario <name>\\n",
+      "stateFields": [
+        "visible",
+        "generation",
+        "hideCount",
+        "staleRenderCount",
+        "renderCount",
+        "confirmationCount",
+        "confirmationHideFailures",
+        "scenario"
+      ],
+      "metricsExtra": [
+        "samples"
+      ],
+      "samplesFields": [
+        "callbackNs",
+        "coreNs",
+        "queueWaitNs",
+        "coreExecNs",
+        "hostReadNs",
+        "markedWriteNs",
+        "anchorReadNs",
+        "commitCallNs",
+        "commitCount",
+        "hostSelection",
+        "renderNs",
+        "firstDisplayNs",
+        "confirmationHidden",
+        "visibleAtReturn",
+        "firstDisplay",
+        "scenario"
+      ],
+      "containsText": false
+    },
+    "enableProcedure": {
+      "marker": "/Users/gomeen/Library/Logs/Gogaku/validation-enabled",
+      "markerMode": "0600",
+      "logDirectory": "/Users/gomeen/Library/Logs/Gogaku",
+      "logDirectoryMode": "0700",
+      "socketMode": "0600",
+      "requires": "验收构建（scripts/build.py --validation）＋重启输入法进程"
+    }
+  },
+  "plan": {
+    "schema": "gogaku.first-key-plan.v1",
+    "createdAt": "2026-11-01T09:11:38.036968+00:00",
+    "composition": "nihc",
+    "iterations": 10,
+    "hosts": [
+      "textedit"
+    ],
+    "confirmations": [
+      {
+        "id": "space",
+        "label": "空格确认首选候选",
+        "committed": "你好"
+      },
+      {
+        "id": "enter",
+        "label": "Enter 上屏原编码",
+        "committed": "nihc"
+      },
+      {
+        "id": "digit1",
+        "label": "数字 1 选当前页首个候选",
+        "committed": "你好"
+      },
+      {
+        "id": "semicolon",
+        "label": "组合中分号一次上屏",
+        "committed": "你好；"
+      },
+      {
+        "id": "shift",
+        "label": "组合中 Shift 单击上屏原编码",
+        "committed": "nihc"
+      }
+    ],
+    "postKeys": [
+      {
+        "id": "letter",
+        "label": "字母 n（后键首字）",
+        "kind": "composition"
+      },
+      {
+        "id": "comma",
+        "label": "逗号（无组合标点表）",
+        "kind": "punctuation"
+      },
+      {
+        "id": "period",
+        "label": "句号（无组合标点表）",
+        "kind": "punctuation"
+      },
+      {
+        "id": "stop",
+        "label": "停止（不发任何键）",
+        "kind": "stop"
+      }
+    ],
+    "sha256": "482a4f8a1adb7ca04743a1abf02490cef808159f8dfe12309d98f8072e307305"
+  },
+  "inputLettersEnabled": true,
+  "groups": [
+    {
+      "id": "textedit/default/space/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "n",
+        "value": "你好n",
+        "caret": 3,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/space/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好，",
+        "marked": "",
+        "value": "你好，",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/space/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好。",
+        "marked": "",
+        "value": "你好。",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/space/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "",
+        "value": "你好",
+        "caret": 2,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/enter/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc",
+        "marked": "n",
+        "value": "nihcn",
+        "caret": 5,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/enter/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc，",
+        "marked": "",
+        "value": "nihc，",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/enter/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc。",
+        "marked": "",
+        "value": "nihc。",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/enter/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc",
+        "marked": "",
+        "value": "nihc",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/digit1/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "n",
+        "value": "你好n",
+        "caret": 3,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/digit1/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好，",
+        "marked": "",
+        "value": "你好，",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/digit1/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好。",
+        "marked": "",
+        "value": "你好。",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/digit1/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好",
+        "marked": "",
+        "value": "你好",
+        "caret": 2,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/semicolon/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；",
+        "marked": "n",
+        "value": "你好；n",
+        "caret": 4,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/semicolon/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；，",
+        "marked": "",
+        "value": "你好；，",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/semicolon/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；。",
+        "marked": "",
+        "value": "你好；。",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/semicolon/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "你好；",
+        "marked": "",
+        "value": "你好；",
+        "caret": 3,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/shift/letter",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc",
+        "marked": "n",
+        "value": "nihcn",
+        "caret": 5,
+        "panel": true
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/shift/comma",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc，",
+        "marked": "",
+        "value": "nihc，",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/shift/period",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc。",
+        "marked": "",
+        "value": "nihc。",
+        "caret": 5,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 1
+      },
+      "failures": []
+    },
+    {
+      "id": "textedit/default/shift/stop",
+      "iterations": 10,
+      "warmup": 2,
+      "ran": 12,
+      "passed": 12,
+      "failed": 0,
+      "expected": {
+        "committed": "nihc",
+        "marked": "",
+        "value": "nihc",
+        "caret": 4,
+        "panel": false
+      },
+      "caretUnverified": 12,
+      "insertsPerIteration": {
+        "confirmEvent": 1,
+        "postKeyEvent": 0
+      },
+      "failures": []
+    }
+  ],
+  "panelReports": [
+    {
+      "confirm": "space",
+      "summary": {
+        "count": 9,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 9,
+          "p50": 3334503,
+          "p95": 6788770,
+          "p99": 6788770,
+          "max": 6788770
+        },
+        "coreNs": {
+          "count": 7,
+          "p50": 537582,
+          "p95": 2279994,
+          "p99": 2279994,
+          "max": 2279994
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 1517305,
+          "p95": 1517305,
+          "p99": 1517305,
+          "max": 1517305
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 8445235,
+          "p95": 10748058,
+          "p99": 10748058,
+          "max": 10748058
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 10748058,
+          "p95": 10748058,
+          "p99": 10748058,
+          "max": 10748058
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "enter",
+      "summary": {
+        "count": 9,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 9,
+          "p50": 4033283,
+          "p95": 6609670,
+          "p99": 6609670,
+          "max": 6609670
+        },
+        "coreNs": {
+          "count": 7,
+          "p50": 526889,
+          "p95": 2052860,
+          "p99": 2052860,
+          "max": 2052860
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 1901257,
+          "p95": 1901257,
+          "p99": 1901257,
+          "max": 1901257
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 7959846,
+          "p95": 10824755,
+          "p99": 10824755,
+          "max": 10824755
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 10824755,
+          "p95": 10824755,
+          "p99": 10824755,
+          "max": 10824755
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "digit1",
+      "summary": {
+        "count": 9,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 9,
+          "p50": 3526209,
+          "p95": 6106444,
+          "p99": 6106444,
+          "max": 6106444
+        },
+        "coreNs": {
+          "count": 7,
+          "p50": 503324,
+          "p95": 2080674,
+          "p99": 2080674,
+          "max": 2080674
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 1664094,
+          "p95": 1664094,
+          "p99": 1664094,
+          "max": 1664094
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 7986753,
+          "p95": 9985541,
+          "p99": 9985541,
+          "max": 9985541
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 9985541,
+          "p95": 9985541,
+          "p99": 9985541,
+          "max": 9985541
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "semicolon",
+      "summary": {
+        "count": 9,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 9,
+          "p50": 3457973,
+          "p95": 5133611,
+          "p99": 5133611,
+          "max": 5133611
+        },
+        "coreNs": {
+          "count": 7,
+          "p50": 438014,
+          "p95": 1891018,
+          "p99": 1891018,
+          "max": 1891018
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 1623113,
+          "p95": 1623113,
+          "p99": 1623113,
+          "max": 1623113
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 7352197,
+          "p95": 8373282,
+          "p99": 8373282,
+          "max": 8373282
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 8373282,
+          "p95": 8373282,
+          "p99": 8373282,
+          "max": 8373282
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    },
+    {
+      "confirm": "shift",
+      "summary": {
+        "count": 10,
+        "metricScope": {
+          "callbackNs": "IMK handle 回调总时长（主线程实测）",
+          "coreNs": "共享核心同步处理时长",
+          "renderNs": "按键到候选渲染完成（含排队）",
+          "firstDisplayNs": "组合首键到候选首次显示",
+          "commitCallNs": "仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据"
+        },
+        "callbackNs": {
+          "count": 10,
+          "p50": 2761478,
+          "p95": 7246556,
+          "p99": 7246556,
+          "max": 7246556
+        },
+        "coreNs": {
+          "count": 7,
+          "p50": 517562,
+          "p95": 2128529,
+          "p99": 2128529,
+          "max": 2128529
+        },
+        "commitCallNs": {
+          "count": 1,
+          "p50": 1736039,
+          "p95": 1736039,
+          "p99": 1736039,
+          "max": 1736039
+        },
+        "renderNs": {
+          "count": 4,
+          "p50": 8302618,
+          "p95": 11430987,
+          "p99": 11430987,
+          "max": 11430987
+        },
+        "firstDisplayNs": {
+          "count": 1,
+          "p50": 11430987,
+          "p95": 11430987,
+          "p99": 11430987,
+          "max": 11430987
+        },
+        "confirmationSamples": 1,
+        "confirmationHiddenFalse": 0,
+        "visibleAtReturnTrue": 0,
+        "firstDisplayCount": 1
+      }
+    }
+  ],
+  "skipped": [],
+  "checks": [
+    {
+      "check": "textedit/default/space/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/space/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:12:28.238822+00:00"
+    },
+    {
+      "check": "textedit/default/space/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/space/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:12:28.238876+00:00"
+    },
+    {
+      "check": "textedit/default/space/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/space/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:12:28.238999+00:00"
+    },
+    {
+      "check": "textedit/default/space/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/space/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:13:03.247950+00:00"
+    },
+    {
+      "check": "textedit/default/space/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/space/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:13:03.248007+00:00"
+    },
+    {
+      "check": "textedit/default/space/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/space/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:13:03.248140+00:00"
+    },
+    {
+      "check": "textedit/default/space/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/space/period",
+      "iteration": null,
+      "at": "2026-11-01T09:13:38.267381+00:00"
+    },
+    {
+      "check": "textedit/default/space/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/space/period",
+      "iteration": null,
+      "at": "2026-11-01T09:13:38.267448+00:00"
+    },
+    {
+      "check": "textedit/default/space/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/space/period",
+      "iteration": null,
+      "at": "2026-11-01T09:13:38.267587+00:00"
+    },
+    {
+      "check": "textedit/default/space/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/space/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:14:13.270957+00:00"
+    },
+    {
+      "check": "textedit/default/space/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/space/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:14:13.271034+00:00"
+    },
+    {
+      "check": "textedit/default/space/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/space/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:14:13.271163+00:00"
+    },
+    {
+      "check": "textedit/default/enter/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/enter/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:14:53.157175+00:00"
+    },
+    {
+      "check": "textedit/default/enter/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/enter/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:14:53.157253+00:00"
+    },
+    {
+      "check": "textedit/default/enter/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/enter/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:14:53.157388+00:00"
+    },
+    {
+      "check": "textedit/default/enter/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/enter/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:15:28.222991+00:00"
+    },
+    {
+      "check": "textedit/default/enter/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/enter/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:15:28.223069+00:00"
+    },
+    {
+      "check": "textedit/default/enter/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/enter/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:15:28.223204+00:00"
+    },
+    {
+      "check": "textedit/default/enter/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/enter/period",
+      "iteration": null,
+      "at": "2026-11-01T09:16:03.217561+00:00"
+    },
+    {
+      "check": "textedit/default/enter/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/enter/period",
+      "iteration": null,
+      "at": "2026-11-01T09:16:03.217645+00:00"
+    },
+    {
+      "check": "textedit/default/enter/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/enter/period",
+      "iteration": null,
+      "at": "2026-11-01T09:16:03.217781+00:00"
+    },
+    {
+      "check": "textedit/default/enter/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/enter/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:16:38.226329+00:00"
+    },
+    {
+      "check": "textedit/default/enter/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/enter/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:16:38.226405+00:00"
+    },
+    {
+      "check": "textedit/default/enter/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/enter/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:16:38.226600+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/digit1/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:17:18.057364+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/digit1/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:17:18.057474+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/digit1/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:17:18.057619+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/digit1/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:17:53.043886+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/digit1/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:17:53.043983+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/digit1/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:17:53.044119+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/digit1/period",
+      "iteration": null,
+      "at": "2026-11-01T09:18:28.015478+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/digit1/period",
+      "iteration": null,
+      "at": "2026-11-01T09:18:28.015577+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/digit1/period",
+      "iteration": null,
+      "at": "2026-11-01T09:18:28.015718+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/digit1/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:19:02.955142+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/digit1/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:19:02.955219+00:00"
+    },
+    {
+      "check": "textedit/default/digit1/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/digit1/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:19:02.955388+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:19:42.698372+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:19:42.698456+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:19:42.698603+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:20:17.714219+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:20:17.714328+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:20:17.714469+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/period",
+      "iteration": null,
+      "at": "2026-11-01T09:20:52.696971+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/period",
+      "iteration": null,
+      "at": "2026-11-01T09:20:52.697042+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/period",
+      "iteration": null,
+      "at": "2026-11-01T09:20:52.697158+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:21:27.745768+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:21:27.745867+00:00"
+    },
+    {
+      "check": "textedit/default/semicolon/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/semicolon/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:21:27.746005+00:00"
+    },
+    {
+      "check": "textedit/default/shift/letter：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/shift/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:22:08.219731+00:00"
+    },
+    {
+      "check": "textedit/default/shift/letter：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/shift/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:22:08.219823+00:00"
+    },
+    {
+      "check": "textedit/default/shift/letter：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/shift/letter",
+      "iteration": null,
+      "at": "2026-11-01T09:22:08.219971+00:00"
+    },
+    {
+      "check": "textedit/default/shift/comma：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/shift/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:22:43.816697+00:00"
+    },
+    {
+      "check": "textedit/default/shift/comma：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/shift/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:22:43.816776+00:00"
+    },
+    {
+      "check": "textedit/default/shift/comma：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/shift/comma",
+      "iteration": null,
+      "at": "2026-11-01T09:22:43.816912+00:00"
+    },
+    {
+      "check": "textedit/default/shift/period：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 24 次（每轮确认 1 次＋标点后键 1 次），实际 24 次",
+      "phase": "panel",
+      "group": "textedit/default/shift/period",
+      "iteration": null,
+      "at": "2026-11-01T09:23:19.467066+00:00"
+    },
+    {
+      "check": "textedit/default/shift/period：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/shift/period",
+      "iteration": null,
+      "at": "2026-11-01T09:23:19.467149+00:00"
+    },
+    {
+      "check": "textedit/default/shift/period：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/shift/period",
+      "iteration": null,
+      "at": "2026-11-01T09:23:19.467292+00:00"
+    },
+    {
+      "check": "textedit/default/shift/stop：插字次数按确认与后键分别匹配",
+      "ok": true,
+      "detail": "发出 12 轮，期望插字 12 次（每轮确认 1 次＋标点后键 0 次），实际 12 次",
+      "phase": "panel",
+      "group": "textedit/default/shift/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:23:55.088474+00:00"
+    },
+    {
+      "check": "textedit/default/shift/stop：每次插字时候选窗均在回调内隐藏",
+      "ok": true,
+      "detail": "confirmationHideFailures 增加 0",
+      "phase": "panel",
+      "group": "textedit/default/shift/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:23:55.088556+00:00"
+    },
+    {
+      "check": "textedit/default/shift/stop：样本流插字归属与隐藏状态",
+      "ok": true,
+      "detail": "12/12 轮逐事件核对通过",
+      "phase": "panel",
+      "group": "textedit/default/shift/stop",
+      "iteration": null,
+      "at": "2026-11-01T09:23:55.088695+00:00"
+    },
+    {
+      "check": "caret/textedit：组合后光标在末尾插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:55.950014+00:00"
+    },
+    {
+      "check": "caret/textedit：Left（声母后）插入点＝[6, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:56.671388+00:00"
+    },
+    {
+      "check": "caret/textedit：再 Left（音节边界）插入点＝[6, 2]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 2], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:57.153654+00:00"
+    },
+    {
+      "check": "caret/textedit：Right插入点＝[6, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:57.637969+00:00"
+    },
+    {
+      "check": "caret/textedit：Home插入点＝[6, 0]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 0], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:58.123420+00:00"
+    },
+    {
+      "check": "caret/textedit：End插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:58.829672+00:00"
+    },
+    {
+      "check": "caret/textedit：Ctrl＋A插入点＝[6, 0]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 0], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:59.311327+00:00"
+    },
+    {
+      "check": "caret/textedit：Ctrl＋E插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:23:59.794768+00:00"
+    },
+    {
+      "check": "caret/textedit：Ctrl＋B（声母后）插入点＝[6, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:24:00.278034+00:00"
+    },
+    {
+      "check": "caret/textedit：Ctrl＋F（回末尾）插入点＝[6, 6]",
+      "ok": true,
+      "detail": "{\"caret\": [6, 6], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:24:00.761709+00:00"
+    },
+    {
+      "check": "caret/textedit：原码显示插入点在末尾＝[4, 4]",
+      "ok": true,
+      "detail": "{\"caret\": [4, 4], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:24:02.972792+00:00"
+    },
+    {
+      "check": "caret/textedit：原码显示 Left 后插入点＝[4, 3]",
+      "ok": true,
+      "detail": "{\"caret\": [4, 3], \"visible\": true, \"windowNumber\": 5041}",
+      "phase": "caret",
+      "group": "caret/textedit",
+      "iteration": null,
+      "at": "2026-11-01T09:24:03.456541+00:00"
+    },
+    {
+      "check": "panel/space：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4454, \"hideCount\": 2865, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1589, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T09:24:05.090090+00:00"
+    },
+    {
+      "check": "panel/space：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4454, \"hideCount\": 2865, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1589, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4456, \"hideCount\": ",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T09:24:05.215264+00:00"
+    },
+    {
+      "check": "panel/space：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 9, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 9, \"p50\": 3334503, \"p95\": 6788770, \"p99\": 6788770, \"max\": 6788770}, \"coreNs\": {\"count\": 7, \"p50\": 537582, \"p95\": 2279994, \"p99\": 2279994, \"max\": 2279994}, ",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T09:24:05.216203+00:00"
+    },
+    {
+      "check": "panel/space：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4456, \"hideCount\": 2867, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1589, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4456, \"hideC",
+      "phase": "panel",
+      "group": "panel/space",
+      "iteration": null,
+      "at": "2026-11-01T09:24:07.220655+00:00"
+    },
+    {
+      "check": "panel/enter：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4466, \"hideCount\": 2873, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1593, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T09:24:07.733165+00:00"
+    },
+    {
+      "check": "panel/enter：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4466, \"hideCount\": 2873, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1593, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4468, \"hideCount\": ",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T09:24:07.862561+00:00"
+    },
+    {
+      "check": "panel/enter：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 9, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 9, \"p50\": 4033283, \"p95\": 6609670, \"p99\": 6609670, \"max\": 6609670}, \"coreNs\": {\"count\": 7, \"p50\": 526889, \"p95\": 2052860, \"p99\": 2052860, \"max\": 2052860}, ",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T09:24:07.863336+00:00"
+    },
+    {
+      "check": "panel/enter：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4468, \"hideCount\": 2875, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1593, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4468, \"hideC",
+      "phase": "panel",
+      "group": "panel/enter",
+      "iteration": null,
+      "at": "2026-11-01T09:24:09.863919+00:00"
+    },
+    {
+      "check": "panel/digit1：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4478, \"hideCount\": 2881, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1597, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T09:24:10.374000+00:00"
+    },
+    {
+      "check": "panel/digit1：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4478, \"hideCount\": 2881, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1597, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4480, \"hideCount\": ",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T09:24:10.504586+00:00"
+    },
+    {
+      "check": "panel/digit1：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 9, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 9, \"p50\": 3526209, \"p95\": 6106444, \"p99\": 6106444, \"max\": 6106444}, \"coreNs\": {\"count\": 7, \"p50\": 503324, \"p95\": 2080674, \"p99\": 2080674, \"max\": 2080674}, ",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T09:24:10.505546+00:00"
+    },
+    {
+      "check": "panel/digit1：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4480, \"hideCount\": 2883, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1597, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4480, \"hideC",
+      "phase": "panel",
+      "group": "panel/digit1",
+      "iteration": null,
+      "at": "2026-11-01T09:24:12.508630+00:00"
+    },
+    {
+      "check": "panel/semicolon：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4490, \"hideCount\": 2889, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1601, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T09:24:13.030371+00:00"
+    },
+    {
+      "check": "panel/semicolon：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4490, \"hideCount\": 2889, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1601, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4492, \"hideCount\": ",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T09:24:13.157934+00:00"
+    },
+    {
+      "check": "panel/semicolon：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 9, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 9, \"p50\": 3457973, \"p95\": 5133611, \"p99\": 5133611, \"max\": 5133611}, \"coreNs\": {\"count\": 7, \"p50\": 438014, \"p95\": 1891018, \"p99\": 1891018, \"max\": 1891018}, ",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T09:24:13.158477+00:00"
+    },
+    {
+      "check": "panel/semicolon：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4492, \"hideCount\": 2891, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1601, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 9, \"generation\": 4492, \"hideC",
+      "phase": "panel",
+      "group": "panel/semicolon",
+      "iteration": null,
+      "at": "2026-11-01T09:24:15.161657+00:00"
+    },
+    {
+      "check": "panel/shift：组合中候选窗可见",
+      "ok": true,
+      "detail": "{\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4502, \"hideCount\": 2897, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1605, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T09:24:15.669412+00:00"
+    },
+    {
+      "check": "panel/shift：确认后候选窗在回调内隐藏",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 0, \"confirmationHideFailures\": 0, \"events\": 8, \"generation\": 4502, \"hideCount\": 2897, \"panelFrame\": [291, 565, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1605, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": true}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 10, \"generation\": 4504, \"hideCount\":",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T09:24:15.852618+00:00"
+    },
+    {
+      "check": "panel/shift：提交样本显示回调内已隐藏且回调结束时不可见",
+      "ok": true,
+      "detail": "{\"count\": 10, \"metricScope\": {\"callbackNs\": \"IMK handle 回调总时长（主线程实测）\", \"coreNs\": \"共享核心同步处理时长\", \"renderNs\": \"按键到候选渲染完成（含排队）\", \"firstDisplayNs\": \"组合首键到候选首次显示\", \"commitCallNs\": \"仅 insertText 调用时长；不含核心选词与宿主实际接收，不能作为端到端门槛证据\"}, \"callbackNs\": {\"count\": 10, \"p50\": 2761478, \"p95\": 7246556, \"p99\": 7246556, \"max\": 7246556}, \"coreNs\": {\"count\": 7, \"p50\": 517562, \"p95\": 2128529, \"p99\": 2128529, \"max\": 2128529}",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T09:24:15.853446+00:00"
+    },
+    {
+      "check": "panel/shift：确认后 2 秒内候选窗未重弹",
+      "ok": true,
+      "detail": "{\"before\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 10, \"generation\": 4504, \"hideCount\": 2899, \"panelFrame\": [-10000, -10000, 439, 335], \"panelPreeditCaret\": [6, 6], \"panelWindowNumber\": 5041, \"renderCount\": 1605, \"scenario\": \"\", \"staleRenderCount\": 0, \"visible\": false}, \"after\": {\"confirmationCount\": 1, \"confirmationHideFailures\": 0, \"events\": 10, \"generation\": 4504, \"hid",
+      "phase": "panel",
+      "group": "panel/shift",
+      "iteration": null,
+      "at": "2026-11-01T09:24:17.856995+00:00"
+    }
+  ],
+  "failures": 0,
+  "evidence": "docs/validation/short-tests/first-key-textedit.evidence.jsonl"
+}

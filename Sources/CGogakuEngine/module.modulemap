@@ -1,0 +1,5 @@
+module CGogakuEngine [system] {
+  header "../../native/EngineBridge/include/gogaku_engine.h"
+  link "GogakuEngine"
+  export *
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>Gogaku 宿主测试页</title>
+<style>
+  body { font: 15px/1.6 -apple-system, sans-serif; margin: 24px; }
+  textarea, [contenteditable], input { font-size: 16px; border: 1px solid #999; border-radius: 6px; padding: 8px; width: 480px; }
+  [contenteditable] { min-height: 60px; background: #fafafa; }
+  label { display: block; margin: 12px 0 4px; }
+  #readout { margin-top: 16px; color: #333; white-space: pre-wrap; }
+  #run { font-family: ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<h3>Gogaku 宿主测试页（本地临时文件，无网络请求）</h3>
+<p>本轮运行标记：<span id="run">-</span></p>
+<label>textarea（普通输入框）</label>
+<textarea id="area" rows="3" autofocus></textarea>
+<label>contenteditable（富文本区）</label>
+<div id="rich" contenteditable="true"></div>
+<label>password（密码框：应直通且不学习）</label>
+<input id="secret" type="password" autocomplete="off">
+<label>search（地址栏形态的普通文本框）</label>
+<input id="search" type="text" autocomplete="off">
+<div id="readout"></div>
+<script>
+  // 无网络、无外部资源。页面只做两件事：
+  // 1) 把四个受测字段的当前值与当前焦点字段写进 document.title，
+  //    驱动侧用窗口标题（AX／AppleScript）读取，避免依赖不稳定的网页 AX 树；
+  // 2) 记录本轮运行标记（URL 的 ?run=），让窗口标题带上本轮唯一身份，
+  //    驱动侧据此确认「正在操作的是本次创建的专属测试窗口」。
+  const params = new URLSearchParams(location.search);
+  const run = params.get('run') || 'norun';
+  document.getElementById('run').textContent = run;
+  const readout = document.getElementById('readout');
+  const FIELDS = ['area', 'rich', 'secret', 'search'];
+  function focusId() {
+    const active = document.activeElement;
+    if (!active) { return ''; }
+    return FIELDS.includes(active.id) ? active.id : '';
+  }
+  function valueOf(id) {
+    const node = document.getElementById(id);
+    return id === 'rich' ? node.textContent : node.value;
+  }
+  function refresh() {
+    // 标题携带当前值：AX 只需读窗口标题即可验证（Chrome 网页区 AX 树不稳定）。
+    const snapshot = {
+      run: run,
+      area: valueOf('area'),
+      rich: valueOf('rich'),
+      secretLength: document.getElementById('secret').value.length,
+      search: valueOf('search'),
+      focus: focusId()
+    };
+    document.title = 'Gogaku Test ' + run + ' ' + JSON.stringify(snapshot);
+    readout.textContent = [
+      'run=' + run,
+      'area=' + JSON.stringify(snapshot.area),
+      'rich=' + JSON.stringify(snapshot.rich),
+      'secret.length=' + snapshot.secretLength,
+      'search=' + JSON.stringify(snapshot.search),
+      'focus=' + snapshot.focus
+    ].join('\n');
+  }
+  for (const id of FIELDS) {
+    const node = document.getElementById(id);
+    node.addEventListener('input', refresh);
+    node.addEventListener('compositionend', refresh);
+  }
+  // 焦点变化也要进标题：驱动侧靠标题里的 focus 字段确认当前受测目标。
+  document.addEventListener('focusin', refresh);
+  document.addEventListener('focusout', refresh);
+  refresh();
+</script>
+</body>
+</html>

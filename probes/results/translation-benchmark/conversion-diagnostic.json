@@ -1,0 +1,74 @@
+{
+  "context": "Initial OPUS model conversion with Torch and CT2 installed together; torch threads=4. Conversion later succeeded at threads=1. CT2 inference subsequently ran in a separate environment without Torch.",
+  "exception": {
+    "codes": "0x0000000000000001, 0x0000000000000010",
+    "rawCodes": [
+      1,
+      16
+    ],
+    "type": "EXC_BAD_ACCESS",
+    "signal": "SIGSEGV",
+    "subtype": "KERN_INVALID_ADDRESS at 0x0000000000000010"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 11,
+    "namespace": "SIGNAL",
+    "indicator": "Segmentation fault: 11",
+    "byProc": "exc handler",
+    "byPid": 67057
+  },
+  "openmp_libraries": [
+    "/private/tmp/*/libiomp5.dylib",
+    "/private/tmp/*/libiomp5.dylib"
+  ],
+  "crashing_thread_frames": [
+    {
+      "symbol": "void __kmp_suspend_64<false, true>(int, kmp_flag_64<false, true>*)",
+      "library": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "symbol": "bool _INTERNAL0cd0f94b::__kmp_wait_template<kmp_flag_64<false, true>, true, false, true>(kmp_info*, kmp_flag_64<false, true>*, void*)",
+      "library": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "symbol": "_INTERNAL0cd0f94b::__kmp_hyper_barrier_release(barrier_type, kmp_info*, int, int, int, void*)",
+      "library": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "symbol": "__kmp_fork_barrier(int, int)",
+      "library": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "symbol": "__kmp_launch_thread",
+      "library": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "symbol": "_INTERNALf925d962::__kmp_launch_worker(void*)",
+      "library": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "symbol": "_pthread_start",
+      "library": "/usr/lib/system/libsystem_pthread.dylib"
+    },
+    {
+      "symbol": "thread_start",
+      "library": "/usr/lib/system/libsystem_pthread.dylib"
+    }
+  ],
+  "source_report_sha256": "cf2c42c7a742eee44bc296116c720a88ad912b9219d06ac4fee1b05e2f778c03",
+  "openmp_images": [
+    {
+      "image_index": 13,
+      "uuid": "8eea90ce-f699-3011-a6a2-5b35e789610e",
+      "base": 4486279168,
+      "path": "/private/tmp/*/libiomp5.dylib"
+    },
+    {
+      "image_index": 50,
+      "uuid": "f65f2a35-ea0c-36ef-8db7-8a8ecaf4629d",
+      "base": 4506861568,
+      "path": "/private/tmp/*/libiomp5.dylib"
+    }
+  ]
+}

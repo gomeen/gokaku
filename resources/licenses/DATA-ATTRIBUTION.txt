@@ -1,0 +1,37 @@
+Gogaku 英文候选词表与释义注释数据 — 署名与许可说明
+====================================================
+
+本目录随 Gogaku 安装包分发以下第三方衍生数据文件，义务在此集中说明；
+完整登记见包内 THIRD-PARTY.md 与仓库 docs/third-party.md。
+
+1. EngineData/english-words.txt（英文候选词表）
+   - 词表来源：SCOWL（English Wordlists）en_US size≤60，官方生成器
+     `mk-list -d final en_US 60`（与 hunspell en_US 构建同一命令），
+     版本 scowl-2020.12.07。
+     SCOWL 为集体作品，MIT-like 许可；逐来源版权与声明见
+     Licenses/SCOWL-Copyright.txt（含 Moby、12Dicts、ENABLE、VarCon、
+     AGID、WordNet、UKACD、Ispell 等各来源条目）。
+   - 排序来源：wordfreq 3.1.1 `top_n_list('en', 200000)` 英文词频降序。
+     wordfreq 代码 Apache-2.0；内置频率数据 CC BY-SA 4.0。
+     本衍生词表按 CC BY-SA 4.0 分发（见 Licenses/CC-BY-SA-4.0.txt）。
+     署名：wordfreq 由 Robyn Speer 编写；词频数据部分来源于 SUBTLEX
+     （van Heuven et al., 2014, Behavior Research Methods, 46, 1004-1017）。
+     声明修改：本词表为 SCOWL 词表与 wordfreq 词频排序的交集截取（衍生、已修改）。
+     来源页面：https://github.com/rspeer/wordfreq ；http://wordlist.aspell.net/
+
+2. EngineData/gloss.tsv（候选窗「词性＋译文」注释）
+   - 来源：Wiktionary 英文版中文词条，经 wiktextract 提取
+     （kaikki.org "Chinese" 提取文件，具体版本与哈希见
+     resources/gloss-sources.json 与 gloss.tsv 文件头）。
+     Wiktionary 文本为 CC BY-SA 4.0 ＋ GFDL 双许可，本派生数据选择
+     CC BY-SA 4.0 一支分发（见 Licenses/CC-BY-SA-4.0.txt）。
+     署名：Wiktionary contributors, CC BY-SA 4.0
+     <https://creativecommons.org/licenses/by-sa/4.0/legalcode>
+     许可声明页：<https://en.wiktionary.org/wiki/Wiktionary:Copyrights>
+     免责声明：<https://en.wiktionary.org/wiki/Wiktionary:General_disclaimer>
+     原文 URI（逐词条）：<https://en.wiktionary.org/wiki/<词头>>
+     提取工具：wiktextract（MIT，https://github.com/tatuylonen/wiktextract）。
+     声明修改：本文件经 wiktextract 提取并改写（截断多义项、过滤非中文键、
+     词性缩写），为衍生数据。
+   - 义务：ShareAlike 只约束本数据文件本身；本文件以纯文本独立分发
+     （mere aggregation），不并入任何主张数据库权的数据库。

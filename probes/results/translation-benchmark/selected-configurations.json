@@ -1,0 +1,11 @@
+{
+  "method": "lowest four-case tuning median per model/backend/precision; MPS precision selected jointly; tuning medians are exploratory only",
+  "configs": [
+    "m2m100-ct2-float32-t2",
+    "m2m100-ct2-int8-t4",
+    "opus-ct2-float32-t4",
+    "opus-ct2-int8-t2",
+    "opus-torch-cpu-t4",
+    "opus-torch-mps-float32-fallback"
+  ]
+}

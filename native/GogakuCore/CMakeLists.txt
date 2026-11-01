@@ -1,0 +1,103 @@
+cmake_minimum_required(VERSION 3.25)
+project(GogakuCore LANGUAGES C CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+if(NOT DEFINED GOGAKU_DEPS)
+  message(FATAL_ERROR "Pass -DGOGAKU_DEPS with pinned dependency cache (libime 1.1.17)")
+endif()
+find_path(BOOST_INCLUDE boost/version.hpp PATHS /usr/local/opt/boost/include /opt/homebrew/opt/boost/include REQUIRED)
+
+# 可选 ASan＋UBSan 构建（随机按键模糊测试用；常规构建不受影响）。
+# 插桩必须同时作用于共享核心库与测试可执行：add_compile_options 只对其后
+# 创建的目标生效，若核心库先于它创建，核心内部（normal_session.cpp 等）
+# 不会被插桩，模糊测试的「无内存错误」结论无效。这里改为逐目标显式设置，
+# 不依赖目标创建顺序。
+set(GOGAKU_SANITIZER_COMPILE_FLAGS "")
+set(GOGAKU_SANITIZER_LINK_FLAGS "")
+if(GOGAKU_SANITIZERS)
+  set(GOGAKU_SANITIZER_COMPILE_FLAGS -fsanitize=address,undefined -fno-omit-frame-pointer -g)
+  set(GOGAKU_SANITIZER_LINK_FLAGS -fsanitize=address,undefined)
+endif()
+
+function(gogaku_enable_sanitizers target)
+  if(GOGAKU_SANITIZERS)
+    target_compile_options(${target} PRIVATE ${GOGAKU_SANITIZER_COMPILE_FLAGS})
+    target_link_options(${target} PRIVATE ${GOGAKU_SANITIZER_LINK_FLAGS})
+  endif()
+endfunction()
+
+add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp)
+target_include_directories(GogakuCore
+    PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}"
+    PUBLIC include)
+target_link_directories(GogakuCore PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(GogakuCore PRIVATE IMEPinyin IMECore Fcitx5Utils)
+target_compile_definitions(GogakuCore PRIVATE GOGAKU_CORE_BUILDING)
+set_target_properties(GogakuCore PROPERTIES
+    OUTPUT_NAME gogaku_core
+    CXX_VISIBILITY_PRESET hidden
+    VISIBILITY_INLINES_HIDDEN ON
+    BUILD_RPATH "${GOGAKU_DEPS}/build/bin;${GOGAKU_DEPS}/prefix/lib"
+    INSTALL_NAME_DIR "@rpath")
+if(WIN32)
+  set_target_properties(GogakuCore PROPERTIES RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:GogakuCore>)
+endif()
+
+# 核心库自身也插桩（见上：只插桩测试壳无法覆盖核心内部）。
+gogaku_enable_sanitizers(GogakuCore)
+
+enable_testing()
+# ABI 版本合同测试（C，不依赖 libime 数据）。
+add_executable(gogaku_core_abi_test tests/abi_version_test.c)
+target_include_directories(gogaku_core_abi_test PRIVATE include)
+target_link_libraries(gogaku_core_abi_test PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_abi_test)
+add_test(NAME abi_version COMMAND gogaku_core_abi_test)
+
+# 普通模式事件轨迹测试。词典/模型路径经环境变量提供
+# （GOGAKU_CORE_TEST_DATA），与本机缓存保持一致；测试词典由文本格式临时生成，
+# 需直接包含 libime 头。
+add_executable(gogaku_core_normal_test tests/normal_session_test.cpp)
+target_include_directories(gogaku_core_normal_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_core_normal_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_core_normal_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_core_normal_test)
+add_test(NAME normal_session COMMAND gogaku_core_normal_test)
+
+# 万次事件性能基准（手动运行，不计入 ctest）。
+add_executable(gogaku_core_normal_bench tests/normal_session_bench.cpp)
+target_include_directories(gogaku_core_normal_bench PRIVATE include)
+target_link_libraries(gogaku_core_normal_bench PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_normal_bench)
+
+# 分项成本基准（手动运行，不计入 ctest）：拆测解码／候选／合并／查询／快照。
+# 直接使用 libime 头，需与核心相同的依赖路径。
+add_executable(gogaku_core_normal_profile tests/normal_session_profile.cpp)
+target_include_directories(gogaku_core_normal_profile PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_core_normal_profile PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_core_normal_profile PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_core_normal_profile)
+
+# 中文质量回归：120 条冻结用例的首选／前十门槛与调频／自定义词不干扰检查。
+add_executable(gogaku_core_quality_test tests/normal_session_quality.cpp)
+target_include_directories(gogaku_core_quality_test PRIVATE include)
+target_link_libraries(gogaku_core_quality_test PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_quality_test)
+add_test(NAME quality_regression COMMAND gogaku_core_quality_test)
+set_tests_properties(quality_regression PROPERTIES SKIP_RETURN_CODE 3)
+
+# 随机按键序列模糊测试（手动运行；默认种子与序列数即可覆盖 ≥10 万序列）。
+add_executable(gogaku_core_fuzz tests/normal_session_fuzz.cpp)
+target_include_directories(gogaku_core_fuzz PRIVATE include)
+target_link_libraries(gogaku_core_fuzz PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_fuzz)
+# 常规构建的冒烟模糊测试（复查 E1：缺数据时显式 SKIP 退出码 3，不当作通过）。
+add_test(NAME fuzz_smoke COMMAND gogaku_core_fuzz 20261031 2000)
+set_tests_properties(fuzz_smoke PROPERTIES SKIP_RETURN_CODE 3)
+
+# 数据可靠性测试辅助进程（probes/validate-data-reliability.py 启动／校验）。
+add_executable(gogaku_data_reliability_worker tests/data_reliability_worker.cpp)
+target_include_directories(gogaku_data_reliability_worker PRIVATE include)
+target_link_libraries(gogaku_data_reliability_worker PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_data_reliability_worker)

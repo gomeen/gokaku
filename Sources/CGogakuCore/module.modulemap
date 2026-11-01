@@ -1,0 +1,5 @@
+module CGogakuCore [system] {
+  header "../../native/GogakuCore/include/gogaku_core.h"
+  link "gogaku_core"
+  export *
+}

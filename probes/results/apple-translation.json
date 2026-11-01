@@ -1,0 +1,16 @@
+[
+  {
+    "availability" : "supported",
+    "cases" : [
+
+    ],
+    "direction" : "en->zh-Hans"
+  },
+  {
+    "availability" : "supported",
+    "cases" : [
+
+    ],
+    "direction" : "zh-Hans->en"
+  }
+]

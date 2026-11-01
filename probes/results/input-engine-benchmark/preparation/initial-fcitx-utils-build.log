@@ -1,0 +1,43 @@
+[1/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/event_none.cpp.o
+[2/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/stringutils.cpp.o
+[3/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/standardpaths_p_unix.cpp.o
+[4/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/testing.cpp.o
+[5/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/key.cpp.o
+[6/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/cutf8.cpp.o
+[7/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/color.cpp.o
+[8/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/i18nstring.cpp.o
+[9/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/eventdispatcher.cpp.o
+[10/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/library.cpp.o
+[11/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/fs.cpp.o
+[12/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/fs_deprecated.cpp.o
+[13/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/unixfd.cpp.o
+[14/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/standardpath.cpp.o
+[15/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/utf8.cpp.o
+[16/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/element.cpp.o
+[17/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/connectableobject.cpp.o
+[18/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/inputbuffer.cpp.o
+[19/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/i18n.cpp.o
+[20/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/log.cpp.o
+FAILED: [code=1] src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/log.cpp.o 
+/usr/bin/c++ -DFCITX_GETTEXT_DOMAIN=\"fcitx5\" -DFcitx5Utils_EXPORTS -I/tmp/gogaku-ime-benchmark/libime/fcitx5-build -I/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/.. -I/tmp/gogaku-ime-benchmark/libime/fcitx5-build/src/lib/fcitx-utils/.. -isystem /usr/local/opt/gettext/include -Wall -Wextra  -O3 -DNDEBUG -std=c++20 -fPIC -fvisibility=hidden -fvisibility-inlines-hidden -MD -MT src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/log.cpp.o -MF src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/log.cpp.o.d -o src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/log.cpp.o -c /tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp
+/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp:38:30: error: no type named 'osyncstream' in namespace 'std'
+   38 |     static thread_local std::osyncstream localLogStream;
+      |                         ~~~~~^
+/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp:43:19: error: no type named 'osyncstream' in namespace 'std'
+   43 | thread_local std::osyncstream LogConfig::localLogStream = []() {
+      |              ~~~~~^
+/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp:44:10: error: no member named 'osyncstream' in namespace 'std'
+   44 |     std::osyncstream out(*LogConfig::defaultLogStream);
+      |          ^~~~~~~~~~~
+/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp:45:5: error: use of undeclared identifier 'out'
+   45 |     out.rdbuf()->set_emit_on_sync(true);
+      |     ^~~
+/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp:46:12: error: use of undeclared identifier 'out'
+   46 |     return out;
+      |            ^~~
+/tmp/gogaku-ime-benchmark/libime/fcitx5-source/src/lib/fcitx-utils/log.cpp:204:42: error: no member named 'osyncstream' in namespace 'std'
+  204 |         LogConfig::localLogStream = std::osyncstream(buf);
+      |                                          ^~~~~~~~~~~
+6 errors generated.
+[21/30] Building CXX object src/lib/fcitx-utils/CMakeFiles/Fcitx5Utils.dir/misc.cpp.o
+ninja: build stopped: subcommand failed.

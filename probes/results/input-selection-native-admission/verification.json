@@ -1,0 +1,46 @@
+{
+  "status": "passed",
+  "paced_experiments": [
+    {
+      "path": "probes/results/input-selection-paced",
+      "key_events": 702,
+      "native_operations": 15,
+      "independent_statistics_match": true,
+      "event_coverage": true,
+      "translation_requests": 0
+    },
+    {
+      "path": "probes/results/input-selection-layout",
+      "key_events": 702,
+      "native_operations": 15,
+      "independent_statistics_match": true,
+      "event_coverage": true,
+      "translation_requests": 0
+    }
+  ],
+  "python_syntax_files": [
+    "probes/prepare-rime-input.py",
+    "probes/prepare-qingjian-input.py",
+    "probes/prepare-libime-input.py",
+    "probes/prepare-translation-models.py",
+    "probes/summarize-input-engine-benchmark.py",
+    "probes/prepare-input-engine-cases.py",
+    "probes/benchmark-translations.py",
+    "probes/translation-worker.py",
+    "probes/summarize-translation-benchmark.py",
+    "probes/benchmark-input-decision.py",
+    "probes/benchmark-input-engines.py",
+    "probes/validate-translation-runtime.py"
+  ],
+  "local_markdown_file_links": 149,
+  "broken_links": [],
+  "runtime_error_logs": [],
+  "swift_build": "swiftc -O succeeded; native contracts executed",
+  "lsp": "sourcekit-lsp timed out twice; no clean LSP claim",
+  "true_translation_contention": "not run; missing models, explicit failure of this planned coverage",
+  "limitations": [
+    "No IMK installation, external host, display timestamp, or translation concurrency acceptance.",
+    "Offscreen forced-raster pass diagnostic only.",
+    "CPU speed limit and high system load prevent normal-frequency performance ranking."
+  ]
+}

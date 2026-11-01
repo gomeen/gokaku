@@ -1,0 +1,101 @@
+# 每行：类别 | 英语源文 | 中文参考；人工编写合成内容，冻结前未查看新后端输出。
+word|appointment|预约
+word|receipt|收据
+word|refund|退款
+word|deadline|截止日期
+word|umbrella|雨伞
+word|platform|站台
+word|battery|电池
+word|medicine|药
+word|address|地址
+word|invoice|发票
+word|luggage|行李
+word|temperature|温度
+word|password|密码
+word|reservation|预订
+word|elevator|电梯
+word|allergy|过敏
+word|subscription|订阅
+word|intersection|十字路口
+word|discount|折扣
+word|permission|许可
+phrase|cancel an order|取消订单
+phrase|make a reservation|预订座位
+phrase|miss the train|错过火车
+phrase|take a break|休息一下
+phrase|on the second floor|在二楼
+phrase|without sugar|不加糖
+phrase|a return ticket|往返票
+phrase|out of stock|缺货
+phrase|by the end of this week|在本周结束前
+phrase|as soon as possible|尽快
+phrase|leave a message|留言
+phrase|pay in cash|用现金支付
+phrase|turn down the volume|调低音量
+phrase|at least twice|至少两次
+phrase|no later than Thursday|最迟星期四
+phrase|keep the original file|保留原文件
+phrase|an empty folder|空文件夹
+phrase|a delayed flight|延误的航班
+phrase|for personal use|供个人使用
+phrase|a one-way street|单行道
+sentence|I cannot open the attachment.|我打不开附件。
+sentence|Please keep the door closed.|请保持门关闭。
+sentence|The package arrived yesterday.|包裹昨天到了。
+sentence|We have not received the payment yet.|我们还没有收到付款。
+sentence|Is this seat taken?|这个座位有人吗？
+sentence|I need two tickets, not three.|我需要两张票，不是三张。
+sentence|She works from home on Mondays.|她星期一在家办公。
+sentence|Could you speak more slowly?|你能说慢一点吗？
+sentence|The shop closes at half past eight.|商店八点半关门。
+sentence|I left my keys on the table.|我把钥匙落在桌子上了。
+sentence|You do not need to reply today.|你今天不必回复。
+sentence|Do not delete the backup.|不要删除备份。
+sentence|Only the first item is free.|只有第一项免费。
+sentence|The price includes breakfast.|价格包含早餐。
+sentence|There are no trains after midnight.|午夜后没有火车。
+sentence|I used to live near the station.|我以前住在车站附近。
+sentence|Please send it to Chen, not Wang.|请把它发给陈，不要发给王。
+sentence|The total is 128.50 yuan.|总共是128.50元。
+sentence|My flight leaves on June 12.|我的航班6月12日出发。
+sentence|The room number is 406.|房间号是406。
+sentence|I will wait until 7:15.|我会等到7点15分。
+sentence|We moved the appointment from Tuesday to Wednesday.|我们把预约从星期二改到了星期三。
+sentence|The blue one is cheaper than the red one.|蓝色的比红色的便宜。
+sentence|I am allergic to peanuts.|我对花生过敏。
+sentence|This is not the latest version.|这不是最新版本。
+sentence|If you are busy, we can talk later.|如果你忙，我们可以晚点再谈。
+sentence|It may rain this evening.|今天傍晚可能下雨。
+sentence|I have already submitted the form.|我已经提交了表格。
+sentence|He has never been to London.|他从没去过伦敦。
+sentence|We need at least five chairs.|我们至少需要五把椅子。
+sentence|Please reduce the amount by ten percent.|请把金额减少百分之十。
+sentence|Do I have to book in advance?|我必须提前预约吗？
+sentence|The bus stop is across the street.|公交车站在街对面。
+sentence|I would rather walk than take a taxi.|我宁愿步行，也不愿打车。
+sentence|Please return the book before Friday.|请在星期五之前还书。
+sentence|Neither answer is correct.|两个答案都不正确。
+sentence|I need a copy of the contract.|我需要一份合同副本。
+sentence|The test failed only on the first attempt.|测试只有第一次尝试失败了。
+sentence|Could we move this call to the afternoon?|我们能把这次通话改到下午吗？
+sentence|I forgot whether I locked the door.|我忘了是否锁了门。
+long|If the delivery does not arrive by Friday, please cancel the order and refund the full amount to my original payment method.|如果星期五之前还没送到，请取消订单，并通过原支付方式全额退款。
+long|The old entrance will be closed from 9 a.m. to 4 p.m. tomorrow, so please use the side door during that time.|明天上午9点到下午4点旧入口将关闭，请在这段时间使用侧门。
+long|Although the first test passed, we should not publish the update until the remaining two tests are complete.|虽然第一项测试通过了，但在其余两项测试完成之前，我们不应该发布更新。
+long|Please tell Maria that the appointment has been moved to August 3, and remind her to bring the original document rather than a copy.|请告诉玛丽亚，预约已改到8月3日，并提醒她带原件而不是复印件。
+long|I ordered three small boxes and two large ones, but the package contained only two small boxes and one large box.|我订了三个小盒子和两个大盒子，但包裹里只有两个小盒子和一个大盒子。
+long|If you have already paid, ignore this reminder; otherwise, please complete the payment before 6 p.m. next Monday.|如果你已经付款，请忽略这条提醒；否则，请在下星期一下午6点之前完成付款。
+long|The hotel is a ten-minute walk from the station, but the road is being repaired, so allow an extra fifteen minutes.|酒店离车站步行十分钟，但道路正在维修，所以请额外预留十五分钟。
+long|We do not need to translate the product names, but every warning and instruction must be available in both Chinese and English.|我们不需要翻译产品名称，但每一条警告和说明都必须同时提供中文和英文。
+long|Please do not overwrite the original spreadsheet; save your changes in a new file and send only that file to the team.|请不要覆盖原电子表格；把修改保存到新文件中，并且只把那个文件发给团队。
+long|I am available on Tuesday morning and Thursday afternoon, but I cannot attend any meetings on Wednesday because I will be traveling.|我星期二上午和星期四下午有空，但星期三要出行，无法参加任何会议。
+protected|https://example.org/path?q=42|https://example.org/path?q=42
+protected|user+test@example.org|user+test@example.org
+protected|let count = 42;|let count = 42;
+protected|Gogaku v3.2.1|Gogaku v3.2.1
+protected|AB-2048-X|AB-2048-X
+typo|recievee|qxvzzz
+typo|definatelyy|zzqvvv
+typo|adresss|qqxzzv
+typo|tomoroww|vvzzqq
+typo|unkn0wnzz|zzvvxx

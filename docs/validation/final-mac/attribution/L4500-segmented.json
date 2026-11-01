@@ -1,0 +1,148 @@
+{
+  "scenario": "L4500-segmented",
+  "at": "2026-11-01T15:05:36.830191+00:00",
+  "elapsedSeconds": 10.745,
+  "actualEvents": 540,
+  "cycles": 12,
+  "compositions": 48,
+  "hostTextLengthAfter": 4777,
+  "hostFlags": {
+    "allowsUndo": false,
+    "automaticSpellingCorrection": false,
+    "automaticTextCompletion": false,
+    "automaticTextReplacement": false,
+    "continuousSpellChecking": false
+  },
+  "settingsApplied": {},
+  "summary": {
+    "count": 540,
+    "callbackNs": {
+      "count": 540,
+      "p50": 6100402,
+      "p95": 8890033,
+      "p99": 10242528,
+      "max": 14154615
+    },
+    "coreNs": {
+      "count": 540,
+      "p50": 1251029,
+      "p95": 3293029,
+      "p99": 3820499,
+      "max": 4008598
+    },
+    "queueWaitNs": {
+      "count": 540,
+      "p50": 3463,
+      "p95": 5217,
+      "p99": 6133,
+      "max": 18728
+    },
+    "coreExecNs": {
+      "count": 540,
+      "p50": 1241543,
+      "p95": 3283505,
+      "p99": 3808804,
+      "max": 3993656
+    },
+    "hostReadNs": {
+      "count": 540,
+      "p50": 1354438,
+      "p95": 2100234,
+      "p99": 2513623,
+      "max": 3258259
+    },
+    "markedWriteNs": {
+      "count": 432,
+      "p50": 3360569,
+      "p95": 4058222,
+      "p99": 5104274,
+      "max": 9902456
+    },
+    "anchorReadNs": {
+      "count": 432,
+      "p50": 77,
+      "p95": 540815,
+      "p99": 649290,
+      "max": 779782
+    },
+    "commitCallNs": {
+      "count": 48,
+      "p50": 2200246,
+      "p95": 2539910,
+      "p99": 2833736,
+      "max": 2833736
+    },
+    "renderNs": {
+      "count": 492,
+      "p50": 8275223,
+      "p95": 11558334,
+      "p99": 14238190,
+      "max": 20955781
+    },
+    "firstDisplayNs": {
+      "count": 48,
+      "p50": 11419080,
+      "p95": 18631611,
+      "p99": 20955781,
+      "max": 20955781
+    },
+    "commitEvents": 48,
+    "commitHiddenFalse": 0,
+    "firstDisplayEvents": 48
+  },
+  "hostMarkedWrites": {
+    "count": 432,
+    "durationNs": {
+      "count": 432,
+      "p50": 3021269,
+      "p95": 3623715,
+      "p99": 3999688,
+      "max": 4455814
+    }
+  },
+  "hostInsertions": {
+    "count": 48,
+    "durationNs": {
+      "count": 48,
+      "p50": 1950269,
+      "p95": 2232466,
+      "p99": 2466954,
+      "max": 2466954
+    },
+    "latencyNs": {
+      "count": 48,
+      "p50": 6238361,
+      "p95": 18789542,
+      "p99": 30608013,
+      "max": 30608013
+    }
+  },
+  "markedWritePairing": {
+    "paired": 432,
+    "imeP95": {
+      "count": 432,
+      "p50": 3360569,
+      "p95": 4058222,
+      "p99": 5104274,
+      "max": 9902456
+    },
+    "hostP95": {
+      "count": 432,
+      "p50": 3021269,
+      "p95": 3623715,
+      "p99": 3999688,
+      "max": 4455814
+    }
+  },
+  "samplesFile": "/Users/gomeen/code/gomeen/gogaku/docs/validation/final-mac/attribution/L4500-segmented-samples.json",
+  "environment": {
+    "at": "2026-11-01T15:05:36.857299+00:00",
+    "pmsetTherm": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-01 23:05:36 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 100",
+    "pmset": "System-wide power settings:\n SleepDisabled\t\t0\nCurrently in use:\n lidwake              1\n lowpowermode         0\n standbydelayhigh     86400\n proximitywake        0\n standby              1\n standbydelaylow      10800\n ttyskeepawake        1\n hibernatemode        3\n powernap             0\n gpuswitch            2\n hibernatefile        /var/vm/sleepimage\n highstandbythreshold 50\n displaysleep         10 (display sleep prevented by caffeinate, caffeinate)\n womp                 0\n networkoversleep     0\n sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)\n tcpkeepalive         1\n halfdim              1\n acwake               0\n disksleep            10",
+    "loadavg": "{ 3.36 2.90 2.83 }",
+    "battery": "Now drawing from 'AC Power'\n -InternalBattery-0 (id=6553699)\t72%; charging; (no estimate) present: true",
+    "displayAwake": true,
+    "sleepState": "sleep                1 (sleep prevented by caffeinate, caffeinate, caffeinate, caffeinate)",
+    "caffeinateProcesses": "9956 /usr/bin/caffeinate -i -s -w 1295\n21218 /usr/bin/caffeinate -di -w 21194\n69557 caffeinate -d -i -w 69544"
+  }
+}

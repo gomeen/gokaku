@@ -1,0 +1,142 @@
+{
+  "schema": "gogaku.first-key-matrix.v1",
+  "checkedAt": "2026-11-01T10:11:22.569632+00:00",
+  "runId": "17935278596892",
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "installedPath": "/Users/gomeen/Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput",
+    "installedSHA256": "f508cc430de6ed3c1b596317decfa5845d656b87c88c4cfd32287c5044771568"
+  },
+  "driver": {
+    "probeSHA256": "446fe97377b1573e2e7449a4719031845259fc435bd580e3da3de51a410a24b0",
+    "axReaderSHA256": "3b2804debf6e0912fea4bad24e1d76332e66140ba9ed8dd8b549166c41ba6adf",
+    "pageSHA256": "6b965f6d06249192fde7833c94b7b26d7b8b481a1b06180c0090a3dc29463284",
+    "planSHA256": "733793e92ff28b944f68fa9aede04fab66b2d2171bf7192ac0cd3be8c4af1437"
+  },
+  "panelState": {
+    "enabled": true,
+    "socket": "/Users/gomeen/Library/Logs/Gogaku/validation.sock",
+    "protocol": {
+      "transport": "AF_UNIX/SOCK_STREAM",
+      "request": "state\\n | metrics\\n | reset\\n | scenario <name>\\n",
+      "stateFields": [
+        "visible",
+        "generation",
+        "hideCount",
+        "staleRenderCount",
+        "renderCount",
+        "confirmationCount",
+        "confirmationHideFailures",
+        "scenario"
+      ],
+      "metricsExtra": [
+        "samples"
+      ],
+      "samplesFields": [
+        "callbackNs",
+        "coreNs",
+        "queueWaitNs",
+        "coreExecNs",
+        "hostReadNs",
+        "markedWriteNs",
+        "anchorReadNs",
+        "commitCallNs",
+        "commitCount",
+        "hostSelection",
+        "renderNs",
+        "firstDisplayNs",
+        "confirmationHidden",
+        "visibleAtReturn",
+        "firstDisplay",
+        "scenario"
+      ],
+      "containsText": false
+    },
+    "enableProcedure": {
+      "marker": "/Users/gomeen/Library/Logs/Gogaku/validation-enabled",
+      "markerMode": "0600",
+      "logDirectory": "/Users/gomeen/Library/Logs/Gogaku",
+      "logDirectoryMode": "0700",
+      "socketMode": "0600",
+      "requires": "验收构建（scripts/build.py --validation）＋重启输入法进程"
+    }
+  },
+  "plan": {
+    "schema": "gogaku.first-key-plan.v1",
+    "createdAt": "2026-11-01T10:10:59.355876+00:00",
+    "composition": "nihc",
+    "iterations": 10,
+    "hosts": [
+      "terminal",
+      "orca-pty"
+    ],
+    "confirmations": [
+      {
+        "id": "space",
+        "label": "空格确认首选候选",
+        "committed": "你好"
+      },
+      {
+        "id": "enter",
+        "label": "Enter 上屏原编码",
+        "committed": "nihc"
+      },
+      {
+        "id": "digit1",
+        "label": "数字 1 选当前页首个候选",
+        "committed": "你好"
+      },
+      {
+        "id": "semicolon",
+        "label": "组合中分号一次上屏",
+        "committed": "你好；"
+      },
+      {
+        "id": "shift",
+        "label": "组合中 Shift 单击上屏原编码",
+        "committed": "nihc"
+      }
+    ],
+    "postKeys": [
+      {
+        "id": "letter",
+        "label": "字母 n（后键首字）",
+        "kind": "composition"
+      },
+      {
+        "id": "comma",
+        "label": "逗号（无组合标点表）",
+        "kind": "punctuation"
+      },
+      {
+        "id": "period",
+        "label": "句号（无组合标点表）",
+        "kind": "punctuation"
+      },
+      {
+        "id": "stop",
+        "label": "停止（不发任何键）",
+        "kind": "stop"
+      }
+    ],
+    "sha256": "733793e92ff28b944f68fa9aede04fab66b2d2171bf7192ac0cd3be8c4af1437"
+  },
+  "inputLettersEnabled": true,
+  "groups": [],
+  "panelReports": [],
+  "skipped": [
+    {
+      "host": "terminal",
+      "target": "default",
+      "reason": "Terminal.app 未安装（本机环境限制，记为跳过）"
+    },
+    {
+      "host": "orca-pty",
+      "target": "default",
+      "reason": "宿主就绪超时：前台 'org.gogaku.validation.host' 标题 'Gogaku IMK regression host'"
+    }
+  ],
+  "checks": [],
+  "failures": 0,
+  "evidence": "docs/validation/short-tests/first-key-terminal-orca.evidence.jsonl"
+}

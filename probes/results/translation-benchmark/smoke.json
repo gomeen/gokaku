@@ -1,0 +1,393 @@
+{
+  "parameters": {
+    "phase": "smoke",
+    "configs": [
+      "opus-ct2-float32-t1",
+      "opus-ct2-int8-t1",
+      "opus-torch-cpu-t1",
+      "opus-torch-mps-float32",
+      "opus-torch-mps-float16",
+      "m2m100-ct2-int8-t1"
+    ],
+    "rounds": 1,
+    "beam": 1,
+    "case_ids": [
+      "en-word",
+      "en-sentence",
+      "zh-word",
+      "zh-sentence"
+    ],
+    "dataset_sha256": "39b1dde0ecce1feda88765ddc8574bcd5a89be002967b0fda18552f51a1b5e6a",
+    "root": "/private/tmp/gogaku-benchmark/models"
+  },
+  "passes": [
+    {
+      "config": {
+        "id": "opus-torch-mps-float32",
+        "model": "opus",
+        "backend": "torch",
+        "device": "mps",
+        "precision": "float32",
+        "threads": 1,
+        "beam": 1
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:21:57.204329+00:00",
+      "system_before": {
+        "uptime": "11:21  up 19:33, 10 users, load averages: 251.53 195.29 258.56",
+        "load_average": [
+          251.5302734375,
+          195.29345703125,
+          258.556640625
+        ],
+        "cpu_processes": [
+          " 6074  95.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/GeoServices.framework/geod",
+          "43025  48.8 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          " 5933  46.1 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreServices/SpringBoard.app/SpringBoard",
+          "42868  42.8 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "37184  42.5 /Applications/WeChat.app/Contents/MacOS/WeChat",
+          "  196  38.8 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          " 6219  36.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/PosterBoard.app/PosterBoard",
+          "83766  35.0 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine",
+          " 5949  32.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/IDS.framework/identityservicesd.app/identityservicesd",
+          " 5957  32.1 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/locationd"
+        ]
+      },
+      "rows": [],
+      "warmup_rows": [
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "en-word",
+          "direction": "en-zh",
+          "source": "meeting",
+          "generated": false,
+          "error": "NotImplementedError(\"The operator 'aten::isin.Tensor_Tensor_out' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.\")",
+          "peak_rss_bytes": 688685056
+        },
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "source": "会议",
+          "generated": false,
+          "error": "NotImplementedError(\"The operator 'aten::isin.Tensor_Tensor_out' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.\")",
+          "peak_rss_bytes": 689254400
+        }
+      ],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-opus-torch-mps-float32.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 6377,
+        "config": {
+          "id": "opus-torch-mps-float32",
+          "model": "opus",
+          "backend": "torch",
+          "device": "mps",
+          "precision": "float32",
+          "threads": 1,
+          "beam": 1
+        },
+        "model_load_ms": 45515.39162,
+        "peak_rss_bytes": 642428928,
+        "versions": {
+          "torch": "2.2.2"
+        },
+        "parent_ready_ms": 91928.49182899999
+      },
+      "status": "warmup_failed",
+      "shutdown": {
+        "event": "stopped",
+        "peak_rss_bytes": 689254400
+      },
+      "system_after": {
+        "uptime": "11:23  up 19:35, 10 users, load averages: 585.30 350.53 312.85",
+        "load_average": [
+          585.29736328125,
+          350.52880859375,
+          312.8544921875
+        ],
+        "cpu_processes": [
+          " 6220 175.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/StreamingExtractor.framework/XPCServices/STExtractionService.xpc/STExtractionService",
+          " 6171  97.6 /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+          "  631  86.9 /Applications/Surge.app/Contents/MacOS/Surge",
+          "43025  82.6 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          " 4981  63.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/lsd",
+          "42804  40.8 /Applications/Orca.app/Contents/MacOS/Orca",
+          " 6044  34.5 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/nsurlsessiond",
+          "42868  34.2 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "46206  32.8 pi",
+          "  196  32.8 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer"
+        ]
+      },
+      "errors": 2,
+      "worker_failures": 0
+    },
+    {
+      "config": {
+        "id": "opus-torch-mps-float16",
+        "model": "opus",
+        "backend": "torch",
+        "device": "mps",
+        "precision": "float16",
+        "threads": 1,
+        "beam": 1
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:23:44.351109+00:00",
+      "system_before": {
+        "uptime": "11:23  up 19:35, 10 users, load averages: 585.30 350.53 312.85",
+        "load_average": [
+          585.29736328125,
+          350.52880859375,
+          312.8544921875
+        ],
+        "cpu_processes": [
+          "43025 154.1 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)",
+          " 6220 124.9 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/StreamingExtractor.framework/XPCServices/STExtractionService.xpc/STExtractionService",
+          "83766  93.9 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine",
+          " 4981  72.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/lsd",
+          "  631  69.9 /Applications/Surge.app/Contents/MacOS/Surge",
+          " 6171  69.6 /System/Library/Frameworks/Metal.framework/Versions/A/XPCServices/MTLCompilerService.xpc/Contents/MacOS/MTLCompilerService",
+          " 6801  45.3 /System/Applications/Utilities/Activity Monitor.app/Contents/MacOS/Activity Monitor",
+          "42879  38.7 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper",
+          "42868  35.4 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "  196  35.3 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer"
+        ]
+      },
+      "rows": [],
+      "warmup_rows": [
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "en-word",
+          "direction": "en-zh",
+          "source": "meeting",
+          "generated": false,
+          "error": "NotImplementedError(\"The operator 'aten::isin.Tensor_Tensor_out' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.\")",
+          "peak_rss_bytes": 852611072
+        },
+        {
+          "event": "result",
+          "phase": "warmup",
+          "id": "zh-word",
+          "direction": "zh-en",
+          "source": "会议",
+          "generated": false,
+          "error": "NotImplementedError(\"The operator 'aten::isin.Tensor_Tensor_out' is not currently implemented for the MPS device. If you want this op to be added in priority during the prototype phase of this feature, please comment on https://github.com/pytorch/pytorch/issues/77764. As a temporary fix, you can set the environment variable `PYTORCH_ENABLE_MPS_FALLBACK=1` to use the CPU as a fallback for this op. WARNING: this will be slower than running natively on MPS.\")",
+          "peak_rss_bytes": 853389312
+        }
+      ],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-opus-torch-mps-float16.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 7692,
+        "config": {
+          "id": "opus-torch-mps-float16",
+          "model": "opus",
+          "backend": "torch",
+          "device": "mps",
+          "precision": "float16",
+          "threads": 1,
+          "beam": 1
+        },
+        "model_load_ms": 14271.604734,
+        "peak_rss_bytes": 801005568,
+        "versions": {
+          "torch": "2.2.2"
+        },
+        "parent_ready_ms": 24592.97883799999
+      },
+      "status": "warmup_failed",
+      "shutdown": {
+        "event": "stopped",
+        "peak_rss_bytes": 853389312
+      },
+      "system_after": {
+        "uptime": "11:24  up 19:36, 10 users, load averages: 447.38 339.62 310.21",
+        "load_average": [
+          447.38427734375,
+          339.62158203125,
+          310.2099609375
+        ],
+        "cpu_processes": [
+          " 4981  90.8 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/lsd",
+          "83766  42.4 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine",
+          "  196  30.0 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          "42868  27.4 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          " 6099  26.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/SeymourServices.framework/fitcored",
+          "43522  23.4 /usr/libexec/diagnosticd",
+          " 4918  23.2 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          " 6024  22.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          " 5026  19.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/containermanagerd",
+          "46206  18.1 pi"
+        ]
+      },
+      "errors": 2,
+      "worker_failures": 0
+    },
+    {
+      "config": {
+        "id": "m2m100-ct2-int8-t1",
+        "model": "m2m100",
+        "backend": "ct2",
+        "device": "cpu",
+        "precision": "int8",
+        "threads": 1,
+        "beam": 1
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:24:14.283658+00:00",
+      "system_before": {
+        "uptime": "11:24  up 19:36, 10 users, load averages: 447.38 339.62 310.21",
+        "load_average": [
+          447.38427734375,
+          339.62158203125,
+          310.2099609375
+        ],
+        "cpu_processes": [
+          " 4981  85.2 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/lsd",
+          "  196  29.2 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer",
+          " 6024  28.2 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "42868  27.7 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.48/Helpers/Google Chrome Helper (Aperitif).app/Contents/MacOS/Google Chrome Helper (Aperitif)",
+          "43522  26.7 /usr/libexec/diagnosticd",
+          " 4918  26.2 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          " 5949  25.5 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/IDS.framework/identityservicesd.app/identityservicesd",
+          " 6099  25.2 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/SeymourServices.framework/fitcored",
+          "46206  23.7 pi",
+          " 5026  18.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/containermanagerd"
+        ]
+      },
+      "rows": [],
+      "warmup_rows": [],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-m2m100-ct2-int8-t1.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 8114,
+        "config": {
+          "id": "m2m100-ct2-int8-t1",
+          "model": "m2m100",
+          "backend": "ct2",
+          "device": "cpu",
+          "precision": "int8",
+          "threads": 1,
+          "beam": 1
+        },
+        "model_load_ms": 9650.055819,
+        "peak_rss_bytes": 784896000,
+        "versions": {
+          "ctranslate2": "4.6.0"
+        },
+        "parent_ready_ms": 18390.104519999993
+      },
+      "status": "failed",
+      "error": "RuntimeError('Worker exited with status -6')",
+      "system_after": {
+        "uptime": "11:24  up 19:36, 10 users, load averages: 405.04 336.28 309.66",
+        "load_average": [
+          405.03564453125,
+          336.27880859375,
+          309.65576171875
+        ],
+        "cpu_processes": [
+          " 4918  76.9 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          " 8338  75.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/WeatherPosterApp.app/Extensions/WeatherPoster.appex/WeatherPoster",
+          "43522  73.6 /usr/libexec/diagnosticd",
+          " 8223  72.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/installd",
+          " 8352  72.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/PridePosterApp.app/Extensions/PridePosterExtension.appex/PridePosterExtension",
+          " 8259  71.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/NanoTimeKit.framework/nanotimekitcompaniond",
+          " 8285  69.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/icloudmailagent",
+          " 8297  69.1 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/ScreenTimeCore.framework/ScreenTimeAgent",
+          " 8368  65.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/ManagedAppDistribution.framework/Support/managedappdistributiond",
+          " 8364  64.4 (mlhostd)"
+        ]
+      },
+      "errors": 0,
+      "worker_failures": 1
+    },
+    {
+      "config": {
+        "id": "opus-ct2-int8-t1",
+        "model": "opus",
+        "backend": "ct2",
+        "device": "cpu",
+        "precision": "int8",
+        "threads": 1,
+        "beam": 1
+      },
+      "round": 0,
+      "phase": "smoke",
+      "started_at": "2026-10-30T03:24:33.968772+00:00",
+      "system_before": {
+        "uptime": "11:24  up 19:36, 10 users, load averages: 405.04 336.28 309.66",
+        "load_average": [
+          405.03564453125,
+          336.27880859375,
+          309.65576171875
+        ],
+        "cpu_processes": [
+          " 5040 187.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/mobileassetd",
+          " 4918 113.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          " 8259  72.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/NanoTimeKit.framework/nanotimekitcompaniond",
+          " 8352  67.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/PridePosterApp.app/Extensions/PridePosterExtension.appex/PridePosterExtension",
+          " 8338  66.9 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/WeatherPosterApp.app/Extensions/WeatherPoster.appex/WeatherPoster",
+          " 8285  64.9 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/icloudmailagent",
+          " 8297  61.4 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/ScreenTimeCore.framework/ScreenTimeAgent",
+          " 8223  61.3 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/installd",
+          " 8368  59.5 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/Frameworks/ManagedAppDistribution.framework/Support/managedappdistributiond",
+          " 4829  55.4 launchd_sim"
+        ]
+      },
+      "rows": [],
+      "warmup_rows": [],
+      "stderr_log": "probes/results/translation-benchmark/smoke-0-opus-ct2-int8-t1.stderr.log",
+      "ready": {
+        "event": "ready",
+        "pid": 8417,
+        "config": {
+          "id": "opus-ct2-int8-t1",
+          "model": "opus",
+          "backend": "ct2",
+          "device": "cpu",
+          "precision": "int8",
+          "threads": 1,
+          "beam": 1
+        },
+        "model_load_ms": 7890.306942,
+        "peak_rss_bytes": 428331008,
+        "versions": {
+          "ctranslate2": "4.6.0"
+        },
+        "parent_ready_ms": 32571.987811000014
+      },
+      "status": "failed",
+      "error": "RuntimeError('Worker exited with status -6')",
+      "system_after": {
+        "uptime": "11:25  up 19:37, 10 users, load averages: 527.91 371.73 323.47",
+        "load_average": [
+          527.90576171875,
+          371.7294921875,
+          323.46875
+        ],
+        "cpu_processes": [
+          " 4845 181.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreServices/SpringBoard.app/SpringBoard",
+          " 8470 132.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/PrivateFrameworks/StreamingExtractor.framework/XPCServices/STExtractionService.xpc/STExtractionService",
+          "83766  90.8 /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc/Contents/MacOS/com.apple.Virtualization.VirtualMachine",
+          " 4918  85.0 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/usr/libexec/diagnosticd",
+          "  225  71.7 /usr/libexec/airportd",
+          " 8841  63.1 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/Health.app/PlugIns/HealthMentalHealthWidgetExtension.appex/HealthMentalHealthWidgetExtension",
+          "43522  61.7 /usr/libexec/diagnosticd",
+          " 8857  57.6 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/System/Library/CoreServices/AccessibilityUIServer.app/PlugIns/AccessibilityControlsExtension.appex/AccessibilityControlsExtension",
+          " 8872  56.7 /Library/Developer/CoreSimulator/Volumes/iOS_23F77/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS 26.5.simruntime/Contents/Resources/RuntimeRoot/Applications/TVRemoteUIService.app/PlugIns/TVRemoteWidgetExtension.appex/TVRemoteWidgetExtension",
+          "  631  56.5 /Applications/Surge.app/Contents/MacOS/Surge"
+        ]
+      },
+      "errors": 0,
+      "worker_failures": 1
+    }
+  ]
+}
