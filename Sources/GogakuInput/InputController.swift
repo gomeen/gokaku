@@ -333,9 +333,12 @@ final class GogakuInputController: IMKInputController {
         if event.type == .keyUp { return false }
         if event.type == .flagsChanged {
             // Shift 单击判定；其他修饰键变化不挂起组合（规格）。
+            // Hyper（fn／globe 修饰）不算 Shift 单击：fn 按住时 flags 含 .function，
+            // 与 Command／Control／Option 一样取消单击资格；长按（≥600ms）与
+            // 按住期间的其他按键已在 ShiftClickTracker 排除。
             let flags = event.modifierFlags.intersection([.shift])
             let onlyShift = flags.rawValue != 0 &&
-                event.modifierFlags.intersection([.command, .control, .option]).rawValue == 0
+                event.modifierFlags.intersection([.command, .control, .option, .function]).rawValue == 0
             if onlyShift && !shiftTracker.pressing {
                 shiftTracker.press(event)
             } else if shiftTracker.pressing {

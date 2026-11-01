@@ -1113,10 +1113,14 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
         case GC_EV_SHIFT_CLICK: {
             if (composing) {
                 // 组合中 Shift：暂存＋剩余原编码一次上屏，不切中英。
+                // 提交后必须更新最近上屏字符：下一个标点以它判定数字后半角
+                // 例外（反例：数字 7 → 组合 nihc → Shift → 句号，应得全角「。」
+                // 而非沿用数字后半角；与 Enter／空格／选词提交同规则）。
                 commit = composition_remainder(*s);
                 c.clear();
                 c.clearContextWords();
                 invalidate_merge(*s);
+                s->lastChar = last_scalar_codepoint(commit);
                 s->literalUsed = false;
                 s->selected = 0;
             } else if (s->engMode == EngMode::Off) {

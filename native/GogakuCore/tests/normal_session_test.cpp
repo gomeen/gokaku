@@ -399,6 +399,31 @@ void test_shift(const Env &env) {
     check_eq(in.p ? in.p->commit : "", "nihc", "组合中 Shift 上屏原编码");
     check(in.p != nullptr && in.p->english == 0, "组合中 Shift 不切英文");
     check(in.p != nullptr && in.p->composing == 0, "组合中 Shift 后组合结束");
+    // Shift 提交必须更新最近上屏字符：反例「数字 → 字母组合 → Shift → 句号／冒号」。
+    // 修复前 lastChar 仍停在数字 7，句号错误沿用数字后半角规则输出半角 "."。
+    DelSnap digit{send(s, GC_EV_TEXT, "7")};
+    check(digit.p != nullptr && digit.p->consumed == 0, "无组合数字交还宿主");
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+    DelSnap rawCommit{send(s, GC_EV_SHIFT_CLICK)};
+    check_eq(rawCommit.p ? rawCommit.p->commit : "", "nihc", "数字后组合 Shift 上屏原编码");
+    DelSnap dot{send(s, GC_EV_TEXT, ".")};
+    check_eq(dot.p ? dot.p->commit : "", "。", "Shift 提交字母后句号恢复全角（修复点）");
+    DelSnap digit2{send(s, GC_EV_TEXT, "9")};
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
+    DelSnap partialCommit{send(s, GC_EV_SHIFT_CLICK)};
+    check_eq(partialCommit.p ? partialCommit.p->commit : "", "ni", "部分编码 Shift 上屏剩余原编码");
+    DelSnap colon{send(s, GC_EV_TEXT, ":")};
+    check_eq(colon.p ? colon.p->commit : "", "：", "Shift 提交字母后冒号恢复全角");
+    // 对照：真数字后仍保持半角（不因修复扩大例外范围）。
+    DelSnap digit3{send(s, GC_EV_TEXT, "3")};
+    DelSnap dot2{send(s, GC_EV_TEXT, ".")};
+    check_eq(dot2.p ? dot2.p->commit : "", ".", "真数字后句号仍保持半角");
+    // 对照：Enter 提交同规则（提交后标点全角）。
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+    DelSnap enterCommit{send(s, GC_EV_ENTER)};
+    check_eq(enterCommit.p ? enterCommit.p->commit : "", "nihc", "Enter 上屏原编码");
+    DelSnap dot3{send(s, GC_EV_TEXT, ".")};
+    check_eq(dot3.p ? dot3.p->commit : "", "。", "Enter 提交后句号全角");
     DelSnap idle{send(s, GC_EV_SHIFT_CLICK)};
     check(idle.p != nullptr && idle.p->english == 1, "未组合单击切临时英文");
     check(idle.p != nullptr && idle.p->toast == 2, "英文提示 toast");
