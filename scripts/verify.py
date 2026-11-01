@@ -178,11 +178,13 @@ def check_swift_tests(ctx):
 
 
 def check_clean_build(ctx):
-    """干净构建：全新构建目录组装安装包，产物身份与当前提交绑定。"""
-    build_dir = ROOT / '.build/verify-clean'
-    if build_dir.exists():
-        shutil.rmtree(build_dir)
-    result = sh(['python3', 'scripts/build.py', '--configuration', 'release'], timeout=3600)
+    """干净构建：全新构建根（native/core/swift 互不 reuse）组装安装包，产物身份
+    与当前提交绑定。依赖缓存只读复用（不清除用户缓存）。"""
+    build_root = ROOT / '.build/verify-clean'
+    if build_root.exists():
+        shutil.rmtree(build_root)
+    result = sh(['python3', 'scripts/build.py', '--configuration', 'release'],
+                env={'GOGAKU_BUILD_ROOT': str(build_root)}, timeout=3600)
     evidence = ctx.evidence('clean-build.log', result.stdout + result.stderr)
     if result.returncode != 0:
         return FAIL, '构建失败：' + result.stdout.strip().splitlines()[-1][:200], evidence

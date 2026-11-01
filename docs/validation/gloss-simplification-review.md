@@ -27,6 +27,10 @@
 | 单条义项 >64 字符 | 0 |
 | 每词义项数 | ≤2 |
 
+## 常用词条抽查（用户实际输入高频词）
+
+对用户实际输入涉及的高频词条逐一核对（2026-11-02，全部有合格简短注释）：你好 `hello; hi`、时间 `n. a point in time · n. free time; leisure; spare time`、会议 `n. meeting; conference · n. council; congress`、银行 `n. bank (financial institution)`、世界、中文、输入法 `n. input method`、学习、电脑、手机。粗俗／俚语反例（哲学曾带「homosexual」第二条）已由强语域剔除规则消除，复检确认不再出现。
+
 ## 固定种子抽样审阅（50 条）
 
 `random.seed(20261102)`，对排序后的键全表抽样 50 条，逐条人工审阅。样例与判定：
@@ -40,15 +44,15 @@
 ## 产物身份
 
 - 源文件：`kaikki.org-dictionary-Chinese.jsonl.gz`，sha256 `4e54d7a3d2974b5efb6bf80ec0a6d8c71d916b90b30a350bdd71bdfda0dce36b`（本地缓存副本与记录一致）。
-- 输出：`resources/gloss.tsv` sha256 `0c079a9342924c8146960576025222684a9b4c7ebee6f05d9e3b4ea1c2250cc9`，来源清单 `resources/gloss-sources.json`（entry_count 143777）。
+- 输出：`resources/gloss.tsv` sha256 `fd081959d2b5b5902ce528ff3d8259c6d47c79d768d2187822ee4e5a98b86bec`，来源清单 `resources/gloss-sources.json`（entry_count 143777）。
 - 署名义务不变：CC BY-SA 4.0，随包附许可文本；见[第三方许可](../third-party.md)。
 
 ## 降级与拒包行为验证
 
 | 场景 | 行为 | 验证 |
 | --- | --- | --- |
-| 包内缺 gloss.tsv | 构建时打印降级提示并继续打包（无注释形态）；核心查表为空，候选正常显示 | `scripts/build.py` 打包分支；核心测试在无 gloss 数据环境运行通过 |
-| gloss.tsv 与清单哈希不符（损坏／被改） | 构建失败：`数据校验失败 gloss.tsv`，拒绝打包 | `scripts/build.py` 打包分支断言 |
+| 包内缺 gloss.tsv | 构建时打印降级提示并继续打包（无注释形态）；核心查表为空，候选正常显示 | **已实测（2026-11-02）**：移除两文件后构建退出 0，输出「resources/gloss.tsv 未生成，按降级形态打包（无该数据）」 |
+| gloss.tsv 与清单哈希不符（损坏／被改） | 构建失败：`数据校验失败 gloss.tsv`，拒绝打包 | **已实测（2026-11-02）**：改写一字节后构建退出 1，抛出 RuntimeError「数据校验失败 gloss.tsv」 |
 | gloss.tsv 缺失时运行 | `NormalEngine` 配置 `glossPath=nil`；候选 gloss 为空字符串，面板不渲染注释 | 离线渲染与核心回归覆盖 |
 
-两项构建行为在 2026-11-02 的验证构建中实际执行（见构建日志与 `docs/validation/engineering-readiness.md` §数据可靠性）。
+本轮两项构建分支实际执行（改写一字节 → 拒包；移除文件 → 降级），见下表。

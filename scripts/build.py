@@ -86,6 +86,8 @@ def check_build_number_not_regressing(new: int, baseline: int) -> None:
 if 'DEVELOPER_DIR' not in os.environ and Path('/Applications/Xcode.app/Contents/Developer').is_dir():
     os.environ['DEVELOPER_DIR'] = '/Applications/Xcode.app/Contents/Developer'
 CACHE = Path(os.environ.get('GOGAKU_DEPS', Path.home() / 'Library/Caches/Gogaku/libime-1.1.17'))
+# 构建根：默认 .build；verify.py 干净构建用 GOGAKU_BUILD_ROOT 指到全新目录。
+BUILD_ROOT = Path(os.environ.get('GOGAKU_BUILD_ROOT', ROOT / '.build'))
 DIST = ROOT / 'dist'
 
 def run(args):
@@ -106,7 +108,7 @@ def rpaths(path):
     return re.findall(r'cmd LC_RPATH\n\s+cmdsize \d+\n\s+path (.*?) \(offset', output(['otool', '-l', path]))
 
 def bundle_libraries(binary, frameworks):
-    search = [ROOT / '.build/native', ROOT / '.build/core', CACHE / 'build/bin', CACHE / 'prefix/lib']
+    search = [BUILD_ROOT / 'native', BUILD_ROOT / 'core', CACHE / 'build/bin', CACHE / 'prefix/lib']
     pending = [binary]
     copied = set()
     origins = {binary: binary}
@@ -211,7 +213,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
     contents = app / 'Contents'
     for folder in ['MacOS', 'Resources', 'Frameworks', 'Helpers']:
         (contents / folder).mkdir(parents=True, exist_ok=True)
-    source = ROOT / '.build' / configuration / executable
+    source = BUILD_ROOT / 'swift' / configuration / executable
     binary = contents / 'MacOS' / executable
     shutil.copy2(source, binary)
     bundle_libraries(binary, contents / 'Frameworks')
@@ -272,7 +274,10 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
         for filename, expected in lock['artifacts'].items():
             source = CACHE / 'data' / filename
             if digest(source) != expected: raise RuntimeError(f'资源校验失败 {filename}')
-            shutil.copy2(source, data / filename)
+            # copyfile 而非 copy2：出厂文件带 uchg 保护标志时，copystat 会把
+            # 不可变标志带进包，导致后续重装 rmtree／安装失败。
+            shutil.copyfile(source, data / filename)
+            (data / filename).chmod(0o644)
         # 英文候选／释义数据：只在生成物与来源清单都在且哈希一致时打包；
         # 任一缺失则按规格降级（无注释、无英文候选），不阻塞构建。
         for filename, manifest_name in [('english-words.txt', 'english-wordlist-sources.json'),
@@ -287,7 +292,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
             shutil.copy2(source, data / filename)
         shutil.copy2(CACHE / 'dependencies.lock.json', contents / 'Resources/dependencies.lock.json')
         helper = contents / 'Helpers/GogakuTranslator'
-        shutil.copy2(ROOT / '.build' / configuration / 'GogakuTranslator', helper)
+        shutil.copy2(BUILD_ROOT / 'swift' / configuration / 'GogakuTranslator', helper)
         bundle_libraries(helper, contents / 'Frameworks')
     (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
     write_build_identity(contents, meta)
@@ -352,13 +357,13 @@ if __name__ == '__main__':
     print(f"构建版本 {meta['version']}（构建号 {meta['buildNumber']}，{stage}，提交 {meta['git']['commit'][:12]}）")
     run(['swift', 'scripts/check-menu-icon.swift', ROOT / 'assets/app-icon/gogaku-menu.pdf'])
     if args.prepare or not (CACHE / 'dependencies.lock.json').exists(): run(['python3', 'scripts/prepare-dependencies.py', '--jobs', '2'])
-    run(['cmake', '-S', 'native/EngineBridge', '-B', '.build/native', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
-    run(['cmake', '--build', '.build/native', '-j', '2'])
+    run(['cmake', '-S', 'native/EngineBridge', '-B', BUILD_ROOT / 'native', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
+    run(['cmake', '--build', BUILD_ROOT / 'native', '-j', '2'])
     # 共享普通模式核心（native/GogakuCore，ABI v2）。
-    run(['cmake', '-S', 'native/GogakuCore', '-B', '.build/core', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
-    run(['cmake', '--build', '.build/core', '-j', '2'])
-    run(['ctest', '--test-dir', '.build/core', '--output-on-failure'])
-    swift_args = ['swift', 'build', '-c', args.configuration, '-j', '2']
+    run(['cmake', '-S', 'native/GogakuCore', '-B', BUILD_ROOT / 'core', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
+    run(['cmake', '--build', BUILD_ROOT / 'core', '-j', '2'])
+    run(['ctest', '--test-dir', BUILD_ROOT / 'core', '--output-on-failure'])
+    swift_args = ['swift', 'build', '-c', args.configuration, '-j', '2', '--scratch-path', str(BUILD_ROOT / 'swift')]
     if args.validation: swift_args += ['-Xswiftc', '-DGOGAKU_VALIDATION']
     run(swift_args)
     DIST.mkdir(exist_ok=True)

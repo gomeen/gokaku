@@ -27,9 +27,10 @@
 | --- | --- | --- | --- |
 | `prepare-dependencies.py` 隐式迁移 `/tmp/gogaku-ime-benchmark` 遗留物 | 生产构建依赖旧探针缓存路径 | 删除迁移块；本机工具（git／cmake／ninja／clang）缺失时明确报错 | 语法检查＋`verify.py fast` 资源检查通过 |
 | 版本硬编码 `CFBundleVersion=1`、`0.1.0` | 构建不可区分、无法追溯 | `version.json` 单一来源＋包内／外部构建身份（见 [versioning.md](../versioning.md)） | 构建（本轮 release 验证）产出身份且提交绑定 |
-| 无干净构建证明 | 不确定性漂移 | `verify.py release` 的 `clean-build`：全新 `.build/verify-clean` 目录构建；依赖缓存只读复用（不清除用户缓存，全新缓存构建留待依赖变更时执行并记录） | 本轮 release 报告（见 §8 产物） |
+| 无干净构建证明 | 不确定性漂移 | `build.py` 支持 `GOGAKU_BUILD_ROOT`；`verify.py release` 的 `clean-build` 先删后建全新构建根（native／core／swift 互不复用）；依赖缓存只读复用（不清除用户缓存，全新缓存构建留待依赖变更时执行并记录） | 本轮 release 报告（见 §8 产物） |
+| 出厂模型被未知进程改名 `.corrupt`（2026-11-02 两次；内容未损坏，已按锁哈希核对后恢复） | 依赖静默损坏会传染到所有下游测试与安装包 | 无法定位行为进程（两次均发生在多进程验证窗口内；仓库内所有 rename 源码路径均只针对 userDir/model.userlm 与 custom-words 路径）。处置：`chflags uchg` 对出厂 `sc.dict`／`zh_CN.lm` 加文件系统不可变保护（重新生成依赖前需 `nouchg`，已写进 prepare-dependencies 注释）；`verify.py resources` 检查会在再次发生时立即记 blocked，不再静默传染 | 恢复后 shasum 与锁哈希一致；275 项核心断言全过 |
 
-**后续改进**（不阻塞）：全新 GOGAKU_DEPS 缓存的冷构建演练；`swift build` 产物模块目录路径的版本 pin 说明。
+**后续改进**（不阻塞）：全新 GOGAKU_DEPS 缓存的冷构建演练；`swift build` 产物模块目录路径的版本 pin 说明；继续追查 `.corrupt` 改名来源（若复现，用 `chflags` 触发显式失败定位）。
 
 ## 3. 测试与证据
 
@@ -54,7 +55,7 @@
 | `Settings.save()` 用 `.atomic`（临时＋rename）但无 fsync；`InputController.persistPreference` 用 `try?` 静默吞错（按应用偏好） | 后续改进 | 最坏结果是偏好回退为默认值，不产生半截文件，不涉学习数据；列后续改进（加 fsync＋失败提示），不在本轮扩 |
 | 学习记录 SQLite 写路径 | 不适用 | 学习模式保持关闭，真实记录链路未启用；启用前须按产品规格验收（队列≤256、失败不拖慢输入） |
 
-**故障注入覆盖**：40 轮 SIGKILL＋损坏注入＋删除复活（本轮 release 档重跑）；写失败反例（自定义词保存失败提示、flush 失败保留 dirty）已有单测；「提交已发生但持久化失败不回退正文」由调频 flush 的 dirty 语义保证（提交上屏不依赖 flush 成功）。
+**故障注入覆盖**：40 轮 SIGKILL＋损坏注入＋删除复活（本轮 release 档重跑）；核心单测新增 `write_failure` 反例组（2026-11-02）：只读目录下 flush 保留 dirty、会话仍可用，快速添加明确报「自定义词语保存失败」＋beep（不显示成功），权限恢复后同会话重试 flush 补上持久化（事件轨迹共 275 项断言全过）；「提交已发生但持久化失败不回退正文」由调频 flush 的 dirty 语义保证（提交上屏不依赖 flush 成功）。
 
 ## 5. 安装与恢复
 

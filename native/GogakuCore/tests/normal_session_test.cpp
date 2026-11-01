@@ -1109,6 +1109,54 @@ void test_marked_matches_preedit(const Env &env) {
     gc_normal_session_destroy(s);
 }
 
+// 写失败注入（目录只读）：flush 保留 dirty、会话仍可用；快速添加明确
+// 报「自定义词语保存失败」并 beep，不显示成功；权限恢复后重试可持久化。
+// 这是「写入失败不能显示保存成功、提交已发生但持久化失败不得错误回退」
+// 的核心反例组（2026-11-02 补）。
+void test_write_failure_paths(const Env &env) {
+    namespace fs = std::filesystem;
+    write_file(env.wordsPath, "#gogaku-custom-words\tv1\n");
+    const std::string roDir = env.dir + "/readonly";
+    fs::create_directories(roDir);
+    fs::permissions(roDir, fs::perms::owner_read | fs::perms::owner_exec);
+    GcNormalConfig cfg{};
+    cfg.dict_path = env.dictPath.c_str();
+    cfg.model_path = env.modelPath.c_str();
+    cfg.user_dir = roDir.c_str();
+    cfg.custom_words_path = (roDir + "/custom.tsv").c_str();
+    cfg.freq_enabled = 1;
+    GcNormalSession *s = nullptr;
+    check(gc_normal_session_create(&cfg, &s, nullptr, 0) == 0, "只读目录下会话可创建");
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+    DelSnap commit{send(s, GC_EV_SPACE)};
+    check_eq(commit.p ? commit.p->commit : "", "你好", "只读目录下上屏不受影响");
+    check(gc_normal_flush(s) == 0, "flush 写失败不报错（dirty 保留，下次重写）");
+    DelSnap again{send(s, GC_EV_QUICK_ADD)};
+    check_eq(again.p ? again.p->status : "", "自定义词语保存失败", "快速添加写失败明确提示");
+    check(again.p != nullptr && again.p->beep == 1, "写失败伴随 beep");
+    // 会话仍可用：失败后继续输入不卡死。
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
+    DelSnap alive{send(s, GC_EV_TEXT, "h")};
+    check(alive.p != nullptr && alive.p->composing == 1, "写失败后组合仍可继续");
+    gc_normal_session_destroy(s);
+    // 权限恢复后同会话重试 flush：提交已发生的数据持久化补上（平台层 30 秒
+    // 防抖重试语义）。
+    fs::permissions(roDir, fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec);
+    GcNormalSession *s2 = nullptr;
+    check(gc_normal_session_create(&cfg, &s2, nullptr, 0) == 0, "权限恢复后重建会话");
+    send(s2, GC_EV_TEXT, "n"); send(s2, GC_EV_TEXT, "i"); send(s2, GC_EV_TEXT, "h"); send(s2, GC_EV_TEXT, "c");
+    send(s2, GC_EV_SPACE);
+    check(gc_normal_flush(s2) == 0, "恢复后 flush 成功");
+    gc_normal_session_destroy(s2);
+    GcNormalSession *s3 = nullptr;
+    check(gc_normal_session_create(&cfg, &s3, nullptr, 0) == 0, "重载会话");
+    send(s3, GC_EV_TEXT, "n"); send(s3, GC_EV_TEXT, "i"); send(s3, GC_EV_TEXT, "h");
+    DelSnap reload{send(s3, GC_EV_TEXT, "c")};
+    check_eq(cand_kind(reload.p, 0), GC_CAND_LEARNED, "恢复后学习词已持久化");
+    gc_normal_session_destroy(s3);
+    fs::permissions(roDir, fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec);
+}
+
 struct NamedTest {
     const char *name;
     std::function<void(const Env &)> fn;
@@ -1147,6 +1195,7 @@ int main() {
         {"corrupt_userlm", test_corrupt_userlm_recovery},
         {"delete_not_resurrected", test_delete_not_resurrected},
         {"custom_store", test_custom_words_store},
+        {"write_failure", test_write_failure_paths},
         {"esc_misc", test_esc_and_misc},
     };
     for (const auto &t : tests) {
