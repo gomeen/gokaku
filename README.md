@@ -49,7 +49,6 @@
 - [技术选型决定](docs/input-selection-decision.md)：libime＋原生前端的采用理由、其他方案不选原因，以及自由句模型与完整产品的未通过结论。
 - [产品方向](docs/product.md)：已确认需求、建议方案、待验证问题与验收方向。
 - [输入习惯原型说明](docs/prototype-input-habits.md)：候选窗外观与比例、标点、Shift、编辑键、分段选择、英文候选与学习演示的六轮迭代定稿；含青简本机配置逐项对照与三项用户裁决。
-- [输入习惯原型说明](docs/prototype-input-habits.md)：候选窗外观与比例、标点、Shift、编辑键、分段选择、英文候选与学习演示的六轮迭代定稿；含青简本机配置逐项对照与三项用户裁决。
 - [输入流程原型说明](docs/prototype-input-flow.md)：体验方式、浏览器验证结果与模拟边界。
 - [可行性验证](docs/feasibility.md)：青简、Rime、小鹤双拼与 macOS 检查接口的证据及剩余工作。
 - [输入法整体选型](docs/input-method-research.md)：围绕实际打字性能与质量，覆盖前端、引擎与数据、学习调度、宿主兼容、耗电、隐私和分发的全面调研与下一轮验证。
