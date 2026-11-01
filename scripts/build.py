@@ -1,16 +1,88 @@
 #!/usr/bin/env python3
-"""构建并组装仅依赖系统库/包内库的本机开发版；不注册/切换输入源。"""
+"""构建并组装仅依赖系统库/包内库的本机开发版；不注册/切换输入源。
+
+版本来源：仓库根目录 version.json（唯一来源，见 docs/versioning.md）。
+- version：完整 SemVer（可带 -dev.N / -rc.N 预发布段）。
+- buildNumber：单调递增整数，写入两套应用的 CFBundleVersion。
+- CFBundleShortVersionString 只写三段数字；完整版本另存包内 build-identity.json。
+- dev 构建允许带未提交修改（dirty=true 记入身份）；rc／定版构建要求工作区干净。
+"""
 import argparse
 import hashlib
 import json
 import os
+import platform
+import subprocess
+import sys
 from pathlib import Path
 import plistlib
 import re
 import shutil
-import subprocess
 
 ROOT = Path(__file__).resolve().parent.parent
+VERSION_FILE = ROOT / 'version.json'
+
+_SEMVER = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
+                     r'(-(0|[1-9]\d*|dev|rc)\.(0|[1-9]\d*))?$')
+
+
+def load_version(path: Path = VERSION_FILE) -> dict:
+    """读取并校验 version.json；任何非法输入直接报错（不允许带病构建）。"""
+    try:
+        data = json.loads(path.read_text())
+    except FileNotFoundError:
+        raise SystemExit(f'缺少版本来源：{path}')
+    except json.JSONDecodeError as e:
+        raise SystemExit(f'version.json 不是合法 JSON：{e}')
+    if not isinstance(data, dict):
+        raise SystemExit('version.json 顶层必须是对象')
+    extra = set(data) - {'version', 'buildNumber'}
+    if extra:
+        raise SystemExit(f'version.json 含未知字段：{sorted(extra)}')
+    version = data.get('version')
+    if not isinstance(version, str) or not _SEMVER.match(version):
+        raise SystemExit(f'非法版本号：{version!r}（需要 SemVer 三段数字，'
+                         f'预发布段只允许 dev.N／rc.N，如 0.1.0-dev.1）')
+    build = data.get('buildNumber')
+    if not isinstance(build, int) or isinstance(build, bool) or build < 1:
+        raise SystemExit(f'非法构建号：{build!r}（需要正整数）')
+    return {'version': version, 'buildNumber': build}
+
+
+def version_release(version: str) -> str:
+    """三段数字部分（CFBundleShortVersionString 只允许数字段）。"""
+    return version.split('-', 1)[0]
+
+
+def version_stage(version: str) -> str:
+    """dev（默认）／rc／final（无预发布段）。rc／final 构建要求工作区干净。"""
+    if '-' not in version:
+        return 'final'
+    pre = version.split('-', 1)[1]
+    return 'rc' if pre.startswith('rc.') else 'dev'
+
+
+def git_identity() -> dict:
+    def git(*args):
+        return subprocess.run(['git', *args], cwd=ROOT, capture_output=True, text=True)
+    commit = git('rev-parse', 'HEAD')
+    status = git('status', '--porcelain')
+    if commit.returncode != 0:
+        raise SystemExit('git 不可用或仓库未初始化；构建身份需要提交信息')
+    dirty = bool(status.stdout.strip())
+    return {'commit': commit.stdout.strip(), 'dirty': dirty}
+
+
+def require_clean_allowed(stage: str, dirty: bool) -> None:
+    if stage in ('rc', 'final') and dirty:
+        raise SystemExit(f'{stage} 构建要求源码已提交且工作区干净；'
+                         '请先提交或改用 dev 版本号。')
+
+
+def check_build_number_not_regressing(new: int, baseline: int) -> None:
+    if new < baseline:
+        raise SystemExit(f'构建号倒退：{new} < 已有 {baseline}；'
+                         'buildNumber 必须单调递增（见 docs/versioning.md）。')
 if 'DEVELOPER_DIR' not in os.environ and Path('/Applications/Xcode.app/Contents/Developer').is_dir():
     os.environ['DEVELOPER_DIR'] = '/Applications/Xcode.app/Contents/Developer'
 CACHE = Path(os.environ.get('GOGAKU_DEPS', Path.home() / 'Library/Caches/Gogaku/libime-1.1.17'))
@@ -108,7 +180,32 @@ def licenses(destination):
     (destination / 'upstream-manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     shutil.copy2(ROOT / 'docs/third-party.md', destination / 'THIRD-PARTY.md')
 
-def assemble(name, executable, identifier, input_method=False, configuration='release'):
+def write_build_identity(contents: Path, meta: dict) -> None:
+    """包内身份：完整版本＋构建号＋提交＋dirty＋环境与依赖哈希（产物哈希在外部记录）。"""
+    identity = {
+        'fullVersion': meta['version'],
+        'shortVersion': version_release(meta['version']),
+        'stage': version_stage(meta['version']),
+        'buildNumber': meta['buildNumber'],
+        'commit': meta['git']['commit'],
+        'dirty': meta['git']['dirty'],
+        'arch': platform.machine(),
+        'configuration': meta['configuration'],
+        'validationBuild': meta['validation'],
+        'abiVersion': 2,
+    }
+    lock = CACHE / 'dependencies.lock.json'
+    if lock.exists():
+        identity['dependencies'] = json.loads(lock.read_text())
+    for name in ['english-wordlist-sources.json', 'gloss-sources.json']:
+        source = ROOT / 'resources' / name
+        if source.exists():
+            identity.setdefault('dataSources', {})[name] = json.loads(source.read_text())
+    (contents / 'Resources/build-identity.json').write_text(
+        json.dumps(identity, ensure_ascii=False, indent=2) + '\n')
+
+
+def assemble(name, executable, identifier, input_method=False, configuration='release', meta=None):
     app = DIST / (name + '.app')
     if app.exists(): shutil.rmtree(app)
     contents = app / 'Contents'
@@ -118,10 +215,13 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
     binary = contents / 'MacOS' / executable
     shutil.copy2(source, binary)
     bundle_libraries(binary, contents / 'Frameworks')
+    # CFBundleShortVersionString 只写三段数字（系统限制）；完整预发布版本
+    # 在包内 build-identity.json，设置应用与诊断输出读取显示。
     info = {
         'CFBundleIdentifier': identifier, 'CFBundleName': name, 'CFBundleDisplayName': name,
         'CFBundleExecutable': executable, 'CFBundlePackageType': 'APPL',
-        'CFBundleVersion': '1', 'CFBundleShortVersionString': '0.1.0',
+        'CFBundleVersion': str(meta['buildNumber']),
+        'CFBundleShortVersionString': version_release(meta['version']),
         'LSMinimumSystemVersion': '26.0', 'NSHighResolutionCapable': True,
         'CFBundleIconFile': 'AppIcon', 'CFBundleDevelopmentRegion': 'zh-Hans',
     }
@@ -190,10 +290,46 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
         shutil.copy2(ROOT / '.build' / configuration / 'GogakuTranslator', helper)
         bundle_libraries(helper, contents / 'Frameworks')
     (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
+    write_build_identity(contents, meta)
     licenses(contents / 'Licenses')
     run(['codesign', '--force', '--sign', '-', app])
     run(['codesign', '--verify', '--deep', '--strict', app])
     return app
+
+def write_dist_identity(apps: list, meta: dict, configuration: str, validation: bool) -> Path:
+    """外部身份记录：包内身份＋主程序／helper／动态库／安装包哈希（不写入包内）。"""
+    def file_hash(path: Path) -> dict:
+        return {'sha256': digest(path), 'bytes': path.stat().st_size}
+    report = dict(
+        fullVersion=meta['version'], buildNumber=meta['buildNumber'],
+        stage=version_stage(meta['version']), commit=meta['git']['commit'],
+        dirty=meta['git']['dirty'], arch=platform.machine(),
+        configuration=configuration, validationBuild=validation,
+        toolchain={'swift': output(['swift', '--version']).splitlines()[0].strip(),
+                   'cmake': output(['cmake', '--version']).splitlines()[0].strip()},
+        apps={},
+    )
+    for app in apps:
+        entries = {}
+        contents = app / 'Contents'
+        for rel in ['MacOS', 'Helpers', 'Frameworks']:
+            folder = contents / rel
+            if folder.exists():
+                for path in sorted(folder.iterdir()):
+                    if path.is_file():
+                        entries[str(path.relative_to(app))] = file_hash(path)
+        entries[str((app / 'Contents/Info.plist').relative_to(app))] = file_hash(app / 'Contents/Info.plist')
+        # 安装包是目录，不能直接哈希：对排序后的（相对路径，文件哈希）列表哈希，
+        # 内容不变则哈希不变（plimmutable 快照语义）。
+        bundle_fingerprint = json.dumps(entries, ensure_ascii=False, sort_keys=True)
+        bundle_sha = hashlib.sha256(bundle_fingerprint.encode()).hexdigest()
+        report['apps'][app.name] = {'bundleSha256': bundle_sha, 'files': entries,
+                                    'identity': json.loads(
+                                        (contents / 'Resources/build-identity.json').read_text())}
+    out = DIST / 'build-identity.json'
+    out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    return out
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
@@ -202,6 +338,18 @@ if __name__ == '__main__':
     parser.add_argument('--configuration', choices=['release', 'debug'], default='release',
                         help='Swift 构建配置（默认 release；debug 仅用于开发诊断）')
     args = parser.parse_args()
+    meta = load_version()
+    meta['git'] = git_identity()
+    stage = version_stage(meta['version'])
+    require_clean_allowed(stage, meta['git']['dirty'])
+    if stage == 'final':
+        tag = subprocess.run(['git', 'tag', '--list', 'v' + meta['version']], cwd=ROOT,
+                             capture_output=True, text=True)
+        if tag.stdout.strip():
+            raise SystemExit(f"v{meta['version']} 标签已存在；定版标签不移动，请使用新版本号。")
+    if meta['git']['dirty']:
+        print(f"提示：工作区有未提交修改，构建身份标记 dirty=true（版本 {meta['version']}）")
+    print(f"构建版本 {meta['version']}（构建号 {meta['buildNumber']}，{stage}，提交 {meta['git']['commit'][:12]}）")
     run(['swift', 'scripts/check-menu-icon.swift', ROOT / 'assets/app-icon/gogaku-menu.pdf'])
     if args.prepare or not (CACHE / 'dependencies.lock.json').exists(): run(['python3', 'scripts/prepare-dependencies.py', '--jobs', '2'])
     run(['cmake', '-S', 'native/EngineBridge', '-B', '.build/native', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
@@ -214,11 +362,16 @@ if __name__ == '__main__':
     if args.validation: swift_args += ['-Xswiftc', '-DGOGAKU_VALIDATION']
     run(swift_args)
     DIST.mkdir(exist_ok=True)
-    apps = [assemble('Gogaku', 'GogakuInput', 'org.gogaku.inputmethod', True, args.configuration),
-            assemble('Gogaku Settings', 'GogakuSettings', 'org.gogaku.settings', configuration=args.configuration)]
+    meta['configuration'] = args.configuration
+    meta['validation'] = bool(args.validation)
+    apps = [assemble('Gogaku', 'GogakuInput', 'org.gogaku.inputmethod', True, args.configuration, meta),
+            assemble('Gogaku Settings', 'GogakuSettings', 'org.gogaku.settings',
+                     configuration=args.configuration, meta=meta)]
     report = []
     for app in apps:
         for path in app.rglob('*'):
             if path.is_file(): report.append({'path': str(path.relative_to(DIST)), 'bytes': path.stat().st_size, 'sha256': digest(path)})
     (DIST / 'bundle-manifest.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    identity_path = write_dist_identity(apps, meta, args.configuration, bool(args.validation))
     print('\n'.join(str(app) for app in apps))
+    print(f'构建身份：{identity_path}')

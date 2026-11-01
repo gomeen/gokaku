@@ -2,6 +2,25 @@ import SwiftUI
 import Translation
 import GogakuCore
 
+/// 包内构建身份（Contents/Resources/build-identity.json）。
+/// 设置页与诊断输出展示完整预发布版本；缺失时回退 Info.plist 三段版本。
+enum BuildIdentity {
+    static let displayVersion: String = {
+        let bundle = Bundle.main
+        guard let url = bundle.url(forResource: "build-identity", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let full = object["fullVersion"] as? String else {
+            let short = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+            let build = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
+            return "\(short)（构建 \(build)，无身份记录）"
+        }
+        let build = object["buildNumber"] as? Int ?? 0
+        let dirty = (object["dirty"] as? Bool ?? false) ? " dirty" : ""
+        return "\(full) 构建\(build)\(dirty)"
+    }()
+}
+
 @main struct GogakuSettingsApp: App {
     var body: some Scene {
         Window("Gogaku 设置", id: "settings") {
@@ -130,6 +149,10 @@ private struct SettingsView: View {
             .scrollContentBackground(.hidden)
             Text("本机开发版")
                 .font(.system(size: 11))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 18)
+            Text(BuildIdentity.displayVersion)
+                .font(.system(size: 10, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 18)
                 .padding(.bottom, 18)
