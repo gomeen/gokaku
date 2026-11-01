@@ -195,7 +195,14 @@ def check_clean_build(ctx):
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip()
     dirty = bool(sh(['git', 'status', '--porcelain', '--untracked-files=no']).stdout.strip())
     if data['commit'] != head:
-        return FAIL, f"身份提交 {data['commit'][:12]} ≠ 当前 HEAD {head[:12]}（报告指向旧产物）", evidence
+        # 允许 HEAD 是身份提交的纯文档后代（验证期间改文档不产生新二进制）；
+        # 任何源码/脚本/资源差异仍视为「报告指向旧产物」。
+        ancestor = sh(['git', 'merge-base', '--is-ancestor', data['commit'], head]).returncode == 0
+        changed = sh(['git', 'diff', '--name-only', data['commit'], head]).stdout.split()
+        docs_only = bool(changed) and all(
+            c.startswith('docs/') or c in ('README.md', 'CHANGELOG.md', 'AGENTS.md') for c in changed)
+        if not (ancestor and docs_only):
+            return FAIL, f"身份提交 {data['commit'][:12]} ≠ 当前 HEAD {head[:12]}（报告指向旧产物；变更：{changed[:5]}）", evidence
     if data['dirty']:
         return BLOCK, '构建身份标记 dirty；发布门槛要求源码已提交且工作区干净', evidence
     return PASS, (f"{data['fullVersion']} 构建{data['buildNumber']} 提交 {head[:12]}"
