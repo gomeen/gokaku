@@ -39,6 +39,9 @@
 ## 文档
 
 - [开发版使用说明](docs/native-development.md)：构建、安装、手动启用、语言资源、恢复和卸载。
+- [版本与构建管理](docs/versioning.md)：version.json 单一版本来源、构建身份、阶段规则与拒绝路径。
+- [变更记录](../CHANGELOG.md)：各版本变更摘要。
+- [工程化检查](docs/validation/engineering-readiness.md)：交付链路六项检查、整改与发布阻塞分列。
 - [原生开发验收记录](docs/validation/native-development.md)：实际测试证据、状态和阻塞。
 - [第三方许可](docs/third-party.md)：固定组件、实际打包许可和公开分发前义务。
 - [释义词性数据调研](docs/research-gloss-data.md)：候选窗「词性＋译文」注释的数据源选择、许可义务与落地路径。

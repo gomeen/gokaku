@@ -352,6 +352,10 @@ def check_host_plan(ctx):
     plan = [
         ('宿主矩阵', 'python3 probes/validate-real-hosts.py --hosts appkit,chrome,safari,terminal,orca '
                      '--iterations 200（每种确认方式 × 后键 × 200 次，连续两轮）'),
+        ('Orca Shift 专项', 'python3 probes/first_key_regression.py --hosts orca --iterations 200 '
+                            '--enable-validation --report docs/validation/verify/orca-shift.json '
+                            '（单独追踪：输入法实际收到的按下／释放事件、组合变化、插字次数、PTY 字节；'
+                            '不预设与 Terminal 同因）'),
         ('性能', 'python3 probes/measure-imk-latency.py --events 10000（约万次真实事件，含首次显示；'
                  '计时期间不并行构建）'),
         ('稳定性', '两小时浸泡与内存趋势：宿主矩阵持续运行记录（专用文档／字段／PTY，逐次核对前台身份，'
