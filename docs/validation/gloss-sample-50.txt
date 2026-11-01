@@ -1,0 +1,53 @@
+# 释义精简固定种子抽样审阅样本（random.seed(20261102)，对排序后键抽样 50 条）
+# 生成于 2026-11-02；对应 gloss.tsv sha256 见 gloss-sources.json
+
+册纸	n. old and useless books, newspapers, and periodicals
+积弊	n. long-standing abuse
+子代	n. filial generation; offspring (of an organism)
+喝礼生	n. master of ceremonies; MC; emcee
+胡桐	n. Calophyllum inophyllum
+低音结他	n. bass guitar
+志在	v. to mind; to care about
+翻番	v. to double · v. to increase by a specified number of times
+雨麻花	n. drizzle; light rain
+贯彻始终	phr. to follow through; to carry through to the end
+建言	v. to offer a suggestion
+帮困	v. to help the poor
+老鹰婆	n. eagle
+蚺蛇	n. python; boa
+灿亮	adj. bright; dazzling
+征询	v. to seek the opinion of; to consult
+鼠蹊	n. groin
+铁金龟	n. scarab
+偷闲	v. to snatch a break; to find time (to do something) · v. to be lazy; to goof off
+医士	n. doctor; physician
+古罗马	name Ancient Rome
+刀片	n. razor blade · n. tool bit; blade
+飞蝇钓	n. fly fishing
+麻将馆	n. mahjong parlour
+䥄	to plaster with gold
+东风	n. spring wind
+警探	n. police detective
+盛壮	adj. vigorous and strong
+黑白片	n. black-and-white film
+冻伤	v. to suffer from chilblain; to suffer from frostbite · n. chilblain; frostbite
+苹果酸	n. malic acid
+啄米	v. to peck at rice grains on the ground (of chicken)
+抢马桶	v. to have many people outside waiting to use the toilet
+铺张浪费	phr. extravagance and waste; extravagant
+反目成仇	phr. to fall out and become enemies
+氡	radon
+音质	n. audio quality · n. tone; timbre
+骁勇善战	phr. brave and good at fighting
+落膈	adj. feeling comfortable from food entering the digestive tract · adj. comfortable; happy
+四六儿不懂	phr. to be completely ignorant (of rules, customs, etc.)
+歇天露	v. to bivouac; to sleep outside
+婨	Used in female personal names.
+来历不明	phr. of unknown origins
+火漆钱	n. fire-lacquer coin
+啃老族	n. adults who mooch off their parents; boomerang kids
+软蔫蔫	adj. soft and wilted (of vegetables, etc.) · adj. weak; feeble; infirm
+丰盛	adj. rich; sumptuous (food)
+都城	n. national capital · n. city wall
+安全	adj. safe; secure · n. safety; security
+电子商务	n. e-commerce
