@@ -17,7 +17,8 @@
 
 - **Shift 提交不更新最近上屏字符**（核心缺陷）：组合中 Shift 上屏后，下一标点错误沿用数字后半角例外（Terminal 实测「Shift 确认＋句号」得半角 `.`）。修复后与 Enter／空格／选词提交同规则；补「数字 → 字母组合 → Shift → 句号／冒号」核心反例回归（事件轨迹 257 → 265 项断言）。
 - **安装备份以旧 `.app` 形式暴露**：备份改为 `*.app.disabled` 并只保留最近 3 份，历史 `.app` 备份自动改名；消除 LaunchServices 索引旧备份导致输入法随机启动旧二进制的隐患（此前曾发生 76 个旧备份包）。安装后自动核对实际安装路径全部文件与 dist 清单哈希。
-- 依赖准备移除对 `/tmp` 旧探针缓存的隐式迁移；本机工具（git／cmake／ninja／clang）缺失时明确报错。
+- 出厂数据拷入包改 `copyfile`：macOS `copystat` 会把 `uchg` 不可变标志带进包，导致重装删除失败；出厂 `sc.dict`／`zh_CN.lm` 加 `chflags uchg` 文件系统级保护（重新生成依赖前需 `nouchg`）。
+- 依赖准备移除对 `/tmp` 旧探针缓存的隐式迁移；本机工具（git／cmake／ninja／clang）缺失时明确报错；干净构建改用独立构建根（`GOGAKU_BUILD_ROOT`）。
 - 文档错误更正：收尾复测「5.55ms 低于 5ms」表述（5.55ms 高于 5ms 门槛）；开发说明中的 Debug 测试命令统一为 Release 配置；过时的 Apple Translation 使用说明改为历史证据定位。
 
 ### 变更
