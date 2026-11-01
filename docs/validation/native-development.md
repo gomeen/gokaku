@@ -1,8 +1,19 @@
 # 原生工程实施验收记录
 
-更新：2026-11-01（试用前收尾复测；同日晚间新增验收工具修正、真实宿主短测与耗时归因，见[pre-user-test.md](pre-user-test.md)同日章节与[归因报告](final-mac/attribution/attribution.json)）。目标机器：Intel Mac、macOS 26.7.2。
+更新：2026-11-02（工程化检查、版本管理与普通输入收尾修复；性能与宿主矩阵阻塞未变）。目标机器：Intel Mac、macOS 26.7.2。
 
-## 试用前收尾复测（当前）
+## 工程化与普通输入收尾（2026-11-02）
+
+本轮完成[工程化检查](engineering-readiness.md)与整改、Git 基线与单一版本来源（`version.json`，见 [versioning.md](../versioning.md)）、统一验证入口 `scripts/verify.py`（fast／release／host 三档，机器可读报告）。普通输入修复：
+
+- **Shift 提交不更新最近上屏字符（已修，核心）**：组合中 Shift 上屏后 `lastChar` 停留在组合前字符，下一标点错误沿用数字后半角例外——这正是上一轮 Terminal「Shift 确认＋句号」得半角 `.` 的根因（彼时归因平台层，实际在核心；此前“离线核心两路径都输出「。」”的验证走的是 Enter 路径，未覆盖 Shift 路径）。修复后 Shift 与 Enter／空格／选词提交同规则；新增「数字 → 字母组合 → Shift → 句号／冒号」反例回归（事件轨迹 257 → 265 项断言）。**该结论待真实 Terminal 短测复验后才能标宿主通过。**
+- **Orca Shift 单击未提交（待追踪）**：维持上一轮判定——释放事件存在但插字 0 次、组合疑似先被取消；与 Terminal 不同因。待验证构建＋`first_key_regression.py --hosts orca` 逐事件核对（按下／释放、组合变化、提交次数、PTY 字节），本轮未运行。
+- **释义精简（已生成，待包验证）**：`character` 不作词性、结构化标签不透传、强语域剔除、单条 ≤64 字符不截断；词条 161,839 → 143,777；固定种子 50 条审阅见 [gloss-simplification-review.md](gloss-simplification-review.md)。中文质量首选 109/120、前十 112/120 未降（quality 回归本轮通过）。
+- **Hyper（fn）不触发 Shift 单击**（平台层判定排除 `.function` 修饰）。
+
+本轮已验证：核心 ctest 4/4（265 断言）、Swift Release 49 项、中文质量 109／112 未降、fast 档全部通过（含版本拒绝路径 7/7、资源哈希一致）。数据可靠性 40 轮、十万序列插桩、宿主矩阵与性能测量由 release／host 档重跑（结果见本轮 verify 报告；未完成的项不标通过）。性能阻塞与试用停止状态不变：必要同步宿主写入在长单行场景超预算的结论未被本轮工作改变。
+
+## 试用前收尾复测（2026-11-01，历史，仍为性能结论依据）
 
 **正式性能未通过，已按计划停止交付试用。** Release 最终包 10,035 个真实 IMK 事件：主线程 p95 10.35ms／p99 15.38ms，超过 5ms／10ms；首次显示 p95 21.93ms／p99 24.44ms、AppKit 探针收字 p95 23.26ms 和 892/892 次回调内隐藏通过。当前结论和全部原始证据见[收尾复测报告](pre-user-test.md)。旧轮次“最终版已安装”“日志已移除”“宿主连续两轮全过”及性能“条件性达标”已逐项更正；Chrome 半角逗号仍待最终矩阵复验，不归因 Chromium。
 
@@ -105,10 +116,10 @@ python3 probes/validate-imk-host.py --orca
 
 ```sh
 cmake --build .build/native -j 2
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -j 2
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -j 2
 ```
 
-**25 项测试，0 失败，运行时间 14.837 秒。** 该时间不是输入延迟。默认 CLT 缺 XCTest 时，仅为本次命令设置 `DEVELOPER_DIR`。
+**25 项测试，0 失败，运行时间 14.837 秒。** 该时间不是输入延迟。默认 CLT 缺 XCTest 时，仅为本次命令设置 `DEVELOPER_DIR`。（2026-11-02 注：本节为历史记录；命令现统一为 Release 配置，当前为 49 项 XCTest＋swift-testing。）
 
 | 类别 | 数量 | 实际覆盖 |
 | --- | --- | --- |

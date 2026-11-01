@@ -9,10 +9,10 @@
 ```sh
 python3 scripts/prepare-dependencies.py --jobs 2
 python3 scripts/build.py
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -j 2
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -j 2
 ```
 
-若默认 Command Line Tools 缺少 XCTest，使用上面的单次 `DEVELOPER_DIR`，无需改全局 `xcode-select`。构建脚本在已有 `/Applications/Xcode.app` 时也使用该目录。
+若默认 Command Line Tools 缺少 XCTest，使用上面的单次 `DEVELOPER_DIR`，无需改全局 `xcode-select`。构建脚本在已有 `/Applications/Xcode.app` 时也使用该目录。测试与交付构建同为 **Release 配置**；Debug 测试结果不作为验收证据。日常提交用 `python3 scripts/verify.py --profile fast` 一条命令跑核心＋Swift＋版本＋资源检查（档位说明见 `scripts/verify.py` 文件头与 [工程化检查](validation/engineering-readiness.md)）。
 
 产物为 `dist/Gogaku.app` 与 `dist/Gogaku Settings.app`。输入源包含固定libime数据及重定位共享库，运行不需Homebrew或源码目录。依赖锁与许可在包内；ad-hoc签名只用于本机，不代表已公证或可公开分发。正式公开前仍须处理GPL／LGPL源码及重新链接义务。
 
@@ -48,9 +48,9 @@ python3 probes/validate-imk-host.py --orca
 
 设置窗口参考 Zakki，采用左侧分类导航、右侧平面分组布局。四页分别为“语言资源”“快捷键”“学习与隐私”“学习片段”；标签在左、控件在右，每页独立滚动。修改快捷键、记录开关、应用排除或忽略词后，点击页面底部固定的“保存设置”。切换页面会保留本次窗口中尚未保存的输入。
 
-## Apple本地语言资源
+## Apple本地语言资源（历史实现）
 
-在设置应用左侧选择“语言资源”，分别点击“中文 → 英语”和“英语 → 中文”右侧的“安装资源”，按系统提示明确授权。安装后点击“刷新状态”；已显示“已安装”（系统 `installed`）的方向不必重复安装。系统管理资源，Gogaku不复制权重。只有双向均为“已安装”后，才能执行真实翻译验收；“尚未安装”（系统 `supported`）只说明系统支持获取资源。
+**Apple Translation 已退出正式交付链路**（双端计划已确认统一采用 small100；本节仅作历史证据保留，不是当前使用说明）。设置应用“语言资源”页仍保留系统授权入口作为历史实现：点击“安装资源”后按系统提示授权，“刷新状态”读取系统 `installed`／`supported`；系统管理资源，Gogaku不复制权重。该入口的安装状态**不代表**学习功能可用：正式学习交付以 small100 两端质量门槛为准，当前学习模式保持关闭（见验收记录）。不要按本节把安装 Apple 语言资源当作学习功能前置步骤。
 
 推理helper使用 `TranslationSession(installedSource:target:)`，缺包返回 `resource_not_installed`，不在后台下载。当前辅助进程不提供任意网络接口。
 

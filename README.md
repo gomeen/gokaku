@@ -18,9 +18,11 @@
 
 ## 当前状态
 
-[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。本轮（2026-11-01 晚）修复验收工具两处判定缺口（插字次数按确认与后键分别核算、终端光标不再冒充），修复拼音光标在宿主 marked text 丢失（NSAttributedString 写入）、探针 reset 残留组合与旧备份包随机启动三个确定性问题；探针与 TextEdit 短测全绿（各 92/92），Terminal 93 项仅余 Shift＋句号半角一例，Chrome 驱动环境故障待重跑，Safari 未跑。主线程耗时归因已定位：核心恒定约 3ms，成本是宿主对长单行的 setMarkedText/insertText 布局（4500 字单段 10.9ms vs 分段 4.1ms，正式测量的连续追加场景恰是最坏情况），**同步必要宿主调用本身超预算，按停止条件继续阻塞试用**。证据见[收尾复测报告](docs/validation/pre-user-test.md)与[归因报告](docs/validation/final-mac/attribution/attribution.json)。此前 49 项 Swift 测试、51 项渲染检查、40 轮数据可靠性检查在本轮源改动后全部复跑通过。最终 10,035 次真实 IMK 事件的主线程 p95 10.35ms／p99 15.38ms，**性能未通过，已停止交付试用**；最终宿主连续两轮、十万序列插桩和稳定性复测未完成。上一轮“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回，证据见[收尾复测报告](docs/validation/pre-user-test.md)。
+[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。2026-11-02 轮：完成[工程化检查与整改](docs/validation/engineering-readiness.md)（版本可追溯、干净构建、备份暴露、/tmp 隐式依赖、测试证据绑定），建立 Git 基线与单一版本来源（`version.json`，见 [版本管理](docs/versioning.md)），新增统一验证入口 `python3 scripts/verify.py`（fast／release／host 三档）；修复 **Shift 提交不更新最近上屏字符**的核心缺陷（Terminal「Shift＋句号」半角根因，上一轮归因平台层有误），释义精简规则落地（`char.` 词性、结构化标签与强语域义项剔除，见[审阅记录](docs/validation/gloss-simplification-review.md)）。本轮 fast 档验证全过：核心 ctest 4/4（265 断言）、Swift Release 49 项、中文质量 109/120 与 112/120 未降。
 
-**完整首阶段仍未通过。** 学习路线采用两端统一 small100＋CT2；Mac 分词、转换、速度和离线可行，但模型质量门槛不通过，生产学习辅助和真实学习记录保持关闭。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。
+**性能与宿主阻塞未变，仍未到试用阶段**：上一轮 10,035 次真实 IMK 事件主线程 p95 10.35ms／p99 15.38ms（门槛 5ms／10ms）未达标；归因结论（长单行文档的必要同步宿主写入本身超预算）未被本轮工作改变。最终宿主连续两轮、十万序列插桩、两小时稳定性／内存／冷启动未完成；Orca 的 Shift 单击失败待专项追踪；「5.55ms 低于 5ms」等历史文字错误已更正（见[收尾复测报告](docs/validation/pre-user-test.md)）。此前“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回。本轮 Shift 修复在真实宿主复验前，不标宿主通过。
+
+**完整首阶段仍未通过。** 学习路线采用两端统一 small100＋CT2；Mac 分词、转换、速度和离线可行，但模型质量门槛不通过，生产学习辅助和真实学习记录保持关闭。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
 
 已授权当前用户安装开发版，由用户手动启用输入源；系统语言包仅通过设置应用中的显式系统授权入口安装。构建、安装、恢复和卸载见[开发版使用说明](docs/native-development.md)。
 
