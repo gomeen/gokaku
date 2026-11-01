@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """仅管理 Gogaku 自身的当前用户安装；保留其他输入源与用户数据。"""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import plistlib
@@ -14,6 +15,8 @@ INPUT = Path.home() / 'Library/Input Methods/Gogaku.app'
 SETTINGS = Path.home() / 'Applications/Gogaku Settings.app'
 SUPPORT = Path.home() / 'Library/Application Support/Gogaku'
 LSREGISTER = '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
+# 开发备份保留份数；更早的备份按时间删除，避免旧二进制无限累积。
+KEEP_BACKUPS = 3
 
 def current_is_gogaku():
     # 只读当前输入源标识，不扫描任何私人输入历史。
@@ -27,10 +30,58 @@ def own(path, identifier):
         raise SystemExit(f'拒绝覆盖非 Gogaku 应用：{path}')
 
 def backup(path):
-    if path.exists():
-        directory = SUPPORT / 'DeveloperBackups' / time.strftime('%Y%m%d-%H%M%S')
-        directory.mkdir(parents=True, exist_ok=True)
-        shutil.move(str(path), str(directory / path.name))
+    if not path.exists():
+        return
+    directory = SUPPORT / 'DeveloperBackups' / time.strftime('%Y%m%d-%H%M%S')
+    directory.mkdir(parents=True, exist_ok=True)
+    # 备份不能保留 .app 扩展名：LaunchServices 会索引 Application Support 里的
+    # .app 并可能在输入法启动时捡到旧二进制（曾发生 76 个旧备份包随机启动）。
+    # 改为 .app.disabled 后 LS 不再把它当作可启动应用。
+    target = directory / (path.name + '.disabled')
+    shutil.move(str(path), str(target))
+    prune_backups()
+
+def prune_backups():
+    root = SUPPORT / 'DeveloperBackups'
+    if not root.exists():
+        return
+    # 旧版脚本留下的 *.app 备份一并改名，消除被 LaunchServices 误启动的隐患。
+    for d in root.iterdir():
+        if not d.is_dir():
+            continue
+        for legacy in d.glob('*.app'):
+            legacy.rename(legacy.with_name(legacy.name + '.disabled'))
+    entries = sorted((d for d in root.iterdir() if d.is_dir()), key=lambda d: d.name)
+    for stale in entries[:-KEEP_BACKUPS] if len(entries) > KEEP_BACKUPS else []:
+        shutil.rmtree(stale, ignore_errors=True)
+
+def verify_install(source: Path, target: Path):
+    """安装后核对：实际安装路径的每个文件与 dist 清单哈希一致。
+    防止旧包残留、拷贝损坏或旧备份包冒充新版本。"""
+    manifest_path = ROOT / 'dist' / 'bundle-manifest.json'
+    if not manifest_path.exists():
+        raise SystemExit('缺少 dist/bundle-manifest.json；请用 scripts/build.py 构建后再安装。')
+    manifest = {entry['path']: entry for entry in json.loads(manifest_path.read_text())}
+    prefix = str(target) + '/'
+    installed = {str(p): p for p in target.rglob('*') if p.is_file()}
+    for rel, entry in manifest.items():
+        if not rel.startswith(str(source) + '/'):
+            continue
+        rel_path = rel.removeprefix(str(source) + '/')
+        installed_path = target / rel_path
+        if not installed_path.is_file():
+            raise SystemExit(f'安装不完整：缺少 {rel_path}')
+        if file_digest(installed_path) != entry['sha256']:
+            raise SystemExit(f'哈希不一致：{installed_path}（期望 {entry["sha256"][:12]}…）')
+        installed.pop(str(installed_path), None)
+    extra = [p for p in installed if '__pycache__' not in p]
+    if extra:
+        raise SystemExit(f'安装目录含清单外文件：{extra[:3]}')
+    print(f'已核对 {target} 运行时哈希（{len([r for r in manifest if r.startswith(str(source) + "/")])} 个文件与 dist 清单一致）')
+
+def file_digest(path: Path) -> str:
+    with path.open('rb') as f:
+        return hashlib.file_digest(f, 'sha256').hexdigest()
 
 def install():
     if current_is_gogaku(): raise SystemExit('请先手动切换到 ABC 或其他现有输入源，再更新 Gogaku。')
@@ -40,6 +91,7 @@ def install():
         target.parent.mkdir(parents=True, exist_ok=True)
         backup(target)
         shutil.copytree(source, target, symlinks=True)
+        verify_install(source, target)
     # imklaunchagent 的输入法启动路径依赖 LaunchServices 数据库；
     # 移包重装会丢失登记，必须重新注册，否则系统不拉起输入法进程。
     subprocess.run([LSREGISTER, '-f', str(INPUT)], check=False)
