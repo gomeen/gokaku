@@ -1,6 +1,79 @@
 import Foundation
 import AppKit
 
+/// 可配置快捷键的规范绑定。
+/// - `key` 是规范键标识（小写字母、数字、`f1`…`f19`、`return`、标点等），
+///   平台层负责与 keyCode／生成字符互转，不进入共享核心 C ABI。
+/// - `modifiers` 用 NSEvent.ModifierFlags rawValue，只取四修饰位。
+/// - `disabled == true` 表示用户明确清除；旧格式缺省该字段时不等于清除。
+public struct Shortcut: Codable, Equatable {
+    public var key: String
+    public var modifiers: UInt
+    public var disabled: Bool
+
+    public init(key: String, modifiers: UInt, disabled: Bool = false) {
+        self.key = key
+        self.modifiers = modifiers
+        self.disabled = disabled
+    }
+
+    private enum CodingKeys: String, CodingKey { case key, modifiers, disabled }
+
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        key = try c.decode(String.self, forKey: .key)
+        modifiers = try c.decode(UInt.self, forKey: .modifiers)
+        disabled = try c.decodeIfPresent(Bool.self, forKey: .disabled) ?? false
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(key, forKey: .key)
+        try c.encode(modifiers, forKey: .modifiers)
+        // 默认不写 disabled 字段：旧二进制（无该字段解码）仍可读取。
+        if disabled { try c.encode(true, forKey: .disabled) }
+    }
+
+    public var isValid: Bool { !disabled && !key.isEmpty && modifiers != 0 }
+}
+
+/// 按应用默认英文列表项：旧格式是 `[String]`（bundle id，全部启用），
+/// 新格式带每项启用状态；关闭后仍保留该行。
+public struct EnglishAppEntry: Codable, Equatable {
+    public var id: String
+    public var enabled: Bool
+    public init(id: String, enabled: Bool = true) {
+        self.id = id
+        self.enabled = enabled
+    }
+
+    private enum CodingKeys: String, CodingKey { case id, enabled }
+
+    public init(from decoder: Decoder) throws {
+        if let container = try? decoder.singleValueContainer(),
+           let legacy = try? container.decode(String.self) {
+            self.init(id: legacy, enabled: true)
+            return
+        }
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(id: try c.decode(String.self, forKey: .id),
+                  enabled: try c.decodeIfPresent(Bool.self, forKey: .enabled) ?? true)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        // 启用中的条目输出旧格式纯字符串；只有停用条目才写对象形式，
+        // 保证随包同建的旧二进制在未使用停用功能时仍可整文件解码。
+        if enabled {
+            var c = encoder.singleValueContainer()
+            try c.encode(id)
+        } else {
+            var c = encoder.container(keyedBy: CodingKeys.self)
+            try c.encode(id, forKey: .id)
+            try c.encode(enabled, forKey: .enabled)
+        }
+    }
+}
+
 public struct SpellingIssue: Equatable, Codable, Sendable {
     public let location: Int
     public let length: Int
@@ -34,15 +107,57 @@ public enum Spelling {
         return result
     }
 }
-public struct Shortcut: Codable, Equatable {
-    public var key: String
-    public var modifiers: UInt
-    public init(key: String, modifiers: UInt) { self.key = key; self.modifiers = modifiers }
-}
 public struct AppPreference: Codable {
     public var mode: InputMode = .normal
     public var direction: Direction = .zhToEn
     public init() {}
+}
+
+/// 快捷键配置命令。固定操作不在此列，仅用于冲突检查与展示。
+public enum ConfigurableCommand: String, CaseIterable, Sendable {
+    case modeSwitch = "gogaku.mode"
+    case directionSwitch = "gogaku.direction"
+    case quickAdd = "gogaku.quickAdd"
+
+    public var displayName: String {
+        switch self {
+        case .modeSwitch: return "普通／学习"
+        case .directionSwitch: return "学习方向"
+        case .quickAdd: return "快速添加"
+        }
+    }
+
+    public var detail: String {
+        switch self {
+        case .modeSwitch: return "切换中文输入与语言学习模式"
+        case .directionSwitch: return "切换中文到英语、英语到中文"
+        case .quickAdd: return "把最近上屏的中文存为拼音词"
+        }
+    }
+
+    public func shortcut(in settings: Settings) -> Shortcut {
+        switch self {
+        case .modeSwitch: return settings.modeShortcut
+        case .directionSwitch: return settings.directionShortcut
+        case .quickAdd: return settings.quickAddShortcut
+        }
+    }
+
+    public func setShortcut(_ shortcut: Shortcut, in settings: inout Settings) {
+        switch self {
+        case .modeSwitch: settings.modeShortcut = shortcut
+        case .directionSwitch: settings.directionShortcut = shortcut
+        case .quickAdd: settings.quickAddShortcut = shortcut
+        }
+    }
+
+    public var defaultShortcut: Shortcut {
+        switch self {
+        case .modeSwitch: return Shortcut(key: "k", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
+        case .directionSwitch: return Shortcut(key: "j", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
+        case .quickAdd: return Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
+        }
+    }
 }
 public enum CandidateThemeID: String, Codable, Sendable {
     case rimeMacOSLike = "rime-macos-like"
@@ -83,7 +198,8 @@ public struct Settings: Codable {
     public var fullPinyinPreedit = true                            // ni'hao / nihc
     public var frequencyEnabled = true                             // 中文调频
     public var englishCandidatesEnabled = true
-    public var appDefaultEnglish: [String] = defaultEnglishApps
+    /// 按应用默认英文：新格式带启用状态；计算属性输出启用中的 bundle id。
+    public var appDefaultEnglish: [EnglishAppEntry] = defaultEnglishApps.map { EnglishAppEntry(id: $0) }
     public var quickAddShortcut = Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
     public var quickAddExcludedApplications: Set<String> = []
 
@@ -120,10 +236,20 @@ public struct Settings: Codable {
         fullPinyinPreedit = try container.decodeIfPresent(Bool.self, forKey: .fullPinyinPreedit) ?? true
         frequencyEnabled = try container.decodeIfPresent(Bool.self, forKey: .frequencyEnabled) ?? true
         englishCandidatesEnabled = try container.decodeIfPresent(Bool.self, forKey: .englishCandidatesEnabled) ?? true
-        appDefaultEnglish = try container.decodeIfPresent([String].self, forKey: .appDefaultEnglish) ?? defaultEnglishApps
+        if let legacy = try? container.decode([String].self, forKey: .appDefaultEnglish) {
+            appDefaultEnglish = legacy.map { EnglishAppEntry(id: $0, enabled: true) }
+        } else {
+            appDefaultEnglish = try container.decodeIfPresent([EnglishAppEntry].self, forKey: .appDefaultEnglish)
+                ?? defaultEnglishApps.map { EnglishAppEntry(id: $0) }
+        }
         quickAddShortcut = try container.decodeIfPresent(Shortcut.self, forKey: .quickAddShortcut)
             ?? Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
         quickAddExcludedApplications = try container.decodeIfPresent(Set<String>.self, forKey: .quickAddExcludedApplications) ?? []
+    }
+
+    /// 输入法使用的启用中的按应用默认英文 bundle id 列表。
+    public var enabledDefaultEnglishApps: [String] {
+        appDefaultEnglish.filter(\.enabled).map(\.id)
     }
 
     /// 模糊音位标志（与共享核心 GC_FUZZY_* 一致）。
@@ -141,9 +267,11 @@ public struct Settings: Codable {
         guard let data = try? Data(contentsOf: directory.appendingPathComponent("settings.json")), let value = try? JSONDecoder().decode(Settings.self, from: data) else { return Settings() }
         return value
     }
+
+    /// 原子写入，不发送变更通知（通知由 SettingsStore 在成功落盘后发送，
+    /// 避免失败时伪报成功）。文件权限仅当前用户可读写。
     public func save(at directory: URL = Paths.support) throws {
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
         try JSONEncoder().encode(self).write(to: directory.appendingPathComponent("settings.json"), options: .atomic)
-        DistributedNotificationCenter.default().postNotificationName(Notification.Name("org.gogaku.settings.changed"), object: nil, userInfo: nil, deliverImmediately: true)
     }
 }
