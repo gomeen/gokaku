@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import plistlib
 import shutil
@@ -99,9 +100,35 @@ def install():
     # Refresh bundle metadata (including menu icons) once during installation.
     # Registering does not enable/select a source or repeat the consent prompt.
     run_tis([str(INPUT)])
+    # HUD 进程内缓存的旧图标不会随注册刷新（见 refresh_hud_icon_cache 注释），
+    # 重装图标资源后必须让 TextInputSwitcher 重建，切换浮层才显示新键帽图标。
+    refresh_hud_icon_cache()
     print(f'已安装：{INPUT}\n设置：{SETTINGS}')
     print('如系统输入源列表还没有 Gogaku，运行 python3 scripts/manage-install.py register；')
     print('或自行注销后重新登录。然后在 系统设置 → 键盘 → 文本输入 → 编辑 → ＋ 中手动添加并切换。')
+
+def refresh_hud_icon_cache():
+    """重启输入源切换 HUD 代理，让它下次显示时从当前安装包重建图标。
+
+    依据 2026-11 只读调查（probes/tis-icon-probe.swift、probes/render-hud-paths.swift）：
+    - TIS 的图标 URL 始终指向安装包内 gogaku-menu.pdf，磁盘无图标位图缓存
+      （com.apple.IntlDataCache.le.kbdx 只存输入源注册表，无位图）；
+    - HUD 由 com.apple.TextInputSwitcher 渲染，它把每个输入源的 NSImage 缓存在
+      进程内 InputSource 对象上（fIconImage/fCustomIcon 等），进程不重启不重读；
+    - 该代理常驻跨安装（曾观察到自键帽图标首个安装前运行至今），导致 HUD 一直
+      显示旧包的裸笔画图标，而菜单栏按需重读所以正常。
+    launchd 将其登记为 Aqua 按需服务（MachServices 带 ResetAtClose/HideUntilCheckIn），
+    kickstart -k 后任何输入源切换都会拉起新进程并重建图标，无需注销。
+    回滚安全性：仅影响 HUD 进程自身；失败时仅提示手动注销一次，不阻断安装。
+    """
+    result = subprocess.run(['launchctl', 'kickstart', '-k',
+                             f'gui/{os.getuid()}/com.apple.TextInputSwitcher'],
+                            capture_output=True, text=True)
+    if result.returncode == 0:
+        print('已重启输入源切换 HUD（TextInputSwitcher）：下次切换输入源时按新包重建图标。')
+    else:
+        reason = result.stderr.strip() or f'exit={result.returncode}'
+        print(f'提示：未能自动重启输入源切换 HUD（{reason}）；注销并重新登录一次可达到同样效果。')
 
 def uninstall(purge):
     if current_is_gogaku(): raise SystemExit('请先手动切换到其他输入源，并在系统设置中移除 Gogaku，再卸载。')
