@@ -1,12 +1,20 @@
 #!/usr/bin/env python3
 """Gogaku 统一验证入口：三种明确的检查档位，产出机器可读报告。
 
-用法：
-  python3 scripts/verify.py --profile fast      # 日常提交：核心＋Release Swift＋版本＋资源
-  python3 scripts/verify.py --profile release   # 交付门槛：干净构建＋包检查＋质量＋渲染＋
-                                                #            数据可靠性＋ASan/UBSan＋安装预检
+验证节奏（开发要快，全量留给里程碑与排查）：
+  python3 scripts/verify.py --profile fast       # 平时开发（约 2 分钟）：关键测试——核心
+                                                 # ctest＋Release Swift＋版本＋资源
+  python3 scripts/verify.py --profile release --only asan-ubsan --quick
+                                                 # 核心／内存敏感改动后（约 4 分钟）：
+                                                 # ASan/UBSan 2000 序列冒烟（不满足
+                                                 # 十万序列门槛，证据须注明）
+  python3 scripts/verify.py --profile release    # 发版本／交付 rc／定版／疑难排查（约
+                                                 # 2.5 小时，建议后台跑）：干净构建＋包
+                                                 # 检查＋质量＋渲染＋数据可靠性＋十万序
+                                                 # 列 ASan/UBSan＋安装预检
   python3 scripts/verify.py --profile host --yes # 真实宿主／性能／稳定性（显式要求，逐项
-                                                # 核对前台身份并恢复输入源与焦点）
+                                                 # 核对前台身份并恢复输入源与焦点；仅在
+                                                 # 用户空闲时段执行）
 
 规则：
 - 每项检查输出 passed／failed／skipped／blocked；必需项只有全部 passed 才算
@@ -14,6 +22,8 @@
   不会因命令退出 0 而被误读为覆盖完整。
 - 报告写入 docs/validation/verify/report-<profile>-<时间戳>.json，含每项状态、
   耗时与证据路径；历史报告不自动继承为当前版本通过（每次重跑重建身份绑定）。
+- --quick 的 ASan 冒烟允许开发期快速回归，但其报告会注明「不满足十万序列
+  门槛」；对外交付（rc／定版）必须以完整十万序列报告为准。
 - release 档位不做真实输入注入、不接管桌面；host 档位必须显式 --yes。
 """
 import argparse

@@ -12,7 +12,20 @@ python3 scripts/build.py
 DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -j 2
 ```
 
-若默认 Command Line Tools 缺少 XCTest，使用上面的单次 `DEVELOPER_DIR`，无需改全局 `xcode-select`。构建脚本在已有 `/Applications/Xcode.app` 时也使用该目录。测试与交付构建同为 **Release 配置**；Debug 测试结果不作为验收证据。日常提交用 `python3 scripts/verify.py --profile fast` 一条命令跑核心＋Swift＋版本＋资源检查（档位说明见 `scripts/verify.py` 文件头与 [工程化检查](validation/engineering-readiness.md)）。
+若默认 Command Line Tools 缺少 XCTest，使用上面的单次 `DEVELOPER_DIR`，无需改全局 `xcode-select`。构建脚本在已有 `/Applications/Xcode.app` 时也使用该目录。测试与交付构建同为 **Release 配置**；Debug 测试结果不作为验收证据。
+
+### 验证节奏
+
+开发要快，全量留给里程碑与排查；档位实现见 `scripts/verify.py` 文件头。
+
+| 场景 | 命令 | 耗时 | 内容 |
+| --- | --- | --- | --- |
+| 平时开发（每轮改动） | `python3 scripts/verify.py --profile fast` | 约 2 分钟 | 关键测试：核心 ctest＋Release Swift＋版本＋资源 |
+| 核心／内存敏感改动后（可选） | `python3 scripts/verify.py --profile release --only asan-ubsan --quick` | 约 4 分钟 | ASan/UBSan 2000 序列冒烟（注明不满足十万门槛） |
+| 发版本／交付 rc／定版／疑难排查 | `python3 scripts/verify.py --profile release` | 约 2.5 小时 | 全量：干净构建＋包检查＋质量＋渲染＋数据可靠性＋十万序列插桩＋安装预检；**后台运行，不阻塞迭代** |
+| 真实宿主／性能／稳定性 | `python3 scripts/verify.py --profile host --yes` | 数小时 | 两轮宿主矩阵、Orca Shift 专项、万次性能、两小时稳定性；仅用户空闲时段执行 |
+
+约定：全量档只在「要对外提供安装包」或「出现难以定位的问题需要全面排查」时运行；开发阶段不允许为等待全量结果阻塞迭代（后台跑完再归档证据）。历史报告不自动代表当前源码通过，源码改变后按受影响范围补跑。
 
 产物为 `dist/Gogaku.app` 与 `dist/Gogaku Settings.app`。输入源包含固定libime数据及重定位共享库，运行不需Homebrew或源码目录。依赖锁与许可在包内；ad-hoc签名只用于本机，不代表已公证或可公开分发。正式公开前仍须处理GPL／LGPL源码及重新链接义务。
 
