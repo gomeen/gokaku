@@ -6,12 +6,26 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy) NSString *application;
 @property(nonatomic) NSRange selection;
 @property(nonatomic) BOOL selectionValid;
-/** 光标矩形三态：YES＝本次读取且有效；NO＋rectangleRead=NO＝未读取；NO＋rectangleRead=YES＝读取了但无效。 */
+/** 光标矩形三态：YES＝本次读取且有效；NO＋rectangleRead=NO＝未读取（身份复查等
+ *  跳过几何）；NO＋rectangleRead=YES＝读取了但没有可信矩形——几何异常，或选区
+ *  未知（location NSNotFound）时不读任何字符索引，不冒充光标，控制器据此隐藏
+ *  面板保留组合。 */
 @property(nonatomic) BOOL rectangleValid;
 @property(nonatomic) BOOL rectangleRead;
+/** 宿主自报窗口层级（IMKTextInput.windowLevel）；windowLevelValid=NO 时恒为 0。 */
+@property(nonatomic) NSInteger windowLevel;
+@property(nonatomic) BOOL windowLevelValid;
 @property(nonatomic) NSRange markedRange;  /* 宿主字母范围；location NSNotFound = 无 */
 @property(nonatomic) NSRect rectangle;
 @end
+
+/** 候选窗基准层级（NSWindow.Level.popUpMenu）；宿主层级不可用或更低时使用。 */
+FOUNDATION_EXPORT NSInteger const GGPanelLevelBaseline;
+/** 宿主异常层级的钳制上限，防止候选窗被推到系统层之上。 */
+FOUNDATION_EXPORT NSInteger const GGPanelLevelCeiling;
+/** 宿主窗口层级 → 候选窗目标层级（纯函数）：无效或 ≤0 → 基准；
+ *  否则 max(基准, clientWindowLevel + 1)，钳到上限。 */
+FOUNDATION_EXPORT NSInteger GGPanelTargetLevel(NSInteger clientWindowLevel, BOOL clientWindowLevelValid);
 /** 只读取 client 元数据/光标，不读取正文。IPC 异常按无法确认目标处理。 */
 FOUNDATION_EXPORT GGHostSnapshot * _Nullable gg_read_host(id _Nullable client);
 /** 复查身份／选区时跳过光标几何 IPC；includeRectangle=NO 时 rectangleRead=NO、rectangleValid=NO。 */

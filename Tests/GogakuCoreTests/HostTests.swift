@@ -8,6 +8,8 @@ final class HostTests: XCTestCase {
         var selection = NSRange(location: 0, length: 0)
         var rectangle = NSRect.zero
         var geometryReads = 0
+        var windowLevelValue: Int = 0
+        @objc var windowLevel: Int { windowLevelValue }
         @objc func supportsUnicode() -> Bool { true }
         @objc func selectedRange() -> NSRange { selection }
         @objc func markedRange() -> NSRange { NSRange(location: NSNotFound, length: 0) }
@@ -18,6 +20,42 @@ final class HostTests: XCTestCase {
             rect.pointee = rectangle
             return [:]
         }
+    }
+
+    /// 不实现 windowLevel 的宿主：属性读取抛异常时快照回退为无效层级。
+    private final class LevellessClient: NSObject {
+        @objc func supportsUnicode() -> Bool { true }
+        @objc func selectedRange() -> NSRange { NSRange(location: 0, length: 0) }
+        @objc func markedRange() -> NSRange { NSRange(location: NSNotFound, length: 0) }
+        @objc func bundleIdentifier() -> String { "org.gogaku.validation.host" }
+    }
+
+    func testWindowLevelReadFromClient() {
+        let client = MetadataClient()
+        client.windowLevelValue = 2000
+        let snapshot = gg_read_host(client)
+        XCTAssertEqual(snapshot?.windowLevel, 2000)
+        XCTAssertEqual(snapshot?.windowLevelValid, true)
+    }
+
+    func testWindowLevelExceptionFallsBackToInvalid() {
+        let client = LevellessClient()
+        let snapshot = gg_read_host(client)
+        XCTAssertNotNil(snapshot)
+        XCTAssertEqual(snapshot?.windowLevel, 0, "层级异常时值恒为 0")
+        XCTAssertEqual(snapshot?.windowLevelValid, false)
+    }
+
+    func testUnknownSelectionDoesNotReadCaretRectangle() {
+        let client = MetadataClient()
+        client.selection = NSRange(location: NSNotFound, length: 0)
+        client.rectangle = NSRect(x: 10, y: 10, width: 1, height: 15)
+        let snapshot = gg_read_host(client)
+        XCTAssertNotNil(snapshot)
+        XCTAssertEqual(client.geometryReads, 0, "选区未知不读任何字符索引的矩形，不用索引 0 冒充光标")
+        XCTAssertEqual(snapshot?.rectangleRead, true, "带矩形读取调用发生过：读过但不可信")
+        XCTAssertEqual(snapshot?.rectangleValid, false)
+        XCTAssertEqual(snapshot?.rectangle, NSZeroRect)
     }
 
     func testIdentityRecheckSkipsGeometryIPC() {

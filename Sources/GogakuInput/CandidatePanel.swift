@@ -1,6 +1,7 @@
 import AppKit
 import CoreText
 import GogakuCore
+import GogakuHost
 
 private extension NSAttributedString {
     func draw(inRect rect: NSRect) {
@@ -484,8 +485,11 @@ final class CandidatePanel: NSPanel {
         stateChanged?()
     }
 
-    /// 普通按键只排队；新快照、隐藏或取消都会使旧代次失效。
-    func enqueue(_ view: CompositionView, at anchor: NSRect, submitted: (() -> Void)? = nil) {
+    /// 普通按键只排队；新快照、隐藏或取消都会使旧代次失效。宿主层级随快照
+    /// 一起排队：迟到代次被整代拒绝，不会把旧层级套在新渲染上。
+    func enqueue(_ view: CompositionView, at anchor: NSRect,
+                 clientWindowLevel: Int = 0, clientWindowLevelValid: Bool = false,
+                 submitted: (() -> Void)? = nil) {
         generation &+= 1
         let expected = generation
         DispatchQueue.main.async { [weak self] in
@@ -495,18 +499,37 @@ final class CandidatePanel: NSPanel {
                 self.stateChanged?()
                 return
             }
-            self.render(view, at: anchor)
+            self.render(view, at: anchor, clientWindowLevel: clientWindowLevel,
+                        clientWindowLevelValid: clientWindowLevelValid)
             submitted?()
         }
     }
 
-    func render(_ view: CompositionView, at anchor: NSRect) {
+    /// 宿主窗口层级 → 候选窗目标层级的排序修正。策略纯函数 GGPanelTargetLevel
+    /// 在 GogakuHost（HostTests／PanelLevelTests 覆盖）：目标 = max(.popUpMenu,
+    /// 客户端层级 + 1)；客户端层级无效或 ≤0 时用普通弹层基准；数值上限防异常值。
+    /// 客户端层级不高于基准时不抬高——常态排序不变，只在客户端确实更高时抬高。
+    /// 层级变化必须先设 level 再重新排序才对 WindowServer 生效；层级相同不置前，
+    /// 避免逐键无条件置前。只改排序，不触碰位置与透明度。
+    private func applyClientWindowLevel(clientLevel: Int, clientLevelValid: Bool) {
+        let target = GGPanelTargetLevel(clientLevel, clientLevelValid)
+        guard target != level.rawValue else { return }
+        level = NSWindow.Level(rawValue: target)
+        orderFrontRegardless()
+    }
+
+    /// 渲染当前组合视图并按宿主层级修正排序。clientWindowLevel 是宿主自报窗口
+    /// 层级（IMKTextInput.windowLevel，经 GogakuHost 快照带回）；未知时传 false，
+    /// 面板用普通弹层基准。隐藏恢复走同一路径：层级不同才置前一次。
+    func render(_ view: CompositionView, at anchor: NSRect,
+                clientWindowLevel: Int = 0, clientWindowLevelValid: Bool = false) {
         guard let nextFrame = layoutPanel(view, at: anchor) else {
             // 无有效坐标（锚点不在任何屏幕内等）：不显示，交由控制器保留组合。
             dismiss()
             return
         }
         prime()
+        applyClientWindowLevel(clientLevel: clientWindowLevel, clientLevelValid: clientWindowLevelValid)
         if nextFrame != frame { setFrame(nextFrame, display: false) }
         placementAnchor = anchor
         placementOrigin = nextFrame.origin

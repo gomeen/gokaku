@@ -12,6 +12,10 @@ private struct FocusTarget: Equatable {
     let selection: NSRange     // 当前选区（复查与展示用；组合中会被字母推动）
     let markedRange: NSRange   // 宿主报告的字母范围（location NSNotFound = 无）
     let rect: NSRect           // 本次读取有效的宿主光标矩形；未读取或无效时为零矩形
+    // 宿主自报窗口层级（IMKTextInput.windowLevel，经 GogakuHost 快照带回）。
+    // 只用于候选窗排序，不参与目标身份相等判断（见 ==）；未知时 valid=false、值为 0。
+    let windowLevel: Int
+    let windowLevelValid: Bool
     // IMK 每次返回的 client 代理不是同一实例，uniqueClientIdentifierString 也
     // 实测逐次变化；组合中字母会移动宿主选区，目标身份用「应用／进程＋锚点」
     // 比较，同框判断含字母范围规则（FocusRule，有单元测试）。
@@ -85,7 +89,8 @@ final class GogakuInputController: IMKInputController {
                       let current = self.currentTarget(), current == self.target,
                       let rect = self.displayRect else { return }
                 view.issues = result.issues ?? []; self.displayed = view
-                self.panel.render(view, at: rect)
+                self.panel.render(view, at: rect, clientWindowLevel: current.windowLevel,
+                                  clientWindowLevelValid: current.windowLevelValid)
             }
         }
         return service
@@ -176,7 +181,9 @@ final class GogakuInputController: IMKInputController {
     /// 光标矩形三态：notRead（本次未读取）／valid／invalid；未读取不能被当成
     /// 当前有效位置，也不再用鼠标位置或虚构屏幕尺寸回退。
     private enum RectState { case notRead, valid, invalid }
-    private func hostFacts(readRectangle: Bool = false) -> (application: String, pid: pid_t, selection: NSRange, markedRange: NSRange, rect: NSRect, rectState: RectState)? {
+    private func hostFacts(readRectangle: Bool = false) -> (application: String, pid: pid_t, selection: NSRange,
+                                                            markedRange: NSRange, rect: NSRect, rectState: RectState,
+                                                            windowLevel: Int, windowLevelValid: Bool)? {
         #if GOGAKU_VALIDATION
         let readStart = DispatchTime.now().uptimeNanoseconds
         defer { ValidationMonitor.shared.phase("hostReadNs", duration: DispatchTime.now().uptimeNanoseconds - readStart) }
@@ -192,7 +199,8 @@ final class GogakuInputController: IMKInputController {
         ValidationMonitor.shared.selectionRead(snapshot.selection)
         #endif
         let state: RectState = !snapshot.rectangleRead ? .notRead : (snapshot.rectangleValid ? .valid : .invalid)
-        return (snapshot.application, pid, snapshot.selection, snapshot.markedRange, snapshot.rectangle, state)
+        return (snapshot.application, pid, snapshot.selection, snapshot.markedRange, snapshot.rectangle, state,
+                Int(snapshot.windowLevel), snapshot.windowLevelValid)
     }
 
     private func currentTarget(readRectangle: Bool = false) -> FocusTarget? {
@@ -208,10 +216,12 @@ final class GogakuInputController: IMKInputController {
                 return nil
             }
             return FocusTarget(application: facts.application, pid: facts.pid, anchor: previous.anchor,
-                               selection: facts.selection, markedRange: facts.markedRange, rect: freshRect)
+                               selection: facts.selection, markedRange: facts.markedRange, rect: freshRect,
+                               windowLevel: facts.windowLevel, windowLevelValid: facts.windowLevelValid)
         }
         return FocusTarget(application: facts.application, pid: facts.pid, anchor: facts.selection,
-                           selection: facts.selection, markedRange: facts.markedRange, rect: freshRect)
+                           selection: facts.selection, markedRange: facts.markedRange, rect: freshRect,
+                           windowLevel: facts.windowLevel, windowLevelValid: facts.windowLevelValid)
     }
 
     private func configure() {
@@ -501,7 +511,8 @@ final class GogakuInputController: IMKInputController {
             let firstDisplay = !panel.contentVisible
             displayed = view
             if let rect = displayRect {
-                panel.enqueue(view, at: rect) {
+                panel.enqueue(view, at: rect, clientWindowLevel: target.windowLevel,
+                              clientWindowLevelValid: target.windowLevelValid) {
                     ValidationMonitor.shared.rendered(metricID, compositionStart: start, first: firstDisplay)
                 }
             } else {
@@ -511,7 +522,8 @@ final class GogakuInputController: IMKInputController {
             #else
             displayed = view
             if let rect = displayRect {
-                panel.enqueue(view, at: rect)
+                panel.enqueue(view, at: rect, clientWindowLevel: target.windowLevel,
+                              clientWindowLevelValid: target.windowLevelValid)
             } else {
                 panel.dismiss()
             }
@@ -564,7 +576,8 @@ final class GogakuInputController: IMKInputController {
         let changed = displayRect != current.rect
         displayRect = current.rect
         if changed, let view = displayed {
-            panel.enqueue(view, at: current.rect)
+            panel.enqueue(view, at: current.rect, clientWindowLevel: current.windowLevel,
+                          clientWindowLevelValid: current.windowLevelValid)
         }
     }
 
@@ -606,7 +619,8 @@ final class GogakuInputController: IMKInputController {
                state.markedRange.location != NSNotFound, state.markedRange.length == marked.utf16.count {
                 self.target = FocusTarget(application: target.application, pid: target.pid,
                                           anchor: NSRange(location: state.markedRange.location, length: 0),
-                                          selection: state.selection, markedRange: state.markedRange, rect: target.rect)
+                                          selection: state.selection, markedRange: state.markedRange, rect: target.rect,
+                                          windowLevel: target.windowLevel, windowLevelValid: target.windowLevelValid)
             }
         }
     }
@@ -774,7 +788,8 @@ final class GogakuInputController: IMKInputController {
             }
             self.displayed = shown
             guard let rect = self.displayRect else { self.panel.dismiss(); return }
-            self.panel.render(shown, at: rect)
+            self.panel.render(shown, at: rect, clientWindowLevel: current.windowLevel,
+                              clientWindowLevelValid: current.windowLevelValid)
         }
     }
 
@@ -904,7 +919,7 @@ final class GogakuInputController: IMKInputController {
         item("切换学习方向（学习功能关闭）", #selector(toggleDirection(_:)), enabled: false)
         menu.addItem(.separator())
         for (index, draft) in DraftStore.shared.drafts.enumerated() where draft.application == application && draft.mode == mode && draft.direction == direction {
-            let label = draft.literal ? "恢复未上屏文本" : "恢复草稿"
+            let label = draft.literal ? "恢复未发出文字" : "恢复未完成输入"
             let i = NSMenuItem(title: "\(label) \(index + 1)（\(draft.raw.count) 字符）", action: #selector(restoreDraft(_:)), keyEquivalent: "")
             i.target = self; i.representedObject = draft.id; menu.addItem(i)
         }
