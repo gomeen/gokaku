@@ -30,6 +30,7 @@ struct ShortcutsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            // 用户裁决 2026-11-02：去掉标题行，筛选胶囊与搜索同行。
             headerCard
             groupHeader("模式与快速添加")
             commandRows
@@ -38,43 +39,25 @@ struct ShortcutsPage: View {
         }
     }
 
-    // MARK: 头部卡片（.kshead：标题行＋筛选行，搜索与筛选分行）
+    // MARK: 头部（筛选胶囊与搜索同行；无卡片背景，底部 hairline）
 
     private var headerCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // .kshead__bar：⌨ 图标＋标题＋右侧搜索框（flex 0 1 300）。
-            HStack(spacing: 14) {
-                Text("⌨")
-                    .font(.system(size: 13))
-                    .foregroundStyle(SettingsPalette.accentText)
-                    .frame(width: 26, height: 26)
-                    .background(RoundedRectangle(cornerRadius: 7).fill(SettingsPalette.accentSoft))
-                    .accessibilityHidden(true)
-                Text("键盘快捷方式")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(SettingsPalette.primaryText)
+            HStack(spacing: 12) {
+                HStack(spacing: 8) {
+                    ForEach(Filter.allCases, id: \.self) { item in
+                        filterTab(item)
+                    }
+                }
                 Spacer(minLength: 12)
                 SettingsSearchField(text: $query, placeholder: "搜索",
                                     accessibilityName: "搜索命令或快捷键",
                                     background: SettingsPalette.windowBackground)
                     .frame(maxWidth: 300)
             }
-            .padding(.horizontal, 14)
-            .padding(.vertical, 10)
-            // .kstabs：筛选胶囊行（与搜索分行），底部 hairline。
-            HStack(spacing: 8) {
-                ForEach(Filter.allCases, id: \.self) { item in
-                    filterTab(item)
-                }
-            }
-            .padding(.horizontal, 14)
             .padding(.bottom, 10)
             SettingsRowDivider()
         }
-        .background(SettingsPalette.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10)
-            .strokeBorder(SettingsPalette.border, lineWidth: 1))
         .accessibilityElement(children: .contain)
     }
 

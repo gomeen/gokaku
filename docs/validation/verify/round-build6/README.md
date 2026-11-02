@@ -39,3 +39,31 @@
 ## 并行会话说明
 
 本仓库工作区存在另一会话的未提交修改（translate-safety 相关：`gogakuCore.h`、CMakeLists、若干 docs）。本轮未触碰、未提交这些改动；最终 fast 档在含这些改动的工作区运行并通过。`docs/validation/native-development.md` 的本轮正式登记因该文件正被另一会话编辑而暂缓，待协调后补记。
+
+## 第二轮整改（2026-11-02 晚：Orca Shift 无效与候选窗位置）
+
+### 发现与修复
+
+| 项 | 结论 | 证据 |
+| --- | --- | --- |
+| Orca 组合中 Shift 单击无效 | 真机根因：Orca（Chromium 系）对每个修饰键过渡**双投递 flagsChanged**（同边沿 2ms 内两条同 raw 事件），重复按下落入「按住期间有其他按键」分支把单击资格判死。修复：按下沿幂等化。另纠错：此前「Orca 不转发 flagsChanged」的结论建立在 NSLog 可见的错误前提上（GogakuInput 进程的 NSLog 对统一日志不可见，本轮实证），已推翻 | 侧车轨迹：`shift event` 同边沿双事件→无 event-fire；修复后用户实测 Orca／微信正常 |
+| 不投递修饰键事件的宿主兜底 | ShiftTapPoller：25Hz 采样 `CGEventSource.flagsState`（共享内存、零权限），仅当按住窗口＋120ms 宽限内无任何 flagsChanged 事件才代发，与事件通路互斥 | 实测轨迹中从未误发（事件宿主全部由事件通路负责） |
+| 候选窗位置（pi 终端错位） | Orca 终端 TUI 锚点在真实位置（y=845）与陈旧位置（y=148，偏差约 700pt）间跳变（pi 重渲染后宿主锚点丢失）；且 Orca 不向输入法转发 mouseDown。尝试鼠标／点击位置可信度校验（期间修复 CGEvent 左上原点 vs Cocoa 左下原点混算 bug），均无法可靠区分 → **用户裁决：移除校验，完全信任宿主锚点**，Orca 终端偶发顶部错位记上游缺陷 | 侧车 seed 轨迹（y=845→y=148 同分钟内交替）、seed-rejected 轨迹、用户逐轮反馈 |
+
+### 顺带发现与处理
+
+- NSLog 在 GogakuInput 进程对统一日志不可见（`log stream`／`log show` 双路过滤均零），进程内诊断一律改文件侧车（临时埋点，最终版已全部移除）。
+- settings 布局重排（快捷键去标题＋筛选搜索同行；普通输入输入方案/模糊音拆分；全部分组平铺化）复验 24 张截图归档 `settings/`。
+- 菜单图标字形放大居中，`check-menu-icon` 墨量窗口按新字形重标定。
+
+### 验证
+
+- fast 档最终全过（`report-fast-20261102-230342.json`：核心 ctest 100%＋Swift Release 96 项）。
+- TextEdit 真机严格场景：组合中 Shift 上屏原编码／Shift 后英文直输／临时英文回中文 全过（`validate-real-hosts.py`，本轮 flagsChanged 重构后未破坏任何既有行为）。
+- 用户真机确认：Orca Shift 单击切换正常、微信正常；聊天框/pi 输入框候选窗跟随正常（除上游陈旧锚点场景）。
+
+### 遗留
+
+- Orca 终端 TUI 偶发陈旧锚点（顶部错位）：上游缺陷，已按裁决不在输入法侧校验；待 Orca 修复后自然消失。
+- orca-pty 专项：本轮复跑 `first_key_regression.py --hosts orca-pty` 显示整轮裸透传（字母都未进 IME，51/56 失败）——比此前「仅 Shift 失败」更深的宿主连接问题，仍属既有专项遗留，与真机行为（用户 Orca 正常）矛盾，待专项排查。
+- orca-pty Shift 单击检测专项继续保留。

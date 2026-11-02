@@ -95,9 +95,10 @@ enum SettingsPalette {
     static let actionColumnWidth: CGFloat = 104
 }
 
-// MARK: - 卡片（panel）
+// MARK: - 分组 section（内容区平铺：标题、间距、分割）
 
-/// 平面分组卡片（panel：描边卡片＋小标题＋内容）。
+/// 分组 section：无卡片背景与圆角，标题＋内容＋底部 hairline 分割
+/// （用户裁决 2026-11-02：内容区不需要圆角卡片背景）。
 struct SettingsCard<Content: View>: View {
     let title: String
     @ViewBuilder var content: Content
@@ -109,23 +110,20 @@ struct SettingsCard<Content: View>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // .panel__title：12.5/600，padding 12 14 0。
+            // .panel__title：12.5/600；平铺后与页面 26pt 内边距对齐。
             Text(title).font(.system(size: 12.5, weight: .semibold))
                 .foregroundStyle(SettingsPalette.primaryText)
                 .accessibilityAddTraits(.isHeader)
-                .padding(.horizontal, 14)
-                .padding(.top, 12)
-            content
-                // .panel__body：padding 2 14 10。
-                .padding(.horizontal, 14)
-                .padding(.top, 2)
                 .padding(.bottom, 10)
+            content
+            // section 之间的分割线（内容末尾）。
+            Rectangle()
+                .fill(SettingsPalette.hairline)
+                .frame(height: 1)
+                .padding(.top, 16)
+                .accessibilityHidden(true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SettingsPalette.cardBackground)
-        .clipShape(RoundedRectangle(cornerRadius: SettingsPalette.cardCornerRadius))
-        .overlay(RoundedRectangle(cornerRadius: SettingsPalette.cardCornerRadius)
-            .strokeBorder(SettingsPalette.border, lineWidth: 1))
     }
 }
 

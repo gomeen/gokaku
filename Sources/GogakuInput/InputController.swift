@@ -47,6 +47,84 @@ private struct ShiftClickTracker {
     var pressing: Bool { pressTime > 0 }
 }
 
+/// 修饰键事件依赖宿主投递；Orca（Chromium 系）会投递但每个过渡双投递
+/// （2026-11-02 侧车实测，已由事件通路幂等化修复）。若某宿主完全不投递，
+/// 事件通路永远沉默——轮询 CGEventSource 会话级修饰键快照作纯兜底
+/// （共享内存读取，无需任何权限）：仅当整个按住窗口＋120ms 宽限内没有任何
+/// flagsChanged 事件时才代发，保证与事件通路互斥、永不双发。
+private final class ShiftTapPoller {
+    private var timer: Timer?
+    private var shiftDown = false          // 上次采样的 Shift 状态
+    private var pressTime: TimeInterval = 0
+    private var otherKeySeen = false       // 按住期间出现过按键（含其他修饰键）
+    private var lastFlagsEventAt: TimeInterval = -10
+    private var pendingFire: (press: TimeInterval, side: Int64)?
+    private var pendingTimer: Timer?
+
+    private let onShiftClick: (Int64) -> Void
+
+    init(onShiftClick: @escaping (Int64) -> Void) { self.onShiftClick = onShiftClick }
+
+    /// 25Hz 采样：兼顾快速单击捕获与开销（flagsState 为共享内存读取）。
+    func start() {
+        guard timer == nil else { return }
+        shiftDown = Self.shiftNow()
+        let t = Timer(timeInterval: 0.04, repeats: true) { [weak self] _ in self?.sample() }
+        RunLoop.main.add(t, forMode: .common)
+        timer = t
+    }
+
+    func stop() {
+        timer?.invalidate(); timer = nil
+        pendingTimer?.invalidate(); pendingTimer = nil
+        pendingFire = nil
+        shiftDown = false; pressTime = 0
+    }
+
+    /// 事件通路每收到一条 flagsChanged 都告知（按下／释放／其他修饰键均算）。
+    func noteFlagsEvent() { lastFlagsEventAt = ProcessInfo.processInfo.systemUptime }
+
+    /// 按住期间出现按键（keyDown／其他修饰键事件）→ 取消单击资格。
+    func markOtherKey() { if pressTime > 0 { otherKeySeen = true } }
+
+    private static func flagsNow() -> CGEventFlags { CGEventSource.flagsState(.combinedSessionState) }
+    private static func shiftNow() -> Bool { flagsNow().contains(.maskShift) }
+
+    private func sample() {
+        let now = ProcessInfo.processInfo.systemUptime
+        let flags = Self.flagsNow()
+        let shift = flags.contains(.maskShift)
+        let other = flags.intersection([.maskCommand, .maskControl, .maskAlternate, .maskSecondaryFn]).rawValue != 0
+        if shift && !shiftDown {
+            shiftDown = true; pressTime = now; otherKeySeen = other
+        } else if !shift && shiftDown {
+            shiftDown = false
+            let press = pressTime
+            pressTime = 0
+            let sawFlagsEvents = lastFlagsEventAt >= press
+            // 与事件通路同一规格：<600ms、按住期间无其他按键／修饰键；
+            // 延迟 120ms 确认期内事件通路仍无任何 flagsChanged 才代发。
+            if !sawFlagsEvents, press > 0, !otherKeySeen, now - press < 0.6 {
+                pendingFire = (press, 0)
+                let t = Timer(timeInterval: 0.12, repeats: false) { [weak self] _ in self?.confirmPendingFire() }
+                RunLoop.main.add(t, forMode: .common)
+                pendingTimer = t
+            }
+        } else if other {
+            markOtherKey()
+        }
+    }
+
+    private func confirmPendingFire() {
+        pendingTimer = nil
+        guard let (press, side) = pendingFire else { return }
+        pendingFire = nil
+        // 宽限期内事件通路收到了任何 flagsChanged → 本轮由事件通路负责，不代发。
+        guard lastFlagsEventAt < press else { return }
+        onShiftClick(side)
+    }
+}
+
 @objc(GogakuInputController)
 final class GogakuInputController: IMKInputController {
     /// 共享引擎（词库只加载一次）；本控制器只是调用方。
@@ -71,6 +149,13 @@ final class GogakuInputController: IMKInputController {
     private var sourceIndex = 0
     private var requestedSpellStamp: InputStamp?
     private var shiftTracker = ShiftClickTracker()
+    /// Orca 等 Chromium 系宿主不转发 flagsChanged 的轮询兜底（验后保留，仅日志可移除）。
+    private lazy var shiftPoller = ShiftTapPoller { [weak self] side in
+        guard let self, self.active, self.engineAvailable else { return }
+        if let current = self.currentTarget() {
+            _ = self.handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: self.target == nil)
+        } else { self.suspend() }
+    }
     private var flushWork: DispatchWorkItem?
     /// 当前有效显示位置（宿主光标矩形）；nil＝面板隐藏但组合保留。
     /// 与目标身份锚点分离：位置变化不改变目标身份。
@@ -153,6 +238,7 @@ final class GogakuInputController: IMKInputController {
 
     override func activateServer(_ sender: Any!) {
         active = true
+        shiftPoller.start()
         panel.choose = { [weak self] row in self?.panelChoose(row: row) }
         settings = Settings.load()
         panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
@@ -164,9 +250,9 @@ final class GogakuInputController: IMKInputController {
         configure()
     }
 
-    override func deactivateServer(_ sender: Any!) { stopPositionRefresh(); suspend(); active = false }
+    override func deactivateServer(_ sender: Any!) { shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false }
     override func commitComposition(_ sender: Any!) { suspend() }
-    override func inputControllerWillClose() { suspend(); active = false }
+    override func inputControllerWillClose() { shiftPoller.stop(); suspend(); active = false }
     override func hidePalettes() { panel.dismiss(); toast.hide() }
 
     override func recognizedEvents(_ sender: Any!) -> Int {
@@ -179,8 +265,12 @@ final class GogakuInputController: IMKInputController {
     /// 前台常常还是上一个应用，导致误判）；目标身份来自输入客户端自报的应用，
     /// 配合 IMK 激活／停用生命周期与插字前选区复查防串应用。
     /// 光标矩形三态：notRead（本次未读取）／valid／invalid；未读取不能被当成
-    /// 当前有效位置，也不再用鼠标位置或虚构屏幕尺寸回退。
+    /// 当前有效位置，也不用鼠标位置或虚构屏幕尺寸回退（2026-11-02 二次确认：
+    /// 曾试做鼠标/点击位置可信度校验，但 Orca 不转发 mouseDown 且锚点会在
+    /// 真实位置与陈旧位置间跳变，无法可靠区分，裁决为完全信任宿主锚点；
+    /// Orca 终端 TUI 偶发陈旧锚点属上游缺陷）。
     private enum RectState { case notRead, valid, invalid }
+
     private func hostFacts(readRectangle: Bool = false) -> (application: String, pid: pid_t, selection: NSRange,
                                                             markedRange: NSRange, rect: NSRect, rectState: RectState,
                                                             windowLevel: Int, windowLevelValid: Bool)? {
@@ -354,21 +444,38 @@ final class GogakuInputController: IMKInputController {
         // keyUp 不是新输入：一律透传（单字符原文提交竞态的历史修复）。
         if event.type == .keyUp { return false }
         if event.type == .flagsChanged {
+            shiftPoller.noteFlagsEvent()   // 轮询兑底互斥：本轮窗口内有事件就不代发
             // Shift 单击判定；其他修饰键变化不挂起组合（规格）。
             // Hyper（fn／globe 修饰）不算 Shift 单击：fn 按住时 flags 含 .function，
             // 与 Command／Control／Option 一样取消单击资格；长按（≥600ms）与
             // 按住期间的其他按键已在 ShiftClickTracker 排除。
+            // Orca（Chromium 系）每个修饰键过渡双投递 flagsChanged（2026-11-02
+            // 侧车实测：同一边沿 2ms 内两条 raw 相同的事件）——重复的 Shift 按下
+            // 必须幂等，不得清除单击资格（此前正是它把每次 Orca Shift 单击判死）。
             let flags = event.modifierFlags.intersection([.shift])
-            let onlyShift = flags.rawValue != 0 &&
+            let hasShift = flags.rawValue != 0
+            let onlyShift = hasShift &&
                 event.modifierFlags.intersection([.command, .control, .option, .function]).rawValue == 0
-            if onlyShift && !shiftTracker.pressing {
-                shiftTracker.press(event)
-            } else if shiftTracker.pressing {
-                if !flags.contains(.shift), let side = shiftTracker.release(event) {
-                    if let current = currentTarget() {
-                        _ = handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: target == nil)
-                    } else { suspend() }
-                } else { shiftTracker.markOtherKey() }
+            if !hasShift {
+                // 释放沿（Shift 已松开；raw 里可能仍带其他修饰键）。
+                if shiftTracker.pressing {
+                    if let side = shiftTracker.release(event) {
+                        if let current = currentTarget() {
+                            _ = handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: target == nil)
+                        } else { suspend() }
+                    } else {
+                        shiftTracker.markOtherKey(); shiftPoller.markOtherKey()
+                    }
+                } else if event.modifierFlags.intersection([.command, .control, .option, .function]).rawValue != 0 {
+                    // 无按下上下文的纯修饰键变化（如 Ctrl 单独按下）。
+                    shiftPoller.markOtherKey()
+                }
+            } else if onlyShift {
+                // Shift 按下沿（重复投递幂等：已按下时保持单击资格不变）。
+                if !shiftTracker.pressing { shiftTracker.press(event) }
+            } else {
+                // Shift＋其他修饰键：取消单击资格。
+                shiftTracker.markOtherKey(); shiftPoller.markOtherKey()
             }
             return false   // 修饰键事件本身交还宿主
         }
@@ -376,6 +483,7 @@ final class GogakuInputController: IMKInputController {
             suspend(); return false
         }
         if shiftTracker.pressing { shiftTracker.markOtherKey() }
+        shiftPoller.markOtherKey()
         if match(settings.modeShortcut, event: event) { toggleMode(nil); return true }
         if match(settings.directionShortcut, event: event) { toggleDirection(nil); return true }
         if match(settings.quickAddShortcut, event: event) && mode == .normal, let current = currentTarget() {
@@ -576,7 +684,7 @@ final class GogakuInputController: IMKInputController {
             // Orca 1.4.246 实测（2026-11-02 诊断）：组合（marked range）覆盖插入点
             // 期间，宿主对插入点与组合起点的 attributes 查询都返回零矩形，组合结束
             // 才恢复有效。已有有效锚点时冻结在组合内最后测得的位置（不追逐、不
-            // 隐藏，矩形恢复后重新跟随）；从未获得过锚点（如 Bob 输入弹窗）才走
+            // 隐藏，矩形恢复后重新跟随）；从未获得过锚点（含陈旧锚点被拒）才走
             // hidePanelKeepComposition 的隐藏保留组合路径。
             return
         }
@@ -915,23 +1023,26 @@ final class GogakuInputController: IMKInputController {
     @objc private func clearDrafts(_ sender: Any?) { DraftStore.shared.clear() }
 
     override func menu() -> NSMenu! {
+        // 菜单只保留可操作的必要项（用户裁决 2026-11-02：不要过多显示）：
+        // 草稿恢复（仅有草稿时）＋清空＋设置。学习功能关闭状态在设置页与文档
+        // 说明，不再占菜单行；清空动作也仅在存在草稿时出现。
         let menu = NSMenu()
-        func item(_ title: String, _ action: Selector, enabled: Bool = true) {
-            let i = NSMenuItem(title: title, action: action, keyEquivalent: "")
-            i.target = self
-            i.isEnabled = enabled
-            menu.addItem(i)
+        let drafts = DraftStore.shared.drafts.filter { $0.application == application && $0.mode == mode && $0.direction == direction }
+        if !drafts.isEmpty {
+            for (index, draft) in drafts.enumerated() {
+                let label = draft.literal ? "恢复未发出文字" : "恢复未完成输入"
+                let i = NSMenuItem(title: "\(label) \(index + 1)（\(draft.raw.count) 字符）", action: #selector(restoreDraft(_:)), keyEquivalent: "")
+                i.target = self; i.representedObject = draft.id; menu.addItem(i)
+            }
+            menu.addItem(.separator())
+            let clear = NSMenuItem(title: "清空未完成输入", action: #selector(clearDrafts(_:)), keyEquivalent: "")
+            clear.target = self
+            menu.addItem(clear)
+            menu.addItem(.separator())
         }
-        item("切换为学习模式（正式翻译模型未过质量门槛，保持关闭）", #selector(toggleMode(_:)), enabled: false)
-        item("切换学习方向（学习功能关闭）", #selector(toggleDirection(_:)), enabled: false)
-        menu.addItem(.separator())
-        for (index, draft) in DraftStore.shared.drafts.enumerated() where draft.application == application && draft.mode == mode && draft.direction == direction {
-            let label = draft.literal ? "恢复未发出文字" : "恢复未完成输入"
-            let i = NSMenuItem(title: "\(label) \(index + 1)（\(draft.raw.count) 字符）", action: #selector(restoreDraft(_:)), keyEquivalent: "")
-            i.target = self; i.representedObject = draft.id; menu.addItem(i)
-        }
-        item("清空内存草稿", #selector(clearDrafts(_:)))
-        item("设置与学习片段…", #selector(openSettings(_:)))
+        let settings = NSMenuItem(title: "设置…", action: #selector(openSettings(_:)), keyEquivalent: "")
+        settings.target = self
+        menu.addItem(settings)
         return menu
     }
 }

@@ -15,6 +15,8 @@ struct NormalInputPage: View {
         VStack(alignment: .leading, spacing: 0) {
             schemeCard
             SettingsCardSpacing()
+            fuzzyCard
+            SettingsCardSpacing()
             candidateCard
             SettingsCardSpacing()
             englishCard
@@ -31,44 +33,41 @@ struct NormalInputPage: View {
         }
     }
 
-    // MARK: 输入方案（纵向单选；模糊音为 hairline 分隔的子块）
+    // MARK: 输入方案（纵向单选，独立一块）
 
     private var schemeCard: some View {
         SettingsCard("输入方案") {
-            VStack(alignment: .leading, spacing: 0) {
-                Picker("输入方案", selection: binding(\.inputScheme)) {
-                    Text("小鹤双拼（默认）").tag(InputScheme.xiaohe)
-                    Text("全拼").tag(InputScheme.fullPinyin)
-                }
-                .pickerStyle(.radioGroup)
-                // 原型 .radios 为纵向列表（radioGroup 默认纵向，每项 12px）。
-                .font(.system(size: 12))
-                .padding(.vertical, 8)
-                .accessibilityLabel("输入方案")
-                // .subblock：hairline 上边框、上留白 12、内留白 10。
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("模糊音（默认全关）")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(SettingsPalette.primaryText)
-                    // 三列九项 checkbox（.fzgrid：列距 12、行距 9；代码用等宽 11px）。
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
-                              alignment: .leading, spacing: 9) {
-                        ForEach(InputScheme.fuzzyPairs, id: \.id) { pair in
-                            Toggle(pair.id, isOn: Binding(
-                                get: { settings.fuzzyPinyin.contains(pair.id) },
-                                set: { on in
-                                    if on { settings.fuzzyPinyin.insert(pair.id) } else { settings.fuzzyPinyin.remove(pair.id) }
-                                    submit()
-                                }))
-                                .font(.system(size: 11, design: .monospaced))
-                                .accessibilityLabel("模糊音 \(pair.id)")
-                        }
-                    }
-                }
-                .padding(.top, 12)
-                SettingsRowDivider()
-                    .padding(.bottom, 10)
+            Picker("输入方案", selection: binding(\.inputScheme)) {
+                Text("小鹤双拼（默认）").tag(InputScheme.xiaohe)
+                Text("全拼").tag(InputScheme.fullPinyin)
             }
+            .pickerStyle(.radioGroup)
+            .labelsHidden()   // 区块标题已是「输入方案」，避免行标签重复
+            // 原型 .radios 为纵向列表（radioGroup 默认纵向，每项 12px）。
+            .font(.system(size: 12))
+            .padding(.vertical, 2)
+            .accessibilityLabel("输入方案")
+        }
+    }
+
+    // MARK: 模糊音（三列九项 checkbox，独立一块）
+
+    private var fuzzyCard: some View {
+        SettingsCard("模糊音") {
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
+                      alignment: .leading, spacing: 9) {
+                ForEach(InputScheme.fuzzyPairs, id: \.id) { pair in
+                    Toggle(pair.id, isOn: Binding(
+                        get: { settings.fuzzyPinyin.contains(pair.id) },
+                        set: { on in
+                            if on { settings.fuzzyPinyin.insert(pair.id) } else { settings.fuzzyPinyin.remove(pair.id) }
+                            submit()
+                        }))
+                        .font(.system(size: 11, design: .monospaced))
+                        .accessibilityLabel("模糊音 \(pair.id)")
+                }
+            }
+            .padding(.vertical, 2)
         }
     }
 
