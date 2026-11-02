@@ -354,35 +354,207 @@ def check_install_preflight(ctx):
 
 
 def check_host_plan(ctx):
-    """host 档位预检＋运行计划：真实注入必须显式 --yes，且不与其他检查并行。"""
+    """host 档位预检：安装件存在性与身份说明；真实注入必须显式 --yes。"""
     installed = (Path.home() / 'Library/Input Methods/Gogaku.app').exists()
-    if not installed:
-        return BLOCK, '输入法未安装（~/Library/Input Methods/Gogaku.app 不存在）', None
-    plan = [
-        ('宿主矩阵', 'python3 probes/validate-real-hosts.py --hosts appkit,chrome,safari,terminal,orca '
-                     '--iterations 200（每种确认方式 × 后键 × 200 次，连续两轮）'),
-        ('Orca Shift 专项', 'python3 probes/first_key_regression.py --hosts orca --iterations 200 '
-                            '--enable-validation --report docs/validation/verify/orca-shift.json '
-                            '（单独追踪：输入法实际收到的按下／释放事件、组合变化、插字次数、PTY 字节；'
-                            '不预设与 Terminal 同因）'),
-        ('性能', 'python3 probes/measure-imk-latency.py --events 10000（约万次真实事件，含首次显示；'
-                 '计时期间不并行构建）'),
-        ('稳定性', '两小时浸泡与内存趋势：宿主矩阵持续运行记录（专用文档／字段／PTY，逐次核对前台身份，'
-                   '结束恢复输入源与焦点）'),
-    ]
+    settings_app = (Path.home() / 'Applications/Gogaku Settings.app').exists()
+    if not installed or not settings_app:
+        missing = []
+        if not installed:
+            missing.append('~/Library/Input Methods/Gogaku.app')
+        if not settings_app:
+            missing.append('~/Applications/Gogaku Settings.app')
+        return BLOCK, '输入法未安装（缺 ' + '、'.join(missing) + '）；先构建并安装', None
+    plan = (
+        'host 档位需要 --yes 显式确认（将向系统注入真实按键并占用桌面）。确认后逐项执行：\n'
+        '  - host-identity：安装件身份与 version.json 一致性核对\n'
+        f'  - host-matrix-round-1／round-2：probes/validate-real-hosts.py --hosts {HOST_MATRIX_HOSTS} --iterations 200（连续两轮）\n'
+        '  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n'
+        '  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n'
+        '  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n'
+        '  - native-gui：设置六页 × 两种窗口尺寸 × 浅／深外观的真实点击／键盘导航验收（目前无自动化探针，需人工核对后归档证据）'
+    )
     if not ctx['yes']:
-        lines = '\n'.join(f'  - {name}：{cmd}' for name, cmd in plan)
-        return BLOCK, ('host 档位需要 --yes 显式确认（将向系统注入真实按键并占用桌面）。'
-                       '确认后逐项执行：\n' + lines), None
-    failures = []
-    for name, cmd in plan:
-        result = sh(['bash', '-c', cmd], timeout=14400)
-        evidence = ctx.evidence(f'host-{name}.log', result.stdout + result.stderr)
-        if result.returncode != 0:
-            failures.append(f'{name} 失败（exit={result.returncode}，见 {Path(evidence).name}）')
-    if failures:
-        return FAIL, '；'.join(failures), ctx.evidence_path('host-summary.txt')
-    return PASS, '宿主矩阵／性能／稳定性完成', None
+        return BLOCK, plan, None
+    return PASS, 'host 档位预检通过（安装件存在）', None
+
+
+HOST_MATRIX_HOSTS = 'textedit,chrome,safari,terminal,orca-pty'
+
+
+def _installed_identity(ctx):
+    """安装件身份：双包存在、版本与 version.json 一致（CFBundleShortVersionString
+    只存三段数字，预发布段按 build.py 同一规则剥离）；返回 (detail, problems, sha)。"""
+    import plistlib
+    import hashlib
+    version_data = json.loads(VERSION_FILE.read_text()) if VERSION_FILE.exists() else {}
+    expected_release = (version_data.get('version'), str(version_data.get('buildNumber')))
+    problems, notes = [], []
+    binary = Path.home() / 'Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput'
+    apps = [Path.home() / 'Library/Input Methods/Gogaku.app',
+            Path.home() / 'Applications/Gogaku Settings.app']
+    for app in apps:
+        plist = app / 'Contents/Info.plist'
+        if not plist.exists():
+            problems.append(f'{app} 缺少 Info.plist')
+            continue
+        info = plistlib.loads(plist.read_bytes())
+        got = (info.get('CFBundleShortVersionString'), str(info.get('CFBundleVersion')))
+        expected = (str(expected_release[0]).split('-', 1)[0], expected_release[1])
+        if got != expected:
+            problems.append(f'{app.name} 版本 {got} ≠ version.json {expected}')
+        else:
+            notes.append(f'{app.name} {got[0]} b{got[1]}')
+    sha = hashlib.file_digest(binary.open('rb'), 'sha256').hexdigest() if binary.exists() else None
+    if sha is None:
+        problems.append('输入法主二进制不存在：' + str(binary))
+    return '；'.join(notes), problems, sha
+
+
+def _host_json_problems(report_path, expect_sha, min_checks=1):
+    """核对宿主报告：结果文件可读、完成数量达标、失败为 0、安装件身份一致。
+    缺证据按 blocked 处理（返回 None 表示需 blocked）。"""
+    if not Path(report_path).exists():
+        return None
+    try:
+        report = json.loads(Path(report_path).read_text())
+    except json.JSONDecodeError:
+        return None
+    problems = []
+    checks = report.get('checks')
+    failures = report.get('failures')
+    if not isinstance(checks, list) or failures is None:
+        problems.append('报告缺少 checks／failures 字段')
+    else:
+        if len(checks) < min_checks:
+            problems.append(f'检查数 {len(checks)} < 门槛 {min_checks}')
+        if failures != 0:
+            problems.append(f'失败 {failures} 项')
+    sha = report.get('inputSource', {}).get('installedSHA256')
+    if expect_sha and sha != expect_sha:
+        problems.append(f"报告安装件身份 {str(sha)[:12]} ≠ 当前安装件 {str(expect_sha)[:12]}")
+    skipped = report.get('skipped') or []
+    if skipped:
+        problems.append(f"有 {len(skipped)} 个宿主被跳过：" + '; '.join(s.get('host', '?') for s in skipped[:4]))
+    return problems
+
+
+def check_host_identity(ctx):
+    notes, problems, sha = _installed_identity(ctx)
+    ctx['installed_sha'] = sha
+    if problems:
+        return FAIL, '；'.join(problems), None
+    return PASS, '安装件身份与 version.json 一致（' + notes + f'；输入法 SHA-256 {sha[:12]}…）', None
+
+
+def check_host_matrix_round(ctx, round_no):
+    if not ctx['yes']:
+        return BLOCK, 'host 档位需要 --yes', None
+    expect_sha = ctx.get('installed_sha')
+    report_path = ctx.evidence_path(f'real-host-matrix-round-{round_no}.json')
+    evidence_path = ctx.evidence_path(f'real-host-matrix-round-{round_no}.jsonl')
+    result = sh(['python3', 'probes/validate-real-hosts.py',
+                 '--hosts', HOST_MATRIX_HOSTS, '--iterations', '200',
+                 '--report', report_path, '--evidence', evidence_path], timeout=14400)
+    log = ctx.evidence(f'host-matrix-round-{round_no}.log', result.stdout + result.stderr)
+    problems = _host_json_problems(report_path, expect_sha)
+    if problems is None:
+        return BLOCK, f'第 {round_no} 轮报告缺失或不可读（exit={result.returncode}，见日志）', log
+    if result.returncode == 5:
+        return FAIL, f'第 {round_no} 轮前台身份断言失败，整轮中止', log
+    if problems:
+        return FAIL, f'第 {round_no} 轮未通过：' + '；'.join(problems), log
+    report = json.loads(Path(report_path).read_text())
+    hosts = report.get('hosts')
+    return PASS, ('第 %d 轮通过（%d 项检查；宿主 %s）' % (round_no, len(report['checks']), hosts)), log
+
+
+def check_orca_shift(ctx):
+    if not ctx['yes']:
+        return BLOCK, 'host 档位需要 --yes', None
+    expect_sha = ctx.get('installed_sha')
+    report_path = ctx.evidence_path('orca-shift.json')
+    result = sh(['python3', 'probes/first_key_regression.py', '--hosts', 'orca-pty',
+                 '--iterations', '200', '--enable-validation', '--report', report_path], timeout=14400)
+    log = ctx.evidence('orca-shift.log', result.stdout + result.stderr)
+    problems = _host_json_problems(report_path, expect_sha)
+    if problems is None:
+        return BLOCK, 'Orca Shift 专项报告缺失或不可读', log
+    if problems:
+        return FAIL, 'Orca Shift 专项未通过：' + '；'.join(problems), log
+    report = json.loads(Path(report_path).read_text())
+    return PASS, f'Orca Shift 专项通过（{len(report["checks"])} 项检查，含逐事件核对）', log
+
+
+def check_host_performance(ctx):
+    if not ctx['yes']:
+        return BLOCK, 'host 档位需要 --yes', None
+    report_path = ctx.evidence_path('imk-latency.json')
+    samples_path = ctx.evidence_path('imk-latency-samples.json')
+    result = sh(['python3', 'probes/measure-imk-latency.py', '--events', '10000',
+                 '--report', report_path, '--samples', samples_path,
+                 '--evidence', ctx.evidence_path('imk-latency-cycles.jsonl')], timeout=14400)
+    log = ctx.evidence('performance.log', result.stdout + result.stderr)
+    if not Path(report_path).exists():
+        return BLOCK, '性能报告缺失（exit=' + str(result.returncode) + '）', log
+    report = json.loads(Path(report_path).read_text())
+    acceptance = report.get('acceptance')
+    if not isinstance(acceptance, dict) or 'passed' not in acceptance:
+        return FAIL, '性能报告缺少 acceptance 判定', log
+    events = report.get('events') or report.get('sampleCount')
+    detail = '性能门槛判定：' + json.dumps(acceptance.get('checks', acceptance), ensure_ascii=False)[:300]
+    if result.returncode != 0 or not acceptance['passed']:
+        return FAIL, detail, log
+    return PASS, detail, log
+
+
+def check_host_stability(ctx):
+    if not ctx['yes']:
+        return BLOCK, 'host 档位需要 --yes', None
+    report_path = ctx.evidence_path('stability-soak.json')
+    result = sh(['python3', 'probes/stability-soak.py', '--minutes', '120',
+                 '--hosts', 'textedit,orca-pty', '--iterations', '25',
+                 '--report', report_path], timeout=14400)
+    log = ctx.evidence('stability.log', result.stdout + result.stderr)
+    if not Path(report_path).exists():
+        return BLOCK, '稳定性报告缺失', log
+    report = json.loads(Path(report_path).read_text())
+    duration_min = (report.get('durationSeconds') or 0) / 60
+    trend = report.get('memoryTrend') or []
+    problems = []
+    if report.get('badRounds'):
+        problems.append('异常轮次 ' + str(report['badRounds']))
+    if report.get('totalFailures'):
+        problems.append('失败 %d 项' % report['totalFailures'])
+    if report.get('aborted'):
+        problems.append('中止：' + json.dumps(report['aborted'], ensure_ascii=False))
+    if duration_min < 110:
+        problems.append(f'时长 {duration_min:.1f} 分钟 < 110 分钟门槛')
+    if len(trend) < 2:
+        problems.append('内存趋势样本不足')
+    if problems:
+        return FAIL, '稳定性未通过：' + '；'.join(problems), log
+    memory = report.get('memorySummaryKB', {})
+    return PASS, ('稳定性通过（%.0f 分钟 / %s 轮 / %s 项检查；内存峰值 %sKB，均值 %sKB）'
+                  % (duration_min, report.get('roundsCompleted'), report.get('totalChecks'),
+                     memory.get('maxRSSKB'), memory.get('meanRSSKB'))), log
+
+
+def check_native_gui(ctx):
+    """原生 GUI 验收：目前无自动化探针。必须有已归档的人工验收证据，缺证据记 blocked。"""
+    evidence = ROOT / 'docs/validation/verify' / 'native-gui-acceptance.json'
+    if evidence.exists():
+        try:
+            report = json.loads(evidence.read_text())
+            commit = report.get('commit')
+            pages = report.get('pages')
+            if commit and pages and report.get('pass'):
+                return PASS, f"GUI 验收已归档（六页×两尺寸×浅深，提交 {str(commit)[:12]}）", str(evidence)
+        except json.JSONDecodeError:
+            pass
+        return FAIL, 'GUI 验收证据存在但字段不完整（需 commit／pages／pass）', str(evidence)
+    return BLOCK, ('原生 GUI 验收未归档：需六页 × 900×620／760×520 × 浅／深的真实点击、'
+                   '键盘导航、录制与应用选择验收，读落盘配置并截图；证据写入 '
+                   + str(evidence) + '（含 commit、pages、pass 字段）', None)
 
 
 # ── 档位定义 ──────────────────────────────────────────────────────────────
@@ -409,6 +581,13 @@ PROFILES = {
     ],
     'host': [
         ('host-plan', True, check_host_plan),
+        ('host-identity', True, check_host_identity),
+        ('host-matrix-round-1', True, lambda ctx: check_host_matrix_round(ctx, 1)),
+        ('host-matrix-round-2', True, lambda ctx: check_host_matrix_round(ctx, 2)),
+        ('orca-shift', True, check_orca_shift),
+        ('performance', True, check_host_performance),
+        ('stability', True, check_host_stability),
+        ('native-gui', True, check_native_gui),
     ],
 }
 

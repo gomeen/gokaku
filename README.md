@@ -18,13 +18,15 @@
 
 ## 当前状态
 
-[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。2026-11-02 轮：完成[工程化检查与整改](docs/validation/engineering-readiness.md)（版本可追溯、干净构建、备份暴露、/tmp 隐式依赖、测试证据绑定），建立 Git 基线与单一版本来源（`version.json`，见 [版本管理](docs/versioning.md)），新增统一验证入口 `python3 scripts/verify.py`（fast／release／host 三档）；修复 **Shift 提交不更新最近上屏字符**的核心缺陷（Terminal「Shift＋句号」半角根因，上一轮归因平台层有误），释义精简规则落地（`char.` 词性、结构化标签与强语域义项剔除，见[审阅记录](docs/validation/gloss-simplification-review.md)）。本轮 fast 档验证全过：核心 ctest 4/4（265 断言）、Swift Release 49 项、中文质量 109/120 与 112/120 未降。
+[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。2026-11-03 轮：设置页按[已定稿原型](../prototypes/settings-final.html)完成原生落地（六页外壳、立即保存写入协调器、真实索引的应用列表与可搜索弹层、VS Code 式快捷键表格含录制／冲突检查、自定义词语紧凑列表＋搜索；语言资源页移除 Apple Translation 入口），快捷键模型升级为规范键标识＋修饰键＋明确禁用状态（兼容旧配置），候选窗定位重构（光标矩形三态、100ms 复查、无效位置隐藏保留组合），`verify.py --profile host` 从文字计划改为真实调度（两轮矩阵、Orca Shift 专项、万次性能、新增两小时稳定性浸泡探针）。本轮 fast 档全过（核心 ctest 4/4、Swift Release 87 项），离线渲染 51 项含放置几何，GUI 六页真实点击冒烟截图归档。
+
+2026-11-02 轮：完成[工程化检查与整改](docs/validation/engineering-readiness.md)（版本可追溯、干净构建、备份暴露、/tmp 隐式依赖、测试证据绑定），建立 Git 基线与单一版本来源（`version.json`，见 [版本管理](docs/versioning.md)），新增统一验证入口 `python3 scripts/verify.py`（fast／release／host 三档）；修复 **Shift 提交不更新最近上屏字符**的核心缺陷（Terminal「Shift＋句号」半角根因，上一轮归因平台层有误），释义精简规则落地（`char.` 词性、结构化标签与强语域义项剔除，见[审阅记录](docs/validation/gloss-simplification-review.md)），构建 4 修复自定义拼音词候选剪枝与自动读音解析（详见[验收记录](docs/validation/native-development.md)）。
 
 **性能与宿主阻塞未变，仍未到试用阶段**：上一轮 10,035 次真实 IMK 事件主线程 p95 10.35ms／p99 15.38ms（门槛 5ms／10ms）未达标；归因结论（长单行文档的必要同步宿主写入本身超预算）未被本轮工作改变。最终宿主连续两轮、十万序列插桩、两小时稳定性／内存／冷启动未完成；Orca 的 Shift 单击失败待专项追踪；「5.55ms 低于 5ms」等历史文字错误已更正（见[收尾复测报告](docs/validation/pre-user-test.md)）。此前“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回。本轮 Shift 修复在真实宿主复验前，不标宿主通过。
 
 **完整首阶段仍未通过。** 学习路线采用两端统一 small100＋CT2；Mac 分词、转换、速度和离线可行，但模型质量门槛不通过，生产学习辅助和真实学习记录保持关闭。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
 
-已授权当前用户安装开发版，由用户手动启用输入源；系统语言包仅通过设置应用中的显式系统授权入口安装。构建、安装、恢复和卸载见[开发版使用说明](docs/native-development.md)。
+已授权当前用户安装开发版，由用户手动启用输入源；设置页不再提供 Apple 语言资源安装或查询入口（Apple Translation 已退出正式链路），随包资源状态与功能开放状态见设置「语言资源」页。构建、安装、恢复和卸载见[开发版使用说明](docs/native-development.md)。
 
 已有两个单文件浏览器原型仍只使用预设样例；独立真实模型实验与核心回归不能代替完整输入源验收。[输入习惯原型](docs/prototype-input-habits.md)经六轮迭代定稿，其按键裁决已并入[产品方向](docs/product.md)，但尚未落到原生输入法。
 
