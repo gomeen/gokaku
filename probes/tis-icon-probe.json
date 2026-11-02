@@ -1,0 +1,87 @@
+{
+  "rows" : [
+    {
+      "bundleID" : "com.apple.keyboardlayout.all",
+      "enabled" : true,
+      "iconImageURL" : "NULL",
+      "iconRef" : {
+        "pointer" : "0x0000000000000103"
+      },
+      "inputModeID" : "",
+      "inputSourceID" : "com.apple.keylayout.ABC",
+      "name" : "ABC",
+      "selected" : false,
+      "sourceType" : -1
+    },
+    {
+      "bundleID" : "app.qingjian.inputmethod",
+      "enabled" : true,
+      "iconImageURL" : {
+        "bytes" : 1887,
+        "exists" : true,
+        "path" : "\/Users\/gomeen\/Library\/Input Methods\/Qingjian.app\/Contents\/Resources\/qingjian-menu.pdf",
+        "reachable" : true,
+        "sha256_head" : "fnv=00000000e7875e81.len=1887"
+      },
+      "iconRef" : "NULL",
+      "inputModeID" : "app.qingjian.inputmethod.Hans",
+      "inputSourceID" : "app.qingjian.inputmethod.Hans",
+      "name" : "Qingjian",
+      "selected" : true,
+      "sourceType" : -1
+    },
+    {
+      "bundleID" : "app.qingjian.inputmethod",
+      "enabled" : true,
+      "iconImageURL" : {
+        "bytes" : 1887,
+        "exists" : true,
+        "path" : "\/Users\/gomeen\/Library\/Input Methods\/Qingjian.app\/Contents\/Resources\/qingjian-menu.pdf",
+        "reachable" : true,
+        "sha256_head" : "fnv=00000000e7875e81.len=1887"
+      },
+      "iconRef" : "NULL",
+      "inputModeID" : "",
+      "inputSourceID" : "app.qingjian.inputmethod",
+      "name" : "Qingjian",
+      "selected" : false,
+      "sourceType" : -1
+    },
+    {
+      "bundleID" : "org.gogaku.inputmethod",
+      "enabled" : true,
+      "iconImageURL" : {
+        "bytes" : 3125,
+        "exists" : true,
+        "path" : "\/Users\/gomeen\/Library\/Input Methods\/Gogaku.app\/Contents\/Resources\/gogaku-menu.pdf",
+        "reachable" : true,
+        "sha256_head" : "fnv=00000000b9c3daf5.len=3125"
+      },
+      "iconRef" : "NULL",
+      "inputModeID" : "org.gogaku.inputmethod.Hans",
+      "inputSourceID" : "org.gogaku.inputmethod.Hans",
+      "name" : "Gogaku",
+      "selected" : false,
+      "sourceType" : -1
+    },
+    {
+      "bundleID" : "org.gogaku.inputmethod",
+      "enabled" : true,
+      "iconImageURL" : {
+        "bytes" : 3125,
+        "exists" : true,
+        "path" : "\/Users\/gomeen\/Library\/Input Methods\/Gogaku.app\/Contents\/Resources\/gogaku-menu.pdf",
+        "reachable" : true,
+        "sha256_head" : "fnv=00000000b9c3daf5.len=3125"
+      },
+      "iconRef" : "NULL",
+      "inputModeID" : "",
+      "inputSourceID" : "org.gogaku.inputmethod",
+      "name" : "Gogaku",
+      "selected" : false,
+      "sourceType" : -1
+    }
+  ],
+  "targetBundleID" : "org.gogaku.inputmethod",
+  "totalSourcesEnumerated" : 325
+}
