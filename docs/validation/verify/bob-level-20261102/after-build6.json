@@ -1,0 +1,46 @@
+{
+  "schema": "gogaku.bob-level-fix.v1",
+  "capturedAt": "2026-11-02",
+  "installedBuild": 6,
+  "installedCommit": "94f7706d93b9 (isFloatingPanel/level 顺序修复)",
+  "findings": [
+    "候选窗层级的真机根因：NSPanel isFloatingPanel=true 的 setter 会把已设 level 覆写为 floating(3)，面板常年在 layer 3，被 Bob 输入弹窗（modalPanel=8）遮挡（用户截图症状）。",
+    "修复一（init 顺序）：isFloatingPanel 先设、level 后设；重启后真机窗口清单显示候选窗 layer=101。",
+    "修复二（渲染时层级）：渲染按宿主层级取 max(101, 客户端+1)，宿主层级无效用 101。",
+    "修复三（索引 0 兜底移除）：Bob 输入弹窗不提供有效光标矩形，b5 曾以字符索引 0 的矩形冒充插入点导致面板错位显示后被挡；b6 按既定策略「缺少可信定位信息就隐藏、保留组合」执行——组合正常建立（marked text），面板不显示、上屏不受影响。",
+    "行为变化提示：Bob 输入弹窗内候选窗从「错位显示且被挡」变为「隐藏保留组合」。如需在弹窗内显示候选窗，需要另行为此类宿主设计插入点回退方案（此前已被裁决否决，本轮不做）。"
+  ],
+  "windowOrder": [
+    {
+      "index": 0,
+      "owner": "Gogaku",
+      "pid": 85685,
+      "layer": 101,
+      "bounds": "-10000,11000,180,120"
+    },
+    {
+      "index": 18,
+      "owner": "Bob",
+      "pid": 629,
+      "layer": 8,
+      "bounds": "696,133,400,293"
+    },
+    {
+      "index": 19,
+      "owner": "Bob",
+      "pid": 629,
+      "layer": 8,
+      "bounds": "1,1118,1,1"
+    },
+    {
+      "index": 21,
+      "owner": "Gogaku Settings",
+      "pid": 79536,
+      "layer": 0,
+      "bounds": "80,60,900,620"
+    }
+  ],
+  "screenshots": [
+    "after-build6-composition.png"
+  ]
+}

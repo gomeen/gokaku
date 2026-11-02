@@ -1,0 +1,112 @@
+{
+  "schema": "gogaku.real-host-matrix.v2",
+  "checkedAt": "2026-11-02T12:50:27.630492+00:00",
+  "runId": "17936238130273",
+  "source": "org.gogaku.inputmethod.Hans",
+  "excludedHosts": [
+    "raycast",
+    "spotlight"
+  ],
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "installedPath": "/Users/gomeen/Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput",
+    "installedSHA256": "b99aea690f50cdec9c67bd572d865ad456a433f17a72509f262838de208df2a8"
+  },
+  "driver": {
+    "probeSHA256": "749c5deeca6fc9c99c5b03db6c6058b9254b9c2ba56ca151d2645a9915ccfd64",
+    "axReaderSHA256": "3b2804debf6e0912fea4bad24e1d76332e66140ba9ed8dd8b549166c41ba6adf",
+    "pageSHA256": "6b965f6d06249192fde7833c94b7b26d7b8b481a1b06180c0090a3dc29463284"
+  },
+  "panelState": {
+    "enabled": false,
+    "socket": null
+  },
+  "strictScenarios": [
+    "combo-punctuation",
+    "idle-comma",
+    "idle-period",
+    "capital-space",
+    "esc-cancel",
+    "rapid-commit",
+    "shift-in-combo",
+    "shift-then-english",
+    "shift-back-to-chinese",
+    "marked-letters",
+    "marked-clear"
+  ],
+  "inputLettersEnabled": true,
+  "hosts": [
+    "probe/default"
+  ],
+  "skipped": [],
+  "firstKeyMatrix": null,
+  "checks": [
+    {
+      "check": "probe/default: 组合中标点一次上屏（nihc＋;）",
+      "ok": true,
+      "detail": "{\"value\": \"你好；\", \"caret\": 3}",
+      "at": "2026-11-02T12:50:19.902162+00:00"
+    },
+    {
+      "check": "probe/default: 无组合逗号按标点表（nihc 空格后 ,）",
+      "ok": true,
+      "detail": "{\"value\": \"你好，\", \"caret\": 3}",
+      "at": "2026-11-02T12:50:20.718867+00:00"
+    },
+    {
+      "check": "probe/default: 无组合句号按标点表（nihc 空格后 .）",
+      "ok": true,
+      "detail": "{\"value\": \"你好。\", \"caret\": 3}",
+      "at": "2026-11-02T12:50:21.535391+00:00"
+    },
+    {
+      "check": "probe/default: 单独大写字母加空格原样上屏",
+      "ok": true,
+      "detail": "{\"value\": \"M\", \"caret\": 1}",
+      "at": "2026-11-02T12:50:22.235407+00:00"
+    },
+    {
+      "check": "probe/default: Esc 取消组合不残留",
+      "ok": true,
+      "detail": "{\"value\": \"\", \"caret\": 0}",
+      "at": "2026-11-02T12:50:22.935597+00:00"
+    },
+    {
+      "check": "probe/default: 连续输入 nihc＋空格一次提交",
+      "ok": true,
+      "detail": "{\"value\": \"你好\", \"caret\": 2}",
+      "at": "2026-11-02T12:50:23.508762+00:00"
+    },
+    {
+      "check": "probe/default: 组合中 Shift 单击上屏原编码",
+      "ok": true,
+      "detail": "{\"value\": \"nihc\", \"caret\": 4}",
+      "at": "2026-11-02T12:50:24.268743+00:00"
+    },
+    {
+      "check": "probe/default: 组合中 Shift 后进英文直输（nihc→Shift→abc.）",
+      "ok": true,
+      "detail": "{\"value\": \"nihcabc.\", \"caret\": 8}",
+      "at": "2026-11-02T12:50:25.144903+00:00"
+    },
+    {
+      "check": "probe/default: 临时英文 Shift 切回中文继续输入",
+      "ok": true,
+      "detail": "{\"value\": \"nihc你好\", \"caret\": 6}",
+      "at": "2026-11-02T12:50:26.342979+00:00"
+    },
+    {
+      "check": "probe/default: 输入区字母与光标（组合中未上屏）",
+      "ok": true,
+      "detail": "{\"value\": \"ni'hao\", \"caret\": 6}",
+      "at": "2026-11-02T12:50:26.922192+00:00"
+    },
+    {
+      "check": "probe/default: 确认后输入区字母被清除",
+      "ok": true,
+      "detail": "{\"value\": \"你好\", \"caret\": 2}",
+      "at": "2026-11-02T12:50:27.626471+00:00"
+    }
+  ],
+  "failures": 0
+}

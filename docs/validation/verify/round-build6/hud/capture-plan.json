@@ -1,0 +1,25 @@
+{
+  "frames": {
+    "dark-switch": [
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-dark-0.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-dark-1.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-dark-2.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-dark-3.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-dark-4.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-dark-5.png"
+    ],
+    "light-switch": [
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-light-0.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-light-1.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-light-2.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-light-3.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-light-4.png",
+      "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/round-build6/hud/hud-light-5.png"
+    ]
+  },
+  "originalDark": true,
+  "inputSource": {
+    "id": "org.gogaku.inputmethod.Hans",
+    "installedSHA256": "b7a3dccc501c0235e76094a1c33774fd13cd64c7824e4254e9d9ccb7efa23430"
+  }
+}

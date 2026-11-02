@@ -393,13 +393,19 @@ func handle(_ request: [String: Any]) {
     case "combo":
         // 严格立即输入：steps 里的每一步背靠背投递，步骤之间没有人为延迟；
         // 每一步之前复查守卫，前台身份变化立即中止并不再投递后续按键。
+        // 兼容两种形状：[[动作,...]]（多步）与 [动作,...]（单步，validate-real-hosts
+        // 严格场景的 letters_action() 直接作为一步投递）。
+        let rawSteps = request["steps"] as! [Any]
+        let normalizedSteps: [[Any]] = rawSteps.first is [Any]
+            ? rawSteps.map { $0 as! [Any] }
+            : [rawSteps]
         let spec = guardSpec(request)
         var guardOK = true
         var reason = "ok"
         var front = ""
         var frontPid = 0
         var failedStep = -1
-        for (index, step) in (request["steps"] as! [[Any]]).enumerated() {
+        for (index, step) in normalizedSteps.enumerated() {
             let actions = step.compactMap { $0 as? [String: Any] }
             let verdict = evaluate(spec)
             front = verdict.front; frontPid = verdict.frontPid

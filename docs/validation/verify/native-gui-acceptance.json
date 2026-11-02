@@ -1,0 +1,38 @@
+{
+  "commit": "94f7706d93b9331cb8a99fa2ae9bc7896a4c8a01",
+  "build": 6,
+  "buildCommit": "94f7706d93b9",
+  "pass": true,
+  "pages": [
+    "resources",
+    "normal-input",
+    "custom-words",
+    "shortcuts",
+    "privacy",
+    "records"
+  ],
+  "sizes": [
+    "900x620",
+    "760x520"
+  ],
+  "appearances": [
+    "dark",
+    "light"
+  ],
+  "screenshots": 24,
+  "shotDir": "docs/validation/verify/round-build6/settings/",
+  "interactions": [
+    "录制 ⌃⌥K → settings.json modeShortcut={k,786432} 落盘，状态栏「已保存」，行显示「自定义」",
+    "冲突草稿（⌘Return 撞固定操作原文上屏）→ 不写入绑定，行内橙色提示，冲突计数 1，冲突筛选可见",
+    "恢复默认 → settings.json 回 {k,393216}",
+    "重开应用 → 显示默认 ⌃⇧K，我修改的 0，settings.json 与测试前一致"
+  ],
+  "evidence": [
+    "shortcut-recorded-ctrl-opt-k.png",
+    "shortcut-conflict-draft.png",
+    "shortcut-conflict-filter.png",
+    "shortcut-restored-default.png",
+    "shortcut-reopened.png"
+  ],
+  "notes": "GUI 截图与交互回环于 build 6（94f7706）真实设置应用执行；系统控件形态（NSSwitch、分段选中色、按钮三档）与 demo 的像素级差异已在实现报告声明。"
+}

@@ -1,0 +1,185 @@
+{
+  "sizes": [
+    "900x620",
+    "760x520"
+  ],
+  "pages": [
+    "resources",
+    "normal-input",
+    "custom-words",
+    "shortcuts",
+    "privacy",
+    "records"
+  ],
+  "shots": [
+    {
+      "page": "resources",
+      "size": "900x620",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/resources-900x620-dark.png",
+      "ok": true
+    },
+    {
+      "page": "normal-input",
+      "size": "900x620",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/normal-input-900x620-dark.png",
+      "ok": true
+    },
+    {
+      "page": "custom-words",
+      "size": "900x620",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/custom-words-900x620-dark.png",
+      "ok": true
+    },
+    {
+      "page": "shortcuts",
+      "size": "900x620",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/shortcuts-900x620-dark.png",
+      "ok": true
+    },
+    {
+      "page": "privacy",
+      "size": "900x620",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/privacy-900x620-dark.png",
+      "ok": true
+    },
+    {
+      "page": "records",
+      "size": "900x620",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/records-900x620-dark.png",
+      "ok": true
+    },
+    {
+      "page": "resources",
+      "size": "760x520",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/resources-760x520-dark.png",
+      "ok": true
+    },
+    {
+      "page": "normal-input",
+      "size": "760x520",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/normal-input-760x520-dark.png",
+      "ok": true
+    },
+    {
+      "page": "custom-words",
+      "size": "760x520",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/custom-words-760x520-dark.png",
+      "ok": true
+    },
+    {
+      "page": "shortcuts",
+      "size": "760x520",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/shortcuts-760x520-dark.png",
+      "ok": true
+    },
+    {
+      "page": "privacy",
+      "size": "760x520",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/privacy-760x520-dark.png",
+      "ok": true
+    },
+    {
+      "page": "records",
+      "size": "760x520",
+      "appearance": "dark",
+      "file": "docs/validation/verify/round-build6/settings/records-760x520-dark.png",
+      "ok": true
+    },
+    {
+      "page": "resources",
+      "size": "900x620",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/resources-900x620-light.png",
+      "ok": true
+    },
+    {
+      "page": "normal-input",
+      "size": "900x620",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/normal-input-900x620-light.png",
+      "ok": true
+    },
+    {
+      "page": "custom-words",
+      "size": "900x620",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/custom-words-900x620-light.png",
+      "ok": true
+    },
+    {
+      "page": "shortcuts",
+      "size": "900x620",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/shortcuts-900x620-light.png",
+      "ok": true
+    },
+    {
+      "page": "privacy",
+      "size": "900x620",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/privacy-900x620-light.png",
+      "ok": true
+    },
+    {
+      "page": "records",
+      "size": "900x620",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/records-900x620-light.png",
+      "ok": true
+    },
+    {
+      "page": "resources",
+      "size": "760x520",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/resources-760x520-light.png",
+      "ok": true
+    },
+    {
+      "page": "normal-input",
+      "size": "760x520",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/normal-input-760x520-light.png",
+      "ok": true
+    },
+    {
+      "page": "custom-words",
+      "size": "760x520",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/custom-words-760x520-light.png",
+      "ok": true
+    },
+    {
+      "page": "shortcuts",
+      "size": "760x520",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/shortcuts-760x520-light.png",
+      "ok": true
+    },
+    {
+      "page": "privacy",
+      "size": "760x520",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/privacy-760x520-light.png",
+      "ok": true
+    },
+    {
+      "page": "records",
+      "size": "760x520",
+      "appearance": "light",
+      "file": "docs/validation/verify/round-build6/settings/records-760x520-light.png",
+      "ok": true
+    }
+  ],
+  "windowId": 10806
+}
