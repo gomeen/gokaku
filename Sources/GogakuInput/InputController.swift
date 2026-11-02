@@ -568,9 +568,16 @@ final class GogakuInputController: IMKInputController {
     private func refreshDisplayPosition() {
         guard active, displayed != nil, target != nil else { stopPositionRefresh(); return }
         guard let current = currentTarget(readRectangle: true), let anchor = target,
-              current.application == anchor.application, current.pid == anchor.pid,
-              current.rect != .zero else {
+              current.application == anchor.application, current.pid == anchor.pid else {
             hidePanelKeepComposition()
+            return
+        }
+        if current.rect == .zero {
+            // Orca 1.4.246 实测（2026-11-02 诊断）：组合（marked range）覆盖插入点
+            // 期间，宿主对插入点与组合起点的 attributes 查询都返回零矩形，组合结束
+            // 才恢复有效。已有有效锚点时冻结在组合内最后测得的位置（不追逐、不
+            // 隐藏，矩形恢复后重新跟随）；从未获得过锚点（如 Bob 输入弹窗）才走
+            // hidePanelKeepComposition 的隐藏保留组合路径。
             return
         }
         let changed = displayRect != current.rect

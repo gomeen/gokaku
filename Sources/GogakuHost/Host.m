@@ -20,23 +20,35 @@ GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
         } @catch (NSException *nested) { windowLevel = 0; windowLevelValid = NO; }
         NSString *application = [client bundleIdentifier];
         if (!application.length) return nil;
+        NSRange marked = NSMakeRange(NSNotFound, 0);
+        @try { marked = [client markedRange]; } @catch (NSException *nested) {}
         NSRect rectangle = NSZeroRect;
         BOOL rectangleRead = NO;
         BOOL rectangleValid = NO;
         if (includeRectangle) {
             // 选区未知（NSNotFound）不再用字符索引 0 冒充光标：索引 0 的矩形属于
-            // 正文开头，与真实插入点无关，会误导候选窗定位。此时不读取任何几何，
-            // 记为「读过但不可信」（rectangleRead=YES、rectangleValid=NO、零矩形），
-            // 控制器据此隐藏面板但保留组合。
+            // 正文开头，与真实插入点无关，会误导候选窗定位。
             rectangleRead = YES;
             if (selection.location != NSNotFound) {
                 @try { [client attributesForCharacterIndex:selection.location lineHeightRectangle:&rectangle]; }
                 @catch (NSException *nested) { rectangle = NSZeroRect; }
             }
-            // 零宽光标矩形可以有效（caret 无宽度）；非有限值或负尺寸才是无效。
+            // Orca 1.4.246 实测（2026-11-02 诊断日志）：组合（marked range）覆盖
+            // 插入点时，对插入点索引返回零矩形，组合结束后恢复有效。此时改查
+            // 组合起点 markedRange.location——同样是宿主真实测量，不是虚构回退
+            //（与鼠须管同款做法）；面板跟随组合起点，组合结束恢复插入点跟踪。
+            // Orca 对组合内起点也返回零矩形，最终由控制器冻结组合内最后有效
+            // 锚点（refreshDisplayPosition）；仍无效才落零矩形（隐藏保留组合）。
             rectangleValid = isfinite(rectangle.origin.x) && isfinite(rectangle.origin.y)
                 && isfinite(rectangle.size.width) && isfinite(rectangle.size.height)
                 && rectangle.size.width >= 0 && rectangle.size.height > 0;
+            if (!rectangleValid && marked.location != NSNotFound && marked.length > 0) {
+                @try { [client attributesForCharacterIndex:marked.location lineHeightRectangle:&rectangle]; }
+                @catch (NSException *nested) { rectangle = NSZeroRect; }
+                rectangleValid = isfinite(rectangle.origin.x) && isfinite(rectangle.origin.y)
+                    && isfinite(rectangle.size.width) && isfinite(rectangle.size.height)
+                    && rectangle.size.width >= 0 && rectangle.size.height > 0;
+            }
         }
         GGHostSnapshot *result = [GGHostSnapshot new];
         result.clientID = @""; result.application = application;
@@ -46,8 +58,6 @@ GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
         result.rectangleValid = rectangleValid;
         result.windowLevel = windowLevel;
         result.windowLevelValid = windowLevelValid;
-        NSRange marked = NSMakeRange(NSNotFound, 0);
-        @try { marked = [client markedRange]; } @catch (NSException *nested) {}
         result.markedRange = marked;
         return result;
     } @catch (NSException *exception) { return nil; }
