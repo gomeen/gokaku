@@ -41,7 +41,9 @@ for y in Int(CGFloat(sideY) * 0.25)..<Int(CGFloat(sideY) * 0.8) {
     }
 }
 let marginX = min(xMin, sideX - 1 - xMax), marginY = min(yMin, sideY - 1 - yMax)
-guard ink >= 14000, ink < 26000 else {
+guard ink >= 12500, ink < 26000 else {
+    // 下限 12500：字形放大后（2026-11-02，对齐鼠须管／青简的字形填充比例）
+    // 镔空变大，实测真品墨量 13950；裸笔画产物仍在数千以内被拒。
     print("FAIL: unexpected ink coverage (opaque pixels=\(ink))"); exit(1)
 }
 guard marginX <= Int(2 * scale), marginY <= Int(2 * scale) else {
