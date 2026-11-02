@@ -17,16 +17,17 @@
 
 ## 已知行为变化（需用户知晓）
 
-1. **Bob 输入弹窗内候选窗从「错位显示且被挡」变为「隐藏保留组合」**：该弹窗不提供有效光标矩形，b5 靠索引 0 兜底错位显示；b6 按既定策略「缺少可信定位信息就隐藏」执行，组合与上屏不受影响。如需弹窗内显示候选窗，需另行设计插入点回退（此前已被裁决否决）。
-2. **orca-pty 的 Shift 单击检测失败为既有专项遗留**（单击未到达核心，组合延续；与本轮规则改动无关）。probe 与 TextEdit 宿主完整通过。
-3. 冲突草稿在 Esc 取消录制后清除计数，行内提示残留至下一次交互（小瑕疵，记入后续打磨）。
+1. **Bob 输入弹窗内候选窗从「错位显示且被挡」变为「隐藏保留组合」**：该弹窗不提供有效光标矩形（含组合起点查询），b5 靠索引 0 兜底错位显示；b6 按既定策略「缺少可信定位信息就隐藏」执行，组合与上屏不受影响。如需弹窗内显示候选窗，需另行设计插入点回退（此前已被裁决否决）。
+2. **Orca 1.4.246（2026-11-02 03:08 自动更新）组合期间对插入点与组合起点都返回零矩形**，用户报告「Orca 输入不显示候选窗」。修复：插入点矩形无效时改查组合起点（宿主真实测量）；Orca 连组合起点也为零，控制器再冻结组合内最后有效锚点（首字位置），矩形恢复重新跟随。真机验证：候选窗显示于插入点旁（layer 101 > Orca 19），组合结束恢复跟踪（`orca-panel-final.png`）。
+3. orca-pty 的 Shift 单击检测失败为既有专项遗留（单击未到达核心，组合延续；与本轮规则改动无关）。probe 与 TextEdit 宿主完整通过（修复后 final 回归 11/11）。
+4. 冲突草稿在 Esc 取消录制后清除计数，行内提示残留至下一次交互（小瑕疵，记入后续打磨）。
 
 ## 验证记录
 
 - 开发期：fast 档全过 ×2（合并后 `report-fast-20261102-194912.json`、最终 `report-fast-20261102-205343.json`：核心 ctest 100%＋Swift Release 96 项）；ASan＋UBSan 冒烟 2000 序列无错误；渲染检查 51 项。
 - 四个实现分支（settings-visual／shift-english／panel-level／switch-icon）各自经独立复核代理审查实际 diff：C 分支曾退回（probes 单文件编译链破坏，已修复并实测）；其余一次通过。
-- 真机（本机构建 6，安装件 `~/Library/Input Methods/Gogaku.app`）：HUD/输入菜单截图、设置 GUI 24 张＋交互回环、Bob 层级窗口清单、Shift strict 场景（probe／TextEdit／orca-pty）。
-- 版本：`version.json` buildNumber 6；`dist/build-identity.json` commit 94f7706d（isFloatingPanel 修复）；证据归档提交 44e47e3。
+- 真机（本机构建 6，安装件 `~/Library/Input Methods/Gogaku.app`）：HUD/输入菜单截图、设置 GUI 24 张＋交互回环、Bob 层级窗口清单、Shift strict 场景（probe／TextEdit／orca-pty）、Orca 1.4.246 面板显示修复（`orca-panel-final.png`，最终版 commit 7627535 复验）。
+- 版本：`version.json` buildNumber 6；`dist/build-identity.json` commit 7627535f（isFloatingPanel 修复＋Orca 组合矩形回退/锚点冻结）；证据归档提交见 git log。
 
 ## 未测范围
 
