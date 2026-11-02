@@ -414,8 +414,12 @@ final class CandidatePanel: NSPanel {
             backing: .buffered,
             defer: false
         )
-        level = .popUpMenu
+        // isFloatingPanel 的 setter 会把 level 覆写为 floating(3)（实测 AppKit
+        // 行为，见 PanelLevelTests 与 2026-11-02 真机核查）：必须先设它再设
+        // level，否则候选窗基准层级被钳在 floating，被 Bob 等层级 ≥modalPanel
+        // (8) 的宿主浮窗遮挡（用户报告的遮挡根因之一）。
         isFloatingPanel = true
+        level = .popUpMenu
         hidesOnDeactivate = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         hasShadow = true

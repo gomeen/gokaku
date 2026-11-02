@@ -90,8 +90,11 @@ def main():
             print(f'输入源切换失败：当前 {state.get("source")!r}')
             return 2
         checks.append({'check': '输入源已切换到 Gogaku', 'ok': True})
+        # 驱动自激活会关掉 Bob 弹窗：必须在驱动就绪后再唤起，并立刻断言＋投键。
+        osa('tell application "System Events" to tell process "Bob"\n  click menu bar item 1 of menu bar 2\n  delay 0.3\n  click menu item "输入翻译" of menu 1 of menu bar item 1 of menu bar 2\nend tell')
+        time.sleep(1.2)
         osa(f'tell application id "{BOB_BUNDLE}" to activate')
-        time.sleep(1.0)
+        time.sleep(0.6)
         info = driver.ax(op='check', marker='')
         front = info.get('frontBundle') or ''
         if front != BOB_BUNDLE:
