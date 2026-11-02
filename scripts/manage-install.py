@@ -126,6 +126,8 @@ def refresh_hud_icon_cache():
                             capture_output=True, text=True)
     if result.returncode == 0:
         print('已重启输入源切换 HUD（TextInputSwitcher）：下次切换输入源时按新包重建图标。')
+        print('若切换浮层仍显示旧图，运行 launchctl kickstart -k gui/$UID/com.apple.TextInputSwitcher；'
+              '仍不行则注销并重新登录一次。')
     else:
         reason = result.stderr.strip() or f'exit={result.returncode}'
         print(f'提示：未能自动重启输入源切换 HUD（{reason}）；注销并重新登录一次可达到同样效果。')

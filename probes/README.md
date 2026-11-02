@@ -128,3 +128,17 @@ BENCH_ROOT=/tmp/gogaku-benchmark
 ```
 
 汇总脚本要求所有正式轮次齐全，生成请求级统计、逐条译文对照与产物哈希。它不自动给翻译打分。`parent_ready_ms` 包含解释器导入，`model_load_ms` 是已导入环境下的模型及分词器加载，`peak_rss_bytes` 是 Python 推理进程峰值；MPS 的该值不包含全部独立显存，不能直接与 CPU RSS 比较为模型总内存。
+
+## 输入源切换 HUD 图标取图证据（2026-11）
+
+只读调查探针，配合 scripts/manage-install.py 的 HUD 重启步骤。结论与证据见 [results/icon-compare/SUMMARY.md](results/icon-compare/SUMMARY.md)；背景：切换浮层曾显示旧包"裸笔画"图标，根因是 TextInputSwitcher 进程内 NSImage 缓存跨安装不失效。
+
+```sh
+# TIS 图标属性枚举（只读；输出 JSON 到 stdout，存档副本 results/icon-compare/）
+swift probes/tis-icon-probe.swift
+# 四种候选渲染路径对比（NSImage／alpha 蒙版／反相蒙版／PDFKit／CGPDFPage），
+# 产出 opaque・black・transparent 占比与对比 PNG，验证当前键帽 PDF 在合理路径下形态正确
+swift probes/render-hud-paths.swift --output probes/results/icon-compare
+```
+
+两个探针都不注册、不启用、不切换输入源、不写系统目录。`render-hud-paths` 的 C 路径（PDFKit 缩略）非确定性，哈希会漂移，以占比结论为准。
