@@ -1,0 +1,60 @@
+{
+  "profile": "fast",
+  "startedAt": "2026-11-02T17:32:52+0800",
+  "finishedAt": "2026-11-02T17:32:52+0800",
+  "commit": "b1c22bf69c88e8a1f77dcbde75c835a619f0dba7",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.0-dev.1",
+    "buildNumber": 5
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.0-dev.1 构建5；拒绝路径 7/7；installed=Gogaku.app 0.1.0 b5;Gogaku Settings.app 0.1.0 b5",
+      "durationMs": 52,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 3,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "resources",
+      "core-tests",
+      "swift-tests"
+    ]
+  }
+}

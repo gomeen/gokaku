@@ -1,0 +1,96 @@
+{
+  "profile": "host",
+  "startedAt": "2026-11-02T15:56:28+0800",
+  "finishedAt": "2026-11-02T15:56:28+0800",
+  "commit": "4a660d23882be2154215e26744858b9985a2e536",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.0-dev.1",
+    "buildNumber": 4
+  },
+  "checks": [
+    {
+      "name": "host-plan",
+      "required": true,
+      "status": "blocked",
+      "detail": "host 档位需要 --yes 显式确认（将向系统注入真实按键并占用桌面）。确认后逐项执行：\n  - host-identity：安装件身份与 version.json 一致性核对\n  - host-matrix-round-1／round-2：probes/validate-real-hosts.py --hosts textedit,chrome,safari,terminal,orca-pty --iterations 200（连续两轮）\n  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n  - native-gui：设置六页 × 两种窗口尺寸 × 浅／深外观的真实点击／键盘导航验收（目前无自动化探针，需人工核对后归档证据）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "host-identity",
+      "required": true,
+      "status": "passed",
+      "detail": "安装件身份与 version.json 一致（Gogaku.app 0.1.0 b4；Gogaku Settings.app 0.1.0 b4；输入法 SHA-256 fe5a25d426d3…）",
+      "durationMs": 16,
+      "evidence": null
+    },
+    {
+      "name": "host-matrix-round-1",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "host-matrix-round-2",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "orca-shift",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "performance",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "stability",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "native-gui",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 6,
+    "blocked": 1
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "host-plan",
+      "host-matrix-round-1",
+      "host-matrix-round-2",
+      "orca-shift",
+      "performance",
+      "stability",
+      "native-gui"
+    ]
+  }
+}
