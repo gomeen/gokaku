@@ -2,6 +2,10 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+## 0.1.1-rc.1（构建 7）— 2026-11-02
+
+相对 0.1.0-dev.1（构建 6）的变更：普通输入修复（Orca Shift 单击、候选窗锚点）、设置页布局重排、翻译加固层第一片入共享核心、菜单图标字形放大；学习模式交付仍保持阻塞（模型质量门槛未重跑）。
+
 ## 0.1.0-dev.1（构建 6）— 2026-11-02
 
 ### 变更（模型路线与翻译加固，2026-11-02 裁决）
