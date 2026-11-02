@@ -1,0 +1,60 @@
+{
+  "profile": "fast",
+  "startedAt": "2026-11-02T05:46:34+0800",
+  "finishedAt": "2026-11-02T05:46:51+0800",
+  "commit": "176ae8e75ad1490255bc0f14c1022dd3aba29870",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.0-dev.1",
+    "buildNumber": 2
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "147 项全部通过（Release，9 个套件）",
+      "durationMs": 16238,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261102-054634/swift-tests.log"
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 3,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "version",
+      "resources",
+      "core-tests"
+    ]
+  }
+}

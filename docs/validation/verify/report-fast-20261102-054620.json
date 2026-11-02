@@ -1,0 +1,56 @@
+{
+  "profile": "fast",
+  "startedAt": "2026-11-02T05:45:29+0800",
+  "finishedAt": "2026-11-02T05:46:20+0800",
+  "commit": "176ae8e75ad1490255bc0f14c1022dd3aba29870",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.0-dev.1",
+    "buildNumber": 2
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.0-dev.1 构建2；拒绝路径 7/7；installed=Gogaku.app 0.1.0 b1;Gogaku Settings.app 0.1.0 b1",
+      "durationMs": 23,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 107,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全过（100% tests passed）",
+      "durationMs": 32707,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261102-054529/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "11 项全部通过（Release）",
+      "durationMs": 18202,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261102-054529/swift-tests.log"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": true,
+    "notPassed": []
+  }
+}

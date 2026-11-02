@@ -1,0 +1,123 @@
+{
+  "profile": "release",
+  "startedAt": "2026-11-02T05:54:26+0800",
+  "finishedAt": "2026-11-02T05:54:29+0800",
+  "commit": "176ae8e75ad1490255bc0f14c1022dd3aba29870",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.0-dev.1",
+    "buildNumber": 2
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "clean-build",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "bundle-check",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "quality",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "render",
+      "required": true,
+      "status": "failed",
+      "detail": "渲染工具编译失败：error: link command failed with exit code 1 (use -v to see invocation)\nld: library 'gogaku_engine' not found\nclang: error: linker command failed with exit code 1 (use -v to see invocation)\n",
+      "durationMs": 2459,
+      "evidence": null
+    },
+    {
+      "name": "data-reliability",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "asan-ubsan",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "install-preflight",
+      "required": false,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 10,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "version",
+      "resources",
+      "core-tests",
+      "swift-tests",
+      "clean-build",
+      "bundle-check",
+      "quality",
+      "render",
+      "data-reliability",
+      "asan-ubsan"
+    ]
+  }
+}

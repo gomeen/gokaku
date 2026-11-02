@@ -1,0 +1,98 @@
+{
+  "checkedAt": "2026-11-01T22:47:14.593952+00:00",
+  "apps": [
+    {
+      "app": "/Users/gomeen/code/gomeen/gogaku/dist/Gogaku.app",
+      "signature": "valid_ad_hoc_local_only",
+      "dependencyClosure": "package_and_system_only",
+      "inputLogCode": "absent",
+      "binaries": [
+        "Frameworks/libboost_iostreams.dylib",
+        "Frameworks/libboost_random.dylib",
+        "Frameworks/libgogaku_core.dylib",
+        "Frameworks/libintl.8.dylib",
+        "Frameworks/liblzma.5.dylib",
+        "Frameworks/libzstd.1.dylib",
+        "Frameworks/libIMECore.0.dylib",
+        "Frameworks/libIMEPinyin.0.dylib",
+        "Frameworks/libFcitx5Utils.2.dylib",
+        "Frameworks/libGogakuEngine.dylib",
+        "MacOS/GogakuInput",
+        "Helpers/GogakuTranslator"
+      ],
+      "binarySHA256": {
+        "Frameworks/libboost_iostreams.dylib": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b",
+        "Frameworks/libboost_random.dylib": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013",
+        "Frameworks/libgogaku_core.dylib": "c925ae6d2374ceaf73c31d7384a0e5e5bc84d24e80d3774b16280ca9f36fa394",
+        "Frameworks/libintl.8.dylib": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb",
+        "Frameworks/liblzma.5.dylib": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259",
+        "Frameworks/libzstd.1.dylib": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a",
+        "Frameworks/libIMECore.0.dylib": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5",
+        "Frameworks/libIMEPinyin.0.dylib": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35",
+        "Frameworks/libFcitx5Utils.2.dylib": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62",
+        "Frameworks/libGogakuEngine.dylib": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1",
+        "MacOS/GogakuInput": "e5e2479731b9b5b68a907991bcf4770476c9a7648d80c352d2385b6dd7e7e67a",
+        "Helpers/GogakuTranslator": "dd0bb8a9fb5501736e5d31430883049d2230bd4275ae633331e7c88ee078f03d"
+      }
+    },
+    {
+      "app": "/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Settings.app",
+      "signature": "valid_ad_hoc_local_only",
+      "dependencyClosure": "package_and_system_only",
+      "inputLogCode": "absent",
+      "binaries": [
+        "Frameworks/libboost_iostreams.dylib",
+        "Frameworks/libboost_random.dylib",
+        "Frameworks/libgogaku_core.dylib",
+        "Frameworks/libintl.8.dylib",
+        "Frameworks/liblzma.5.dylib",
+        "Frameworks/libzstd.1.dylib",
+        "Frameworks/libIMECore.0.dylib",
+        "Frameworks/libIMEPinyin.0.dylib",
+        "Frameworks/libFcitx5Utils.2.dylib",
+        "Frameworks/libGogakuEngine.dylib",
+        "MacOS/GogakuSettings"
+      ],
+      "binarySHA256": {
+        "Frameworks/libboost_iostreams.dylib": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b",
+        "Frameworks/libboost_random.dylib": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013",
+        "Frameworks/libgogaku_core.dylib": "c925ae6d2374ceaf73c31d7384a0e5e5bc84d24e80d3774b16280ca9f36fa394",
+        "Frameworks/libintl.8.dylib": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb",
+        "Frameworks/liblzma.5.dylib": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259",
+        "Frameworks/libzstd.1.dylib": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a",
+        "Frameworks/libIMECore.0.dylib": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5",
+        "Frameworks/libIMEPinyin.0.dylib": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35",
+        "Frameworks/libFcitx5Utils.2.dylib": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62",
+        "Frameworks/libGogakuEngine.dylib": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1",
+        "MacOS/GogakuSettings": "935274d0aa4d9fdd0c878d87928fdf8a5b18a62ad40fa1cce014505307692e02"
+      }
+    }
+  ],
+  "menuIcon": {
+    "gogaku-menu.pdf": "PASS: 22x16pt page, ink=16078, holes=3110, bounds=(3,124)-(172,124)"
+  },
+  "engine": "passed_factory_xiaohe_from_package",
+  "normalCore": "passed_normal_xiaohe_from_package_abi_v2",
+  "dataAndLicenses": {
+    "english-words.txt": {
+      "sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+      "lines": 50000
+    },
+    "gloss.tsv": {
+      "sha256": "fd081959d2b5b5902ce528ff3d8259c6d47c79d768d2187822ee4e5a98b86bec",
+      "lines": 143782
+    },
+    "licenses": "data_licenses_present"
+  },
+  "spelling": "passed_utf16_from_package",
+  "systemResources": {
+    "enToZh": "supported",
+    "os": "Version 26.7.2 (Build 25G332)",
+    "quality": "unreviewed",
+    "strategy": "systemDefault",
+    "zhToEn": "supported"
+  },
+  "hostAcceptance": "not_tested",
+  "qualityAcceptance": "not_tested",
+  "performanceAcceptance": "not_tested"
+}

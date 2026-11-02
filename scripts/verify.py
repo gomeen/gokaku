@@ -310,10 +310,12 @@ def check_asan_ubsan(ctx):
     sequences = 2000 if ctx['quick'] else 100000
     result = sh([binary, '20261031', str(sequences)], env=env,
                 timeout=600 if ctx['quick'] else 14400)
-    evidence = ctx.evidence('asan-ubsan.log', result.stdout[-4000:] + result.stderr[-4000:])
+    # fuzz 全部输出走 stderr（fprintf）；完成判定必须看合并输出。
+    combined = (result.stdout or '') + (result.stderr or '')
+    evidence = ctx.evidence('asan-ubsan.log', combined[-8000:])
     if result.returncode != 0:
         return FAIL, f'插桩运行失败（exit={result.returncode}；中断或报错均不算通过）', evidence
-    if f'{sequences} sequences' not in result.stdout and str(sequences) not in result.stdout:
+    if f'{sequences} 序列' not in combined or '— PASS' not in combined:
         return FAIL, '无完成计数输出；不视为通过', evidence
     return PASS, f'{sequences} 随机序列 ASan＋UBSan 无错误' + \
         ('（quick 冒烟，不满足十万门槛）' if ctx['quick'] else ''), evidence

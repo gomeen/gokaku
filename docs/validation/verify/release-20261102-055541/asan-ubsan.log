@@ -1,0 +1,2 @@
+FAIL: recreate failed at seq 36352: /Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/source/src/libime/core/kenlm/util/file.cc:76 in int util::OpenReadOrThrow(const char *) threw ErrnoException because `-1 == (ret = open(name, 0x0000))'.
+No such file or directory while opening /Users/gomee

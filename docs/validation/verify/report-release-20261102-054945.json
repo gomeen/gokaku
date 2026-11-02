@@ -1,0 +1,116 @@
+{
+  "profile": "release",
+  "startedAt": "2026-11-02T05:47:23+0800",
+  "finishedAt": "2026-11-02T05:49:45+0800",
+  "commit": "176ae8e75ad1490255bc0f14c1022dd3aba29870",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.0-dev.1",
+    "buildNumber": 2
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.0-dev.1 构建2；拒绝路径 7/7；installed=Gogaku.app 0.1.0 b1;Gogaku Settings.app 0.1.0 b1",
+      "durationMs": 19,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 106,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全过（100% tests passed）",
+      "durationMs": 29744,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "49 项全部通过（Release）",
+      "durationMs": 18638,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/swift-tests.log"
+    },
+    {
+      "name": "clean-build",
+      "required": true,
+      "status": "failed",
+      "detail": "构建失败：构建版本 0.1.0-dev.1（构建号 2，dev，提交 176ae8e75ad1）",
+      "durationMs": 57348,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/clean-build.log"
+    },
+    {
+      "name": "bundle-check",
+      "required": true,
+      "status": "passed",
+      "detail": "签名、闭包与包内冒烟通过（含输入法与设置应用）",
+      "durationMs": 4872,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/bundle-check.log"
+    },
+    {
+      "name": "quality",
+      "required": true,
+      "status": "passed",
+      "detail": "首选 109/120、前十 112/120（≥109／112）",
+      "durationMs": 8378,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/quality.log"
+    },
+    {
+      "name": "render",
+      "required": true,
+      "status": "failed",
+      "detail": "渲染工具编译失败：/render-candidate-panel.swift:21:8: error: missing required modules: 'CGogakuCore', 'CGogakuEngine', 'CSQLite'\n 19 | import AppKit\n 20 | import Foundation\n 21 | import GogakuCore\n    |        `- error: missing required modules: 'CGogakuCore', 'CGogakuEngine', 'CSQLite'\n 22 | \n 23 | var failures = 0\n",
+      "durationMs": 681,
+      "evidence": null
+    },
+    {
+      "name": "data-reliability",
+      "required": true,
+      "status": "passed",
+      "detail": "40 轮强杀／损坏恢复／删词不复活通过",
+      "durationMs": 15078,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/data-reliability.log"
+    },
+    {
+      "name": "asan-ubsan",
+      "required": true,
+      "status": "failed",
+      "detail": "插桩运行失败（exit=-6；中断或报错均不算通过）",
+      "durationMs": 6982,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261102-054723/asan-ubsan.log"
+    },
+    {
+      "name": "install-preflight",
+      "required": false,
+      "status": "failed",
+      "detail": "Gogaku Settings.app 缺少包内 build-identity.json",
+      "durationMs": 145,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 4,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "clean-build",
+      "render",
+      "asan-ubsan"
+    ]
+  }
+}
