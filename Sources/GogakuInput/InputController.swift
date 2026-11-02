@@ -89,8 +89,8 @@ final class GogakuInputController: IMKInputController {
                       let current = self.currentTarget(), current == self.target,
                       let rect = self.displayRect else { return }
                 view.issues = result.issues ?? []; self.displayed = view
-                self.panel.render(view, at: rect, clientWindowLevel: current.windowLevel,
-                                  clientWindowLevelValid: current.windowLevelValid)
+                self.panel.render(view, at: rect, targetWindowLevel:
+                                  GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
             }
         }
         return service
@@ -511,8 +511,8 @@ final class GogakuInputController: IMKInputController {
             let firstDisplay = !panel.contentVisible
             displayed = view
             if let rect = displayRect {
-                panel.enqueue(view, at: rect, clientWindowLevel: target.windowLevel,
-                              clientWindowLevelValid: target.windowLevelValid) {
+                panel.enqueue(view, at: rect, targetWindowLevel:
+                              GGPanelTargetLevel(target.windowLevel, target.windowLevelValid)) {
                     ValidationMonitor.shared.rendered(metricID, compositionStart: start, first: firstDisplay)
                 }
             } else {
@@ -522,8 +522,8 @@ final class GogakuInputController: IMKInputController {
             #else
             displayed = view
             if let rect = displayRect {
-                panel.enqueue(view, at: rect, clientWindowLevel: target.windowLevel,
-                              clientWindowLevelValid: target.windowLevelValid)
+                panel.enqueue(view, at: rect, targetWindowLevel:
+                              GGPanelTargetLevel(target.windowLevel, target.windowLevelValid))
             } else {
                 panel.dismiss()
             }
@@ -576,8 +576,8 @@ final class GogakuInputController: IMKInputController {
         let changed = displayRect != current.rect
         displayRect = current.rect
         if changed, let view = displayed {
-            panel.enqueue(view, at: current.rect, clientWindowLevel: current.windowLevel,
-                          clientWindowLevelValid: current.windowLevelValid)
+            panel.enqueue(view, at: current.rect, targetWindowLevel:
+                          GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
         }
     }
 
@@ -788,8 +788,8 @@ final class GogakuInputController: IMKInputController {
             }
             self.displayed = shown
             guard let rect = self.displayRect else { self.panel.dismiss(); return }
-            self.panel.render(shown, at: rect, clientWindowLevel: current.windowLevel,
-                              clientWindowLevelValid: current.windowLevelValid)
+            self.panel.render(shown, at: rect, targetWindowLevel:
+                              GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
         }
     }
 

@@ -1,7 +1,6 @@
 import AppKit
 import CoreText
 import GogakuCore
-import GogakuHost
 
 private extension NSAttributedString {
     func draw(inRect rect: NSRect) {
@@ -453,8 +452,9 @@ final class CandidatePanel: NSPanel {
         return NSRect(origin: origin, size: size)
     }
 
-    /// 延迟矩阵探针专用：布局＋几何提交（不触发窗口排序；真实路径中排序
-    /// 只发生在启动预热，逐键路径只更新透明度与位置）。无效位置不显示。
+    /// 延迟矩阵探针专用：布局＋几何提交（不触发窗口排序；真实路径中排序发生在
+    /// 启动预热，且逐键 render 在目标层级变化时重排一次——本探针路径不传层级、
+    /// 不排序，只更新位置与透明度）。无效位置不显示。
     func renderLayoutOnly(_ view: CompositionView, at anchor: NSRect) {
         if let frame = layoutPanel(view, at: anchor) {
             setFrame(frame, display: false)
@@ -485,11 +485,12 @@ final class CandidatePanel: NSPanel {
         stateChanged?()
     }
 
-    /// 普通按键只排队；新快照、隐藏或取消都会使旧代次失效。宿主层级随快照
+    /// 普通按键只排队；新快照、隐藏或取消都会使旧代次失效。目标层级随快照
     /// 一起排队：迟到代次被整代拒绝，不会把旧层级套在新渲染上。
+    /// targetWindowLevel＝已按宿主层级算好的最终目标层级（GogakuHost
+    /// GGPanelTargetLevel 的结果；nil＝不改层级，离线探针等不传参路径行为不变）。
     func enqueue(_ view: CompositionView, at anchor: NSRect,
-                 clientWindowLevel: Int = 0, clientWindowLevelValid: Bool = false,
-                 submitted: (() -> Void)? = nil) {
+                 targetWindowLevel: Int? = nil, submitted: (() -> Void)? = nil) {
         generation &+= 1
         let expected = generation
         DispatchQueue.main.async { [weak self] in
@@ -499,37 +500,32 @@ final class CandidatePanel: NSPanel {
                 self.stateChanged?()
                 return
             }
-            self.render(view, at: anchor, clientWindowLevel: clientWindowLevel,
-                        clientWindowLevelValid: clientWindowLevelValid)
+            self.render(view, at: anchor, targetWindowLevel: targetWindowLevel)
             submitted?()
         }
     }
 
-    /// 宿主窗口层级 → 候选窗目标层级的排序修正。策略纯函数 GGPanelTargetLevel
-    /// 在 GogakuHost（HostTests／PanelLevelTests 覆盖）：目标 = max(.popUpMenu,
-    /// 客户端层级 + 1)；客户端层级无效或 ≤0 时用普通弹层基准；数值上限防异常值。
-    /// 客户端层级不高于基准时不抬高——常态排序不变，只在客户端确实更高时抬高。
-    /// 层级变化必须先设 level 再重新排序才对 WindowServer 生效；层级相同不置前，
-    /// 避免逐键无条件置前。只改排序，不触碰位置与透明度。
-    private func applyClientWindowLevel(clientLevel: Int, clientLevelValid: Bool) {
-        let target = GGPanelTargetLevel(clientLevel, clientLevelValid)
-        guard target != level.rawValue else { return }
-        level = NSWindow.Level(rawValue: target)
+    /// 渲染当前组合视图并把窗口排序修正到给定目标层级（调用方已按宿主层级算好；
+    /// 策略纯函数 GGPanelTargetLevel 在 GogakuHost，由 HostTests／PanelLevelTests
+    /// 覆盖）。层级变化必须先设 level 再重新排序才对 WindowServer 生效；层级
+    /// 相同不置前，避免逐键无条件置前。只改排序，不触碰位置与透明度。
+    private func applyClientWindowLevel(targetLevel: Int) {
+        guard targetLevel != level.rawValue else { return }
+        level = NSWindow.Level(rawValue: targetLevel)
         orderFrontRegardless()
     }
 
-    /// 渲染当前组合视图并按宿主层级修正排序。clientWindowLevel 是宿主自报窗口
-    /// 层级（IMKTextInput.windowLevel，经 GogakuHost 快照带回）；未知时传 false，
-    /// 面板用普通弹层基准。隐藏恢复走同一路径：层级不同才置前一次。
+    /// 渲染当前组合视图并按目标层级修正排序（nil＝不改层级）。隐藏恢复走同一
+    /// 路径：层级不同才置前一次。
     func render(_ view: CompositionView, at anchor: NSRect,
-                clientWindowLevel: Int = 0, clientWindowLevelValid: Bool = false) {
+                targetWindowLevel: Int? = nil) {
         guard let nextFrame = layoutPanel(view, at: anchor) else {
             // 无有效坐标（锚点不在任何屏幕内等）：不显示，交由控制器保留组合。
             dismiss()
             return
         }
         prime()
-        applyClientWindowLevel(clientLevel: clientWindowLevel, clientLevelValid: clientWindowLevelValid)
+        if let target = targetWindowLevel { applyClientWindowLevel(targetLevel: target) }
         if nextFrame != frame { setFrame(nextFrame, display: false) }
         placementAnchor = anchor
         placementOrigin = nextFrame.origin
