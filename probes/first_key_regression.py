@@ -98,27 +98,30 @@ COMPOSITION = 'nihc'
 COMPOSITION_LETTERS = list(COMPOSITION)
 
 # 5 种确认方式。committed 是「确认之后宿主正文应精确等于」的字符串。
+# after＝确认后的模式状态（2026-11-02 裁决）：chinese＝中文待续；english＝
+# 临时英文直输（Shift 提交后进入，字母/标点原样透传，直到再单击 Shift 回中文）。
 CONFIRMATIONS = [
-    {'id': 'space', 'label': '空格确认首选候选',
+    {'id': 'space', 'label': '空格确认首选候选', 'after': 'chinese',
      'steps': [[{'key': 'space'}]], 'committed': '你好'},
-    {'id': 'enter', 'label': 'Enter 上屏原编码',
+    {'id': 'enter', 'label': 'Enter 上屏原编码', 'after': 'chinese',
      'steps': [[{'key': 'return'}]], 'committed': 'nihc'},
-    {'id': 'digit1', 'label': '数字 1 选当前页首个候选',
+    {'id': 'digit1', 'label': '数字 1 选当前页首个候选', 'after': 'chinese',
      'steps': [[{'key': '1'}]], 'committed': '你好'},
-    {'id': 'semicolon', 'label': '组合中分号一次上屏',
+    {'id': 'semicolon', 'label': '组合中分号一次上屏', 'after': 'chinese',
      'steps': [[{'key': ';'}]], 'committed': '你好；'},
-    {'id': 'shift', 'label': '组合中 Shift 单击上屏原编码',
+    {'id': 'shift', 'label': '组合中 Shift 单击上屏原编码并切英文直输', 'after': 'english',
      'steps': [[{'modifier': 'shift', 'hold': 0.05}]], 'committed': 'nihc'},
 ]
 
 # 4 种后键。kind 决定期望结果：punctuation 追加标点，composition 起新组合，cancel 不留残留。
+# committed＝中文待续态下的宿主文本（IME 标点表映射）；raw＝英文直输态下透传宿主的字面字符。
 POST_KEYS = [
     {'id': 'letter', 'label': '字母 n（后键首字）', 'kind': 'composition',
-     'steps': [[{'key': 'n'}]], 'marked': 'n', 'panel': True},
+     'steps': [[{'key': 'n'}]], 'marked': 'n', 'raw': 'n', 'panel': True},
     {'id': 'comma', 'label': '逗号（无组合标点表）', 'kind': 'punctuation',
-     'steps': [[{'key': ','}]], 'committed': '，', 'panel': False},
+     'steps': [[{'key': ','}]], 'committed': '，', 'raw': ',', 'panel': False},
     {'id': 'period', 'label': '句号（无组合标点表）', 'kind': 'punctuation',
-     'steps': [[{'key': '.'}]], 'committed': '。', 'panel': False},
+     'steps': [[{'key': '.'}]], 'committed': '。', 'raw': '.', 'panel': False},
     {'id': 'stop', 'label': '停止（不发任何键）', 'kind': 'stop',
      'steps': [], 'panel': False},
 ]
@@ -228,10 +231,20 @@ def expected_result(confirm, post, value_view='committed_only'):
     """
     committed = confirm['committed']
     marked = ''
-    if post['kind'] == 'punctuation':
-        committed = committed + post['committed']
-    elif post['kind'] == 'composition':
-        marked = post['marked']
+    if confirm.get('after', 'chinese') == 'english':
+        # Shift 提交后进入临时英文直输（2026-11-02 裁决）：字母/标点原样透传
+        # 宿主（标点保持半角），不起新组合、无候选窗。
+        if post['kind'] == 'punctuation':
+            committed = committed + post['raw']
+        elif post['kind'] == 'composition':
+            committed = committed + post['raw']
+        panel_visible = False
+    else:
+        if post['kind'] == 'punctuation':
+            committed = committed + post['committed']
+        elif post['kind'] == 'composition':
+            marked = post['marked']
+        panel_visible = bool(post['panel'])
     visible_marked = marked if value_view == 'marked_visible' else ''
     value = committed + visible_marked
     if post['kind'] == 'composition':
@@ -239,7 +252,7 @@ def expected_result(confirm, post, value_view='committed_only'):
     else:
         caret = len(committed)
     return {'committed': committed, 'marked': marked, 'value': value,
-            'caret': caret, 'panel': bool(post['panel'])}
+            'caret': caret, 'panel': panel_visible}
 
 
 # --------------------------------------------------------------------------
@@ -250,12 +263,14 @@ def expected_insert_events(confirm, post):
     """一次迭代的插字次数期望（按事件路径，与宿主文本无关）。
 
     确认事件本身插字 1 次（空格／Enter／数字／组合中标点，或 Shift 单击的
-    释放事件）；逗号／句号后键在无组合状态走标点表，再插字 1 次；字母后键
-    开新组合只写 marked text，不插字；停止不发键。
+    释放事件）；逗号／句号后键在中文待续态走标点表，再插字 1 次；Shift 提交
+    后的英文直输态标点由宿主透传，无插字；字母后键开新组合只写 marked text，
+    不插字；停止不发键。
     """
+    chinese_idle = confirm.get('after', 'chinese') == 'chinese'
     return {
         'confirmEvent': 1,
-        'postKeyEvent': 1 if post['kind'] == 'punctuation' else 0,
+        'postKeyEvent': 1 if (chinese_idle and post['kind'] == 'punctuation') else 0,
     }
 
 
@@ -338,9 +353,12 @@ def verify_iteration_samples(confirm, post, block, label=''):
     expected = expected_insert_events(confirm, post)
     if post['kind'] == 'punctuation':
         sample = take(EVENT_KEY_DOWN, '标点后键')
-        if sample is not None and commit_count(sample) != 1:
-            problems.append(f'{prefix}标点后键事件插字次数不符：期望 1，'
-                            f'实际 {commit_count(sample)}（漏字或重复）')
+        if sample is not None:
+            expected_post = expected['postKeyEvent']
+            if commit_count(sample) != expected_post:
+                problems.append(f'{prefix}标点后键事件插字次数不符：期望 {expected_post}，'
+                                f'实际 {commit_count(sample)}'
+                                + ('（英文直输态不应插字）' if expected_post == 0 else '（漏字或重复）'))
     elif post['id'] == 'letter':
         for what in ('字母后键', '续输字母'):
             sample = take(EVENT_KEY_DOWN, what)
@@ -413,9 +431,9 @@ GOLDEN_EXPECTATIONS = {
     ('semicolon', 'comma'): ('你好；，', '', 4, False),
     ('semicolon', 'period'): ('你好；。', '', 4, False),
     ('semicolon', 'stop'): ('你好；', '', 3, False),
-    ('shift', 'letter'): ('nihc', 'n', 5, True),
-    ('shift', 'comma'): ('nihc，', '', 5, False),
-    ('shift', 'period'): ('nihc。', '', 5, False),
+    ('shift', 'letter'): ('nihcn', '', 5, False),
+    ('shift', 'comma'): ('nihc,', '', 5, False),
+    ('shift', 'period'): ('nihc.', '', 5, False),
     ('shift', 'stop'): ('nihc', '', 4, False),
 }
 
@@ -480,7 +498,9 @@ def synthetic_iteration(confirm, post, *, confirm_commits=None, post_commits=Non
         block.append(synthetic_sample(EVENT_KEY_DOWN, next_id, commits=commits,
                                       hidden=confirm_hidden)); next_id += 1
     if post['kind'] == 'punctuation':
-        commits = 1 if post_commits is None else post_commits
+        # 英文直输态（Shift 确认后）标点透传宿主，无插字；中文待续态插字 1 次。
+        default_post = 0 if confirm['id'] == 'shift' else 1
+        commits = default_post if post_commits is None else post_commits
         block.append(synthetic_sample(EVENT_KEY_DOWN, next_id, commits=commits))
     elif post['id'] == 'letter':
         block.append(synthetic_sample(EVENT_KEY_DOWN, next_id, commits=letter_commits)); next_id += 1
@@ -516,18 +536,20 @@ def insert_accounting_self_test():
         if not any(needle in issue for issue in issues):
             problems.append(f'合成[{name}]：未检出缺陷（{needle}）→ {issues}')
 
-    # 1. 期望次数表：全部 20 组合。
+    # 1. 期望次数表：全部 20 组合（Shift 确认后英文直输：标点后键无插字）。
     for confirm_item in CONFIRMATIONS:
         for post_item in POST_KEYS:
             expected = expected_iteration_insert_total(confirm_item, post_item)
-            wanted = 2 if post_item['kind'] == 'punctuation' else 1
+            wanted = 1
+            if confirm_item.get('after', 'chinese') == 'chinese' and post_item['kind'] == 'punctuation':
+                wanted = 2
             if expected != wanted:
                 problems.append(f'合成[期望表] {confirm_item["id"]}/{post_item["id"]}：'
                                 f'插字期望 {expected} ≠ {wanted}')
     # 2. 正确路径不误报。
     expect_clean('空格＋逗号＝两次插字', space, comma)
     expect_clean('空格＋句号＝两次插字', space, period)
-    expect_clean('Shift＋句号（释放事件插字）', shift, period)
+    expect_clean('Shift＋句号（确认插字；英文直输后标点透传）', shift, period)
     expect_clean('Enter＋字母（仅确认一次）', enter, letter)
     expect_clean('空格＋停止（仅确认一次）', space, stop)
     # 3. 漏字。
@@ -536,6 +558,7 @@ def insert_accounting_self_test():
     expect_dirty('Shift 释放漏字（样本流）', shift, period, '释放', confirm_commits=0)
     # 4. 重复插字。
     expect_dirty('标点事件内重复插字', space, comma, '重复', post_commits=2)
+    expect_dirty('英文直输态标点插字（不应插字）', shift, period, '英文直输态', post_commits=1)
     expect_dirty('字母后键事件插字（重复）', enter, letter, '不应插字', letter_commits=1)
     block = synthetic_iteration(enter, stop)
     stray = synthetic_sample(EVENT_KEY_DOWN, 99, commits=1)
@@ -595,9 +618,10 @@ def plan_self_test(plan):
                 if result['caret'] < 0:
                     problems.append(f'{group["id"]} 的期望光标非法')
                 if result['value'] != result['committed'] + (
-                        post['marked'] if (view == 'marked_visible' and post['kind'] == 'composition') else ''):
+                        result['marked'] if view == 'marked_visible' else ''):
                     problems.append(f'{group["id"]} 的 {view} 期望不自洽')
-                if result['panel'] != (post['kind'] == 'composition'):
+                if result['panel'] != (post['kind'] == 'composition'
+                                       and confirm.get('after', 'chinese') == 'chinese'):
                     problems.append(f'{group["id"]} 的候选窗可见性期望不自洽')
     return problems
 
