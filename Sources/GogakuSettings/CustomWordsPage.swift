@@ -31,20 +31,20 @@ struct CustomWordsPage: View {
         VStack(alignment: .leading, spacing: 14) {
             if corrupt {
                 Label("custom-words.tsv 已损坏，已备份为 .corrupt 并按空表启动；确认下方内容后保存即可恢复。",
-                      systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
+                      systemImage: "exclamationmark.triangle").foregroundStyle(SettingsPalette.danger)
             }
+            // 原型 .wordspage 顶部行：分段＋搜索框（flex，最宽 300）＋新增按钮。
             HStack(spacing: 12) {
                 Picker("词语类型", selection: $kind) {
                     Text("短码短语").tag(Kind.shortcode)
                     Text("拼音词").tag(Kind.pinyin)
                 }
                 .pickerStyle(.segmented)
-                .frame(width: 220)
                 .accessibilityLabel("自定义词语类型")
                 SettingsSearchField(text: $search, placeholder: "搜索内容、编码或读音",
                                     accessibilityName: "搜索自定义词语")
-                    .frame(maxWidth: 300)
-                Spacer()
+                    .frame(minWidth: 120, maxWidth: 300, alignment: .leading)
+                Spacer(minLength: 12)
                 Button("新增\(kind.title)") {
                     editing = WordEditRequest(
                         word: CustomWord(kind: kind.rawValue, enabled: true, code: "", pinyin: "", content: ""),
@@ -79,7 +79,10 @@ struct CustomWordsPage: View {
 
     @ViewBuilder private var toolbar: some View {
         HStack(spacing: 10) {
-            Text("\(kind.title) · \(rows.count) 条").font(.system(size: 11)).foregroundStyle(.secondary)
+            // 原型 .wordsToolbar：计数文案，搜索中注明排序不可用。
+            Text("\(kind.title) · \(rows.count) 条\(searching ? "（搜索中，排序不可用）" : "")")
+                .font(.system(size: 11.5))
+                .foregroundStyle(SettingsPalette.secondaryText)
             Spacer()
             Button("编辑") { if let row = selectedRow { editing = WordEditRequest(word: row.word, storageIndex: row.storageIndex) } }
                 .controlSize(.small).disabled(selectedRow == nil)
@@ -108,25 +111,22 @@ struct CustomWordsPage: View {
         let currentRows = rows
         if currentRows.isEmpty {
             Text(search.isEmpty ? "暂无\(kind.title)。" : "没有匹配的\(kind.title)。")
-                .font(.system(size: 12)).foregroundStyle(.secondary)
+                .font(.system(size: 12)).foregroundStyle(SettingsPalette.secondaryText)
                 .frame(maxWidth: .infinity, minHeight: 80, alignment: .center)
         } else {
+            // 原型 w1 行列表：无边框容器，行间 hairline。
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(Array(currentRows.enumerated()), id: \.element.id) { index, row in
                         wordRow(row, isFirst: index == 0, isLast: index == currentRows.count - 1)
-                        if index < currentRows.count - 1 { Divider().opacity(0.35) }
+                        if index < currentRows.count - 1 { SettingsRowDivider() }
                     }
                 }
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: SettingsPalette.cardCornerRadius))
-                .overlay(RoundedRectangle(cornerRadius: SettingsPalette.cardCornerRadius)
-                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1))
             }
         }
     }
 
-    /// 单行：启用开关＋内容＋编码／读音（长内容省略）。
+    /// 单行（.word：mini 开关＋标题 12.5/600＋编码／读音 11 次级色；长内容省略）。
     private func wordRow(_ row: CustomWordListModel.Row, isFirst: Bool, isLast: Bool) -> some View {
         let word = row.word
         let title = word.kind == Int32(GC_WORD_SHORTCODE) ? word.code : word.content
@@ -144,16 +144,19 @@ struct CustomWordsPage: View {
                 .labelsHidden().toggleStyle(.switch).controlSize(.mini)
                 .accessibilityLabel("启用\(title)")
             VStack(alignment: .leading, spacing: 2) {
-                Text(title.isEmpty ? "（空）" : title).font(.system(size: 13)).lineLimit(1).truncationMode(.tail)
-                Text(subtitle.isEmpty ? "—" : subtitle).font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(title.isEmpty ? "（空）" : title).font(.system(size: 12.5, weight: .semibold))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                    .lineLimit(1).truncationMode(.tail)
+                Text(subtitle.isEmpty ? "—" : subtitle).font(.system(size: 11))
+                    .foregroundStyle(SettingsPalette.secondaryText)
                     .lineLimit(1).truncationMode(.tail)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             if searching {
-                Text("搜索结果").font(.system(size: 10)).foregroundStyle(.tertiary)
+                Text("搜索结果").font(.system(size: 10)).foregroundStyle(SettingsPalette.tertiaryText)
             }
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 8)
         .padding(.vertical, 8)
         .contentShape(Rectangle())
         .background(selectedRowID == row.id ? SettingsPalette.accentSoft : Color.clear)
@@ -240,7 +243,7 @@ struct WordEditSheet: View {
                 }
             }
             if let error {
-                Text(error).foregroundStyle(.red).font(.callout)
+                Text(error).foregroundStyle(SettingsPalette.danger).font(.callout)
             }
             HStack {
                 Spacer()

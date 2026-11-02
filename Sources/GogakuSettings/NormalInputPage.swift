@@ -1,44 +1,58 @@
 import SwiftUI
 import GogakuCore
 
-/// 普通输入页（2026-11-03 定稿）：字号 12–16 整数滑块带刻度、展开全拼／原始编码
-/// 分段控件、模糊音三列九项（无计数／解释／批量操作）、按应用默认英文与快速添加
-/// 排除共用应用列表组件。所有改动立即提交（连续文本输入合并 300ms）。
+/// 普通输入页（2026-11-03 定稿，对应原型 panels）：输入方案（纵向单选＋模糊音
+/// 三列九项 checkbox）、候选窗与输入区（12–16 整数滑块带刻度、左标签右控件行、
+/// 「显示英文释义／显示输入的字母」开关、「展开全拼／原始编码」分段控件）、
+/// 英文候选与调频、按应用默认英文、快速添加（内联录制＋排除应用）。
+/// 所有改动立即提交（连续文本输入合并 300ms）。
 struct NormalInputPage: View {
     @Binding var settings: GogakuCore.Settings
     @State private var freqClearHint = ""
     @ObservedObject private var catalog = AppCatalog()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 0) {
             schemeCard
+            SettingsCardSpacing()
             candidateCard
+            SettingsCardSpacing()
             englishCard
+            SettingsCardSpacing()
             appDefaultsCard
+            SettingsCardSpacing()
             quickAddCard
             if !freqClearHint.isEmpty {
-                Text(freqClearHint).font(.system(size: 11)).foregroundStyle(.secondary)
+                Text(freqClearHint)
+                    .font(.system(size: 11))
+                    .foregroundStyle(SettingsPalette.secondaryText)
+                    .padding(.top, 10)
             }
         }
     }
 
-    // MARK: 输入方案
+    // MARK: 输入方案（纵向单选；模糊音为 hairline 分隔的子块）
 
     private var schemeCard: some View {
         SettingsCard("输入方案") {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 0) {
                 Picker("输入方案", selection: binding(\.inputScheme)) {
                     Text("小鹤双拼（默认）").tag(InputScheme.xiaohe)
                     Text("全拼").tag(InputScheme.fullPinyin)
                 }
                 .pickerStyle(.radioGroup)
-                .horizontalRadioGroupLayout()
+                // 原型 .radios 为纵向列表（radioGroup 默认纵向，每项 12px）。
+                .font(.system(size: 12))
+                .padding(.vertical, 8)
                 .accessibilityLabel("输入方案")
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("模糊音（默认全关）").font(.system(size: 12, weight: .medium))
-                    // 三列九项，无计数、解释或批量操作。
+                // .subblock：hairline 上边框、上留白 12、内留白 10。
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("模糊音（默认全关）")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(SettingsPalette.primaryText)
+                    // 三列九项 checkbox（.fzgrid：列距 12、行距 9；代码用等宽 11px）。
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12, alignment: .leading), count: 3),
-                              alignment: .leading, spacing: 8) {
+                              alignment: .leading, spacing: 9) {
                         ForEach(InputScheme.fuzzyPairs, id: \.id) { pair in
                             Toggle(pair.id, isOn: Binding(
                                 get: { settings.fuzzyPinyin.contains(pair.id) },
@@ -46,139 +60,176 @@ struct NormalInputPage: View {
                                     if on { settings.fuzzyPinyin.insert(pair.id) } else { settings.fuzzyPinyin.remove(pair.id) }
                                     submit()
                                 }))
-                                .font(.system(size: 12))
+                                .font(.system(size: 11, design: .monospaced))
                                 .accessibilityLabel("模糊音 \(pair.id)")
                         }
                     }
+                }
+                .padding(.top, 12)
+                SettingsRowDivider()
+                    .padding(.bottom, 10)
+            }
+        }
+    }
+
+    // MARK: 候选窗与输入区（左标签右控件行，行间 hairline）
+
+    private var candidateCard: some View {
+        SettingsCard("候选窗与输入区") {
+            VStack(alignment: .leading, spacing: 0) {
+                // 候选字号：12–16 整数滑块带刻度（原型 .range 宽 150＋两端刻度）。
+                SettingsRow("候选字号") {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Slider(value: Binding(
+                            get: { Double(settings.candidateFontSize) },
+                            set: { value in
+                                let clamped = min(16, max(12, Int(value.rounded())))
+                                if clamped != settings.candidateFontSize {
+                                    settings.candidateFontSize = clamped
+                                    submit()
+                                }
+                            }), in: 12...16, step: 1)
+                            .frame(width: 150)
+                            .accessibilityLabel("候选字号")
+                            .accessibilityValue("\(settings.candidateFontSize) 号")
+                        fontTicks
+                    }
+                }
+                SettingsRowDivider()
+                // 英文释义（用户裁决：显示名「显示英文释义」＋帮助文案）。
+                SettingsRow("显示英文释义",
+                            detail: "候选词的英文词义参考，不随中文上屏") {
+                    Toggle("", isOn: binding(\.glossEnabled))
+                        .toggleStyle(.switch)
+                        .accessibilityLabel("显示英文释义")
+                }
+                SettingsRowDivider()
+                SettingsRow("在宿主正文显示输入的字母（下划线）") {
+                    Toggle("", isOn: binding(\.inputLettersEnabled))
+                        .toggleStyle(.switch)
+                        .accessibilityLabel("在宿主正文显示输入的字母")
+                }
+                SettingsRowDivider()
+                // 显示内容：分段控件（.seg 两段）。
+                SettingsRow("显示内容") {
+                    Picker("显示内容", selection: binding(\.fullPinyinPreedit)) {
+                        Text("展开全拼").tag(true)
+                        Text("原始编码").tag(false)
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 220)
+                    .accessibilityLabel("输入区字母显示内容")
                 }
             }
         }
     }
 
-    // MARK: 候选窗与输入区
-
-    private var candidateCard: some View {
-        SettingsCard("候选窗与输入区") {
-            VStack(alignment: .leading, spacing: 12) {
-                // 候选字号 12–16 整数滑块＋刻度。
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("候选字号：\(settings.candidateFontSize) 号（注释 −1，序号 −3）")
-                        .font(.system(size: 13))
-                    Slider(value: Binding(
-                        get: { Double(settings.candidateFontSize) },
-                        set: { value in
-                            let clamped = min(16, max(12, Int(value.rounded())))
-                            if clamped != settings.candidateFontSize {
-                                settings.candidateFontSize = clamped
-                                submit()
-                            }
-                        }), in: 12...16, step: 1)
-                        .accessibilityLabel("候选字号")
-                        .accessibilityValue("\(settings.candidateFontSize) 号")
-                    HStack {
-                        ForEach([12, 13, 14, 15, 16], id: \.self) { size in
-                            Text(String(size))
-                                .font(.system(size: 10)).foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity)
-                                .onTapGesture {
-                                    if settings.candidateFontSize != size {
-                                        settings.candidateFontSize = size
-                                        submit()
-                                    }
-                                }
+    /// 刻度（.ticks：与滑块同宽 150、两端对齐、10px；当前值强调色加粗、可点选）。
+    private var fontTicks: some View {
+        HStack {
+            ForEach([12, 13, 14, 15, 16], id: \.self) { size in
+                Text(String(size))
+                    .font(.system(size: 10, weight: size == settings.candidateFontSize ? .semibold : .regular))
+                    .foregroundStyle(size == settings.candidateFontSize
+                                     ? SettingsPalette.accentText : SettingsPalette.tertiaryText)
+                    .padding(.horizontal, 2)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        if settings.candidateFontSize != size {
+                            settings.candidateFontSize = size
+                            submit()
                         }
                     }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("候选字号刻度")
-                }
-                Toggle("候选旁英文释义（词性＋译文；无合格词性数据时只显示译文）",
-                       isOn: binding(\.glossEnabled)).font(.system(size: 13))
-                Toggle("在宿主正文显示输入的字母（下划线）",
-                       isOn: binding(\.inputLettersEnabled)).font(.system(size: 13))
-                // 显示内容：分段控件。
-                Picker("显示内容", selection: binding(\.fullPinyinPreedit)) {
-                    Text("展开全拼").tag(true)
-                    Text("原始编码").tag(false)
-                }
-                .pickerStyle(.segmented)
-                .frame(width: 220)
-                .accessibilityLabel("输入区字母显示内容")
+                    .accessibilityLabel("候选字号 \(size) 号")
             }
         }
+        .frame(width: 150)
+        .accessibilityElement(children: .contain)
     }
 
     // MARK: 英文候选与调频
 
     private var englishCard: some View {
         SettingsCard("中文模式下的英文候选与调频") {
-            VStack(alignment: .leading, spacing: 10) {
-                Toggle("给英文候选（词表＋词频；数据包就绪后生效）",
-                       isOn: binding(\.englishCandidatesEnabled)).font(.system(size: 13))
-                Toggle("本地中文调频（只学习普通模式完整上屏的中文）",
-                       isOn: binding(\.frequencyEnabled)).font(.system(size: 13))
+            VStack(alignment: .leading, spacing: 0) {
+                SettingsRow("给英文候选（词表＋词频；SCOWL／wordfreq 数据包就绪后生效）") {
+                    Toggle("", isOn: binding(\.englishCandidatesEnabled))
+                        .toggleStyle(.switch)
+                        .accessibilityLabel("给英文候选")
+                }
+                SettingsRowDivider()
+                SettingsRow("本地中文调频（只学习普通模式完整上屏的中文）") {
+                    Toggle("", isOn: binding(\.frequencyEnabled))
+                        .toggleStyle(.switch)
+                        .accessibilityLabel("本地中文调频")
+                }
+                SettingsRowDivider()
+                // 清空操作行（无路径说明；反馈文案与原型一致）。
                 HStack {
                     Button("清空调频数据") {
                         let dir = Settings.chineseDirectory
                         try? FileManager.default.removeItem(at: dir)
-                        freqClearHint = "已清空调频数据；自定义词语不受影响。输入法下次重载后生效。"
+                        freqClearHint = "已清空调频数据；自定义词语不受影响。"
                     }
-                    Text("数据存 ~/Library/Application Support/Gogaku/chinese/").font(.system(size: 11)).foregroundStyle(.secondary)
+                    .accessibilityLabel("清空调频数据，自定义词语不受影响")
+                    Spacer()
                 }
+                .padding(.vertical, 9)
             }
         }
     }
 
-    // MARK: 按应用默认英文
+    // MARK: 按应用默认英文（无引导文案；应用列表共用组件）
 
     private var appDefaultsCard: some View {
         SettingsCard("按应用默认英文") {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("这些应用切入时为临时英文；手动 Shift 可覆盖，无组合时 Esc 回到该应用默认。")
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-                AppListEditor(mode: .defaultEnglish(entries: Binding(
-                    get: { settings.appDefaultEnglish },
-                    set: { newValue in
-                        settings.appDefaultEnglish = newValue
-                        submit()
-                    })),
-                    emptyText: "尚未添加应用。添加后，这些应用切入时默认英文。",
-                    addSheetTitle: "添加应用",
-                    accessibilityPrefix: "默认英文",
-                    catalog: catalog)
-            }
+            AppListEditor(mode: .defaultEnglish(entries: Binding(
+                get: { settings.appDefaultEnglish },
+                set: { newValue in
+                    settings.appDefaultEnglish = newValue
+                    submit()
+                })),
+                emptyText: "尚未添加应用。添加后，这些应用切入时默认英文。",
+                addSheetTitle: "添加应用",
+                accessibilityPrefix: "默认英文",
+                catalog: catalog)
+            .padding(.vertical, 4)
         }
     }
 
-    // MARK: 快速添加
+    // MARK: 快速添加（内联快捷键录制；无长说明）
 
     private var quickAddCard: some View {
         SettingsCard("快速添加") {
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("快捷键").font(.system(size: 13))
-                    Spacer()
+                // .inline：「快捷键：」＋键帽＋「重新录制」。
+                HStack(spacing: 10) {
+                    Text("快捷键：")
+                        .font(.system(size: 11))
+                        .foregroundStyle(SettingsPalette.secondaryText)
                     ShortcutEditor(command: .quickAdd,
                                    shortcut: Binding(get: { settings.quickAddShortcut },
                                                      set: { settings.quickAddShortcut = $0; submit() }),
-                                   settings: settings)
-                    .frame(width: 240, alignment: .trailing)
+                                   settings: settings,
+                                   layout: .inlineRecord)
                 }
-                Text("把当前应用、当前输入框 60 秒内最近一次完整上屏的中文候选连同实际拼音加为拼音词；排除应用中不生效。")
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("排除应用（加入即排除，移除即恢复）").font(.system(size: 12, weight: .medium))
-                    AppListEditor(mode: .excluded(ids: Binding(
-                        get: { settings.quickAddExcludedApplications },
-                        set: { newValue in
-                            settings.quickAddExcludedApplications = newValue
-                            submit()
-                        })),
-                        emptyText: "尚未排除任何应用；加入后这些应用里不能用快速添加。",
-                        addSheetTitle: "添加要排除的应用",
-                        accessibilityPrefix: "快速添加排除",
-                        catalog: catalog)
-                }
+                .padding(.vertical, 4)
+                .accessibilityElement(children: .contain)
+                Text("排除应用（无开关，加入即排除）")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                AppListEditor(mode: .excluded(ids: Binding(
+                    get: { settings.quickAddExcludedApplications },
+                    set: { newValue in
+                        settings.quickAddExcludedApplications = newValue
+                        submit()
+                    })),
+                    emptyText: "尚未排除任何应用；加入后这些应用里不能用快速添加。",
+                    addSheetTitle: "添加要排除的应用",
+                    accessibilityPrefix: "快速添加排除",
+                    catalog: catalog)
             }
+            .padding(.vertical, 4)
         }
     }
 

@@ -42,21 +42,13 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .records: return "学习片段"
         }
     }
-    var symbol: String {
-        switch self {
-        case .resources: return "character.book.closed"
-        case .normalInput: return "keyboard"
-        case .customWords: return "text.badge.plus"
-        case .shortcuts: return "command"
-        case .privacy: return "hand.raised"
-        case .records: return "text.book.closed"
-        }
-    }
 }
 
-/// 设置外壳：200pt 侧栏、六页、内容滚动区、固定底部状态栏。
-/// 立即保存：普通选项／应用列表／快捷键改动立即提交，连续文本输入合并 300ms，
-/// 失焦或关闭窗口时提交剩余有效改动；保存状态由 SettingsStore 回调驱动。
+/// 设置外壳（对应原型 .shell--a）：200pt 文字侧栏、六页、页头 22/600、
+/// 内容滚动区（水平内边距 26）、固定底部状态栏。侧栏选中态用 accent-soft 底＋
+/// accent-text 文字（原型 .nav__item），无图标。立即保存：普通选项／应用列表／
+/// 快捷键改动立即提交，连续文本输入合并 300ms，失焦或关闭窗口时提交剩余有效改动；
+/// 保存状态由 SettingsStore 回调驱动。
 private struct SettingsView: View {
     @State private var page: SettingsPage = .normalInput
     @State private var settings = Settings.load()
@@ -67,14 +59,16 @@ private struct SettingsView: View {
     var body: some View {
         HStack(spacing: 0) {
             sidebar
-            Divider()
+            // 侧栏右描边（.side { border-right: 1px solid var(--border) }）。
+            Rectangle().fill(SettingsPalette.border).frame(width: 1)
             VStack(alignment: .leading, spacing: 0) {
-                // 页面只保留标题，无副标题与重复说明。
+                // 页面只保留标题（原型 .pagehead：22/600，padding 22 26 14）。
                 Text(page.title).font(.system(size: 22, weight: .semibold))
+                    .foregroundStyle(SettingsPalette.primaryText)
                     .accessibilityAddTraits(.isHeader)
-                    .padding(.horizontal, 28)
-                    .padding(.top, 26)
-                    .padding(.bottom, 18)
+                    .padding(.horizontal, 26)
+                    .padding(.top, 22)
+                    .padding(.bottom, 14)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         switch page {
@@ -87,14 +81,16 @@ private struct SettingsView: View {
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 28)
-                    .padding(.bottom, 24)
+                    // .scroller：padding 2 26 18。
+                    .padding(.horizontal, 26)
+                    .padding(.bottom, 18)
                 }
                 .id(page)
                 statusBar
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
+        .background(SettingsPalette.windowBackground)
         .font(.system(size: 13))
         .tint(SettingsPalette.accent)
         .onAppear {
@@ -116,43 +112,58 @@ private struct SettingsView: View {
         }
     }
 
+    // MARK: 侧栏（.side：side-bg 底、文字导航、底部版本）
+
     private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 0) {
+            // .side__title：14/600，padding 18 16 10。
             Text("Gogaku")
                 .font(.system(size: 14, weight: .semibold))
-                .padding(.horizontal, 18)
-                .padding(.top, 22)
-            List(SettingsPage.allCases, selection: $page) { item in
-                Label(item.title, systemImage: item.symbol)
-                    .padding(.vertical, 4)
-                    .tag(item)
+                .foregroundStyle(SettingsPalette.primaryText)
+                .padding(.horizontal, 16)
+                .padding(.top, 18)
+                .padding(.bottom, 10)
+            // .nav：gap 1，padding 0 8。
+            VStack(alignment: .leading, spacing: 1) {
+                ForEach(SettingsPage.allCases) { item in
+                    SidebarItem(title: item.title, isSelected: page == item) {
+                        page = item
+                    }
+                }
             }
-            .listStyle(.sidebar)
-            .scrollContentBackground(.hidden)
-            Text("本机开发版")
-                .font(.system(size: 11))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 18)
-            Text(BuildIdentity.displayVersion)
-                .font(.system(size: 10, design: .monospaced))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 18)
-                .padding(.bottom, 18)
+            .padding(.horizontal, 8)
+            .accessibilityElement(children: .contain)
+            Spacer(minLength: 0)
+            // .side__foot：meta 11 / ver mono 10，padding 12 16 14。
+            VStack(alignment: .leading, spacing: 3) {
+                Text("本机开发版")
+                    .font(.system(size: 11))
+                    .foregroundStyle(SettingsPalette.secondaryText)
+                Text(BuildIdentity.displayVersion)
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundStyle(SettingsPalette.tertiaryText)
+            }
+            .padding(.horizontal, 16)
+            .padding(.top, 12)
+            .padding(.bottom, 14)
         }
         .frame(width: 200)
         .frame(maxHeight: .infinity, alignment: .topLeading)
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(SettingsPalette.sidebarBackground)
     }
 
-    /// 固定底部状态栏：保存中／已保存／失败及重试。失败不伪报成功，不无限重试。
+    /// 固定底部状态栏（.statusbar：min-height 36、win-bg 底、顶部 border 线、
+    /// 圆点 7×7）：保存中／已保存／失败及重试。失败不伪报成功，不无限重试。
     private var statusBar: some View {
-        HStack(spacing: 10) {
-            Circle().fill(Color(nsColor: status.tone))
+        HStack(spacing: 8) {
+            Circle().fill(status.dotColor)
                 .frame(width: 7, height: 7)
                 .accessibilityHidden(true)
-            Text(status.text.isEmpty ? "改动立即保存" : status.text)
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+            Text(status.text.isEmpty ? "修改后立即生效" : status.text)
+                .font(.system(size: 11))
+                .foregroundStyle(SettingsPalette.secondaryText)
                 .accessibilityLabel("保存状态：\(status.text.isEmpty ? "无待保存改动" : status.text)")
+            Spacer(minLength: 8)
             if case .failed = status {
                 Button("重试") {
                     SettingsStore.shared.retry()
@@ -161,12 +172,11 @@ private struct SettingsView: View {
                 .controlSize(.small)
                 .accessibilityLabel("重试保存")
             }
-            Spacer(minLength: 8)
         }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 10)
-        .background(Color(nsColor: .windowBackgroundColor).opacity(0.98))
-        .overlay(Divider().opacity(0.5), alignment: .top)
+        .padding(.horizontal, 26)
+        .frame(minHeight: 36)
+        .background(SettingsPalette.windowBackground)
+        .overlay(Rectangle().fill(SettingsPalette.border).frame(height: 1), alignment: .top)
     }
 
     private func refreshRecords() {
@@ -179,37 +189,103 @@ private struct SettingsView: View {
     }
 }
 
-// MARK: - 语言资源页（不提供 Apple Translation 查询与安装入口）
-
-private struct ResourcesPage: View {
-    @State private var bundled: [String] = []
+/// 侧栏导航项（.nav__item：13px、padding 6 10、radius 6；选中 accent-soft 底＋
+/// accent-text 文字＋600 字重，悬停中性灰底；无图标，与原型一致）。
+private struct SidebarItem: View {
+    let title: String
+    let isSelected: Bool
+    let action: () -> Void
+    @State private var hovered = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            SettingsCard("随包语言资源") {
-                VStack(alignment: .leading, spacing: 8) {
-                    if bundled.isEmpty {
-                        Text("正在读取随包资源…").font(.system(size: 12)).foregroundStyle(.secondary)
-                    }
-                    ForEach(bundled, id: \.self) { line in
-                        Text(line).font(.system(size: 12)).lineLimit(1).truncationMode(.middle)
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: isSelected ? .semibold : .regular))
+                .foregroundStyle(isSelected ? SettingsPalette.accentText : SettingsPalette.primaryText)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isSelected ? SettingsPalette.accentSoft
+                              : hovered ? Color.primary.opacity(0.13) : Color.clear))
+        }
+        .buttonStyle(.plain)
+        .onHover { hovered = $0 }
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+        .accessibilityLabel(title)
+    }
+}
+
+// MARK: - 语言资源页（不提供 Apple Translation 查询与安装入口；
+// 原型为两个 section＋hr：本地翻译资源行、开发版状态）
+
+private struct ResourcesPage: View {
+    @State private var bundled: [(name: String, size: String?)] = []
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            section("本地翻译") {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(bundled.enumerated()), id: \.element.name) { index, item in
+                        resourceRow(item)
+                        if index < bundled.count - 1 { SettingsRowDivider() }
                     }
                     Text("以上为实际随包数据。资源缺失时普通输入自动降级，不影响已安装词库。")
-                        .font(.system(size: 11)).foregroundStyle(.secondary)
+                        .font(.system(size: 11))
+                        .foregroundStyle(SettingsPalette.secondaryText)
+                        .padding(.top, 8)
                 }
             }
-            SettingsCard("功能状态") {
+            SettingsRule()
+            section("开发版状态") {
                 VStack(alignment: .leading, spacing: 8) {
-                    Label("普通输入：已在本机开发范围验证，完整宿主与性能验收仍在进行。",
-                          systemImage: "keyboard").font(.system(size: 12))
-                    Label("学习功能尚未开放：正式翻译模型未过质量门槛；菜单保持置灰。",
-                          systemImage: "book.closed").font(.system(size: 12)).foregroundStyle(.secondary)
-                    Label("本页不提供系统语言资源安装入口；翻译模型质量与安装流程另行验收。",
-                          systemImage: "info.circle").font(.system(size: 11)).foregroundStyle(.secondary)
+                    // .body-text：12.5px。
+                    Text("普通输入：已在本机开发范围验证，完整宿主与性能验收仍在进行。")
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(SettingsPalette.primaryText)
+                    Text("学习功能尚未开放：正式翻译模型未过质量门槛；菜单保持置灰。")
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(SettingsPalette.primaryText)
+                    Text("本页不提供系统语言资源安装入口；翻译模型质量与安装流程另行验收。")
+                        .font(.system(size: 11))
+                        .foregroundStyle(SettingsPalette.secondaryText)
                 }
             }
         }
         .onAppear { loadBundled() }
+    }
+
+    /// section 标题（.section__title：15/600）。
+    private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title).font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(SettingsPalette.primaryText)
+                .accessibilityAddTraits(.isHeader)
+            content()
+        }
+    }
+
+    /// 资源行（原型 .word：↧ 图标块 32×32＋名称＋尺寸）。
+    private func resourceRow(_ item: (name: String, size: String?)) -> some View {
+        HStack(spacing: 10) {
+            Text("↧")
+                .font(.system(size: 13))
+                .foregroundStyle(SettingsPalette.accentText)
+                .frame(width: 32, height: 32)
+                .background(RoundedRectangle(cornerRadius: 8).fill(SettingsPalette.accentSoft))
+                .accessibilityHidden(true)
+            Text(item.name)
+                .font(.system(size: 13))
+                .foregroundStyle(SettingsPalette.primaryText)
+            Spacer()
+            Text(item.size ?? "—")
+                .font(.system(size: 11))
+                .foregroundStyle(SettingsPalette.secondaryText)
+        }
+        .padding(.vertical, 8)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(item.name)，\(item.size ?? "未随包提供")")
     }
 
     private func loadBundled() {
@@ -218,14 +294,14 @@ private struct ResourcesPage: View {
         bundled = names.map { name in
             let url = data.appendingPathComponent(name)
             if let values = try? url.resourceValues(forKeys: [.fileSizeKey]), let size = values.fileSize {
-                return "\(name) · \(ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))"
+                return (name, ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
             }
-            return "\(name) · 未随包提供"
+            return (name, nil)
         }
     }
 }
 
-// MARK: - 学习与隐私页
+// MARK: - 学习与隐私页（原型为三个 section＋hr；排除应用按规格保留原生应用列表）
 
 private struct PrivacyPage: View {
     @Binding var settings: GogakuCore.Settings
@@ -233,48 +309,72 @@ private struct PrivacyPage: View {
     @ObservedObject private var catalog = AppCatalog()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            SettingsCard("学习记录") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Toggle("记录学习片段（仅保留已确认成功的学习片段，30 天后过期）",
-                           isOn: Binding(get: { settings.recording },
-                                         set: { settings.recording = $0; submit() }))
-                        .font(.system(size: 13))
+        VStack(alignment: .leading, spacing: 0) {
+            section("学习记录") {
+                SettingsRow("记录学习片段",
+                            detail: "当前开发版尚未接通成功提交后的记录；此开关只保存偏好，不解除真实学习记录门禁，也不会开始采集。") {
+                    Toggle("", isOn: Binding(get: { settings.recording },
+                                             set: { settings.recording = $0; submit() }))
+                        .toggleStyle(.switch)
                         .accessibilityLabel("记录学习片段，保留30天")
-                    Text("当前开发版尚未接通成功提交后的记录；此开关只保存偏好，不解除真实学习记录门禁，也不会开始采集。")
-                        .font(.system(size: 11)).foregroundStyle(.secondary)
                 }
             }
-            SettingsCard("排除应用（不保存学习记录）") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("这些应用的输入不保存学习记录；与「普通输入」页的快速添加排除相互独立。")
-                        .font(.system(size: 11)).foregroundStyle(.secondary)
-                    AppListEditor(mode: .excluded(ids: Binding(
-                        get: { settings.excludedApplications },
-                        set: { settings.excludedApplications = $0; submit() })),
-                        emptyText: "尚未排除任何应用。",
-                        addSheetTitle: "添加不记录学习内容的应用",
-                        accessibilityPrefix: "学习记录排除",
-                        catalog: catalog)
-                }
+            SettingsRule()
+            section("排除应用") {
+                AppListEditor(mode: .excluded(ids: Binding(
+                    get: { settings.excludedApplications },
+                    set: { settings.excludedApplications = $0; submit() })),
+                    emptyText: "尚未排除任何应用。",
+                    addSheetTitle: "添加不记录学习内容的应用",
+                    accessibilityPrefix: "学习记录排除",
+                    catalog: catalog)
             }
-            SettingsCard("英语忽略词") {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("每行一个词，适合姓名、品牌或无需拼写提示的表达。连续输入合并保存。")
-                        .font(.system(size: 11)).foregroundStyle(.secondary)
-                    TextEditor(text: Binding(
-                        get: { ignored },
-                        set: { newValue in
-                            ignored = newValue
-                            applyIgnored()
-                        }))
-                        .font(.system(size: 12, design: .monospaced))
-                        .frame(height: 96)
-                        .accessibilityLabel("英语忽略词，每行一个")
-                }
+            SettingsRule()
+            section("英语忽略词") {
+                ignoreEditor
             }
         }
         .onAppear { ignored = settings.ignoredWords.sorted().joined(separator: "\n") }
+    }
+
+    /// section 标题（.section__title：15/600）。
+    private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(title).font(.system(size: 15, weight: .semibold))
+                .foregroundStyle(SettingsPalette.primaryText)
+                .accessibilityAddTraits(.isHeader)
+            content()
+        }
+    }
+
+    /// 忽略词文本域（原型 .textarea mono 四行＋占位「每行一个忽略词」）。
+    private var ignoreEditor: some View {
+        ZStack(alignment: .topLeading) {
+            TextEditor(text: Binding(
+                get: { ignored },
+                set: { newValue in
+                    ignored = newValue
+                    applyIgnored()
+                }))
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(SettingsPalette.primaryText)
+                .scrollContentBackground(.hidden)
+                .background(SettingsPalette.cardBackground)
+                .frame(height: 96)
+                .padding(5)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .overlay(RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(SettingsPalette.borderStrong, lineWidth: 1))
+                .accessibilityLabel("英语忽略词，每行一个")
+            if ignored.isEmpty {
+                Text("每行一个忽略词")
+                    .font(.system(size: 12, design: .monospaced))
+                    .foregroundStyle(SettingsPalette.tertiaryText)
+                    .padding(.horizontal, 11)
+                    .padding(.top, 11)
+                    .allowsHitTesting(false)
+            }
+        }
     }
 
     /// 连续文本输入合并 300ms 后提交（SettingsStore 内部去抖）。
@@ -290,7 +390,7 @@ private struct PrivacyPage: View {
     }
 }
 
-// MARK: - 学习片段页（真实存储读取）
+// MARK: - 学习片段页（真实存储读取；原型 listhead＋记录行＋出厂空状态）
 
 private struct RecordsPage: View {
     @Binding var records: [LearningEvent]
@@ -298,42 +398,68 @@ private struct RecordsPage: View {
     private let store = LearningStore()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
+            // .listhead：标题与刷新按钮两端对齐。
             HStack {
-                Text("最近的片段").font(.system(size: 15, weight: .semibold)).accessibilityAddTraits(.isHeader)
+                Text("最近的片段").font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                    .accessibilityAddTraits(.isHeader)
                 Spacer()
-                Button("刷新", action: onRefresh).accessibilityLabel("刷新学习片段")
+                Button("刷新", action: onRefresh).controlSize(.small)
+                    .accessibilityLabel("刷新学习片段")
             }
+            .padding(.top, 2)
             if records.isEmpty {
-                VStack(spacing: 12) {
-                    Image(systemName: "text.book.closed").font(.system(size: 28)).foregroundStyle(.tertiary)
-                    Text("暂无学习片段").font(.system(size: 15, weight: .medium))
-                    Text("已确认成功的学习内容会显示在这里。学习功能尚未开放。")
-                        .font(.system(size: 12)).foregroundStyle(.secondary)
+                // .empty：虚线框空状态。
+                VStack(spacing: 5) {
+                    Image(systemName: "text.book.closed").font(.system(size: 26))
+                        .foregroundStyle(SettingsPalette.tertiaryText)
+                    Text("暂无学习片段").font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(SettingsPalette.primaryText)
+                    Text("已确认成功的学习内容会显示在这里。")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(SettingsPalette.secondaryText)
                 }
-                .frame(maxWidth: .infinity, minHeight: 200)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 20)
+                .background(
+                    RoundedRectangle(cornerRadius: 9)
+                        .strokeBorder(SettingsPalette.borderStrong,
+                                      style: StrokeStyle(lineWidth: 1, dash: [4])))
             } else {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(records) { event in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(event.source + " → " + event.target).textSelection(.enabled)
-                            Text("\(event.direction == .zhToEn ? "中→英" : "英→中") · \(event.category) · \(event.createdAt.formatted())")
-                                .font(.system(size: 11)).foregroundStyle(.secondary)
-                            HStack {
-                                if !event.issues.isEmpty {
-                                    Button("排除此条误报") { store.dismissIssues(id: event.id) { _ in onRefresh() } }
-                                }
-                                Spacer()
-                                Button("删除片段") { store.delete(ids: [event.id]) { _ in onRefresh() } }
-                            }
-                        }
-                        .padding(.vertical, 14)
-                        Divider().opacity(0.45)
+                        recordRow(event)
                     }
                 }
             }
-            Text("采用帮助不代表掌握；工具生成的错误不作为用户错误。最多显示 1000 条，可在「学习与隐私」中暂停记录或排除应用。")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
         }
+    }
+
+    /// 记录行（原型 .rec：左 pair＋meta，右操作按钮）。
+    private func recordRow(_ event: LearningEvent) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            VStack(alignment: .leading, spacing: 3) {
+                Text(event.source + " → " + event.target)
+                    .font(.system(size: 13))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                    .textSelection(.enabled)
+                Text("\(event.direction == .zhToEn ? "中→英" : "英→中") · \(event.category) · \(event.createdAt.formatted())")
+                    .font(.system(size: 11))
+                    .foregroundStyle(SettingsPalette.secondaryText)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .trailing, spacing: 4) {
+                if !event.issues.isEmpty {
+                    Button("排除此条误报") { store.dismissIssues(id: event.id) { _ in onRefresh() } }
+                        .controlSize(.small)
+                        .accessibilityLabel("排除此条误报：\(event.source)")
+                }
+                Button("删除片段") { store.delete(ids: [event.id]) { _ in onRefresh() } }
+                    .controlSize(.small)
+                    .accessibilityLabel("删除片段：\(event.source)")
+            }
+        }
+        .padding(.vertical, 10)
     }
 }
