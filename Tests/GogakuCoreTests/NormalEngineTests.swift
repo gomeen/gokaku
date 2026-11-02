@@ -107,6 +107,38 @@ final class NormalEngineTests: XCTestCase {
         XCTAssertNotNil(CustomWordStore.validate(kind: Int32(GC_WORD_PINYIN), code: "", pinyin: "hui'yi", content: "会议纪"))
     }
 
+    func testFactoryCustomPinyinInBothSchemesAndReload() throws {
+        let word = CustomWord(kind: Int32(GC_WORD_PINYIN), enabled: true,
+                              code: "", pinyin: "ji'shi'jiao", content: "极视角")
+        for (scheme, keys) in [(GC_SCHEME_XIAOHE, "jiuijn"), (GC_SCHEME_FULLPINYIN, "jishijiao")] {
+            for reload in [false, true] {
+                XCTAssertTrue(CustomWordStore.write(path: wordsPath.path, words: reload ? [] : [word]))
+                let engine = engine()
+                engine.update(scheme: Int32(scheme.rawValue), fuzzyMask: 0,
+                              fullPinyinPreedit: true, freqEnabled: false)
+                if reload {
+                    XCTAssertTrue(CustomWordStore.write(path: wordsPath.path, words: [word]))
+                    XCTAssertTrue(engine.reloadCustomWords())
+                }
+                let snapshot = try XCTUnwrap(type(keys, on: engine))
+                XCTAssertEqual(snapshot.preedit, "ji'shi'jiao")
+                XCTAssertEqual(snapshot.candidates.first?.text, "极视角")
+                XCTAssertEqual(snapshot.candidates.first?.kind, Int32(GC_CAND_PINYIN_WORD))
+                let commit = try XCTUnwrap(engine.handle(.space, app: "test.app", field: "f", timeMs: 0))
+                XCTAssertEqual(commit.commit, "极视角")
+                XCTAssertFalse(engine.quickAddAvailable)
+            }
+        }
+    }
+
+    func testFactoryAutoPinyinUsesCommonReadings() {
+        for (word, pinyin) in [("极视角", "ji'shi'jiao"), ("角", "jiao"), ("会议", "hui'yi")] {
+            XCTAssertEqual(CustomWordStore.autoPinyin(dictPath: dictPath.path, hanzi: word), pinyin)
+        }
+        XCTAssertNil(CustomWordStore.autoPinyin(dictPath: dir.appendingPathComponent("missing.dict").path,
+                                              hanzi: "极视角"))
+    }
+
     func testFocusSyncAndAppDefaults() throws {
         let engine = engine()
         engine.setAppDefaults(["com.raycast.macos"])

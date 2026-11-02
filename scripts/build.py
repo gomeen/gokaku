@@ -296,6 +296,16 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
         helper = contents / 'Helpers/GogakuTranslator'
         shutil.copy2(BUILD_ROOT / 'swift' / configuration / 'GogakuTranslator', helper)
         bundle_libraries(helper, contents / 'Frameworks')
+    elif executable == 'GogakuSettings':
+        # 自动读音只需出厂词典；设置应用必须能独立运行，不依赖开发缓存。
+        data = contents / 'Resources/EngineData'
+        data.mkdir()
+        lock = json.loads((CACHE / 'dependencies.lock.json').read_text())
+        source = CACHE / 'data/sc.dict'
+        if digest(source) != lock['artifacts']['sc.dict']:
+            raise RuntimeError('设置应用词典校验失败 sc.dict')
+        shutil.copyfile(source, data / 'sc.dict')
+        (data / 'sc.dict').chmod(0o644)
     (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
     write_build_identity(contents, meta)
     licenses(contents / 'Licenses')

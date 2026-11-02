@@ -40,8 +40,9 @@ constexpr int64_t kQuickAddWindowMs = 60000;
 // 词典下标：0 = 出厂 SystemDict；libime TrieDictionary 仅提供两个槽位
 // （SystemDict／UserDict），自定义拼音词与已学习词共用 idx 1。
 constexpr size_t kUserDictIdx = 1;
-// libime 词条 cost 越低越优；自定义词与已学习词给明显低值。
-constexpr float kCustomWordCost = -18.0f;
+// libime 的 cost 加到语言模型分数上，值越大越优；不能当作待最小化的代价。
+// 自定义拼音词用正值提升，避免未知词在解码阶段被剪枝（提升候选排序已来不及）。
+constexpr float kCustomWordCost = 18.0f;
 constexpr float kLearnedWordCost = -12.0f;
 
 char *copy_cstr(const std::string &s) {

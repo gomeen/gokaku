@@ -764,6 +764,67 @@ void test_custom_words(const Env &env) {
     }
 }
 
+// 使用真实出厂词典：小型测试词典无法暴露生僻自定义词在解码时被剪枝的问题。
+void test_factory_custom_pinyin(const Env &env) {
+    Env factory = env;
+    factory.dictPath = (std::filesystem::path(env.modelPath).parent_path() / "sc.dict").string();
+    const std::string header = "#gogaku-custom-words\tv1\n";
+    const std::string word = "1\t1\t\tji'shi'jiao\t极视角\n";
+    struct Case { int32_t scheme; const char *keys; const char *sentence; };
+    const Case cases[] = {
+        {GC_SCHEME_XIAOHE, "jiuijn", "woxlkjjiuijn"},
+        {GC_SCHEME_FULLPINYIN, "jishijiao", "woxiangkanjishijiao"},
+    };
+    for (const auto &c : cases) {
+        for (bool reload : {false, true}) {
+            write_file(factory.wordsPath, reload ? header : header + word);
+            auto *s = make_session(factory, false, c.scheme);
+            if (s == nullptr) continue;
+            if (reload) {
+                write_file(factory.wordsPath, header + word);
+                check(gc_normal_reload_custom_words(s) == 0, "新增拼音词后重载成功");
+            }
+            for (char k : std::string(c.keys)) {
+                DelSnap d{send(s, GC_EV_TEXT, std::string(1, k))};
+            }
+            DelSnap v{send(s, GC_EV_END)};
+            check_eq(cand_text(v.p, 0), "极视角", "出厂词典中自定义拼音词置顶（双拼／全拼，初载／重载）");
+            check_eq(cand_kind(v.p, 0), GC_CAND_PINYIN_WORD, "生僻自定义词保留自定义类别");
+            DelSnap sp{send(s, GC_EV_SPACE)};
+            check_eq(sp.p ? sp.p->commit : "", "极视角", "生僻自定义词一次上屏");
+            check(gc_normal_quick_add_available(s) == 0, "生僻自定义词不进入快速添加记录");
+            for (char k : std::string(c.sentence)) {
+                DelSnap d{send(s, GC_EV_TEXT, std::string(1, k))};
+            }
+            DelSnap sentence{send(s, GC_EV_SPACE)};
+            check_eq(sentence.p ? sentence.p->commit : "", "我想看极视角", "生僻自定义拼音词参与长句组句");
+            gc_normal_session_destroy(s);
+        }
+    }
+}
+
+void test_factory_auto_pinyin(const Env &env) {
+    const std::string dict = (std::filesystem::path(env.modelPath).parent_path() / "sc.dict").string();
+    const std::vector<std::pair<std::string, std::string>> cases = {
+        {"极视角", "ji'shi'jiao"}, {"极", "ji"}, {"视", "shi"},
+        {"角", "jiao"}, {"会议", "hui'yi"},
+    };
+    for (const auto &[word, expected] : cases) {
+        char *out = nullptr;
+        check(gc_custom_pinyin_lookup(dict.c_str(), word.c_str(), &out) == 0,
+              "真实出厂词典自动读音成功：" + word);
+        check_eq(out ? out : "", expected, "真实出厂词典优先常用读音：" + word);
+        free(out);
+    }
+    char *missing = nullptr;
+    check(gc_custom_pinyin_lookup((env.dir + "/missing.dict").c_str(), "极", &missing) == 2,
+          "自动读音缺词典时明确失败");
+    check(missing == nullptr, "自动读音失败不返回部分结果");
+    check(gc_custom_pinyin_lookup(env.dictPath.c_str(), "极", &missing) == 2,
+          "自动读音确实缺字时明确失败");
+    check(missing == nullptr, "缺字不返回部分读音");
+}
+
 void test_quick_add(const Env &env) {
     write_file(env.wordsPath, "#gogaku-custom-words\tv1\n");
     auto *s = make_session(env);
@@ -1188,6 +1249,8 @@ int main() {
         {"full_pinyin", test_full_pinyin_scheme},
         {"fuzzy", test_fuzzy},
         {"custom_words", test_custom_words},
+        {"factory_custom_pinyin", test_factory_custom_pinyin},
+        {"factory_auto_pinyin", test_factory_auto_pinyin},
         {"quick_add", test_quick_add},
         {"delete_word", test_delete_word},
         {"delete_prefixed_learned_word", test_delete_prefixed_learned_word},

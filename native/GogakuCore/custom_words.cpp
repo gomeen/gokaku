@@ -199,19 +199,16 @@ std::mutex g_reading_mutex;
 std::unordered_map<std::string, std::unordered_map<std::string, CharReading>> g_reading_cache;
 
 bool parse_dump_line(const std::string &line, std::string &hanzi, std::string &pinyin, float &cost) {
-    // 行格式：hanzi pinyin [weight]；hanzi 含空格时带引号（单字不会）。
-    auto fields = split_line(line);
-    if (fields.size() < 2 || fields.size() > 3) return false;
-    if (fields.size() == 3) {
-        try {
-            cost = std::stof(fields[2]);
-        } catch (...) {
-            return false;
-        }
-    }
-    hanzi = fields[0];
-    pinyin = fields[1];
-    return true;
+    // libime 导出格式是空白分隔的 hanzi pinyin [score]，不是自定义文件的 TSV。
+    // 这里只提取单字，带引号／空格的多字词在下方过滤。
+    std::istringstream fields(line);
+    if (!(fields >> hanzi >> pinyin)) return false;
+    cost = 0.0f;
+    fields >> std::ws;
+    if (fields.eof()) return true;
+    if (!(fields >> cost)) return false;
+    fields >> std::ws;
+    return fields.eof();
 }
 
 bool build_readings(const char *dict_path, char *err, size_t err_len) {
@@ -230,7 +227,8 @@ bool build_readings(const char *dict_path, char *err, size_t err_len) {
             if (!parse_dump_line(line, hanzi, pinyin, cost)) continue;
             if (scalar_count(hanzi) != 1 || !is_han_scalar(first_scalar(hanzi))) continue;
             auto it = readings.find(hanzi);
-            if (it == readings.end() || cost < it->second.cost) {
+            // 与 libime 解码一致：分数越大越常用（例如 角 的 jiao 高于 jue）。
+            if (it == readings.end() || cost > it->second.cost) {
                 readings[hanzi] = CharReading{pinyin, cost};
             }
         }

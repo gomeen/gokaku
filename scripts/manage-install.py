@@ -62,22 +62,23 @@ def verify_install(source: Path, target: Path):
     if not manifest_path.exists():
         raise SystemExit('缺少 dist/bundle-manifest.json；请用 scripts/build.py 构建后再安装。')
     manifest = {entry['path']: entry for entry in json.loads(manifest_path.read_text())}
-    prefix = str(target) + '/'
+    # build.py 写入的 manifest 路径相对于 dist（如 'Gogaku.app/Contents/...'），
+    # 不是绝对路径；前缀必须按同一基准算，否则一个条目都匹配不上。
+    prefix = str(source.relative_to(manifest_path.parent)) + '/'
     installed = {str(p): p for p in target.rglob('*') if p.is_file()}
     for rel, entry in manifest.items():
-        if not rel.startswith(str(source) + '/'):
+        if not rel.startswith(prefix):
             continue
-        rel_path = rel.removeprefix(str(source) + '/')
-        installed_path = target / rel_path
+        installed_path = target / rel.removeprefix(prefix)
         if not installed_path.is_file():
-            raise SystemExit(f'安装不完整：缺少 {rel_path}')
+            raise SystemExit(f'安装不完整：缺少 {rel}')
         if file_digest(installed_path) != entry['sha256']:
             raise SystemExit(f'哈希不一致：{installed_path}（期望 {entry["sha256"][:12]}…）')
         installed.pop(str(installed_path), None)
     extra = [p for p in installed if '__pycache__' not in p]
     if extra:
         raise SystemExit(f'安装目录含清单外文件：{extra[:3]}')
-    print(f'已核对 {target} 运行时哈希（{len([r for r in manifest if r.startswith(str(source) + "/")])} 个文件与 dist 清单一致）')
+    print(f'已核对 {target} 运行时哈希（{sum(1 for r in manifest if r.startswith(prefix))} 个文件与 dist 清单一致）')
 
 def file_digest(path: Path) -> str:
     with path.open('rb') as f:

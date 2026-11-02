@@ -88,6 +88,31 @@ def engine_smoke(app):
     finally: lib.ge_destroy(handle)
     return 'passed_factory_xiaohe_from_package'
 
+def auto_pinyin_smoke(app):
+    """设置应用通过自己的动态库与随包字典自动读音，不依赖开发缓存。"""
+    lib = c.CDLL(str(app / 'Contents/Frameworks/libgogaku_core.dylib'))
+    lookup = lib.gc_custom_pinyin_lookup
+    lookup.argtypes = [c.c_char_p, c.c_char_p, c.POINTER(c.c_void_p)]
+    lookup.restype = c.c_int
+    release = c.CDLL(None).free
+    release.argtypes = [c.c_void_p]
+    dictionary = app / 'Contents/Resources/EngineData/sc.dict'
+    assert dictionary.is_file(), '设置应用缺少自动读音所需的随包字典'
+    results = {}
+    for word, expected in [('极视角', "ji'shi'jiao"), ('角', 'jiao'), ('会议', "hui'yi")]:
+        value = c.c_void_p()
+        rc = lookup(str(dictionary).encode(), word.encode(), c.byref(value))
+        try:
+            assert rc == 0 and value.value, f'设置应用自动读音失败：{word} rc={rc}'
+            actual = c.string_at(value).decode()
+            assert actual == expected, (word, actual, expected)
+            results[word] = actual
+        finally:
+            if value.value:
+                release(value)
+    return {'status': 'passed_from_settings_package', 'readings': results,
+            'dictSHA256': hashlib.sha256(dictionary.read_bytes()).hexdigest()}
+
 def spelling_smoke(app):
     helper = app / 'Contents/Helpers/GogakuTranslator'
     status = json.loads(run([helper, '--status']))
@@ -180,7 +205,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     report = {'checkedAt': datetime.now(timezone.utc).isoformat(), 'apps': [inspect(args.input_app), inspect(args.settings_app)],
               'menuIcon': menu_icon(args.input_app), 'engine': engine_smoke(args.input_app), 'normalCore': normal_core_smoke(args.input_app),
-              'dataAndLicenses': data_and_license_smoke(args.input_app), **spelling_smoke(args.input_app),
+              'dataAndLicenses': data_and_license_smoke(args.input_app),
+              'settingsAutoPinyin': auto_pinyin_smoke(args.settings_app), **spelling_smoke(args.input_app),
               'hostAcceptance': 'not_tested', 'qualityAcceptance': 'not_tested', 'performanceAcceptance': 'not_tested'}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
