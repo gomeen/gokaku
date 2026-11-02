@@ -88,6 +88,6 @@
 ## 8. 本轮验证产物
 
 - fast 档：`verify/report-fast-*.json`（version／resources／core-tests／swift-tests 全 passed）。
-- release 档：`verify/report-release-*.json`（干净构建、包检查、质量、渲染、40 轮可靠性、插桩、安装预检）。
-- host 档：`verify/report-host-*.json`（默认 blocked＋计划；`--yes` 后执行真实矩阵）。
+- release 档（完整跑，2026-11-02）：`verify/report-release-20261102-091139.json` —— 11 项中 10 项 passed，asan-ubsan 一项因检查脚本自身只读 stdout 而误判 failed（fuzz 实际输出为 PASS，证据见同目录 `asan-ubsan.log`）；判定修复后重跑该单项：`verify/report-release-20261102-111248.json` passed（100000 序列 / 1250029 事件，失败 0）。合并后全部 11 项均有 passed 证据。
+- host 档：`verify/report-host-*.json`（默认 blocked＋计划，含 Orca Shift 专项；`--yes` 后执行真实矩阵，需用户空闲时段）。
 - 释义审阅：[gloss-simplification-review.md](gloss-simplification-review.md)。
