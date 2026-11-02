@@ -33,22 +33,15 @@ GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
                 @try { [client attributesForCharacterIndex:selection.location lineHeightRectangle:&rectangle]; }
                 @catch (NSException *nested) { rectangle = NSZeroRect; }
             }
-            // Orca 1.4.246 实测（2026-11-02 诊断日志）：组合（marked range）覆盖
-            // 插入点时，对插入点索引返回零矩形，组合结束后恢复有效。此时改查
-            // 组合起点 markedRange.location——同样是宿主真实测量，不是虚构回退
-            //（与鼠须管同款做法）；面板跟随组合起点，组合结束恢复插入点跟踪。
-            // Orca 对组合内起点也返回零矩形，最终由控制器冻结组合内最后有效
-            // 锚点（refreshDisplayPosition）；仍无效才落零矩形（隐藏保留组合）。
+            // 零宽光标矩形可以有效（caret 无宽度）；非有限值或负尺寸才是无效。
+            // 组合中矩形无效（Orca 1.4.246 对组合覆盖的插入点返回零矩形）由控
+            // 制器冻结组合内最后有效锚点（refreshDisplayPosition）；此处不做
+            // 组合起点索引回退——网页/Electron 输入框对组合起点返回控件原点
+            // 附近的矩形，会被误当合法锚点把面板钉到屏幕左上角（2026-11-02
+            // 用户报告后撤销该回退）。
             rectangleValid = isfinite(rectangle.origin.x) && isfinite(rectangle.origin.y)
                 && isfinite(rectangle.size.width) && isfinite(rectangle.size.height)
                 && rectangle.size.width >= 0 && rectangle.size.height > 0;
-            if (!rectangleValid && marked.location != NSNotFound && marked.length > 0) {
-                @try { [client attributesForCharacterIndex:marked.location lineHeightRectangle:&rectangle]; }
-                @catch (NSException *nested) { rectangle = NSZeroRect; }
-                rectangleValid = isfinite(rectangle.origin.x) && isfinite(rectangle.origin.y)
-                    && isfinite(rectangle.size.width) && isfinite(rectangle.size.height)
-                    && rectangle.size.width >= 0 && rectangle.size.height > 0;
-            }
         }
         GGHostSnapshot *result = [GGHostSnapshot new];
         result.clientID = @""; result.application = application;
