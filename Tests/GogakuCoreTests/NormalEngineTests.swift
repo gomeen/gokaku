@@ -3,7 +3,7 @@ import XCTest
 import CGogakuCore
 
 /// 共享 C++ 普通模式核心的 Swift 桥接回归。
-/// 详细事件轨迹向量在 native/GogakuCore/tests（195 项断言）；这里覆盖桥接层合同：
+/// 详细事件轨迹向量在 native/GogakuCore/tests（348 项检查断言）；这里覆盖桥接层合同：
 /// 配置传递、事件映射、自定义词语读写与校验、快速添加记录。
 final class NormalEngineTests: XCTestCase {
     var dir: URL!
@@ -75,20 +75,20 @@ final class NormalEngineTests: XCTestCase {
     func testShiftClickCommitAndToggle() throws {
         let engine = engine()
         _ = type("nihc", on: engine)
-        // 组合中 Shift：原编码上屏、不切英文（规格）。
+        // 组合中 Shift：暂存＋剩余原编码一次上屏，同一事件进入临时英文。
         let shift = try XCTUnwrap(engine.handle(.shiftClick(side: 0), app: "test.app", field: "f", timeMs: 0))
         XCTAssertEqual(shift.commit, "nihc")
-        XCTAssertEqual(shift.english, 0)
+        XCTAssertEqual(shift.english, 1)
+        XCTAssertEqual(shift.toast, 2)
         XCTAssertFalse(shift.composing)
-        // 未组合单击切换英文；字母直通。
-        let toggle = try XCTUnwrap(engine.handle(.shiftClick(side: 0), app: "test.app", field: "f", timeMs: 0))
-        XCTAssertEqual(toggle.english, 1)
-        XCTAssertEqual(toggle.toast, 2)
+        // 提交后的字母按英文直输交还宿主。
         let pass = try XCTUnwrap(engine.handle(.text("x"), app: "test.app", field: "f", timeMs: 0))
         XCTAssertFalse(pass.consumed)
-        // 再切回中文并完成一次普通上屏（出厂词典）。
+        // 再按 Shift 切回中文（临时英文→中文，不回按应用默认）。
         let back = try XCTUnwrap(engine.handle(.shiftClick(side: 0), app: "test.app", field: "f", timeMs: 0))
         XCTAssertEqual(back.english, 0)
+        XCTAssertEqual(back.toast, 1)
+        // 中文组合恢复正常（出厂词典）。
         let snap = try XCTUnwrap(type("nihc", on: engine))
         XCTAssertEqual(snap.candidates.first?.text, "你好")
     }
@@ -163,6 +163,8 @@ final class NormalEngineTests: XCTestCase {
         XCTAssertEqual(restored.candidates.first?.text, "你好")
         _ = engine.handle(.esc, app: app, field: "f", timeMs: 0)
         XCTAssertEqual(engine.handle(.shiftClick(side: 0), app: app, field: "f", timeMs: 0)?.english, 1)
+        // 临时英文态下 restoreRawInput 仍能回到中文并组合：
+        // Shift 覆盖为中文后一次性重放（临时英文→中文不再经过按应用默认）。
         restored = try XCTUnwrap(engine.restoreRawInput("nihc", app: app, field: "f", timeMs: 0))
         XCTAssertEqual(restored.english, 0)
         XCTAssertEqual(restored.rawInput, "nihc")

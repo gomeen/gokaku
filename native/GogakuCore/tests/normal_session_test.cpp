@@ -393,45 +393,108 @@ void test_paging(const Env &env) {
 }
 
 void test_shift(const Env &env) {
-    auto *s = make_session(env);
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-    DelSnap in{send(s, GC_EV_SHIFT_CLICK)};
-    check_eq(in.p ? in.p->commit : "", "nihc", "组合中 Shift 上屏原编码");
-    check(in.p != nullptr && in.p->english == 0, "组合中 Shift 不切英文");
-    check(in.p != nullptr && in.p->composing == 0, "组合中 Shift 后组合结束");
-    // Shift 提交必须更新最近上屏字符：反例「数字 → 字母组合 → Shift → 句号／冒号」。
-    // 修复前 lastChar 仍停在数字 7，句号错误沿用数字后半角规则输出半角 "."。
-    DelSnap digit{send(s, GC_EV_TEXT, "7")};
-    check(digit.p != nullptr && digit.p->consumed == 0, "无组合数字交还宿主");
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-    DelSnap rawCommit{send(s, GC_EV_SHIFT_CLICK)};
-    check_eq(rawCommit.p ? rawCommit.p->commit : "", "nihc", "数字后组合 Shift 上屏原编码");
-    DelSnap dot{send(s, GC_EV_TEXT, ".")};
-    check_eq(dot.p ? dot.p->commit : "", "。", "Shift 提交字母后句号恢复全角（修复点）");
-    DelSnap digit2{send(s, GC_EV_TEXT, "9")};
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
-    DelSnap partialCommit{send(s, GC_EV_SHIFT_CLICK)};
-    check_eq(partialCommit.p ? partialCommit.p->commit : "", "ni", "部分编码 Shift 上屏剩余原编码");
-    DelSnap colon{send(s, GC_EV_TEXT, ":")};
-    check_eq(colon.p ? colon.p->commit : "", "：", "Shift 提交字母后冒号恢复全角");
-    // 对照：真数字后仍保持半角（不因修复扩大例外范围）。
-    DelSnap digit3{send(s, GC_EV_TEXT, "3")};
-    DelSnap dot2{send(s, GC_EV_TEXT, ".")};
-    check_eq(dot2.p ? dot2.p->commit : "", ".", "真数字后句号仍保持半角");
-    // 对照：Enter 提交同规则（提交后标点全角）。
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-    DelSnap enterCommit{send(s, GC_EV_ENTER)};
-    check_eq(enterCommit.p ? enterCommit.p->commit : "", "nihc", "Enter 上屏原编码");
-    DelSnap dot3{send(s, GC_EV_TEXT, ".")};
-    check_eq(dot3.p ? dot3.p->commit : "", "。", "Enter 提交后句号全角");
-    DelSnap idle{send(s, GC_EV_SHIFT_CLICK)};
-    check(idle.p != nullptr && idle.p->english == 1, "未组合单击切临时英文");
-    check(idle.p != nullptr && idle.p->toast == 2, "英文提示 toast");
-    DelSnap letter{send(s, GC_EV_TEXT, "x")};
-    check(letter.p != nullptr && letter.p->consumed == 0, "英文模式字母交还宿主");
-    DelSnap back{send(s, GC_EV_SHIFT_CLICK)};
-    check(back.p != nullptr && back.p->english == 0 && back.p->toast == 1, "再按切回中文");
-    gc_normal_session_destroy(s);
+    { // 组合中 Shift：暂存＋剩余原编码一次上屏，同一事件进入临时英文。
+        auto *s = make_session(env);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        DelSnap in{send(s, GC_EV_SHIFT_CLICK)};
+        check_eq(in.p ? in.p->commit : "", "nihc", "组合中 Shift 上屏原编码");
+        check(in.p != nullptr && in.p->english == 1, "组合中 Shift 进入临时英文");
+        check(in.p != nullptr && in.p->toast == 2, "组合中 Shift 英文提示");
+        check(in.p != nullptr && in.p->composing == 0, "组合中 Shift 后组合结束");
+        check(in.p != nullptr && in.p->consumed == 1, "组合中 Shift 事件被消费");
+        // 提交后的字母／标点按英文直输交还宿主（核心不产出，保持半角）。
+        DelSnap letter{send(s, GC_EV_TEXT, "x")};
+        check(letter.p != nullptr && letter.p->consumed == 0, "临时英文字母交还宿主");
+        DelSnap dot{send(s, GC_EV_TEXT, ".")};
+        check(dot.p != nullptr && dot.p->consumed == 0, "临时英文句号交还宿主");
+        check_eq(dot.p ? dot.p->commit : "", "", "临时英文核心不产出标点");
+        // 再按 Shift 切回中文（临时英文→中文），此后标点才映射全角。
+        DelSnap back{send(s, GC_EV_SHIFT_CLICK)};
+        check(back.p != nullptr && back.p->english == 0 && back.p->toast == 1, "再按 Shift 切回中文");
+        DelSnap dot2{send(s, GC_EV_TEXT, ".")};
+        check_eq(dot2.p ? dot2.p->commit : "", "。", "切回中文后句号映射全角");
+        gc_normal_session_destroy(s);
+    }
+    { // lastChar 回归载体：数字直通 → 组合 Shift 提交 → 切回中文 → 句号应得全角。
+        // 修复前 lastChar 仍停在数字 7，句号错误沿用数字后半角规则输出半角 "."。
+        auto *s = make_session(env);
+        DelSnap digit{send(s, GC_EV_TEXT, "7")};
+        check(digit.p != nullptr && digit.p->consumed == 0, "无组合数字交还宿主");
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        DelSnap rawCommit{send(s, GC_EV_SHIFT_CLICK)};
+        check_eq(rawCommit.p ? rawCommit.p->commit : "", "nihc", "数字直通后组合 Shift 上屏原编码");
+        check(rawCommit.p != nullptr && rawCommit.p->english == 1, "数字直通后组合 Shift 进英文");
+        DelSnap back{send(s, GC_EV_SHIFT_CLICK)};
+        check(back.p != nullptr && back.p->english == 0, "切回中文");
+        DelSnap dot{send(s, GC_EV_TEXT, ".")};
+        check_eq(dot.p ? dot.p->commit : "", "。", "Shift 提交字母后句号恢复全角（lastChar 已更新）");
+        gc_normal_session_destroy(s);
+    }
+    { // 分段（部分暂存）组合：Shift 上屏＝已暂存中文＋剩余原编码。
+        auto *s = make_session(env);
+        DelSnap v{nullptr};
+        for (char k : std::string("wojbtm")) { auto *snap = send(s, GC_EV_TEXT, std::string(1, k)); if (snap) { gc_snapshot_free(v.p); v.p = snap; } }
+        long wo = -1;
+        for (size_t i = 0; i < v.p->count; ++i) if (cand_text(v.p, i) == "我") { wo = static_cast<long>(i); break; }
+        check(wo >= 0, "候选中存在分段 我");
+        if (wo >= 0) {
+            send(s, GC_EV_TEXT, std::to_string(wo + 1));  // 暂存 我，剩余 jbtm 继续组合
+            DelSnap partCommit{send(s, GC_EV_SHIFT_CLICK)};
+            check_eq(partCommit.p ? partCommit.p->commit : "", "我jbtm", "分段组合 Shift＝暂存＋剩余原编码");
+            check(partCommit.p != nullptr && partCommit.p->english == 1, "分段组合 Shift 进临时英文");
+            check(partCommit.p != nullptr && partCommit.p->composing == 0, "分段组合 Shift 后组合结束");
+        }
+        gc_normal_session_destroy(s);
+    }
+    { // 大写字面段组合：Shift 上屏＝字面段＋剩余原编码。
+        auto *s = make_session(env, false);
+        send(s, GC_EV_TEXT, "C"); send(s, GC_EV_TEXT, "p"); send(s, GC_EV_TEXT, "j");
+        DelSnap litCommit{send(s, GC_EV_SHIFT_CLICK)};
+        check_eq(litCommit.p ? litCommit.p->commit : "", "Cpj", "大写字面段组合 Shift 一次上屏");
+        check(litCommit.p != nullptr && litCommit.p->english == 1, "大写字面段组合 Shift 进临时英文");
+        gc_normal_session_destroy(s);
+    }
+    { // 左右 Shift 等价：组合中提交进英文，无组合切换，再按回中文。
+        auto *s = make_session(env);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
+        DelSnap right{send(s, GC_EV_SHIFT_CLICK, "", 1)};
+        check_eq(right.p ? right.p->commit : "", "ni", "右 Shift 组合中上屏原编码");
+        check(right.p != nullptr && right.p->english == 1 && right.p->toast == 2, "右 Shift 进临时英文");
+        DelSnap back{send(s, GC_EV_SHIFT_CLICK, "", 1)};
+        check(back.p != nullptr && back.p->english == 0 && back.p->toast == 1, "右 Shift 切回中文");
+        DelSnap idle{send(s, GC_EV_SHIFT_CLICK, "", 1)};
+        check(idle.p != nullptr && idle.p->english == 1 && idle.p->toast == 2, "右 Shift 未组合切临时英文");
+        gc_normal_session_destroy(s);
+    }
+    { // 两次连续 Shift 往返：提交并进英文 → 再按回中文 → 中文组合恢复。
+        auto *s = make_session(env);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        DelSnap first{send(s, GC_EV_SHIFT_CLICK)};
+        check(first.p != nullptr && first.p->english == 1, "第一次 Shift 提交并进英文");
+        DelSnap second{send(s, GC_EV_SHIFT_CLICK)};
+        check(second.p != nullptr && second.p->english == 0 && second.p->toast == 1, "第二次 Shift 回中文");
+        DelSnap letter{send(s, GC_EV_TEXT, "n")};
+        check(letter.p != nullptr && letter.p->composing == 1, "回中文后字母重新进入组合");
+        gc_normal_session_destroy(s);
+    }
+    { // 对照：真数字后半角例外不因 Shift 规则扩大范围。
+        auto *s = make_session(env);
+        DelSnap digit3{send(s, GC_EV_TEXT, "3")};
+        check(digit3.p != nullptr && digit3.p->consumed == 0, "真数字交还宿主");
+        DelSnap dot{send(s, GC_EV_TEXT, ".")};
+        check_eq(dot.p ? dot.p->commit : "", ".", "真数字后句号仍保持半角");
+        gc_normal_session_destroy(s);
+    }
+    { // 对照：Enter 仍只上屏原编码并保持中文。
+        auto *s = make_session(env);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        DelSnap enterCommit{send(s, GC_EV_ENTER)};
+        check_eq(enterCommit.p ? enterCommit.p->commit : "", "nihc", "Enter 上屏原编码");
+        check(enterCommit.p != nullptr && enterCommit.p->english == 0, "Enter 不切英文（保持中文）");
+        DelSnap dot{send(s, GC_EV_TEXT, ".")};
+        check_eq(dot.p ? dot.p->commit : "", "。", "Enter 提交后句号全角");
+        gc_normal_session_destroy(s);
+    }
 }
 
 void test_per_app_english(const Env &env) {
@@ -454,6 +517,25 @@ void test_per_app_english(const Env &env) {
     check(esc.p != nullptr && esc.p->english == 2, "无组合 Esc 回到应用默认");
     DelSnap esc2{send(s, GC_EV_ESC, "", 0, 0, "com.raycast", "f1")};
     check(esc2.p != nullptr && esc2.p->consumed == 0, "已是默认时 Esc 交还宿主");
+    // 新规格完整链：覆盖默认英文为中文 → 组合 Shift 提交进临时英文 →
+    // 再 Shift 回中文（不回按应用默认）→ Esc 恢复应用默认。
+    DelSnap cn{send(s, GC_EV_SHIFT_CLICK, "", 0, 0, "com.raycast", "f1")};
+    check(cn.p != nullptr && cn.p->english == 0, "再次 Shift 覆盖默认英文为中文");
+    send(s, GC_EV_TEXT, "n", 0, 0, "com.raycast", "f1");
+    send(s, GC_EV_TEXT, "i", 0, 0, "com.raycast", "f1");
+    send(s, GC_EV_TEXT, "h", 0, 0, "com.raycast", "f1");
+    send(s, GC_EV_TEXT, "c", 0, 0, "com.raycast", "f1");
+    DelSnap commitShift{send(s, GC_EV_SHIFT_CLICK, "", 0, 0, "com.raycast", "f1")};
+    check_eq(commitShift.p ? commitShift.p->commit : "", "nihc", "默认英文应用内组合 Shift 上屏原编码");
+    check(commitShift.p != nullptr && commitShift.p->english == 1 && commitShift.p->toast == 2,
+          "组合 Shift 提交后进临时英文");
+    DelSnap letter2{send(s, GC_EV_TEXT, "x", 0, 0, "com.raycast", "f1")};
+    check(letter2.p != nullptr && letter2.p->consumed == 0, "临时英文字母直通");
+    DelSnap back{send(s, GC_EV_SHIFT_CLICK, "", 0, 0, "com.raycast", "f1")};
+    check(back.p != nullptr && back.p->english == 0 && back.p->toast == 1,
+          "临时英文 Shift 回中文（不回按应用默认）");
+    DelSnap esc3{send(s, GC_EV_ESC, "", 0, 0, "com.raycast", "f1")};
+    check(esc3.p != nullptr && esc3.p->english == 2, "Esc 恢复应用默认不变");
     gc_normal_session_destroy(s);
 }
 
@@ -834,11 +916,22 @@ void test_quick_add(const Env &env) {
     check(gc_normal_quick_add_available(s) == 1, "完整上屏后有可快速添加记录");
     DelSnap add{send(s, GC_EV_QUICK_ADD, "", 0, 1000)};
     check_eq(add.p ? add.p->status : "", "已加入「你好」", "快速添加成功提示");
-    // 再次添加：已存在
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-    send(s, GC_EV_SPACE);
-    DelSnap dup{send(s, GC_EV_QUICK_ADD, "", 0, 2000)};
-    check_eq(dup.p ? dup.p->status : "", "已存在", "重复添加提示已存在");
+    // 再次添加：已存在。加入自定义词后整码空格走拼音词提交（不可快速添加），
+    // 改用分段暂存（nih 下选不完整覆盖的 你，补 c 后整句提交）触发已学习提交。
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
+    DelSnap vnih{send(s, GC_EV_TEXT, "h")};
+    long ni = -1;
+    for (size_t i = 0; i < vnih.p->count; ++i) {
+        if (cand_text(vnih.p, i) == "你" && vnih.p->candidates[i].completes == 0) { ni = static_cast<long>(i); break; }
+    }
+    check(ni >= 0, "nih 候选中存在不完整覆盖的 你");
+    if (ni >= 0) {
+        send(s, GC_EV_TEXT, std::to_string(ni + 1));  // 暂存 你，剩余 h 继续组合
+        send(s, GC_EV_TEXT, "c");                     // 剩余 hao 完整编码
+        send(s, GC_EV_SPACE);                         // 整句 你好 已学习提交
+        DelSnap dup{send(s, GC_EV_QUICK_ADD, "", 0, 2000)};
+        check_eq(dup.p ? dup.p->status : "", "已存在", "重复添加提示已存在");
+    }
     // 超过 60 秒：交还宿主
     send(s, GC_EV_TEXT, "k"); send(s, GC_EV_TEXT, "d"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "v");
     send(s, GC_EV_SPACE);
@@ -866,6 +959,45 @@ void test_quick_add(const Env &env) {
     send(s, GC_EV_SPACE, "", 0, 0, "excluded.app", "f1");
     DelSnap ex{send(s, GC_EV_QUICK_ADD, "", 0, 4000, "excluded.app", "f1")};
     check(ex.p != nullptr && ex.p->consumed == 0, "排除应用不可快速添加");
+    // 原编码上屏不可快速添加：非「已学习中文候选提交」的上屏路径使记录失效。
+    // 基线用 jbtm→今天（今天不在自定义表中，空格提交是已学习提交）。
+    { // 中文空格提交后可用；Enter 原编码上屏后不可用。
+        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
+        DelSnap today{send(s, GC_EV_SPACE)};
+        check_eq(today.p ? today.p->commit : "", "今天", "基线：今天已学习提交");
+        check(gc_normal_quick_add_available(s) == 1, "中文空格提交后可快速添加");
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        send(s, GC_EV_ENTER);
+        check(gc_normal_quick_add_available(s) == 0, "Enter 原编码上屏后不可快速添加");
+    }
+    { // 组合中 Shift 原编码上屏后不可用。
+        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
+        send(s, GC_EV_SPACE);
+        check(gc_normal_quick_add_available(s) == 1, "再次中文空格提交后可快速添加");
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        send(s, GC_EV_SHIFT_CLICK);
+        check(gc_normal_quick_add_available(s) == 0, "Shift 原编码上屏后不可快速添加");
+    }
+    { // 组合中未处理字符先上屏原编码再交还：同样失效。
+        send(s, GC_EV_SHIFT_CLICK);  // 上一块以临时英文结束，先切回中文
+        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
+        send(s, GC_EV_SPACE);
+        check(gc_normal_quick_add_available(s) == 1, "第三次中文空格提交后可快速添加");
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
+        DelSnap slash{send(s, GC_EV_TEXT, "/")};
+        check(slash.p != nullptr && slash.p->consumed == 0, "未处理字符交还宿主");
+        check_eq(slash.p ? slash.p->commit : "", "nih", "未处理字符先上屏原编码");
+        check(gc_normal_quick_add_available(s) == 0, "原编码交还前上屏后不可快速添加");
+    }
+    { // 数字 0 走纯原编码前缀上屏（高亮候选不完整覆盖）：同样失效。
+        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
+        send(s, GC_EV_SPACE);
+        check(gc_normal_quick_add_available(s) == 1, "第四次中文空格提交后可快速添加");
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
+        DelSnap zero{send(s, GC_EV_TEXT, "0")};
+        check_eq(zero.p ? zero.p->commit : "", "nih0", "数字 0 先上屏原编码前缀再输出数字");
+        check(gc_normal_quick_add_available(s) == 0, "数字 0 原编码前缀上屏后不可快速添加");
+    }
     gc_normal_session_destroy(s);
 }
 
@@ -1184,7 +1316,8 @@ void test_write_failure_paths(const Env &env) {
     cfg.dict_path = env.dictPath.c_str();
     cfg.model_path = env.modelPath.c_str();
     cfg.user_dir = roDir.c_str();
-    cfg.custom_words_path = (roDir + "/custom.tsv").c_str();
+    const std::string customPath = roDir + "/custom.tsv";  // 生存期覆盖 session_create（悬垂指针 ASan 会拦截）
+    cfg.custom_words_path = customPath.c_str();
     cfg.freq_enabled = 1;
     GcNormalSession *s = nullptr;
     check(gc_normal_session_create(&cfg, &s, nullptr, 0) == 0, "只读目录下会话可创建");
