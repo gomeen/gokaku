@@ -126,11 +126,17 @@ def refresh_hud_icon_cache():
                             capture_output=True, text=True)
     if result.returncode == 0:
         print('已重启输入源切换 HUD（TextInputSwitcher）：下次切换输入源时按新包重建图标。')
-        print('若切换浮层仍显示旧图，运行 launchctl kickstart -k gui/$UID/com.apple.TextInputSwitcher；'
-              '仍不行则注销并重新登录一次。')
     else:
-        reason = result.stderr.strip() or f'exit={result.returncode}'
-        print(f'提示：未能自动重启输入源切换 HUD（{reason}）；注销并重新登录一次可达到同样效果。')
+        # 本机实测：kickstart 对该系统按需代理可能被 SIP 拒绝（Operation not
+        # permitted）；killall -9 等效（进程属当前用户，launchd ResetAtClose
+        # 拉起新进程），实曾在 2026-11-02 验证可用。
+        fallback = subprocess.run(['killall', '-9', 'TextInputSwitcher'],
+                                  capture_output=True, text=True)
+        if fallback.returncode == 0:
+            print('已重启输入源切换 HUD（killall）：下次切换输入源时按新包重建图标。')
+        else:
+            reason = result.stderr.strip() or f'exit={result.returncode}'
+            print(f'提示：未能自动重启输入源切换 HUD（{reason}）；注销并重新登录一次可达到同样效果。')
 
 def uninstall(purge):
     if current_is_gogaku(): raise SystemExit('请先手动切换到其他输入源，并在系统设置中移除 Gogaku，再卸载。')
