@@ -22,8 +22,11 @@ GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
         result.clientID = @""; result.application = application;
         result.selection = selection; result.rectangle = rectangle;
         result.selectionValid = selection.location != NSNotFound && selection.length != NSNotFound;
+        result.rectangleRead = includeRectangle;
+        // 零宽光标矩形可以有效（caret 无宽度）；非有限值或负尺寸才是无效。
         result.rectangleValid = isfinite(rectangle.origin.x) && isfinite(rectangle.origin.y)
-            && isfinite(rectangle.size.width) && isfinite(rectangle.size.height) && rectangle.size.height > 0;
+            && isfinite(rectangle.size.width) && isfinite(rectangle.size.height)
+            && rectangle.size.width >= 0 && rectangle.size.height > 0;
         NSRange marked = NSMakeRange(NSNotFound, 0);
         @try { marked = [client markedRange]; } @catch (NSException *nested) {}
         result.markedRange = marked;

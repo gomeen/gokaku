@@ -123,7 +123,7 @@ host.font = NSFont.systemFont(ofSize: 16)
         // 与真实输入法一致：面板在组合开始时显示一次；后续逐键只做布局＋几何提交。
         // 布局与窗口几何提交分开计量：几何提交依赖窗口服务器与显示器状态，
         // 在显示器非交互状态下会显著膨胀（报告单独注明）。
-        let frame = panel.layoutPanel(view, at: rect)
+        let frame = panel.layoutPanel(view, at: rect) ?? NSRect(origin: .zero, size: panel.frame.size)
         let s0 = nowNs()
         panel.setFrame(frame, display: false)
         submitNs = nowNs() - s0

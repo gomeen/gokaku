@@ -11,7 +11,7 @@ private struct FocusTarget: Equatable {
     let anchor: NSRange        // 该输入框的锚定选区（首次定位或提交后重锚），组合内粘性
     let selection: NSRange     // 当前选区（复查与展示用；组合中会被字母推动）
     let markedRange: NSRange   // 宿主报告的字母范围（location NSNotFound = 无）
-    let rect: NSRect
+    let rect: NSRect           // 本次读取有效的宿主光标矩形；未读取或无效时为零矩形
     // IMK 每次返回的 client 代理不是同一实例，uniqueClientIdentifierString 也
     // 实测逐次变化；组合中字母会移动宿主选区，目标身份用「应用／进程＋锚点」
     // 比较，同框判断含字母范围规则（FocusRule，有单元测试）。
@@ -68,6 +68,11 @@ final class GogakuInputController: IMKInputController {
     private var requestedSpellStamp: InputStamp?
     private var shiftTracker = ShiftClickTracker()
     private var flushWork: DispatchWorkItem?
+    /// 当前有效显示位置（宿主光标矩形）；nil＝面板隐藏但组合保留。
+    /// 与目标身份锚点分离：位置变化不改变目标身份。
+    private var displayRect: NSRect?
+    /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
+    private var positionTimer: Timer?
     // 真实宿主安全矩阵未通过前，不启用学习辅助或采集。
     private let learningHostValidated = false
 
@@ -77,9 +82,10 @@ final class GogakuInputController: IMKInputController {
             DispatchQueue.main.async {
                 guard let self, var view = self.displayed, view.stamp == result.stamp,
                       self.pendingEdits == 0,
-                      let current = self.currentTarget(), current == self.target else { return }
+                      let current = self.currentTarget(), current == self.target,
+                      let rect = self.displayRect else { return }
                 view.issues = result.issues ?? []; self.displayed = view
-                self.panel.render(view, at: current.rect)
+                self.panel.render(view, at: rect)
             }
         }
         return service
@@ -134,7 +140,7 @@ final class GogakuInputController: IMKInputController {
                           fuzzyMask: settings.fuzzyMask,
                           fullPinyinPreedit: settings.fullPinyinPreedit,
                           freqEnabled: settings.frequencyEnabled)
-            normal.setAppDefaults(settings.appDefaultEnglish)
+            normal.setAppDefaults(settings.enabledDefaultEnglishApps)
             normal.setExcludedApps(Array(settings.quickAddExcludedApplications))
             normal.reloadCustomWords()
         }
@@ -153,7 +159,7 @@ final class GogakuInputController: IMKInputController {
         configure()
     }
 
-    override func deactivateServer(_ sender: Any!) { suspend(); active = false }
+    override func deactivateServer(_ sender: Any!) { stopPositionRefresh(); suspend(); active = false }
     override func commitComposition(_ sender: Any!) { suspend() }
     override func inputControllerWillClose() { suspend(); active = false }
     override func hidePalettes() { panel.dismiss(); toast.hide() }
@@ -167,7 +173,10 @@ final class GogakuInputController: IMKInputController {
     /// 浮层宿主（Spotlight／Raycast）：不用「前台应用＝输入目标」限制（浮层激活时
     /// 前台常常还是上一个应用，导致误判）；目标身份来自输入客户端自报的应用，
     /// 配合 IMK 激活／停用生命周期与插字前选区复查防串应用。
-    private func hostFacts(readRectangle: Bool = false) -> (application: String, pid: pid_t, selection: NSRange, markedRange: NSRange, rect: NSRect)? {
+    /// 光标矩形三态：notRead（本次未读取）／valid／invalid；未读取不能被当成
+    /// 当前有效位置，也不再用鼠标位置或虚构屏幕尺寸回退。
+    private enum RectState { case notRead, valid, invalid }
+    private func hostFacts(readRectangle: Bool = false) -> (application: String, pid: pid_t, selection: NSRange, markedRange: NSRange, rect: NSRect, rectState: RectState)? {
         #if GOGAKU_VALIDATION
         let readStart = DispatchTime.now().uptimeNanoseconds
         defer { ValidationMonitor.shared.phase("hostReadNs", duration: DispatchTime.now().uptimeNanoseconds - readStart) }
@@ -182,13 +191,13 @@ final class GogakuInputController: IMKInputController {
         #if GOGAKU_VALIDATION
         ValidationMonitor.shared.selectionRead(snapshot.selection)
         #endif
-        let rectangle = snapshot.rectangleValid ? snapshot.rectangle
-            : (target?.rect ?? NSRect(origin: NSEvent.mouseLocation, size: NSSize(width: 1, height: 16)))
-        return (snapshot.application, pid, snapshot.selection, snapshot.markedRange, rectangle)
+        let state: RectState = !snapshot.rectangleRead ? .notRead : (snapshot.rectangleValid ? .valid : .invalid)
+        return (snapshot.application, pid, snapshot.selection, snapshot.markedRange, snapshot.rectangle, state)
     }
 
     private func currentTarget(readRectangle: Bool = false) -> FocusTarget? {
         guard let facts = hostFacts(readRectangle: readRectangle) else { return nil }
+        let freshRect = facts.rectState == .valid ? facts.rect : .zero
         if let previous = target, displayed != nil || !markedShown.isEmpty {
             guard FocusRule.isSameField(application: facts.application, pid: facts.pid,
                                         selection: facts.selection, markedRange: facts.markedRange,
@@ -199,14 +208,15 @@ final class GogakuInputController: IMKInputController {
                 return nil
             }
             return FocusTarget(application: facts.application, pid: facts.pid, anchor: previous.anchor,
-                               selection: facts.selection, markedRange: facts.markedRange, rect: previous.rect)
+                               selection: facts.selection, markedRange: facts.markedRange, rect: freshRect)
         }
         return FocusTarget(application: facts.application, pid: facts.pid, anchor: facts.selection,
-                           selection: facts.selection, markedRange: facts.markedRange, rect: facts.rect)
+                           selection: facts.selection, markedRange: facts.markedRange, rect: freshRect)
     }
 
     private func configure() {
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
+        displayRect = nil; stopPositionRefresh()
         markedShown = ""; markedCaret = -1
         panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
@@ -234,6 +244,7 @@ final class GogakuInputController: IMKInputController {
         let app = application, oldMode = mode, oldDirection = direction
         let raw = rawOverride ?? displayed?.raw ?? ""
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
+        stopPositionRefresh(); displayRect = nil
         panel.dismiss(); toast.hide()
         if clearMarked, !markedShown.isEmpty, let old = target, let facts = hostFacts(),
            facts.application == old.application, facts.pid == old.pid,
@@ -267,7 +278,8 @@ final class GogakuInputController: IMKInputController {
     }
 
     private func match(_ shortcut: Shortcut, event: NSEvent) -> Bool {
-        event.charactersIgnoringModifiers?.lowercased() == shortcut.key.lowercased() && event.modifierFlags.intersection([.control, .shift, .option, .command]).rawValue == shortcut.modifiers
+        guard !shortcut.disabled, let combo = KeyCombo.from(event: event) else { return false }
+        return combo.keyID == shortcut.key && combo.modifiers == shortcut.modifiers
     }
 
     /// 普通模式事件映射（按键 → NormalEvent）。
@@ -377,6 +389,13 @@ final class GogakuInputController: IMKInputController {
     /// 状态由进程级串行队列保持有序；多控制器（多应用）共用同一队列与同一会话。
     private func handleNormalSync(_ event: NSEvent, at target: FocusTarget, fieldChanged: Bool) -> Bool {
         guard let normalEvent = normalEvent(for: event) else {
+            // Command／Option 组合按宿主快捷键规则交还宿主（规格：普通模式
+            // Command＋Enter 是宿主快捷键，不是原文上屏；仅未映射普通键在
+            // 组合中先上屏原编码再交还宿主）。
+            if event.modifierFlags.intersection([.command, .option]).rawValue != 0 {
+                panel.dismiss()
+                return false
+            }
             // 未映射按键（Tab、F1…）：组合中先上屏原编码再交还宿主。
             if displayed != nil {
                 _ = handleNormalSync(.enter, at: target, fieldChanged: false)
@@ -471,21 +490,81 @@ final class GogakuInputController: IMKInputController {
         }
         view.status = snap.status
         if snap.composing {
+            // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
+            // 否则等待 marked 更新后的合并刷新。无有效坐标时隐藏面板但保留组合
+            //（不丢弃文字；恢复有效且字段一致后重新显示）。
+            if displayRect == nil, target.rect != .zero { displayRect = target.rect }
+            startPositionRefresh()
             #if GOGAKU_VALIDATION
             if displayed == nil { compositionStart = ValidationMonitor.shared.startTime(ValidationMonitor.shared.currentEvent) }
             let metricID = ValidationMonitor.shared.currentEvent, start = compositionStart
             let firstDisplay = !panel.contentVisible
             displayed = view
-            panel.enqueue(view, at: target.rect) {
-                ValidationMonitor.shared.rendered(metricID, compositionStart: start, first: firstDisplay)
+            if let rect = displayRect {
+                panel.enqueue(view, at: rect) {
+                    ValidationMonitor.shared.rendered(metricID, compositionStart: start, first: firstDisplay)
+                }
+            } else {
+                panel.dismiss()
+                ValidationMonitor.shared.rendered(metricID, compositionStart: start, first: false)
             }
             #else
             displayed = view
-            panel.enqueue(view, at: target.rect)
+            if let rect = displayRect {
+                panel.enqueue(view, at: rect)
+            } else {
+                panel.dismiss()
+            }
             #endif
+            // marked text 更新后读取最新插入位置（合并刷新：同一事件内只读一次；
+            // 额外宿主读取经 ValidationMonitor 的 hostReadNs 纳入性能测量）。
+            refreshDisplayPosition()
         } else {
             displayed = nil
+            displayRect = nil
+            stopPositionRefresh()
             panel.dismiss()
+        }
+    }
+
+    // MARK: - 显示位置复查
+
+    /// 组合存在时以 100ms 间隔复查宿主光标位置（滚动／窗口移动）。
+    /// 同一坐标不重复布局；旧代次刷新由面板 generation 检查拒绝，不会使已
+    /// 关闭面板复活。额外宿主读取在 hostFacts 中计入 hostReadNs。
+    private func startPositionRefresh() {
+        guard positionTimer == nil else { return }
+        let timer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
+            self?.refreshDisplayPosition()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        positionTimer = timer
+    }
+
+    private func stopPositionRefresh() {
+        positionTimer?.invalidate()
+        positionTimer = nil
+    }
+
+    /// 隐藏面板但保留组合与字母；坐标恢复有效且字段一致后由复查重新显示。
+    private func hidePanelKeepComposition() {
+        displayRect = nil
+        panel.dismiss()
+    }
+
+    /// 读取最新插入位置并更新面板位置；仅在显示层面生效，不改目标身份。
+    private func refreshDisplayPosition() {
+        guard active, displayed != nil, target != nil else { stopPositionRefresh(); return }
+        guard let current = currentTarget(readRectangle: true), let anchor = target,
+              current.application == anchor.application, current.pid == anchor.pid,
+              current.rect != .zero else {
+            hidePanelKeepComposition()
+            return
+        }
+        let changed = displayRect != current.rect
+        displayRect = current.rect
+        if changed, let view = displayed {
+            panel.enqueue(view, at: current.rect)
         }
     }
 
@@ -694,7 +773,8 @@ final class GogakuInputController: IMKInputController {
                                                          resource: "NSSpellChecker:en_US", ignoredWords: Array(self.settings.ignoredWords)))
             }
             self.displayed = shown
-            self.panel.render(shown, at: current.rect)
+            guard let rect = self.displayRect else { self.panel.dismiss(); return }
+            self.panel.render(shown, at: rect)
         }
     }
 
@@ -766,8 +846,8 @@ final class GogakuInputController: IMKInputController {
     private func persistPreference() {
         var p = AppPreference(); p.mode = mode; p.direction = direction
         settings.applications[application] = p
-        let value = settings
-        DispatchQueue.global(qos: .utility).async { try? value.save() }
+        // 磁盘操作不放入按键回调：串行协调器合并最新改动，失败保留待保存。
+        SettingsStore.shared.submit(settings)
     }
 
     @objc private func toggleMode(_ sender: Any?) {

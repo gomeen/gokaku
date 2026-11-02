@@ -435,35 +435,31 @@ final class CandidatePanel: NSPanel {
         dismiss()
     }
 
-    /// 延迟矩阵探针专用：只做布局计算，返回目标窗口 frame；不触碰窗口服务器。
-    func layoutPanel(_ view: CompositionView, at anchor: NSRect) -> NSRect {
+    /// 延迟矩阵探针专用：只做布局计算，返回目标窗口 frame；无法安全显示时返回 nil。
+    func layoutPanel(_ view: CompositionView, at anchor: NSRect) -> NSRect? {
         content.update(view)
         let size = content.layoutSize
-        let screen = NSScreen.screens.first(where: { $0.frame.intersects(anchor) }) ?? NSScreen.main
-        let visible = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1024, height: 768)
-        let proposedX = min(max(anchor.minX, visible.minX + 8), visible.maxX - size.width - 8)
-        let proposedY: CGFloat
-        if anchor.minY - size.height - 8 >= visible.minY {
-            proposedY = anchor.minY - size.height - 8
-        } else {
-            proposedY = min(visible.maxY - size.height - 8, anchor.maxY + 8)
-        }
+        let screens = NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }
+        guard let proposed = PanelPlacement.origin(anchor: anchor, panelSize: size, screens: screens) else { return nil }
+        // 同一坐标不重复布局：同锚点复用上次 origin，但重算尺寸后必须仍在
+        // 屏幕可视区内，越界时回退到重新计算的位置。
         var origin = (isVisible && placementAnchor == anchor && placementOrigin != nil)
-            ? placementOrigin! : NSPoint(x: proposedX, y: proposedY)
-        if origin.x + size.width > visible.maxX - 8 {
-            origin.x = max(visible.minX + 8, visible.maxX - 8 - size.width)
+            ? placementOrigin! : proposed
+        if !PanelPlacement.isContained(origin: origin, panelSize: size, screens: screens) {
+            origin = proposed
         }
         content.frame = NSRect(origin: .zero, size: size)
         return NSRect(origin: origin, size: size)
     }
 
     /// 延迟矩阵探针专用：布局＋几何提交（不触发窗口排序；真实路径中排序
-    /// 只发生在启动预热，逐键路径只更新透明度与位置）。
+    /// 只发生在启动预热，逐键路径只更新透明度与位置）。无效位置不显示。
     func renderLayoutOnly(_ view: CompositionView, at anchor: NSRect) {
-        let frame = layoutPanel(view, at: anchor)
-        setFrame(frame, display: false)
-        placementAnchor = anchor
-        placementOrigin = frame.origin
+        if let frame = layoutPanel(view, at: anchor) {
+            setFrame(frame, display: false)
+            placementAnchor = anchor
+            placementOrigin = frame.origin
+        }
     }
 
     /// 启动时建立 WindowServer 窗口，此后隐藏只改透明度与位置，不重新排序。
@@ -505,8 +501,12 @@ final class CandidatePanel: NSPanel {
     }
 
     func render(_ view: CompositionView, at anchor: NSRect) {
+        guard let nextFrame = layoutPanel(view, at: anchor) else {
+            // 无有效坐标（锚点不在任何屏幕内等）：不显示，交由控制器保留组合。
+            dismiss()
+            return
+        }
         prime()
-        let nextFrame = layoutPanel(view, at: anchor)
         if nextFrame != frame { setFrame(nextFrame, display: false) }
         placementAnchor = anchor
         placementOrigin = nextFrame.origin

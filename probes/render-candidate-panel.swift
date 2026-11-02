@@ -230,6 +230,20 @@ struct RenderPanelProbe {
             DispatchQueue.main.async {
                 check(!panel.contentVisible && panel.alphaValue == 0, "隐藏在当前循环完成")
                 check(panel.staleRenderCount == 200 && callbacks == 0, "200 次迟到渲染全部丢弃")
+                // 放置几何（真实屏幕）：屏内锚点可布局；完全不在任何屏幕内的
+                // 锚点与全零锚点不布局（面板隐藏，组合保留的控制器语义）。
+                if let screen = NSScreen.main {
+                    let visible = screen.visibleFrame
+                    let anchor = NSRect(x: visible.midX, y: visible.midY, width: 0, height: 17)
+                    let frame = panel.layoutPanel(view, at: anchor)
+                    check(frame != nil, "屏内锚点布局返回 frame")
+                    if let frame {
+                        check(screen.visibleFrame.contains(frame), "面板落在锚点所在屏幕可视区内")
+                    }
+                    check(panel.layoutPanel(view, at: .zero) == nil, "全零锚点不布局")
+                    check(panel.layoutPanel(view, at: NSRect(x: 99999, y: 99999, width: 0, height: 17)) == nil,
+                          "不在任何屏幕内的锚点不布局")
+                }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     check(!panel.contentVisible && callbacks == 0, "2 秒内未重新弹出")
                     exit(failures == 0 ? 0 : 2)
