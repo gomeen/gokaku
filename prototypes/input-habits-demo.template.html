@@ -673,16 +673,20 @@ function shiftClick(side) {
     toast('学习演示中', 1200, 'msg');
     return;
   }
-  // 输入中文（组合中）按 Shift：直接上屏输入的内容（原编码），不切换中英；左右 Shift 行为相同
+  // 输入中文（组合中）按 Shift：原编码一次上屏并进入英文直输；左右 Shift 行为相同
+  // （2026-11-02 裁决，替换旧「上屏后不切中英」规则；再单击 Shift 回中文）
   if (S.comp) {
     const selLen = S.comp.snap && S.comp.snap.selLen ? S.comp.snap.selLen : 0;
     const raw = S.comp.literals + S.comp.staged.join('') + S.comp.keys.slice(selLen);
     commitText(raw);
-    status(`Shift：直接上屏输入的内容「${raw}」（原编码，不切换中英；左右 Shift 行为相同）。`);
+    S.mode = 'en';
+    S.tempEn = true;
+    toast('英', 800);
+    status(`Shift：上屏「${raw}」（原编码），进入英文直输；再单击 Shift 返回中文（左右 Shift 行为相同）。`);
     return;
   }
   S.mode = S.mode === 'cn' ? 'en' : 'cn';
-  S.tempEn = false;
+  S.tempEn = S.mode === 'en';
   toast(S.mode === 'cn' ? '中' : '英', 800);
   status(`Shift 单击切换到${S.mode === 'cn' ? '中文' : '英文'}。`);
 }

@@ -18,7 +18,9 @@
 
 ## 当前状态
 
-[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。2026-11-03 轮：设置页按[已定稿原型](../prototypes/settings-final.html)完成原生落地（六页外壳、立即保存写入协调器、真实索引的应用列表与可搜索弹层、VS Code 式快捷键表格含录制／冲突检查、自定义词语紧凑列表＋搜索；语言资源页移除 Apple Translation 入口），快捷键模型升级为规范键标识＋修饰键＋明确禁用状态（兼容旧配置），候选窗定位重构（光标矩形三态、100ms 复查、无效位置隐藏保留组合），`verify.py --profile host` 从文字计划改为真实调度（两轮矩阵、Orca Shift 专项、万次性能、新增两小时稳定性浸泡探针）。本轮 fast 档全过（核心 ctest 4/4、Swift Release 87 项），离线渲染 51 项含放置几何，GUI 六页真实点击冒烟截图归档。
+[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。2026-11-02 整改轮（构建 6）：**组合中 Shift 改为原样上屏后切英文直输**（用户裁决，替换「上屏不切中英」旧规则；真机探针黄金表同步重写）；候选窗读取宿主 `windowLevel` 并在其上一层显示（修复 Bob 浮窗遮挡），宿主选区未知不再伪造光标矩形；设置页按定稿原型逐项还原并修复快捷键编辑器录制／清除／恢复默认不生效、冲突筛选看不到草稿的问题；系统切换浮层图标根因实证（HUD 进程缓存旧图）并在安装流程重启该代理；原编码／非已学习提交使快速添加失效；菜单「恢复草稿」改「恢复未完成输入」。逐项证据见[验收记录](docs/validation/native-development.md)。
+
+2026-11-03 轮：设置页按[已定稿原型](../prototypes/settings-final.html)完成原生落地（六页外壳、立即保存写入协调器、真实索引的应用列表与可搜索弹层、VS Code 式快捷键表格含录制／冲突检查、自定义词语紧凑列表＋搜索；语言资源页移除 Apple Translation 入口），快捷键模型升级为规范键标识＋修饰键＋明确禁用状态（兼容旧配置），候选窗定位重构（光标矩形三态、100ms 复查、无效位置隐藏保留组合），`verify.py --profile host` 从文字计划改为真实调度（两轮矩阵、Orca Shift 专项、万次性能、新增两小时稳定性浸泡探针）。本轮 fast 档全过（核心 ctest 4/4、Swift Release 87 项），离线渲染 51 项含放置几何，GUI 六页真实点击冒烟截图归档。
 
 2026-11-02 轮：完成[工程化检查与整改](docs/validation/engineering-readiness.md)（版本可追溯、干净构建、备份暴露、/tmp 隐式依赖、测试证据绑定），建立 Git 基线与单一版本来源（`version.json`，见 [版本管理](docs/versioning.md)），新增统一验证入口 `python3 scripts/verify.py`（fast／release／host 三档）；修复 **Shift 提交不更新最近上屏字符**的核心缺陷（Terminal「Shift＋句号」半角根因，上一轮归因平台层有误），释义精简规则落地（`char.` 词性、结构化标签与强语域义项剔除，见[审阅记录](docs/validation/gloss-simplification-review.md)），构建 4 修复自定义拼音词候选剪枝与自动读音解析（详见[验收记录](docs/validation/native-development.md)）。
 
