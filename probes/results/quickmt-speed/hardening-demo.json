@@ -1,0 +1,230 @@
+{
+ "dylib": "/Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib",
+ "cases": [
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "attend a meeting",
+   "rawOutput": "参加会议 会议",
+   "knownIssue": "尾部重复",
+   "checks": {
+    "repeat": 1,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "fallback-original",
+   "normalized": null
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "good morning",
+   "rawOutput": "早上好 好 好",
+   "knownIssue": "词元复读",
+   "checks": {
+    "repeat": 2,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "fallback-original",
+   "normalized": null
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "see you tomorrow",
+   "rawOutput": "明天见,你明天见",
+   "knownIssue": "短语复现",
+   "checks": {
+    "repeat": 1,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "fallback-original",
+   "normalized": null
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "thanks",
+   "rawOutput": "謝謝你!",
+   "knownIssue": "繁体漂移",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 1
+   },
+   "verdict": "candidate-normalized",
+   "normalized": "谢谢你!"
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "how are you",
+   "rawOutput": "你怎麼會這樣?",
+   "knownIssue": "繁体＋语义跑偏",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 1
+   },
+   "verdict": "candidate-normalized",
+   "normalized": "你怎么会这样?"
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "I cannot open the attachment, please send it again.",
+   "rawOutput": "我无法打开附件,请再寄。 联系方式",
+   "knownIssue": "尾部多余",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "candidate",
+   "normalized": null
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "en-zh",
+   "source": "Alice will meet Bob in Beijing on Friday.",
+   "rawOutput": "爱丽丝将于周五在北京与鲍勃见面。",
+   "knownIssue": "修复对照（应通过）",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "candidate",
+   "normalized": null
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "zh-en",
+   "source": "谢谢",
+   "rawOutput": "Thanks for the",
+   "knownIssue": "截断",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "candidate",
+   "normalized": null
+  },
+  {
+   "origin": "quickmt-2026-11-02",
+   "direction": "zh-en",
+   "source": "我明天有一个会议。",
+   "rawOutput": "I have a meeting tomorrow.",
+   "knownIssue": "修复对照（应通过）",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "candidate",
+   "normalized": null
+  },
+  {
+   "origin": "small100-gate",
+   "direction": "en-zh",
+   "source": "9 a.m. to 4 p.m.",
+   "rawOutput": "下午9点至下午4点",
+   "knownIssue": "时段翻转",
+   "checks": {
+    "repeat": 0,
+    "time": 1,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "fallback-original",
+   "normalized": null
+  },
+  {
+   "origin": "small100-gate",
+   "direction": "en-zh",
+   "source": "The meeting has been moved to next Tuesday at 10:30 a.m. Please don't invite Alice.",
+   "rawOutput": "会议将于下周二下午10点30点,…",
+   "knownIssue": "时段翻转＋语病",
+   "checks": {
+    "repeat": 0,
+    "time": 1,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "fallback-original",
+   "normalized": null
+  },
+  {
+   "origin": "small100-gate",
+   "direction": "en-zh",
+   "source": "attend a meeting",
+   "rawOutput": "參加會議",
+   "knownIssue": "繁体输出",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 1
+   },
+   "verdict": "candidate-normalized",
+   "normalized": "参加会议"
+  },
+  {
+   "origin": "small100-gate",
+   "direction": "en-zh",
+   "source": "Alice will meet Bob in Beijing on Friday.",
+   "rawOutput": "艾丽丝星期五将在北京见面。",
+   "knownIssue": "人名丢失（加固层不修，交专名层/审阅）",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "candidate",
+   "normalized": null
+  },
+  {
+   "origin": "small100-gate",
+   "direction": "en-zh",
+   "source": "Gogaku v3.2.1",
+   "rawOutput": "古巴 v3.2.1",
+   "knownIssue": "品牌改写（交保护层/审阅）",
+   "checks": {
+    "repeat": 0,
+    "time": 0,
+    "length": 0,
+    "script": 0
+   },
+   "verdict": "candidate",
+   "normalized": null
+  },
+  {
+   "origin": "small100-gate",
+   "direction": "en-zh",
+   "source": "qqxzzv",
+   "rawOutput": "QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ",
+   "knownIssue": "乱码编造",
+   "checks": {
+    "repeat": 2,
+    "time": 0,
+    "length": 2,
+    "script": 1
+   },
+   "verdict": "fallback-original",
+   "normalized": null
+  }
+ ]
+}

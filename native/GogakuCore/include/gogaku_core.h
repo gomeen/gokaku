@@ -247,6 +247,55 @@ GOGAKU_CORE_EXPORT int gc_custom_words_validate(int32_t kind, const char *code,
 GOGAKU_CORE_EXPORT int gc_custom_pinyin_lookup(const char *dict_path,
                                                const char *hanzi, char **out);
 
+/* ---------- 翻译加固层（2026-11-02 模型路线裁决的处置手段；附加接口） ----------
+ *
+ * 处置口径：修正或安全拦截均算已处置——回退为显示原文不译、错误译文不进入
+ * 默认候选即达标（docs/implementation-plan.md §四；手段证据见
+ * docs/research-translation-model-unblock.md §四/§七）。
+ * 纯文本规则，无 libime 依赖；UTF-8＋字节长度；非法 UTF-8 原样透传不崩溃；
+ * 无全局状态；v1 局限（单字级 t2s、句首大写词不作候选等）见调研文档。
+ */
+
+/* 输出重复分类：0=正常，1=可疑（后缀复制/短语复现），
+ * 2=严重（同词元连续≥3 次/二元组连续重复，如 181 个 Q）。 */
+GOGAKU_CORE_EXPORT int32_t gc_translate_repeat_classify(const char *text, size_t length);
+
+/* 繁→简归一（单字级，OpenCC TSCharacters 生成表）。返回所需字节数（含 NUL）；
+ * buffer 非 NULL 且容量足够时写出，不足时不写。text 为 NULL 或 length=0 时
+ * 仅返回 1。 */
+GOGAKU_CORE_EXPORT size_t gc_translate_t2s(const char *text, size_t length,
+                                           char *buffer, size_t buffer_capacity);
+
+/* 是否含繁体专用字：0=无，1=有（需归一）。 */
+GOGAKU_CORE_EXPORT int32_t gc_translate_has_traditional(const char *text, size_t length);
+
+/* 时间一致性：0=一致或不涉及，1=时段矛盾（9 a.m.→下午9点），
+ * 2=显式数字时间丢失，3=半点丢失（十点半→10 点整）。 */
+GOGAKU_CORE_EXPORT int32_t gc_translate_time_check(const char *source, size_t source_length,
+                                                   const char *output, size_t output_length);
+
+/* 脚本校验：expected 'Z'=简体中文（汉字主导且无繁体专用字），
+ * 'E'=英语（拉丁字母主导）。0=通过，1=不符，2=空/无文字。 */
+GOGAKU_CORE_EXPORT int32_t gc_translate_script_check(const char *text, size_t length,
+                                                     char expected);
+
+/* 长度比率（粗网）：0=合理，1=疑似截断，2=疑似膨胀，2 同用于参数错误。 */
+GOGAKU_CORE_EXPORT int32_t gc_translate_length_check(const char *source, size_t source_length,
+                                                     const char *output, size_t output_length);
+
+typedef struct GcTextRange {
+    size_t begin;  /* UTF-8 字节偏移（含） */
+    size_t end;    /* UTF-8 字节偏移（不含） */
+} GcTextRange;
+
+/* 保护候选扫描：URL／版本号（v3.2.1）／驼峰或异形大写（VSCode、iPhone）／
+ * 全大写（VS）／句中大写词（Bob、Gogaku；停用词表排除可译普通词）。
+ * 句首大写词不作候选（v1 局限，品牌靠调用方词表）。返回完整候选个数；
+ * 超出 capacity 的不写 out_ranges（可为 NULL）。 */
+GOGAKU_CORE_EXPORT size_t gc_translate_protection_scan(const char *text, size_t length,
+                                                       GcTextRange *out_ranges,
+                                                       size_t capacity);
+
 #ifdef __cplusplus
 }
 #endif

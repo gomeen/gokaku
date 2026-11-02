@@ -27,7 +27,8 @@ function(gogaku_enable_sanitizers target)
   endif()
 endfunction()
 
-add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp)
+add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp
+    translate/translate_safety.cpp)
 target_include_directories(GogakuCore
     PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}"
     PUBLIC include)
@@ -86,6 +87,13 @@ target_link_libraries(gogaku_core_quality_test PRIVATE GogakuCore)
 gogaku_enable_sanitizers(gogaku_core_quality_test)
 add_test(NAME quality_regression COMMAND gogaku_core_quality_test)
 set_tests_properties(quality_regression PROPERTIES SKIP_RETURN_CODE 3)
+
+# 翻译加固层回归：纯文本规则，无词典依赖（2026-11-02 模型路线裁决的处置手段）。
+add_executable(gogaku_core_translate_safety_test tests/translate_safety_test.cpp)
+target_include_directories(gogaku_core_translate_safety_test PRIVATE include)
+target_link_libraries(gogaku_core_translate_safety_test PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_translate_safety_test)
+add_test(NAME translate_safety COMMAND gogaku_core_translate_safety_test)
 
 # 随机按键序列模糊测试（手动运行；默认种子与序列数即可覆盖 ≥10 万序列）。
 add_executable(gogaku_core_fuzz tests/normal_session_fuzz.cpp)

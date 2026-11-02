@@ -62,11 +62,12 @@ C ABI 使用明确的整数、UTF-8 及长度；DLL 内部申请的内存由同�
 ### 正式路线与停止条件
 
 - Apple Translation 退出正式交付链路；已有探针保留为历史证据，设置页不再把安装 Apple 语言资源作为学习功能前置。
-- 本轮唯一模型候选为已核查的 `alirezamsh/small100`，固定 revision `8ab680e26a596d2e3d2d2d17ae0f68df1037328c`。
-- 两端采用相同 CT2 INT8 产物、分词实现、词表、语言标记和 greedy 参数；初始 batch=1、2 线程。正确使用 small100 的目标语言输入前缀，不照搬 M2M100 协议。
+- **主路线（2026-11-02 裁决）：`alirezamsh/small100`（revision `8ab680e26a596d2e3d2d2d17ae0f68df1037328c`）＋翻译加固层解堵学习模式。** 处置口径：对固定风险集逐条「修正或安全拦截」均算已处置——回退为显示原文不译、错误译文不进入默认候选即达标；手段与证据见[模型解堵调研](research-translation-model-unblock.md)§四。
+- 新候选验证流程（2026-11-02 解冻「不扩模型名单」）：宽松许可（MIT／Apache／BSD／MPL／CC-BY）优先，CC-BY-NC 仅作评测对照、不进生产；`quickmt/quickmt-en-zh`／`quickmt-zh-en` 为首选验证项（Mac 门槛机速度实测达标，约为预算 1/6–1/8，见[探针报告](../probes/results/quickmt-speed/report.md)），Mozilla zh→en 59M 次之，MADLAD-400 3B 降为可选对照；decoder-only LLM 与 llama.cpp 出局（死守 500ms 预算，不松动、不分层）；OPUS 旧模型维持不恢复。任何替换须经同一自建短文本评测集＋固定风险集语义审阅＋用户盲测，保持两端同一组模型同参数，替换后加固层继续生效。
+- 两端采用相同 CT2 INT8 产物、分词实现、词表、语言标记和 greedy 参数；初始 batch=1、2 线程。正确使用各模型自身的输入协议（small100 目标语言前缀、quickmt spm＋`</s>`），不混用。
 - 模型转换使用隔离环境；生产翻译辅助进程采用 CTranslate2 和 SentencePiece 的本地实现，Windows 按其支持的 MSVC 工具链构建，避免把 PyTorch／转换环境装入输入法进程。
 - 使用同一权重不保证不同 CPU 后端逐字输出完全一致：分别运行同一验收集，比较差异并审阅语义；不通过强制回退或隐藏差异制造一致。
-- **small100 任一端质量、离线能力或性能不合格，双端学习交付保持阻塞。** 不改为一端 Apple、一端其他模型，不恢复 OPUS／M2M100，不自行扩模型名单。
+- **任一端质量、离线能力或性能不合格，双端学习交付保持阻塞**；解除路径为加固层按上述处置口径使固定风险集逐条达标，或新候选按上述验证流程通过。不改为一端 Apple、一端其他模型。
 
 ### 词与表达资源
 
@@ -173,7 +174,7 @@ Mac 输入源使用一个隔离翻译进程；Windows 多个宿主中的 TSF 实
 
 | 阶段 | 状态 | 证据／缺口 |
 | --- | --- | --- |
-| G0 Windows 环境＋模型门槛 | 阻塞／Mac 部分完成 | Windows 桌面环境未提供，Windows libime／C ABI 烟测待环境；Mac small100 技术可行（分词／INT8 转换／速度／离线），**质量门槛不通过**（固定风险集存在未处置意义破坏），双端学习交付保持阻塞，见验收记录与[语义审阅](../probes/results/small100-gate/semantic-review.md) |
+| G0 Windows 环境＋模型门槛 | 阻塞／Mac 部分完成 | Windows 桌面环境未提供，Windows libime／C ABI 烟测待环境；Mac small100 技术可行（分词／INT8 转换／速度／离线），**质量门槛不通过**（固定风险集存在未处置意义破坏），双端学习交付保持阻塞，见验收记录与[语义审阅](../probes/results/small100-gate/semantic-review.md)。2026-11-02 裁决解堵路径：加固层处置口径＋宽松许可候选验证流程；quickmt 双向速度实测达标（质量待门槛），见[模型解堵调研](research-translation-model-unblock.md)§六／§七 |
 | G1 共享核心迁移 | 进行中（普通模式已迁入，学习规则未迁） | 最小共享接口（`native/GogakuCore` C ABI）已建并升到 v2；普通模式行为规格已全部迁入共享 C++ 核心（含自定义词语、英文候选、调频、按应用默认英文，见下行“本阶段”行），Mac Swift 已改为薄调用。共同事件轨迹向量仍只覆盖普通模式；学习模式组合／翻译调度／记录规则仍在 Swift，未迁移；Windows 侧未验证 |
 | G2 双端普通输入闭环 | Mac 部分有历史证据 | 18 项 AppKit／Orca 检查通过；完整宿主矩阵未过；Windows TSF 未开始 |
 | G3 模型与学习交互 | 阻塞 | Mac 模型质量门槛不通过，生产学习辅助保持关闭 |
