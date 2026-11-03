@@ -224,6 +224,49 @@ def smoke(command):
             (ROOT / 'smoke.json').write_text(json.dumps(transcript, ensure_ascii=False, indent=2) + '\n')
 
 
+def patch_kenlm_cxx20(source):
+    """vendored kenlm 用 std::binary_function（C++17 移除；MacOSX26.5 SDK 的 libc++
+    彻底删除残留），libime 以 -std=c++20 编译时 search_trie.cc 等报
+    "no template named 'binary_function'"。注入兼容基类并替换 5 个文件的引用。
+    幂等：已替换（kenlm_compat 出现）的文件跳过。"""
+    kenlm = source / 'src/libime/core/kenlm'
+    compat = kenlm / 'util' / 'binary_function_compat.hh'
+    if not compat.exists():
+        compat.write_text(
+            '#pragma once\n'
+            '// Gogaku 构建兼容层：kenlm vendored 代码引用的 std::binary_function 在\n'
+            '// C++17 起移除、MacOSX26.5 SDK libc++ 删除残留；此基类提供相同成员 typedefs。\n'
+            '#ifndef KENLM_BINARY_FUNCTION_COMPAT_HH\n'
+            '#define KENLM_BINARY_FUNCTION_COMPAT_HH\n'
+            'namespace kenlm_compat {\n'
+            'template <class A, class B, class R> struct binary_function {\n'
+            '    typedef A first_argument_type;\n'
+            '    typedef B second_argument_type;\n'
+            '    typedef R result_type;\n'
+            '};\n'
+            '}\n'
+            '#endif\n', encoding='utf-8')
+    jobs = [('lm/trie_sort.hh', '#include "util/binary_function_compat.hh"'),
+            ('util/sized_iterator.hh', '#include "binary_function_compat.hh"'),
+            ('util/stream/sort_test.cc', '#include "../binary_function_compat.hh"'),
+            ('util/stream/sort.hh', '#include "binary_function_compat.hh"'),
+            ('util/joint_sort.hh', '#include "binary_function_compat.hh"')]
+    for rel, include in jobs:
+        path = kenlm / rel
+        text = path.read_text(encoding='utf-8')
+        if 'kenlm_compat::binary_function' in text or 'std::binary_function' not in text:
+            continue
+        text = text.replace('std::binary_function', 'kenlm_compat::binary_function')
+        anchor = text.find('#include')
+        if anchor == -1:
+            text = include + '\n' + text
+        else:
+            line_end = text.find('\n', anchor)
+            text = text[:line_end + 1] + include + '\n' + text[line_end + 1:]
+        path.write_text(text, encoding='utf-8')
+        print(f'kenlm c++20 兼容补丁: {rel}')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--jobs', type=int, default=2)
@@ -237,6 +280,7 @@ def main():
     MANIFEST['adjustments'] = [
         'Only isolated Fcitx5Utils target and its subdirectory are built/installed; no input method registration.',
         'Fcitx5Utils needs -fexperimental-library for Apple libc++ osyncstream; initial failure log retained.',
+        'libime/kenlm needs -D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION for clang 21 libc++ (std::binary_function removed); pinned kenlm trie_sort.hh still derives from it.',
         'libime ENABLE_DATA=OFF avoids unrelated table downloads; build only pinyin/core and two data tools.',
         'Factory data converted using exact upstream commands (-s -a 22 -q 4 trie); no data substitution.',
         'API defaults retained except Xiaohe/useShuangpin/Pinyin preedit; no frontend fuzzy/correction settings added.',
@@ -298,7 +342,10 @@ def main():
         run(['cmake', '--install', ROOT / 'fcitx5-build/src/lib/fcitx-utils'], 'fcitx-install')
         run(['cmake', '-S', source, '-B', ROOT / 'build', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release',
              f'-DCMAKE_INSTALL_PREFIX={prefix}', f'-DCMAKE_PREFIX_PATH={prefix}', '-DENABLE_TEST=OFF',
-             '-DENABLE_DATA=OFF', '-DENABLE_DOC=OFF', '-DENABLE_TOOLS=ON'], 'libime-configure')
+             '-DENABLE_DATA=OFF', '-DENABLE_DOC=OFF', '-DENABLE_TOOLS=ON',
+             # clang 21 / macOS 26.5 SDK 的 libc++ 默认移除了 std::binary_function
+             # （pinned kenlm trie_sort.hh 仍依赖）；用 libc++ 官方兼容开关保留。
+             '-DCMAKE_CXX_FLAGS=-D_LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION'], 'libime-configure')
         run(['cmake', '--build', ROOT / 'build', '--target', 'IMEPinyin', 'libime_pinyindict',
              'libime_slm_build_binary', '-j', args.jobs], 'libime-build')
         if not (data / 'sc.dict').exists():
