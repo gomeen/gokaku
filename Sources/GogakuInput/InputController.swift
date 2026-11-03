@@ -292,7 +292,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         if translated {
             storeTranslationMemory(pending.source, text)
         } else {
-            toast.show("译文失败，已上屏原文", anchor: toastAnchor)
+            toast.show("译文失败，已上屏原文", anchor: freshToastAnchor())
         }
         insertLearningCommit(text, at: pending.anchor)
         // 重放缓冲按键（重放前已清 pending，避免再次入队）。
@@ -736,9 +736,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             return
         }
         if snap.beep { NSSound.beep() }
-        if snap.toast != 0 { toast.show(snap.toast == 1 ? "中" : "英", anchor: toastAnchor) }
+        if snap.toast != 0 { toast.show(snap.toast == 1 ? "中" : "英", anchor: freshToastAnchor()) }
         // 无组合的瞬态说明（如快速添加结果）用提示浮层；组合中状态走面板状态行。
-        if !snap.composing && !snap.status.isEmpty { toast.show(snap.status, anchor: toastAnchor) }
+        if !snap.composing && !snap.status.isEmpty { toast.show(snap.status, anchor: freshToastAnchor()) }
         if snap.candidates.contains(where: { $0.kind == GC_CAND_LEARNED }) {
             scheduleFlush()
         }
@@ -1223,9 +1223,12 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         SettingsStore.shared.submit(settings)
     }
 
-    /// 切换提示的输入位置锚点：当前显示矩形优先，其次目标光标矩形。
-    private var toastAnchor: NSRect? {
+    /// 提示锚点：显示矩形／目标矩形，否则实时读宿主光标矩形（组合外也可用）。
+    private func freshToastAnchor() -> NSRect? {
         if let rect = displayRect, rect != .zero { return rect }
+        if let current = currentTarget(readRectangle: true, strictComposition: false), current.rect != .zero {
+            return current.rect
+        }
         if let rect = target?.rect, rect != .zero { return rect }
         return nil
     }
@@ -1233,7 +1236,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     @objc private func toggleMode(_ sender: Any?) {
         // quickmt 开发版裁决：开关打开时学习模式可切换；关闭保持门禁态（蜂鸣）。
         guard learningDevEnabled else { NSSound.beep(); return }
-        let anchor = toastAnchor
+        let anchor = freshToastAnchor()   // 在 suspend 清理前读当前插入点
         suspend()
         mode = mode == .normal ? .learning : .normal
         persistPreference()
@@ -1243,7 +1246,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
 
     @objc private func toggleDirection(_ sender: Any?) {
         guard learningDevEnabled else { NSSound.beep(); return }
-        let anchor = toastAnchor
+        let anchor = freshToastAnchor()
         suspend()
         direction = direction == .zhToEn ? .enToZh : .zhToEn
         persistPreference()
@@ -1359,23 +1362,19 @@ final class ToastWindow: NSPanel {
 
     func show(_ text: String, anchor: NSRect? = nil) {
         hideWork?.cancel()
-        label.stringValue = text
-        label.textColor = NSColor.white
         // 按文本自适应尺寸（固定 44×36 会截断「中→英」等提示）。
         let textSize = text.size(withAttributes: [.font: label.font!])
         let size = NSSize(width: max(44, ceil(textSize.width) + 16), height: 36)
+        // 用户裁决：提示必须在输入附近；无有效锚点时不显示（不放固定角落）。
+        guard let caret = anchor, caret != .zero,
+              let origin = PanelPlacement.toastOrigin(
+                  anchor: caret, panelSize: size,
+                  screens: NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }) else { return }
+        label.stringValue = text
+        label.textColor = NSColor.white
         label.frame = NSRect(x: 0, y: 0, width: size.width, height: size.height)
         setContentSize(size)
-        if let caret = anchor, caret != .zero,
-           let origin = PanelPlacement.toastOrigin(
-               anchor: caret, panelSize: size,
-               screens: NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }) {
-            setFrameOrigin(origin)
-        } else if let screen = NSScreen.main {
-            // 无有效锚点时回退右上角固定示意位置。
-            let visible = screen.visibleFrame
-            setFrameTopLeftPoint(NSPoint(x: visible.maxX - 60, y: visible.maxY - 48))
-        }
+        setFrameOrigin(origin)
         orderFrontRegardless()
         let work = DispatchWorkItem { [weak self] in self?.hide() }
         hideWork = work
