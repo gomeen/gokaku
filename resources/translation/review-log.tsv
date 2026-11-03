@@ -1,0 +1,110 @@
+# review-log.tsv — 翻译表达资源人工复核记录（否决／改写）
+# 每行：方向	源表达	处置	目标	理由
+# 只记录否决与改写；未记录的条目即整表人工复核通过（复核对象见
+# scripts/build-translation-expressions.py --print 的输出，范围由
+# selection-seeds.txt 与词频阈值决定）。
+# 复核原则：完整输入命中时译法必须是最常见、最自然的日常表达；词典义项顺序
+# 供参考但不作结论；多义且日常首义不明的条目整条否决。
+en-zh	like	override	喜欢	词典首义给「同」，日常应为喜欢
+en-zh	see	override	看见	「看到」可用，但看见更常见
+en-zh	need	override	需要	词典首义给「用」，语义过宽
+en-zh	school	override	学校	「学院」偏高等教育
+en-zh	order	override	订单	孤立 order 日常指订单
+en-zh	course	override	课程	「经过」是动词义
+en-zh	office	override	办公室	「机关」偏行政机构
+en-zh	room	override	房间	单字「房」不作完整表达
+en-zh	remember	override	记得	单字「记」不作完整表达
+en-zh	understand	override	明白	单字「明」不作完整表达
+en-zh	late	override	迟到	「迟迟」是副词
+en-zh	morning	override	早上	单字「早」不作完整表达
+en-zh	phone	override	电话	「致电」偏书面
+en-zh	project	override	项目	「计划」是 plan
+en-zh	cool	override	凉快	「帅」是口语另一义
+en-zh	drive	override	开车	「驾」是文言
+en-zh	key	override	钥匙	「关键」是形容词义
+en-zh	cannot	override	不能	「不可」偏书面
+en-zh	walk	override	走路	单字「走」不作完整表达
+en-zh	listen	override	听	「侧耳」是书面描述
+en-zh	sleep	override	睡觉	单字「睡」可作动词但日常用睡觉
+en-zh	speak	override	说话	「讲」可用，说话更常见
+en-zh	charge	override	收费	「攻击」是另一义
+en-zh	store	override	商店	单字「存」是动词义
+en-zh	tomorrow	override	明天	「未来」语义漂移
+en-zh	clean	override	干净	单字「清」不作完整表达
+en-zh	train	override	火车	「训练」是动词义
+en-zh	cash	override	现金	单字「兑」是动词义
+en-zh	doctor	override	医生	「先生」是称谓
+en-zh	teacher	override	老师	「先生」是称谓
+en-zh	weather	override	天气	单字「气」不作完整表达
+en-zh	evening	override	晚上	单字「晚」不作完整表达
+en-zh	sad	override	难过	「不幸」语义不同
+en-zh	bus	override	公交车	「汽车」是 car
+en-zh	medicine	override	药	「药物」可用但日常说药
+en-zh	plane	override	飞机	「平面」是几何义
+en-zh	cheap	override	便宜	「实惠」偏性价比
+en-zh	warm	override	暖和	「暖」可作形容词但不作完整表达
+en-zh	afraid	override	害怕	单字「恐」不作完整表达
+en-zh	route	override	路线	单字「路」语义过宽
+en-zh	schedule	override	日程	「调度」是调度义
+en-zh	milk	override	牛奶	单字「乳」不作日常表达
+en-zh	cook	override	做饭	单字「烧」不作完整表达
+en-zh	breakfast	override	早餐	「过早」是方言
+en-zh	fruit	override	水果	单字「果」不作完整表达
+en-zh	rice	override	米饭	「大米」是生米
+en-zh	shower	override	洗澡	「阵雨」是天气义
+en-zh	appointment	override	预约	「任命」是另一义
+en-zh	egg	override	鸡蛋	单字「蛋」可用但鸡蛋更常见
+en-zh	package	override	包裹	「裹」是动词
+en-zh	confirm	override	确认	「证实」是另一义
+en-zh	arrive	override	到达	单字「到」可作补语但日常说到达
+en-zh	salary	override	工资	「待遇」语义更宽
+en-zh	satisfied	override	满意	单字「安」是另一义
+en-zh	soup	override	汤	「汤汁」偏书面
+en-zh	neighbor	override	邻居	单字「邻」不作完整表达
+en-zh	navigation	override	导航	「领航」偏航空语境
+en-zh	receipt	override	收据	「票据」是上位词
+en-zh	attachment	override	附件	「附着」是动词义
+en-zh	vegetarian	override	素食	单字「素」语义不足
+en-zh	checkout	override	结账	「销售点」是另一义
+en-zh	humid	override	潮湿	单字「潮」可用但潮湿更完整
+en-zh	crossroads	override	十字路口	「交叉点」偏几何
+en-zh	restroom	override	洗手间	单字「厕」不作完整表达
+en-zh	get up	override	起床	单字「起」不作完整表达
+en-zh	good morning	override	早上好	「早」是省略说法
+en-zh	good afternoon	override	下午好	「午安」不用于下午问候
+en-zh	good evening	override	晚上好	「晚安」是告别用语
+en-zh	how much	override	多少钱	「这么」是误配
+en-zh	no problem	override	没问题	「没说的」是方言
+en-zh	speak slowly	override	慢慢说	「讷」是生僻书面词
+en-zh	take care	override	保重	单字「管」是动词义
+en-zh	wait a moment	override	稍等	「且慢」偏书面
+en-zh	delivery	override	快递	「交割」是金融义
+en-zh	vegetable	override	蔬菜	「菜」可用但蔬菜更明确
+en-zh	cloudy	override	多云	单字「阴」只指阴天
+en-zh	depart	override	出发	「离开」方向不同
+en-zh	fever	override	发烧	「热病」是旧词
+en-zh	excuse me	override	打扰一下	「对不起」是道歉
+zh-en	需要	override	need	词典首义给 needs，取动词原形
+zh-en	项目	override	project	「item」是另一义
+zh-en	明白	override	understand	「clear」是形容词义
+zh-en	出发	override	set off	「start」语义过宽
+zh-en	受伤	override	be injured	「sustain injuries」偏书面
+zh-en	想要	override	want	「fancy」是英式口语
+zh-en	简历	override	resume	「curriculum vitae」偏英式
+zh-en	感谢	override	thanks	「thank」单独使用不自然
+zh-en	密码	override	password	「cipher」是加密义
+zh-en	打印	override	print	「affix a seal」是盖章义
+zh-en	周日	override	Sunday	「weekday」是工作日
+zh-en	路线	override	route	「itinerary」是行程单
+zh-en	期待	override	look forward to	「await」偏书面
+zh-en	预约	override	appointment	「booking」偏英式
+zh-en	公交车	override	bus	「public transport vehicle」过长
+zh-en	下班	override	get off work	「finish work」偏直译
+zh-en	安排	override	plan	「plans」是复数名词
+zh-en	谢谢	override	thanks	「thank」单独使用不自然
+zh-en	检查	override	check	「inspection」是名词另一义
+zh-en	一刻	override	a quarter	「a moment」是另一义
+zh-en	半夜	override	midnight	可用，保留
+zh-en	文件	override	document	可用，保留
+zh-en	请假	override	take leave	「request leave of absence」过长
+zh-en	迟到	override	be late	「arrive late」可用，取更短说法

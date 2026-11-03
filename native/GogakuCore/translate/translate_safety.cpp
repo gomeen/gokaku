@@ -209,93 +209,443 @@ bool contains(std::string_view hay, std::string_view needle) {
     return hay.find(needle) != std::string_view::npos;
 }
 
-bool has_digit(std::string_view v) {
-    for (const char ch : v) {
-        if (ch >= '0' && ch <= '9') return true;
-    }
-    return false;
-}
-
-// 数字时间线索：「10:30」「9点」（含空格分隔的「 9」，配合 am/pm 判断）。
-bool has_digit_time(std::string_view v) {
-    for (size_t i = 0; i + 1 < v.size(); ++i) {
-        if (v[i] < '0' || v[i] > '9') continue;
-        if (v[i + 1] == ':') return true;
-        // 「点」UTF-8 = E7 82 B9
-        if (i + 3 < v.size() && v[i + 1] == '\xE7' && v[i + 2] == '\x82' &&
-            v[i + 3] == '\xB9') {
-            return true;
-        }
-        if (v[i + 1] == ' ') return true;
-    }
-    return false;
-}
-
-// ---- 时间事实抽取（源/输出共用词表）----
-struct TimeFacts {
-    bool has_am = false;             // a.m. / am / morning / 上午 / 早上 / 清晨
-    bool has_pm = false;             // p.m. / pm / afternoon / evening / night / 下午 / 晚上 / 傍晚 / 夜里
-    bool has_meridiem_digit = false; // 显式「数字＋上下午」
-    bool has_half = false;           // 点半 / half past / thirty / :30
-    bool has_any_time = false;       // 任何时间线索（含 noon/midnight/中午/午夜）
+// ---- URL 片段（脚本/长度统计与保护扫描共用）----
+// URL 内的字母是地址而不是语言：既不能把「详情见 https://…」判成拉丁主导，
+// 也不能让长 URL 把长度比率撑爆。
+struct UrlSpan {
+    size_t begin;
+    size_t end;
 };
 
-TimeFacts extract_facts(std::string_view v) {
-    TimeFacts f;
-    // 拉丁侧：按「字母＋点」切词元，去点后比对 am/pm（避免 example/amp 误报）。
-    std::string token;
-    auto flush_token = [&](bool at_boundary) {
-        if (at_boundary && !token.empty()) {
-            std::string clean;
-            for (const char ch : token) {
-                if (ch != '.') clean.push_back(ch);
-            }
-            for (char &ch : clean) {
-                if (ch >= 'A' && ch <= 'Z') ch = static_cast<char>(ch - 'A' + 'a');
-            }
-            if (clean == "am") f.has_am = true;
-            if (clean == "pm") f.has_pm = true;
-        }
-        token.clear();
-    };
-    for (size_t i = 0; i <= v.size(); ++i) {
-        const bool in_token = i < v.size() && (is_ascii_letter(v[i]) || v[i] == '.');
-        if (!in_token) {
-            flush_token(true);
-            continue;
-        }
-        token.push_back(v[i]);
-    }
-
-    std::string lower(v);
+std::vector<UrlSpan> find_url_spans(std::string_view view) {
+    std::vector<UrlSpan> spans;
+    std::string lower(view);
     for (char &ch : lower) {
         if (ch >= 'A' && ch <= 'Z') ch = static_cast<char>(ch - 'A' + 'a');
     }
-    const std::string_view lv(lower);
-    if (contains(lv, "morning")) f.has_am = true;
-    if (contains(lv, "afternoon")) f.has_pm = true;
-    if (contains(lv, "evening") || contains(lv, "night")) f.has_pm = true;
-    if (contains(lv, "noon") || contains(lv, "midnight")) f.has_any_time = true;
-    if (contains(lv, "half past") || contains(lv, "thirty")) f.has_half = true;
-    if (contains(lv, ":30")) f.has_half = true;
-
-    // 中文侧（按 UTF-8 子串）。
-    if (contains(v, "上午") || contains(v, "早上") || contains(v, "清晨")) f.has_am = true;
-    if (contains(v, "下午") || contains(v, "晚上") || contains(v, "傍晚") ||
-        contains(v, "夜里")) {
-        f.has_pm = true;
+    for (const std::string_view needle : {"http://", "https://", "www."}) {
+        size_t pos = lower.find(needle);
+        while (pos != std::string::npos) {
+            size_t end = pos;
+            while (end < view.size() && view[end] != ' ' && view[end] != '\t' &&
+                   view[end] != '\n') {
+                ++end;
+            }
+            while (end > pos && std::string_view(".),;:!?\"'").find(view[end - 1]) !=
+                                     std::string_view::npos) {
+                --end;
+            }
+            bool merged = false;
+            for (UrlSpan &span : spans) {
+                if (pos <= span.end && end >= span.begin) {
+                    span.begin = std::min(span.begin, pos);
+                    span.end = std::max(span.end, end);
+                    merged = true;
+                    break;
+                }
+            }
+            if (!merged) spans.push_back(UrlSpan{pos, end});
+            pos = lower.find(needle, end);
+        }
     }
-    if (contains(v, "中午") || contains(v, "午夜") || contains(v, "凌晨")) f.has_any_time = true;
-    if (contains(v, "点半")) {
-        f.has_half = true;
-        f.has_any_time = true;
-    }
+    return spans;
+}
 
-    if ((f.has_am || f.has_pm) && has_digit_time(v)) f.has_meridiem_digit = true;
-    if (f.has_am || f.has_pm || f.has_half || f.has_any_time || f.has_meridiem_digit) {
-        f.has_any_time = true;
+bool inside_spans(const std::vector<UrlSpan> &spans, size_t pos) {
+    for (const UrlSpan &span : spans) {
+        if (pos >= span.begin && pos < span.end) return true;
+    }
+    return false;
+}
+
+// ---- 时间事实抽取（源/输出共用；按「数值＋时段」逐条成对比较）----
+// v1 的近似是「出现下午就算翻转」「出现半点就算丢半」，于是把
+// 「上午九点到下午四点」这类合法区间和英文动词 am 判成矛盾。v2 改成抽取有序
+// 时间点（时/分/是否半点/绑定时段），逐条比对数值、顺序和时段关系。
+struct TimeMention {
+    int hour = -1;
+    int minute = -1;
+    int meridiem = 0;  // 0=未绑定 1=上午 2=下午 3=正午/午夜类
+    bool half = false;
+};
+
+struct TimeFacts {
+    bool any = false;
+    int loose = 0;  // 未绑定到具体数值的时段线索（in the morning / 中午）
+    std::vector<TimeMention> mentions;
+    std::vector<std::pair<long, std::string>> numbers;  // 未被时间表达解释的数字
+};
+
+int cjk_marker(std::string_view v, size_t pos, size_t &length) {
+    struct Marker {
+        std::string_view text;
+        int cls;
+    };
+    static const Marker kMarkers[] = {
+        {"上午", 1}, {"早上", 1}, {"早晨", 1}, {"清晨", 1}, {"凌晨", 1},
+        {"下午", 2}, {"晚上", 2}, {"傍晚", 2}, {"夜里", 2}, {"夜晚", 2},
+        {"中午", 3}, {"午夜", 3}, {"正午", 3},
+    };
+    for (const Marker &m : kMarkers) {
+        if (pos + m.text.size() <= v.size() && v.compare(pos, m.text.size(), m.text) == 0) {
+            length = m.text.size();
+            return m.cls;
+        }
+    }
+    return 0;
+}
+
+int chinese_digit(uint32_t cp) {
+    switch (cp) {
+        case 0x96F6:  // 零
+        case 0x3007:  // 〇
+            return 0;
+        case 0x4E00: return 1;  // 一
+        case 0x4E8C:            // 二
+        case 0x4E24: return 2;  // 两
+        case 0x4E09: return 3;  // 三
+        case 0x56DB: return 4;  // 四
+        case 0x4E94: return 5;  // 五
+        case 0x516D: return 6;  // 六
+        case 0x4E03: return 7;  // 七
+        case 0x516B: return 8;  // 八
+        case 0x4E5D: return 9;  // 九
+        default: return -1;
+    }
+}
+
+bool is_cn_ten(uint32_t cp) { return cp == 0x5341; }  // 十
+
+// 解析 0–99 的中文数字（十一 / 二十 / 二十三）。返回消耗的标量个数；
+// 不是可解释数字时返回 0，可解释但超出钟点范围时 value<0。
+size_t parse_cn_number(const std::vector<Scalar> &scalars, size_t i, int &value) {
+    size_t j = i;
+    std::vector<int> parts;  // -10 表示「十」
+    while (j < scalars.size() && parts.size() < 4) {
+        if (is_cn_ten(scalars[j].cp)) {
+            parts.push_back(-10);
+            ++j;
+            continue;
+        }
+        const int d = chinese_digit(scalars[j].cp);
+        if (d < 0) break;
+        parts.push_back(d);
+        ++j;
+    }
+    if (parts.empty()) return 0;
+    size_t ten_pos = parts.size();
+    for (size_t k = 0; k < parts.size(); ++k) {
+        if (parts[k] != -10) continue;
+        if (ten_pos != parts.size()) { value = -1; return j - i; }  // 多个「十」不解释
+        ten_pos = k;
+    }
+    if (ten_pos == parts.size()) {
+        if (parts.size() > 2) { value = -1; return j - i; }  // 三零二 交给通用数字规则
+        int v = 0;
+        for (const int d : parts) v = v * 10 + d;
+        value = v;
+        return j - i;
+    }
+    if (ten_pos > 1 || parts.size() > 2) { value = -1; return j - i; }
+    const int tens = ten_pos == 0 ? 1 : parts[0];
+    const int ones = parts.size() == ten_pos + 1 ? 0 : parts[ten_pos + 1];
+    value = tens * 10 + ones;
+    return j - i;
+}
+
+std::string cn_number(long value);
+
+// 英文数词（含 half past 需要的钟点词）。
+int english_number(std::string_view word) {
+    static const struct {
+        std::string_view text;
+        int value;
+    } kWords[] = {{"one", 1},       {"two", 2},     {"three", 3}, {"four", 4},
+                  {"five", 5},     {"six", 6},     {"seven", 7}, {"eight", 8},
+                  {"nine", 9},     {"ten", 10},    {"eleven", 11}, {"twelve", 12},
+                  {"thirteen", 13}, {"fourteen", 14}, {"fifteen", 15},
+                  {"sixteen", 16}, {"seventeen", 17}, {"eighteen", 18},
+                  {"nineteen", 19}, {"twenty", 20}};
+    for (const auto &entry : kWords) {
+        if (word == entry.text) return entry.value;
+    }
+    return -1;
+}
+
+std::string lower_ascii(std::string_view v) {
+    std::string out(v);
+    for (char &ch : out) {
+        if (ch >= 'A' && ch <= 'Z') ch = static_cast<char>(ch - 'A' + 'a');
+    }
+    return out;
+}
+
+// 读取 pos 起的拉丁字母串（含点），去点后小写；返回结束字节位置。
+size_t read_latin_word(std::string_view v, size_t pos, std::string &clean) {
+    size_t end = pos;
+    clean.clear();
+    while (end < v.size() && (is_ascii_letter(static_cast<unsigned char>(v[end])) || v[end] == '.')) {
+        if (v[end] != '.') clean.push_back(v[end]);
+        ++end;
+    }
+    clean = lower_ascii(clean);
+    return end;
+}
+
+TimeFacts extract_time(std::string_view v) {
+    TimeFacts f;
+    const auto scalars = Utf8View(v).collect();
+    int pending = 0;
+    size_t i = 0;
+    auto advance_past = [&](size_t byte_end) {
+        while (i < scalars.size() && scalars[i].begin < byte_end) ++i;
+    };
+    auto record_marker = [&](int cls) {
+        pending = cls;
+        f.loose = cls;
+        f.any = true;
+    };
+    while (i < scalars.size()) {
+        const Scalar &s = scalars[i];
+        // 1) 中文时段标记
+        size_t marker_len = 0;
+        if (const int cls = cjk_marker(v, s.begin, marker_len); cls != 0) {
+            record_marker(cls);
+            advance_past(s.begin + marker_len);
+            continue;
+        }
+        // 2) 拉丁时段词
+        if (s.cp < 0x80 && is_ascii_letter(s.cp)) {
+            std::string word;
+            const size_t end = read_latin_word(v, s.begin, word);
+            if (word == "morning") {
+                record_marker(1);
+            } else if (word == "afternoon" || word == "evening" || word == "night") {
+                record_marker(2);
+            } else if (word == "noon" || word == "midnight") {
+                record_marker(3);
+            } else if (word == "half") {
+                // half past ten → 10:30
+                size_t probe = end;
+                while (probe < v.size() && v[probe] == ' ') ++probe;
+                std::string next;
+                const size_t past_end = read_latin_word(v, probe, next);
+                if (next == "past") {
+                    size_t hour_at = past_end;
+                    while (hour_at < v.size() && v[hour_at] == ' ') ++hour_at;
+                    std::string hour_word;
+                    const size_t hour_end = read_latin_word(v, hour_at, hour_word);
+                    const int hour = english_number(hour_word);
+                    if (hour >= 0) {
+                        TimeMention m;
+                        m.hour = hour;
+                        m.minute = 30;
+                        m.half = true;
+                        m.meridiem = pending;
+                        pending = 0;
+                        f.mentions.push_back(m);
+                        f.any = true;
+                        advance_past(hour_end);
+                        continue;
+                    }
+                }
+            }
+            advance_past(end > s.begin ? end : s.begin + 1);
+            continue;
+        }
+        // 3) ASCII 数字：可能是钟点，也可能是普通数字
+        if (s.cp >= '0' && s.cp <= '9') {
+            size_t end = s.begin;
+            while (end < v.size() && v[end] >= '0' && v[end] <= '9') ++end;
+            const std::string digits = std::string(v.substr(s.begin, end - s.begin));
+            long value = digits.size() <= 9 ? 0 : -1;
+            if (value == 0 && !digits.empty()) {
+                for (const char ch : digits) value = value * 10 + (ch - '0');
+            }
+            size_t probe = end;
+            int minute = -1;
+            bool colon = false;
+            if (probe < v.size() && v[probe] == ':') {
+                size_t digits_end = probe + 1;
+                while (digits_end < v.size() && v[digits_end] >= '0' && v[digits_end] <= '9') {
+                    ++digits_end;
+                }
+                if (digits_end > probe + 1 && digits_end - probe - 1 <= 2) {
+                    minute = 0;
+                    for (size_t k = probe + 1; k < digits_end; ++k) {
+                        minute = minute * 10 + (v[k] - '0');
+                    }
+                    colon = true;
+                    probe = digits_end;
+                }
+            }
+            size_t after = probe;
+            bool unit = colon;
+            // 点时／点／时
+            size_t unit_len = 0;
+            if (v.compare(after, 3, "\xE7\x82\xB9") == 0) {  // 点
+                unit_len = 3;
+            } else if (v.compare(after, 3, "\xE6\x97\xB6") == 0) {  // 时
+                unit_len = 3;
+            }
+            if (unit_len != 0) {
+                unit = true;
+                after += unit_len;
+                // 半 / 一刻 / 三刻 / N分
+                size_t cursor = after;
+                while (cursor < v.size() && v[cursor] == ' ') ++cursor;
+                if (v.compare(cursor, 3, "\xE5\x8D\x8A") == 0) {  // 半
+                    minute = 30;
+                    after = cursor + 3;
+                } else if (v.compare(cursor, 6, "\xE4\xB8\x80\xE5\x88\xBB") == 0) {  // 一刻
+                    minute = 15;
+                    after = cursor + 6;
+                } else if (v.compare(cursor, 6, "\xE4\xB8\x89\xE5\x88\xBB") == 0) {  // 三刻
+                    minute = 45;
+                    after = cursor + 6;
+                } else if (cursor < v.size() && v[cursor] >= '0' && v[cursor] <= '9') {
+                    size_t digits_end = cursor;
+                    while (digits_end < v.size() && v[digits_end] >= '0' && v[digits_end] <= '9') {
+                        ++digits_end;
+                    }
+                    if (digits_end - cursor <= 2) {
+                        minute = 0;
+                        for (size_t k = cursor; k < digits_end; ++k) minute = minute * 10 + (v[k] - '0');
+                    }
+                    after = digits_end;
+                    if (v.compare(after, 3, "\xE5\x88\x86") == 0) after += 3;  // 分
+                }
+            }
+            // 可选 am/pm 紧邻（允许空格）：只有紧跟在数字后才算时段，
+            // 这样英文动词 am（I am ...）不再触发时段检查。
+            int meridiem = 0;
+            {
+                size_t cursor = after;
+                while (cursor < v.size() && v[cursor] == ' ') ++cursor;
+                std::string suffix;
+                const size_t suffix_end = read_latin_word(v, cursor, suffix);
+                if (suffix == "am") meridiem = 1;
+                if (suffix == "pm") meridiem = 2;
+                if (meridiem != 0) after = suffix_end;
+            }
+            if (unit || meridiem != 0) {
+                TimeMention m;
+                m.hour = value >= 0 && value <= 99 ? static_cast<int>(value) : -1;
+                m.minute = minute;
+                m.meridiem = meridiem != 0 ? meridiem : pending;
+                m.half = minute == 30;
+                pending = 0;
+                f.mentions.push_back(m);
+                f.any = true;
+                advance_past(after > s.begin ? after : end);
+                continue;
+            }
+            f.numbers.emplace_back(value, digits);
+            advance_past(end);
+            continue;
+        }
+        // 4) 中文数字钟点（三点、十点半、十二点）
+        if (is_cn_ten(s.cp) || chinese_digit(s.cp) >= 0) {
+            int hour = -1;
+            const size_t used = parse_cn_number(scalars, i, hour);
+            if (used == 0) {
+                ++i;
+                continue;
+            }
+            size_t cursor = scalars[i + used - 1].end;
+            bool unit = false;
+            if (v.compare(cursor, 3, "\xE7\x82\xB9") == 0 ||  // 点
+                v.compare(cursor, 3, "\xE6\x97\xB6") == 0) {  // 时
+                unit = true;
+                cursor += 3;
+            }
+            if (unit && hour >= 0) {
+                int minute_value = -1;
+                if (v.compare(cursor, 3, "\xE5\x8D\x8A") == 0) {  // 半
+                    minute_value = 30;
+                    cursor += 3;
+                } else if (v.compare(cursor, 6, "\xE4\xB8\x80\xE5\x88\xBB") == 0) {
+                    minute_value = 15;
+                    cursor += 6;
+                } else if (v.compare(cursor, 6, "\xE4\xB8\x89\xE5\x88\xBB") == 0) {
+                    minute_value = 45;
+                    cursor += 6;
+                } else {
+                    size_t probe = i + used;
+                    int cn_minute = -1;
+                    const size_t cn_used = probe <= scalars.size()
+                                               ? parse_cn_number(scalars, probe, cn_minute)
+                                               : 0;
+                    if (cn_used > 0 && cn_minute >= 0 &&
+                        v.compare(scalars[probe + cn_used - 1].end, 3, "\xE5\x88\x86") == 0) {
+                        minute_value = cn_minute;
+                        cursor = scalars[probe + cn_used - 1].end + 3;
+                    }
+                }
+                TimeMention m;
+                m.hour = hour;
+                m.minute = minute_value;
+                m.meridiem = pending;
+                m.half = minute_value == 30;
+                pending = 0;
+                f.mentions.push_back(m);
+                f.any = true;
+                advance_past(cursor);
+                continue;
+            }
+            advance_past(cursor);
+            continue;
+        }
+        ++i;
     }
     return f;
+}
+
+// 中文数字写法（供「数值保留」比对：302 ↔ 三百零二／三零二）。
+std::string cn_number(long value) {
+    static const char *kDigits[] = {"零", "一", "二", "三", "四",
+                                    "五", "六", "七", "八", "九"};
+    if (value < 0 || value > 9999) return {};
+    if (value < 10) return kDigits[value];
+    auto tail = [&](long v) -> std::string {
+        if (v == 0) return {};
+        if (v < 10) return kDigits[v];
+        return cn_number(v);
+    };
+    if (value < 20) return std::string("十") + tail(value % 10);
+    if (value < 100) return std::string(kDigits[value / 10]) + "十" + tail(value % 10);
+    if (value < 1000) {
+        std::string out = std::string(kDigits[value / 100]) + "百";
+        const long rest = value % 100;
+        if (rest == 0) return out;
+        if (rest < 10) return out + "零" + kDigits[rest];
+        return out + cn_number(rest);
+    }
+    std::string out = std::string(kDigits[value / 1000]) + "千";
+    const long rest = value % 1000;
+    if (rest == 0) return out;
+    if (rest < 100) return out + "零" + cn_number(rest);
+    return out + cn_number(rest);
+}
+
+// 数字保留定位：优先同形 ASCII，其次中文写法（含逐位写法）。
+size_t find_number(std::string_view out, std::string_view digits, long value) {
+    size_t pos = out.find(digits);
+    if (pos != std::string_view::npos) return pos;
+    const std::string place = cn_number(value);
+    if (!place.empty()) {
+        pos = out.find(place);
+        if (pos != std::string_view::npos) return pos;
+    }
+    if (digits.size() <= 4) {
+        static const char *kDigits[] = {"零", "一", "二", "三", "四",
+                                        "五", "六", "七", "八", "九"};
+        std::string spelled;
+        for (const char ch : digits) spelled += kDigits[ch - '0'];
+        pos = out.find(spelled);
+        if (pos != std::string_view::npos) return pos;
+    }
+    return std::string_view::npos;
 }
 
 }  // namespace
@@ -315,6 +665,40 @@ int32_t gc_translate_repeat_classify(const char *text, size_t length) {
 
     const auto tokens = tokenize_for_repeat(scalars, view);
     if (tokens.size() < 2) return 0;
+
+    // 合法叠词：单字汉字叠用（看看／试试／慢慢／哈哈）与数量叠用（一个一个／一天一天）。
+    // 它们与模型复读的形态相同，但是正常汉语，不能因此回退原文。
+    auto is_single_han = [](std::string_view token) {
+        return token.size() == 3 && static_cast<unsigned char>(token[0]) >= 0xE0;
+    };
+    auto is_numeral_token = [](std::string_view token) {
+        if (token.size() == 1) return token[0] >= '0' && token[0] <= '9';
+        if (token.size() != 3) return false;
+        const auto *p = reinterpret_cast<const unsigned char *>(token.data());
+        const uint32_t cp = (static_cast<uint32_t>(p[0] & 0x0F) << 12) |
+                            (static_cast<uint32_t>(p[1] & 0x3F) << 6) |
+                            static_cast<uint32_t>(p[2] & 0x3F);
+        static const uint32_t kNumerals[] = {0x4E00, 0x4E8C, 0x4E24, 0x4E09, 0x56DB,
+                                             0x4E94, 0x516D, 0x4E03, 0x516B, 0x4E5D,
+                                             0x5341, 0x767E, 0x5343, 0x4E07};
+        for (const uint32_t numeral : kNumerals) {
+            if (cp == numeral) return true;
+        }
+        return false;
+    };
+    if (tokens.size() == 2 && token_equal_lower(tokens[0], tokens[1]) &&
+        is_single_han(tokens[0])) {
+        return 0;
+    }
+    if (tokens.size() == 4 && token_equal_lower(tokens[0], tokens[2]) &&
+        token_equal_lower(tokens[1], tokens[3]) && is_numeral_token(tokens[0])) {
+        return 0;
+    }
+    if (tokens.size() == 4 && is_single_han(tokens[0]) &&
+        token_equal_lower(tokens[0], tokens[1]) && is_single_han(tokens[2]) &&
+        token_equal_lower(tokens[2], tokens[3])) {
+        return 0;  // 多多少少、高高兴兴
+    }
 
     // 0b) 同一词元连续 ≥3 次 → 严重（「好 好 好」）。
     for (size_t i = 0; i + 2 < tokens.size(); ++i) {
@@ -397,28 +781,49 @@ int32_t gc_translate_has_traditional(const char *text, size_t length) {
 int32_t gc_translate_time_check(const char *source, size_t source_length,
                                 const char *output, size_t output_length) {
     if (source == nullptr || output == nullptr) return 0;
-    const std::string_view src(source, source_length);
     const std::string_view out(trim(std::string_view(output, output_length)));
-    const TimeFacts sf = extract_facts(src);
-    if (!sf.has_any_time) return 0;
-    const TimeFacts of = extract_facts(out);
+    const TimeFacts sf = extract_time(std::string_view(source, source_length));
+    const TimeFacts of = extract_time(out);
 
-    // 1) 时段矛盾（a.m.→下午、上午→p.m.）。
-    if (sf.has_am && of.has_pm) return 1;
-    if (sf.has_pm && of.has_am) return 1;
-    // 2) 源有显式数字时间、输出数字和时间词全丢 → 丢失。
-    if (sf.has_meridiem_digit && !has_digit(out) && !of.has_any_time && !of.has_am &&
-        !of.has_pm) {
-        return 2;
+    // 1) 逐条时间点对比：数值、顺序、时段关系。
+    if (!sf.mentions.empty()) {
+        if (of.mentions.empty()) return 2;  // 源时间点整体丢失
+        if (of.mentions.size() < sf.mentions.size()) return 2;
+        if (of.mentions.size() > sf.mentions.size()) return 4;  // 增义
+        for (size_t i = 0; i < sf.mentions.size(); ++i) {
+            const TimeMention &a = sf.mentions[i];
+            const TimeMention &b = of.mentions[i];
+            if (a.hour >= 0 && b.hour >= 0 && a.hour != b.hour) return 4;
+            if (a.half && !b.half) return 3;
+            if (a.minute >= 0 && b.minute >= 0 && a.minute != b.minute) return 4;
+            const int am = a.meridiem != 0 ? a.meridiem : sf.loose;
+            const int bm = b.meridiem != 0 ? b.meridiem : of.loose;
+            if (am != 0 && bm != 0 && am != bm) return 1;
+        }
+    } else if (sf.loose != 0 && of.loose != 0 && sf.loose != of.loose) {
+        return 1;
     }
-    // 3) 半点丢失（十点半→10 点整、half past→整点）。
-    if (sf.has_half && !of.has_half) return 3;
+
+    // 2) 未被时间表达解释的数字必须原样保留（顺序不得打乱）。
+    size_t cursor = 0;
+    for (const auto &number : sf.numbers) {
+        const size_t pos = find_number(out, number.second, number.first);
+        if (pos == std::string_view::npos) return 2;
+        if (pos < cursor) return 4;
+        cursor = pos;
+    }
     return 0;
 }
 
 int32_t gc_translate_script_check(const char *text, size_t length, char expected) {
     if (text == nullptr) return 2;
-    const Counts c = count_scripts(Utf8View(std::string_view(text, length)).collect());
+    const std::string_view view(text, length);
+    const auto urls = find_url_spans(view);
+    std::vector<Scalar> kept;
+    for (const Scalar &scalar : Utf8View(view).collect()) {
+        if (!inside_spans(urls, scalar.begin)) kept.push_back(scalar);
+    }
+    const Counts c = count_scripts(kept);
     if (c.han == 0 && c.latin == 0) return 2;
     if (expected == 'Z' || expected == 'z') {
         if (gc_translate_has_traditional(text, length) != 0) return 1;
@@ -430,15 +835,27 @@ int32_t gc_translate_script_check(const char *text, size_t length, char expected
     return 2;
 }
 
+// 长度统计排除 URL：地址长度与译文长度无关，否则「打开 https://…」永远判膨胀。
+static std::vector<Scalar> scalars_without_urls(std::string_view view) {
+    const auto urls = find_url_spans(view);
+    std::vector<Scalar> kept;
+    for (const Scalar &scalar : Utf8View(view).collect()) {
+        if (!inside_spans(urls, scalar.begin)) kept.push_back(scalar);
+    }
+    return kept;
+}
+
 int32_t gc_translate_length_check(const char *source, size_t source_length,
                                   const char *output, size_t output_length) {
     if (source == nullptr || output == nullptr) return 2;
-    const auto src = Utf8View(std::string_view(source, source_length)).collect();
-    const auto out = Utf8View(std::string_view(output, output_length)).collect();
+    const std::string_view src_view(source, source_length);
+    const std::string_view out_view(output, output_length);
+    const auto src = scalars_without_urls(src_view);
+    const size_t o_count = scalars_without_urls(out_view).size();
     if (src.empty()) return 2;
-    if (out.empty()) return 1;
+    if (o_count == 0) return 1;
     const long double s = static_cast<long double>(src.size());
-    const long double o = static_cast<long double>(out.size());
+    const long double o = static_cast<long double>(o_count);
     const bool src_zh = han_dominant(src);
     // 经验区间：中→英 1 汉字≈0.8–12 标量；英→中 1 标量≈0.10–1.2 汉字。短源放宽下限。
     const long double min_ratio = src_zh ? 0.8L : 0.10L;
@@ -457,43 +874,25 @@ size_t gc_translate_protection_scan(const char *text, size_t length,
     std::vector<GcTextRange> found;
 
     // URL 优先整段扫描（含 ://?&= 等非词元字符）。
-    std::vector<GcTextRange> url_ranges;
-    {
-        std::string lower(view);
-        for (char &ch : lower) {
-            if (ch >= 'A' && ch <= 'Z') ch = static_cast<char>(ch - 'A' + 'a');
-        }
-        for (const std::string_view needle : {"http://", "https://", "www."}) {
-            size_t pos = lower.find(needle);
-            while (pos != std::string::npos) {
-                size_t end = pos;
-                while (end < view.size() && view[end] != ' ' && view[end] != '\t' &&
-                       view[end] != '\n') {
-                    ++end;
-                }
-                // 去掉尾部标点。
-                while (end > pos && std::string_view(".),;:!?\"'").find(view[end - 1]) !=
-                                         std::string_view::npos) {
-                    --end;
-                }
-                url_ranges.push_back(GcTextRange{pos, end});
-                pos = lower.find(needle, end);
-            }
-        }
-    }
-    auto in_url = [&](size_t begin) {
-        for (const GcTextRange &r : url_ranges) {
-            if (begin >= r.begin && begin < r.end) return true;
-        }
-        return false;
-    };
-    for (const GcTextRange &r : url_ranges) {
+    const auto url_spans = find_url_spans(view);
+    auto in_url = [&](size_t begin) { return inside_spans(url_spans, begin); };
+    for (const UrlSpan &span : url_spans) {
         bool dup = false;
         for (const GcTextRange &p : found) {
-            if (p.begin == r.begin) dup = true;
+            if (p.begin == span.begin) dup = true;
         }
-        if (!dup) found.push_back(r);
+        if (!dup) found.push_back(GcTextRange{span.begin, span.end});
     }
+
+    // 已审阅品牌词表：句首大写词无法与普通句首词区分，只能靠已知品牌表
+    //（Round2 已知错误：句首 Gogaku 未计入保护词，模型改成「古巴」）。
+    static const char *kBrands[] = {
+        "gogaku", "github", "vscode", "iphone", "ipad", "macos", "ios",
+        "figma", "jira", "gmail", "outlook",
+        "powerpoint", "xcode", "whatsapp", "openai", "chatgpt", "kubernetes",
+        "telegram", "linkedin", "youtube", "netflix", "wechat", "alipay",
+        "taobao", "weibo", "bilibili", "douyin", "tiktok", "instagram",
+        "facebook", "twitter", "microsoft", "tencent", "huawei", "xiaomi"};
 
     static const char *kStopwords[] = {
         "a", "an", "the", "i", "you", "we", "he", "she", "it", "they", "my", "your",
@@ -549,8 +948,17 @@ size_t gc_translate_protection_scan(const char *text, size_t length,
                 }
             }
             int cls = 0;
+            bool in_brands = false;
+            for (const char *brand : kBrands) {
+                if (lower == brand) {
+                    in_brands = true;
+                    break;
+                }
+            }
             if (digits > 0 && dots > 0) {
                 cls = 2;  // 版本号（v3.2.1）
+            } else if (in_brands) {
+                cls = 6;  // 已知品牌（含句首，可硬保留）
             } else if (internal_upper) {
                 cls = 3;  // 驼峰/异形大写（VSCode、iPhone）
             } else if (upper >= 2 && lowerc == 0 && digits == 0) {

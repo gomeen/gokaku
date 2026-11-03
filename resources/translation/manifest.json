@@ -1,0 +1,66 @@
+{
+ "schemaVersion": 1,
+ "version": "2026-11-04.1",
+ "kind": "audited-translation-expressions",
+ "directions": [
+  "en-zh",
+  "zh-en"
+ ],
+ "license": "CC BY-SA 4.0",
+ "attribution": "CC-CEDICT contributors（https://www.mdbg.net/chinese/dictionary?page=cc-cedict），本文件为衍生数据并声明修改",
+ "sources": {
+  "cc-cedict": {
+   "file": "cedict_ts.u8.gz",
+   "bytes": 3983033,
+   "sha256": "e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb",
+   "entries": 125356,
+   "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
+  },
+  "jieba": {
+   "file": "jieba-dict.txt",
+   "sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+   "url": "https://github.com/fxsjy/jieba",
+   "license": "MIT"
+  },
+  "english-words": {
+   "file": "english-words.txt",
+   "sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+   "note": "wordfreq 频序，SCOWL 词表；见 resources/licenses"
+  }
+ },
+ "selection": {
+  "seeds": "resources/translation/selection-seeds.txt",
+  "seedsZh": 271,
+  "seedsEn": 200,
+  "maxSenseGroups": 3,
+  "sliceCap": 300,
+  "properNounPolicy": "拼音首字母大写的专名条目不进入资源",
+  "conflictPolicy": "同一词头存在互不一致义项时整条不进资源",
+  "zhPolicy": "2–6 字词头；类别清单或 jieba 词频 ≥ 4000；义项组 ≤ 3",
+  "enPolicy": "唯一英文串→最多 3 个常用中文译法，按词频取首要；类别清单或英文词频前 8000",
+  "note": "完整输入精确命中才直接使用；义项集合保留在证据里"
+ },
+ "counts": {
+  "en-zh": 180,
+  "zh-en": 300,
+  "reviewedExceptions": 103,
+  "rejectedByReview": 0,
+  "overriddenByReview": 103,
+  "overrideUnattested": 40,
+  "unambiguousHeadwords": 87098,
+  "ambiguousSkipped": 823,
+  "properNounsSkipped": 20183,
+  "englishKeys": 18187
+ },
+ "review": {
+  "status": "audited-v1",
+  "log": "review-log.tsv",
+  "logSha256": "706e596a405cc10e0a763cefb4eca350f00659aed4bab5565d02051bb1e8d88d",
+  "policy": "规则筛选＋整表逐条人工复核；否决与改写记入 review-log.tsv，未记录即复核通过"
+ },
+ "files": {
+  "expressions.tsv": "608baf194f6a247ffba9473b20fa05b855a5e6cd25c2e01d52807701265ffc05",
+  "templates.json": "49c78c95761bc83c597152ac77478b83a26857e6e2f916aa714394ea21034162",
+  "brands.tsv": "e26646ba183c86544335af2fd55130b7f9a66e6a07e556784f4923633c3f990b"
+ }
+}

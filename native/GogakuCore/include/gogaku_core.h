@@ -269,8 +269,10 @@ GOGAKU_CORE_EXPORT size_t gc_translate_t2s(const char *text, size_t length,
 /* 是否含繁体专用字：0=无，1=有（需归一）。 */
 GOGAKU_CORE_EXPORT int32_t gc_translate_has_traditional(const char *text, size_t length);
 
-/* 时间一致性：0=一致或不涉及，1=时段矛盾（9 a.m.→下午9点），
- * 2=显式数字时间丢失，3=半点丢失（十点半→10 点整）。 */
+/* 时间一致性（源/输出逐条“数值＋时段”对比）：0=一致或不涉及，
+ * 1=时段矛盾（9 a.m.→下午9点），2=时间点／数字丢失（含数字未保留），
+ * 3=半点丢失（十点半→10 点整），4=数值/顺序/个数不符（增义、乱序、改数）。
+ * 合法区间（上午九点到下午四点）不会被当成时段翻盘。 */
 GOGAKU_CORE_EXPORT int32_t gc_translate_time_check(const char *source, size_t source_length,
                                                    const char *output, size_t output_length);
 
@@ -288,9 +290,9 @@ typedef struct GcTextRange {
     size_t end;    /* UTF-8 字节偏移（不含） */
 } GcTextRange;
 
-/* 保护候选扫描：URL／版本号（v3.2.1）／驼峰或异形大写（VSCode、iPhone）／
- * 全大写（VS）／句中大写词（Bob、Gogaku；停用词表排除可译普通词）。
- * 句首大写词不作候选（v1 局限，品牌靠调用方词表）。返回完整候选个数；
+/* 保护候选扫描：URL／版本号（v3.2.1）／已审阅品牌（Gogaku、GitHub，含句首）／
+ * 驼峰或异形大写（VSCode、iPhone）／全大写（VS）／句中大写词（Bob；停用词表
+ * 排除可译普通词）。句首普通大写词仍不作候选（v1 局限）。返回完整候选个数；
  * 超出 capacity 的不写 out_ranges（可为 NULL）。 */
 GOGAKU_CORE_EXPORT size_t gc_translate_protection_scan(const char *text, size_t length,
                                                        GcTextRange *out_ranges,

@@ -1,0 +1,72 @@
+{
+ "schemaVersion": 1,
+ "version": "2026-11-04.1",
+ "kind": "audited-bidirectional-time-date-templates",
+ "purpose": "独立钟点、明确上午/下午、分钟偏移、数量区间与常用相对日期的双向模板。只有完整输入被模板覆盖时才直接给出译法；含任意正文的句子不按词拼接。",
+ "policy": {
+  "fullMatchOnly": true,
+  "noWordConcatenation": "模板只能覆盖整个输入，不能从句子中抽取片段拼成译文",
+  "typedParams": ["relativeDay", "meridiem", "hour", "minute", "range"]
+ },
+ "meridiem": {
+  "zh": {
+   "上午": "am",
+   "早上": "am",
+   "早晨": "am",
+   "清晨": "am",
+   "下午": "pm",
+   "傍晚": "pm",
+   "晚上": "pm",
+   "夜里": "pm"
+  },
+  "en": {
+   "a.m.": "am",
+   "am": "am",
+   "morning": "am",
+   "p.m.": "pm",
+   "pm": "pm",
+   "afternoon": "pm",
+   "evening": "pm",
+   "night": "pm"
+  },
+  "zhOutput": {
+   "am": "上午",
+   "pm": "下午"
+  },
+  "enOutput": {
+   "am": "a.m.",
+   "pm": "p.m."
+  }
+ },
+ "neutral": {
+  "zh": ["中午", "正午"],
+  "en": ["noon", "midday"]
+ },
+ "relativeDays": {
+  "今天": "today",
+  "明天": "tomorrow",
+  "后天": "the day after tomorrow",
+  "大后天": "three days from now",
+  "昨天": "yesterday",
+  "前天": "the day before yesterday",
+  "今晚": "tonight",
+  "明晚": "tomorrow night"
+ },
+ "minuteForms": {
+  "zh": {
+   "半": 30,
+   "一刻": 15,
+   "三刻": 45
+  }
+ },
+ "rangeJoin": {
+  "zh": ["到", "至", "-", "—"],
+  "en": [" to ", "-", "–"]
+ },
+ "enRangePrefix": ["from ", "between "],
+ "notes": [
+  "单一钟点、明确上午/下午、分钟偏移、常用相对日期与时间区间都在模板范围内。",
+  "星期、日期（几月几号）不进入模板：审核译法来自 CC-CEDICT 词条（周一…周日、月份），不在此处生成。",
+  "上午/下午同时出现的区间由模板与加固层共同处理，不视为时段翻转。"
+ ]
+}

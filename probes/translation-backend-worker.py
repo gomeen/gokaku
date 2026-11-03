@@ -126,6 +126,8 @@ class Small100Adapter:
         if not source.strip():
             raise ValueError("empty input is not a translation case")
         tokenizer = self._tokenizer(direction)
+        beam = int(case.get("beam") or self.identity["beam"])
+        num_hypotheses = max(1, min(int(case.get("numHypotheses") or 1), beam))
         start = time.perf_counter_ns()
         cpu_start = time.process_time_ns()
         ids, tokens, prefix = self._encode(tokenizer, source)
@@ -135,21 +137,37 @@ class Small100Adapter:
             target_prefix=[prefix],
             max_batch_size=1,
             batch_type="examples",
-            beam_size=self.identity["beam"],
+            beam_size=beam,
+            num_hypotheses=num_hypotheses,
             max_decoding_length=self.identity["maxDecodingLength"],
             return_scores=True,
+            return_end_token=True,
         )[0]
         generated = time.perf_counter_ns()
+        candidates = []
+        for out_tokens, score in zip(result.hypotheses, result.scores):
+            text, output_tokens = self._decode(tokenizer, out_tokens)
+            ended = bool(out_tokens) and out_tokens[-1] in ("</s>",)
+            candidates.append({
+                "text": text,
+                "score": float(score),
+                "tokens": output_tokens,
+                "ended": ended,
+                "truncated": not ended,
+            })
         out_tokens = result.hypotheses[0]
         text, output_tokens = self._decode(tokenizer, out_tokens)
         end = time.perf_counter_ns()
-        truncated = len([t for t in out_tokens if t not in ("</s>", "<pad>", "<unk>")]) >= self.identity["maxDecodingLength"]
+        truncated = not candidates[0]["ended"] if candidates else True
         return {
             "id": case.get("id"),
             "direction": direction,
             "kind": case.get("kind"),
             "source": source,
             "output": text,
+            "beam": beam,
+            "numHypotheses": num_hypotheses,
+            "candidates": candidates,
             "inputTokens": len(ids),
             "outputTokens": output_tokens,
             "sourceUnknownTokens": ids.count(tokenizer.unk_token_id),
@@ -208,6 +226,7 @@ class QuickmtAdapter:
             "threads": args.threads,
             "beam": args.beam,
             "maxDecodingLength": args.max_decoding_length,
+            "scoring": bool(args.enable_scoring),
             "protocol": "src spm + </s>; tgt spm decode",
         }
 
@@ -220,6 +239,8 @@ class QuickmtAdapter:
         source = case.get("source", "")
         if not source.strip():
             raise ValueError("empty input is not a translation case")
+        beam = int(case.get("beam") or self.identity["beam"])
+        num_hypotheses = max(1, min(int(case.get("numHypotheses") or 1), beam))
         start = time.perf_counter_ns()
         cpu_start = time.process_time_ns()
         pieces = self.src_spm.encode(source, out_type=str) + ["</s>"]
@@ -228,22 +249,37 @@ class QuickmtAdapter:
             [pieces],
             max_batch_size=1,
             batch_type="examples",
-            beam_size=self.identity["beam"],
+            beam_size=beam,
+            num_hypotheses=num_hypotheses,
             max_decoding_length=self.identity["maxDecodingLength"],
             return_scores=True,
+            return_end_token=True,
         )[0]
         generated = time.perf_counter_ns()
+        candidates = []
+        for out_tokens, score in zip(result.hypotheses, result.scores):
+            ended = bool(out_tokens) and out_tokens[-1] in ("</s>",)
+            candidates.append({
+                "text": self.tgt_spm.decode([t for t in out_tokens if t != "</s>"]).strip(),
+                "score": float(score),
+                "tokens": len([t for t in out_tokens if t != "</s>"]),
+                "ended": ended,
+                "truncated": not ended,
+            })
         out_tokens = result.hypotheses[0]
-        text = self.tgt_spm.decode(out_tokens).strip()
+        text = self.tgt_spm.decode([t for t in out_tokens if t != "</s>"]).strip()
         end = time.perf_counter_ns()
         output_tokens = len([t for t in out_tokens if t != "</s>"])
-        truncated = output_tokens >= self.identity["maxDecodingLength"]
+        truncated = not candidates[0]["ended"] if candidates else True
         return {
             "id": case.get("id"),
             "direction": direction,
             "kind": case.get("kind"),
             "source": source,
             "output": text,
+            "beam": beam,
+            "numHypotheses": num_hypotheses,
+            "candidates": candidates,
             "inputTokens": len(pieces),
             "outputTokens": output_tokens,
             "sourceUnknownTokens": pieces.count(self.src_spm.id_to_piece(self.src_spm.unk_id())),
@@ -256,6 +292,84 @@ class QuickmtAdapter:
             "totalMs": (end - start) / 1e6,
             "cpuMs": (time.process_time_ns() - cpu_start) / 1e6,
             "peakRssBytes": peak_rss_bytes(),
+        }
+
+
+class ReverseScorer:
+    """用 quickmt 反向给候选打分（只评分，不自由生成回译）。
+
+    中→英方向：候选是英语，用 quickmt-en-zh 以候选英语为源、原中文为目标，
+    分数即「把候选英语译回中文能还原原文」的可信度。
+    英→中方向：候选是中文，用 quickmt-zh-en 以候选中文为源、原英语为目标。
+    """
+
+    def __init__(self, root, compute_type, threads):
+        import ctranslate2
+        import sentencepiece
+
+        self.ctranslate2 = ctranslate2
+        self.sentencepiece = sentencepiece
+        self.root = root
+        self.compute_type = compute_type
+        self.threads = threads
+        self.models = {}
+
+    def _model(self, direction):
+        model = self.models.get(direction)
+        if model is not None:
+            return model
+        model_dir = self.root / ("quickmt-" + direction)
+        if not (model_dir / "model.bin").is_file():
+            raise RuntimeError("reverse scoring model missing: %s" % model_dir)
+        model = {
+            "translator": self.ctranslate2.Translator(
+                str(model_dir), device="cpu", compute_type=self.compute_type,
+                inter_threads=1, intra_threads=self.threads),
+            "src": self.sentencepiece.SentencePieceProcessor(
+                model_file=str(model_dir / "src.spm.model")),
+            "tgt": self.sentencepiece.SentencePieceProcessor(
+                model_file=str(model_dir / "tgt.spm.model")),
+        }
+        self.models[direction] = model
+        return model
+
+    def score(self, case):
+        """case: {direction, source, candidates: [str]}
+
+        源/目标是「候选译文 → 原文」，模型取候选语言那一边的 quickmt。
+        """
+        direction = normalize_direction(case.get("direction"))
+        if direction not in DIRECTIONS:
+            raise ValueError("reverse scoring needs a concrete direction")
+        reverse = "en-zh" if direction == "zh-en" else "zh-en"
+        source = case.get("source", "")
+        candidates = case.get("candidates") or []
+        if not source.strip() or not candidates:
+            return {"event": "score_result", "id": case.get("id"), "scores": []}
+        model = self._model(reverse)
+        tgt_batch = [model["tgt"].encode(source, out_type=str)] * len(candidates)
+        src_batch = [model["src"].encode(text, out_type=str) + ["</s>"] for text in candidates]
+        start = time.perf_counter_ns()
+        results = model["translator"].score_batch(
+            src_batch, tgt_batch, max_batch_size=len(src_batch), batch_type="examples")
+        elapsed = (time.perf_counter_ns() - start) / 1e6
+        scores = []
+        for result in results:
+            log_probs = list(result.log_probs)
+            total = float(sum(log_probs))
+            count = len(log_probs) or 1
+            scores.append({
+                "logProb": total,
+                "tokens": len(log_probs),
+                "normalized": total / count,
+            })
+        return {
+            "event": "score_result",
+            "id": case.get("id"),
+            "direction": direction,
+            "reverseModel": "quickmt-" + reverse,
+            "scores": scores,
+            "scoreMs": elapsed,
         }
 
 
@@ -276,6 +390,10 @@ def main():
     parser.add_argument("--compute-type", default="int8")
     parser.add_argument("--beam", type=int, default=1)
     parser.add_argument("--max-decoding-length", type=int, default=256)
+    parser.add_argument("--enable-scoring", action="store_true",
+                        help="quickmt worker 额外加载双向模型做反向评分")
+    parser.add_argument("--scoring-only", action="store_true",
+                        help="只提供 score 请求（反向评分 worker）")
     args = parser.parse_args()
 
     for key in ["OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS"]:
@@ -293,8 +411,13 @@ def main():
 
     process_start = time.perf_counter()
     load_start = time.perf_counter_ns()
+    scorer = None
     try:
-        adapter = build_adapter(args)
+        adapter = None if args.scoring_only else build_adapter(args)
+        if args.backend == "quickmt" and args.enable_scoring:
+            scorer = ReverseScorer(args.root, args.compute_type, args.threads)
+            for direction in sorted(DIRECTIONS):
+                scorer._model(direction)
         if "torch" in sys.modules:
             raise RuntimeError("CTranslate2 runtime must be isolated from PyTorch/OpenMP")
         ready = {
@@ -302,8 +425,15 @@ def main():
             "pid": os.getpid(),
             "backend": args.backend,
             "direction": args.direction,
-            "identity": adapter.identity,
-            "versions": adapter.versions,
+            "identity": adapter.identity if adapter is not None else {
+                "backend": "quickmt",
+                "adapter": "reverse-scorer",
+                "models": ["quickmt-en-zh", "quickmt-zh-en"],
+                "computeType": args.compute_type,
+                "threads": args.threads,
+                "protocol": "candidate -> original scoring via score_batch",
+            },
+            "versions": adapter.versions if adapter is not None else {"ctranslate2": __import__("ctranslate2").__version__},
             "modelLoadMs": load_ms(load_start),
             "processStartToReadyMs": (time.perf_counter() - process_start) * 1000.0,
             "peakRssBytes": peak_rss_bytes(),
@@ -326,6 +456,13 @@ def main():
             request = json.loads(line)
         except Exception as error:
             emit({"event": "protocol_error", "error": repr(error)})
+            continue
+        if request.get("event") == "score":
+            try:
+                emit(scorer.score(request))
+            except Exception as error:
+                emit({"event": "score_result", "id": request.get("id"), "error": repr(error),
+                      "scores": []})
             continue
         if request.get("event") == "stop":
             emit({"event": "stopped", "peakRssBytes": peak_rss_bytes()})

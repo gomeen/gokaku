@@ -1,0 +1,42 @@
+# brands.tsv — 已审阅品牌／产品名处理表
+# 列：词条	策略	规范译法	说明
+# preserve：输入命中该词条时，候选译文必须原样保留该词条（大小写不敏感）；
+#           模型改写（把 Gogaku 译成「古巴」）即被结构检查否决。
+# map：完整输入精确等于该词条时直接给出规范译法（审核过的汉语常用名）。
+# 原则：只收录无歧义的专名。slack / zoom / notion / word / excel / windows /
+#       apple 这类同时是普通词的串不进入 preserve，避免误伤日常输入。
+Gogaku	preserve	Gogaku	产品自称，任何语向都原样保留
+GitHub	preserve	GitHub	平台名
+VS Code	preserve	VS Code	编辑器名
+Visual Studio Code	preserve	Visual Studio Code	编辑器全名
+Microsoft Teams	preserve	Microsoft Teams	协作工具全名
+Microsoft	preserve	Microsoft	公司名
+Figma	preserve	Figma	设计工具
+Jira	preserve	Jira	缺陷跟踪工具
+Gmail	preserve	Gmail	邮箱服务
+Outlook	preserve	Outlook	邮箱服务
+PowerPoint	preserve	PowerPoint	演示软件
+Xcode	preserve	Xcode	开发工具
+iPhone	preserve	iPhone	设备名
+iPad	preserve	iPad	设备名
+macOS	preserve	macOS	系统名
+iOS	preserve	iOS	系统名
+Telegram	preserve	Telegram	通讯软件
+LinkedIn	preserve	LinkedIn	职业社交平台
+YouTube	preserve	YouTube	视频平台
+Netflix	preserve	Netflix	流媒体平台
+TikTok	preserve	TikTok	短视频平台
+Instagram	preserve	Instagram	社交平台
+Facebook	preserve	Facebook	社交平台
+Twitter	preserve	Twitter	社交平台
+OpenAI	preserve	OpenAI	公司名
+ChatGPT	preserve	ChatGPT	产品名
+Kubernetes	preserve	Kubernetes	系统名
+Docker	preserve	Docker	容器工具
+WeChat	map	微信	审核过的常用汉语名
+Weibo	map	微博	审核过的常用汉语名
+Taobao	map	淘宝	审核过的常用汉语名
+Alipay	map	支付宝	审核过的常用汉语名
+Douyin	map	抖音	审核过的常用汉语名
+Bilibili	map	哔哩哔哩	审核过的常用汉语名
+WeChat Pay	map	微信支付	审核过的常用汉语名

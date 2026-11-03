@@ -1,0 +1,485 @@
+# expressions.tsv — 审核过的翻译表达资源（首片）
+# 方向	源表达	译入表达	义项组数	CC-CEDICT 词头	拼音	审核状态	备选译法
+# 来源：CC-CEDICT（CC BY-SA 4.0，https://www.mdbg.net/chinese/dictionary?page=cc-cedict），sha256=e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb
+# 选词：resources/translation/selection-seeds.txt 类别清单 + jieba 词频；不从评测集补答案
+# 义务：署名 CC-CEDICT 贡献者、声明修改、本衍生数据按 CC BY-SA 4.0 分发
+en-zh	like	喜欢	1	喜欢	-	audited-v1	同|一样|若
+en-zh	know	知道	1	知道	-	audited-v1	知|认识
+en-zh	see	看见	1	看见	-	audited-v1	看到|瞧
+en-zh	want	想	1	想	-	audited-v1	需要|需
+en-zh	need	需要	1	需要	-	audited-v1	用|需
+en-zh	love	爱	1	爱	-	audited-v1	爱情|喜爱
+en-zh	help	帮助	1	帮助	-	audited-v1	帮|扶
+en-zh	school	学校	1	学校	-	audited-v1	学院|派
+en-zh	please	请	1	请	-	audited-v1	悦|敬请
+en-zh	today	今天	1	今天	-	audited-v1	今日|今儿
+en-zh	order	订单	1	订单	-	audited-v1	叫|点|定
+en-zh	course	课程	1	课程	-	audited-v1	经过|学科|课
+en-zh	book	书	1	书	-	audited-v1	定|著作
+en-zh	office	办公室	1	办公室	-	audited-v1	机关|任|办
+en-zh	room	房间	1	房间	-	audited-v1	房|空间|室
+en-zh	remember	记得	1	记得	-	audited-v1	记|记忆
+en-zh	understand	明白	1	明白	-	audited-v1	明|了解
+en-zh	happy	高兴	1	高兴	-	audited-v1	幸福|快乐
+en-zh	late	迟到	1	迟到	-	audited-v1	晚|迟|迟迟
+en-zh	morning	早上	1	早上	-	audited-v1	早|上午|晨
+en-zh	report	报告	1	报告	-	audited-v1	报|报道
+en-zh	phone	电话	1	电话	-	audited-v1	致电
+en-zh	building	建筑	1	建筑	-	audited-v1	房子|馆
+en-zh	study	学	1	学	-	audited-v1	学习|攻
+en-zh	price	价格	1	价格	-	audited-v1	代价|价钱
+en-zh	rest	休息	1	休息	-	audited-v1	歇|休
+en-zh	project	项目	1	项目	-	audited-v1	计划|工程
+en-zh	sorry	抱歉	1	抱歉	-	audited-v1	怆
+en-zh	hot	热	1	热	-	audited-v1	辣|热门
+en-zh	cool	凉快	1	凉快	-	audited-v1	帅|冷却|镇定
+en-zh	meeting	会议	1	会议	-	audited-v1	集会|会面
+en-zh	drive	开车	1	开车	-	audited-v1	驾|带动|驾驶
+en-zh	key	钥匙	1	钥匙	-	audited-v1	关键|拳头|键
+en-zh	cannot	不能	1	不能	-	audited-v1	不可|不得
+en-zh	hate	恨	1	恨	-	audited-v1	疾|仇恨
+en-zh	walk	走路	1	走路	-	audited-v1	走|步|行走
+en-zh	hospital	医院	1	医院	-	audited-v1	
+en-zh	forget	忘	1	忘	-	audited-v1	忘记|遗忘
+en-zh	listen	听	1	听	-	audited-v1	侧耳|聆听|聆
+en-zh	sleep	睡觉	1	睡觉	-	audited-v1	睡|睡眠
+en-zh	speak	说话	1	说话	-	audited-v1	讲|曰
+en-zh	tonight	今晚	1	今晚	-	audited-v1	今夜|今宵
+en-zh	charge	收费	1	收费	-	audited-v1	攻击|闯|控
+en-zh	cold	冷	1	冷	-	audited-v1	冰|寒
+en-zh	network	网络	1	网络	-	audited-v1	网|联网
+en-zh	store	商店	1	商店	-	audited-v1	存|店|保存
+en-zh	student	学生	1	学生	-	audited-v1	学员|学子
+en-zh	tomorrow	明天	1	明天	-	audited-v1	未来|明日
+en-zh	station	站	1	站	-	audited-v1	驻地|屯
+en-zh	welcome	欢迎	1	欢迎	-	audited-v1	迎|迎接
+en-zh	clean	干净	1	干净	-	audited-v1	清|净
+en-zh	train	火车	1	火车	-	audited-v1	训练|培训|练
+en-zh	contract	合同	1	合同	-	audited-v1	患|缩
+en-zh	degree	程度	1	程度	-	audited-v1	地步|份儿
+en-zh	floor	地面	1	地面	-	audited-v1	桥面|地板
+en-zh	weekend	周末	1	周末	-	audited-v1	
+en-zh	cash	现金	1	现金	-	audited-v1	兑|兑现
+en-zh	address	地址	1	地址	-	audited-v1	讲话|住址
+en-zh	yesterday	昨天	1	昨天	-	audited-v1	昨日|昨儿
+en-zh	doctor	医生	1	医生	-	audited-v1	先生|博士
+en-zh	teacher	老师	1	老师	-	audited-v1	先生|师|教师
+en-zh	weather	天气	1	天气	-	audited-v1	气|气象
+en-zh	coffee	咖啡	1	咖啡	-	audited-v1	咖
+en-zh	evening	晚上	1	晚上	-	audited-v1	晚|黄昏
+en-zh	interview	采访	1	采访	-	audited-v1	访问|面试
+en-zh	airport	机场	1	机场	-	audited-v1	飞机场|空港
+en-zh	sad	难过	1	难过	-	audited-v1	不幸|悲|悲伤
+en-zh	bus	公交车	1	公交车	-	audited-v1	汽车|客车|公车
+en-zh	dinner	晚饭	1	晚饭	-	audited-v1	晚餐|饮宴
+en-zh	apple	苹果	1	苹果	-	audited-v1	
+en-zh	boss	老板	1	老板	-	audited-v1	大哥|首领
+en-zh	medicine	药	1	药	-	audited-v1	药物|医学|医药
+en-zh	tea	茶	1	茶	-	audited-v1	茶叶
+en-zh	afternoon	下午	1	下午	-	audited-v1	午后|昃
+en-zh	plane	飞机	1	飞机	-	audited-v1	平面|刨子
+en-zh	cheap	便宜	1	便宜	-	audited-v1	实惠|低廉|低贱
+en-zh	rain	雨	1	雨	-	audited-v1	雨水|下雨
+en-zh	tired	疲惫	1	疲惫	-	audited-v1	乏|疲倦
+en-zh	warm	暖和	1	暖和	-	audited-v1	暖|温|热烈
+en-zh	afraid	害怕	1	害怕	-	audited-v1	恐|生怕|凛
+en-zh	beer	啤酒	1	啤酒	-	audited-v1	啤|麦酒
+en-zh	expensive	贵	1	贵	-	audited-v1	昂贵|值钱
+en-zh	email	邮件	1	邮件	-	audited-v1	电子邮件|邮箱
+en-zh	shopping	购物	1	购物	-	audited-v1	血拼
+en-zh	sugar	糖	1	糖	-	audited-v1	糖类
+en-zh	route	路线	1	路线	-	audited-v1	路|线路
+en-zh	schedule	日程	1	日程	-	audited-v1	调度|时间表
+en-zh	angry	愤怒	1	愤怒	-	audited-v1	恼怒|好气
+en-zh	holiday	节日	1	节日	-	audited-v1	佳节
+en-zh	lunch	午饭	1	午饭	-	audited-v1	午餐|中餐
+en-zh	milk	牛奶	1	牛奶	-	audited-v1	乳|乳汁|奶子
+en-zh	pack	收拾	1	收拾	-	audited-v1	包扎|打包
+en-zh	snow	雪	1	雪	-	audited-v1	白雪|天花
+en-zh	cook	做饭	1	做饭	-	audited-v1	烧|煮
+en-zh	temperature	温度	1	温度	-	audited-v1	温|体温
+en-zh	chicken	鸡	1	鸡	-	audited-v1	
+en-zh	worried	担心	1	担心	-	audited-v1	忧|悄悄
+en-zh	breakfast	早餐	1	早餐	-	audited-v1	过早|早点
+en-zh	ticket	票	1	票	-	audited-v1	筹|门票
+en-zh	salt	盐	1	盐	-	audited-v1	卤|腌
+en-zh	delivery	快递	1	快递	-	audited-v1	交割|寄递
+en-zh	rent	租	1	租	-	audited-v1	雇|租赁
+en-zh	fruit	水果	1	水果	-	audited-v1	果|果实
+en-zh	rice	米饭	1	米饭	-	audited-v1	大米|水稻|稻
+en-zh	bread	面包	1	面包	-	audited-v1	
+en-zh	shower	洗澡	1	洗澡	-	audited-v1	阵雨|淋浴
+en-zh	appointment	预约	1	预约	-	audited-v1	任命|约会
+en-zh	egg	鸡蛋	1	鸡蛋	-	audited-v1	蛋|卵
+en-zh	package	包裹	1	包裹	-	audited-v1	裹|包装|打包
+en-zh	hungry	饿	1	饿	-	audited-v1	饥|馁
+en-zh	confirm	确认	1	确认	-	audited-v1	证实|印证
+en-zh	nurse	护士	1	护士	-	audited-v1	护理|哺乳
+en-zh	arrive	到达	1	到达	-	audited-v1	到|至|来到
+en-zh	salary	工资	1	工资	-	audited-v1	待遇|薪水|薪
+en-zh	discount	优惠	1	优惠	-	audited-v1	折扣|贴现
+en-zh	delicious	美味	1	美味	-	audited-v1	香喷喷|喷香
+en-zh	toilet	厕所	1	厕所	-	audited-v1	卫生间|厕
+en-zh	goodbye	再见	1	再见	-	audited-v1	
+en-zh	beef	牛肉	1	牛肉	-	audited-v1	
+en-zh	satisfied	满意	1	满意	-	audited-v1	安|满足
+en-zh	exam	考试	1	考试	-	audited-v1	
+en-zh	menu	菜单	1	菜单	-	audited-v1	菜谱|功能表
+en-zh	fever	发烧	1	发烧	-	audited-v1	热病
+en-zh	taxi	出租车	1	出租车	-	audited-v1	滑行|出租汽车
+en-zh	garbage	垃圾	1	垃圾	-	audited-v1	废料
+en-zh	soup	汤	1	汤	-	audited-v1	汤汁|羹汤|歠
+en-zh	homework	作业	1	作业	-	audited-v1	功课|家庭作业
+en-zh	deadline	期限	1	期限	-	audited-v1	限期|截止日
+en-zh	neighbor	邻居	1	邻居	-	audited-v1	邻|隔壁
+en-zh	forecast	预计	1	预计	-	audited-v1	预测|预报
+en-zh	laundry	洗衣	1	洗衣	-	audited-v1	洗衣店
+en-zh	password	密码	1	密码	-	audited-v1	口令|暗号
+en-zh	passport	护照	1	护照	-	audited-v1	
+en-zh	subway	地铁	1	地铁	-	audited-v1	轨道交通|捷运
+en-zh	navigation	导航	1	导航	-	audited-v1	领航
+en-zh	injection	针	1	针	-	audited-v1	注射|注射剂
+en-zh	colleague	同事	1	同事	-	audited-v1	同僚|僚
+en-zh	headache	头疼	1	头疼	-	audited-v1	头风
+en-zh	cough	咳嗽	1	咳嗽	-	audited-v1	嗽
+en-zh	vegetable	蔬菜	1	蔬菜	-	audited-v1	菜
+en-zh	receipt	收据	1	收据	-	audited-v1	票据|凭证|发票
+en-zh	peanut	花生	1	花生	-	audited-v1	土豆|落花生
+en-zh	attachment	附件	1	附件	-	audited-v1	附着|执着
+en-zh	pharmacy	药店	1	药店	-	audited-v1	药房|药学
+en-zh	coupon	购物券	1	购物券	-	audited-v1	优惠券|代金券
+en-zh	luggage	行李	1	行李	-	audited-v1	行囊
+en-zh	allergic	过敏	1	过敏	-	audited-v1	
+en-zh	supermarket	超市	1	超市	-	audited-v1	超级市场
+en-zh	vegetarian	素食	1	素食	-	audited-v1	素|素食者
+en-zh	thirsty	渴	1	渴	-	audited-v1	口渴
+en-zh	chili	辣椒	1	辣椒	-	audited-v1	辣子|红辣椒
+en-zh	noodles	面条	1	面条	-	audited-v1	挂面
+en-zh	depart	出发	1	出发	-	audited-v1	离开|走路|离场
+en-zh	checkout	结账	1	结账	-	audited-v1	销售点
+en-zh	cloudy	多云	1	多云	-	audited-v1	阴|霭霭
+en-zh	humid	潮湿	1	潮湿	-	audited-v1	潮|滋润
+en-zh	crossroads	十字路口	1	十字路口	-	audited-v1	交叉点|逵
+en-zh	restroom	洗手间	1	洗手间	-	audited-v1	厕|洗澡间|圊
+en-zh	invoice	发票	1	发票	-	audited-v1	请款
+en-zh	bank card	银行卡	1	银行卡	-	audited-v1	
+en-zh	excuse me	打扰一下	1	打扰一下	-	audited-v1	对不起|请问|失陪
+en-zh	gas station	加油站	1	加油站	-	audited-v1	
+en-zh	get up	起床	1	起床	-	audited-v1	起|起身
+en-zh	good afternoon	下午好	1	下午好	-	audited-v1	午安
+en-zh	good evening	晚上好	1	晚上好	-	audited-v1	晚安
+en-zh	good morning	早上好	1	早上好	-	audited-v1	早|早安
+en-zh	good night	晚安	1	晚安	-	audited-v1	
+en-zh	how much	多少钱	1	多少钱	-	audited-v1	这么|几何|几多
+en-zh	last week	上周	1	上周	-	audited-v1	上星期|上个星期
+en-zh	long time no see	好久不见	1	好久不见	-	audited-v1	
+en-zh	next week	下周	1	下周	-	audited-v1	下星期|下个星期
+en-zh	no problem	没问题	1	没问题	-	audited-v1	没说的
+en-zh	parking lot	停车场	1	停车场	-	audited-v1	存车处
+en-zh	speak slowly	慢慢说	1	慢慢说	-	audited-v1	讷
+en-zh	take care	保重	1	保重	-	audited-v1	管|小心|关照
+en-zh	thank you	谢谢	1	谢谢	-	audited-v1	领教
+en-zh	traffic jam	塞车	1	塞车	-	audited-v1	堵车|交通阻塞
+en-zh	traffic light	红绿灯	1	红绿灯	-	audited-v1	交通灯
+en-zh	wait a moment	稍等	1	稍等	-	audited-v1	且慢|稍候|等一等
+en-zh	water bill	水费	1	水费	-	audited-v1	
+zh-en	公司	company	1	公司	gong1 si1	audited-v1	
+zh-en	知道	know	1	知道	zhi1 dao4	audited-v1	
+zh-en	学生	student	2	學生	xue2 sheng5	audited-v1	
+zh-en	会议	meeting	2	會議	hui4 yi4	audited-v1	
+zh-en	需要	need	1	需要	xu1 yao4	audited-v1	
+zh-en	学校	school	1	學校	xue2 xiao4	audited-v1	
+zh-en	今天	today	2	今天	jin1 tian1	audited-v1	
+zh-en	学习	learn	1	學習	xue2 xi2	audited-v1	
+zh-en	项目	project	1	項目	xiang4 mu4	audited-v1	
+zh-en	价格	price	1	價格	jia4 ge2	audited-v1	
+zh-en	明白	understand	3	明白	ming2 bai5	audited-v1	
+zh-en	喜欢	like	3	喜歡	xi3 huan5	audited-v1	
+zh-en	飞机	airplane	1	飛機	fei1 ji1	audited-v1	
+zh-en	网络	network	2	網絡	wang3 luo4	audited-v1	
+zh-en	小时	hour	1	小時	xiao3 shi2	audited-v1	
+zh-en	考试	exam	1	考試	kao3 shi4	audited-v1	
+zh-en	机场	airport	2	機場	ji1 chang3	audited-v1	
+zh-en	医院	hospital	1	醫院	yi1 yuan4	audited-v1	
+zh-en	老师	teacher	1	老師	lao3 shi1	audited-v1	
+zh-en	分钟	minute	1	分鐘	fen1 zhong1	audited-v1	
+zh-en	晚上	evening	2	晚上	wan3 shang5	audited-v1	
+zh-en	刚才	just now	2	剛才	gang1 cai2	audited-v1	
+zh-en	检查	check	3	檢查	jian3 cha2	audited-v1	
+zh-en	欢迎	welcome	1	歡迎	huan1 ying2	audited-v1	
+zh-en	工资	wages	1	工資	gong1 zi1	audited-v1	
+zh-en	手机	cell phone	1	手機	shou3 ji1	audited-v1	
+zh-en	下午	afternoon	2	下午	xia4 wu3	audited-v1	
+zh-en	昨天	yesterday	1	昨天	zuo2 tian1	audited-v1	
+zh-en	路线	route	3	路線	lu4 xian4	audited-v1	
+zh-en	老板	boss	1	老闆	lao3 ban3	audited-v1	
+zh-en	办公室	office	1	辦公室	ban4 gong1 shi4	audited-v1	
+zh-en	文件	document	2	文件	wen2 jian4	audited-v1	
+zh-en	医生	doctor	1	醫生	yi1 sheng1	audited-v1	
+zh-en	温度	temperature	1	溫度	wen1 du4	audited-v1	
+zh-en	出发	set off	2	出發	chu1 fa1	audited-v1	
+zh-en	休息	rest	1	休息	xiu1 xi5	audited-v1	
+zh-en	客户	client	1	客戶	ke4 hu4	audited-v1	
+zh-en	合同	contract	1	合同	he2 tong5	audited-v1	
+zh-en	满意	satisfied	3	滿意	man3 yi4	audited-v1	
+zh-en	害怕	be afraid	1	害怕	hai4 pa4	audited-v1	
+zh-en	地址	address	1	地址	di4 zhi3	audited-v1	
+zh-en	明天	tomorrow	1	明天	ming2 tian1	audited-v1	
+zh-en	到达	reach	1	到達	dao4 da2	audited-v1	
+zh-en	上午	morning	1	上午	shang4 wu3	audited-v1	
+zh-en	课程	course	1	課程	ke4 cheng2	audited-v1	
+zh-en	天气	weather	1	天氣	tian1 qi4	audited-v1	
+zh-en	面试	interview	1	面試	mian4 shi4	audited-v1	
+zh-en	记得	remember	1	記得	ji4 de5	audited-v1	
+zh-en	生气	get angry	2	生氣	sheng1 qi4	audited-v1	
+zh-en	忘记	forget	1	忘記	wang4 ji4	audited-v1	
+zh-en	受伤	be injured	3	受傷	shou4 shang1	audited-v1	
+zh-en	同事	colleague	1	同事	tong2 shi4	audited-v1	
+zh-en	蔬菜	vegetables	1	蔬菜	shu1 cai4	audited-v1	
+zh-en	睡觉	go to bed	2	睡覺	shui4 jiao4	audited-v1	
+zh-en	感谢	thanks	1	感謝	gan3 xie4	audited-v1	
+zh-en	确认	confirm	3	確認	que4 ren4	audited-v1	
+zh-en	简历	resume	3	簡歷	jian3 li4	audited-v1	
+zh-en	水果	fruit	1	水果	shui3 guo3	audited-v1	
+zh-en	火车	train	1	火車	huo3 che1	audited-v1	
+zh-en	中午	noon	2	中午	zhong1 wu3	audited-v1	
+zh-en	咖啡	coffee	1	咖啡	ka1 fei1	audited-v1	
+zh-en	鸡蛋	egg	1	雞蛋	ji1 dan4	audited-v1	
+zh-en	上班	start work	2	上班	shang4 ban1	audited-v1	
+zh-en	苹果	apple	1	蘋果	ping2 guo3	audited-v1	
+zh-en	星期	week	2	星期	xing1 qi1	audited-v1	
+zh-en	咳嗽	cough	1	咳嗽	ke2 sou5	audited-v1	
+zh-en	期待	look forward to	3	期待	qi1 dai4	audited-v1	
+zh-en	多久	how long	1	多久	duo1 jiu3	audited-v1	
+zh-en	早上	early morning	1	早上	zao3 shang5	audited-v1	
+zh-en	牛肉	beef	1	牛肉	niu2 rou4	audited-v1	
+zh-en	地铁	subway	1	地鐵	di4 tie3	audited-v1	
+zh-en	火车站	train station	1	火車站	huo3 che1 zhan4	audited-v1	
+zh-en	谢谢	thanks	1	謝謝	xie4 xie5	audited-v1	
+zh-en	对不起	i'm sorry	2	對不起	dui4 bu5 qi3	audited-v1	
+zh-en	现金	cash	1	現金	xian4 jin1	audited-v1	
+zh-en	密码	password	2	密碼	mi4 ma3	audited-v1	
+zh-en	做饭	prepare a meal	2	做飯	zuo4 fan4	audited-v1	
+zh-en	半夜	midnight	2	半夜	ban4 ye4	audited-v1	
+zh-en	花生	peanut	1	花生	hua1 sheng1	audited-v1	
+zh-en	车站	rail station	2	車站	che1 zhan4	audited-v1	
+zh-en	厕所	toilet	1	廁所	ce4 suo3	audited-v1	
+zh-en	行李	luggage	1	行李	xing2 li5	audited-v1	
+zh-en	商店	store	1	商店	shang1 dian4	audited-v1	
+zh-en	面包	bread	1	麵包	mian4 bao1	audited-v1	
+zh-en	面条	noodles	1	麵條	mian4 tiao2	audited-v1	
+zh-en	走路	walk	3	走路	zou3 lu4	audited-v1	
+zh-en	导航	navigate	1	導航	dao3 hang2	audited-v1	
+zh-en	牛奶	cow's milk	1	牛奶	niu2 nai3	audited-v1	
+zh-en	请问	excuse me	1	請問	qing3 wen4	audited-v1	
+zh-en	讨厌	dislike	2	討厭	tao3 yan4	audited-v1	
+zh-en	你好	hello	1	你好	ni3 hao3	audited-v1	
+zh-en	钥匙	key	1	鑰匙	yao4 shi5	audited-v1	
+zh-en	预报	forecast	1	預報	yu4 bao4	audited-v1	
+zh-en	难过	feel sad	2	難過	nan2 guo4	audited-v1	
+zh-en	加班	work overtime	1	加班	jia1 ban1	audited-v1	
+zh-en	护士	nurse	1	護士	hu4 shi5	audited-v1	
+zh-en	啤酒	beer	1	啤酒	pi2 jiu3	audited-v1	
+zh-en	周末	weekend	1	週末	zhou1 mo4	audited-v1	
+zh-en	机票	plane ticket	1	機票	ji1 piao4	audited-v1	
+zh-en	下班	get off work	2	下班	xia4 ban1	audited-v1	
+zh-en	邻居	neighbor	1	鄰居	lin2 ju1	audited-v1	
+zh-en	潮湿	damp	2	潮濕	chao2 shi1	audited-v1	
+zh-en	会议室	meeting room	1	會議室	hui4 yi4 shi4	audited-v1	
+zh-en	超市	supermarket	1	超市	chao1 shi4	audited-v1	
+zh-en	起床	get up	1	起床	qi3 chuang2	audited-v1	
+zh-en	过敏	allergic	2	過敏	guo4 min3	audited-v1	
+zh-en	药店	pharmacy	1	藥店	yao4 dian4	audited-v1	
+zh-en	开车	drive a car	2	開車	kai1 che1	audited-v1	
+zh-en	扫描	scan	1	掃描	sao3 miao2	audited-v1	
+zh-en	下雨	rain	1	下雨	xia4 yu3	audited-v1	
+zh-en	打印	print	3	打印	da3 yin4	audited-v1	
+zh-en	邮件	mail	3	郵件	you2 jian4	audited-v1	
+zh-en	辣椒	hot pepper	2	辣椒	la4 jiao1	audited-v1	
+zh-en	路口	crossing	2	路口	lu4 kou3	audited-v1	
+zh-en	洗澡	bathe	2	洗澡	xi3 zao3	audited-v1	
+zh-en	米饭	rice	1	米飯	mi3 fan4	audited-v1	
+zh-en	出租车	taxi	2	出租車	chu1 zu1 che1	audited-v1	
+zh-en	打扫	clean	2	打掃	da3 sao3	audited-v1	
+zh-en	头疼	headache	1	頭疼	tou2 teng2	audited-v1	
+zh-en	早餐	breakfast	1	早餐	zao3 can1	audited-v1	
+zh-en	高铁	high speed rail	1	高鐵	gao1 tie3	audited-v1	
+zh-en	再见	goodbye	1	再見	zai4 jian4	audited-v1	
+zh-en	周日	Sunday	1	週日	zhou1 ri4	audited-v1	
+zh-en	迟到	be late	1	遲到	chi2 dao4	audited-v1	
+zh-en	日程	schedule	2	日程	ri4 cheng2	audited-v1	
+zh-en	暖和	warm	1	暖和	nuan3 huo5	audited-v1	
+zh-en	充电	recharge	1	充電	chong1 dian4	audited-v1	
+zh-en	订单	order	1	訂單	ding4 dan1	audited-v1	
+zh-en	前天	the day before yesterday	1	前天	qian2 tian1	audited-v1	
+zh-en	发票	invoice	1	發票	fa1 piao4	audited-v1	
+zh-en	晚餐	dinner	1	晚餐	wan3 can1	audited-v1	
+zh-en	抱歉	sorry	2	抱歉	bao4 qian4	audited-v1	
+zh-en	午餐	lunch	2	午餐	wu3 can1	audited-v1	
+zh-en	发烧	have a fever	3	發燒	fa1 shao1	audited-v1	
+zh-en	护照	passport	1	護照	hu4 zhao4	audited-v1	
+zh-en	没关系	it doesn't matter	1	沒關係	mei2 guan1 xi5	audited-v1	
+zh-en	晴天	clear sky	2	晴天	qing2 tian1	audited-v1	
+zh-en	请假	take leave	1	請假	qing3 jia4	audited-v1	
+zh-en	银行卡	bank card	1	銀行卡	yin2 hang2 ka3	audited-v1	
+zh-en	洗衣	laundry	1	洗衣	xi3 yi1	audited-v1	
+zh-en	打折	give a discount	1	打折	da3 zhe2	audited-v1	
+zh-en	复印	photocopy	2	複印	fu4 yin4	audited-v1	
+zh-en	骑车	ride a bike	1	騎車	qi2 che1	audited-v1	
+zh-en	菜单	menu	1	菜單	cai4 dan1	audited-v1	
+zh-en	鸡肉	chicken meat	1	雞肉	ji1 rou4	audited-v1	
+zh-en	停车场	parking lot	1	停車場	ting2 che1 chang3	audited-v1	
+zh-en	公交车	bus	2	公交車	gong1 jiao1 che1	audited-v1	
+zh-en	下雪	snow	1	下雪	xia4 xue3	audited-v1	
+zh-en	预约	appointment	3	預約	yu4 yue1	audited-v1	
+zh-en	收据	receipt	1	收據	shou1 ju4	audited-v1	
+zh-en	加油站	gas station	1	加油站	jia1 you2 zhan4	audited-v1	
+zh-en	电费	electricity cost	1	電費	dian4 fei4	audited-v1	
+zh-en	打包	wrap	3	打包	da3 bao1	audited-v1	
+zh-en	洗手间	toilet	3	洗手間	xi3 shou3 jian1	audited-v1	
+zh-en	刮风	be windy	1	颳風	gua1 feng1	audited-v1	
+zh-en	快递	express delivery	1	快遞	kuai4 di4	audited-v1	
+zh-en	买单	pay the bill	1	買單	mai3 dan1	audited-v1	
+zh-en	急诊	emergency treatment	1	急診	ji2 zhen3	audited-v1	
+zh-en	凉快	pleasantly cool	3	涼快	liang2 kuai5	audited-v1	
+zh-en	素食	vegetarian food	1	素食	su4 shi2	audited-v1	
+zh-en	慢走	stay a bit	3	慢走	man4 zou3	audited-v1	
+zh-en	堵车	traffic congestion	1	堵車	du3 che1	audited-v1	
+zh-en	阴天	cloudy day	1	陰天	yin1 tian1	audited-v1	
+zh-en	水费	water bill	1	水費	shui3 fei4	audited-v1	
+zh-en	退货	return merchandise	2	退貨	tui4 huo4	audited-v1	
+zh-en	回头见	see you	2	回頭見	hui2 tou2 jian4	audited-v1	
+zh-en	早安	good morning	1	早安	zao3 an1	audited-v1	
+zh-en	晚安	good night	1	晚安	wan3 an1	audited-v1	
+zh-en	抽血	take blood	1	抽血	chou1 xue4	audited-v1	
+zh-en	红绿灯	traffic light	1	紅綠燈	hong2 lu:4 deng1	audited-v1	
+zh-en	几号	heroin	1	幾號	ji3 hao4	audited-v1	
+zh-en	好久不见	long time no see	1	好久不見	hao3 jiu3 bu5 jian4	audited-v1	
+zh-en	新年快乐	happy new year	1	新年快樂	xin1 nian2 kuai4 le4	audited-v1	
+zh-en	生日快乐	happy birthday	1	生日快樂	sheng1 ri4 kuai4 le4	audited-v1	
+zh-en	不可以	may not	1	不可以	bu4 ke3 yi3	audited-v1	
+zh-en	买东西	do one's shopping	1	買東西	mai3 dong1 xi5	audited-v1	
+zh-en	周末愉快	have a nice weekend	1	週末愉快	zhou1 mo4 yu2 kuai4	audited-v1	
+zh-en	没问题	no problem	1	沒問題	mei2 wen4 ti2	audited-v1	
+zh-en	稍等	wait a moment	1	稍等	shao1 deng3	audited-v1	
+zh-en	等一下	wait a moment	3	等一下	deng3 yi1 xia4	audited-v1	
+zh-en	自己	oneself	1	自己	zi4 ji3	audited-v1	
+zh-en	国家	country	1	國家	guo2 jia1	audited-v1	
+zh-en	主要	main	1	主要	zhu3 yao4	audited-v1	
+zh-en	进行	proceed	3	進行	jin4 xing2	audited-v1	
+zh-en	经济	economy	2	經濟	jing1 ji4	audited-v1	
+zh-en	人民	the people	1	人民	ren2 min2	audited-v1	
+zh-en	社会	society	1	社會	she4 hui4	audited-v1	
+zh-en	这种	this kind of	1	這種	zhe4 zhong3	audited-v1	
+zh-en	地区	region	2	地區	di4 qu1	audited-v1	
+zh-en	开始	beginning	1	開始	kai1 shi3	audited-v1	
+zh-en	技术	technology	1	技術	ji4 shu4	audited-v1	
+zh-en	重要	important	1	重要	zhong4 yao4	audited-v1	
+zh-en	成为	become	1	成為	cheng2 wei2	audited-v1	
+zh-en	因为	because	1	因為	yin1 wei4	audited-v1	
+zh-en	通过	adopt	2	通過	tong1 guo4	audited-v1	
+zh-en	研究	research	3	研究	yan2 jiu1	audited-v1	
+zh-en	文化	culture	3	文化	wen2 hua4	audited-v1	
+zh-en	企业	company	1	企業	qi3 ye4	audited-v1	
+zh-en	历史	history	1	歷史	li4 shi3	audited-v1	
+zh-en	世界	world	1	世界	shi4 jie4	audited-v1	
+zh-en	其中	among	2	其中	qi2 zhong1	audited-v1	
+zh-en	不能	cannot	3	不能	bu4 neng2	audited-v1	
+zh-en	时间	time	1	時間	shi2 jian1	audited-v1	
+zh-en	生产	produce	2	生產	sheng1 chan3	audited-v1	
+zh-en	情况	circumstances	1	情況	qing2 kuang4	audited-v1	
+zh-en	决定	decide	2	決定	jue2 ding4	audited-v1	
+zh-en	关系	relation	3	關係	guan1 xi5	audited-v1	
+zh-en	领导	lead	3	領導	ling3 dao3	audited-v1	
+zh-en	生活	live	3	生活	sheng1 huo2	audited-v1	
+zh-en	时候	time	3	時候	shi2 hou5	audited-v1	
+zh-en	一种	one kind of	1	一種	yi1 zhong3	audited-v1	
+zh-en	出来	come out	3	出來	chu1 lai2	audited-v1	
+zh-en	同时	simultaneously	1	同時	tong2 shi2	audited-v1	
+zh-en	认为	believe	1	認為	ren4 wei2	audited-v1	
+zh-en	部分	part	1	部分	bu4 fen5	audited-v1	
+zh-en	市场	marketplace	1	市場	shi4 chang3	audited-v1	
+zh-en	工业	industry	1	工業	gong1 ye4	audited-v1	
+zh-en	建设	build	1	建設	jian4 she4	audited-v1	
+zh-en	形成	form	1	形成	xing2 cheng2	audited-v1	
+zh-en	出现	appear	1	出現	chu1 xian4	audited-v1	
+zh-en	一定	surely	3	一定	yi1 ding4	audited-v1	
+zh-en	城市	city	1	城市	cheng2 shi4	audited-v1	
+zh-en	以上	that level or higher	3	以上	yi3 shang4	audited-v1	
+zh-en	政治	politics	2	政治	zheng4 zhi4	audited-v1	
+zh-en	人们	people	1	人們	ren2 men5	audited-v1	
+zh-en	委员会	committee	1	委員會	wei3 yuan2 hui4	audited-v1	
+zh-en	发现	notice	3	發現	fa1 xian4	audited-v1	
+zh-en	记者	reporter	1	記者	ji4 zhe3	audited-v1	
+zh-en	国际	international	1	國際	guo2 ji4	audited-v1	
+zh-en	规定	stipulate	2	規定	gui1 ding4	audited-v1	
+zh-en	法律	law	1	法律	fa3 lu:4	audited-v1	
+zh-en	发生	happen	1	發生	fa1 sheng1	audited-v1	
+zh-en	使用	use	3	使用	shi3 yong4	audited-v1	
+zh-en	中心	center	1	中心	zhong1 xin1	audited-v1	
+zh-en	教育	educate	3	教育	jiao4 yu4	audited-v1	
+zh-en	政府	government	1	政府	zheng4 fu3	audited-v1	
+zh-en	因此	thus	1	因此	yin1 ci3	audited-v1	
+zh-en	人口	population	2	人口	ren2 kou3	audited-v1	
+zh-en	建立	establish	3	建立	jian4 li4	audited-v1	
+zh-en	参加	participate	1	參加	can1 jia1	audited-v1	
+zh-en	产品	goods	3	產品	chan3 pin3	audited-v1	
+zh-en	而且	but also	2	而且	er2 qie3	audited-v1	
+zh-en	面积	area	2	面積	mian4 ji1	audited-v1	
+zh-en	各种	various	1	各種	ge4 zhong3	audited-v1	
+zh-en	我国	my country	1	我國	wo3 guo2	audited-v1	
+zh-en	皇帝	emperor	1	皇帝	huang2 di4	audited-v1	
+zh-en	行政	administration	2	行政	xing2 zheng4	audited-v1	
+zh-en	职业	occupation	2	職業	zhi2 ye4	audited-v1	
+zh-en	制度	system	2	制度	zhi4 du4	audited-v1	
+zh-en	世纪	century	1	世紀	shi4 ji4	audited-v1	
+zh-en	主席	chairperson	3	主席	zhu3 xi2	audited-v1	
+zh-en	系统	system	1	系統	xi4 tong3	audited-v1	
+zh-en	组成	form	2	組成	zu3 cheng2	audited-v1	
+zh-en	民族	nationality	1	民族	min2 zu2	audited-v1	
+zh-en	增长	grow	1	增長	zeng1 zhang3	audited-v1	
+zh-en	自然	nature	3	自然	zi4 ran2	audited-v1	
+zh-en	大学	university	1	大學	da4 xue2	audited-v1	
+zh-en	政体	form of government	1	政體	zheng4 ti3	audited-v1	
+zh-en	各级	all levels	1	各級	ge4 ji2	audited-v1	
+zh-en	人员	staff	3	人員	ren2 yuan2	audited-v1	
+zh-en	产生	arise	2	產生	chan3 sheng1	audited-v1	
+zh-en	时期	period	2	時期	shi2 qi1	audited-v1	
+zh-en	最后	final	2	最後	zui4 hou4	audited-v1	
+zh-en	一次	first	3	一次	yi1 ci4	audited-v1	
+zh-en	表示	express	2	表示	biao3 shi4	audited-v1	
+zh-en	改革	reform	1	改革	gai3 ge2	audited-v1	
+zh-en	那么	like that	3	那麼	na4 me5	audited-v1	
+zh-en	能力	capability	2	能力	neng2 li4	audited-v1	
+zh-en	一直	straight	2	一直	yi1 zhi2	audited-v1	
+zh-en	基础	base	2	基礎	ji1 chu3	audited-v1	
+zh-en	还有	there still remain	2	還有	hai2 you3	audited-v1	
+zh-en	得到	get	1	得到	de2 dao4	audited-v1	
+zh-en	进入	enter	1	進入	jin4 ru4	audited-v1	
+zh-en	目前	at the present time	2	目前	mu4 qian2	audited-v1	
+zh-en	对于	regarding	1	對於	dui4 yu2	audited-v1	
+zh-en	过程	process	1	過程	guo4 cheng2	audited-v1	
+zh-en	方法	method	1	方法	fang1 fa3	audited-v1	
+zh-en	举行	hold	1	舉行	ju3 xing2	audited-v1	
+zh-en	群众	mass	3	群眾	qun2 zhong4	audited-v1	
+zh-en	第一	first	2	第一	di4 yi1	audited-v1	
+zh-en	单位	unit	1	單位	dan1 wei4	audited-v1	
+zh-en	孩子	child	1	孩子	hai2 zi5	audited-v1	
+zh-en	资源	resource	1	資源	zi1 yuan2	audited-v1	
+zh-en	过去	past	2	過去	guo4 qu4	audited-v1	
+zh-en	条件	condition	2	條件	tiao2 jian4	audited-v1	
+zh-en	提高	raise	3	提高	ti2 gao1	audited-v1	
+zh-en	工程	engineering	2	工程	gong1 cheng2	audited-v1	
+zh-en	方式	way	1	方式	fang1 shi4	audited-v1	
+zh-en	百科	universal	2	百科	bai3 ke1	audited-v1	
+zh-en	军事	military	1	軍事	jun1 shi4	audited-v1	
+zh-en	完成	complete	1	完成	wan2 cheng2	audited-v1	
+zh-en	农业	agriculture	2	農業	nong2 ye4	audited-v1	
+zh-en	增加	raise	1	增加	zeng1 jia1	audited-v1	
+zh-en	获得	obtain	1	獲得	huo4 de2	audited-v1	
+zh-en	一声	first tone in mandarin	1	一聲	yi1 sheng1	audited-v1	
+zh-en	觉得	feel	1	覺得	jue2 de5	audited-v1	
+zh-en	理论	theory	3	理論	li3 lun4	audited-v1	
+zh-en	中央	central	3	中央	zhong1 yang1	audited-v1	
+zh-en	价值	value	2	價值	jia4 zhi2	audited-v1	
+zh-en	科技	science and technology	1	科技	ke1 ji4	audited-v1	

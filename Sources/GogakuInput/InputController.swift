@@ -160,6 +160,9 @@ final class GogakuInputController: IMKInputController {
     /// 当前有效显示位置（宿主光标矩形）；nil＝面板隐藏但组合保留。
     /// 与目标身份锚点分离：位置变化不改变目标身份。
     private var displayRect: NSRect?
+    /// 锚点瞬移过滤器（AnchorPlausibility）的连续可疑计数；组合开始/结束、
+    /// 换目标、隐藏面板时随 displayRect 一并清零。
+    private var anchorSuspectStreak = 0
     /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
     private var positionTimer: Timer?
     // 真实宿主安全矩阵未通过前，不启用学习辅助或采集。
@@ -316,7 +319,7 @@ final class GogakuInputController: IMKInputController {
 
     private func configure() {
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
-        displayRect = nil; stopPositionRefresh()
+        displayRect = nil; anchorSuspectStreak = 0; stopPositionRefresh()
         markedShown = ""; markedCaret = -1
         panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
@@ -344,7 +347,7 @@ final class GogakuInputController: IMKInputController {
         let app = application, oldMode = mode, oldDirection = direction
         let raw = rawOverride ?? displayed?.raw ?? ""
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
-        stopPositionRefresh(); displayRect = nil
+        stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0
         panel.dismiss(); toast.hide()
         if clearMarked, !markedShown.isEmpty, let old = target, let facts = hostFacts(),
            facts.application == old.application, facts.pid == old.pid,
@@ -642,6 +645,7 @@ final class GogakuInputController: IMKInputController {
         } else {
             displayed = nil
             displayRect = nil
+            anchorSuspectStreak = 0
             stopPositionRefresh()
             panel.dismiss()
         }
@@ -669,6 +673,7 @@ final class GogakuInputController: IMKInputController {
     /// 隐藏面板但保留组合与字母；坐标恢复有效且字段一致后由复查重新显示。
     private func hidePanelKeepComposition() {
         displayRect = nil
+        anchorSuspectStreak = 0
         panel.dismiss()
     }
 
@@ -686,6 +691,22 @@ final class GogakuInputController: IMKInputController {
             // 才恢复有效。已有有效锚点时冻结在组合内最后测得的位置（不追逐、不
             // 隐藏，矩形恢复后重新跟随）；从未获得过锚点（含陈旧锚点被拒）才走
             // hidePanelKeepComposition 的隐藏保留组合路径。
+            return
+        }
+        // 瞬移过滤器（2026-11-03 用户报告 Orca 打字中面板无规律跳到无关位置）：
+        // 布局抖动／选择闪断时 Orca 会短暂回报非零但错误的矩形（控件原点、
+        // 缓冲区首行），零矩形冻结拦不住。同一组合内新锚点若离上次有效锚点
+        // 超过 teleportLimit 则先冻结在原位；连续 escapeAfter 拍仍报远处新
+        // 位置才接受（窗口真实拖动／滚动的逃生门）。组合开始时 displayRect
+        // 为空，第一拍直接采纳。
+        let decision = AnchorPlausibility.classify(previous: displayRect,
+                                                   next: current.rect,
+                                                   suspectStreak: anchorSuspectStreak)
+        switch decision {
+        case .accept, .escapeAccept:
+            anchorSuspectStreak = 0
+        case .freeze:
+            anchorSuspectStreak += 1
             return
         }
         let changed = displayRect != current.rect

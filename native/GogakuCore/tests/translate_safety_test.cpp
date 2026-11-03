@@ -58,6 +58,13 @@ int main() {
     expect_eq(gc_translate_repeat_classify(LEN("I have a meeting tomorrow.")), 0,
               "normal sentence en");
     expect_eq(gc_translate_repeat_classify(LEN("会议")), 0, "single token");
+    // 合法叠词不得当成复读（2026-11-04 加固层第二片误报修复）。
+    expect_eq(gc_translate_repeat_classify(LEN("哈哈")), 0, "repeat legal 哈哈");
+    expect_eq(gc_translate_repeat_classify(LEN("看看")), 0, "repeat legal 看看");
+    expect_eq(gc_translate_repeat_classify(LEN("多多少少")), 0, "repeat legal AABB");
+    expect_eq(gc_translate_repeat_classify(LEN("一个一个")), 0, "repeat legal 一个一个");
+    expect_eq(gc_translate_repeat_classify(LEN("一天一天")), 0, "repeat legal 一天一天");
+    expect_eq(gc_translate_repeat_classify(LEN("会议会议")), 2, "repeat still 会议会议");
     // 181 个 Q（small100 乱码编造）
     const std::string many_q(181, 'Q');
     expect_eq(gc_translate_repeat_classify(many_q.data(), many_q.size()), 2, "repeat 181 Q");
@@ -101,6 +108,27 @@ int main() {
               3, "time 十点半->10 a.m. lost half");
     expect_eq(gc_translate_time_check(LEN("at half past ten"), LEN("十点。")), 3,
               "time half past lost");
+    // 第二片误报修复：英文动词 am、合法上下午区间、数值与顺序。
+    expect_eq(gc_translate_time_check(LEN("I am free in the afternoon."), LEN("我下午有空。")), 0,
+              "time verb am not meridiem");
+    expect_eq(gc_translate_time_check(LEN("I am allergic to peanuts."), LEN("我对花生过敏。")), 0,
+              "time verb am no time facts");
+    expect_eq(gc_translate_time_check(LEN("The meeting runs from 9 a.m. to 4 p.m."),
+                                     LEN("会议从上午9点开到下午4点。")),
+              0, "time legal am-to-pm range");
+    expect_eq(gc_translate_time_check(LEN("The meeting runs from 9 a.m. to 4 p.m."),
+                                     LEN("会议从下午9点开到下午4点。")),
+              1, "time range am->pm flip");
+    expect_eq(gc_translate_time_check(LEN("会议室是302。"), LEN("The meeting room is 302.")), 0,
+              "time number preserved ascii");
+    expect_eq(gc_translate_time_check(LEN("会议室是302。"), LEN("The meeting room is three hundred.")),
+              2, "time number lost");
+    expect_eq(gc_translate_time_check(LEN("会议室是三百零二。"), LEN("The meeting room is 302.")), 0,
+              "time chinese numeral preserved");
+    expect_eq(gc_translate_time_check(LEN("从9点到10点"), LEN("from 10 to 9")), 2,
+              "time points lost but numbers kept");
+    expect_eq(gc_translate_time_check(LEN("从9点到10点"), LEN("从10点到9点")), 4,
+              "time number order");
 
     // ---- 脚本校验 ----
     expect_eq(gc_translate_script_check(LEN("参加会议"), 'Z'), 0, "script zh ok");
@@ -108,6 +136,10 @@ int main() {
     expect_eq(gc_translate_script_check(LEN("參加會議"), 'Z'), 1, "script zh rejects traditional");
     expect_eq(gc_translate_script_check(LEN("Thank you very much."), 'E'), 0, "script en ok");
     expect_eq(gc_translate_script_check(LEN("谢谢"), 'E'), 1, "script en rejects han");
+    expect_eq(gc_translate_script_check(LEN("详情见 https://example.com/abcdefghijklmnop"), 'Z'), 0,
+              "script ignores url latin");
+    expect_eq(gc_translate_script_check(LEN("open https://example.com/abcdefghijklmnop"), 'E'), 0,
+              "script en url ok");
     expect_eq(gc_translate_script_check(LEN("   "), 'Z'), 2, "script empty-ish");
     // quickmt 繁体漂移样本（thanks→謝謝你!）
     expect_eq(gc_translate_script_check(LEN("謝謝你!"), 'Z'), 1, "script zh flags 謝謝你");
@@ -122,6 +154,9 @@ int main() {
               "len brand passthrough");
     expect_eq(gc_translate_length_check(LEN("attend a meeting"), LEN("参加会议会议会议会议会议会议会议会议会议会议")),
               2, "len bloated en->zh");
+    expect_eq(gc_translate_length_check(LEN("打开 https://example.com/abcdefghijklmnopqrstuvwxyz"),
+                                     LEN("open https://example.com/abcdefghijklmnopqrstuvwxyz")),
+              0, "len ignores url");
 
     // ---- 保护扫描 ----
     GcTextRange ranges[16];
@@ -158,6 +193,17 @@ int main() {
     const std::string src5 = "I have a meeting tomorrow.";
     n = gc_translate_protection_scan(src5.data(), src5.size(), ranges, 16);
     expect_eq(static_cast<long long>(n), 0, "protect plain sentence none");
+    // 句首已知品牌（Round2 已知错误：Gogaku 在句首未进保护词）
+    const std::string src6 = "Gogaku is a keyboard for input.";
+    n = gc_translate_protection_scan(src6.data(), src6.size(), ranges, 16);
+    expect_eq(static_cast<long long>(n), 1, "protect sentence-initial brand");
+    if (n >= 1) {
+        expect_str(src6.substr(ranges[0].begin, ranges[0].end - ranges[0].begin).c_str(), "Gogaku",
+                   "protect sentence-initial Gogaku range");
+    }
+    const std::string src7 = "push the change to GitHub today";
+    n = gc_translate_protection_scan(src7.data(), src7.size(), ranges, 16);
+    expect_eq(static_cast<long long>(n), 1, "protect mid-sentence brand");
     n = gc_translate_protection_scan(src1.data(), src1.size(), nullptr, 0);
     expect_eq(static_cast<long long>(n), 2, "protect null buffer count");
 
