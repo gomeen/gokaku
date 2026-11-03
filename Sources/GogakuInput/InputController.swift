@@ -226,6 +226,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private var pendingTranslatedCommit: PendingTranslatedCommit?
     /// 英→中无译文阶段的延迟隐藏任务（防逐键闪烁）。
     private var enToZhHideWork: DispatchWorkItem?
+    /// 中→英预译的空闲防抖任务（2026-11 用户反馈：连续输入加防抖）。
+    private var eagerDebounceWork: DispatchWorkItem?
     /// 学习翻译后端：quickmt 开发版外置 Python 辅助进程（装配路径与 beam 由
     /// 设置解析）；设置变更时销毁重建（rebuildLearningTranslatorIfNeeded）。
     /// 请求按 sourceID 分路：commit＝提交替换（学习模式中→英）、
@@ -234,7 +236,10 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
 
     private func makeTranslator() -> TranslationService {
         let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize)
-        let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
+        // 英→中连续输入防抖 300ms（2026-11 用户反馈）：逐键请求改停顿后单发；
+        // 提交替换走 requestImmediately 不受影响。
+        let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments,
+                                         debounceInterval: 0.30)
         service.onResult = { [weak self] result in
             guard let self else { return }
             switch result.sourceID {
@@ -274,6 +279,15 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private func storeTranslationMemory(_ source: String, _ target: String) {
         if translationMemory.count >= 256 { translationMemory.removeAll() }
         translationMemory[source] = target
+    }
+
+    /// 中→英连续输入防抖：停顿 0.25s 才泵预译（2026-11 用户反馈）。
+    /// 结果链式续泵（applyEagerTranslation defer）不受防抖影响。
+    private func scheduleEagerPump() {
+        eagerDebounceWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.pumpEagerBacklog() }
+        eagerDebounceWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
     }
 
     /// 顺序泵出预译队列：一次只一个在飞请求；结果回来后续泵下一个。
@@ -896,8 +910,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             // marked text 更新后读取最新插入位置（合并刷新：同一事件内只读一次；
             // 额外宿主读取经 ValidationMonitor 的 hostReadNs 纳入性能测量）。
             refreshDisplayPosition()
-            // displayed 已更新为当前视图后泵预译队列（stamp 匹配面板代次）。
-            pumpEagerBacklog()
+            // displayed 已更新为当前视图后按防抖泵预译队列（stamp 匹配面板代次）。
+            scheduleEagerPump()
         } else {
             displayed = nil
             displayRect = nil
@@ -905,6 +919,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             stopPositionRefresh()
             panel.dismiss()
             eagerBacklog = []
+            eagerDebounceWork?.cancel()
         }
     }
 
@@ -1197,7 +1212,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             self.panel.dismiss()
         }
         enToZhHideWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: work)
+        // 宽限 0.7s：须覆盖防抖 0.3s＋首译时延，否则宽限先到会复现闪烁
+        //（2026-11-03 与防抖同轮调整）。
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7, execute: work)
     }
     private func cancelEnToZhHide() {
         enToZhHideWork?.cancel()

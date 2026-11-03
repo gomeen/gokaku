@@ -48,14 +48,19 @@ public final class TranslationService {
     private var cache: [String: (Date, TranslationResult)] = [:]
     private var cacheBytes = 0
     public var onResult: ((TranslationResult) -> Void)?
-    public init(executable: URL, arguments: [String] = []) { self.executable = executable; self.arguments = arguments }
+    /// 连续请求的空闲防抖间隔；requestImmediately 不防抖（提交路径）。
+    public var debounceInterval: TimeInterval
+    public init(executable: URL, arguments: [String] = [], debounceInterval: TimeInterval = 0.12) {
+        self.executable = executable; self.arguments = arguments; self.debounceInterval = debounceInterval
+    }
     deinit { process?.terminate() }
     public func request(_ request: TranslationRequest) {
         queue.async {
             self.valid.removeAll(); self.valid.insert(request.id)
             self.pending = nil; self.debounce?.cancel()
             let work = DispatchWorkItem { [weak self] in self?.enqueue(request) }
-            self.debounce = work; self.queue.asyncAfter(deadline: .now() + .milliseconds(120), execute: work)
+            self.debounce = work
+            self.queue.asyncAfter(deadline: .now() + self.debounceInterval, execute: work)
         }
     }
     /// 提交路径免抖动：选词上屏的译文替换不等 120ms。

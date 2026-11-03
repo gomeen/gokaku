@@ -16,6 +16,8 @@ public struct ScreenFrame: Equatable, Sendable {
 /// - 非有限值、负尺寸的锚点或面板尺寸 → 不显示；零宽光标矩形有效。
 /// - 默认插入点右下（margin 8pt）；下方空间不足时上翻；上翻越界时回推。
 /// - 最终 origin 钳制在屏幕可视区内，支持负坐标与不同缩放。
+/// - 面板宽／高超过可视区：钉在可视区内缘（顶部／左侧可见，允许尾部裁剪），
+///   不再整体隐藏（2026-11-03 用户反馈：超高面板整体消失）。
 public enum PanelPlacement {
     public static let margin: CGFloat = 8
 
@@ -43,20 +45,25 @@ public enum PanelPlacement {
         // 完全不在任何屏幕内的锚点不得显示（无「任意屏幕」回退）。
         guard let screen = screens.first(where: { isFinite($0.frame) && $0.frame.intersects(anchor) }) else { return nil }
         let visible = screen.visibleFrame
-        guard isFinite(visible), visible.width >= panelSize.width, visible.height >= panelSize.height else { return nil }
+        guard isFinite(visible) else { return nil }
 
         let maxX = max(visible.minX + margin, visible.maxX - margin - panelSize.width)
         let x = min(max(anchor.minX, visible.minX + margin), maxX)
         // 默认插入点右下；下方放不下时上翻（锚点上方 + margin）。
         let fitsBelow = anchor.minY - panelSize.height - margin >= visible.minY
-        let y: CGFloat
+        var y: CGFloat
         if fitsBelow {
             y = anchor.minY - panelSize.height - margin
         } else {
             // 上翻；若上翻后超出屏幕顶部，回推到顶部内边界。
             y = min(anchor.maxY + margin, visible.maxY - margin - panelSize.height)
         }
-        return NSPoint(x: x, y: max(visible.minY + margin, min(y, visible.maxY - margin - panelSize.height)))
+        // 面板高于可视区：顶边钉在屏幕顶部内侧（预编辑／候选可见，
+        // 底部允许裁剪），优于整体消失。
+        if panelSize.height > visible.height - margin * 2 {
+            y = visible.maxY - margin - panelSize.height
+        }
+        return NSPoint(x: x, y: y)
     }
 
     /// 模式／方向切换提示浮层：优先锚点上方（下方常被候选窗占用），

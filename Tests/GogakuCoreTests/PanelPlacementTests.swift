@@ -88,10 +88,20 @@ final class PanelPlacementTests: XCTestCase {
                                            panelSize: size, screens: []))
     }
 
-    func testPanelLargerThanScreenIsRejected() {
-        let huge = NSSize(width: 2500, height: 1200)
-        XCTAssertNil(PanelPlacement.origin(anchor: NSRect(x: 800, y: 700, width: 0, height: 17),
-                                           panelSize: huge, screens: [main]))
+    func testTooTallPanelPinsToTopInsteadOfHidden() {
+        // 面板高于可视区：顶边钉在屏幕顶部内侧（预编辑／候选可见，底部允许裁剪），
+        // 不再整体隐藏（2026-11-03 用户反馈：超高面板整体消失）。
+        let tall = NSSize(width: 200, height: 1100)
+        let origin = PanelPlacement.origin(anchor: NSRect(x: 800, y: 700, width: 0, height: 17),
+                                           panelSize: tall, screens: [main])
+        XCTAssertNotNil(origin)
+        XCTAssertEqual(origin!.y + tall.height, main.visibleFrame.maxY - PanelPlacement.margin)
+        // 超宽：左缘钉在可视区内，允许右侧裁剪。
+        let wide = NSSize(width: 2500, height: 300)
+        let wideOrigin = PanelPlacement.origin(anchor: NSRect(x: 800, y: 700, width: 0, height: 17),
+                                               panelSize: wide, screens: [main])
+        XCTAssertNotNil(wideOrigin)
+        XCTAssertEqual(wideOrigin!.x, main.visibleFrame.minX + PanelPlacement.margin)
     }
 
     func testContainmentCheckForStickyOrigin() {

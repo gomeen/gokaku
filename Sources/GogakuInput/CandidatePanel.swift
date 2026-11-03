@@ -130,7 +130,7 @@ private final class PanelLayout {
             var annotationLines = 1
             var rowHeight = m.rowHeight
             // 长注释截断（省略号）：行内容不得超过最大内宽，只牺牲注释；
-            // 学习中→英高亮行例外：注释在行内换行（最多 3 行），不截断。
+            // 学习中→英高亮行例外：注释在行内换行（最多 6 行），不截断。
             if let text = annotation, annotationWidth > 0 {
                 let fixed = m.rowLeftPadding + m.indexLeftMargin + indexWidth + m.wordLeftMargin + wordWidth + m.annotationLeftMargin
                 if wrapAnnotation {
@@ -140,7 +140,9 @@ private final class PanelLayout {
                     if annotationLines > 1 {
                         rowHeight = m.rowHeight + CGFloat(annotationLines - 1) * m.annotationLineHeight
                     }
-                    let contentWidth = fixed
+                    // 内容宽度必须计入注释区（fixed + available），否则窗口保持
+                    // 窄宽、换行注释右缘被窗口裁掉（2026-11-03 用户反馈：超出隐藏）。
+                    let contentWidth = fixed + annotationWidth
                     contents.append(RowContent(indexOfShown: offset, selected: selected, index: index, indexWidth: indexWidth,
                                                word: word, wordWidth: wordWidth, annotation: annotation, annotationWidth: annotationWidth,
                                                contentWidth: contentWidth, annotationLines: annotationLines, rowHeight: rowHeight))
