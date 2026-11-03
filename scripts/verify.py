@@ -187,6 +187,16 @@ def check_swift_tests(ctx):
     return PASS, f'{total} 项全部通过（Release）', evidence
 
 
+def check_translation_eval_regression(ctx):
+    """翻译评测管线回归：专项集加载、超预算不报通过、缺失审阅不报完成等断言。"""
+    result = sh(['python3', 'scripts/validate-translation-eval.py'], timeout=600)
+    evidence = ctx.evidence('translation-eval-regression.log', result.stdout + result.stderr)
+    if result.returncode != 0:
+        return FAIL, f'评测回归失败（exit={result.returncode}）', evidence
+    m = re.search(r'(\d+) 项断言全部通过', result.stdout)
+    return PASS, '评测管线回归通过' + (f'（{m.group(1)} 项断言）' if m else ''), evidence
+
+
 def check_clean_build(ctx):
     """干净构建：全新构建根（native/core/swift 互不 reuse）组装安装包，产物身份
     与当前提交绑定。依赖缓存只读复用（不清除用户缓存）。"""
@@ -575,12 +585,14 @@ PROFILES = {
         ('resources', True, check_resources),
         ('core-tests', True, check_core_tests),
         ('swift-tests', True, check_swift_tests),
+        ('translation-eval-regression', True, check_translation_eval_regression),
     ],
     'release': [
         ('version', True, check_version),
         ('resources', True, check_resources),
         ('core-tests', True, check_core_tests),
         ('swift-tests', True, check_swift_tests),
+        ('translation-eval-regression', True, check_translation_eval_regression),
         ('clean-build', True, check_clean_build),
         ('bundle-check', True, check_bundle),
         ('quality', True, check_quality),

@@ -101,9 +101,11 @@ struct CandidatePanelTheme {
                 topLineVerticalPadding: 4,
                 rowHeight: 46.0 * size / 21.0,
                 rowLeftPadding: 5,
-                indexTopMargin: 8,
+                // 2026-11-03 裁决：行内容垂直居中微调 −2pt（尾钩修复后行内不对称
+                // 变得可见，用户要求居中；青简实测边距在此基础上 −2pt）。
+                indexTopMargin: 6,
                 indexLeftMargin: 5,
-                wordTopMargin: 6.5,
+                wordTopMargin: 4.5,
                 wordLeftMargin: 8,
                 annotationLeftMargin: 8,
                 highlightRightExtension: 4,
