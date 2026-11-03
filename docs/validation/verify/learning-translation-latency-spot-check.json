@@ -1,0 +1,76 @@
+{
+ "purpose": "学习模式 quickmt 开发版延迟抽测（2026-11-03 裁决验收项 5；beam1，仅记录不建基准）",
+ "beam": 1,
+ "n": 10,
+ "medianMs": 67.8,
+ "maxMs": 97.1,
+ "over500ms": 0,
+ "coldStartNote": "每方向预热一次（含模型懒加载 1–2s），预热不计入逐句延迟",
+ "results": [
+  {
+   "direction": "zhToEn",
+   "source": "我明天上午十点有一个会议，可能要迟到十分钟。",
+   "target": "I have a meeting tomorrow at ten o'clock in the morning, probably ten minutes late.",
+   "milliseconds": 97.1
+  },
+  {
+   "direction": "zhToEn",
+   "source": "请把这个文件发给团队。",
+   "target": "Please send this file to the team.",
+   "milliseconds": 62.3
+  },
+  {
+   "direction": "zhToEn",
+   "source": "今天傍晚可能下雨。",
+   "target": "It may rain this evening.",
+   "milliseconds": 43.9
+  },
+  {
+   "direction": "zhToEn",
+   "source": "价格包含早餐。",
+   "target": "Breakfast is included in the price.",
+   "milliseconds": 41.4
+  },
+  {
+   "direction": "zhToEn",
+   "source": "如果你已经付款，请忽略这条提醒。",
+   "target": "If you have already paid, ignore this reminder.",
+   "milliseconds": 67.9
+  },
+  {
+   "direction": "enToZh",
+   "source": "I cannot open the attachment, please send it again.",
+   "target": "我无法打开附件,请再寄。 联系方式",
+   "milliseconds": 82.8
+  },
+  {
+   "direction": "enToZh",
+   "source": "Could we move this call to the afternoon?",
+   "target": "我们能把电话转到下午吗?",
+   "milliseconds": 67.7
+  },
+  {
+   "direction": "enToZh",
+   "source": "The package arrived yesterday.",
+   "target": "包裹昨天到达。 。",
+   "milliseconds": 47.8
+  },
+  {
+   "direction": "enToZh",
+   "source": "Please do not overwrite the original spreadsheet.",
+   "target": "请不要覆盖原始电子表格。 使用说明",
+   "milliseconds": 68.5
+  },
+  {
+   "direction": "enToZh",
+   "source": "My flight will depart on June 12th.",
+   "target": "我的航班将于6月12日起飞。",
+   "milliseconds": 69.4
+  }
+ ],
+ "offlineCheck": {
+  "method": "sandbox-exec profile: allow file/exec/ipc-posix-shm, deny network*",
+  "date": "2026-11-03",
+  "result": "双向推理正常（enToZh/zhToEn 各 1 条正确返回），进程级无网络断言通过；冷载含于毫秒值"
+ }
+}
