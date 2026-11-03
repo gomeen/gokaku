@@ -224,6 +224,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         var buffer: [NSEvent]
     }
     private var pendingTranslatedCommit: PendingTranslatedCommit?
+    /// 英→中无译文阶段的延迟隐藏任务（防逐键闪烁）。
+    private var enToZhHideWork: DispatchWorkItem?
     /// 学习翻译后端：quickmt 开发版外置 Python 辅助进程（装配路径与 beam 由
     /// 设置解析）；设置变更时销毁重建（rebuildLearningTranslatorIfNeeded）。
     /// 请求按 sourceID 分路：commit＝提交替换（学习模式中→英）、
@@ -542,6 +544,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                                    raw: pending.source, literal: true)
         }
         eagerBacklog = []
+        cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0
         panel.dismiss(); toast.hide()
@@ -1185,6 +1188,23 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         }
     }
 
+    /// 英→中无译文时的延迟隐藏：防逐键显示/隐藏闪烁（2026-11 用户反馈）。
+    /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
+    private func scheduleEnToZhHide() {
+        enToZhHideWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            guard let self, self.mode == .learning, self.direction == .enToZh,
+                  self.displayed?.candidates.isEmpty != false else { return }
+            self.panel.dismiss()
+        }
+        enToZhHideWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: work)
+    }
+    private func cancelEnToZhHide() {
+        enToZhHideWork?.cancel()
+        enToZhHideWork = nil
+    }
+
     private func publishLearning(generation: UInt64, completesEdit: Bool = false) {
         guard let value = hub.existingLearningSession?.view else { return }
         DispatchQueue.main.async { [weak self] in
@@ -1223,12 +1243,13 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             }
             self.displayed = value
             startPositionRefresh()
-            // 英→中无译文结果不显示面板，只输入（2026-11 用户裁决）；
-            // 译文到达后由后续 publish/render 显示，位置由复查定时器持续跟踪。
+            // 英→中无译文结果不立即隐藏（宽限 0.4s 防逐键闪烁，2026-11 用户裁决）；
+            // 期间译文到达即原地刷新；停下且确实无译文才隐藏。
             if self.mode == .learning, self.direction == .enToZh, value.candidates.isEmpty {
-                self.panel.dismiss()
+                self.scheduleEnToZhHide()
                 return
             }
+            self.cancelEnToZhHide()
             guard let rect = self.displayRect else { self.panel.dismiss(); return }
             self.panel.render(value, at: rect, targetWindowLevel:
                               GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
@@ -1311,6 +1332,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private func cancelLearning() {
         focus &+= 1; let generation = focus
         pendingEdits = 0; displayed = nil
+        cancelEnToZhHide()
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
         let m = mode, d = direction
         hub.async { [weak self] in self?.hub.existingLearningSession?.configure(focus: generation, mode: m, direction: d) }
