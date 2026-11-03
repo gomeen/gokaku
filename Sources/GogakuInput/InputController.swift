@@ -326,9 +326,6 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                              source: candidate.source, range: candidate.range, target: candidate.target,
                              explanation: "", resource: candidate.resource, engineIndex: candidate.engineIndex)
         }
-        if view.candidates.indices.contains(inPage), let translated = translationMemory[view.candidates[inPage].target] {
-            view.status = "译文：\(translated)"
-        }
         displayed = view
         panel.render(view, at: rect, targetWindowLevel:
                      GGPanelTargetLevel(anchor.windowLevel, anchor.windowLevelValid))
@@ -865,10 +862,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                 if snap.candidates.indices.contains(inPage) {
                     let highlight = snap.candidates[inPage].text
                     eagerBacklog = translationMemory[highlight] == nil ? [highlight] : []
-                    // 高亮候选已有缓存时状态行即时预览（无需等预译）。
-                    if let translated = translationMemory[highlight], view.status.isEmpty {
-                        view.status = "译文：\(translated)"
-                    }
+                    // 高亮候选已有缓存时注释即时就绪（缓存合并进候选人选，无需等预译）。
                 }
             }
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；

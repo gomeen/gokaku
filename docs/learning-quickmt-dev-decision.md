@@ -59,6 +59,37 @@
 
 用户提出「不限制方向、不主动切换、自动识别」后经评估选择**维持手动**：⌃⇧J（设置可自定义）切方向。评估要点（如未来重开此题）：拼音轨/英文轨可按「共享核心有无中文候选」逐键确定性判定，但 mini＝小鹤「迷你」＝英文词一类真歧义无解，Space 语义（拼音轨选词 vs 英文轨空格）存在硬冲突，误判会在错误时机提交——需要逃逸键＋预览兜底，收益不抵复杂度。已落地：模式／方向切换提示浮层跟随输入插入点（优先光标上方，PanelPlacement.toastOrigin 纯几何＋单测），浮层按文本自适应宽度，无有效锚点回退右上角。
 
+## 五点七、quickmt 配置项清单（2026-11-03 用户问询，构建 41）
+
+全部配置集中在三处，代码内其余行为均为固定实现（双向权重懒加载、单请求串行、无端口/无日志/无网络、尾部孤立标点剥离、源标量上限 512）。
+
+**1. 输入法设置（`~/Library/Application Support/Gogaku/settings.json`）**
+
+| 键 | 默认 | 取值 | 作用 |
+|---|---|---|---|
+| `learningTranslationEnabled` | `true` | 开关 | 学习模式总开关；关闭后切换键不再进入学习模式 |
+| `learningBeamSize` | `1` | 1–10（超界自动钳制） | quickmt beam 大小；越大译文越稳、首译越慢；worker 由该值带 `--beam` 启动 |
+
+**2. worker 启动参数（`scripts/quickmt_worker.py`，输入法按设置自动传参，一般不动）**
+
+| 参数 | 默认 | 作用 |
+|---|---|---|
+| `--root` | 脚本所在目录 | 装配目录（venv＋权重） |
+| `--beam` | `1`（由 `learningBeamSize` 传入） | 解码 beam，1 即贪心 |
+| `--threads` | `2` | CT2 intra 线程数 |
+| `--compute-type` | `int8` | ctranslate2 计算精度（可 `float16`/`int8_float16` 等） |
+| `--max-decoding-length` | `256` | 解码最大 token 数（长译文上限） |
+
+**3. 装配脚本（`scripts/prepare-learning-translation.py`，一次性）**
+
+| 参数 | 默认 | 作用 |
+|---|---|---|
+| `--root` | 默认安装目录 | 装配目标 |
+| `--cache` | 探针权重缓存 | 免重复下载 |
+| `--python` | 系统 `python3` | venv 基解释器 |
+| `--skip-venv` | — | 跳过 venv 重建 |
+| `--worker-only` | — | 只更新 worker 脚本 |
+
 ## 六、后续可选路径（均不在本次范围）
 
 1. 资源审核层接入（`resources/translation/` 风险处置／审阅表达资源），恢复正式 approved 口径。

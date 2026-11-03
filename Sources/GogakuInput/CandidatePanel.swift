@@ -35,6 +35,7 @@ private final class PanelLayout {
         let annotation: NSAttributedString?
         let annotationX: CGFloat
         let annotationWidth: CGFloat
+        let annotationLines: Int
     }
 
     struct Button {
@@ -109,8 +110,13 @@ private final class PanelLayout {
             let annotation: NSAttributedString?
             let annotationWidth: CGFloat
             let contentWidth: CGFloat
+            let annotationLines: Int
+            let rowHeight: CGFloat
         }
         var contents: [RowContent] = []
+        // 学习中→英：仅高亮候选显示英文注释；长译文在行内换行不截断
+        //（2026-11 用户反馈：显示不全）。
+        let learningZhToEn = learning && view.stamp.direction == .zhToEn
         for (offset, candidate) in shown.enumerated() {
             let selected = (learning ? pageStart + offset : view.page * CandidatePage.size + offset) == view.selected
             // 学习模式数字直接选词（2026-11 裁决：与普通模式同快捷键，不再用 ⌥数字）。
@@ -120,16 +126,33 @@ private final class PanelLayout {
             let annotation: NSAttributedString? = candidate.explanation.isEmpty ? nil
                 : NSAttributedString(string: candidate.explanation, attributes: attributes(theme.annotationFont, selected ? theme.selectedAnnotation : theme.annotationText))
             var indexWidth = index.widthPt, wordWidth = word.widthPt, annotationWidth = annotation?.widthPt ?? 0
-            // 长注释截断（省略号）：行内容不得超过最大内宽，只牺牲注释。
+            let wrapAnnotation = learningZhToEn && selected
+            var annotationLines = 1
+            var rowHeight = m.rowHeight
+            // 长注释截断（省略号）：行内容不得超过最大内宽，只牺牲注释；
+            // 学习中→英高亮行例外：注释在行内换行（最多 3 行），不截断。
             if let text = annotation, annotationWidth > 0 {
                 let fixed = m.rowLeftPadding + m.indexLeftMargin + indexWidth + m.wordLeftMargin + wordWidth + m.annotationLeftMargin
+                if wrapAnnotation {
+                    let available = max(maxInner - fixed, 24)
+                    annotationWidth = available
+                    annotationLines = min(3, max(1, Int(ceil(text.widthPt / available))))
+                    if annotationLines > 1 {
+                        rowHeight = m.rowHeight + CGFloat(annotationLines - 1) * m.annotationLineHeight
+                    }
+                    let contentWidth = fixed
+                    contents.append(RowContent(indexOfShown: offset, selected: selected, index: index, indexWidth: indexWidth,
+                                               word: word, wordWidth: wordWidth, annotation: annotation, annotationWidth: annotationWidth,
+                                               contentWidth: contentWidth, annotationLines: annotationLines, rowHeight: rowHeight))
+                    continue
+                }
                 let available = maxInner - fixed
                 if available < annotationWidth {
                     let (truncated, width) = Self.truncate(text, maxWidth: max(available, 24))
                     annotationWidth = width
                     contents.append(RowContent(indexOfShown: offset, selected: selected, index: index, indexWidth: indexWidth,
                                                word: word, wordWidth: wordWidth, annotation: truncated, annotationWidth: annotationWidth,
-                                               contentWidth: fixed + annotationWidth))
+                                               contentWidth: fixed + annotationWidth, annotationLines: 1, rowHeight: rowHeight))
                     continue
                 }
             }
@@ -137,7 +160,7 @@ private final class PanelLayout {
                 + (annotation != nil ? m.annotationLeftMargin + annotationWidth : 0)
             contents.append(RowContent(indexOfShown: offset, selected: selected, index: index, indexWidth: indexWidth,
                                        word: word, wordWidth: wordWidth, annotation: annotation, annotationWidth: annotationWidth,
-                                       contentWidth: contentWidth))
+                                       contentWidth: contentWidth, annotationLines: 1, rowHeight: rowHeight))
         }
 
         // 2. 预编辑：已转（gloss）＋插入点＋未转（faint）；长输入自动换行
@@ -232,14 +255,15 @@ private final class PanelLayout {
         for content in contents {
             let wordX = m.windowPadding + m.rowLeftPadding + m.indexLeftMargin + content.indexWidth + m.wordLeftMargin
             placed.append(Row(indexOfShown: content.indexOfShown,
-                              frame: NSRect(x: 0, y: y, width: panelWidth, height: m.rowHeight),
+                              frame: NSRect(x: 0, y: y, width: panelWidth, height: content.rowHeight),
                               selected: content.selected,
                               index: content.index, indexWidth: content.indexWidth,
                               wordX: wordX, word: content.word, wordWidth: content.wordWidth,
                               annotation: content.annotation,
                               annotationX: wordX + content.wordWidth + m.annotationLeftMargin,
-                              annotationWidth: content.annotationWidth))
-            y += m.rowHeight
+                              annotationWidth: content.annotationWidth,
+                              annotationLines: content.annotationLines))
+            y += content.rowHeight
         }
         rows = placed
         if let statusString {
@@ -357,7 +381,8 @@ final class PanelContent: NSView {
             row.word.draw(inRect: NSRect(x: row.wordX, y: row.frame.minY + m.wordTopMargin,
                                          width: row.wordWidth, height: m.candidateLineHeight))
             row.annotation?.draw(inRect: NSRect(x: row.annotationX, y: row.frame.minY + m.indexTopMargin,
-                                                width: row.annotationWidth, height: m.annotationLineHeight))
+                                                width: row.annotationWidth,
+                                                height: m.annotationLineHeight * CGFloat(row.annotationLines)))
         }
         layout.status?.draw(inRect: layout.statusRect)
         layout.page?.draw(inRect: layout.pageRect)
