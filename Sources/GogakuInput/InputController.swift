@@ -306,13 +306,22 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         guard mode == .learning, direction == .zhToEn,
               var view = displayed, view.stamp == result.stamp, pendingEdits == 0,
               let rect = displayRect, let anchor = target else { return }
-        view.candidates = view.candidates.map { candidate in
-            guard let translated = translationMemory[candidate.target], candidate.explanation != translated else { return candidate }
+        // 只刷新高亮候选的注释（2026-11 用户裁决：其余行不显示英文）。
+        let inPage = view.selected - view.page * CandidatePage.size
+        view.candidates = view.candidates.enumerated().map { offset, candidate in
+            let translated = translationMemory[candidate.target]
+            if offset == inPage, let translated {
+                if candidate.explanation == translated { return candidate }
+                return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
+                                 source: candidate.source, range: candidate.range, target: candidate.target,
+                                 explanation: translated, resource: candidate.resource, engineIndex: candidate.engineIndex)
+            }
+            // 非高亮行不显示英文；残留注释（旧缓存）清空。
+            if candidate.explanation.isEmpty { return candidate }
             return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
                              source: candidate.source, range: candidate.range, target: candidate.target,
-                             explanation: translated, resource: candidate.resource, engineIndex: candidate.engineIndex)
+                             explanation: "", resource: candidate.resource, engineIndex: candidate.engineIndex)
         }
-        let inPage = view.selected - view.page * CandidatePage.size
         if view.candidates.indices.contains(inPage), let translated = translationMemory[view.candidates[inPage].target] {
             view.status = "译文：\(translated)"
         }
@@ -826,15 +835,17 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         view.page = snap.page
         view.selected = snap.selected
         view.candidates = snap.candidates.map { item in
-            Candidate(stamp: view.stamp,
+            let isHighlighted = item.text == highlightedCandidateText(snap)
+            return Candidate(stamp: view.stamp,
                       sourceID: "normal:\(item.kind)",
                       source: item.text,
                       range: RawRange(start: 0, length: 0),
                       target: item.text,
-                      // 学习中→英：注释＝真实提交文本（quickmt 逐候选译文，未预译完
-                      // 前留空）；词典释义（gloss）与提交文本不同源，不再混入。
-                      explanation: learningSwap ? (translationMemory[item.text] ?? "")
-                                                : (settings.glossEnabled ? item.gloss : ""),
+                      // 学习中→英：仅高亮候选显示真实提交文本（quickmt 译文，
+                      // 2026-11 用户裁决：其余不显示）；历史缓存不外溢。
+                      explanation: learningSwap
+                          ? (isHighlighted ? (translationMemory[item.text] ?? "") : "")
+                          : (settings.glossEnabled ? item.gloss : ""),
                       resource: "gogaku-core")
         }
         view.status = snap.status
@@ -1292,7 +1303,13 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         SettingsStore.shared.submit(settings)
     }
 
-    /// 提示锚点：显示矩形／目标矩形，否则实时读宿主光标矩形（组合外也可用）。
+    /// 当前高亮候选文本（页内索引换算；越界返回 nil）。
+    private func highlightedCandidateText(_ snap: NormalSnapshot) -> String? {
+        let inPage = snap.selected - snap.page * CandidatePage.size
+        return snap.candidates.indices.contains(inPage) ? snap.candidates[inPage].text : nil
+    }
+
+    /// 切换提示的输入位置锚点：显示矩形／目标矩形，否则实时读宿主光标矩形（组合外也可用）。
     private func freshToastAnchor() -> NSRect? {
         if let rect = displayRect, rect != .zero { return rect }
         if let current = currentTarget(readRectangle: true, strictComposition: false), current.rect != .zero {
@@ -1409,10 +1426,11 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     }
 }
 
-/// 「中／英」等模式切换提示浮层：无边框小面板，0.8 秒自动隐藏；
-/// 位置跟随输入插入点（优先锚点上方，复用 PanelPlacement 几何），
-/// 无有效锚点时回退屏幕右上角。
+/// 「中／英」等模式切换提示浮层：深色圆角背景（音量 HUD 风格，深浅外观均
+/// 可读），2 秒自动隐藏；位置跟随输入插入点（优先锚点上方，复用
+/// PanelPlacement 几何），无有效锚点时不显示。
 final class ToastWindow: NSPanel {
+    private let box = NSView()
     private let label = NSTextField(labelWithString: "")
     private var hideWork: DispatchWorkItem?
 
@@ -1426,23 +1444,32 @@ final class ToastWindow: NSPanel {
         isOpaque = false
         backgroundColor = .clear
         hasShadow = false
+        // 深色圆角背景：白字在任何宿主背景上都可读（用户反馈：加背景）。
+        box.wantsLayer = true
+        box.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.78).cgColor
+        box.layer?.cornerRadius = 9
+        box.layer?.masksToBounds = true
         label.font = .systemFont(ofSize: 22, weight: .medium)
         label.alignment = .center
-        contentView = label
+        box.frame = NSRect(x: 0, y: 0, width: 44, height: 36)
+        box.autoresizingMask = [.width, .height]
+        label.frame = box.bounds
+        label.autoresizingMask = [.width, .height]
+        box.addSubview(label)
+        contentView = box
     }
 
     func show(_ text: String, anchor: NSRect? = nil) {
         hideWork?.cancel()
         // 按文本自适应尺寸（固定 44×36 会截断「中→英」等提示）。
         let textSize = text.size(withAttributes: [.font: label.font!])
-        let size = NSSize(width: max(44, ceil(textSize.width) + 16), height: 36)
+        let size = NSSize(width: max(44, ceil(textSize.width) + 24), height: 40)
         // 用户裁决：提示必须在输入附近；无有效锚点时不显示（不放固定角落）。
         guard let caret = anchor, caret != .zero,
               let origin = PanelPlacement.toastOrigin(
                   anchor: caret, panelSize: size,
                   screens: NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }) else { return }
         label.stringValue = text
-        label.textColor = NSColor.white
         label.frame = NSRect(x: 0, y: 0, width: size.width, height: size.height)
         setContentSize(size)
         setFrameOrigin(origin)
