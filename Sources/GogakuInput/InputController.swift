@@ -200,9 +200,14 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     /// 学习中→英走普通核心路径时的应用哨兵：绕开按应用默认英文（学习组合
     /// 始终组中文），与真实应用隔离；核心按键语义与普通模式完全一致。
     private static let learningCoreApp = "org.gogaku.learning"
-    /// 已知译文（学习中→英）：来自高亮候选预译与历史提交；命中即同步上屏。
+    /// 已知译文（学习中→英）：来自候选预译与历史提交；注释即提交文本。
     private var translationMemory: [String: String] = [:]
-    private var lastEagerSource = ""
+    /// 逐候选预译：高亮优先，串行逐个请求（同一服务内不超一个在飞，
+    /// 避免 latest-wins 丢请求）。
+    private var eagerInFlight: String?
+    private var eagerBacklog: [String] = []
+    /// 预译专用服务：与提交／英→中请求隔离，避免互相顶掉在飞请求。
+    private lazy var eagerTranslator = makeEagerTranslator()
     /// 译文未就绪的提交：缓冲后续按键，避免译文异步上屏与新组合交错。
     private struct PendingTranslatedCommit {
         let source: String
@@ -244,24 +249,56 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         return service
     }
 
+    /// 预译专用服务：独立实例，避免与提交／英→中请求互相顶掉在飞请求。
+    private func makeEagerTranslator() -> TranslationService {
+        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize)
+        let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
+        service.onResult = { [weak self] result in
+            DispatchQueue.main.async { self?.applyEagerTranslation(result) }
+        }
+        return service
+    }
+
     /// 译文缓存有界；溢出直接清空（预译很快重建）。
     private func storeTranslationMemory(_ source: String, _ target: String) {
         if translationMemory.count >= 256 { translationMemory.removeAll() }
         translationMemory[source] = target
     }
 
-    /// 高亮候选预译：组合期间提前译当前高亮候选，提交时多数命中缓存同步上屏；
-    /// 译文就绪后在状态行预览（不改候选列表，交互与普通模式一致）。
+    /// 顺序泵出预译队列：一次只一个在飞请求；结果回来后续泵下一个。
+    /// 用 requestImmediately 逐个发，避免同一服务的 latest-wins 丢请求。
+    private func pumpEagerBacklog() {
+        guard mode == .learning, direction == .zhToEn, eagerInFlight == nil,
+              let next = eagerBacklog.first(where: { translationMemory[$0] == nil }) else { return }
+        eagerInFlight = next
+        // 用当前组合 stamp 发起：applyEagerTranslation 以 stamp 匹配面板代次。
+        let stamp = displayed?.stamp ?? InputStamp(mode: .learning, direction: .zhToEn)
+        eagerTranslator.requestImmediately(TranslationRequest(stamp: stamp, sourceID: "eager", source: next,
+                                                              resource: LearningTranslation.resourceID))
+    }
+
+    /// 预译结果：入译文缓存；刷新当前面板注释（注释＝真实提交文本）与
+    /// 高亮项状态行预览；续泵下一个。
     private func applyEagerTranslation(_ result: TranslationResult) {
-        if result.error == nil, let target = result.target, !target.isEmpty {
-            storeTranslationMemory(result.source, target)
+        let finished = eagerInFlight
+        eagerInFlight = nil
+        if result.error == nil, let translated = result.target, !translated.isEmpty, result.source == finished {
+            storeTranslationMemory(result.source, translated)
         }
+        defer { pumpEagerBacklog() }
         guard mode == .learning, direction == .zhToEn,
-              result.error == nil, let translated = result.target, !translated.isEmpty,
-              result.source == lastEagerSource,
               var view = displayed, view.stamp == result.stamp, pendingEdits == 0,
-              view.status.isEmpty, let rect = displayRect, let anchor = target else { return }
-        view.status = "译文：\(translated)"
+              let rect = displayRect, let anchor = target else { return }
+        view.candidates = view.candidates.map { candidate in
+            guard let translated = translationMemory[candidate.target], candidate.explanation != translated else { return candidate }
+            return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
+                             source: candidate.source, range: candidate.range, target: candidate.target,
+                             explanation: translated, resource: candidate.resource, engineIndex: candidate.engineIndex)
+        }
+        let inPage = view.selected - view.page * CandidatePage.size
+        if view.candidates.indices.contains(inPage), let translated = translationMemory[view.candidates[inPage].target] {
+            view.status = "译文：\(translated)"
+        }
         displayed = view
         panel.render(view, at: rect, targetWindowLevel:
                      GGPanelTargetLevel(anchor.windowLevel, anchor.windowLevelValid))
@@ -476,7 +513,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             DraftStore.shared.save(application: app, mode: .learning, direction: .zhToEn,
                                    raw: pending.source, literal: true)
         }
-        lastEagerSource = ""
+        eagerBacklog = []
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0
         panel.dismiss(); toast.hide()
@@ -526,6 +563,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             || previous.learningBeamSize != settings.learningBeamSize else { return }
         translator.invalidate()
         translator = makeTranslator()
+        eagerTranslator.invalidate()
+        eagerTranslator = makeEagerTranslator()
     }
 
     private func match(_ shortcut: Shortcut, event: NSEvent) -> Bool {
@@ -767,21 +806,25 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                       source: item.text,
                       range: RawRange(start: 0, length: 0),
                       target: item.text,
-                      explanation: settings.glossEnabled ? item.gloss : "",
+                      // 学习中→英：注释＝真实提交文本（quickmt 逐候选译文，未预译完
+                      // 前留空）；词典释义（gloss）与提交文本不同源，不再混入。
+                      explanation: learningSwap ? (translationMemory[item.text] ?? "")
+                                                : (settings.glossEnabled ? item.gloss : ""),
                       resource: "gogaku-core")
         }
         view.status = snap.status
         if snap.composing {
-            // 学习中→英：预译当前高亮候选（结果进译文缓存，状态行预览）。
+            // 学习中→英：预译当前页候选（高亮优先），注释与状态行随缓存刷新。
             if learningSwap {
                 let inPage = snap.selected - snap.page * CandidatePage.size
-                if snap.candidates.indices.contains(inPage) {
-                    let highlight = snap.candidates[inPage].text
-                    if highlight != lastEagerSource {
-                        lastEagerSource = highlight
-                        translator.request(TranslationRequest(stamp: view.stamp, sourceID: "eager",
-                                                              source: highlight, resource: LearningTranslation.resourceID))
-                    }
+                var ordered: [String] = []
+                if snap.candidates.indices.contains(inPage) { ordered.append(snap.candidates[inPage].text) }
+                for item in snap.candidates where !ordered.contains(item.text) { ordered.append(item.text) }
+                eagerBacklog = ordered.filter { translationMemory[$0] == nil }
+                // 高亮候选已有缓存时状态行即时预览（无需等预译）。
+                if snap.candidates.indices.contains(inPage),
+                   let translated = translationMemory[snap.candidates[inPage].text], view.status.isEmpty {
+                    view.status = "译文：\(translated)"
                 }
             }
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
@@ -815,13 +858,15 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             // marked text 更新后读取最新插入位置（合并刷新：同一事件内只读一次；
             // 额外宿主读取经 ValidationMonitor 的 hostReadNs 纳入性能测量）。
             refreshDisplayPosition()
+            // displayed 已更新为当前视图后泵预译队列（stamp 匹配面板代次）。
+            pumpEagerBacklog()
         } else {
             displayed = nil
             displayRect = nil
             anchorSuspectStreak = 0
             stopPositionRefresh()
             panel.dismiss()
-            lastEagerSource = ""
+            eagerBacklog = []
         }
     }
 
@@ -1378,7 +1423,8 @@ final class ToastWindow: NSPanel {
         orderFrontRegardless()
         let work = DispatchWorkItem { [weak self] in self?.hide() }
         hideWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8, execute: work)
+        // 2026-11 用户反馈 0.8s 太短，加长到 2s。
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
     }
 
     func hide() {
