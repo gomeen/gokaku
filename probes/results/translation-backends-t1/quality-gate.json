@@ -1,0 +1,111 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T014017Z",
+ "parameters": {
+  "backends": [
+   "small100",
+   "quickmt"
+  ],
+  "directions": [
+   "en-zh",
+   "zh-en"
+  ],
+  "cases": "speed",
+  "rounds": 5,
+  "threads": 1,
+  "computeType": "int8",
+  "beam": 1,
+  "maxDecodingLength": 256,
+  "workerPython": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/venv-ct2/bin/python",
+  "small100Root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate",
+  "quickmtRoot": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed",
+  "hardeningDylib": "/Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib",
+  "languageProbes": "not-run"
+ },
+ "userBlindTest": "not-run",
+ "agentSemanticReview": "pending",
+ "reviewMetadata": null,
+ "thresholds": {
+  "usableRate": 0.95,
+  "shortExpressionP95Ms": 500,
+  "shortSentenceP95Ms": 2000
+ },
+ "backends": {
+  "small100": {
+   "directions": {
+    "zh-en": {
+     "translateCases": 0,
+     "modelAvailable": 0,
+     "modelAvailableRate": 0.0,
+     "usable": 0,
+     "usableRate": 0.0,
+     "verdictCounts": {},
+     "fallbackReasons": {},
+     "preserveCases": 0,
+     "preservePolicySatisfied": 0,
+     "empty": 0,
+     "error": 0,
+     "truncated": 0
+    },
+    "en-zh": {
+     "translateCases": 0,
+     "modelAvailable": 0,
+     "modelAvailableRate": 0.0,
+     "usable": 0,
+     "usableRate": 0.0,
+     "verdictCounts": {},
+     "fallbackReasons": {},
+     "preserveCases": 0,
+     "preservePolicySatisfied": 0,
+     "empty": 0,
+     "error": 0,
+     "truncated": 0
+    }
+   },
+   "risk": [],
+   "reviewIndex": [],
+   "gate": {
+    "verdict": "not-applicable",
+    "note": "本运行只有速度子集，未包含风险集/保留集质量样本。"
+   }
+  },
+  "quickmt": {
+   "directions": {
+    "zh-en": {
+     "translateCases": 0,
+     "modelAvailable": 0,
+     "modelAvailableRate": 0.0,
+     "usable": 0,
+     "usableRate": 0.0,
+     "verdictCounts": {},
+     "fallbackReasons": {},
+     "preserveCases": 0,
+     "preservePolicySatisfied": 0,
+     "empty": 0,
+     "error": 0,
+     "truncated": 0
+    },
+    "en-zh": {
+     "translateCases": 0,
+     "modelAvailable": 0,
+     "modelAvailableRate": 0.0,
+     "usable": 0,
+     "usableRate": 0.0,
+     "verdictCounts": {},
+     "fallbackReasons": {},
+     "preserveCases": 0,
+     "preservePolicySatisfied": 0,
+     "empty": 0,
+     "error": 0,
+     "truncated": 0
+    }
+   },
+   "risk": [],
+   "reviewIndex": [],
+   "gate": {
+    "verdict": "not-applicable",
+    "note": "本运行只有速度子集，未包含风险集/保留集质量样本。"
+   }
+  }
+ }
+}

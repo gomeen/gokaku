@@ -1,0 +1,193 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T012307Z",
+ "workers": {
+  "small100": {
+   "identity": {
+    "backend": "small100",
+    "adapter": "small100",
+    "repository": "alirezamsh/small100",
+    "revision": "8ab680e26a596d2e3d2d2d17ae0f68df1037328c",
+    "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/ct2-int8",
+    "sourceDir": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source",
+    "computeType": "int8",
+    "threads": 2,
+    "beam": 1,
+    "maxDecodingLength": 256,
+    "protocol": "tgt_lang encoder prefix; decoder starts from eos"
+   },
+   "versions": {
+    "ctranslate2": "4.6.0",
+    "sentencepiece": "0.2.0",
+    "transformers": "4.44.2"
+   },
+   "modelLoadMs": 1831.367882,
+   "processStartToReadyMs": 1831.372401,
+   "readyPeakRssBytes": 542531584,
+   "peakRssBytes": 601812992,
+   "artifactBytes": 347675798,
+   "rootBytes": 1846430914,
+   "cpuToWallRatio": {
+    "n": 1200,
+    "min": 1.62,
+    "p50": 1.83,
+    "p95": 1.85,
+    "p99": 1.86,
+    "max": 1.87,
+    "mean": 1.83
+   },
+   "requestCount": 1200
+  },
+  "quickmt-en-zh": {
+   "identity": {
+    "backend": "quickmt",
+    "adapter": "quickmt",
+    "model": "quickmt-en-zh",
+    "direction": "en-zh",
+    "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh",
+    "computeType": "int8",
+    "threads": 2,
+    "beam": 1,
+    "maxDecodingLength": 256,
+    "protocol": "src spm + </s>; tgt spm decode"
+   },
+   "versions": {
+    "ctranslate2": "4.6.0",
+    "sentencepiece": "0.2.0"
+   },
+   "modelLoadMs": 1134.564332,
+   "processStartToReadyMs": 1134.5676139999998,
+   "readyPeakRssBytes": 779022336,
+   "peakRssBytes": 802897920,
+   "artifactBytes": 412640707,
+   "rootBytes": 412644571,
+   "cpuToWallRatio": {
+    "n": 590,
+    "min": 1.18,
+    "p50": 1.82,
+    "p95": 1.85,
+    "p99": 1.85,
+    "max": 1.86,
+    "mean": 1.81
+   },
+   "requestCount": 600
+  },
+  "quickmt-zh-en": {
+   "identity": {
+    "backend": "quickmt",
+    "adapter": "quickmt",
+    "model": "quickmt-zh-en",
+    "direction": "zh-en",
+    "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en",
+    "computeType": "int8",
+    "threads": 2,
+    "beam": 1,
+    "maxDecodingLength": 256,
+    "protocol": "src spm + </s>; tgt spm decode"
+   },
+   "versions": {
+    "ctranslate2": "4.6.0",
+    "sentencepiece": "0.2.0"
+   },
+   "modelLoadMs": 1209.46124,
+   "processStartToReadyMs": 1209.465009,
+   "readyPeakRssBytes": 711589888,
+   "peakRssBytes": 721309696,
+   "artifactBytes": 409701393,
+   "rootBytes": 409706714,
+   "cpuToWallRatio": {
+    "n": 600,
+    "min": 1.55,
+    "p50": 1.81,
+    "p95": 1.83,
+    "p99": 1.84,
+    "max": 1.84,
+    "mean": 1.81
+   },
+   "requestCount": 600
+  }
+ },
+ "totals": {
+  "peakRssBytes": 2126020608,
+  "artifactBytes": 1170017898,
+  "workerCount": 3
+ },
+ "directionSwitch": {
+  "small100": {
+   "sharedWeights": true,
+   "switchRequiresModelLoad": false,
+   "firstAfterDirectionChangeMs": {
+    "n": 8,
+    "min": 88.63,
+    "p50": 155.1,
+    "p95": 399.4,
+    "p99": 399.4,
+    "max": 399.4,
+    "mean": 212.97
+   },
+   "sameDirectionMs": {
+    "n": 1076,
+    "min": 70.46,
+    "p50": 195.33,
+    "p95": 623.93,
+    "p99": 734.7,
+    "max": 883.22,
+    "mean": 231.57
+   }
+  },
+  "quickmt": {
+   "sharedWeights": false,
+   "switchRequiresModelLoad": true,
+   "perDirectionLoadMs": {
+    "quickmt-en-zh": 1134.564332,
+    "quickmt-zh-en": 1209.46124
+   },
+   "note": "两个方向各自加载模型；切换方向需加载另一份模型（约见 perDirectionLoadMs），或同时常驻。"
+  }
+ },
+ "environment": {
+  "platform": "darwin",
+  "machine": "x86_64",
+  "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "system": {
+   "uptime": "9:23  up 3 days, 11:27, 8 users, load averages: 3.68 3.78 3.44",
+   "loadAverage": [
+    3.6767578125,
+    3.77734375,
+    3.43896484375
+   ],
+   "topCpu": "26972  35.2 /usr/local/Cellar/python@3.15/3.15.2/Frameworks/Python.framework/Versions/3.15/Resources/Python.app/Contents/MacOS/Python\n21388  25.2 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  16.6 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n26817  15.9 /Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/156.0.8078.74/Helpers/Google Chrome Helper (Aperitif Renderer).app/Contents/MacOS/Google Chrome Helper (Aperitif Renderer)\n76383  14.5 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n 2649  13.3 pi\n22111  11.3 /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent\n 6937   8.7 /Applications/WeChat.app/Contents/MacOS/WeChat"
+  }
+ },
+ "notes": "RSS 为进程 ru_maxrss 峰值；本轮未单独采样稳定驻留内存，不能把峰值当作长期常驻。",
+ "warmup": {
+  "small100-en-zh": {
+   "status": "ok",
+   "warmupBatchIpcMs": 311.341348,
+   "firstRequestTotalMs": 188.632422,
+   "rowCount": 2,
+   "note": "预热不计入热态延迟统计；首个请求单独保留。"
+  },
+  "small100-zh-en": {
+   "status": "ok",
+   "warmupBatchIpcMs": 250.386708,
+   "firstRequestTotalMs": 138.035645,
+   "rowCount": 2,
+   "note": "预热不计入热态延迟统计；首个请求单独保留。"
+  },
+  "quickmt-en-zh": {
+   "status": "ok",
+   "warmupBatchIpcMs": 156.018716,
+   "firstRequestTotalMs": 100.257479,
+   "rowCount": 2,
+   "note": "预热不计入热态延迟统计；首个请求单独保留。"
+  },
+  "quickmt-zh-en": {
+   "status": "ok",
+   "warmupBatchIpcMs": 78.437207,
+   "firstRequestTotalMs": 44.027024,
+   "rowCount": 2,
+   "note": "预热不计入热态延迟统计；首个请求单独保留。"
+  }
+ }
+}

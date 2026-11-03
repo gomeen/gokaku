@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 1,
+  "reviewedAt": "2026-11-03T01:40:00Z",
+  "reviewer": "agent semantic review (not a user blind test)",
+  "method": "逐条对照源文、风险审阅提示、原始输出和加固处置。fallback-original / preserve-expected 记为 pass（错误译文没有进入默认候选）；错误、缺失或明显不自然的译文仍成为 candidate 记为 fail。机械 requireAll/forbid 只是辅助信号，人工判读可以推翻。",
+  "cases": {
+    "small100:zh-not-yet": {
+      "status": "pass",
+      "note": "“还没”保留为 not ... yet。"
+    },
+    "small100:zh-phrase": {
+      "status": "fail",
+      "note": "“开会”是动词短语，输出 The Meeting 名词化且缺动作，不应作为默认候选。"
+    },
+    "small100:zh-time": {
+      "status": "pass",
+      "note": "明天下午三点完整保留。"
+    },
+    "small100:zh-greeting": {
+      "status": "pass",
+      "note": "早上好。"
+    },
+    "small100:zh-contrast": {
+      "status": "pass",
+      "note": "不在上海、在北京的对比保留。"
+    },
+    "small100:zh-url": {
+      "status": "pass",
+      "note": "网址原样保留；加固因长度比率误判回退原文，属安全处置但暴露误报。"
+    },
+    "small100:zh-bank": {
+      "status": "fail",
+      "note": "Banking 是动名词/行业义，不是“银行”的默认词候选。"
+    },
+    "small100:zh-long": {
+      "status": "pass",
+      "note": "模型丢掉“半”并输出 10 a.m.；加固按时段/半点规则回退原文。"
+    },
+    "small100:zh-tomorrow": {
+      "status": "pass",
+      "note": "tomorrow。"
+    },
+    "small100:zh-names": {
+      "status": "pass",
+      "note": "Alice、Bob、北京、星期五和见面关系均保留。"
+    },
+    "small100:zh-word": {
+      "status": "pass",
+      "note": "Meeting，孤立词可接受。"
+    },
+    "small100:zh-sentence": {
+      "status": "pass",
+      "note": "I have a meeting tomorrow，主体和明天保留。"
+    },
+    "small100:zh-condition": {
+      "status": "fail",
+      "note": "条件与取消含义保留，但工具生成英语拼写错误 cancell 进入候选；按产品规则不得作为默认候选。"
+    },
+    "small100:zh-negation": {
+      "status": "pass",
+      "note": "否定发送保留。"
+    },
+    "small100:zh-mixed": {
+      "status": "pass",
+      "note": "Gogaku、v2.1、星期五之前均保留。"
+    },
+    "small100:zh-past": {
+      "status": "pass",
+      "note": "昨天去银行保留。"
+    },
+    "small100:en-mixed": {
+      "status": "pass",
+      "note": "Gogaku、v2.1、星期五之前均保留。"
+    },
+    "small100:en-phrase": {
+      "status": "pass",
+      "note": "繁体输出由 t2s 归一为“参加会议”。"
+    },
+    "small100:en-time": {
+      "status": "pass",
+      "note": "明天下午三点保留。"
+    },
+    "small100:en-greeting": {
+      "status": "pass",
+      "note": "早上好。"
+    },
+    "small100:en-long": {
+      "status": "pass",
+      "note": "模型把上午翻成下午且“30点”语病；加固按时段规则回退原文。"
+    },
+    "small100:en-typo-word": {
+      "status": "pass",
+      "note": "策略应保留错拼；模型输出“充足”不进入候选。"
+    },
+    "small100:en-tomorrow": {
+      "status": "pass",
+      "note": "明天。"
+    },
+    "small100:en-past": {
+      "status": "pass",
+      "note": "昨天去银行，过去时间保留。"
+    },
+    "small100:en-ambiguous": {
+      "status": "pass",
+      "note": "银行是合法义项之一。"
+    },
+    "small100:en-names": {
+      "status": "fail",
+      "note": "丢失 Bob，输出仍成为候选；人名对齐检查尚未接入加固层。"
+    },
+    "small100:en-word": {
+      "status": "pass",
+      "note": "会议。"
+    },
+    "small100:en-sentence": {
+      "status": "fail",
+      "note": "“我明天会见”把会议变成会见，主体关系改变且进入候选。"
+    },
+    "small100:en-url": {
+      "status": "pass",
+      "note": "网址原样保留；脚本校验把 URL 的拉丁字符计入而误判回退，属安全处置但暴露误报。"
+    },
+    "small100:en-negation": {
+      "status": "pass",
+      "note": "否定发送保留。"
+    },
+    "small100:en-unknown": {
+      "status": "pass",
+      "note": "策略应保留未知词；模型输出“同行”不进入候选。"
+    },
+    "small100:en-typo-sentence": {
+      "status": "pass",
+      "note": "策略应保留错拼句；模型猜成“聚会”不进入候选。"
+    },
+    "quickmt:zh-mixed": {
+      "status": "pass",
+      "note": "Gogaku、v2.1、星期五之前保留；多一个 the 不影响意义。"
+    },
+    "quickmt:zh-url": {
+      "status": "pass",
+      "note": "网址原样保留；长度比率误判回退，属安全处置。"
+    },
+    "quickmt:zh-bank": {
+      "status": "fail",
+      "note": "Bank of the Bank 不是“银行”的可用词候选。"
+    },
+    "quickmt:zh-sentence": {
+      "status": "fail",
+      "note": "“我明天有个会”被译成 I have a group tomorrow，会议变 group。"
+    },
+    "quickmt:zh-tomorrow": {
+      "status": "fail",
+      "note": "Tomorrow the future 加入原文没有的“未来”。"
+    },
+    "quickmt:zh-negation": {
+      "status": "pass",
+      "note": "否定发送保留。"
+    },
+    "quickmt:zh-word": {
+      "status": "fail",
+      "note": "Conferences by the 是残句，不是“会议”的可用词候选。"
+    },
+    "quickmt:zh-condition": {
+      "status": "pass",
+      "note": "条件、下雨、取消会议均保留。"
+    },
+    "quickmt:zh-phrase": {
+      "status": "fail",
+      "note": "Meetings for a 是残句，不满足“开会”的表达候选。"
+    },
+    "quickmt:zh-not-yet": {
+      "status": "pass",
+      "note": "haven't eaten yet 保留尚未。"
+    },
+    "quickmt:zh-greeting": {
+      "status": "pass",
+      "note": "Good morning to you. 语义等价。"
+    },
+    "quickmt:zh-time": {
+      "status": "fail",
+      "note": "The cast meets tomorrow at 3pm 把“开会”变成 cast meets，主体/动作偏移。"
+    },
+    "quickmt:zh-past": {
+      "status": "pass",
+      "note": "yesterday 和去银行保留。"
+    },
+    "quickmt:zh-contrast": {
+      "status": "fail",
+      "note": "He's not in Shanghai, in Beijing 缺对比连接且语法不完整；虽可猜意，不作为可直接使用的候选。"
+    },
+    "quickmt:zh-names": {
+      "status": "pass",
+      "note": "Alice、Bob、北京、星期五、见面关系保留。"
+    },
+    "quickmt:zh-long": {
+      "status": "pass",
+      "note": "10:30 a.m. 下周二、否定、Alice 均保留。"
+    },
+    "quickmt:en-unknown": {
+      "status": "pass",
+      "note": "策略应保留未知词；模型重复“美泰克”不进入候选。"
+    },
+    "quickmt:en-typo-word": {
+      "status": "pass",
+      "note": "策略应保留错拼；模型“美泰简介”不进入候选。"
+    },
+    "quickmt:en-tomorrow": {
+      "status": "fail",
+      "note": "“明天 开始”加入原文没有的“开始”。"
+    },
+    "quickmt:en-sentence": {
+      "status": "pass",
+      "note": "明天我有个会议，主体和日期保留。"
+    },
+    "quickmt:en-ambiguous": {
+      "status": "pass",
+      "note": "银行业务是合法义项之一。"
+    },
+    "quickmt:en-negation": {
+      "status": "fail",
+      "note": "否定发送保留，但尾部多出“电子邮件”残片；不应作为可直接使用的候选。"
+    },
+    "quickmt:en-word": {
+      "status": "fail",
+      "note": "会议介绍加入原文没有的“介绍”，不是“meeting”的直接词候选。"
+    },
+    "quickmt:en-url": {
+      "status": "pass",
+      "note": "网址原样保留；尾部“支持”残片触发脚本回退，属安全处置。"
+    },
+    "quickmt:en-phrase": {
+      "status": "pass",
+      "note": "“参加会议 会议”重复由加固回退原文。"
+    },
+    "quickmt:en-mixed": {
+      "status": "fail",
+      "note": "Gogaku、v2.1、星期五保留，但尾部多出“评分”残片。"
+    },
+    "quickmt:en-greeting": {
+      "status": "pass",
+      "note": "“早上好 好 好…”复读由加固判为截断/重复并回退。"
+    },
+    "quickmt:en-time": {
+      "status": "fail",
+      "note": "明天下午三点保留，但尾部多出“大家好”。"
+    },
+    "quickmt:en-typo-sentence": {
+      "status": "pass",
+      "note": "策略应保留错拼句；模型“药剂”不进入候选。"
+    },
+    "quickmt:en-long": {
+      "status": "pass",
+      "note": "下周二上午10:30、否定、Alice 均保留。"
+    },
+    "quickmt:en-names": {
+      "status": "pass",
+      "note": "爱丽丝、鲍勃、北京、星期五和见面关系保留。"
+    },
+    "quickmt:en-past": {
+      "status": "pass",
+      "note": "昨天和银行保留。"
+    }
+  }
+}

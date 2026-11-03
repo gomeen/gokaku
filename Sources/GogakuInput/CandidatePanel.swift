@@ -3,8 +3,16 @@ import CoreText
 import GogakuCore
 
 private extension NSAttributedString {
+    /// 基线原点绘制（rect.maxY 为行框顶，基线＝行框顶−字体上升高度）。
+    /// 不用 .usesLineFragmentOrigin：该路径会把行框外的细降部墨迹裁平
+    ///（实测 2026-11-03：13pt Fira Code WenKai 的 g／y／j 尾钩被切除，
+    /// 单词 sugar 的 g 只剩短桩；且行框高度增大也不恢复）。
+    /// 视觉位置与旧行为一致：行框顶不变，基线不变。
     func draw(inRect rect: NSRect) {
-        draw(with: rect, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+        let ascent = (attribute(.font, at: 0, effectiveRange: nil) as? NSFont)?.ascender
+            ?? NSFont.systemFont(ofSize: NSFont.systemFontSize).ascender
+        draw(with: NSRect(x: rect.minX, y: rect.maxY - ascent, width: rect.width, height: rect.height),
+             options: [.usesFontLeading], context: nil)
     }
     var widthPt: CGFloat { ceil(size().width) }
 }

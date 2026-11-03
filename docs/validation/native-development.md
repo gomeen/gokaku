@@ -1,17 +1,18 @@
 # 原生工程实施验收记录
 
-更新：2026-11-02（模型路线裁决落地：quickmt 速度探针、短文本评测集、翻译加固层第一片）。目标机器：Intel Mac、macOS 26.7.2。
+更新：2026-11-03（翻译后端统一复测：quickmt 速度领先但质量未过，暂不替换；学习模式仍阻塞）。目标机器：Intel Mac、macOS 26.7.2。
 
 ## 翻译模型解堵：裁决落地与加固层第一片（2026-11-02，工作区，未定版）
 
 按用户当日裁决（处置口径、宽松许可候选验证、死守 500ms）推进，全部证据入库；**学习模式交付仍保持阻塞**（质量门槛未重跑，以下为解堵路径的组成部分）：
 
 - **调研与裁决落档**：三路线（换 NMT／小 LLM／加固层）＋快档补充调研见[模型解堵调研](../research-translation-model-unblock.md)（§六裁决记录、§七 quickmt 发现）；实施计划§四、[产品方向](../product.md)「已选工程路线与资源门槛」同步修订。
-- **quickmt 速度探针**（[探针报告](../../probes/results/quickmt-speed/report.md)）：`quickmt-en-zh`／`quickmt-zh-en`（CC-BY-4.0，原生 CT2）在门槛机（CT2 4.6.0 int8、greedy、2 线程、12 轮热态）短表达 p95：en→zh 66.8ms／zh→en 41.6ms；短句 79.0／82.2ms——约为预算 1/6–1/8，比 small100 同参数快 2–2.8 倍；载入 0.9s；风险集 32/32、留存集 180/180 机械可用。质量烟测：small100 四个固定失败点修复三个，但短语级新暴露重复／繁体漂移／截断／语义跑偏（beam 无关，模型固有）。脚本 `scripts/validate-quickmt-speed.py`。
+- **quickmt 速度探针**（[探针报告](../../probes/results/quickmt-speed/report.md)）：`quickmt-en-zh`／`quickmt-zh-en`（CC-BY-4.0，原生 CT2）在门槛机（CT2 4.6.0 int8、greedy、2 线程、12 轮热态）短表达 p95：en→zh 66.8ms／zh→en 41.6ms；短句 79.0／82.2ms——约为预算 1/6–1/8，比 small100 同参数快 2–2.8 倍；载入 0.9s；当时机械口径风险集 32/32、留存集 180/180 可用（未含加固层）。质量烟测：small100 四个固定失败点修复三个，但短语级新暴露重复／繁体漂移／截断／语义跑偏（beam 无关，模型固有）。脚本 `scripts/validate-quickmt-speed.py`。
+- **统一后端复测（2026-11-03，[决定](../../probes/results/translation-backends/decision.md)）**：同一驱动、5 轮交错、2,400 条请求，分模型层／辅助进程层／加固层比较 small100 与 quickmt。quickmt 短表达 p95 43.4–83.6ms、短句 68.9–89.7ms，快约 1.6–3 倍；但加固后 en→zh 可用率仅 77.67%、固定风险 12 条未处置（短语级复读／截断／残片为主）；small100 为 95.15%／94.34%、固定风险 5 条。两者都未过质量门槛，**决定暂不替换、学习模式继续阻塞**；加固层另有时间区间／`am` 动词／合法三元组／URL 脚本四类误报待第二片。语义审阅见[记录](../../probes/results/translation-backends/semantic-review.md)。文档／基准改动后 fast 档复跑通过（`report-fast-20261103-094435.json`）。
 - **自建短文本评测集**（[translation-short-expressions.json](../../validation/translation-short-expressions.json)）：双方向各 44 例冻结；短语／时间／人名／品牌／错拼／乱码陷阱；reference 草案待用户审阅。
 - **翻译加固层第一片**（`native/GogakuCore/translate/`，附加 ABI，无 libime 依赖）：重复分类／繁→简归一（OpenCC 生成表 3616 字，`scripts/build-t2s-table.py`）／时间一致性／脚本校验／长度比率／专名保护扫描；`gogaku_core_translate_safety_test` 55 项断言；处置效果验证 [hardening-demo.json](../../probes/results/quickmt-speed/hardening-demo.json)：15 条真实失败样本中重复／时段／繁体／乱码四类被拦截或归一，**语义跑偏、多余尾部、短源截断、人名丢失、品牌改写五类未拦（需第二片：覆盖 QE／专名对齐）**，如实记录。
 - **已验证**：fast 档全过（版本 b6 拒绝路径 7/7、资源哈希、核心 ctest 5/5 含 translate_safety 55 断言、Swift Release 96 项）；报告 `docs/validation/verify/report-fast-20261102-203457.json`。
-- **未完成／待验证**：quickmt 未跑同一套风险集语义审阅与用户盲测（不标替换）；加固层未接入翻译管线（当前为纯函数＋测试＋验证脚本）；评测集 reference 待用户审阅；host 档、GUI 人工验收、候选窗定位重构宿主回归、性能门槛未过——均不变。学习模式菜单仍置灰。
+- **未完成／待验证**：quickmt 已跑统一风险集语义审阅（2026-11-03）但质量未过，用户盲测仍未进行（不标替换）；加固层未接入翻译管线（当前为纯函数＋测试＋验证脚本）；评测集 reference 待用户审阅；host 档、GUI 人工验收、候选窗定位重构宿主回归、性能门槛未过——均不变。学习模式菜单仍置灰。
 
 ## 设置页原生落地与普通输入收尾（2026-11-03，工作区，未定版）
 

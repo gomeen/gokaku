@@ -26,7 +26,7 @@
 
 **性能与宿主阻塞未变，仍未到试用阶段**：上一轮 10,035 次真实 IMK 事件主线程 p95 10.35ms／p99 15.38ms（门槛 5ms／10ms）未达标；归因结论（长单行文档的必要同步宿主写入本身超预算）未被本轮工作改变。最终宿主连续两轮、十万序列插桩、两小时稳定性／内存／冷启动未完成；Orca 的 Shift 单击失败待专项追踪；「5.55ms 低于 5ms」等历史文字错误已更正（见[收尾复测报告](docs/validation/pre-user-test.md)）。此前“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回。本轮 Shift 修复在真实宿主复验前，不标宿主通过。
 
-**完整首阶段仍未通过。** 学习路线采用两端统一 small100＋CT2；Mac 分词、转换、速度和离线可行，但模型质量门槛不通过，生产学习辅助和真实学习记录保持关闭。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
+**完整首阶段仍未通过。** 学习路线采用两端统一 small100＋CT2；Mac 分词、转换、速度和离线可行，但模型质量门槛不通过。2026-11-03 统一复测确认 quickmt 速度领先，但加固后固定风险 12 条未处置、en→zh 可用率 77.67%，暂不替换；生产学习辅助和真实学习记录保持关闭（[决定](probes/results/translation-backends/decision.md)）。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
 
 已授权当前用户安装开发版，由用户手动启用输入源；设置页不再提供 Apple 语言资源安装或查询入口（Apple Translation 已退出正式链路），随包资源状态与功能开放状态见设置「语言资源」页。构建、安装、恢复和卸载见[开发版使用说明](docs/native-development.md)。
 
@@ -61,6 +61,7 @@
 - [离线翻译候选](docs/translation-candidates.md)：OPUS 之外的模型与许可核查。
 - [翻译实测](docs/translation-benchmark.md)：模型质量缺陷、五轮延迟、内存、禁网与失败路径结果。
 - [翻译实验方案](docs/translation-benchmark-plan.md)：真实模型测试的样例、计时范围与判定条件。
+- [翻译后端统一实测决定](probes/results/translation-backends/decision.md)：small100 与 quickmt 的模型层／IPC／加固层性能、质量门槛、扩展成本与暂不替换决定。
 - [协作说明](AGENTS.md)：后续开发与文档维护的约定。
 
 ## 许可

@@ -1,0 +1,404 @@
+{
+  "schemaVersion": 1,
+  "notes": "风险集机械语义检查。requireAny 是「每组至少命中一个」的列表；requireAll 是逐条必须命中。它只作为审阅索引的辅助信号，不替代逐条语义审阅或用户盲测；manual=true 的条目必须人工判读。",
+  "cases": {
+    "en-word": {
+      "requireAny": [
+        [
+          "会议",
+          "会面",
+          "开会"
+        ]
+      ],
+      "forbid": [
+        "介绍"
+      ]
+    },
+    "en-ambiguous": {
+      "requireAny": [
+        [
+          "银行"
+        ]
+      ]
+    },
+    "en-tomorrow": {
+      "requireAll": [
+        "明天"
+      ],
+      "forbid": [
+        "开始",
+        "然后"
+      ]
+    },
+    "en-phrase": {
+      "requireAny": [
+        [
+          "参加会议",
+          "出席会议",
+          "开会"
+        ]
+      ]
+    },
+    "en-greeting": {
+      "requireAny": [
+        [
+          "早上好",
+          "早安"
+        ]
+      ]
+    },
+    "en-sentence": {
+      "requireAll": [
+        "明天"
+      ],
+      "requireAny": [
+        [
+          "会议",
+          "开会"
+        ]
+      ],
+      "forbid": [
+        "会见",
+        "见面"
+      ]
+    },
+    "en-negation": {
+      "requireAny": [
+        [
+          "不要",
+          "别",
+          "勿",
+          "不"
+        ],
+        [
+          "发送",
+          "发",
+          "寄"
+        ]
+      ],
+      "manual": true
+    },
+    "en-time": {
+      "requireAll": [
+        "明天"
+      ],
+      "requireAny": [
+        [
+          "3",
+          "三"
+        ],
+        [
+          "下午",
+          "晚上"
+        ]
+      ],
+      "forbid": [
+        "大家好"
+      ],
+      "manual": true
+    },
+    "en-names": {
+      "manual": true,
+      "requireAny": [
+        [
+          "爱丽丝",
+          "艾丽丝"
+        ],
+        [
+          "鲍勃",
+          "包勃",
+          "博布"
+        ],
+        [
+          "北京"
+        ],
+        [
+          "星期五",
+          "周五"
+        ]
+      ]
+    },
+    "en-typo-sentence": {
+      "policy": "preserve"
+    },
+    "en-typo-word": {
+      "policy": "preserve"
+    },
+    "en-unknown": {
+      "policy": "preserve"
+    },
+    "en-url": {
+      "requireAll": [
+        "https://example.com/a?x=1"
+      ]
+    },
+    "en-mixed": {
+      "requireAll": [
+        "gogaku",
+        "v2.1"
+      ],
+      "requireAny": [
+        [
+          "星期五",
+          "周五"
+        ]
+      ],
+      "forbid": [
+        "评分"
+      ]
+    },
+    "en-past": {
+      "requireAll": [
+        "昨天"
+      ],
+      "requireAny": [
+        [
+          "银行"
+        ]
+      ],
+      "forbid": [
+        "今天",
+        "明天"
+      ]
+    },
+    "en-long": {
+      "manual": true,
+      "requireAny": [
+        [
+          "星期二",
+          "周二"
+        ],
+        [
+          "10:30",
+          "十点半",
+          "10点半"
+        ],
+        [
+          "上午",
+          "早上"
+        ],
+        [
+          "不要",
+          "别",
+          "勿"
+        ],
+        [
+          "爱丽丝",
+          "艾丽丝",
+          "alice"
+        ]
+      ],
+      "forbid": [
+        "下午",
+        "晚上"
+      ]
+    },
+    "zh-word": {
+      "requireAny": [
+        [
+          "meeting",
+          "conference"
+        ]
+      ],
+      "forbid": [
+        "by the"
+      ]
+    },
+    "zh-tomorrow": {
+      "requireAny": [
+        [
+          "tomorrow"
+        ]
+      ],
+      "forbid": [
+        "future"
+      ]
+    },
+    "zh-bank": {
+      "requireAny": [
+        [
+          "bank"
+        ]
+      ],
+      "forbid": [
+        "of the"
+      ]
+    },
+    "zh-phrase": {
+      "manual": true,
+      "requireAny": [
+        [
+          "meeting",
+          "get together",
+          "have a meeting"
+        ]
+      ]
+    },
+    "zh-greeting": {
+      "requireAny": [
+        [
+          "good morning",
+          "morning"
+        ]
+      ]
+    },
+    "zh-sentence": {
+      "requireAll": [
+        "tomorrow"
+      ],
+      "requireAny": [
+        [
+          "meeting"
+        ]
+      ],
+      "forbid": [
+        "today"
+      ]
+    },
+    "zh-negation": {
+      "requireAny": [
+        [
+          "not",
+          "don't",
+          "do not",
+          "never"
+        ],
+        [
+          "send",
+          "email",
+          "mail"
+        ]
+      ]
+    },
+    "zh-time": {
+      "requireAll": [
+        "tomorrow"
+      ],
+      "requireAny": [
+        [
+          "3",
+          "three"
+        ],
+        [
+          "afternoon",
+          "p.m.",
+          "pm"
+        ]
+      ],
+      "forbid": [
+        "morning",
+        "a.m."
+      ]
+    },
+    "zh-names": {
+      "manual": true,
+      "requireAll": [
+        "alice",
+        "bob",
+        "friday"
+      ],
+      "requireAny": [
+        [
+          "beijing"
+        ]
+      ]
+    },
+    "zh-past": {
+      "requireAll": [
+        "yesterday"
+      ],
+      "requireAny": [
+        [
+          "bank",
+          "went"
+        ]
+      ]
+    },
+    "zh-url": {
+      "requireAll": [
+        "https://example.com/a?x=1"
+      ]
+    },
+    "zh-mixed": {
+      "requireAll": [
+        "gogaku",
+        "v2.1"
+      ],
+      "requireAny": [
+        [
+          "friday",
+          "星期五"
+        ]
+      ]
+    },
+    "zh-condition": {
+      "manual": true,
+      "requireAny": [
+        [
+          "if",
+          "when"
+        ],
+        [
+          "rain"
+        ],
+        [
+          "cancel",
+          "call off"
+        ]
+      ]
+    },
+    "zh-not-yet": {
+      "requireAny": [
+        [
+          "not",
+          "haven't",
+          "have not",
+          "yet"
+        ]
+      ],
+      "forbid": [
+        "already"
+      ]
+    },
+    "zh-long": {
+      "manual": true,
+      "requireAny": [
+        [
+          "tuesday",
+          "周二"
+        ],
+        [
+          "10:30",
+          "ten thirty",
+          "half past ten"
+        ],
+        [
+          "morning",
+          "a.m."
+        ],
+        [
+          "not",
+          "don't",
+          "do not"
+        ],
+        [
+          "alice"
+        ]
+      ]
+    },
+    "zh-contrast": {
+      "manual": true,
+      "requireAll": [
+        "not",
+        "shanghai",
+        "beijing"
+      ],
+      "requireAny": [
+        [
+          "but",
+          "in beijing"
+        ]
+      ]
+    }
+  }
+}

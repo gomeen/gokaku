@@ -1,0 +1,233 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T014041Z",
+ "pins": {
+  "small100": {
+   "repository": "alirezamsh/small100",
+   "revision": "8ab680e26a596d2e3d2d2d17ae0f68df1037328c",
+   "license": "MIT (model card); tokenization_small100.py Apache-2.0",
+   "root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate",
+   "artifact": "ct2-int8"
+  },
+  "quickmt-en-zh": {
+   "repository": "quickmt/quickmt-en-zh",
+   "revision": "f48b69e53866b717607b59f94350e9aae3ed021c",
+   "license": "CC-BY-4.0 (model); quickmt tooling Apache-2.0",
+   "root": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh",
+   "artifact": "native CT2 int8"
+  },
+  "quickmt-zh-en": {
+   "repository": "quickmt/quickmt-zh-en",
+   "revision": "c27cc8024e01a047733a1e34796e2ab19d74b237",
+   "license": "CC-BY-4.0 (model); quickmt tooling Apache-2.0",
+   "root": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en",
+   "artifact": "native CT2 int8"
+  }
+ },
+ "workers": {
+  "small100": {
+   "identity": {
+    "backend": "small100",
+    "adapter": "small100",
+    "repository": "alirezamsh/small100",
+    "revision": "8ab680e26a596d2e3d2d2d17ae0f68df1037328c",
+    "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/ct2-int8",
+    "sourceDir": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source",
+    "computeType": "int8",
+    "threads": 4,
+    "beam": 1,
+    "maxDecodingLength": 256,
+    "protocol": "tgt_lang encoder prefix; decoder starts from eos",
+    "license": "MIT (model card); tokenization_small100.py Apache-2.0"
+   },
+   "root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source",
+   "artifactBytes": 347675798,
+   "rootBytes": 1846430914,
+   "files": [
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/README.md",
+     "bytes": 8985,
+     "sha256": "1313919f8b0ebb17880818ccd3006040438ec6022f9a40fb9746571b11e2bd1d"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/config.json",
+     "bytes": 890,
+     "sha256": "26fd3989cea6037d432c480f5181d05c088a613394d0361edc6605a6a1058715"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/model.safetensors",
+     "bytes": 1330973772,
+     "sha256": "dd3b845a36ea4ed90437fd0b9b477e30c21f144d3658679fd5c945e3c96b0fbc"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/sentencepiece.bpe.model",
+     "bytes": 2423393,
+     "sha256": "d8f7c76ed2a5e0822be39f0a4f95a55eb19c78f4593ce609e2edbc2aea4d380a"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/special_tokens_map.json",
+     "bytes": 1559,
+     "sha256": "009ea667e0ca903c10dac22cf7ae3a3a0b173ff33f8c64154fddd8c043805622"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/tokenization_small100.py",
+     "bytes": 16019,
+     "sha256": "73c8d2405e9c588582434c9f91327127faf133b9f915b203ed07ba4cd0ca9c92"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/tokenizer_config.json",
+     "bytes": 1867,
+     "sha256": "d5a67f279887133e8eb8b9749fd1b6b5831bb1a040fcd6ac820296041f303ba2"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source/vocab.json",
+     "bytes": 3708092,
+     "sha256": "b6e77e474aeea8f441363aca7614317c06381f3eacfe10fb9856d5081d1074cc"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/ct2-int8/config.json",
+     "bytes": 223,
+     "sha256": "8f6496adfc930cbfecbe8281112197705c488fab47d34b4829b06d7f478909af"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/ct2-int8/model.bin",
+     "bytes": 338727246,
+     "sha256": "61c76b8585a63bb129d539345ea8198a0cd76bcd2e2576ab37e16ea919f9b678"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/ct2-int8/shared_vocabulary.json",
+     "bytes": 2796509,
+     "sha256": "7eb5d0ff184c6095c7c10f9911c0aea492250abd12854f9c3d787c64b1c6397e"
+    }
+   ],
+   "versions": {
+    "ctranslate2": "4.6.0",
+    "sentencepiece": "0.2.0",
+    "transformers": "4.44.2"
+   }
+  },
+  "quickmt-en-zh": {
+   "identity": {
+    "backend": "quickmt",
+    "adapter": "quickmt",
+    "model": "quickmt-en-zh",
+    "direction": "en-zh",
+    "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh",
+    "computeType": "int8",
+    "threads": 4,
+    "beam": 1,
+    "maxDecodingLength": 256,
+    "protocol": "src spm + </s>; tgt spm decode",
+    "repository": "quickmt/quickmt-en-zh",
+    "revision": "f48b69e53866b717607b59f94350e9aae3ed021c",
+    "license": "CC-BY-4.0 (model); quickmt tooling Apache-2.0"
+   },
+   "root": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh",
+   "artifactBytes": 412640707,
+   "rootBytes": 412644571,
+   "files": [
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/README.md",
+     "bytes": 3864,
+     "sha256": "67d76ab2546bfbd92b59816725786ae4fb905c8d3dc2ba0acdf9aaaf987bb9d5"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/config.json",
+     "bytes": 223,
+     "sha256": "66edc5d58ceb812a41b4b784497001f815c35400884f40984b19de29e1bc3d69"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/model.bin",
+     "bytes": 409972810,
+     "sha256": "433e7c41b63223f2d4600c740ce2a00a1bbe6dba1190a5fc10e8cc245e2ef387"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/source_vocabulary.json",
+     "bytes": 542122,
+     "sha256": "3c0b368639ef67a374f38e572fe5a0cb001fc0ec99f16787065258be59179a10"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/src.spm.model",
+     "bytes": 800955,
+     "sha256": "c373f1d78753313b0dbc337058bf8450e1fdd6fe662a49e0941affce44ec14c5"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/target_vocabulary.json",
+     "bytes": 590619,
+     "sha256": "a3ef04026e4342b7ccc88dececdcdddbca0835b087ac2e7a9a54b08c01ff6d9f"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-en-zh/tgt.spm.model",
+     "bytes": 733978,
+     "sha256": "23d03d562fc3f8fe57e497dac0ece4827c254675a80c103fc4bb4040638ceb67"
+    }
+   ],
+   "versions": {
+    "ctranslate2": "4.6.0",
+    "sentencepiece": "0.2.0"
+   }
+  },
+  "quickmt-zh-en": {
+   "identity": {
+    "backend": "quickmt",
+    "adapter": "quickmt",
+    "model": "quickmt-zh-en",
+    "direction": "zh-en",
+    "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en",
+    "computeType": "int8",
+    "threads": 4,
+    "beam": 1,
+    "maxDecodingLength": 256,
+    "protocol": "src spm + </s>; tgt spm decode",
+    "repository": "quickmt/quickmt-zh-en",
+    "revision": "c27cc8024e01a047733a1e34796e2ab19d74b237",
+    "license": "CC-BY-4.0 (model); quickmt tooling Apache-2.0"
+   },
+   "root": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en",
+   "artifactBytes": 409701393,
+   "rootBytes": 409706714,
+   "files": [
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/README.md",
+     "bytes": 5321,
+     "sha256": "39f59cf36cffa070245974275247a036efdf432cfd0a21a656dba88c53c392cc"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/config.json",
+     "bytes": 223,
+     "sha256": "66edc5d58ceb812a41b4b784497001f815c35400884f40984b19de29e1bc3d69"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/model.bin",
+     "bytes": 407101843,
+     "sha256": "e7cac9c2bc585e476d8fe47af11ed76723d4b5cf69ccef8f5ff821fb3ec05000"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/source_vocabulary.json",
+     "bytes": 554957,
+     "sha256": "f535f57bbdb306027e9ebbe8d8a41a9f9d3b9465279c903b42de7e50186ad522"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/src.spm.model",
+     "bytes": 720056,
+     "sha256": "56159dc3a8607805f0e3f2cf4c91f37ee221e91fb824ebb362622d22185872cb"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/target_vocabulary.json",
+     "bytes": 532214,
+     "sha256": "578cfc6b44f8e22a8556a19487adbc5b3935ecfaad310bc2dd79ad2b93c5b9f3"
+    },
+    {
+     "path": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed/quickmt-zh-en/tgt.spm.model",
+     "bytes": 792100,
+     "sha256": "c23dc1aa66b7b98263da867137a7eb41d5e4573984fb100c0b295f3010381823"
+    }
+   ],
+   "versions": {
+    "ctranslate2": "4.6.0",
+    "sentencepiece": "0.2.0"
+   }
+  }
+ },
+ "totalArtifactBytes": 1170017898
+}

@@ -1,0 +1,46 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T013119Z",
+ "parameters": {
+  "backends": [
+   "small100"
+  ],
+  "directions": [
+   "en-ja",
+   "ja-en",
+   "en-ko",
+   "ko-en",
+   "en-es",
+   "es-en"
+  ],
+  "cases": "language",
+  "rounds": 5,
+  "threads": 2,
+  "computeType": "int8",
+  "beam": 1,
+  "maxDecodingLength": 256,
+  "workerPython": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/venv-ct2/bin/python",
+  "small100Root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate",
+  "quickmtRoot": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed",
+  "hardeningDylib": "/Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib",
+  "languageProbes": "run"
+ },
+ "userBlindTest": "not-run",
+ "agentSemanticReview": "pending",
+ "thresholds": {
+  "usableRate": 0.95,
+  "shortExpressionP95Ms": 500,
+  "shortSentenceP95Ms": 2000
+ },
+ "backends": {
+  "small100": {
+   "directions": {},
+   "risk": [],
+   "reviewIndex": [],
+   "gate": {
+    "verdict": "not-applicable",
+    "note": "质量门槛只定义于中英方向；本运行是未来语言延迟探针。"
+   }
+  }
+ }
+}

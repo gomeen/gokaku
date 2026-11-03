@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "notes": "未来语言扩展探针：每方向 4 条（词、短语、短句、受保护文本），只用于延迟与资源可行性；没有人工参考，不报告语义质量分数。当前版本范围仍是中英，本文件不表示这些语言已交付。",
+  "cases": [
+    {"id": "en-ja-word", "direction": "en-ja", "kind": "word", "source": "meeting"},
+    {"id": "en-ja-phrase", "direction": "en-ja", "kind": "phrase", "source": "good morning"},
+    {"id": "en-ja-sentence", "direction": "en-ja", "kind": "sentence", "source": "I have a meeting tomorrow."},
+    {"id": "en-ja-protected", "direction": "en-ja", "kind": "protected", "source": "Open https://example.com/a?x=1."},
+    {"id": "ja-en-word", "direction": "ja-en", "kind": "word", "source": "会議"},
+    {"id": "ja-en-phrase", "direction": "ja-en", "kind": "phrase", "source": "おはよう"},
+    {"id": "ja-en-sentence", "direction": "ja-en", "kind": "sentence", "source": "明日会議があります。"},
+    {"id": "ja-en-protected", "direction": "ja-en", "kind": "protected", "source": "https://example.com/a?x=1 を開いてください。"},
+    {"id": "en-ko-word", "direction": "en-ko", "kind": "word", "source": "meeting"},
+    {"id": "en-ko-phrase", "direction": "en-ko", "kind": "phrase", "source": "good morning"},
+    {"id": "en-ko-sentence", "direction": "en-ko", "kind": "sentence", "source": "I have a meeting tomorrow."},
+    {"id": "en-ko-protected", "direction": "en-ko", "kind": "protected", "source": "Open https://example.com/a?x=1."},
+    {"id": "ko-en-word", "direction": "ko-en", "kind": "word", "source": "회의"},
+    {"id": "ko-en-phrase", "direction": "ko-en", "kind": "phrase", "source": "좋은 아침"},
+    {"id": "ko-en-sentence", "direction": "ko-en", "kind": "sentence", "source": "내일 회의가 있습니다."},
+    {"id": "ko-en-protected", "direction": "ko-en", "kind": "protected", "source": "https://example.com/a?x=1 을 여세요."},
+    {"id": "en-es-word", "direction": "en-es", "kind": "word", "source": "meeting"},
+    {"id": "en-es-phrase", "direction": "en-es", "kind": "phrase", "source": "good morning"},
+    {"id": "en-es-sentence", "direction": "en-es", "kind": "sentence", "source": "I have a meeting tomorrow."},
+    {"id": "en-es-protected", "direction": "en-es", "kind": "protected", "source": "Open https://example.com/a?x=1."},
+    {"id": "es-en-word", "direction": "es-en", "kind": "word", "source": "reunión"},
+    {"id": "es-en-phrase", "direction": "es-en", "kind": "phrase", "source": "buenos días"},
+    {"id": "es-en-sentence", "direction": "es-en", "kind": "sentence", "source": "Tengo una reunión mañana."},
+    {"id": "es-en-protected", "direction": "es-en", "kind": "protected", "source": "Abra https://example.com/a?x=1."}
+  ]
+}

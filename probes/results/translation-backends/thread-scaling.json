@@ -1,0 +1,102 @@
+{
+ "schemaVersion": 1,
+ "scope": "线程扩展只在速度子集（每方向 4 条、5 轮）上测；全量正式比较仍用 2 线程。",
+ "threads": {
+  "1": {
+   "small100": {
+    "zh-en": {
+     "shortExpressionP50Ms": 173.54,
+     "shortExpressionP95Ms": 198.11,
+     "shortSentenceP50Ms": 313.27,
+     "shortSentenceP95Ms": 354.88
+    },
+    "en-zh": {
+     "shortExpressionP50Ms": 179.61,
+     "shortExpressionP95Ms": 235.29,
+     "shortSentenceP50Ms": 287.25,
+     "shortSentenceP95Ms": 368.15
+    }
+   },
+   "quickmt": {
+    "zh-en": {
+     "shortExpressionP50Ms": 52.57,
+     "shortExpressionP95Ms": 56.91,
+     "shortSentenceP50Ms": 77.22,
+     "shortSentenceP95Ms": 99.39
+    },
+    "en-zh": {
+     "shortExpressionP50Ms": 68.56,
+     "shortExpressionP95Ms": 137.33,
+     "shortSentenceP50Ms": 87.66,
+     "shortSentenceP95Ms": 133.13
+    }
+   }
+  },
+  "2": {
+   "small100": {
+    "zh-en": {
+     "shortExpressionP50Ms": 113.7,
+     "shortExpressionP95Ms": 134.37,
+     "shortSentenceP50Ms": 218.7,
+     "shortSentenceP95Ms": 300.74
+    },
+    "en-zh": {
+     "shortExpressionP50Ms": 137.38,
+     "shortExpressionP95Ms": 180.05,
+     "shortSentenceP50Ms": 200.56,
+     "shortSentenceP95Ms": 281.34
+    }
+   },
+   "quickmt": {
+    "zh-en": {
+     "shortExpressionP50Ms": 36.57,
+     "shortExpressionP95Ms": 43.4,
+     "shortSentenceP50Ms": 53.76,
+     "shortSentenceP95Ms": 68.92
+    },
+    "en-zh": {
+     "shortExpressionP50Ms": 47.17,
+     "shortExpressionP95Ms": 83.57,
+     "shortSentenceP50Ms": 59.3,
+     "shortSentenceP95Ms": 89.69
+    }
+   }
+  },
+  "4": {
+   "small100": {
+    "zh-en": {
+     "shortExpressionP50Ms": 111.26,
+     "shortExpressionP95Ms": 176.96,
+     "shortSentenceP50Ms": 201.87,
+     "shortSentenceP95Ms": 357.58
+    },
+    "en-zh": {
+     "shortExpressionP50Ms": 127.03,
+     "shortExpressionP95Ms": 191.2,
+     "shortSentenceP50Ms": 185.86,
+     "shortSentenceP95Ms": 326.37
+    }
+   },
+   "quickmt": {
+    "zh-en": {
+     "shortExpressionP50Ms": 36.66,
+     "shortExpressionP95Ms": 61.86,
+     "shortSentenceP50Ms": 55.27,
+     "shortSentenceP95Ms": 95.91
+    },
+    "en-zh": {
+     "shortExpressionP50Ms": 70.2,
+     "shortExpressionP95Ms": 135.6,
+     "shortSentenceP50Ms": 68.61,
+     "shortSentenceP95Ms": 118.67
+    }
+   }
+  }
+ },
+ "note": "2 线程在短表达上优于 1 线程，4 线程没有稳定收益；本机后台负载未停止，线程排名是探索性结果，不是全局最优。",
+ "sourceRuns": {
+  "1": "probes/results/translation-backends-t1",
+  "2": "probes/results/translation-backends",
+  "4": "probes/results/translation-backends-t4"
+ }
+}

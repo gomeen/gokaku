@@ -1,0 +1,110 @@
+{
+ "schemaVersion": 1,
+ "scope": "当前版本范围仅中英；本文件是未来语言扩展的成本与可行性证据，不代表这些语言已交付。",
+ "measurementStatus": "small100 六方向已实测（每方向4条、5轮、热态）；quickmt 扩展方向未下载未实测；MADLAD-400 未下载未实测。",
+ "small100": {
+  "modelCount": 1,
+  "artifactBytes": 347675798,
+  "artifactNote": "单个 CT2 INT8 模型 + 分词资源；同一权重覆盖 100 语言。",
+  "measuredDirections": {
+   "ko-en": {
+    "shortExpressionP50Ms": 96.85,
+    "shortExpressionP95Ms": 112.25,
+    "shortSentenceP50Ms": 192.9,
+    "shortSentenceP95Ms": 404.62,
+    "casesPerDirection": 4,
+    "rounds": 5,
+    "note": "仅延迟/资源探针；没有人工参考，不报告语义质量分数。"
+   },
+   "en-es": {
+    "shortExpressionP50Ms": 126.01,
+    "shortExpressionP95Ms": 139.44,
+    "shortSentenceP50Ms": 248.41,
+    "shortSentenceP95Ms": 371.93,
+    "casesPerDirection": 4,
+    "rounds": 5,
+    "note": "仅延迟/资源探针；没有人工参考，不报告语义质量分数。"
+   },
+   "es-en": {
+    "shortExpressionP50Ms": 101.85,
+    "shortExpressionP95Ms": 108.27,
+    "shortSentenceP50Ms": 240.03,
+    "shortSentenceP95Ms": 371.58,
+    "casesPerDirection": 4,
+    "rounds": 5,
+    "note": "仅延迟/资源探针；没有人工参考，不报告语义质量分数。"
+   },
+   "ja-en": {
+    "shortExpressionP50Ms": 99.17,
+    "shortExpressionP95Ms": 117.49,
+    "shortSentenceP50Ms": 221.28,
+    "shortSentenceP95Ms": 401.51,
+    "casesPerDirection": 4,
+    "rounds": 5,
+    "note": "仅延迟/资源探针；没有人工参考，不报告语义质量分数。"
+   },
+   "en-ja": {
+    "shortExpressionP50Ms": 132.44,
+    "shortExpressionP95Ms": 208.6,
+    "shortSentenceP50Ms": 227.64,
+    "shortSentenceP95Ms": 426.0,
+    "casesPerDirection": 4,
+    "rounds": 5,
+    "note": "仅延迟/资源探针；没有人工参考，不报告语义质量分数。"
+   },
+   "en-ko": {
+    "shortExpressionP50Ms": 88.29,
+    "shortExpressionP95Ms": 108.96,
+    "shortSentenceP50Ms": 260.03,
+    "shortSentenceP95Ms": 450.64,
+    "casesPerDirection": 4,
+    "rounds": 5,
+    "note": "仅延迟/资源探针；没有人工参考，不报告语义质量分数。"
+   }
+  }
+ },
+ "quickmt": {
+  "modelsPerPair": 2,
+  "pairsPublished": 29,
+  "representativeModels": [
+   {
+    "repository": "quickmt/quickmt-en-ja",
+    "revision": "c09e98b8438a239a8210060114cea19c426c0559",
+    "modelBinBytes": 401699775
+   },
+   {
+    "repository": "quickmt/quickmt-ja-en",
+    "revision": "e9ae594ff322d95254d730867c6166b25fd2c704",
+    "modelBinBytes": 407101843
+   },
+   {
+    "repository": "quickmt/quickmt-en-ko",
+    "revision": "a32fa395ebc7b722a0c021e213ca5fec4065c5df",
+    "modelBinBytes": 360796810
+   },
+   {
+    "repository": "quickmt/quickmt-ko-en",
+    "revision": "5d6841fc859fb40acbf9b90837b72b9becd3b577",
+    "modelBinBytes": 360796810
+   },
+   {
+    "repository": "quickmt/quickmt-en-es",
+    "revision": "430b78899a30bf5a867dffd407c64b028bbaebf4",
+    "modelBinBytes": 401699775
+   },
+   {
+    "repository": "quickmt/quickmt-es-en",
+    "revision": "56dc7a38e1929685ce12302f75cbeb153fe32709",
+    "modelBinBytes": 401699775
+   }
+  ],
+  "representativeModelBinBytes": 2333794788,
+  "estimateAllPairsModelBinBytes": null,
+  "note": "以上为 HF API 文件大小（不是下载后实测运行内存）；每个方向独立 spm＋model，切换方向需另一份模型常驻或重新加载。三对代表语言需约 2.33GB model.bin，29 对全装会线性增长。"
+ },
+ "MADLAD-400-3B-MT": {
+  "status": "not-run",
+  "reason": "当前版本范围只有中英；3B 模型需要额外下载/转换，且延迟贴/超预算的证据来自调研而非本机实测。按计划停止规则留作后续多语言版本预研。"
+ },
+ "conclusion": "quickmt 的扩展成本是每个语言对两份方向模型（代表三对约2.33GB，全部29对线性增长）；small100 一个 331.6MiB 模型覆盖多语言，但每个语言的质量和延迟必须逐对验证。当前中英版本不应为了未来语言牺牲已验证的主线，也不应把 small100 的 100 语言支持当成质量证明。"
+}

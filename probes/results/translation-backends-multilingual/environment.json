@@ -1,0 +1,33 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T013119Z",
+ "host": {
+  "platform": "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+  "machine": "x86_64",
+  "processor": "Intel(R) Core(TM) i9-9880H CPU @ 2.30GHz",
+  "macos": "26.7.2",
+  "ncpu": 16
+ },
+ "parentPython": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+ "run": {
+  "platform": "darwin",
+  "machine": "x86_64",
+  "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "system": {
+   "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.34 4.46 4.02",
+   "loadAverage": [
+    4.33935546875,
+    4.4609375,
+    4.0185546875
+   ],
+   "topCpu": "21388  23.6 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n45842  23.0 pi\n 2649  15.0 pi\n76383  14.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n  196  11.0 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76108   8.9 /Applications/Orca.app/Contents/MacOS/Orca\n76153   8.8 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n 2235   5.5 pi"
+  }
+ },
+ "workerVersions": {
+  "small100": {
+   "ctranslate2": "4.6.0",
+   "sentencepiece": "0.2.0",
+   "transformers": "4.44.2"
+  }
+ }
+}

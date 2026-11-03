@@ -63,7 +63,7 @@ C ABI 使用明确的整数、UTF-8 及长度；DLL 内部申请的内存由同�
 
 - Apple Translation 退出正式交付链路；已有探针保留为历史证据，设置页不再把安装 Apple 语言资源作为学习功能前置。
 - **主路线（2026-11-02 裁决）：`alirezamsh/small100`（revision `8ab680e26a596d2e3d2d2d17ae0f68df1037328c`）＋翻译加固层解堵学习模式。** 处置口径：对固定风险集逐条「修正或安全拦截」均算已处置——回退为显示原文不译、错误译文不进入默认候选即达标；手段与证据见[模型解堵调研](research-translation-model-unblock.md)§四。
-- 新候选验证流程（2026-11-02 解冻「不扩模型名单」）：宽松许可（MIT／Apache／BSD／MPL／CC-BY）优先，CC-BY-NC 仅作评测对照、不进生产；`quickmt/quickmt-en-zh`／`quickmt-zh-en` 为首选验证项（Mac 门槛机速度实测达标，约为预算 1/6–1/8，见[探针报告](../probes/results/quickmt-speed/report.md)），Mozilla zh→en 59M 次之，MADLAD-400 3B 降为可选对照；decoder-only LLM 与 llama.cpp 出局（死守 500ms 预算，不松动、不分层）；OPUS 旧模型维持不恢复。任何替换须经同一自建短文本评测集＋固定风险集语义审阅＋用户盲测，保持两端同一组模型同参数，替换后加固层继续生效。
+- 新候选验证流程（2026-11-02 解冻「不扩模型名单」）：宽松许可（MIT／Apache／BSD／MPL／CC-BY）优先，CC-BY-NC 仅作评测对照、不进生产；`quickmt/quickmt-en-zh`／`quickmt-zh-en` 为首选验证项（统一复测速度领先，见[决定](../probes/results/translation-backends/decision.md)；但加固后 en→zh 可用率 77.67%、固定风险 12 条未处置，暂不替换），Mozilla zh→en 59M 次之，MADLAD-400 3B 降为可选对照；decoder-only LLM 与 llama.cpp 出局（死守 500ms 预算，不松动、不分层）；OPUS 旧模型维持不恢复。任何替换须经同一自建短文本评测集＋固定风险集语义审阅＋用户盲测，保持两端同一组模型同参数，替换后加固层继续生效。
 - 两端采用相同 CT2 INT8 产物、分词实现、词表、语言标记和 greedy 参数；初始 batch=1、2 线程。正确使用各模型自身的输入协议（small100 目标语言前缀、quickmt spm＋`</s>`），不混用。
 - 模型转换使用隔离环境；生产翻译辅助进程采用 CTranslate2 和 SentencePiece 的本地实现，Windows 按其支持的 MSVC 工具链构建，避免把 PyTorch／转换环境装入输入法进程。
 - 使用同一权重不保证不同 CPU 后端逐字输出完全一致：分别运行同一验收集，比较差异并审阅语义；不通过强制回退或隐藏差异制造一致。
@@ -174,10 +174,10 @@ Mac 输入源使用一个隔离翻译进程；Windows 多个宿主中的 TSF 实
 
 | 阶段 | 状态 | 证据／缺口 |
 | --- | --- | --- |
-| G0 Windows 环境＋模型门槛 | 阻塞／Mac 部分完成 | Windows 桌面环境未提供，Windows libime／C ABI 烟测待环境；Mac small100 技术可行（分词／INT8 转换／速度／离线），**质量门槛不通过**（固定风险集存在未处置意义破坏），双端学习交付保持阻塞，见验收记录与[语义审阅](../probes/results/small100-gate/semantic-review.md)。2026-11-02 裁决解堵路径：加固层处置口径＋宽松许可候选验证流程；quickmt 双向速度实测达标（质量待门槛），见[模型解堵调研](research-translation-model-unblock.md)§六／§七 |
+| G0 Windows 环境＋模型门槛 | 阻塞／Mac 部分完成 | Windows 桌面环境未提供，Windows libime／C ABI 烟测待环境；Mac small100 技术可行（分词／INT8 转换／速度／离线），**质量门槛不通过**（固定风险集存在未处置意义破坏），双端学习交付保持阻塞，见验收记录与[语义审阅](../probes/results/small100-gate/semantic-review.md)。2026-11-02 裁决解堵路径：加固层处置口径＋宽松许可候选验证流程；2026-11-03 统一复测 quickmt 双向速度领先但质量门槛未过（固定风险 12 条、en→zh 可用率 77.67%），暂不替换，见[决定](../probes/results/translation-backends/decision.md)与[模型解堵调研](research-translation-model-unblock.md)§七 |
 | G1 共享核心迁移 | 进行中（普通模式已迁入，学习规则未迁） | 最小共享接口（`native/GogakuCore` C ABI）已建并升到 v2；普通模式行为规格已全部迁入共享 C++ 核心（含自定义词语、英文候选、调频、按应用默认英文，见下行“本阶段”行），Mac Swift 已改为薄调用。共同事件轨迹向量仍只覆盖普通模式；学习模式组合／翻译调度／记录规则仍在 Swift，未迁移；Windows 侧未验证 |
 | G2 双端普通输入闭环 | Mac 部分有历史证据 | 18 项 AppKit／Orca 检查通过；完整宿主矩阵未过；Windows TSF 未开始 |
-| G3 模型与学习交互 | 阻塞 | Mac 模型质量门槛不通过，生产学习辅助保持关闭 |
+| G3 模型与学习交互 | 阻塞 | Mac 模型质量门槛不通过（2026-11-03 统一复测：small100 5 条、quickmt 12 条固定风险未处置，见[决定](../probes/results/translation-backends/decision.md)），生产学习辅助保持关闭 |
 | G4 记录设置安装与最终验收 | 未通过 | Mac 安装恢复脚本已有；双端验收矩阵未执行 |
 | 本阶段：普通模式规格对齐与试用前收尾（G1 子阶段） | 性能未通过，停止交付试用 | 修复已以 Release 构建安装并核对哈希；核心 ctest 4/4、Swift 49 项、渲染 51 项、40 轮可靠性通过，质量 109/120 与 112/120 未下降。最终 10,035 事件 IMK 主线程 p95 10.35ms／p99 15.38ms，超过 5ms／10ms；候选首次显示、AppKit 收字与回调内隐藏通过。最终全宿主连续两轮、十万序列插桩、内存／两小时稳定性／冷启动未完成。旧 16k 事件 0.4µs 与“条件性达标”作废，见[收尾复测报告](validation/pre-user-test.md)。Windows 未开始 |
 | 工程化与版本管理（2026-11-02） | 工程侧阻塞清零；验收门槛未变 | Git 基线＋单一版本来源（`version.json`，[版本管理](versioning.md)）＋统一验证入口 `scripts/verify.py`（fast/release/host）。修复 Shift 提交不更新最近上屏字符（Terminal 半角句号根因，事件轨迹 265 断言）；释义精简落地（[审阅](validation/gloss-simplification-review.md)）。工程检查与阻塞分列见[工程化检查](validation/engineering-readiness.md)。性能与宿主矩阵门槛未变 |

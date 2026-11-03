@@ -1,0 +1,508 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T013119Z",
+ "startedAt": "2026-11-03T01:31:19.745507+00:00",
+ "parameters": {
+  "backends": [
+   "small100"
+  ],
+  "directions": [
+   "en-ja",
+   "ja-en",
+   "en-ko",
+   "ko-en",
+   "en-es",
+   "es-en"
+  ],
+  "cases": "language",
+  "rounds": 5,
+  "threads": 2,
+  "computeType": "int8",
+  "beam": 1,
+  "maxDecodingLength": 256,
+  "workerPython": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/venv-ct2/bin/python",
+  "small100Root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate",
+  "quickmtRoot": "/Users/gomeen/Library/Caches/Gogaku/models/quickmt-speed",
+  "hardeningDylib": "/Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib",
+  "languageProbes": "run"
+ },
+ "environment": {
+  "platform": "darwin",
+  "machine": "x86_64",
+  "python": "3.15.2 (main, Oct 25 2026, 16:57:51) [Clang 21.0.0 (clang-2100.1.1.101)]",
+  "system": {
+   "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.34 4.46 4.02",
+   "loadAverage": [
+    4.33935546875,
+    4.4609375,
+    4.0185546875
+   ],
+   "topCpu": "21388  23.6 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n45842  23.0 pi\n 2649  15.0 pi\n76383  14.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n  196  11.0 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76108   8.9 /Applications/Orca.app/Contents/MacOS/Orca\n76153   8.8 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n 2235   5.5 pi"
+  }
+ },
+ "workers": {
+  "small100": {
+   "spec": {
+    "backend": "small100",
+    "direction": "both",
+    "root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate"
+   },
+   "pin": {
+    "repository": "alirezamsh/small100",
+    "revision": "8ab680e26a596d2e3d2d2d17ae0f68df1037328c",
+    "license": "MIT (model card); tokenization_small100.py Apache-2.0",
+    "root": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate",
+    "artifact": "ct2-int8"
+   },
+   "ready": {
+    "event": "ready",
+    "pid": 30398,
+    "backend": "small100",
+    "direction": "both",
+    "identity": {
+     "backend": "small100",
+     "adapter": "small100",
+     "repository": "alirezamsh/small100",
+     "revision": "8ab680e26a596d2e3d2d2d17ae0f68df1037328c",
+     "modelDir": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/ct2-int8",
+     "sourceDir": "/Users/gomeen/Library/Caches/Gogaku/models/small100-gate/source",
+     "computeType": "int8",
+     "threads": 2,
+     "beam": 1,
+     "maxDecodingLength": 256,
+     "protocol": "tgt_lang encoder prefix; decoder starts from eos"
+    },
+    "versions": {
+     "ctranslate2": "4.6.0",
+     "sentencepiece": "0.2.0",
+     "transformers": "4.44.2"
+    },
+    "modelLoadMs": 1884.729846,
+    "processStartToReadyMs": 1884.733598,
+    "peakRssBytes": 555982848,
+    "parentReadyMs": 1946.0610789828934
+   },
+   "stderrLog": "/Users/gomeen/code/gomeen/gogaku/probes/results/translation-backends-multilingual/worker-small100.stderr.log",
+   "stoppedPeakRssBytes": 555982848
+  }
+ },
+ "caseCounts": {
+  "language": 24
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "startedAt": "2026-11-03T01:31:25.768931+00:00",
+   "finishedAt": "2026-11-03T01:31:30.875495+00:00",
+   "rows": 24,
+   "errors": 0,
+   "systemBefore": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.55 4.50 4.04",
+    "loadAverage": [
+     4.55224609375,
+     4.5029296875,
+     4.03564453125
+    ],
+    "topCpu": "30398 142.2 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n21388  25.5 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n45842  19.9 pi\n  196  12.4 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  10.4 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153   9.5 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n  291   7.0 /Applications/ToDesk.app/Contents/MacOS/ToDesk_Service\n76108   6.3 /Applications/Orca.app/Contents/MacOS/Orca"
+   },
+   "systemAfter": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.43 4.48 4.03",
+    "loadAverage": [
+     4.427734375,
+     4.4775390625,
+     4.029296875
+    ],
+    "topCpu": "30398 182.0 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n45842  25.5 pi\n21388  23.7 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  15.7 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  13.2 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153  12.1 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n  140  12.1 /usr/libexec/dasd\n  291   9.3 /Applications/ToDesk.app/Contents/MacOS/ToDesk_Service"
+   }
+  },
+  {
+   "round": 2,
+   "startedAt": "2026-11-03T01:31:30.984866+00:00",
+   "finishedAt": "2026-11-03T01:31:36.045377+00:00",
+   "rows": 24,
+   "errors": 0,
+   "systemBefore": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.43 4.48 4.03",
+    "loadAverage": [
+     4.427734375,
+     4.4775390625,
+     4.029296875
+    ],
+    "topCpu": "30398 160.6 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n45842  27.9 pi\n21388  25.2 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  14.8 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  11.6 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153  11.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n  140   9.4 /usr/libexec/dasd\n  291   9.1 /Applications/ToDesk.app/Contents/MacOS/ToDesk_Service"
+   },
+   "systemAfter": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.31 4.45 4.02",
+    "loadAverage": [
+     4.31298828125,
+     4.45263671875,
+     4.02294921875
+    ],
+    "topCpu": "30398 180.0 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n45842  23.7 pi\n21388  23.1 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  15.5 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n  291  14.1 /Applications/ToDesk.app/Contents/MacOS/ToDesk_Service\n76383  12.8 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153  10.8 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n  215  10.2 /usr/libexec/trustd"
+   }
+  },
+  {
+   "round": 3,
+   "startedAt": "2026-11-03T01:31:36.157178+00:00",
+   "finishedAt": "2026-11-03T01:31:41.249992+00:00",
+   "rows": 24,
+   "errors": 0,
+   "systemBefore": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.31 4.45 4.02",
+    "loadAverage": [
+     4.31298828125,
+     4.45263671875,
+     4.02294921875
+    ],
+    "topCpu": "30398 180.0 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n21388  23.1 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n45842  21.7 pi\n  196  12.7 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  10.9 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153   9.0 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n  291   8.7 /Applications/ToDesk.app/Contents/MacOS/ToDesk_Service\n76108   7.3 /Applications/Orca.app/Contents/MacOS/Orca"
+   },
+   "systemAfter": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.21 4.43 4.02",
+    "loadAverage": [
+     4.20751953125,
+     4.42822265625,
+     4.0166015625
+    ],
+    "topCpu": "30398 180.9 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n19485  42.1 /usr/libexec/PerfPowerServices\n45842  34.8 pi\n21388  25.0 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  12.7 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  11.4 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153   9.5 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n76108   9.4 /Applications/Orca.app/Contents/MacOS/Orca"
+   }
+  },
+  {
+   "round": 4,
+   "startedAt": "2026-11-03T01:31:41.359900+00:00",
+   "finishedAt": "2026-11-03T01:31:46.332818+00:00",
+   "rows": 24,
+   "errors": 0,
+   "systemBefore": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.21 4.43 4.02",
+    "loadAverage": [
+     4.20751953125,
+     4.42822265625,
+     4.0166015625
+    ],
+    "topCpu": "30398 149.6 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n19485  34.8 /usr/libexec/PerfPowerServices\n45842  30.0 pi\n21388  24.5 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  12.7 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  11.7 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153   9.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n76108   7.7 /Applications/Orca.app/Contents/MacOS/Orca"
+   },
+   "systemAfter": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.19 4.42 4.02",
+    "loadAverage": [
+     4.1904296875,
+     4.4208984375,
+     4.01611328125
+    ],
+    "topCpu": "30398 184.2 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n21388  25.3 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  12.9 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  10.9 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153   8.9 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n45842   8.6 pi\n22111   6.7 /System/Library/Frameworks/WebKit.framework/Versions/A/XPCServices/com.apple.WebKit.WebContent.xpc/Contents/MacOS/com.apple.WebKit.WebContent\n 2235   6.6 pi"
+   }
+  },
+  {
+   "round": 5,
+   "startedAt": "2026-11-03T01:31:46.441859+00:00",
+   "finishedAt": "2026-11-03T01:31:51.654393+00:00",
+   "rows": 24,
+   "errors": 0,
+   "systemBefore": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 4.19 4.42 4.02",
+    "loadAverage": [
+     4.1904296875,
+     4.4208984375,
+     4.01611328125
+    ],
+    "topCpu": "30398 123.4 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n21388  24.0 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n  196  11.4 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76383  11.3 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n76153   8.8 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper\n45842   8.3 pi\n 2235   6.5 pi\n76108   5.2 /Applications/Orca.app/Contents/MacOS/Orca"
+   },
+   "systemAfter": {
+    "uptime": "9:31  up 3 days, 11:35, 8 users, load averages: 3.85 4.34 3.99",
+    "loadAverage": [
+     3.8466796875,
+     4.34033203125,
+     3.99169921875
+    ],
+    "topCpu": "30398 182.1 /Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app/Contents/MacOS/Python\n30602  45.0 /Applications/Orca.app/Contents/MacOS/Orca\n21388  25.2 /System/Library/PrivateFrameworks/PowerlogCore.framework/Versions/A/XPCServices/PerfPowerServicesSignpostReader.xpc/Contents/MacOS/PerfPowerServicesSignpostReader\n 6991  22.0 /Applications/WeChat.app/Contents/MacOS/WeChatAppEx.app/Contents/Frameworks/WeChatAppEx Framework.framework/Versions/C/Helpers/WeChatAppEx Helper (Renderer).app/Contents/MacOS/WeChatAppEx Helper (Renderer)\n 2235  19.2 pi\n76383  15.7 /Applications/Orca.app/Contents/Frameworks/Orca Helper (Renderer).app/Contents/MacOS/Orca Helper (Renderer)\n  196  15.5 /System/Library/PrivateFrameworks/SkyLight.framework/Resources/WindowServer\n76153  13.4 /Applications/Orca.app/Contents/Frameworks/Orca Helper.app/Contents/MacOS/Orca Helper"
+   }
+  }
+ ],
+ "warmup": {
+  "small100-en-ja": {
+   "ipcMs": 765.958346,
+   "rows": [
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "en-ja-word",
+     "direction": "en-ja",
+     "kind": "word",
+     "source": "meeting",
+     "output": "会議",
+     "inputTokens": 3,
+     "outputTokens": 3,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.40918856859207153,
+     "encodeMs": 0.211291,
+     "generateMs": 119.854361,
+     "decodeMs": 1.288698,
+     "totalMs": 121.35435,
+     "cpuMs": 219.61,
+     "peakRssBytes": 631980032
+    },
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "en-ja-phrase",
+     "direction": "en-ja",
+     "kind": "phrase",
+     "source": "good morning",
+     "output": "朝おはようございます。",
+     "inputTokens": 4,
+     "outputTokens": 7,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.7631571292877197,
+     "encodeMs": 0.204801,
+     "generateMs": 208.973525,
+     "decodeMs": 2.116894,
+     "totalMs": 211.29522,
+     "cpuMs": 390.389,
+     "peakRssBytes": 631980032
+    }
+   ]
+  },
+  "small100-ja-en": {
+   "ipcMs": 638.289363,
+   "rows": [
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "ja-en-word",
+     "direction": "ja-en",
+     "kind": "word",
+     "source": "会議",
+     "output": "Meeting",
+     "inputTokens": 5,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.5443524122238159,
+     "encodeMs": 0.192004,
+     "generateMs": 97.319342,
+     "decodeMs": 0.947811,
+     "totalMs": 98.459157,
+     "cpuMs": 182.85,
+     "peakRssBytes": 699904000
+    },
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "ja-en-phrase",
+     "direction": "ja-en",
+     "kind": "phrase",
+     "source": "おはよう",
+     "output": "Good morning",
+     "inputTokens": 5,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.6963404417037964,
+     "encodeMs": 0.171229,
+     "generateMs": 98.546591,
+     "decodeMs": 0.888224,
+     "totalMs": 99.606044,
+     "cpuMs": 183.446,
+     "peakRssBytes": 699904000
+    }
+   ]
+  },
+  "small100-en-ko": {
+   "ipcMs": 603.116395,
+   "rows": [
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "en-ko-word",
+     "direction": "en-ko",
+     "kind": "word",
+     "source": "meeting",
+     "output": "회의",
+     "inputTokens": 3,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.4688791334629059,
+     "encodeMs": 0.159695,
+     "generateMs": 91.604688,
+     "decodeMs": 0.865921,
+     "totalMs": 92.630304,
+     "cpuMs": 170.551,
+     "peakRssBytes": 751243264
+    },
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "en-ko-phrase",
+     "direction": "en-ko",
+     "kind": "phrase",
+     "source": "good morning",
+     "output": "아침",
+     "inputTokens": 4,
+     "outputTokens": 1,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -1.1796351671218872,
+     "encodeMs": 0.194522,
+     "generateMs": 75.581623,
+     "decodeMs": 0.620511,
+     "totalMs": 76.396656,
+     "cpuMs": 142.064,
+     "peakRssBytes": 751243264
+    }
+   ]
+  },
+  "small100-ko-en": {
+   "ipcMs": 668.689479,
+   "rows": [
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "ko-en-word",
+     "direction": "ko-en",
+     "kind": "word",
+     "source": "회의",
+     "output": "Meeting",
+     "inputTokens": 4,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.5545831918716431,
+     "encodeMs": 0.184842,
+     "generateMs": 109.528996,
+     "decodeMs": 0.932257,
+     "totalMs": 110.646095,
+     "cpuMs": 203.147,
+     "peakRssBytes": 802512896
+    },
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "ko-en-phrase",
+     "direction": "ko-en",
+     "kind": "phrase",
+     "source": "좋은 아침",
+     "output": "Good morning",
+     "inputTokens": 4,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.49799150228500366,
+     "encodeMs": 0.186385,
+     "generateMs": 109.477893,
+     "decodeMs": 0.862311,
+     "totalMs": 110.526589,
+     "cpuMs": 203.798,
+     "peakRssBytes": 802512896
+    }
+   ]
+  },
+  "small100-en-es": {
+   "ipcMs": 667.294854,
+   "rows": [
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "en-es-word",
+     "direction": "en-es",
+     "kind": "word",
+     "source": "meeting",
+     "output": "Reunión",
+     "inputTokens": 3,
+     "outputTokens": 3,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.3843076825141907,
+     "encodeMs": 0.158389,
+     "generateMs": 117.178719,
+     "decodeMs": 1.152349,
+     "totalMs": 118.489457,
+     "cpuMs": 219.85,
+     "peakRssBytes": 852758528
+    },
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "en-es-phrase",
+     "direction": "en-es",
+     "kind": "phrase",
+     "source": "good morning",
+     "output": "Buena mañana",
+     "inputTokens": 4,
+     "outputTokens": 3,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.6734541654586792,
+     "encodeMs": 0.193021,
+     "generateMs": 113.583119,
+     "decodeMs": 1.094176,
+     "totalMs": 114.870316,
+     "cpuMs": 211.235,
+     "peakRssBytes": 852758528
+    }
+   ]
+  },
+  "small100-es-en": {
+   "ipcMs": 628.719744,
+   "rows": [
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "es-en-word",
+     "direction": "es-en",
+     "kind": "word",
+     "source": "reunión",
+     "output": "Meeting",
+     "inputTokens": 3,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -0.4440145194530487,
+     "encodeMs": 0.167597,
+     "generateMs": 89.447557,
+     "decodeMs": 0.811877,
+     "totalMs": 90.427031,
+     "cpuMs": 168.019,
+     "peakRssBytes": 903520256
+    },
+    {
+     "event": "result",
+     "phase": "warmup",
+     "id": "es-en-phrase",
+     "direction": "es-en",
+     "kind": "phrase",
+     "source": "buenos días",
+     "output": "Good day",
+     "inputTokens": 5,
+     "outputTokens": 2,
+     "sourceUnknownTokens": 0,
+     "truncated": false,
+     "generated": true,
+     "score": -1.036186695098877,
+     "encodeMs": 0.197868,
+     "generateMs": 103.813423,
+     "decodeMs": 0.858863,
+     "totalMs": 104.870154,
+     "cpuMs": 194.135,
+     "peakRssBytes": 903520256
+    }
+   ]
+  }
+ },
+ "finishedAt": "2026-11-03T01:31:52.384400+00:00",
+ "requestCount": 120,
+ "totalRequestsPerWorker": {
+  "small100": 126
+ }
+}

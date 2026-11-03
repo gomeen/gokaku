@@ -142,3 +142,30 @@ swift probes/render-hud-paths.swift --output probes/results/icon-compare
 ```
 
 两个探针都不注册、不启用、不切换输入源、不写系统目录。`render-hud-paths` 的 C 路径（PDFKit 缩略）非确定性，哈希会漂移，以占比结论为准。
+
+## 统一翻译后端复测（2026-11-03）
+
+同一驱动比较 small100 与 quickmt 的模型层、辅助进程层和加固层；结论与完整产物见 [统一实测决定](results/translation-backends/decision.md)。前提：small100 门槛缓存、quickmt 本地模型、无 PyTorch 的 `venv-ct2`，以及已构建的 `.build/core/libgogaku_core.dylib`。
+
+```sh
+python3 probes/benchmark-translation-backends.py \
+  --backends small100 quickmt --directions en-zh,zh-en --cases all --rounds 5 \
+  --output-dir probes/results/translation-backends --force
+python3 scripts/summarize-translation-backends.py \
+  --run-dir probes/results/translation-backends \
+  --review probes/results/translation-backends/semantic-review.json
+```
+
+`--cases all` 组合 32 条风险集、200 条保留集和 8 条速度句；每轮 480 条，正式运行要求至少 5 轮。`semantic-review.json` 是本次输出的逐条审阅；重跑后输出若变化需重新审阅，不能把旧审阅硬套到新结果。worker 每请求独立 JSONL 往返，父进程分别记录模型耗时、IPC 往返和加固耗时。`requests.jsonl` 保留逐条源文哈希、token、阶段耗时和输出；`models.json` 重新计算文件 SHA256。
+
+未来语言只做延迟/资源探针，不与中英质量结论混用：
+
+```sh
+python3 probes/benchmark-translation-backends.py \
+  --backends small100 --cases language \
+  --directions en-ja,ja-en,en-ko,ko-en,en-es,es-en --rounds 5 \
+  --output-dir probes/results/translation-backends-multilingual --force
+python3 scripts/summarize-translation-backends.py --run-dir probes/results/translation-backends-multilingual
+```
+
+扩展探针每方向 4 条，没有人工参考，不报告语义质量分数；quickmt 扩展方向本轮未下载、未实测。`--allow-short-run` 只用于烟测，不能作为正式成绩。
