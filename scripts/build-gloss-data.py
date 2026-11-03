@@ -11,8 +11,13 @@
   简体键（覆盖会议→會議、银行→銀行这类常用词）。
 - 噪声义项降级：方言／语域标签（粤语、闽南、文学、幽默、粗俗等）的义项排到
   非标签义项之后；alt-of 义项整条剔除（与正文重复）。
-- character 不作词性展示：它是词条类别而非词性（char. 对用户不可读），
-  该类词条只显示释义；其他无合格词性的词条同样只显示释义。
+- 词性层（2026-11-03 用户裁决「单字也要显示词性」）：Wiktionary 字条目
+  （pos=character）与 name 等无合格词性词条不再纯释义，改用 jieba 词库
+  （MIT，348k 条、词频排序）取该字最高频词条的词性标注，映射为缩写前缀
+  （n.／v.／adj.／adv.／pron.／cl.／part. 等），每条义项带前缀。
+- 覆盖补缺（2026-11-03）：Wiktionary 缺失的单字（軍→军类软重定向无义项）
+  用 CC-CEDICT（CC BY-SA 4.0，当前 dump）的简体单字条目补义项，
+  义项按 / 分条取前 2，同标词性前缀，青简样式「n. army · n. military」。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
 - 注释清洗 v7（2026-11-03 用户裁决不显示括号）：括号内容一律移除；
@@ -27,10 +32,11 @@
 - 纯标点键（、。…）与 ideographic description 序列（⿰…）不收。
 
 运行本脚本只是生成数据文件；把 gloss.tsv 打入输入法包 EngineData 前，必须先在
-docs/third-party.md 登记来源、版本、哈希与署名义务（CC BY-SA 4.0、声明修改、
+ docs/third-party.md 登记来源、版本、哈希与署名义务（CC BY-SA 4.0、声明修改、
 不添加额外限制），并以空表运行回归确认降级路径。
 
-用法：python3 scripts/build-gloss-data.py kaikki-Chinese.jsonl.gz
+用法：python3 scripts/build-gloss-data.py kaikki-Chinese.jsonl.gz \
+        [--cedict cedict.txt.gz] [--jieba dict.txt]
 """
 import gzip
 import hashlib
@@ -46,9 +52,26 @@ POS_ABBREV = {
     "prep": "prep.", "conj": "conj.", "interj": "intj.", "particle": "part.",
     "classifier": "cl.", "num": "num.", "phrase": "phr.", "proverb": "prov.",
 }
-# "name"（专名词）不作词性展示：音译/专名自明（Xun County），name 前缀是噪音
-# （2026-11-03 用户裁决），与 character 条目不显示词性的口径一致。
-# "character" 是词条类别，不进入词性缩写表：显示为纯释义。
+# "character" 是词条类别，不进入词性缩写表：改由下方 jieba 词性层补标。
+
+# jieba 词性标注 → 展示缩写（2026-11-03 词性层）。jieba 词库 MIT 许可，
+# 词性体系见 jieba/__init__.py 词性对照表；这里只映射用户可读的缩写。
+JIEBA_LABELS = {
+    "n": "n.", "nr": "n.", "ns": "n.", "nt": "n.", "nz": "n.", "nl": "n.",
+    "ng": "n.", "t": "t.", "s": "n.", "f": "n.", "v": "v.", "vd": "v.",
+    "vn": "v.", "vi": "v.", "vt": "v.", "vg": "v.", "a": "adj.", "an": "adj.",
+    "ag": "adj.", "ad": "adv.", "d": "adv.", "dg": "adv.", "r": "pron.",
+    "rg": "pron.", "m": "num.", "mg": "num.", "q": "cl.", "qn": "cl.", "c": "conj.",
+    "p": "prep.", "u": "part.", "uj": "part.", "ul": "part.", "ud": "part.",
+    "uv": "part.", "uz": "part.", "ug": "part.", "i": "phr.", "l": "phr.",
+    "j": "abbr.", "eng": "eng.", "y": "intj.", "e": "intj.", "o": "onom.",
+    # 2026-11-03 未映射标签审计补齐：zg 状态词（很／猛然）读起来副词化；
+    # g 学术语素、nrt／nrfg 音译人名归名词；b／z 区别词归形容词；tg 时语素、
+    # x 非语素字（无词性）与前后接成分 h／k 保持不标注。
+    "zg": "adv.", "g": "n.", "b": "adj.", "z": "adj.", "tg": "t.",
+    "nrt": "n.", "nrfg": "n.",
+}
+CEDICT_GLOSS_SPLIT_RE = re.compile(r"\A(\S+)\s+(\S+)\s+\[([^\]]*)\]\s+(.*)\Z")
 
 # 清洗规则 v3（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
 # R1 义项正文内的长括号消歧说明（含括号 >18 字符）整体移除，短括号保留；
@@ -121,14 +144,16 @@ REFERENCE_OF_RE = re.compile(
 DANGLING_WORDS = {"a", "an", "the", "of", "to", "in", "at", "for", "with", "by", "and", "or"}
 
 
-def senses_of(entry: dict) -> list[tuple[bool, str, bool]]:
+def senses_of(entry: dict, extra_pos: str = "") -> list[tuple[bool, str, bool]]:
     """返回 [(是否噪声标签, 文本, 是否截断态)]；alt-of／obsolete／archaic 义项剔除。
 
     清洗规则 v7（2026-11-03）：括号内容一律移除（含短括号，用户裁决不显示
     括号）；synonym of／alternative form of 一类字形指代义项剔除（不是释义）；
     超长义项静默词边界截断并标记截断态（供 R4「截断即行尾」使用）。
-    (Classifier: …) 分类器说明不透传。"""
-    pos = POS_ABBREV.get(entry.get("pos"), "")
+    (Classifier: …) 分类器说明不透传。
+    词性层 v8（2026-11-03）：Wiktionary 词性缺失（character／name 等）时
+    用 jieba 词性层前缀 extra_pos（每条义项带前缀，青简样式）。"""
+    pos = POS_ABBREV.get(entry.get("pos"), "") or extra_pos
     out = []
     for sense in entry.get("senses", []):
         tags = [t.lower() for t in sense.get("tags", [])]
@@ -191,12 +216,90 @@ def presentable(text: str) -> bool:
     return True
 
 
+def load_jieba_pos(path: Path | None) -> dict[str, str]:
+    """jieba 词库（词 频率 词性）→ 单字 → 展示缩写。取该字最高频词条的词性：
+    军→n.、高→adj.、你→pron.、个→cl.、了→part.、均→adv.。只收单 CJK 字。"""
+    if path is None:
+        return {}
+    best: dict[str, tuple[int, str]] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        parts = line.split(" ")
+        if len(parts) != 3:
+            continue
+        word, freq_s, tag = parts
+        if len(word) != 1 or not ("\u3400" <= word <= "\u9fff"):
+            continue
+        label = JIEBA_LABELS.get(tag)
+        if not label:
+            continue
+        try:
+            freq = int(freq_s)
+        except ValueError:
+            continue
+        if word not in best or freq > best[word][0]:
+            best[word] = (freq, label)
+    return {w: label for w, (_, label) in best.items()}
+
+
+def load_cedict_single(path: Path | None) -> dict[str, list[str]]:
+    """CC-CEDICT（繁 簡 [拼音] /释义1/释义2/…）→ 简体单字 → 义项列表（≤2）。
+    跳过 CL: 量词搭配、see 交叉引用、variant of 字形指代、空条；
+    每条义项先过括号／首项／presentable 清洗（与 Wiktionary 同规则）。"""
+    if path is None:
+        return {}
+    opener = gzip.open if path.suffix == ".gz" else open
+    out: dict[str, list[str]] = {}
+    with opener(path, "rt", encoding="utf-8", errors="replace") as stream:
+        for line in stream:
+            if line.startswith("#"):
+                continue
+            m = CEDICT_GLOSS_SPLIT_RE.match(line.strip())
+            if not m:
+                continue
+            simplified = m.group(2)
+            if len(simplified) != 1 or not ("\u3400" <= simplified <= "\u9fff"):
+                continue  # 只补 Wiktionary 缺失的单字，双字词覆盖不动
+            for gloss in m.group(4).strip("/").split("/"):
+                gloss = gloss.strip()
+                if not gloss or gloss.startswith(("CL:", "see ", "arch.", "used in ", "old variant of")):
+                    continue
+                if re.match(r"^(old[ -])?variant of", gloss):
+                    continue
+                text = re.sub(r"\s*\([^)]*\)", "", gloss)
+                text = re.sub(r"\([^)]*$", "", text).rstrip()
+                text = text.split(";")[0].strip()
+                if not text or not presentable(text):
+                    continue
+                # 拼音残片（括号剥离后剩下的 ge4 这类音节）不是释义
+                if re.search(r"[a-z]+\d", text) or text in ("tw", "prc", "e.g."):
+                    continue
+                bucket = out.setdefault(simplified, [])
+                if text not in bucket:
+                    bucket.append(text)
+                if len(bucket) >= MAX_SENSES_PER_WORD:
+                    break
+    return out
+
+
 def main() -> None:
-    if len(sys.argv) != 2:
+    args = [a for a in sys.argv[1:]]
+    cedict_path: Path | None = None
+    jieba_path: Path | None = None
+    if "--cedict" in args:
+        i = args.index("--cedict")
+        cedict_path = Path(args[i + 1])
+        del args[i:i + 2]
+    if "--jieba" in args:
+        i = args.index("--jieba")
+        jieba_path = Path(args[i + 1])
+        del args[i:i + 2]
+    if len(args) != 1:
         print(__doc__)
         sys.exit(2)
-    source = Path(sys.argv[1])
+    source = Path(args[0])
     opener = gzip.open if source.suffix == ".gz" else open
+    jieba_pos = load_jieba_pos(jieba_path)
+    cedict_single = load_cedict_single(cedict_path)
     entries: dict[str, list[tuple[bool, str]]] = {}
     with opener(source, "rt", encoding="utf-8", errors="replace") as stream:
         for line in stream:
@@ -212,20 +315,38 @@ def main() -> None:
             key = simplified_key(entry) or word
             if len(key) > 16 or not all("\u3400" <= c <= "\u9fff" for c in key):
                 continue  # 键必须是纯 CJK 表意字符：排除 ⿰… 部件分解等不可读键
-            found = senses_of(entry)
+            found = senses_of(entry, extra_pos=jieba_pos.get(key, ""))
             if not found:
                 continue
             bucket = entries.setdefault(key, [])
             for item in found:
                 if item not in bucket:
                     bucket.append(item)
+    # 覆盖补缺：Wiktionary 缺失的单字（軍→军 软重定向无义项这类）用
+    # CC-CEDICT 义项＋jieba 词性合成条目，每条义项带词性前缀（青简样式）。
+    supplement = 0
+    for key, glosses in cedict_single.items():
+        if key in entries:
+            continue
+        label = jieba_pos.get(key, "n.")
+        bucket: list[tuple[bool, str, bool]] = []
+        for text in glosses:
+            item = (False, f"{label} {text}".strip(), False)
+            if item not in bucket:
+                bucket.append(item)
+        if bucket:
+            entries[key] = bucket
+            supplement += 1
     out = ROOT / "resources" / "gloss.tsv"
     out.parent.mkdir(parents=True, exist_ok=True)
-    lines = ["# gloss.tsv — 词性＋译文注释（Wiktionary/wiktextract，CC BY-SA 4.0）",
+    lines = ["# gloss.tsv — 词性＋译文注释（Wiktionary/wiktextract，CC BY-SA 4.0；",
+             "# 单字词性层 jieba（MIT）；Wiktionary 缺失单字由 CC-CEDICT（CC BY-SA 4.0）补义项）",
              f"# 来源：kaikki.org Chinese 提取；文件 {source.name} sha256={sha256(source)}",
-             "# 义务：署名 Wiktionary 贡献者、声明修改、衍生数据按 CC BY-SA 4.0 分发、不添加额外限制",
+             (f"# 词性层：jieba dict.txt sha256={sha256(jieba_path)}" if jieba_path else "# 词性层：未提供"),
+             (f"# 补缺源：CC-CEDICT {cedict_path.name} sha256={sha256(cedict_path)}" if cedict_path else "# 补缺源：未提供"),
+             "# 义务：署名 Wiktionary／CC-CEDICT 贡献者、声明修改、衍生数据按 CC BY-SA 4.0 分发、不添加额外限制",
              f"# 规则：每词最多 {MAX_SENSES_PER_WORD} 条简短义项（单条 ≤{MAX_SENSE_LEN} 字符，超长整条剔除）；",
-             "# character 词条不作词性展示；结构化标签不透传；非标签义项优先。"]
+             "# character 词条词性由 jieba 补标；结构化标签不透传；非标签义项优先。"]
     for key in sorted(entries):
         bucket = sorted(entries[key], key=lambda item: item[0])  # 非噪声标签义项优先（稳定排序）
         seen: set[str] = set()
@@ -254,22 +375,34 @@ def main() -> None:
             lines.append(f"{key}\t{joined}")
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     manifest = {
-        "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义）",
+        "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义；"
+                       "单字词性层 jieba；Wiktionary 缺失单字由 CC-CEDICT 补义项）",
         "license": {
             "wiktionary": "CC BY-SA 4.0（双许可取 CC 一支）；署名 Wiktionary contributors，声明修改，逐词条原文 URI",
             "wiktextract": "MIT（提取工具，不覆盖输出数据许可）",
+            "jieba": "MIT（词性标注层，来自 jieba/dict.txt，github.com/fxsjy/jieba）",
+            "cc-cedict": "CC BY-SA 4.0（Wiktionary 缺失单字补义项，mdbg/chineselanguageproject dump）",
         },
         "sources": {
             "kaikki": {"file": source.name, "bytes": source.stat().st_size, "sha256": sha256(source),
                        "url": "https://kaikki.org/dictionary/Chinese/"},
+            **({"jieba": {"file": jieba_path.name, "bytes": jieba_path.stat().st_size,
+                          "sha256": sha256(jieba_path),
+                          "url": "https://github.com/fxsjy/jieba"}} if jieba_path else {}),
+            **({"cc-cedict": {"file": cedict_path.name, "bytes": cedict_path.stat().st_size,
+                              "sha256": sha256(cedict_path),
+                              "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"}} if cedict_path else {}),
         },
         "entry_count": len(entries),
-        "cleaningRules": {"version": "v7", "date": "2026-11-03",
+        "single_char_supplement": supplement,
+        "cleaningRules": {"version": "v8", "date": "2026-11-03",
                           "rules": ["括号内容一律移除", "分号同义枚举只取首项",
                                     "synonym of/alternative form of 等字形指代义项剔除",
                                     "单条≤36字符静默词边界截断(截断态即行尾)",
-                                    "拼接总长≤46字符", "name词性不展示",
-                                    "分隔符统一为点号·"],
+                                    "拼接总长≤46字符",
+                                    "分隔符统一为点号·",
+                                    "词性层：jieba 补标 character 等无词性词条",
+                                    "覆盖补缺：Wiktionary 缺失单字由 CC-CEDICT+jieba 合成"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }

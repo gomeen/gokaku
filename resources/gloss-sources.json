@@ -1,8 +1,10 @@
 {
-  "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义）",
+  "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义；单字词性层 jieba；Wiktionary 缺失单字由 CC-CEDICT 补义项）",
   "license": {
     "wiktionary": "CC BY-SA 4.0（双许可取 CC 一支）；署名 Wiktionary contributors，声明修改，逐词条原文 URI",
-    "wiktextract": "MIT（提取工具，不覆盖输出数据许可）"
+    "wiktextract": "MIT（提取工具，不覆盖输出数据许可）",
+    "jieba": "MIT（词性标注层，来自 jieba/dict.txt，github.com/fxsjy/jieba）",
+    "cc-cedict": "CC BY-SA 4.0（Wiktionary 缺失单字补义项，mdbg/chineselanguageproject dump）"
   },
   "sources": {
     "kaikki": {
@@ -10,11 +12,24 @@
       "bytes": 155996266,
       "sha256": "4e54d7a3d2974b5efb6bf80ec0a6d8c71d916b90b30a350bdd71bdfda0dce36b",
       "url": "https://kaikki.org/dictionary/Chinese/"
+    },
+    "jieba": {
+      "file": "jieba-dict.txt",
+      "bytes": 5071852,
+      "sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+      "url": "https://github.com/fxsjy/jieba"
+    },
+    "cc-cedict": {
+      "file": "cedict_ts.u8.gz",
+      "bytes": 3983033,
+      "sha256": "e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb",
+      "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
     }
   },
-  "entry_count": 161029,
+  "entry_count": 164382,
+  "single_char_supplement": 3353,
   "cleaningRules": {
-    "version": "v7",
+    "version": "v8",
     "date": "2026-11-03",
     "rules": [
       "括号内容一律移除",
@@ -22,10 +37,11 @@
       "synonym of/alternative form of 等字形指代义项剔除",
       "单条≤36字符静默词边界截断(截断态即行尾)",
       "拼接总长≤46字符",
-      "name词性不展示",
-      "分隔符统一为点号·"
+      "分隔符统一为点号·",
+      "词性层：jieba 补标 character 等无词性词条",
+      "覆盖补缺：Wiktionary 缺失单字由 CC-CEDICT+jieba 合成"
     ],
     "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
   },
-  "output_sha256": "6e15f26e6d14829649c5e70c035faf5c16ae0f6f2f809df674a895e1553db145"
+  "output_sha256": "8691762a008eef032b671f6cbede1c4244187e4a3ecafa898f25edde0671bdd7"
 }
