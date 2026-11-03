@@ -418,10 +418,12 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                 Int(snapshot.windowLevel), snapshot.windowLevelValid)
     }
 
-    private func currentTarget(readRectangle: Bool = false) -> FocusTarget? {
+    private func currentTarget(readRectangle: Bool = false, strictComposition: Bool = true) -> FocusTarget? {
         guard let facts = hostFacts(readRectangle: readRectangle) else { return nil }
         let freshRect = facts.rectState == .valid ? facts.rect : .zero
-        if let previous = target, displayed != nil || !markedShown.isEmpty {
+        // 英→中学习组合无宿主侧 marked text，光标漂移不应使组合失效：
+        // strictComposition=false 时只取宿主事实（调用方自行校验同应用同进程）。
+        if strictComposition, let previous = target, displayed != nil || !markedShown.isEmpty {
             guard FocusRule.isSameField(application: facts.application, pid: facts.pid,
                                         selection: facts.selection, markedRange: facts.markedRange,
                                         composing: true,
@@ -1099,7 +1101,20 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             if value.raw.isEmpty {
                 self.panel.dismiss(); self.target = nil; return
             }
-            guard let current = self.currentTarget(), current == self.target else { self.suspend(); return }
+            // 英→中无宿主侧组合：只校验同应用同进程（与 applyNormal 口径一致），
+            // 光标漂移跟随新插入点；组合起点全等会误杀组合（每键入一次即 suspend）。
+            guard let current = self.currentTarget(strictComposition: false) else { self.suspend(); return }
+            guard let previous = self.target else { self.suspend(); return }
+            if current.application != previous.application || current.pid != previous.pid {
+                // 诊断：无原文内容，仅失败原因与选区形状，供真机回归定位。
+                NSLog("GogakuLearning: publish lost field app=%d pid=%d sel=%ld:%ld anchor=%ld:%ld",
+                      current.application == previous.application ? 1 : 0,
+                      current.pid == previous.pid ? 1 : 0,
+                      current.selection.location, current.selection.length,
+                      previous.anchor.location, previous.anchor.length)
+                self.suspend(); return
+            }
+            self.target = current
             // 学习路径没有 applyNormal：首次显示用锚点矩形（组合首键
             // currentTarget(readRectangle: true) 已读取）；若首键未读到矩形，
             // 由位置复查在恢复后补上。后续由位置复查跟随插入点。
@@ -1126,7 +1141,11 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     }
 
     private func choose(_ candidate: Candidate) {
-        guard pendingEdits == 0, displayed?.stamp == candidate.stamp, let anchor = target, currentTarget() == anchor else { suspend(); return }
+        // 英→中无宿主侧组合：同应用同进程即可（与 publishLearning 口径一致）。
+        guard pendingEdits == 0, displayed?.stamp == candidate.stamp, let anchor = target,
+              let current = currentTarget(strictComposition: false),
+              current.application == anchor.application, current.pid == anchor.pid else { suspend(); return }
+        target = current
         let generation = focus
         pendingEdits += 1; displayed = nil
         hub.async { [weak self] in
@@ -1149,18 +1168,21 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     }
 
     private func commitLearningOriginal() {
-        guard let view = displayed, !view.raw.isEmpty, let anchor = target, currentTarget() == anchor, let c = client() else { return }
+        guard let view = displayed, !view.raw.isEmpty, let anchor = target,
+              let current = currentTarget(strictComposition: false),
+              current.application == anchor.application, current.pid == anchor.pid, let c = client() else { return }
         let raw = view.raw, selectedMode = mode, selectedDirection = direction
         cancelLearning()
         func saveDraft() {
             DraftStore.shared.save(application: anchor.application, mode: selectedMode, direction: selectedDirection, raw: raw)
         }
         if raw.utf16.count == 1 {
-            guard gg_mark_confirmed_text(c, raw), let markedTarget = currentTarget() else { saveDraft(); return }
+            guard gg_mark_confirmed_text(c, raw), let markedTarget = currentTarget(strictComposition: false) else { saveDraft(); return }
             target = markedTarget
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
-                guard self.pendingEdits == 0, let nowTarget = self.currentTarget(), nowTarget == markedTarget else {
+                guard self.pendingEdits == 0, let nowTarget = self.currentTarget(strictComposition: false),
+                      nowTarget.application == markedTarget.application, nowTarget.pid == markedTarget.pid else {
                     saveDraft(); return
                 }
                 if !gg_insert_text(c, raw) { saveDraft() }
@@ -1175,7 +1197,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private func insertLearning(_ intent: CommitIntent, anchor: FocusTarget, generation: UInt64) {
         guard !committed.contains(intent.id) else { return }
         committed.insert(intent.id)
-        guard generation == focus, currentTarget() == anchor, let c = client() else {
+        guard generation == focus, let current = currentTarget(strictComposition: false),
+              current.application == anchor.application, current.pid == anchor.pid, let c = client() else {
             DraftStore.shared.save(application: anchor.application, mode: intent.stamp.mode, direction: intent.stamp.direction, raw: intent.recoveryRaw)
             suspend(); return
         }
