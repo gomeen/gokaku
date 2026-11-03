@@ -58,4 +58,25 @@ public enum PanelPlacement {
         }
         return NSPoint(x: x, y: max(visible.minY + margin, min(y, visible.maxY - margin - panelSize.height)))
     }
+
+    /// 模式／方向切换提示浮层：优先锚点上方（下方常被候选窗占用），
+    /// 上方放不下时移到下方，水平随锚点左缘并钳制在屏幕可视区内；
+    /// 锚点无效或不在任何屏幕内时返回 nil（调用方回退固定位置）。
+    public static func toastOrigin(anchor: NSRect, panelSize: NSSize, screens: [ScreenFrame]) -> NSPoint? {
+        guard isFinite(anchor), anchor.size.width >= 0, anchor.size.height >= 0,
+              panelSize.width > 0, panelSize.height > 0, anchor != .zero,
+              let screen = screens.first(where: { isFinite($0.frame) && $0.frame.intersects(anchor) }),
+              isFinite(screen.visibleFrame) else { return nil }
+        let visible = screen.visibleFrame
+        let maxX = max(visible.minX + margin, visible.maxX - margin - panelSize.width)
+        let x = min(max(anchor.minX, visible.minX + margin), maxX)
+        let fitsAbove = anchor.maxY + margin + panelSize.height <= visible.maxY
+        let y: CGFloat
+        if fitsAbove {
+            y = anchor.maxY + margin
+        } else {
+            y = max(visible.minY + margin, anchor.minY - margin - panelSize.height)
+        }
+        return NSPoint(x: x, y: min(max(y, visible.minY + margin), visible.maxY - margin - panelSize.height))
+    }
 }

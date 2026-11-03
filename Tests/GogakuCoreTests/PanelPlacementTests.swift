@@ -101,4 +101,38 @@ final class PanelPlacementTests: XCTestCase {
         XCTAssertFalse(PanelPlacement.isContained(origin: NSPoint(x: 100, y: 100), panelSize: size, screens: []),
                        "无屏幕时不可复用")
     }
+
+    // MARK: 切换提示浮层（2026-11 用户裁决：提示位置跟随输入位置）
+
+    private let toastSize = NSSize(width: 80, height: 36)
+
+    func testToastPrefersAboveCaret() {
+        // 优先锚点上方（下方常被候选窗占用）。
+        let caret = NSRect(x: 800, y: 700, width: 0, height: 17)
+        let origin = PanelPlacement.toastOrigin(anchor: caret, panelSize: toastSize, screens: [main])
+        XCTAssertEqual(origin?.x, 800)
+        XCTAssertEqual(origin?.y, 700 + 17 + 8, "光标上方 + 8pt")
+    }
+
+    func testToastFallsBelowWhenNoRoomAbove() {
+        // 光标贴近屏幕顶部：上方放不下时移到下方。
+        let caret = NSRect(x: 800, y: 1000, width: 0, height: 17)
+        let origin = PanelPlacement.toastOrigin(anchor: caret, panelSize: toastSize, screens: [main])
+        XCTAssertEqual(origin?.y, 1000 - 36 - 8)
+    }
+
+    func testToastClampsHorizontalAndRejectsInvalidAnchor() {
+        // 右缘钳制。
+        let right = PanelPlacement.toastOrigin(anchor: NSRect(x: 1900, y: 600, width: 0, height: 17),
+                                               panelSize: toastSize, screens: [main])
+        XCTAssertLessThanOrEqual(right!.x + toastSize.width, main.visibleFrame.maxX - PanelPlacement.margin)
+        // 零矩形与屏外锚点回退 nil（调用方用固定位置）。
+        XCTAssertNil(PanelPlacement.toastOrigin(anchor: .zero, panelSize: toastSize, screens: [main]))
+        XCTAssertNil(PanelPlacement.toastOrigin(anchor: NSRect(x: 5000, y: 600, width: 0, height: 17),
+                                                panelSize: toastSize, screens: [main]))
+        // 副屏负坐标跟随。
+        let sideOrigin = PanelPlacement.toastOrigin(anchor: NSRect(x: -700, y: 500, width: 0, height: 17),
+                                                    panelSize: toastSize, screens: [main, side])
+        XCTAssertEqual(sideOrigin?.x, -700)
+    }
 }
