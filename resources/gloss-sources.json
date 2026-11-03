@@ -26,10 +26,10 @@
       "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
     }
   },
-  "entry_count": 164382,
-  "single_char_supplement": 3353,
+  "entry_count": 200797,
+  "supplement_count": 39768,
   "cleaningRules": {
-    "version": "v8",
+    "version": "v8.1",
     "date": "2026-11-03",
     "rules": [
       "括号内容一律移除",
@@ -38,10 +38,10 @@
       "单条≤36字符静默词边界截断(截断态即行尾)",
       "拼接总长≤46字符",
       "分隔符统一为点号·",
-      "词性层：jieba 补标 character 等无词性词条",
-      "覆盖补缺：Wiktionary 缺失单字由 CC-CEDICT+jieba 合成"
+      "词性层：jieba 补标无词性词条（含多字词）",
+      "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成"
     ],
     "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
   },
-  "output_sha256": "8691762a008eef032b671f6cbede1c4244187e4a3ecafa898f25edde0671bdd7"
+  "output_sha256": "19c778df0cfb762acaa420a2fbd77d51e550d6e572f37d0861f3aca0c2ff0005"
 }

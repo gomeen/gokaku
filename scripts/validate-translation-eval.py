@@ -494,6 +494,139 @@ def test_partial_round_cannot_complete():
         raise AssertionError("completeRun=False did not fail the summariser")
 
 
+@check("translation resources are hashed, attributed and duplicate-free")
+def test_translation_resources():
+    directory = ROOT / "resources/translation"
+    manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
+    import hashlib
+    data = (directory / "expressions.tsv").read_bytes()
+    actual = hashlib.sha256(data).hexdigest()
+    if manifest["files"]["expressions.tsv"] != actual:
+        raise AssertionError("expressions.tsv hash does not match manifest")
+    if "CC BY-SA 4.0" not in manifest["license"] and "CC BY-SA 4.0" not in data.decode("utf-8"):
+        raise AssertionError("resource file lost its license attribution")
+    seen = set()
+    counts = {"en-zh": 0, "zh-en": 0}
+    for line in data.decode("utf-8").splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        fields = line.split("\t")
+        if len(fields) < 7:
+            raise AssertionError("malformed resource row: %r" % line)
+        direction, source, target = fields[0], fields[1], fields[2]
+        if direction not in counts:
+            raise AssertionError("unknown direction in resource row: %r" % line)
+        if not source.strip() or not target.strip():
+            raise AssertionError("empty source/target: %r" % line)
+        key = (direction, source.strip().lower())
+        if key in seen:
+            raise AssertionError("duplicate resource key: %r" % (key,))
+        seen.add(key)
+        counts[direction] += 1
+    if counts != {k: manifest["counts"][k] for k in counts}:
+        raise AssertionError("resource counts disagree with manifest: %s" % counts)
+
+
+@check("single-word preserve brands match the C++ protection scan")
+def test_brand_consistency():
+    source = (ROOT / "native/GogakuCore/translate/translate_safety.cpp").read_text(encoding="utf-8")
+    start = source.index('static const char *kBrands[] = {')
+    block = source[start:source.index("};", start)]
+    compiled = set()
+    for chunk in block.split('"')[1::2]:
+        if chunk.strip():
+            compiled.add(chunk.strip().lower())
+    brands = []
+    for line in (ROOT / "resources/translation/brands.tsv").read_text(encoding="utf-8").splitlines():
+        if not line.strip() or line.startswith("#"):
+            continue
+        fields = line.split("\t")
+        if len(fields) >= 2 and fields[1].strip() == "preserve":
+            brands.append(fields[0].strip())
+    missing = [brand for brand in brands
+               if " " not in brand and brand.lower() not in compiled]
+    if missing:
+        raise AssertionError("brands.tsv preserve entries missing from C++ scan: %s" % missing)
+
+
+@check("final acceptance set is frozen, sized and disjoint from dev data")
+def test_final_set_frozen():
+    data = json.loads((ROOT / "validation/translation-final-set.json").read_text(encoding="utf-8"))
+    if data.get("status", "").startswith("draft"):
+        raise AssertionError("final set is still a draft")
+    if not data["scoringRules"].get("frozenBeforeRun"):
+        raise AssertionError("final set scoring rules were not frozen before the run")
+    cases = data["cases"]
+    for direction, expected in data["counts"].items():
+        actual = sum(1 for case in cases if case["direction"] == direction)
+        if actual != expected:
+            raise AssertionError("%s: %d cases, expected %d" % (direction, actual, expected))
+    translate = [case for case in cases if case.get("metric") != "probe"]
+    for direction in ("en-zh", "zh-en"):
+        if sum(1 for case in translate if case["direction"] == direction) != 100:
+            raise AssertionError("%s: final set needs 100 scored cases" % direction)
+    if not any(case.get("metric") == "probe" for case in cases):
+        raise AssertionError("final set lost its unlabelled runtime-preserve probes")
+    old = set()
+    for path in ("probes/translation-cases.json",):
+        old |= {case["source"].strip().lower()
+                for case in json.loads((ROOT / path).read_text(encoding="utf-8"))}
+    for path in ("validation/translation-holdout.json",
+                 "validation/translation-short-expressions.json",
+                 "validation/translation-confirm-set.json"):
+        old |= {case["source"].strip().lower()
+                for case in json.loads((ROOT / path).read_text(encoding="utf-8"))["cases"]}
+    overlap = [case["id"] for case in cases if case["source"].strip().lower() in old]
+    if overlap:
+        raise AssertionError("final set overlaps dev data: %s" % overlap[:5])
+
+
+@check("strategy acceptance evidence is complete and self-consistent")
+def test_strategy_acceptance_evidence():
+    import hashlib
+    run_dir = ROOT / "probes/results/translation-strategy-final"
+    report_path = run_dir / "acceptance.json"
+    labels_path = run_dir / "final-labels.json"
+    freeze_path = ROOT / "probes/results/translation-strategy-freeze.json"
+    for path in (report_path, labels_path, freeze_path, run_dir / "run.json"):
+        if not path.is_file():
+            raise AssertionError("strategy evidence missing: %s" % path)
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    run = json.loads((run_dir / "run.json").read_text(encoding="utf-8"))
+    labels = json.loads(labels_path.read_text(encoding="utf-8"))
+    if not run.get("completeRun"):
+        raise AssertionError("final run did not complete")
+    if run["parameters"]["lambdas"] != json.loads(
+            freeze_path.read_text(encoding="utf-8"))["lambda"]:
+        raise AssertionError("final run used lambdas other than the frozen ones")
+    if report.get("labelCoverage", {}).get("missing"):
+        raise AssertionError("acceptance report has unlabelled released results")
+    for direction, entry in report["directions"].items():
+        if entry["scored"] != 100:
+            raise AssertionError("%s: scored %d cases, expected 100" % (direction, entry["scored"]))
+        if entry["qualified"] + entry["errorReleased"] != entry["released"]:
+            raise AssertionError("%s: qualified + errorReleased != released" % direction)
+        expected_gate = entry["coverageRate"] >= report["gate"]
+        if entry["gatePassed"] != expected_gate:
+            raise AssertionError("%s: gate arithmetic inconsistent" % direction)
+    if report["passed"] and not report["risk"]["gatePassed"]:
+        raise AssertionError("overall pass while the fixed risk set has violations")
+    if report["passed"] and report["unstableDecisions"]:
+        raise AssertionError("overall pass while decisions differ across rounds")
+    if not labels.get("verdicts"):
+        raise AssertionError("final labels file is empty")
+    # 证据对应运行时哈希；当前文件是否已变更只提示，不判失败（dylib 每次构建都变）。
+    policy = json.loads(freeze_path.read_text(encoding="utf-8"))["policy"]
+    drift = []
+    for key, expected in policy.items():
+        path = ROOT / json.loads(freeze_path.read_text(encoding="utf-8"))["policyPaths"][key]
+        if path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            drift.append(key)
+    if drift:
+        print("note: 策略文件在验收后已变更（%s），证据对应封板时的哈希" % drift)
+
+
+
 def main():
     for name, fn in checks_run:
         fn()

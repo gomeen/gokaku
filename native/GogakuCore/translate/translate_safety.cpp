@@ -889,7 +889,7 @@ size_t gc_translate_protection_scan(const char *text, size_t length,
     static const char *kBrands[] = {
         "gogaku", "github", "vscode", "iphone", "ipad", "macos", "ios",
         "figma", "jira", "gmail", "outlook",
-        "powerpoint", "xcode", "whatsapp", "openai", "chatgpt", "kubernetes",
+        "powerpoint", "xcode", "whatsapp", "openai", "chatgpt", "kubernetes", "docker",
         "telegram", "linkedin", "youtube", "netflix", "wechat", "alipay",
         "taobao", "weibo", "bilibili", "douyin", "tiktok", "instagram",
         "facebook", "twitter", "microsoft", "tencent", "huawei", "xiaomi"};

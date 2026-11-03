@@ -141,6 +141,38 @@ Comet-QE 级神经 QE 模型大，CPU 预算内不现实，不推荐。
 
 **决定**：不因速度切换 quickmt；保持 small100 主路线，先修加固误报并补人名/品牌与短语审阅，学习模式继续阻塞。完整证据见[统一实测决定](../probes/results/translation-backends/decision.md)、[语义审阅](../probes/results/translation-backends/semantic-review.md)与[质量门槛](../probes/results/translation-backends/quality-gate.json)。
 
+## 八、加固层第二片与组合策略实测（2026-11-04）
+
+### 8.1 已修的四类误报（共享 C++ 加固层 v2，`translate_safety_test` 76 项断言）
+
+| 误报 | 处置 |
+| --- | --- |
+| 英文动词 `am` 被当成午前标记（`I am free in the afternoon.`） | 只有紧跟在数字后的 `am`／`pm` 才算时段；`I am` 不再触发时段检查 |
+| 「上午九点到下午四点」合法区间被判成时段翻转 | 时间检查改为逐条「数值＋时段」对比：抽取有序时间点（时／分／半点／绑定时段），逐条比对数值、顺序与时段关系；新增返回码 4（个数／数值／顺序不符） |
+| 合法叠词被当成复读（看看／试试／哈哈／多多少少／一个一个／一天一天） | 单字汉字叠用、AABB、数量叠用三条白名单放行；「早上好 好 好」「会议会议」仍然拦 |
+| URL 污染语言与长度统计（`详情见 https://…` 判成拉丁主导） | 脚本校验与长度比率都排除 URL 跨度 |
+
+同轮补齐：句首已知品牌进入保护扫描（29 个无歧义专名，与 `resources/translation/brands.tsv` 双向一致）；数字保留新增「未被时间表达解释的数字必须出现且顺序不变」。
+
+### 8.2 组合策略首轮验收发现的**新**误报（未在本轮修）
+
+同一根因还没覆盖完：**受保护串（品牌、版本号）没有从语言主导与长度比率统计里排除**，与 URL 同一类问题。
+
+- `Open the PR on GitHub.` → 「在GitHub上打开 PR。」被判 `script=1`（汉字 5、拉丁 8）；
+- `Update to macOS 15.2.` → 「更新到 macOS 15.2。」同上；
+- `Gogaku v1.4.2 is out.`、`Log in with WeChat.` 同上；
+- `Gogaku 更新到 v1.4.2 了。` → 「Gogaku is updated to v1.4.2.」被判 `length=2`（受保护串把源／目标长度比撑歪）。
+
+另有两条模板边界：区间第二个时间点被渲染成 `o'clock`（时间检查不识别），`a.m.` 尾点被归一化剥除后模板不再匹配（`at 7:30 a.m.` 落到模型路径，模型给出「下午7:30」——回退把这次时段翻转挡下了）。
+
+这再次印证 §五 的结构性结论：护栏只能保证「它识别到的矛盾」不进入候选，开放输入下漏配会持续以新的形态出现。修法与复验要求见[翻译组合策略决定](translation-strategy-decision.md) §八。
+
+### 8.3 反向评分（quickmt `score_batch`）实测
+
+- 协议：中→英用 `quickmt-en-zh` 以候选英语为源、原中文为目标；英→中用 `quickmt-zh-en` 反之；源侧按各模型协议追加 `</s>`；分数为长度归一化对数概率。
+- 排序：正向分数 + λ×反向分数，λ 在开发集上离线选择。en→zh λ=0.25（固定风险集关键错误 3→2）；zh→en λ=0（λ>0 会把「他不在上海，在北京」选成丢失对比关系的译文，关键错误 3→4）。
+- 结论：反向评分**不是方向中立的改进**，也不能替代语义审阅；它只在候选都合法时改变排序，遇到模型本身没有正确候选时无能为力。
+
 ## 引用（主要一手来源）
 
 - 失败基线：[small100 语义审阅](../probes/results/small100-gate/semantic-review.md)
@@ -156,6 +188,7 @@ Comet-QE 级神经 QE 模型大，CPU 预算内不现实，不推荐。
 - OpenCC：https://github.com/BYVoid/OpenCC 及 DESIGN_PRINCIPLES.md；Homebrew/vcpkg port
 - 语言识别门槛：Firefox Translations 文档（CLD2）、Chromium 设计文档（CLD3）、fastText lid 文档
 - QE 兜底：Bergamot `QualityEstimator` API 文档与源码；Firefox Translations bergamot 文档
+
 - TranslateGemma：Google 博客（2026-01）与技术报告 arXiv:2601.09012
 - quickmt：HF `quickmt/quickmt-en-zh`／`quickmt/quickmt-zh-en` 模型卡（评测表、license tags）；GitHub `quickmt/quickmt`（Apache-2.0）
 - HPLT：v1.0 模型卡；HPLT-MT-Models v2.0 `get_data.py`（无 zh）

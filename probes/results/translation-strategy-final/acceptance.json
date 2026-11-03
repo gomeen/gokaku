@@ -1,0 +1,1038 @@
+{
+ "schemaVersion": 1,
+ "runId": "20261103T051102Z",
+ "lambda": {
+  "en-zh": 0.25,
+  "zh-en": 0.0
+ },
+ "freeze": "probes/results/translation-strategy-freeze.json",
+ "gate": 0.95,
+ "unstableDecisions": [],
+ "directions": {
+  "en-zh": {
+   "scored": 100,
+   "released": 93,
+   "qualified": 46,
+   "coverageRate": 0.46,
+   "releaseRate": 0.93,
+   "releasePrecision": 0.4946,
+   "fallbackRate": 0.07,
+   "errorReleased": 47,
+   "gatePassed": false,
+   "pathCounts": {
+    "resource": 4,
+    "model": 88,
+    "structural-reject": 7,
+    "template": 1
+   },
+   "failures": [
+    {
+     "caseId": "fin-e-001",
+     "text": "预计",
+     "reference": "预报",
+     "path": "resource",
+     "note": "forecast→预计，「预报」义丢失"
+    },
+    {
+     "caseId": "fin-e-002",
+     "text": "升降机",
+     "reference": "扶梯",
+     "path": "model",
+     "note": "escalator→升降机（应自动扶梯）"
+    },
+    {
+     "caseId": "fin-e-003",
+     "text": "斯塔格勒",
+     "reference": "订书机",
+     "path": "model",
+     "note": "音译编造「斯塔格勒」"
+    },
+    {
+     "caseId": "fin-e-004",
+     "text": "投票",
+     "reference": "代金券",
+     "path": "model",
+     "note": "voucher→投票，改义"
+    },
+    {
+     "caseId": "fin-e-009",
+     "text": "登机护照",
+     "reference": "登机牌",
+     "path": "model",
+     "note": "boarding pass→登机护照，改义"
+    },
+    {
+     "caseId": "fin-e-011",
+     "text": "保证",
+     "reference": "保修",
+     "path": "model",
+     "note": "warranty→保证，词义不同"
+    },
+    {
+     "caseId": "fin-e-014",
+     "text": "主人",
+     "reference": "房东",
+     "path": "model",
+     "note": "landlord→主人，丢失租赁关系"
+    },
+    {
+     "caseId": "fin-e-015",
+     "text": "水",
+     "reference": "水管工",
+     "path": "model",
+     "note": "plumber→水，残词"
+    },
+    {
+     "caseId": "fin-e-017",
+     "text": "太阳镜",
+     "reference": "防晒霜",
+     "path": "model",
+     "note": "sunscreen→太阳镜，改义"
+    },
+    {
+     "caseId": "fin-e-021",
+     "text": "接下来捕捉你",
+     "reference": "回头见",
+     "path": "model",
+     "note": "catch you later→接下来捕捉你"
+    },
+    {
+     "caseId": "fin-e-022",
+     "text": "拿你的时间",
+     "reference": "慢慢来",
+     "path": "model",
+     "note": "take your time→拿你的时间"
+    },
+    {
+     "caseId": "fin-e-023",
+     "text": "在目的",
+     "reference": "故意",
+     "path": "model",
+     "note": "on purpose→在目的"
+    },
+    {
+     "caseId": "fin-e-024",
+     "text": "保持接触",
+     "reference": "保持联系",
+     "path": "model",
+     "note": "stay in touch→保持接触，不自然"
+    },
+    {
+     "caseId": "fin-e-025",
+     "text": "自由地问",
+     "reference": "随时问我",
+     "path": "model",
+     "note": "feel free to ask→自由地问"
+    },
+    {
+     "caseId": "fin-e-028",
+     "text": "之后",
+     "reference": "您先请",
+     "path": "model",
+     "note": "after you→之后，改义"
+    },
+    {
+     "caseId": "fin-e-029",
+     "text": "说话",
+     "reference": "大声点说",
+     "path": "model",
+     "note": "speak up→说话，丢失「大声」"
+    },
+    {
+     "caseId": "fin-e-030",
+     "text": "保持",
+     "reference": "等一下",
+     "path": "model",
+     "note": "hold on→保持，改义"
+    },
+    {
+     "caseId": "fin-e-033",
+     "text": "现在",
+     "reference": "暂时",
+     "path": "model",
+     "note": "for now→现在，丢失「暂时」"
+    },
+    {
+     "caseId": "fin-e-035",
+     "text": "在个人",
+     "reference": "亲自",
+     "path": "model",
+     "note": "in person→在个人"
+    },
+    {
+     "caseId": "fin-e-036",
+     "text": "排序之外",
+     "reference": "故障",
+     "path": "model",
+     "note": "out of order→排序之外"
+    },
+    {
+     "caseId": "fin-e-037",
+     "text": "出售",
+     "reference": "卖完了",
+     "path": "model",
+     "note": "sold out→出售"
+    },
+    {
+     "caseId": "fin-e-038",
+     "text": "出售",
+     "reference": "打折",
+     "path": "model",
+     "note": "on sale→出售，折扣义丢失"
+    },
+    {
+     "caseId": "fin-e-039",
+     "text": "享受你的餐",
+     "reference": "请慢用",
+     "path": "model",
+     "note": "enjoy your meal→享受你的餐，不自然"
+    },
+    {
+     "caseId": "fin-e-041",
+     "text": "永远不要想",
+     "reference": "没关系",
+     "path": "model",
+     "note": "never mind→永远不要想"
+    },
+    {
+     "caseId": "fin-e-042",
+     "text": "到目前为止如此好",
+     "reference": "到目前为止还不错",
+     "path": "model",
+     "note": "so far so good→直译不自然"
+    },
+    {
+     "caseId": "fin-e-044",
+     "text": "签名在这里",
+     "reference": "在这里签字",
+     "path": "model",
+     "note": "sign here→签名在这里，语序不自然"
+    },
+    {
+     "caseId": "fin-e-045",
+     "text": "只是在案例中",
+     "reference": "以防万一",
+     "path": "model",
+     "note": "just in case→只是在案例中"
+    },
+    {
+     "caseId": "fin-e-048",
+     "text": "在三天内",
+     "reference": "三天后",
+     "path": "model",
+     "note": "in three days→在三天内，时点变区间"
+    },
+    {
+     "caseId": "fin-e-049",
+     "text": "在早餐",
+     "reference": "早餐时",
+     "path": "model",
+     "note": "at breakfast→在早餐，不自然"
+    },
+    {
+     "caseId": "fin-e-052",
+     "text": "在两个星期内",
+     "reference": "两周后",
+     "path": "model",
+     "note": "in two weeks→在两个星期内"
+    },
+    {
+     "caseId": "fin-e-058",
+     "text": "四分之一前六",
+     "reference": "六点一刻",
+     "path": "model",
+     "note": "a quarter past six→四分之一前六"
+    },
+    {
+     "caseId": "fin-e-060",
+     "text": "在一个小时内",
+     "reference": "一小时后",
+     "path": "model",
+     "note": "in an hour→在一个小时内"
+    },
+    {
+     "caseId": "fin-e-061",
+     "text": null,
+     "reference": "在 GitHub 上打开这个 PR。",
+     "path": "structural-reject",
+     "note": "回退未被标注为合理：script / 「在GitHub上打开 PR。」被脚本校验误判为非中文主导（品牌词干扰）"
+    },
+    {
+     "caseId": "fin-e-062",
+     "text": null,
+     "reference": "更新到 macOS 15.2。",
+     "path": "structural-reject",
+     "note": "回退未被标注为合理：script / 「更新到 macOS 15.2。」被脚本校验误判（品牌／版本号干扰）"
+    },
+    {
+     "caseId": "fin-e-063",
+     "text": null,
+     "reference": "Gogaku v1.4.2 发布了。",
+     "path": "structural-reject",
+     "note": "回退未被标注为合理：script / 「Gogaku v1.4.2 已退出。」被脚本校验误判（品牌／版本号干扰）"
+    },
+    {
+     "caseId": "fin-e-067",
+     "text": null,
+     "reference": "用微信登录。",
+     "path": "structural-reject",
+     "note": "回退未被标注为合理：script / 「使用 WeChat 登录。」被脚本校验误判（品牌词干扰）"
+    },
+    {
+     "caseId": "fin-e-070",
+     "text": "请打开Jira票。",
+     "reference": "请开一个 Jira 工单。",
+     "path": "model",
+     "note": "ticket→票，应为工单"
+    },
+    {
+     "caseId": "fin-e-072",
+     "text": "请给我两个桌子。",
+     "reference": "我想要一张两人的桌子。",
+     "path": "model",
+     "note": "a table for two→两个桌子，改义"
+    },
+    {
+     "caseId": "fin-e-073",
+     "text": "我的手机电池几乎死了。",
+     "reference": "我手机快没电了。",
+     "path": "model",
+     "note": "battery almost dead→电池几乎死了"
+    },
+    {
+     "caseId": "fin-e-074",
+     "text": "你能在星期五发送我的报告吗?",
+     "reference": "你能在周五之前把报告发给我吗？",
+     "path": "model",
+     "note": "send me the report→发送我的报告"
+    },
+    {
+     "caseId": "fin-e-076",
+     "text": "包装将在明天下午到达。",
+     "reference": "包裹明天下午到。",
+     "path": "model",
+     "note": "package→包装，改义"
+    },
+    {
+     "caseId": "fin-e-078",
+     "text": "我需要换飞机到星期一。",
+     "reference": "我需要把航班改到周一。",
+     "path": "model",
+     "note": "change my flight→换飞机"
+    },
+    {
+     "caseId": "fin-e-080",
+     "text": "空调再也没有工作。",
+     "reference": "空调又坏了。",
+     "path": "model",
+     "note": "not working again→再也没有工作"
+    },
+    {
+     "caseId": "fin-e-081",
+     "text": "她会在工作后接收孩子们。",
+     "reference": "她下班后去接孩子。",
+     "path": "model",
+     "note": "pick up the kids→接收孩子们"
+    },
+    {
+     "caseId": "fin-e-083",
+     "text": "请记住拿出护照和铅笔。",
+     "reference": "记得带上护照和笔。",
+     "path": "model",
+     "note": "bring→拿出；pen→铅笔"
+    },
+    {
+     "caseId": "fin-e-087",
+     "text": "请停车车在大楼后面。",
+     "reference": "请把车停在楼后面。",
+     "path": "model",
+     "note": "停车车，重复错字"
+    },
+    {
+     "caseId": "fin-e-088",
+     "text": "他忘记了在巴士上的伞。",
+     "reference": "他把伞忘在公交车上了。",
+     "path": "model",
+     "note": "forgot umbrellas→忘记了在巴士上的伞，不自然"
+    },
+    {
+     "caseId": "fin-e-091",
+     "text": "左转向第二个交通灯。",
+     "reference": "在第二个红绿灯左转。",
+     "path": "model",
+     "note": "Turn left at→左转向，语序不自然"
+    },
+    {
+     "caseId": "fin-e-094",
+     "text": "第三楼的打印机被打破。",
+     "reference": "三楼的打印机坏了。",
+     "path": "model",
+     "note": "broken→被打破，改义"
+    },
+    {
+     "caseId": "fin-e-098",
+     "text": "如果你需要的话,请保留收件人。",
+     "reference": "请保留收据，以备需要。",
+     "path": "model",
+     "note": "receipt→收件人，改义"
+    },
+    {
+     "caseId": "fin-e-099",
+     "text": "孩子们在客厅看漫画。",
+     "reference": "孩子们在客厅看动画片。",
+     "path": "model",
+     "note": "cartoons→漫画，改义"
+    }
+   ]
+  },
+  "zh-en": {
+   "scored": 100,
+   "released": 97,
+   "qualified": 53,
+   "coverageRate": 0.53,
+   "releaseRate": 0.97,
+   "releasePrecision": 0.5464,
+   "fallbackRate": 0.03,
+   "errorReleased": 44,
+   "gatePassed": false,
+   "pathCounts": {
+    "resource": 5,
+    "model": 88,
+    "template": 5,
+    "structural-reject": 2
+   },
+   "failures": [
+    {
+     "caseId": "fin-z-002",
+     "text": "External sales",
+     "reference": "takeout",
+     "path": "model",
+     "note": "外卖→External sales"
+    },
+    {
+     "caseId": "fin-z-004",
+     "text": "Replacement",
+     "reference": "reimburse",
+     "path": "model",
+     "note": "报销→Replacement"
+    },
+    {
+     "caseId": "fin-z-005",
+     "text": "Excessive work fees",
+     "reference": "overtime pay",
+     "path": "model",
+     "note": "加班费→Excessive work fees"
+    },
+    {
+     "caseId": "fin-z-008",
+     "text": "Guaranteed",
+     "reference": "warranty",
+     "path": "model",
+     "note": "保修→Guaranteed，词性不同"
+    },
+    {
+     "caseId": "fin-z-009",
+     "text": "Tickets",
+     "reference": "coupon",
+     "path": "model",
+     "note": "优惠券→Tickets"
+    },
+    {
+     "caseId": "fin-z-011",
+     "text": "The owner",
+     "reference": "landlord",
+     "path": "model",
+     "note": "房东→The owner，丢失租赁关系"
+    },
+    {
+     "caseId": "fin-z-016",
+     "text": "Accounting",
+     "reference": "bill",
+     "path": "model",
+     "note": "账单→Accounting"
+    },
+    {
+     "caseId": "fin-z-018",
+     "text": "Backpacking",
+     "reference": "backpack",
+     "path": "model",
+     "note": "背包→Backpacking"
+    },
+    {
+     "caseId": "fin-z-022",
+     "text": "No need for guests.",
+     "reference": "You are welcome.",
+     "path": "model",
+     "note": "不用客气→No need for guests"
+    },
+    {
+     "caseId": "fin-z-024",
+     "text": "Soon is OK.",
+     "reference": "It will be ready right away.",
+     "path": "model",
+     "note": "马上就好→Soon is OK"
+    },
+    {
+     "caseId": "fin-z-025",
+     "text": "How to",
+     "reference": "What should we do?",
+     "path": "model",
+     "note": "怎么办→How to，残句"
+    },
+    {
+     "caseId": "fin-z-026",
+     "text": "Can I get it?",
+     "reference": "Is there enough time?",
+     "path": "model",
+     "note": "来得及吗→Can I get it?"
+    },
+    {
+     "caseId": "fin-z-027",
+     "text": "Ask me anyway.",
+     "reference": "By the way, may I ask",
+     "path": "model",
+     "note": "顺便问一下→Ask me anyway"
+    },
+    {
+     "caseId": "fin-z-028",
+     "text": "Saying Truth",
+     "reference": "To be honest",
+     "path": "model",
+     "note": "说实话→Saying Truth，不自然"
+    },
+    {
+     "caseId": "fin-z-029",
+     "text": "well",
+     "reference": "Okay.",
+     "path": "model",
+     "note": "好的→well，改义"
+    },
+    {
+     "caseId": "fin-z-030",
+     "text": "a word determined.",
+     "reference": "It's a deal.",
+     "path": "model",
+     "note": "一言为定→a word determined"
+    },
+    {
+     "caseId": "fin-z-031",
+     "text": "No guest",
+     "reference": "Don't be polite.",
+     "path": "model",
+     "note": "别客气→No guest"
+    },
+    {
+     "caseId": "fin-z-032",
+     "text": "Tired",
+     "reference": "Sorry for the trouble.",
+     "path": "model",
+     "note": "受累了→Tired"
+    },
+    {
+     "caseId": "fin-z-036",
+     "text": "Unhosted",
+     "reference": "You are welcome.",
+     "path": "model",
+     "note": "不客气→Unhosted"
+    },
+    {
+     "caseId": "fin-z-037",
+     "text": "I see",
+     "reference": "Let me take a look.",
+     "path": "model",
+     "note": "我看看→I see"
+    },
+    {
+     "caseId": "fin-z-038",
+     "text": "Good effort",
+     "reference": "Work hard.",
+     "path": "model",
+     "note": "好好努力→Good effort"
+    },
+    {
+     "caseId": "fin-z-039",
+     "text": "Please slowly.",
+     "reference": "Enjoy your meal.",
+     "path": "model",
+     "note": "请慢用→Please slowly"
+    },
+    {
+     "caseId": "fin-z-040",
+     "text": "Welcome to visit",
+     "reference": "Welcome.",
+     "path": "model",
+     "note": "欢迎光临→Welcome to visit，不自然"
+    },
+    {
+     "caseId": "fin-z-041",
+     "text": "First Going",
+     "reference": "I'm heading off first.",
+     "path": "model",
+     "note": "先走了→First Going"
+    },
+    {
+     "caseId": "fin-z-042",
+     "text": "Back to contact",
+     "reference": "Let's keep in touch.",
+     "path": "model",
+     "note": "回头联系→Back to contact"
+    },
+    {
+     "caseId": "fin-z-048",
+     "text": "The next night.",
+     "reference": "the evening of the day after tomorrow",
+     "path": "model",
+     "note": "后天晚上→The next night，改义"
+    },
+    {
+     "caseId": "fin-z-055",
+     "text": "Last afternoon",
+     "reference": "the afternoon of the day before yesterday",
+     "path": "model",
+     "note": "前天下午→Last afternoon，改义"
+    },
+    {
+     "caseId": "fin-z-057",
+     "text": "Before Wednesday",
+     "reference": "before next Wednesday",
+     "path": "model",
+     "note": "下周三→Before Wednesday，丢失「下」"
+    },
+    {
+     "caseId": "fin-z-058",
+     "text": null,
+     "reference": "from 3 to 5 p.m.",
+     "path": "template",
+     "note": "回退未被标注为合理：time-2 / 模板给出 from 3 p.m. to 5 o'clock，被时间检查误判（o'clock 未识别）"
+    },
+    {
+     "caseId": "fin-z-062",
+     "text": "Payment with micro-scans.",
+     "reference": "Scan the QR code to pay with WeChat.",
+     "path": "model",
+     "note": "微信→micro-scans，品牌丢失"
+    },
+    {
+     "caseId": "fin-z-065",
+     "text": null,
+     "reference": "Gogaku is updated to v1.4.2.",
+     "path": "structural-reject",
+     "note": "回退未被标注为合理：length-2 / 「Gogaku is updated to v1.4.2.」被长度比率误判（品牌／版本号未排除）"
+    },
+    {
+     "caseId": "fin-z-068",
+     "text": "Send the design text to Figma.",
+     "reference": "Send the design file to Figma.",
+     "path": "model",
+     "note": "设计稿→design text"
+    },
+    {
+     "caseId": "fin-z-069",
+     "text": "I bought it on the wallet, tomorrow comes.",
+     "reference": "I bought it on Taobao; it arrives tomorrow.",
+     "path": "model",
+     "note": "淘宝→wallet，品牌丢失"
+    },
+    {
+     "caseId": "fin-z-070",
+     "text": "This machine is installed in macOS.",
+     "reference": "This machine runs macOS.",
+     "path": "model",
+     "note": "装的是→is installed in，改义"
+    },
+    {
+     "caseId": "fin-z-073",
+     "text": "My phone has no electricity.",
+     "reference": "My phone battery is almost dead.",
+     "path": "model",
+     "note": "快没电→has no electricity"
+    },
+    {
+     "caseId": "fin-z-077",
+     "text": "Do you receive credit cards?",
+     "reference": "Do you accept credit cards?",
+     "path": "model",
+     "note": "收→receive，应为accept"
+    },
+    {
+     "caseId": "fin-z-080",
+     "text": "Air conditioning is bad.",
+     "reference": "The air conditioning is broken again.",
+     "path": "model",
+     "note": "又坏了→is bad，丢失「又」"
+    },
+    {
+     "caseId": "fin-z-081",
+     "text": "She took her children after she left work.",
+     "reference": "She will pick up the kids after work.",
+     "path": "model",
+     "note": "接孩子→took her children，时态改义"
+    },
+    {
+     "caseId": "fin-z-084",
+     "text": "The restaurant is not operating on Monday.",
+     "reference": "The restaurant is closed on Mondays.",
+     "path": "model",
+     "note": "不营业→not operating，不自然"
+    },
+    {
+     "caseId": "fin-z-087",
+     "text": "Please park the car behind the floor.",
+     "reference": "Please park the car behind the building.",
+     "path": "model",
+     "note": "楼→floor，改义"
+    },
+    {
+     "caseId": "fin-z-091",
+     "text": "Turn the second red green light to the left.",
+     "reference": "Turn left at the second traffic light.",
+     "path": "model",
+     "note": "Turn the second red green light to the left"
+    },
+    {
+     "caseId": "fin-z-092",
+     "text": "I'm not sure that the store will not open today.",
+     "reference": "I am not sure whether the store is open today.",
+     "path": "model",
+     "note": "开不开→will not open，否定错误"
+    },
+    {
+     "caseId": "fin-z-095",
+     "text": "The conference room also requires two chairs.",
+     "reference": "The meeting room needs two more chairs.",
+     "path": "model",
+     "note": "还需要→also requires，丢失「更多」"
+    },
+    {
+     "caseId": "fin-z-096",
+     "text": "My flight landed tomorrow at 6:45 pm.",
+     "reference": "My flight lands at 6:45 p.m. tomorrow.",
+     "path": "model",
+     "note": "landed tomorrow，时态矛盾"
+    },
+    {
+     "caseId": "fin-z-098",
+     "text": "Please keep the documents in order to be needed.",
+     "reference": "Please keep the receipt in case you need it.",
+     "path": "model",
+     "note": "收据→documents，以备需要→直译"
+    },
+    {
+     "caseId": "fin-z-099",
+     "text": "The kids watch movies in the living room.",
+     "reference": "The kids are watching cartoons in the living room.",
+     "path": "model",
+     "note": "动画片→movies"
+    }
+   ]
+  }
+ },
+ "risk": {
+  "total": 32,
+  "violations": [
+   {
+    "caseId": "en-sentence",
+    "text": "我明天会面。",
+    "missing": [
+     "one-of:会议|开会"
+    ],
+    "forbidden": [],
+    "label": "fail"
+   },
+   {
+    "caseId": "en-typo-sentence",
+    "text": "我明天有一个聚会。",
+    "reason": "typo-or-unknown was translated",
+    "label": "fail"
+   },
+   {
+    "caseId": "zh-bank",
+    "text": "Banking",
+    "missing": [],
+    "forbidden": [],
+    "label": "fail"
+   },
+   {
+    "caseId": "zh-condition",
+    "text": "If it rains, we cancell the meeting.",
+    "missing": [],
+    "forbidden": [],
+    "label": "fail"
+   },
+   {
+    "caseId": "zh-phrase",
+    "text": "The Meeting",
+    "missing": [],
+    "forbidden": [],
+    "label": "fail"
+   }
+  ],
+  "preservedExpected": [
+   {
+    "caseId": "en-typo-sentence",
+    "action": "candidate",
+    "path": "model"
+   },
+   {
+    "caseId": "en-typo-word",
+    "action": "preserve",
+    "path": "runtime-preserve"
+   },
+   {
+    "caseId": "en-unknown",
+    "action": "preserve",
+    "path": "runtime-preserve"
+   }
+  ],
+  "gatePassed": false
+ },
+ "probes": {
+  "cases": {
+   "probe-e-01": {
+    "source": "adress",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "adress"
+   },
+   "probe-e-02": {
+    "source": "recieve",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "recieve"
+   },
+   "probe-e-03": {
+    "source": "asdfgh",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "asdfgh"
+   },
+   "probe-e-04": {
+    "source": "https://example.com/x",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "url-only",
+    "text": "https://example.com/x"
+   },
+   "probe-e-05": {
+    "source": "v3.2.1",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "version-only",
+    "text": "v3.2.1"
+   },
+   "probe-e-06": {
+    "source": "ChatGPT",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "ChatGPT"
+   },
+   "probe-e-07": {
+    "source": "macOS",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "macOS"
+   },
+   "probe-e-08": {
+    "source": "12345",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "no-letters",
+    "text": "12345"
+   },
+   "probe-e-09": {
+    "source": "www.example.com",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "url-only",
+    "text": "www.example.com"
+   },
+   "probe-e-10": {
+    "source": "teh",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "teh"
+   },
+   "probe-e-11": {
+    "source": "QWERTYUIOP",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "QWERTYUIOP"
+   },
+   "probe-e-12": {
+    "source": "This is a deliberately very long English input that goes well beyond any reasonable candidate length for an input method learning mode, and it keeps going with more clauses, more examples, and more filler so that the runtime length limit has to decide what to do instead of sending it to a translation model.",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "over-length",
+    "text": "This is a deliberately very long English input that goes well beyond any reasonable candidate length for an input method learning mode, and it keeps going with more clauses, more examples, and more filler so that the runtime length limit has to decide what to do instead of sending it to a translation model."
+   },
+   "probe-z-01": {
+    "source": "woxihuanni",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "woxihuanni"
+   },
+   "probe-z-02": {
+    "source": "https://example.com/x",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "url-only",
+    "text": "https://example.com/x"
+   },
+   "probe-z-03": {
+    "source": "v2.0",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "version-only",
+    "text": "v2.0"
+   },
+   "probe-z-04": {
+    "source": "chatgpt",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "chatgpt"
+   },
+   "probe-z-05": {
+    "source": "1234567890",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "no-letters",
+    "text": "1234567890"
+   },
+   "probe-z-06": {
+    "source": "qwerty",
+    "action": "candidate",
+    "path": "model",
+    "reason": null,
+    "text": "Qwerty"
+   },
+   "probe-z-07": {
+    "source": "KKKKK",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "unknown-word",
+    "text": "KKKKK"
+   },
+   "probe-z-08": {
+    "source": "。",
+    "action": "preserve",
+    "path": "runtime-preserve",
+    "reason": "no-letters",
+    "text": "。"
+   },
+   "probe-z-09": {
+    "source": "嗯嗯嗯嗯嗯嗯",
+    "action": "fallback-original",
+    "path": "structural-reject",
+    "reason": "repeat",
+    "text": "嗯嗯嗯嗯嗯嗯"
+   },
+   "probe-z-10": {
+    "source": "谢谢谢谢",
+    "action": "candidate",
+    "path": "model",
+    "reason": null,
+    "text": "Thank you"
+   },
+   "probe-z-11": {
+    "source": "ok",
+    "action": "candidate",
+    "path": "model",
+    "reason": null,
+    "text": "OK"
+   },
+   "probe-z-12": {
+    "source": "asdf 中文",
+    "action": "fallback-original",
+    "path": "structural-reject",
+    "reason": "length-2",
+    "text": "asdf 中文"
+   }
+  },
+  "actions": {
+   "preserve": 19,
+   "candidate": 3,
+   "fallback-original": 2
+  }
+ },
+ "latency": {
+  "short-expression": {
+   "budgetMs": 500.0,
+   "count": 1035,
+   "p50": 153.5,
+   "p95": 353.8,
+   "max": 551.2,
+   "overBudget": 2,
+   "overBudgetRecords": [
+    {
+     "caseId": "en-url",
+     "round": 1,
+     "waitMs": 551.2,
+     "overMs": 51.19,
+     "path": "model"
+    },
+    {
+     "caseId": "fin-e-096",
+     "round": 2,
+     "waitMs": 523.2,
+     "overMs": 23.22,
+     "path": "model"
+    }
+   ],
+   "gatePassed": true
+  },
+  "short-sentence": {
+   "budgetMs": 2000.0,
+   "count": 245,
+   "p50": 362.7,
+   "p95": 527.7,
+   "max": 989.5,
+   "overBudget": 0,
+   "overBudgetRecords": [],
+   "gatePassed": true
+  }
+ },
+ "paths": {
+  "model": {
+   "count": 1010,
+   "p95": 416.7
+  },
+  "template": {
+   "count": 30,
+   "p95": 0.2
+  },
+  "structural-reject": {
+   "count": 65,
+   "p95": 723.0
+  },
+  "runtime-preserve": {
+   "count": 105,
+   "p95": 0.1
+  },
+  "resource": {
+   "count": 70,
+   "p95": 0.1
+  }
+ },
+ "labelCoverage": {
+  "missing": [],
+  "labelled": 228,
+  "blocked": false
+ },
+ "gates": {
+  "quality": false,
+  "risk": false,
+  "latency": true,
+  "labels": true,
+  "stable": true
+ },
+ "passed": false
+}

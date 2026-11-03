@@ -479,7 +479,7 @@ class Pipeline:
     """一条固定路线：资源 → 模板 → 品牌 → 模型候选 → 反向评分 → 结构检查。"""
 
     def __init__(self, resources, templates, brands, structure, generate, score,
-                 lambdas=None, preserve=None, score_always=False):
+                 lambdas=None, preserve=None, score_always=False, beams=None):
         self.resources = resources
         self.templates = templates
         self.brands = brands
@@ -492,6 +492,10 @@ class Pipeline:
         self.preserve = preserve or PreserveDetector()
         # 开发数据采集：λ=0 也要取反向分数，供离线选 λ（不重复推理）。
         self.score_always = score_always
+        # 解码分桶：{桶: (beam, 候选数)}；默认短表达 2/2、短句 5/3。
+        self.beams = {'short-expression': (2, 2), 'short-sentence': (5, 3)}
+        if beams:
+            self.beams.update({k: tuple(v) for k, v in beams.items()})
 
     def _direct(self, direction, source, target, kind, extra=None):
         required = self.brands.required(source)
@@ -573,8 +577,7 @@ class Pipeline:
         stage('lookup', look_start)
 
         # 4) 模型候选
-        width = input_width(source)
-        beam, num = (2, 2) if bucket == 'short-expression' else (5, 3)
+        beam, num = self.beams[bucket]
         request = {'id': case.get('id'), 'direction': direction, 'source': source,
                    'kind': case.get('kind'), 'beam': beam, 'numHypotheses': num}
         gen_ns = time.perf_counter_ns()

@@ -180,3 +180,35 @@ python3 scripts/summarize-translation-backends.py --run-dir probes/results/trans
 ```
 
 扩展探针每方向 4 条，没有人工参考，不报告语义质量分数；quickmt 扩展方向本轮未下载、未实测。`--allow-short-run` 只用于烟测，不能作为正式成绩。
+
+## 翻译组合策略验收（2026-11-04）
+
+固定路线「运行时保留判定 → 品牌映射 → 审核表达资源 → 双向时间模板 → small100 多候选 → 结构检查 → quickmt 反向评分」的评测入口。结论与证据见[翻译组合策略决定](../docs/translation-strategy-decision.md)与[首轮验收报告](results/translation-strategy-final/report.md)。
+
+```sh
+# 1) 构建审核资源（需要 CC-CEDICT 与 jieba 缓存；输出 resources/translation/）
+python3 scripts/build-translation-expressions.py
+python3 scripts/build-translation-expressions.py --print   # 只打印供人工复核
+
+# 2) 开发数据采集：候选＋反向分数各取一次（λ=0 也采集，供离线选 λ）
+python3 probes/benchmark-translation-strategy.py \
+  --cases risk,holdout,short,confirm --rounds 1 --allow-short-run --collect-scores \
+  --output-dir probes/results/translation-strategy-dev --force
+python3 scripts/select-translation-lambda.py \
+  --requests probes/results/translation-strategy-dev/requests.jsonl \
+  --labels probes/results/translation-strategy-dev/labels.json \
+  --output probes/results/translation-strategy-dev/lambda-selection.json
+
+# 3) 封板后跑一次验收（λ、资源、模板、品牌表、编排代码与 dylib 哈希绑定）
+python3 probes/benchmark-translation-strategy.py --cases final,risk --rounds 5 \
+  --lambda-file probes/results/translation-strategy-freeze.json \
+  --output-dir probes/results/translation-strategy-final --force
+python3 scripts/summarize-translation-strategy.py \
+  --run probes/results/translation-strategy-final \
+  --labels probes/results/translation-strategy-final/final-labels.json \
+  --output probes/results/translation-strategy-final/acceptance.json
+```
+
+边界：`translation_strategy.py` 与驱动只在隔离辅助进程里编排，不接入生产 C ABI、不改设置与输入行为。驱动校验封板哈希，策略文件改动后必须重新封板并重跑，不能沿用旧验收。汇总要求每条放行译文都有语义标注（缺一即 `blocked`），并把回退、错误放行、分路径与超预算记录分开统计。
+
+

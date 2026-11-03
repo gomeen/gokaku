@@ -1,0 +1,18 @@
+ok: short-set-loaded
+ok: over-budget-cannot-pass
+ok: missing-review-cannot-complete
+ok: known-error-not-qualified
+ok: preserve-labels-not-detection
+ok: summarizer-dataset-assertion
+ok: partial-round-cannot-complete
+ok: translation resources are hashed, attributed and duplicate-free
+Traceback (most recent call last):
+  File "/Users/gomeen/code/gomeen/gogaku/scripts/validate-translation-eval.py", line 639, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/Users/gomeen/code/gomeen/gogaku/scripts/validate-translation-eval.py", line 632, in main
+    fn()
+    ~~^^
+  File "/Users/gomeen/code/gomeen/gogaku/scripts/validate-translation-eval.py", line 549, in test_brand_consistency
+    raise AssertionError("brands.tsv preserve entries missing from C++ scan: %s" % missing)
+AssertionError: brands.tsv preserve entries missing from C++ scan: ['Docker']

@@ -13,11 +13,13 @@
   非标签义项之后；alt-of 义项整条剔除（与正文重复）。
 - 词性层（2026-11-03 用户裁决「单字也要显示词性」）：Wiktionary 字条目
   （pos=character）与 name 等无合格词性词条不再纯释义，改用 jieba 词库
-  （MIT，348k 条、词频排序）取该字最高频词条的词性标注，映射为缩写前缀
-  （n.／v.／adj.／adv.／pron.／cl.／part. 等），每条义项带前缀。
-- 覆盖补缺（2026-11-03）：Wiktionary 缺失的单字（軍→军类软重定向无义项）
-  用 CC-CEDICT（CC BY-SA 4.0，当前 dump）的简体单字条目补义项，
-  义项按 / 分条取前 2，同标词性前缀，青简样式「n. army · n. military」。
+  （MIT，348k 条、词频排序）取同形最高频词条的词性标注，映射为缩写前缀
+  （n.／v.／adj.／adv.／pron.／cl.／part. 等），每条义项带前缀；
+  2026-11-03 扩展到多字词（jieba 词表含十余万多字词条）。
+- 覆盖补缺（2026-11-03）：Wiktionary 缺失的词（单字軍→军类软重定向无义项，
+  以及拼音词库常用词组在 Wiktionary 无词条的）用 CC-CEDICT（CC BY-SA 4.0，
+  当前 dump）的简体条目补义项，义项按 / 分条取前 2，同标词性前缀，
+  青简样式「n. army · n. military」。量词组合（两个/一条类）与专名不强补。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
 - 注释清洗 v7（2026-11-03 用户裁决不显示括号）：括号内容一律移除；
@@ -217,8 +219,9 @@ def presentable(text: str) -> bool:
 
 
 def load_jieba_pos(path: Path | None) -> dict[str, str]:
-    """jieba 词库（词 频率 词性）→ 单字 → 展示缩写。取该字最高频词条的词性：
-    军→n.、高→adj.、你→pron.、个→cl.、了→part.、均→adv.。只收单 CJK 字。"""
+    """jieba 词库（词 频率 词性）→ 词 → 展示缩写。取同形最高频词条的词性：
+    军→n.、高→adj.、你→pron.、个→cl.、了→part.、均→adv.；多字词同样收录
+    （学习→v.、意思→n.，供无词性词组补标）。只收纯 CJK 词。"""
     if path is None:
         return {}
     best: dict[str, tuple[int, str]] = {}
@@ -227,7 +230,7 @@ def load_jieba_pos(path: Path | None) -> dict[str, str]:
         if len(parts) != 3:
             continue
         word, freq_s, tag = parts
-        if len(word) != 1 or not ("\u3400" <= word <= "\u9fff"):
+        if not word or len(word) > 16 or not all("\u3400" <= c <= "\u9fff" for c in word):
             continue
         label = JIEBA_LABELS.get(tag)
         if not label:
@@ -241,10 +244,11 @@ def load_jieba_pos(path: Path | None) -> dict[str, str]:
     return {w: label for w, (_, label) in best.items()}
 
 
-def load_cedict_single(path: Path | None) -> dict[str, list[str]]:
-    """CC-CEDICT（繁 簡 [拼音] /释义1/释义2/…）→ 简体单字 → 义项列表（≤2）。
-    跳过 CL: 量词搭配、see 交叉引用、variant of 字形指代、空条；
-    每条义项先过括号／首项／presentable 清洗（与 Wiktionary 同规则）。"""
+def load_cedict_words(path: Path | None) -> dict[str, list[str]]:
+    """CC-CEDICT（繁 簡 [拼音] /释义1/释义2/…）→ 简体词 → 义项列表（≤2）。
+    覆盖补缺源：单字与多字词都收（2026-11-03 从单字扩展到全部缺失词）。
+    跳过 CL: 量词搭配、see 交叉引用、variant of 字形指代、used in 用法注记、
+    空条；每条义项先过括号／首项／presentable 清洗（与 Wiktionary 同规则）。"""
     if path is None:
         return {}
     opener = gzip.open if path.suffix == ".gz" else open
@@ -257,8 +261,8 @@ def load_cedict_single(path: Path | None) -> dict[str, list[str]]:
             if not m:
                 continue
             simplified = m.group(2)
-            if len(simplified) != 1 or not ("\u3400" <= simplified <= "\u9fff"):
-                continue  # 只补 Wiktionary 缺失的单字，双字词覆盖不动
+            if not simplified or len(simplified) > 16 or not all("\u3400" <= c <= "\u9fff" for c in simplified):
+                continue  # 只补纯 CJK 词键
             for gloss in m.group(4).strip("/").split("/"):
                 gloss = gloss.strip()
                 if not gloss or gloss.startswith(("CL:", "see ", "arch.", "used in ", "old variant of")):
@@ -299,7 +303,7 @@ def main() -> None:
     source = Path(args[0])
     opener = gzip.open if source.suffix == ".gz" else open
     jieba_pos = load_jieba_pos(jieba_path)
-    cedict_single = load_cedict_single(cedict_path)
+    cedict_words = load_cedict_words(cedict_path)
     entries: dict[str, list[tuple[bool, str]]] = {}
     with opener(source, "rt", encoding="utf-8", errors="replace") as stream:
         for line in stream:
@@ -322,10 +326,10 @@ def main() -> None:
             for item in found:
                 if item not in bucket:
                     bucket.append(item)
-    # 覆盖补缺：Wiktionary 缺失的单字（軍→军 软重定向无义项这类）用
+    # 覆盖补缺：Wiktionary 缺失的词（软重定向单字＋拼音词库常用词组）用
     # CC-CEDICT 义项＋jieba 词性合成条目，每条义项带词性前缀（青简样式）。
     supplement = 0
-    for key, glosses in cedict_single.items():
+    for key, glosses in cedict_words.items():
         if key in entries:
             continue
         label = jieba_pos.get(key, "n.")
@@ -340,10 +344,10 @@ def main() -> None:
     out = ROOT / "resources" / "gloss.tsv"
     out.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# gloss.tsv — 词性＋译文注释（Wiktionary/wiktextract，CC BY-SA 4.0；",
-             "# 单字词性层 jieba（MIT）；Wiktionary 缺失单字由 CC-CEDICT（CC BY-SA 4.0）补义项）",
+             "# 词性层 jieba（MIT）；Wiktionary 缺失词（单字＋词组）由 CC-CEDICT（CC BY-SA 4.0）补义项）",
              f"# 来源：kaikki.org Chinese 提取；文件 {source.name} sha256={sha256(source)}",
              (f"# 词性层：jieba dict.txt sha256={sha256(jieba_path)}" if jieba_path else "# 词性层：未提供"),
-             (f"# 补缺源：CC-CEDICT {cedict_path.name} sha256={sha256(cedict_path)}" if cedict_path else "# 补缺源：未提供"),
+             (f"# 补缺源：CC-CEDICT {cedict_path.name} sha256={sha256(cedict_path)}（单字与词组）" if cedict_path else "# 补缺源：未提供"),
              "# 义务：署名 Wiktionary／CC-CEDICT 贡献者、声明修改、衍生数据按 CC BY-SA 4.0 分发、不添加额外限制",
              f"# 规则：每词最多 {MAX_SENSES_PER_WORD} 条简短义项（单条 ≤{MAX_SENSE_LEN} 字符，超长整条剔除）；",
              "# character 词条词性由 jieba 补标；结构化标签不透传；非标签义项优先。"]
@@ -394,15 +398,15 @@ def main() -> None:
                               "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"}} if cedict_path else {}),
         },
         "entry_count": len(entries),
-        "single_char_supplement": supplement,
-        "cleaningRules": {"version": "v8", "date": "2026-11-03",
+        "supplement_count": supplement,
+        "cleaningRules": {"version": "v8.1", "date": "2026-11-03",
                           "rules": ["括号内容一律移除", "分号同义枚举只取首项",
                                     "synonym of/alternative form of 等字形指代义项剔除",
                                     "单条≤36字符静默词边界截断(截断态即行尾)",
                                     "拼接总长≤46字符",
                                     "分隔符统一为点号·",
-                                    "词性层：jieba 补标 character 等无词性词条",
-                                    "覆盖补缺：Wiktionary 缺失单字由 CC-CEDICT+jieba 合成"],
+                                    "词性层：jieba 补标无词性词条（含多字词）",
+                                    "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }

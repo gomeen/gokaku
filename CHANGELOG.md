@@ -38,6 +38,13 @@
 
 - **括号内容一律移除**（含短括号与未闭合残尾，用户确认不显示括号）——(geography) 类消歧说明不再出现在候选行；**synonym of／alternative form of 等字形指代义项剔除**（并 的「synonym of 太原」不再出现）；截断态义项即行尾且截断点悬空虚词（a/of/the）一并去掉（屏 行 "…gate of a · wall" 不再出现）。fast 全过。
 
+### 变更（构建 18 追加：翻译加固层第二片与组合策略首轮验收）
+
+- **加固层第二片（共享 C++，`translate_safety_test` 76 项断言）**：时间检查改为逐条「数值＋时段」对比——合法区间（上午九点到下午四点）不再误判、英文动词 `am` 不再当午前标记、未被时间表达解释的数字必须保留且顺序不变（新增返回码 4）；合法叠词（看看／试试／哈哈／多多少少／一个一个）不再当复读；脚本校验与长度比率排除 URL 跨度；句首已知品牌（29 个无歧义专名）进入保护扫描，与审阅品牌表双向一致。ASan／UBSan quick 冒烟 2000 序列无错误。
+- **组合策略首轮验收（只评策略，不接生产）**：固定路线「运行时保留判定 → 品牌映射 → 审核表达资源 → 双向时间模板 → small100 候选（短表达 beam=2／短句 beam=5，最多 2／3 候选）→ 结构检查 → quickmt 反向评分 → 排序」。新增 `resources/translation/`（CC-CEDICT 衍生审核资源：en→zh 180 条、zh→en 300 条，103 条复核改写；双向时间模板；品牌处理表；manifest 记录来源哈希与许可）、`probes/translation_strategy.py`、`probes/benchmark-translation-strategy.py`、`scripts/build-translation-expressions.py`、`scripts/select-translation-lambda.py`、`scripts/summarize-translation-strategy.py`，以及 worker 的多候选生成与 `score_batch` 反向评分协议。
+- **结果：未通过，学习模式继续关闭。** 冻结验收集（每方向 100 条应译＋12 条未标注保留探针，运行前冻结并与四个开发集去重）上 en→zh 合格 46.0%、zh→en 53.0%（门槛 95%），错误放行 47／44 条；资源路径 8/9、模板 5/6、模型路径 86/176；短表达 p95 354ms、短句 p95 528ms（达标）；固定风险集 5 条意义破坏进入候选。反向评分只在 en→zh 有效（λ=0.25），zh→en 按预先规定的退出路径 λ=0。新发现受保护串污染语言／长度统计导致 5 条正确译文被误拒，本轮未追改封板证据。决定见 [翻译组合策略决定](docs/translation-strategy-decision.md)，证据见[首轮验收报告](probes/results/translation-strategy-final/report.md)。
+- **评测回归锁扩到 11 项**：资源哈希／署名／去重、品牌表与 C++ 扫描一致、验收集冻结与去重、验收证据自洽（缺标注即 blocked、门槛算术、风险集与轮次稳定性），已接入 verify fast 与 release 档。
+
 ### 修复（构建 8–10 追加）
 
 - **候选窗注释英文降部被裁（g／y／j／p 尾钩只留短桩）**：`.usesLineFragmentOrigin` 绘制路径的墨迹裁切线在矩形底边，而基线位于字体 boundingRect 上升高度处——默认行框高度小于「基线＋降部」，尾钩被裁平（实测裁切边界不随行框高度变化，增大高度不超过基线＋降部时同样被裁）。修复：保持行框顶（基线不变），矩形高度扩到字体 boundingRect，裁切边界随之下移；离线 2x 渲染逐像素对齐验证基线零位移、尾钩完整；渲染回归 58 项、fast 档全过。

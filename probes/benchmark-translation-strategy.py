@@ -252,7 +252,9 @@ def main():
         generate=lambda request: generate_request(generate_worker, request),
         score=lambda payload: score_request(scorer_worker, payload) if scorer_worker else (None, 0.0),
         lambdas=lambdas,
-        score_always=args.collect_scores)
+        score_always=args.collect_scores,
+        beams={'short-expression': (args.beam_short, min(2, args.beam_short)),
+               'short-sentence': (args.beam_long, min(3, args.beam_long))})
 
     # 预热（不计入延迟）
     warm = cases[:2]

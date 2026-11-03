@@ -35,3 +35,18 @@ Gogaku 英文候选词表与释义注释数据 — 署名与许可说明
      词性缩写），为衍生数据。
    - 义务：ShareAlike 只约束本数据文件本身；本文件以纯文本独立分发
      （mere aggregation），不并入任何主张数据库权的数据库。
+
+3. resources/translation/expressions.tsv（翻译表达资源，尚未随安装包分发）
+   - 来源：CC-CEDICT 当前 dump（MDBG 发布；版本 2026-11-02，125,356 条；
+     文件哈希见 resources/translation/manifest.json），选词依据为
+     resources/translation/selection-seeds.txt 的类别清单与 jieba 词频
+     （MIT，github.com/fxsjy/jieba）；英文侧排序参考 resources/english-words.txt。
+   - CC-CEDICT 为 CC BY-SA 4.0；本衍生数据按 CC BY-SA 4.0 分发
+     （见 Licenses/CC-BY-SA-4.0.txt）。
+     署名：CC-CEDICT contributors / MDBG
+     <https://www.mdbg.net/chinese/dictionary?page=cc-cedict>
+     声明修改：按义项组数（≤3）、英文唯一性、词频与专名规则筛选，
+     并逐条人工复核（改写与否决记录见 resources/translation/review-log.tsv）；
+     只保留词／短语级表达，不生成句对。
+   - 本文件当前只用于隔离评测辅助进程；学习模式与生产翻译辅助进程未接入，
+     因此不随安装包分发。引入随包分发时须同步更新 docs/third-party.md。
