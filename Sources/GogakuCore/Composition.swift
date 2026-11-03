@@ -149,7 +149,8 @@ public final class CompositionSession {
         guard sources.indices.contains(index) else { return }
         translationNeeded?(view.stamp, sources[index])
     }
-    /// quickmt 成功结果进入候选；开发版资源在注释尾部带固定标注。
+    /// quickmt 成功结果进入候选；英→中源文即预编辑行本身，注释重复为冗余
+    /// （2026-11 用户反馈）留空；中→英由控制器用 quickmt 译文覆盖注释。
     /// approved 由调用方按裁决传入：开发版豁免（resource == quickmt-ct2-dev）
     /// 之外的资源仍只接受经审核资源清单批准的结果。
     public func receive(_ result: TranslationResult, approved: Bool) {
@@ -157,9 +158,8 @@ public final class CompositionSession {
               let target = result.target, !target.isEmpty,
               let source = sources.first(where: { $0.id == result.sourceID && $0.text == result.source }) else { return }
         guard !view.candidates.contains(where: { $0.sourceID == source.id }) else { return }
-        let label = result.resource == LearningTranslation.resourceID ? " · quickmt 开发版" : ""
         view.candidates.append(Candidate(stamp: view.stamp, sourceID: source.id, source: source.text, range: source.range,
-                                         target: target, explanation: source.text + label, resource: result.resource))
+                                         target: target, explanation: "", resource: result.resource))
         view.status = ""
     }
     /// 开发版失败路径：不创建候选、不清输入；状态行提示保留输入与原文上屏。

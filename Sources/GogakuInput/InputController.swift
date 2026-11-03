@@ -151,8 +151,15 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private var requestedSpellStamp: InputStamp?
     private var shiftTracker = ShiftClickTracker()
     /// Orca 等 Chromium 系宿主不转发 flagsChanged 的轮询兜底（验后保留，仅日志可移除）。
+    /// 学习模式下的 Shift 单击：切中→英／英→中方向（2026-11 用户裁决），
+    /// 不进普通模式的临时英文路径。
+    private func handleShiftClickInLearning() {
+        guard learningDevEnabled else { NSSound.beep(); return }
+        toggleDirection(nil)
+    }
     private lazy var shiftPoller = ShiftTapPoller { [weak self] side in
         guard let self, self.active, self.engineAvailable else { return }
+        if self.mode == .learning { self.handleShiftClickInLearning(); return }
         if let current = self.currentTarget() {
             _ = self.handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: self.target == nil)
         } else { self.suspend() }
@@ -666,7 +673,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                 // 释放沿（Shift 已松开；raw 里可能仍带其他修饰键）。
                 if shiftTracker.pressing {
                     if let side = shiftTracker.release(event) {
-                        if let current = currentTarget() {
+                        if mode == .learning {
+                            handleShiftClickInLearning()
+                        } else if let current = currentTarget() {
                             _ = handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: target == nil)
                         } else { suspend() }
                     } else {
@@ -830,17 +839,16 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         }
         view.status = snap.status
         if snap.composing {
-            // 学习中→英：预译当前页候选（高亮优先），注释与状态行随缓存刷新。
+            // 学习中→英：只预译高亮候选（2026-11 用户裁决：仅第一个显示英文）。
             if learningSwap {
                 let inPage = snap.selected - snap.page * CandidatePage.size
-                var ordered: [String] = []
-                if snap.candidates.indices.contains(inPage) { ordered.append(snap.candidates[inPage].text) }
-                for item in snap.candidates where !ordered.contains(item.text) { ordered.append(item.text) }
-                eagerBacklog = ordered.filter { translationMemory[$0] == nil }
-                // 高亮候选已有缓存时状态行即时预览（无需等预译）。
-                if snap.candidates.indices.contains(inPage),
-                   let translated = translationMemory[snap.candidates[inPage].text], view.status.isEmpty {
-                    view.status = "译文：\(translated)"
+                if snap.candidates.indices.contains(inPage) {
+                    let highlight = snap.candidates[inPage].text
+                    eagerBacklog = translationMemory[highlight] == nil ? [highlight] : []
+                    // 高亮候选已有缓存时状态行即时预览（无需等预译）。
+                    if let translated = translationMemory[highlight], view.status.isEmpty {
+                        view.status = "译文：\(translated)"
+                    }
                 }
             }
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
