@@ -269,10 +269,16 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     /// 用 requestImmediately 逐个发，避免同一服务的 latest-wins 丢请求。
     private func pumpEagerBacklog() {
         guard mode == .learning, direction == .zhToEn, eagerInFlight == nil,
-              let next = eagerBacklog.first(where: { translationMemory[$0] == nil }) else { return }
+              let next = eagerBacklog.first(where: { translationMemory[$0] == nil }) else {
+            NSLog("GogakuLearning: eager pump skip mode=%d dir=%d inflight=%d backlog=%d",
+                  mode == .learning ? 1 : 0, direction == .zhToEn ? 1 : 0,
+                  eagerInFlight != nil ? 1 : 0, eagerBacklog.count)
+            return
+        }
         eagerInFlight = next
         // 用当前组合 stamp 发起：applyEagerTranslation 以 stamp 匹配面板代次。
         let stamp = displayed?.stamp ?? InputStamp(mode: .learning, direction: .zhToEn)
+        NSLog("GogakuLearning: eager fire backlog=%d len=%d", eagerBacklog.count, next.unicodeScalars.count)
         eagerTranslator.requestImmediately(TranslationRequest(stamp: stamp, sourceID: "eager", source: next,
                                                               resource: LearningTranslation.resourceID))
     }
@@ -282,9 +288,13 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private func applyEagerTranslation(_ result: TranslationResult) {
         let finished = eagerInFlight
         eagerInFlight = nil
-        if result.error == nil, let translated = result.target, !translated.isEmpty, result.source == finished {
+        let stored = result.error == nil && result.target != nil && !result.target!.isEmpty && result.source == finished
+        if stored, let translated = result.target {
             storeTranslationMemory(result.source, translated)
         }
+        NSLog("GogakuLearning: eager done stored=%d err=%@ stampMatch=%d mem=%d",
+              stored ? 1 : 0, result.error ?? "-",
+              displayed?.stamp == result.stamp ? 1 : 0, translationMemory.count)
         defer { pumpEagerBacklog() }
         guard mode == .learning, direction == .zhToEn,
               var view = displayed, view.stamp == result.stamp, pendingEdits == 0,
