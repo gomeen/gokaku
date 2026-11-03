@@ -244,24 +244,8 @@ private final class PanelLayout {
             pageRect = .zero
         }
         var placedButtons: [Button] = []
-        if learning {
-            let style = attributes(theme.annotationFont, theme.sourceText)
-            var titles = [NSAttributedString(string: "原文上屏 ⌘↩", attributes: style)]
-            if view.stamp.direction == .zhToEn {
-                titles.append(NSAttributedString(string: "切换中文来源", attributes: style))
-            }
-            var x = m.windowPadding
-            for title in titles {
-                let width = title.widthPt + 16
-                let frame = NSRect(x: x, y: y + 4, width: width, height: m.annotationLineHeight + 8)
-                placedButtons.append(Button(frame: frame,
-                                            titleRect: NSRect(x: x + 8, y: frame.minY + 4, width: title.widthPt, height: m.annotationLineHeight),
-                                            title: title,
-                                            action: title.string.hasPrefix("原文") ? (commitOriginal ?? {}) : (switchSource ?? {})))
-                x += width + 8
-            }
-            y += m.annotationLineHeight + 16
-        }
+        // 原文上屏／切换来源按钮行已移除（2026-11 用户裁决：学习面板底部与
+        // 中→英界面保持一致）；原文上屏保留 ⌘↩ 隐藏快捷键。
         buttons = placedButtons
         if issueNotice != nil {
             noticeRect = NSRect(x: m.windowPadding, y: y, width: innerWidth, height: m.annotationLineHeight * 2)

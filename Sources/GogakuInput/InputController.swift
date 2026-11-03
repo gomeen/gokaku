@@ -726,8 +726,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             }
             return handleNormalSync(event, at: current, fieldChanged: fieldChanged)
         }
-        handleLearning(event)
-        return true
+        return handleLearning(event)
     }
 
     // MARK: - 普通模式（共享 C++ 核心）
@@ -1083,47 +1082,56 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     /// 英→中专用按键（学习中→英走普通核心路径）。快捷键与普通模式一致
     /// （2026-11 用户裁决）：数字 1–9 直接选编号候选，不再用 ⌥数字；
     /// 空格保留为英文空格输入（英语短句需要），Enter/数字选中文译文。
-    private func handleLearning(_ event: NSEvent) {
+    /// 英→中按键（学习中→英走普通核心路径）。返回是否消费。
+    /// 无输入时不拦截任何按键（2026-11 用户裁决）：仅 a–z 开始英→中缓冲，
+    /// 其余（空格、数字、标点、修饰组合、方向键…）全部透传宿主。
+    /// 有输入后：数字 1–9 选词、Enter 选中文译文、空格保留英文空格、
+    /// ⌘↩ 原文上屏、Esc 取消——与普通模式的偏差仅为输入内容含空格。
+    private func handleLearning(_ event: NSEvent) -> Bool {
         let flags = event.modifierFlags.intersection([.command, .control, .option, .shift])
-        if flags.contains(.command) {
-            if event.keyCode == 36, mode == .learning, let view = displayed, !view.raw.isEmpty {
-                commitLearningOriginal()
+        let composing = !(displayed?.raw.isEmpty ?? true)
+        if !composing {
+            if flags.intersection([.command, .control, .option]).rawValue != 0 { return false }
+            guard let text = event.characters, !text.isEmpty,
+                  !text.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }),
+                  text.unicodeScalars.allSatisfy({ (97...122).contains($0.value) }) else { return false }
+        } else {
+            if flags.contains(.command) {
+                if event.keyCode == 36, let view = displayed, !view.raw.isEmpty {
+                    commitLearningOriginal()
+                }
+                return true
             }
-            return
+            if flags.contains(.control) { return true }
         }
-        if flags.contains(.control) { return }
-        let pageDelta = pageDelta(for: event)
-        if let delta = pageDelta, let view = displayed, !view.raw.isEmpty {
+        if composing, let delta = pageDelta(for: event), let view = displayed, !view.raw.isEmpty {
             edit { try $0.page(delta) }
-            return
+            return true
         }
         let text = event.characters ?? ""
-        if (displayed?.raw.isEmpty ?? true) {
-            if !(text.count == 1 && text.unicodeScalars.allSatisfy({ (97...122).contains($0.value) })) { return }
-            if flags.contains(.option) || [36, 48, 51, 53, 115, 119, 123, 124, 125, 126, 116, 121].contains(event.keyCode) { return }
-        }
         switch event.keyCode {
-        case 53: cancelLearning(); return
-        case 51: edit { try $0.backspace() }; return
-        case 116: edit { try $0.page(-1) }; return
-        case 121: edit { try $0.page(1) }; return
-        case 125, 124: edit { $0.navigate(1) }; return
-        case 126, 123: edit { $0.navigate(-1) }; return
-        case 36: chooseCurrent(); return
+        case 53 where composing: cancelLearning(); return true
+        case 51 where composing: edit { try $0.backspace() }; return true
+        case 116 where composing: edit { try $0.page(-1) }; return true
+        case 121 where composing: edit { try $0.page(1) }; return true
+        case 125, 124 where composing: edit { $0.navigate(1) }; return true
+        case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+        case 36 where composing: chooseCurrent(); return true
         default: break
         }
         // 数字 1–9 直接选编号候选；无对应候选并入源文（普通模式超页数字的简化）。
         if let n = Int(event.charactersIgnoringModifiers ?? text), (1...CandidatePage.size).contains(n), flags.isEmpty {
             if let view = displayed, pendingEdits == 0 {
                 let index = view.page * CandidatePage.size + n - 1
-                if view.candidates.indices.contains(index) { choose(view.candidates[index]); return }
+                if view.candidates.indices.contains(index) { choose(view.candidates[index]); return true }
             }
             edit { try $0.type(text) }
-            return
+            return true
         }
-        if flags.contains(.option) { return }
-        guard !text.isEmpty, !text.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else { return }
+        if flags.contains(.option) { return true }
+        guard !text.isEmpty, !text.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else { return true }
         edit { try $0.type(text) }
+        return true
     }
 
     private func pageDelta(for event: NSEvent) -> Int? {
@@ -1451,11 +1459,13 @@ final class ToastWindow: NSPanel {
         box.layer?.masksToBounds = true
         label.font = .systemFont(ofSize: 22, weight: .medium)
         label.alignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
         box.frame = NSRect(x: 0, y: 0, width: 44, height: 36)
-        box.autoresizingMask = [.width, .height]
-        label.frame = box.bounds
-        label.autoresizingMask = [.width, .height]
         box.addSubview(label)
+        NSLayoutConstraint.activate([
+            label.centerXAnchor.constraint(equalTo: box.centerXAnchor),
+            label.centerYAnchor.constraint(equalTo: box.centerYAnchor),
+        ])
         contentView = box
     }
 
