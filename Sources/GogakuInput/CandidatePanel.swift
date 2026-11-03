@@ -140,12 +140,14 @@ private final class PanelLayout {
                                        contentWidth: contentWidth))
         }
 
-        // 2. 预编辑：已转（gloss）＋插入点＋未转（faint）
+        // 2. 预编辑：已转（gloss）＋插入点＋未转（faint）；长输入自动换行
+        //（最多 4 行，超出截头保留尾部＋省略号——2026-11 用户反馈长输入显示不全）
         let preeditText = view.preedit.isEmpty ? view.raw : view.preedit
         var preeditString: NSAttributedString?
         var caretX: CGFloat?
         var caretUTF16: Int?
         var preeditWidth: CGFloat = 0
+        var preeditLineCount = 1
         if !preeditText.isEmpty {
             let typedCount = view.stamp.mode == .normal ? min(view.typedPrefix.count, preeditText.count) : 0
             let typed = String(preeditText.prefix(typedCount))
@@ -160,6 +162,21 @@ private final class PanelLayout {
                 ], range: NSRange(location: issue.location, length: issue.length))
             }
             preeditWidth = mutable.widthPt + 2
+            preeditLineCount = max(1, Int(ceil(preeditWidth / max(maxInner, 1))))
+            if preeditLineCount > 4 {
+                // 超过 4 行：按宽度比例截去头部，再微调至合规，头部补省略号。
+                // 下划线属性随文字删除自动平移，无需单独换算。
+                let targetWidth = CGFloat(4) * maxInner
+                let remove = min(max(Int(CGFloat(mutable.length) * (1 - targetWidth / max(preeditWidth, 1))), 0),
+                                 mutable.length - 1)
+                mutable.deleteCharacters(in: NSRange(location: 0, length: remove))
+                while mutable.widthPt + 2 > targetWidth, mutable.length > 1 {
+                    mutable.deleteCharacters(in: NSRange(location: 0, length: max(1, mutable.length / 20)))
+                }
+                mutable.insert(NSAttributedString(string: "…", attributes: attributes(theme.annotationFont, theme.restText)), at: 0)
+                preeditWidth = mutable.widthPt + 2
+                preeditLineCount = 4
+            }
             preeditString = mutable
             if view.stamp.mode == .normal {
                 let offset = max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
@@ -202,10 +219,11 @@ private final class PanelLayout {
             headerRect = .zero
         }
         if preeditString != nil {
-            preeditTextRect = NSRect(x: m.windowPadding, y: y, width: innerWidth, height: m.annotationLineHeight)
+            let preeditHeight = CGFloat(preeditLineCount) * m.annotationLineHeight
+            preeditTextRect = NSRect(x: m.windowPadding, y: y, width: innerWidth, height: preeditHeight)
             preeditHitRect = NSRect(x: 0, y: y - m.topLineVerticalPadding, width: panelWidth,
-                                    height: m.annotationLineHeight + m.topLineVerticalPadding * 2)
-            y += m.annotationLineHeight + m.topLineVerticalPadding * 2
+                                    height: preeditHeight + m.topLineVerticalPadding * 2)
+            y += preeditHeight + m.topLineVerticalPadding * 2
         } else {
             preeditTextRect = .zero
             preeditHitRect = .zero

@@ -336,13 +336,18 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
 
     /// 提交替换（学习模式中→英）：中文提交文本换成 quickmt 译文上屏。
     /// 纯非 CJK 提交（原编码、英文候选）按普通语义原样上屏。
+    /// 中→英译文上屏后补一个尾随空格（2026-11 用户裁决：便于继续输入英文）。
+    private static func withTrailingSpace(_ text: String) -> String {
+        text.hasSuffix(" ") ? text : text + " "
+    }
+
     private func commitLearningSwap(_ text: String, at anchor: FocusTarget, preWriteCheck: FocusTarget?) {
         let hasCJK = text.unicodeScalars.contains {
             (0x4E00...0x9FFF).contains($0.value) || (0x3400...0x4DBF).contains($0.value)
         }
         guard hasCJK else { insertCommit(text, at: anchor, preWriteCheck: preWriteCheck); return }
         if let translated = translationMemory[text] {
-            insertCommit(translated, at: anchor, preWriteCheck: preWriteCheck)
+            insertCommit(Self.withTrailingSpace(translated), at: anchor, preWriteCheck: preWriteCheck)
             return
         }
         pendingTranslatedCommit = PendingTranslatedCommit(source: text, anchor: anchor, buffer: [])
@@ -355,9 +360,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         guard let pending = pendingTranslatedCommit, pending.source == result.source else { return }
         pendingTranslatedCommit = nil
         let translated = result.error == nil && result.target != nil && !result.target!.isEmpty
-        let text = translated ? result.target! : pending.source
+        let text = translated ? Self.withTrailingSpace(result.target!) : pending.source
         if translated {
-            storeTranslationMemory(pending.source, text)
+            storeTranslationMemory(pending.source, result.target!)
         } else {
             toast.show("译文失败，已上屏原文", anchor: freshToastAnchor())
         }
