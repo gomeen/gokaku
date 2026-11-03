@@ -152,11 +152,22 @@ python3 probes/benchmark-translation-backends.py \
   --backends small100 quickmt --directions en-zh,zh-en --cases all --rounds 5 \
   --output-dir probes/results/translation-backends --force
 python3 scripts/summarize-translation-backends.py \
+  --run-dir probes/results/translation-backends-round2 \
   --run-dir probes/results/translation-backends \
-  --review probes/results/translation-backends/semantic-review.json
+  --output-dir probes/results/translation-backends-round2 \
+  --review probes/results/translation-backends-round2/semantic-review-round2.json
 ```
 
-`--cases all` 组合 32 条风险集、200 条保留集和 8 条速度句；每轮 480 条，正式运行要求至少 5 轮。`semantic-review.json` 是本次输出的逐条审阅；重跑后输出若变化需重新审阅，不能把旧审阅硬套到新结果。worker 每请求独立 JSONL 往返，父进程分别记录模型耗时、IPC 往返和加固耗时。`requests.jsonl` 保留逐条源文哈希、token、阶段耗时和输出；`models.json` 重新计算文件 SHA256。
+`--cases all` 组合 32 条风险集、200 条保留集、88 条专项短文本（2026-11-03 起纳入，加载器有数量断言）和 8 条速度句；正式运行要求至少 5 轮。汇总支持多次 `--run-dir` 合并（第一个为主目录，提供模型身份／资源／环境；质量与延迟覆盖并集，主目录 worker pin 不一致即报错）。审阅文件（schema v2，含冻结评分规则）必须覆盖每个放行候选，缺失审阅的门槛报 `blocked-pending-review`，不会报完成；延迟预算取速度子集，任何应译请求超预算都记入 `latencyOverBudget`，缺数据报 `incomplete` 不算通过。评测管线自身回归：`python3 scripts/validate-translation-eval.py`（已接入 verify fast 档）。独立确认集运行与盲测材料生成：
+
+```sh
+python3 probes/benchmark-translation-backends.py --cases short,confirm --rounds 5 \
+  --output-dir probes/results/translation-backends-round2
+python3 scripts/make-translation-blind-comparison.py \
+  --run-dir probes/results/translation-backends-round2
+```
+
+`requests.jsonl` 保留逐条源文哈希、token、阶段耗时和输出；失败请求保留父进程等待时间与 `budgetExceededMs`；`models.json` 重新计算文件 SHA256。重跑后输出若变化需重新审阅，不能把旧审阅硬套到新结果。
 
 未来语言只做延迟/资源探针，不与中英质量结论混用：
 

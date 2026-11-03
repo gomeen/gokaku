@@ -12,9 +12,14 @@
 
 - **候选窗英文注解过长（如「你 you (the person spoken to or written to) · your」）**：注解来自 Wiktionary 逐字定义，旧规则单条 ≤64 字符上限太宽松、正文内括号消歧说明全保留，全库 11% 注解超 60 字符。清洗规则 v3（用户裁决「尽量显示全、不遗漏重要信息」，规则编码在 scripts/build-gloss-data.py 可复现）：① 义项正文内长括号消歧说明（含括号 >18 字符）整体移除、短括号保留；② 单条上限 64→36，超长改词边界截断加 …（替代旧「整条剔除」——截断显式标记不制造完整释义假象，覆盖词条 143,777→160,321）；③ 拼接总长 ≤46 字符（440pt 面板可容纳），超长只保留第一条。效果：「你 you (the person spoken to or written to) · your」→「you · your」；长度分布 p50=25/p90=35/p99=45/max=46。规则版本与产物哈希登记 gloss-sources.json（cleaningRules.v3）。
 
-### 变更（构建 12 追加：清洗规则 v3.1）
+### 变更（构建 12 追加：清洗规则 v3.1→v4）
 
 - **分号同义枚举收紧**：Wiktionary 义项常把同义词全排开（君 sovereign; monarch; ruler; chief; prince; lord），候选窗里是噪音——分号枚举 ≥3 项只保留前 2 项加 …（君 → sovereign; monarch …；菌 bacterium; germ 不变）。另修复 …（U+2026）不在 presentable 允许字符表导致主义项被整条丢弃的回归（词条 147,881→160,347）。
+
+### 变更（构建 13 追加：清洗规则 v4）
+
+- **行内省略号即行尾**：主义项被截断（以 … 结尾）时不再追加后续义项，消除「equal; uniform … · all」这类省略号夹在行中的混乱语序（用户报告）。
+- **专名词不再显示 name 前缀**：浚县/均县的「name Xun County」读感差——音译/专名自明，name 前缀与 character 条目不显示词性的口径一致（用户报告）。剩余以 name 开头的行（152 条）均为释义正文（name of a river）。
 
 ### 修复（构建 8–10 追加）
 

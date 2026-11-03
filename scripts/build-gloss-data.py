@@ -43,8 +43,9 @@ POS_ABBREV = {
     "noun": "n.", "verb": "v.", "adj": "adj.", "adv": "adv.", "pron": "pron.",
     "prep": "prep.", "conj": "conj.", "interj": "intj.", "particle": "part.",
     "classifier": "cl.", "num": "num.", "phrase": "phr.", "proverb": "prov.",
-    "name": "name",
 }
+# "name"（专名词）不作词性展示：音译/专名自明（Xun County），name 前缀是噪音
+# （2026-11-03 用户裁决），与 character 条目不显示词性的口径一致。
 # "character" 是词条类别，不进入词性缩写表：显示为纯释义。
 
 # 清洗规则 v3（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
@@ -53,6 +54,7 @@ POS_ABBREV = {
 #    截断以 … 显式标记，不制造完整释义假象）；
 # R1.5 分号同义枚举（≥3 项）只保留前 2 项加 …（主义项在前不丢主释义）。
 # R3 拼接总长超 MAX_JOINED_LEN 时只保留第一条义项。
+# R4 行内 … 即行尾：主义项截断后不再追加后续义项（省略号只出现在行尾）。
 # 规则全部编码在本脚本，重新生成数据时自动按同规则执行（可复现）。
 # 候选窗注释区约容纳 45 个拉丁字符；36 留出词性前缀余量，46 为拼接上限。
 MAX_SENSE_LEN = 36
@@ -216,12 +218,16 @@ def main() -> None:
             if len(picked) >= MAX_SENSES_PER_WORD:
                 break
         if picked:
+            # R4 行内 … 即行尾：主义项被截断（以 … 结尾）时不再追加后续义项，
+            # 避免「equal; uniform … · all」这类省略号夹在行中的混乱语序。
+            if picked[0].endswith("…"):
+                picked = picked[:1]
             joined = " · ".join(picked)
-            # R3 拼接总长上限：放下两条时丢第二条（第一条自带截断标记）
+            # R3 拼接总长上限：放下两条时丢第二条
             if len(joined) > MAX_JOINED_LEN and len(picked) > 1:
                 joined = picked[0]
-            if len(joined) > MAX_JOINED_LEN:
-                joined = joined[:MAX_JOINED_LEN - 1].rstrip(" ;:,· ") + "…"
+                if joined.endswith("…") is False and len(joined) > MAX_JOINED_LEN:
+                    joined = joined[:MAX_JOINED_LEN - 1].rstrip(" ;:,· ") + "…"
             lines.append(f"{key}\t{joined}")
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     manifest = {
@@ -235,9 +241,10 @@ def main() -> None:
                        "url": "https://kaikki.org/dictionary/Chinese/"},
         },
         "entry_count": len(entries),
-        "cleaningRules": {"version": "v3.1", "date": "2026-11-03",
+        "cleaningRules": {"version": "v4", "date": "2026-11-03",
                           "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举≥3项只留前2项+…",
-                                    "单条≤36字符词边界截断+…", "拼接总长≤46字符只保留第一条"],
+                                    "单条≤36字符词边界截断+…", "行内…即行尾(不再追加义项)",
+                                    "拼接总长≤46字符只保留第一条", "name词性不展示"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }

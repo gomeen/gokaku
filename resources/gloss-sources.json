@@ -12,17 +12,19 @@
       "url": "https://kaikki.org/dictionary/Chinese/"
     }
   },
-  "entry_count": 160347,
+  "entry_count": 160346,
   "cleaningRules": {
-    "version": "v3.1",
+    "version": "v4",
     "date": "2026-11-03",
     "rules": [
       "长括号消歧说明(>18字符)移除",
       "分号同义枚举≥3项只留前2项+…",
       "单条≤36字符词边界截断+…",
-      "拼接总长≤46字符只保留第一条"
+      "行内…即行尾(不再追加义项)",
+      "拼接总长≤46字符只保留第一条",
+      "name词性不展示"
     ],
     "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
   },
-  "output_sha256": "90ce5557413999b3962980d45b2263b52b71e90bb0c37ac200a0d175ced6f504"
+  "output_sha256": "4fd5a08ae6595f2a691f498f26d3490414b95ae60fec30e2aee18f201986dbc0"
 }

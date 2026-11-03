@@ -1,0 +1,3971 @@
+{
+ "schemaVersion": 2,
+ "reviewedAt": "2026-11-03",
+ "reviewer": "agent semantic review round 2 (risk entries carried from round 1; not a user blind test)",
+ "method": "逐条对照源文、参考译文、审阅提示与放行候选输出；按冻结评分规则判定 pass/fail。fail 附五类之一（meaning-error/omission/addition/fragment/unnatural）。每个进入候选的应译用例都有对应记录。",
+ "scoringRules": {
+  "version": 1,
+  "frozenAt": "2026-11-03",
+  "source": "validation/translation-confirm-set.json scoringRules + validation/translation-short-expressions.json referenceNote",
+  "categories": [
+   "meaning-error",
+   "omission",
+   "addition",
+   "fragment",
+   "unnatural"
+  ],
+  "rules": [
+   "允许通行同义表达与自然措辞，不要求逐字一致；参考译文不是唯一合法答案。",
+   "意义错误（改变实体、动作、主体关系或词义）、遗漏（关键实体/时间/数字/否定/条件）、增义（加入原文没有的内容）、残句（截断、复读、尾部残片、不成句）、明显不自然（合格母语者不会这样表达）记 fail 并标注类别。",
+   "孤立多义词允许最常见默认义项；孤立词输出常见译法即 pass。",
+   "人名地名音译允许通行变体；品牌与代码标识必须原样保留。",
+   "时间：数字与相对关系必须保留；不强制源文未说明的限定（『九点到五点』不要求 a.m./p.m.）。",
+   "标点（句号/叹号/全角半角）、大小写、繁简（已归一）差异不记 fail。",
+   "安全回退（加固层拦截）不是语义合格；『提供了正确译文』与『安全回退成功』分开统计。",
+   "本审阅只用于评测评分，不作为运行时安全判定输入。"
+  ]
+ },
+ "cases": {
+  "small100:zh-not-yet": {
+   "status": "pass",
+   "note": "“还没”保留为 not ... yet。"
+  },
+  "small100:zh-phrase": {
+   "status": "fail",
+   "note": "“开会”是动词短语，输出 The Meeting 名词化且缺动作，不应作为默认候选。"
+  },
+  "small100:zh-time": {
+   "status": "pass",
+   "note": "明天下午三点完整保留。"
+  },
+  "small100:zh-greeting": {
+   "status": "pass",
+   "note": "早上好。"
+  },
+  "small100:zh-contrast": {
+   "status": "pass",
+   "note": "不在上海、在北京的对比保留。"
+  },
+  "small100:zh-url": {
+   "status": "pass",
+   "note": "网址原样保留；加固因长度比率误判回退原文，属安全处置但暴露误报。"
+  },
+  "small100:zh-bank": {
+   "status": "fail",
+   "note": "Banking 是动名词/行业义，不是“银行”的默认词候选。"
+  },
+  "small100:zh-long": {
+   "status": "pass",
+   "note": "模型丢掉“半”并输出 10 a.m.；加固按时段/半点规则回退原文。"
+  },
+  "small100:zh-tomorrow": {
+   "status": "pass",
+   "note": "tomorrow。"
+  },
+  "small100:zh-names": {
+   "status": "pass",
+   "note": "Alice、Bob、北京、星期五和见面关系均保留。"
+  },
+  "small100:zh-word": {
+   "status": "pass",
+   "note": "Meeting，孤立词可接受。"
+  },
+  "small100:zh-sentence": {
+   "status": "pass",
+   "note": "I have a meeting tomorrow，主体和明天保留。"
+  },
+  "small100:zh-condition": {
+   "status": "fail",
+   "note": "条件与取消含义保留，但工具生成英语拼写错误 cancell 进入候选；按产品规则不得作为默认候选。"
+  },
+  "small100:zh-negation": {
+   "status": "pass",
+   "note": "否定发送保留。"
+  },
+  "small100:zh-mixed": {
+   "status": "pass",
+   "note": "Gogaku、v2.1、星期五之前均保留。"
+  },
+  "small100:zh-past": {
+   "status": "pass",
+   "note": "昨天去银行保留。"
+  },
+  "small100:en-mixed": {
+   "status": "pass",
+   "note": "Gogaku、v2.1、星期五之前均保留。"
+  },
+  "small100:en-phrase": {
+   "status": "pass",
+   "note": "繁体输出由 t2s 归一为“参加会议”。"
+  },
+  "small100:en-time": {
+   "status": "pass",
+   "note": "明天下午三点保留。"
+  },
+  "small100:en-greeting": {
+   "status": "pass",
+   "note": "早上好。"
+  },
+  "small100:en-long": {
+   "status": "pass",
+   "note": "模型把上午翻成下午且“30点”语病；加固按时段规则回退原文。"
+  },
+  "small100:en-typo-word": {
+   "status": "pass",
+   "note": "策略应保留错拼；模型输出“充足”不进入候选。"
+  },
+  "small100:en-tomorrow": {
+   "status": "pass",
+   "note": "明天。"
+  },
+  "small100:en-past": {
+   "status": "pass",
+   "note": "昨天去银行，过去时间保留。"
+  },
+  "small100:en-ambiguous": {
+   "status": "pass",
+   "note": "银行是合法义项之一。"
+  },
+  "small100:en-names": {
+   "status": "fail",
+   "note": "丢失 Bob，输出仍成为候选；人名对齐检查尚未接入加固层。"
+  },
+  "small100:en-word": {
+   "status": "pass",
+   "note": "会议。"
+  },
+  "small100:en-sentence": {
+   "status": "fail",
+   "note": "“我明天会见”把会议变成会见，主体关系改变且进入候选。"
+  },
+  "small100:en-url": {
+   "status": "pass",
+   "note": "网址原样保留；脚本校验把 URL 的拉丁字符计入而误判回退，属安全处置但暴露误报。"
+  },
+  "small100:en-negation": {
+   "status": "pass",
+   "note": "否定发送保留。"
+  },
+  "small100:en-unknown": {
+   "status": "pass",
+   "note": "策略应保留未知词；模型输出“同行”不进入候选。"
+  },
+  "small100:en-typo-sentence": {
+   "status": "pass",
+   "note": "策略应保留错拼句；模型猜成“聚会”不进入候选。"
+  },
+  "quickmt:zh-mixed": {
+   "status": "pass",
+   "note": "Gogaku、v2.1、星期五之前保留；多一个 the 不影响意义。"
+  },
+  "quickmt:zh-url": {
+   "status": "pass",
+   "note": "网址原样保留；长度比率误判回退，属安全处置。"
+  },
+  "quickmt:zh-bank": {
+   "status": "fail",
+   "note": "Bank of the Bank 不是“银行”的可用词候选。"
+  },
+  "quickmt:zh-sentence": {
+   "status": "fail",
+   "note": "“我明天有个会”被译成 I have a group tomorrow，会议变 group。"
+  },
+  "quickmt:zh-tomorrow": {
+   "status": "fail",
+   "note": "Tomorrow the future 加入原文没有的“未来”。"
+  },
+  "quickmt:zh-negation": {
+   "status": "pass",
+   "note": "否定发送保留。"
+  },
+  "quickmt:zh-word": {
+   "status": "fail",
+   "note": "Conferences by the 是残句，不是“会议”的可用词候选。"
+  },
+  "quickmt:zh-condition": {
+   "status": "pass",
+   "note": "条件、下雨、取消会议均保留。"
+  },
+  "quickmt:zh-phrase": {
+   "status": "fail",
+   "note": "Meetings for a 是残句，不满足“开会”的表达候选。"
+  },
+  "quickmt:zh-not-yet": {
+   "status": "pass",
+   "note": "haven't eaten yet 保留尚未。"
+  },
+  "quickmt:zh-greeting": {
+   "status": "pass",
+   "note": "Good morning to you. 语义等价。"
+  },
+  "quickmt:zh-time": {
+   "status": "fail",
+   "note": "The cast meets tomorrow at 3pm 把“开会”变成 cast meets，主体/动作偏移。"
+  },
+  "quickmt:zh-past": {
+   "status": "pass",
+   "note": "yesterday 和去银行保留。"
+  },
+  "quickmt:zh-contrast": {
+   "status": "fail",
+   "note": "He's not in Shanghai, in Beijing 缺对比连接且语法不完整；虽可猜意，不作为可直接使用的候选。"
+  },
+  "quickmt:zh-names": {
+   "status": "pass",
+   "note": "Alice、Bob、北京、星期五、见面关系保留。"
+  },
+  "quickmt:zh-long": {
+   "status": "pass",
+   "note": "10:30 a.m. 下周二、否定、Alice 均保留。"
+  },
+  "quickmt:en-unknown": {
+   "status": "pass",
+   "note": "策略应保留未知词；模型重复“美泰克”不进入候选。"
+  },
+  "quickmt:en-typo-word": {
+   "status": "pass",
+   "note": "策略应保留错拼；模型“美泰简介”不进入候选。"
+  },
+  "quickmt:en-tomorrow": {
+   "status": "fail",
+   "note": "“明天 开始”加入原文没有的“开始”。"
+  },
+  "quickmt:en-sentence": {
+   "status": "pass",
+   "note": "明天我有个会议，主体和日期保留。"
+  },
+  "quickmt:en-ambiguous": {
+   "status": "pass",
+   "note": "银行业务是合法义项之一。"
+  },
+  "quickmt:en-negation": {
+   "status": "fail",
+   "note": "否定发送保留，但尾部多出“电子邮件”残片；不应作为可直接使用的候选。"
+  },
+  "quickmt:en-word": {
+   "status": "fail",
+   "note": "会议介绍加入原文没有的“介绍”，不是“meeting”的直接词候选。"
+  },
+  "quickmt:en-url": {
+   "status": "pass",
+   "note": "网址原样保留；尾部“支持”残片触发脚本回退，属安全处置。"
+  },
+  "quickmt:en-phrase": {
+   "status": "pass",
+   "note": "“参加会议 会议”重复由加固回退原文。"
+  },
+  "quickmt:en-mixed": {
+   "status": "fail",
+   "note": "Gogaku、v2.1、星期五保留，但尾部多出“评分”残片。"
+  },
+  "quickmt:en-greeting": {
+   "status": "pass",
+   "note": "“早上好 好 好…”复读由加固判为截断/重复并回退。"
+  },
+  "quickmt:en-time": {
+   "status": "fail",
+   "note": "明天下午三点保留，但尾部多出“大家好”。"
+  },
+  "quickmt:en-typo-sentence": {
+   "status": "pass",
+   "note": "策略应保留错拼句；模型“药剂”不进入候选。"
+  },
+  "quickmt:en-long": {
+   "status": "pass",
+   "note": "下周二上午10:30、否定、Alice 均保留。"
+  },
+  "quickmt:en-names": {
+   "status": "pass",
+   "note": "爱丽丝、鲍勃、北京、星期五和见面关系保留。"
+  },
+  "quickmt:en-past": {
+   "status": "pass",
+   "note": "昨天和银行保留。"
+  },
+  "small100:enToZh-001": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-002": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "receipt 应作「收据」，「接收」是接收动作，词义错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-003": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-004": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-005": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-006": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-007": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-008": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-009": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-010": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "invoice 应作「发票」，「账单」对应 bill",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-011": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-012": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-013": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-014": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-015": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-016": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-017": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-018": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "intersection 应作「十字路口」，「跨越」词义错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-019": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-020": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-021": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-022": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-023": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-024": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "应作「休息一下」，「做一个休息」母语者不说",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-025": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-026": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-027": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "return ticket 应作「往返票/返程票」，「返回票」不通行",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-028": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "out of stock 应作「缺货」，「出库」是出货，词义错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-029": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-030": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-031": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-032": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-033": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "应作「调低音量」，「放下音量」动词搭配错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-034": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-035": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "应作「最迟星期四」，「不是星期四以后」生硬费解",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-036": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-037": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-038": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-039": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-040": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "应作「单行道」，「一个单方向街道」生硬",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-041": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-042": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-043": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "package 应作「包裹」，「包装」指外包装",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-044": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-045": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "应作「这个座位有人吗」，「是否被取了」搭配错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-046": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-047": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-048": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-049": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-050": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-051": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-052": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-053": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-054": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-055": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-056": {
+   "status": "fail",
+   "category": "omission",
+   "note": "used to 的过去含义丢失，变成现在住在车站附近",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-057": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "not Wang 误作「而不是陈」，人名错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-058": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-059": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-060": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-061": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-062": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "语境中 appointment 应作「预约」，「任命」词义错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-063": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-064": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "peanuts 应作「花生」，「豆类」改变过敏原",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-065": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-066": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-067": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-068": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-069": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-070": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-071": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-072": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-073": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "across the street 应作「在街对面」，丢「对面」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-074": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-075": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "return the book 应作「还书」，「返回书」不成搭配",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-076": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-077": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-078": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-079": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-080": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "locked 应作「锁门」，「关上门」丢锁定义",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-081": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "「全额退款」丢失，退款至原支付方式误作「返回付款方式」，条件句亦不通",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-083": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "passed 应作「通过」，「已经过去」词义错",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-084": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "appointment 应作「预约」；「原文本」应为「原件」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-086": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-087": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-088": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:enToZh-089": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "small100:zhToEn-001": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-002": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "receipt 应为 receipt，Acceptance 词义错",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-003": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "refund 应为 refund，Return 通常指退货/归还",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-004": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "deadline 应为 deadline/due date，「Date of End」不成话",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-005": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-006": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "站台 应为 platform，station 是车站",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-007": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-008": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-009": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-010": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "invoice 应为 invoice，Billing 是计费动作",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-011": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-012": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-013": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-014": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-015": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-016": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-017": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-018": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-019": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-020": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-021": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-022": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-023": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-024": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-025": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-026": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-027": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-028": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "「The lack of」残句，应为 out of stock",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-029": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-030": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-031": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-032": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-033": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "volume 应为 volume，应 turn down the volume，Low Noise 词义错",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-034": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-035": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "最迟 应为 no later than Thursday，at least Thursday 含义反转",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-036": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-037": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "文件夹 应为 folder，file 是文件",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-038": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-039": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-040": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "单行道 应为 one-way street，Single path 词义错",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-041": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-042": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-043": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-044": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-045": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-046": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-047": {
+   "status": "fail",
+   "category": "omission",
+   "note": "丢「办公(works)」，仅输出 was at home",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-048": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-049": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-050": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-051": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-052": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-053": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-054": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-055": {
+   "status": "fail",
+   "category": "omission",
+   "note": "「午夜后」误作 at midnight，丢 after 关系",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-056": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-058": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "元 误作 $，币种改变",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-059": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-060": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-061": {
+   "status": "fail",
+   "category": "addition",
+   "note": "添加源文未说明的 pm",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-062": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-063": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-064": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "花生 误作 flower，过敏原改变",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-065": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-066": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-067": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-068": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-069": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-070": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-071": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-072": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-073": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "公交车站 误作 The bus stands，且丢「对面」(across)",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-074": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-075": {
+   "status": "fail",
+   "category": "omission",
+   "note": "丢宾语 book，变成请（人）周五前返回",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-076": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-077": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-078": {
+   "status": "fail",
+   "category": "omission",
+   "note": "丢 only/只有第一次，断言范围改变",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-079": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-080": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "锁了门 误作 closed，丢锁定义",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-081": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "「（货物）还没送到」误作 If you have not been sent，主语错乱",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-083": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-084": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Maria 误作 Mary，人名改变",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-086": {
+   "status": "fail",
+   "category": "omission",
+   "note": "next Monday 丢 Monday，误作 next week",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-087": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "repaired 误作 repaid",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-088": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:zhToEn-089": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "overwrite(覆盖) 误作 cover，spreadsheet 误作 form 次要",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:enToZh-001": {
+   "status": "fail",
+   "category": "addition",
+   "note": "appointment 译成「预约咨询」，多「咨询」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-002": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "receipt 译成「收货人」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-003": {
+   "status": "fail",
+   "category": "addition",
+   "note": "refund 译成「退款处理」，多「处理」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-004": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-005": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "umbrella 译成「伞式破碎机」，完全错乱",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-006": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "platform 译成「发展历程」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-007": {
+   "status": "fail",
+   "category": "addition",
+   "note": "battery 译成「电池组」，多「组」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-008": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "medicine 译成「医药行业」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-009": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "address 译成「联系方式」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-010": {
+   "status": "fail",
+   "category": "addition",
+   "note": "invoice 译成「发票开具」，多「开具」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-011": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "luggage 译成「行李箱系列」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-012": {
+   "status": "fail",
+   "category": "addition",
+   "note": "temperature 译成「温度传感器」，多「传感器」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-013": {
+   "status": "fail",
+   "category": "addition",
+   "note": "password 译成「密码管理」，多「管理」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-014": {
+   "status": "fail",
+   "category": "addition",
+   "note": "reservation 译成「预约制」，多「制」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-015": {
+   "status": "fail",
+   "category": "addition",
+   "note": "elevator 译成「电梯系列」，多「系列」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-016": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-017": {
+   "status": "fail",
+   "category": "addition",
+   "note": "subscription 译成「订阅服务」，多「服务」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-018": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "intersection 译成「联系电话」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-019": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "discount 译成「优惠活动」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-020": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "permission 译成「授权书」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-022": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "复读不成句「预约预约服务」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-027": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "往返票译成「返回机票」，且尾部复读「返回」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-029": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部悬挂逗号残句「到这周结束时,」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-030": {
+   "status": "fail",
+   "category": "addition",
+   "note": "句尾多「,尽可能的」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-034": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-035": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-036": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "译成「保持原始文件的格式」，丢失保留文件之义",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-037": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-039": {
+   "status": "fail",
+   "category": "addition",
+   "note": "句尾多「服务」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-040": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "one-way street 译成「单向街景设计」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-041": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-043": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-044": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-046": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-047": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-048": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-050": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-053": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-054": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「价格」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-055": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-056": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-057": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-058": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-059": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-060": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-061": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-062": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "appointment 译成「任命」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-063": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-064": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-065": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-066": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-067": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-068": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-069": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-070": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-071": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-072": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-074": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-075": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-076": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-077": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-078": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-079": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-080": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-081": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-084": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "appointment 译成「任命」",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-086": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-087": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-088": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:enToZh-089": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "en-zh"
+  },
+  "quickmt:zhToEn-002": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Receipts to the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-003": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Refundable for a」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-004": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Deadlines for the End」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-005": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-006": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "站台译成「Station Stage」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-007": {
+   "status": "fail",
+   "category": "addition",
+   "note": "无端加「Spin」（Battery Spin）",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-008": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-011": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "复读「Luggage and Luggage」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-013": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-014": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "实体被换成 cast（Book a Cast）",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-015": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Elevators with」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-016": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-017": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Subscribe to the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-018": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "复读「Crossroads by Crossroads」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-019": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Discounted for the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-020": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Licensed to the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-021": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Cancel Orders to be」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-022": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-023": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-024": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Take a break from the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-025": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-026": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Unsweetened by the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-027": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-028": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-029": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-030": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-031": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「Message to the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-032": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "pay in cash 译成「Pay for the cash」，语义颠倒",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-033": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "turn down 译成「Tune the low volume」，动作错乱",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-034": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "尾部残片「At least twice the」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-035": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-036": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-037": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-038": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-039": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-040": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "one-way street 译成「Single Road」，丢失单向义",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-041": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "open 译成「hit」（can't hit the attachment）",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-042": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-043": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-044": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-045": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-046": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-047": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-048": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "「说」被换成 cast（say the cast）",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-049": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-050": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-051": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-052": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-053": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-054": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-055": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-056": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-057": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-058": {
+   "status": "fail",
+   "category": "omission",
+   "note": "丢失货币单位「元」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-059": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-060": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-061": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "实体错乱「until the cast is 7:15」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-062": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-063": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-064": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-065": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-066": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-067": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-068": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-069": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-070": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-071": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-072": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-073": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "公交车站译成「the bus」",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-074": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-075": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "还书译成「book（预订）」，动作反转",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-076": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-077": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-078": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-079": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "通话被换成 cast",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-080": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-081": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-083": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "发布对象被换成 cast（update to the cast）",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-084": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-086": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-087": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-088": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "quickmt:zhToEn-089": {
+   "status": "pass",
+   "suite": "holdout",
+   "direction": "zh-en"
+  },
+  "small100:cf-e-brand-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Microsoft Teams→『微软团队』，产品名改写",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-07": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "Teacher Wang→『老师 华』，错乱",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-name-08": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Huangshan→『华盛顿』（Washington），错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-01": {
+   "status": "pass",
+   "note": "久不见，省略但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-04": {
+   "status": "pass",
+   "note": "转向左，稍生硬但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-05": {
+   "status": "fail",
+   "category": "omission",
+   "note": "right now→『现在』，丢『马上/立刻』义",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-07": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "well done→『好做』，错乱",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-08": {
+   "status": "pass",
+   "note": "以后见面，可接受",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-09": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-10": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "on time→『时间』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-11": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-phrase-12": {
+   "status": "pass",
+   "note": "好运，省略但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-sent-01": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『7:30点』语病（应为 七点半/7:30）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-sent-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-sent-03": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『请不要…当你离开的时候』机器腔语序",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-sent-04": {
+   "status": "pass",
+   "note": "『留下一周』稍生硬但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-sent-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "out of coffee→『已经出发了咖啡』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-sent-06": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "bring→『拿出』，动作改变",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "in ten minutes→『十分钟内』（应为 十分钟后）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-07": {
+   "status": "fail",
+   "category": "omission",
+   "note": "last winter→『冬天』，丢『去年』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-time-08": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『明天之后的日子』生硬（应为 后天）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-01": {
+   "status": "pass",
+   "note": "站，可接受",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-08": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-09": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-e-word-10": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:cf-z-brand-01": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "支付宝→『Payment of Treasures』逐字错译",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-brand-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-brand-03": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "小米→『Rice』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-brand-04": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "蓝牙→『Blue tooth』，非通行拼写",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-brand-05": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "二维码→『2D code』，非通行术语（QR code）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-brand-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-04": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "艾玛(Emma)→『Amy』，人名错译",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-06": {
+   "status": "pass",
+   "note": "Professor Lee，通行转写",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-07": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "王老师→『The King Teacher』，逐字错译",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-name-08": {
+   "status": "pass",
+   "note": "Yellow Mountain，旅游语境通行",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-01": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『Long ago not seen』非通行表达",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-02": {
+   "status": "pass",
+   "note": "Left Turn，名词化但达意",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-03": {
+   "status": "pass",
+   "note": "Carefully，达意",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-04": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "做得好(称赞)→『Doing well』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "准时→『Timely』（及时义）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-08": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "提前→『Pre-』残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-09": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "我请客→『I am a request.』错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-10": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "真可惜→『It is sad.』不自然",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-11": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "没关系→『No matter』（无论义）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-phrase-12": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-sent-01": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『open the air conditioning』直译（应 turn on）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-sent-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-sent-03": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "现在时→『studied』过去时，时态改变",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-sent-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-sent-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-sent-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-01": {
+   "status": "pass",
+   "note": "This evening，可接受",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-05": {
+   "status": "pass",
+   "note": "10 minutes later，可接受",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-time-08": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "后天→『The next day』（第二天）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-01": {
+   "status": "pass",
+   "note": "The Station，多冠词但达意",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-06": {
+   "status": "pass",
+   "note": "Airports，单复数差异轻度",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-07": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "邻居→『Neighborhood』（街区义）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-08": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-09": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:cf-z-word-10": {
+   "status": "fail",
+   "category": "addition",
+   "note": "朋友→『and friends』，多出 and",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-e-brand-02": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Gogaku→古巴（品牌改写）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-brand-03": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "VS Code→『VS 代码』且『打开文件在…』语序生硬",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-brand-05": {
+   "status": "fail",
+   "category": "omission",
+   "note": "email 渠道丢失：请发送报告给鲍勃",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-02": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "Bob→博夫，非通行音译（通行：鲍勃）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-06": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『见面鲍勃』不成句（动宾结构错误）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-name-08": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-04": {
+   "status": "pass",
+   "note": "明天见面，可接受",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-05": {
+   "status": "pass",
+   "note": "你怎么样，可接受",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-06": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "excuse me 默认打扰义→『原谅我』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-08": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『什么时候是』不成句",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-09": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-10": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『等一刻』生硬（自然：稍等一下）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-11": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『有一天好』词序混乱",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-12": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-13": {
+   "status": "pass",
+   "note": "让我们去吧，稍生硬但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-14": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "take care 告别义→『照顾』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-15": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "by the way→『通过途径』逐词错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-phrase-16": {
+   "status": "pass",
+   "note": "听起来好，稍省略但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-time-01": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "9 a.m.→『9 早晨』，时段错乱",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-time-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-time-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-time-07": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "at noon→『午后』（应为中午）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-e-time-08": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "small100:se-z-brand-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-brand-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-brand-04": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "微信→『by』，无意义输出",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-brand-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-02": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Alice→『by Alice』，多出介词残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "王小明→『King of Min』，逐字错译",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-name-08": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-03": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『What is now?』不成句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "等一下→『wait for』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-08": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-09": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "辛苦了→『hardly』（几乎不）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-10": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "加油→『Added』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-11": {
+   "status": "pass",
+   "note": "Come immediately，达意",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-12": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "开个会→『Open a Meeting』（开→open 直译）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-13": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『I have trouble you.』语法错误",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-14": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-15": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-phrase-16": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-06": {
+   "status": "pass",
+   "note": "9 to 5pm，不强制 a.m.，按冻结规则通过",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-07": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "中午→『Midnight』，语义相反",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "small100:se-z-time-08": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『Midnight at 12h.』生硬残缺",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-e-brand-03": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Wi-Fi→『无线上网』，术语改写",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-name-01": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Paris→『巴黎人』（Parisian）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-name-02": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Tokyo→『东京都』，多出『都』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-name-04": {
+   "status": "fail",
+   "category": "addition",
+   "note": "David→『大卫·泽西』，多出姓氏",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-name-05": {
+   "status": "fail",
+   "category": "addition",
+   "note": "New York→『纽约总部』，多出总部",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-phrase-03": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『真的好吃的』尾部『的』残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-phrase-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『转左转』复读",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-phrase-05": {
+   "status": "fail",
+   "category": "addition",
+   "note": "『现在, 立即』堆叠冗余",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-phrase-11": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『保持接触 联系』复读残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-phrase-12": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "good luck→『好运来娱乐』，错乱",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-sent-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『火车7:30开机 出发』错乱残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-sent-02": {
+   "status": "pass",
+   "note": "完全正确",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-sent-03": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "句尾多出『敬请谅解。』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-sent-04": {
+   "status": "pass",
+   "note": "自然",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-sent-05": {
+   "status": "pass",
+   "note": "自然",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-sent-06": {
+   "status": "pass",
+   "note": "自然",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-01": {
+   "status": "fail",
+   "category": "addition",
+   "note": "今晚 后多出『的节目』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-02": {
+   "status": "fail",
+   "category": "addition",
+   "note": "多出『的节目』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-03": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "昨天下午 后多出『上』残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-04": {
+   "status": "fail",
+   "category": "addition",
+   "note": "下午6点 后多出『会议』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-05": {
+   "status": "fail",
+   "category": "addition",
+   "note": "十分钟后 后多出『开始』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-06": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "多出『都灵』（Turin）",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-07": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『上一个冬天的』尾部『的』残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-time-08": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『明天之后,就』残句",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-01": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "station→『联系方式』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-02": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "ticket→『彩票注册』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-03": {
+   "status": "fail",
+   "category": "addition",
+   "note": "weather→『天气系统』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-04": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "breakfast→『电子邮件』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-05": {
+   "status": "fail",
+   "category": "addition",
+   "note": "hospital→『医院介绍』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-06": {
+   "status": "fail",
+   "category": "addition",
+   "note": "subway→『地铁服务』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-07": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "calendar→『电子邮件』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-09": {
+   "status": "fail",
+   "category": "addition",
+   "note": "airport→『机场班车』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-e-word-10": {
+   "status": "fail",
+   "category": "addition",
+   "note": "neighbor→『邻居介绍』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:cf-z-brand-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Alipay and Alipay』复读",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-brand-02": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Huawei→『Huawei Spin』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-brand-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-brand-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Bluetooth to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-brand-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "二维码→『2D Code Box』，多出 Box 且非通行",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-brand-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Paris by the Paris』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-03": {
+   "status": "pass",
+   "note": "New York City，通行全称",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『David by David』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-07": {
+   "status": "pass",
+   "note": "Teacher Wang，规则允许",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-name-08": {
+   "status": "pass",
+   "note": "Yellow Mountain，旅游语境通行",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Long time no see the cast.』尾部残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-02": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Left to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-03": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Beware of the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Well done to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『On time to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-06": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Stay in touch with the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-07": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Good luck with the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-08": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Early Early Casting』错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-09": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『I invite you to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-11": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Never mind the』尾部残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-phrase-12": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Don't worry about the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-sent-01": {
+   "status": "pass",
+   "note": "自然",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-sent-02": {
+   "status": "pass",
+   "note": "可接受",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-sent-03": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "现在时→『studied』过去时，时态改变",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-sent-04": {
+   "status": "pass",
+   "note": "完全正确",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-sent-05": {
+   "status": "pass",
+   "note": "your mom 可接受",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-sent-06": {
+   "status": "pass",
+   "note": "缺冠词，轻度",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Tonight the cast』残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-02": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『This weekend the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-03": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Yesterday afternoon the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Six p.m. on the 6 p.m.』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『The ten minutes after the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-06": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Every morning the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-07": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Last winter last year』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-time-08": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『The Day After』截断",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Stations with a』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-02": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Weather in the World』错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-04": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Metro→『Metro Spin』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Wallets for the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-06": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Airports Inject』错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-07": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Neighbors by the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-09": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Holidays In The Box』错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:cf-z-word-10": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Friend the Friend』复读错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-e-brand-01": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Gogaku→『高阁科技』，品牌改写",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-brand-02": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Gogaku→『高阁』且多出『视频』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-brand-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-brand-05": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Bob 之后多出『shen』残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-brand-06": {
+   "status": "pass",
+   "note": "会议在上午10:30 举行，自然",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-name-03": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "Beijing→『京东商城』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-name-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-name-06": {
+   "status": "pass",
+   "note": "见鲍勃在车站，语序生硬但达意",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-name-08": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "London→『东京国际』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-04": {
+   "status": "fail",
+   "category": "addition",
+   "note": "明天见 后多出『,你好』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "how are you→『你怎么会这样?』语义跑偏",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-06": {
+   "status": "fail",
+   "category": "addition",
+   "note": "excuse me→『不好意思,我先走了』，多出先走义",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-10": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『等待片刻 等待』复读残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-11": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『有一个美好的一天』直译腔",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-14": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "take care→『关注我们』，错译",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-15": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『以 方式 ,』词序混乱残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-phrase-16": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-time-01": {
+   "status": "fail",
+   "category": "addition",
+   "note": "上午9点 后多出『会议』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-time-02": {
+   "status": "fail",
+   "category": "addition",
+   "note": "上午10:30 后多出『会议』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-time-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『半点十点半 上』错乱残片",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-time-06": {
+   "status": "fail",
+   "category": "addition",
+   "note": "多出『晚上3点』且与下午3点矛盾",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-time-07": {
+   "status": "fail",
+   "category": "addition",
+   "note": "中午 后多出『时光』",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-e-time-08": {
+   "status": "pass",
+   "note": "午夜时分，可接受",
+   "suite": "short",
+   "direction": "en-zh"
+  },
+  "quickmt:se-z-brand-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-brand-04": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-brand-05": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-brand-06": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "会议→『Sessions』且不成句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-02": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Alice→『Alice by Alice』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-03": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Beijing→『Beijing Branch』，多出 Branch",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Fridays by the Fridays』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-05": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "王小明→『King Xiaoming』，王→King 逐字错译",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-06": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-name-08": {
+   "status": "fail",
+   "category": "addition",
+   "note": "London→『London spin』，多出 spin",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-01": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Thanks for the』截断（已知失败样例）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-02": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-03": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "几点→『What time is the cast?』（cast 错译）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-04": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『No problem with the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Wait a minute for the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-06": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "多出『the cast』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-07": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-08": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Good night to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-09": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Hard work on the』残句，丢感谢义",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-10": {
+   "status": "fail",
+   "category": "meaning-error",
+   "note": "加油→『Refuel the』（加油/fuel 义）",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-11": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Come on soon to the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-12": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-13": {
+   "status": "fail",
+   "category": "unnatural",
+   "note": "『Trouble with you』语义错乱",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-14": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Not sure about the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-15": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『I'll be right up to the Iss』残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-phrase-16": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Please say again the』残句",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-01": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-02": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『3pm The 3pm Spin』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-03": {
+   "status": "pass",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-04": {
+   "status": "fail",
+   "category": "addition",
+   "note": "Tomorrow morning 后多出『the cast』",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-05": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Next Monday's next』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-06": {
+   "status": "pass",
+   "note": "9 to 5.，不强制 a.m.，按冻结规则通过",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-07": {
+   "status": "fail",
+   "category": "fragment",
+   "note": "『Noon to the Noon』复读残片",
+   "suite": "short",
+   "direction": "zh-en"
+  },
+  "quickmt:se-z-time-08": {
+   "status": "pass",
+   "note": "Twelve o'clock in the middle of the night，啰嗦但达意",
+   "suite": "short",
+   "direction": "zh-en"
+  }
+ }
+}
