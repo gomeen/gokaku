@@ -1,0 +1,1723 @@
+{
+  "model": "qwen-05b",
+  "artifact": {
+    "id": "qwen-05b",
+    "repository": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+    "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+    "file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "path": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "sizeBytes": 491400032,
+    "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
+  },
+  "command": [
+    "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/runtime-b12064/llama-b12064/llama-server",
+    "-m",
+    "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "--host",
+    "127.0.0.1",
+    "--port",
+    "54030",
+    "-ngl",
+    "0",
+    "-t",
+    "2",
+    "-tb",
+    "2",
+    "-c",
+    "1024",
+    "-np",
+    "1",
+    "-b",
+    "128",
+    "-ub",
+    "128",
+    "--jinja",
+    "--no-webui",
+    "--cache-ram",
+    "0",
+    "--ctx-checkpoints",
+    "0",
+    "--chat-template-kwargs",
+    "{\"enable_thinking\":false}"
+  ],
+  "cases": [
+    {
+      "id": "zh01",
+      "source": "我想周末和朋友一起玩游戏。",
+      "direction": "zh-en",
+      "output": "I want to play games with friends on weekends.",
+      "reasoning": "",
+      "totalMs": 603.0466500087641,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n我想周末和朋友一起玩游戏。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "I want to play games with friends on weekends."
+            }
+          }
+        ],
+        "created": 1793691772,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 11,
+          "prompt_tokens": 54,
+          "total_tokens": 65,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-UvlMHTgI6kdOCPFOCrvSS2SLmX7mZuRL",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 54,
+          "prompt_ms": 288.861,
+          "prompt_per_token_ms": 5.349277777777778,
+          "prompt_per_second": 186.94112393157954,
+          "predicted_n": 11,
+          "predicted_ms": 294.796,
+          "predicted_per_token_ms": 29.479599999999998,
+          "predicted_per_second": 33.92176284617159
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 639520768,
+        "footprintBytes": 111091712,
+        "userTime": 7379848920,
+        "systemTime": 323021040,
+        "pageins": 64
+      },
+      "cpuMs": 2173.09455,
+      "averageCpuPercent": 360.3526443548634
+    },
+    {
+      "id": "zh02",
+      "source": "不用客气，慢慢来，我可以等你。",
+      "direction": "zh-en",
+      "output": "No need to be rude, go at your own pace, I can wait for you.",
+      "reasoning": "",
+      "totalMs": 834.7227570484392,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n不用客气，慢慢来，我可以等你。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "No need to be rude, go at your own pace, I can wait for you."
+            }
+          }
+        ],
+        "created": 1793691772,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 19,
+          "prompt_tokens": 57,
+          "total_tokens": 76,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-e2jMDrclNX567sVlsxdWf5MBiM6wlA8Y",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 57,
+          "prompt_ms": 307.384,
+          "prompt_per_token_ms": 5.392701754385965,
+          "prompt_per_second": 185.43580667829164,
+          "predicted_n": 19,
+          "predicted_ms": 509.35,
+          "predicted_per_token_ms": 28.297222222222224,
+          "predicted_per_second": 35.339157750073625
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 641908736,
+        "footprintBytes": 111259648,
+        "userTime": 10004954243,
+        "systemTime": 400372987,
+        "pageins": 64
+      },
+      "cpuMs": 2697.381058,
+      "averageCpuPercent": 323.1469413315001
+    },
+    {
+      "id": "zh03",
+      "source": "我今天不想做饭，打算点外卖。",
+      "direction": "zh-en",
+      "output": "I don't want to cook today, so I'm planning to order online.",
+      "reasoning": "",
+      "totalMs": 824.3923379923217,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n我今天不想做饭，打算点外卖。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "I don't want to cook today, so I'm planning to order online."
+            }
+          }
+        ],
+        "created": 1793691773,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 17,
+          "prompt_tokens": 56,
+          "total_tokens": 73,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-iYSmdKZLaPX1FtlvtHHGkkFtTnsG4gTC",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 56,
+          "prompt_ms": 316.717,
+          "prompt_per_token_ms": 5.655660714285714,
+          "prompt_per_second": 176.81400114297622,
+          "predicted_n": 17,
+          "predicted_ms": 489.516,
+          "predicted_per_token_ms": 30.59475,
+          "predicted_per_second": 32.68534634210118
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 642088960,
+        "footprintBytes": 108990464,
+        "userTime": 12707619078,
+        "systemTime": 483195113,
+        "pageins": 64
+      },
+      "cpuMs": 2783.098258,
+      "averageCpuPercent": 337.5939015612153
+    },
+    {
+      "id": "zh04",
+      "source": "这次出差的交通费可以报销吗？",
+      "direction": "zh-en",
+      "output": "Can the transportation fees for this trip be reimbursed?",
+      "reasoning": "",
+      "totalMs": 651.5343880164437,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n这次出差的交通费可以报销吗？"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Can the transportation fees for this trip be reimbursed?"
+            }
+          }
+        ],
+        "created": 1793691774,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 12,
+          "prompt_tokens": 56,
+          "total_tokens": 68,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-OaNo1FA35d7TBkp35UEACO4crQmO4zBf",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 56,
+          "prompt_ms": 297.808,
+          "prompt_per_token_ms": 5.318,
+          "prompt_per_second": 188.040616773223,
+          "predicted_n": 12,
+          "predicted_ms": 335.85,
+          "predicted_per_token_ms": 30.531818181818185,
+          "predicted_per_second": 32.75271698675004
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 642342912,
+        "footprintBytes": 109244416,
+        "userTime": 14946491960,
+        "systemTime": 563767516,
+        "pageins": 64
+      },
+      "cpuMs": 2319.445285,
+      "averageCpuPercent": 355.99736984895117
+    },
+    {
+      "id": "zh05",
+      "source": "我在淘宝上买了一双耐克鞋。",
+      "direction": "zh-en",
+      "output": "I bought a Nike shoe on Taobao.",
+      "reasoning": "",
+      "totalMs": 585.7823690166697,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n我在淘宝上买了一双耐克鞋。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "I bought a Nike shoe on Taobao."
+            }
+          }
+        ],
+        "created": 1793691774,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 10,
+          "prompt_tokens": 57,
+          "total_tokens": 67,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-1MVmzPsODQ07YOWZ1CHtHXqgjiisX8fH",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 57,
+          "prompt_ms": 325.512,
+          "prompt_per_token_ms": 5.7107368421052636,
+          "prompt_per_second": 175.1087517510875,
+          "predicted_n": 10,
+          "predicted_ms": 242.292,
+          "predicted_per_token_ms": 26.921333333333333,
+          "predicted_per_second": 37.145262740825125
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 642478080,
+        "footprintBytes": 109379584,
+        "userTime": 17197008816,
+        "systemTime": 645824536,
+        "pageins": 64
+      },
+      "cpuMs": 2332.573876,
+      "averageCpuPercent": 398.198033839018
+    },
+    {
+      "id": "zh06",
+      "source": "会议改到明天下午三点半了。",
+      "direction": "zh-en",
+      "output": "The meeting has been rescheduled for tomorrow afternoon at three o'clock.",
+      "reasoning": "",
+      "totalMs": 732.6471789856441,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n会议改到明天下午三点半了。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "The meeting has been rescheduled for tomorrow afternoon at three o'clock."
+            }
+          }
+        ],
+        "created": 1793691775,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 15,
+          "prompt_tokens": 56,
+          "total_tokens": 71,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-kcVNIwlIFz2LHUvPaq2csDQLKYwPToNG",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 56,
+          "prompt_ms": 314.273,
+          "prompt_per_token_ms": 5.612017857142858,
+          "prompt_per_second": 178.18902673789984,
+          "predicted_n": 15,
+          "predicted_ms": 400.519,
+          "predicted_per_token_ms": 28.6085,
+          "predicted_per_second": 34.954646346365585
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 642732032,
+        "footprintBytes": 109629440,
+        "userTime": 19661856748,
+        "systemTime": 729204268,
+        "pageins": 64
+      },
+      "cpuMs": 2548.211794,
+      "averageCpuPercent": 347.8088590374455
+    },
+    {
+      "id": "zh07",
+      "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+      "direction": "zh-en",
+      "output": "I want two cups of coffee, one with sugar, and the other without sugar.",
+      "reasoning": "",
+      "totalMs": 801.5402040327899,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n我要两杯咖啡，一杯加糖，另一杯不加糖。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "I want two cups of coffee, one with sugar, and the other without sugar."
+            }
+          }
+        ],
+        "created": 1793691776,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 18,
+          "prompt_tokens": 62,
+          "total_tokens": 80,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-8sE0TYjYblgZAd4eeDeLP8zkcZ9hFtt5",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 62,
+          "prompt_ms": 304.022,
+          "prompt_per_token_ms": 4.90358064516129,
+          "prompt_per_second": 203.93261014005566,
+          "predicted_n": 18,
+          "predicted_ms": 479.888,
+          "predicted_per_token_ms": 28.22870588235294,
+          "predicted_per_second": 35.42493248424633
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 643178496,
+        "footprintBytes": 110075904,
+        "userTime": 22294721612,
+        "systemTime": 768550097,
+        "pageins": 64
+      },
+      "cpuMs": 2668.793064,
+      "averageCpuPercent": 332.9581037323517
+    },
+    {
+      "id": "zh08",
+      "source": "如果明天下雨，我们就不去公园了。",
+      "direction": "zh-en",
+      "output": "If it rains tomorrow, we won't go to the park.",
+      "reasoning": "",
+      "totalMs": 711.0483000287786,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n如果明天下雨，我们就不去公园了。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "If it rains tomorrow, we won't go to the park."
+            }
+          }
+        ],
+        "created": 1793691777,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 14,
+          "prompt_tokens": 58,
+          "total_tokens": 72,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-FYNgzADm5tosgWViDTrQpIqPIu2YB9WS",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 58,
+          "prompt_ms": 327.999,
+          "prompt_per_token_ms": 5.655155172413793,
+          "prompt_per_second": 176.8298074079494,
+          "predicted_n": 14,
+          "predicted_ms": 365.229,
+          "predicted_per_token_ms": 28.09453846153846,
+          "predicted_per_second": 35.59410671113192
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 645115904,
+        "footprintBytes": 110731264,
+        "userTime": 24815192056,
+        "systemTime": 854123910,
+        "pageins": 64
+      },
+      "cpuMs": 2606.026971,
+      "averageCpuPercent": 366.50491547402964
+    },
+    {
+      "id": "zh09",
+      "source": "我昨天已经把文件发给你了。",
+      "direction": "zh-en",
+      "output": "I have already sent you the file yesterday.",
+      "reasoning": "",
+      "totalMs": 611.1769279814325,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n我昨天已经把文件发给你了。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "I have already sent you the file yesterday."
+            }
+          }
+        ],
+        "created": 1793691777,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 10,
+          "prompt_tokens": 56,
+          "total_tokens": 66,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-nE4gvPkElvlHwyDoSkZC0C2HfCgl1nxz",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 56,
+          "prompt_ms": 331.461,
+          "prompt_per_token_ms": 5.918946428571429,
+          "prompt_per_second": 168.94898645692857,
+          "predicted_n": 10,
+          "predicted_ms": 261.927,
+          "predicted_per_token_ms": 29.103,
+          "predicted_per_second": 34.36071882623784
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 645181440,
+        "footprintBytes": 108580864,
+        "userTime": 27091181678,
+        "systemTime": 944141709,
+        "pageins": 64
+      },
+      "cpuMs": 2363.698425,
+      "averageCpuPercent": 386.74536239558586
+    },
+    {
+      "id": "zh10",
+      "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+      "direction": "zh-en",
+      "output": "Please save the file first, then close the computer, and remember to bring the charger.",
+      "reasoning": "",
+      "totalMs": 851.4029569923878,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n请先保存文件，再关闭电脑，别忘了带上充电器。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Please save the file first, then close the computer, and remember to bring the charger."
+            }
+          }
+        ],
+        "created": 1793691778,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 19,
+          "prompt_tokens": 62,
+          "total_tokens": 81,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-GnGPe5QlQR9nIf9lqP4QRaAAxvOGbFDI",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 62,
+          "prompt_ms": 306.485,
+          "prompt_per_token_ms": 4.943306451612903,
+          "prompt_per_second": 202.2937501019626,
+          "predicted_n": 19,
+          "predicted_ms": 526.502,
+          "predicted_per_token_ms": 29.25011111111111,
+          "predicted_per_second": 34.18790431945178
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 645197824,
+        "footprintBytes": 108511232,
+        "userTime": 29841157344,
+        "systemTime": 982869875,
+        "pageins": 64
+      },
+      "cpuMs": 2788.699991,
+      "averageCpuPercent": 327.54173192575996
+    },
+    {
+      "id": "en01",
+      "source": "Would you like to go for a walk after dinner?",
+      "direction": "en-zh",
+      "output": "晚饭后想散步吗？",
+      "reasoning": "",
+      "totalMs": 498.3384399674833,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nWould you like to go for a walk after dinner?"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "晚饭后想散步吗？"
+            }
+          }
+        ],
+        "created": 1793691779,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 58,
+          "total_tokens": 65,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-Vjq9OPgG2GNyTLNEwUlQUJZdUUGp04jY",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 58,
+          "prompt_ms": 307.176,
+          "prompt_per_token_ms": 5.296137931034482,
+          "prompt_per_second": 188.81683464854024,
+          "predicted_n": 7,
+          "predicted_ms": 172.757,
+          "predicted_per_token_ms": 28.792833333333334,
+          "predicted_per_second": 34.73086474064727
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 645320704,
+        "footprintBytes": 108535808,
+        "userTime": 31826731092,
+        "systemTime": 1067339609,
+        "pageins": 64
+      },
+      "cpuMs": 2070.025656,
+      "averageCpuPercent": 415.38550711341264
+    },
+    {
+      "id": "en02",
+      "source": "Take your time. There is no need to rush.",
+      "direction": "en-zh",
+      "output": "请稍等。不要急。",
+      "reasoning": "",
+      "totalMs": 555.9470750158653,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nTake your time. There is no need to rush."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "请稍等。不要急。"
+            }
+          }
+        ],
+        "created": 1793691779,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 58,
+          "total_tokens": 66,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-3fwW1XHGYacm8KpUdJHrTtGGNkVi13DU",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 58,
+          "prompt_ms": 332.815,
+          "prompt_per_token_ms": 5.738189655172413,
+          "prompt_per_second": 174.27099139161396,
+          "predicted_n": 8,
+          "predicted_ms": 205.329,
+          "predicted_per_token_ms": 29.332714285714285,
+          "predicted_per_second": 34.09162855709617
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 645369856,
+        "footprintBytes": 108511232,
+        "userTime": 34001657386,
+        "systemTime": 1158450202,
+        "pageins": 64
+      },
+      "cpuMs": 2266.029713,
+      "averageCpuPercent": 407.5980996815809
+    },
+    {
+      "id": "en03",
+      "source": "Please put on sunscreen before going outside.",
+      "direction": "en-zh",
+      "output": "出门前请涂抹防晒霜。",
+      "reasoning": "",
+      "totalMs": 501.50390301132575,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nPlease put on sunscreen before going outside."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "出门前请涂抹防晒霜。"
+            }
+          }
+        ],
+        "created": 1793691780,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 8,
+          "prompt_tokens": 55,
+          "total_tokens": 63,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-dpJwDJELqo977sSyA44Y1x7YTljoTska",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 55,
+          "prompt_ms": 289.958,
+          "prompt_per_token_ms": 5.271963636363637,
+          "prompt_per_second": 189.68264369322452,
+          "predicted_n": 8,
+          "predicted_ms": 193.437,
+          "predicted_per_token_ms": 27.633857142857146,
+          "predicted_per_second": 36.18749256863992
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 645382144,
+        "footprintBytes": 108457984,
+        "userTime": 36002831264,
+        "systemTime": 1217319507,
+        "pageins": 64
+      },
+      "cpuMs": 2060.037628,
+      "averageCpuPercent": 410.77200309515376
+    },
+    {
+      "id": "en04",
+      "source": "I'm running late. Could you save me a seat?",
+      "direction": "en-zh",
+      "output": "我赶不上车了，请你给我一个座位吧。",
+      "reasoning": "",
+      "totalMs": 738.2202739827335,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nI'm running late. Could you save me a seat?"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "我赶不上车了，请你给我一个座位吧。"
+            }
+          }
+        ],
+        "created": 1793691781,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 13,
+          "prompt_tokens": 59,
+          "total_tokens": 72,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-jH69Rl5GJWGtbJ6KwnWJCfCLoOd5vQ9A",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 59,
+          "prompt_ms": 338.343,
+          "prompt_per_token_ms": 5.7346271186440685,
+          "prompt_per_second": 174.37925418879658,
+          "predicted_n": 13,
+          "predicted_ms": 332.039,
+          "predicted_per_token_ms": 27.669916666666666,
+          "predicted_per_second": 36.14033291270002
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647323648,
+        "footprintBytes": 110297088,
+        "userTime": 38559445575,
+        "systemTime": 1307277163,
+        "pageins": 64
+      },
+      "cpuMs": 2646.556623,
+      "averageCpuPercent": 358.50500403107344
+    },
+    {
+      "id": "en05",
+      "source": "Bob sent me a Google Maps link on WhatsApp.",
+      "direction": "en-zh",
+      "output": "Bob给我发了一个WhatsApp上的Google Maps链接。",
+      "reasoning": "",
+      "totalMs": 629.0058600134216,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nBob sent me a Google Maps link on WhatsApp."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "Bob给我发了一个WhatsApp上的Google Maps链接。"
+            }
+          }
+        ],
+        "created": 1793691781,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 11,
+          "prompt_tokens": 57,
+          "total_tokens": 68,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-9n2nZfEjdoGnNCIwy9IlhAAUaFOmLHsU",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 57,
+          "prompt_ms": 329.586,
+          "prompt_per_token_ms": 5.78221052631579,
+          "prompt_per_second": 172.94423913637107,
+          "predicted_n": 11,
+          "predicted_ms": 281.786,
+          "predicted_per_token_ms": 28.1786,
+          "predicted_per_second": 35.48792345964668
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647344128,
+        "footprintBytes": 108085248,
+        "userTime": 40865262259,
+        "systemTime": 1400507616,
+        "pageins": 64
+      },
+      "cpuMs": 2399.047137,
+      "averageCpuPercent": 381.402986762128
+    },
+    {
+      "id": "en06",
+      "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+      "direction": "en-zh",
+      "output": "列车上午10:30发车，而不是10:30晚上。",
+      "reasoning": "",
+      "totalMs": 855.1075260038488,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nThe train leaves at 10:30 a.m., not 10:30 p.m."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "列车上午10:30发车，而不是10:30晚上。"
+            }
+          }
+        ],
+        "created": 1793691782,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 19,
+          "prompt_tokens": 70,
+          "total_tokens": 89,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-M5MyoasML3VE442bT9LHEbPTCFiYdkGB",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 70,
+          "prompt_ms": 320.058,
+          "prompt_per_token_ms": 4.572257142857143,
+          "prompt_per_second": 218.71035874747702,
+          "predicted_n": 19,
+          "predicted_ms": 518.215,
+          "predicted_per_token_ms": 28.789722222222224,
+          "predicted_per_second": 34.73461787096089
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647909376,
+        "footprintBytes": 108634112,
+        "userTime": 43660816235,
+        "systemTime": 1441067286,
+        "pageins": 64
+      },
+      "cpuMs": 2836.09868,
+      "averageCpuPercent": 331.665737203117
+    },
+    {
+      "id": "en07",
+      "source": "This bag costs fifteen dollars less than that one.",
+      "direction": "en-zh",
+      "output": "这包比那包便宜十五美元。",
+      "reasoning": "",
+      "totalMs": 601.0999860009179,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nThis bag costs fifteen dollars less than that one."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "这包比那包便宜十五美元。"
+            }
+          }
+        ],
+        "created": 1793691783,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 10,
+          "prompt_tokens": 57,
+          "total_tokens": 67,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-K4MlmmJSkU0IoORYdNCJErNvy15SSeJX",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 57,
+          "prompt_ms": 321.235,
+          "prompt_per_token_ms": 5.635701754385965,
+          "prompt_per_second": 177.44019175992653,
+          "predicted_n": 10,
+          "predicted_ms": 261.741,
+          "predicted_per_token_ms": 29.08233333333333,
+          "predicted_per_second": 34.38513645168315
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647921664,
+        "footprintBytes": 108646400,
+        "userTime": 45916057404,
+        "systemTime": 1524077534,
+        "pageins": 64
+      },
+      "cpuMs": 2338.251417,
+      "averageCpuPercent": 388.9954203054048
+    },
+    {
+      "id": "en08",
+      "source": "Don't cancel the meeting unless everyone agrees.",
+      "direction": "en-zh",
+      "output": "除非大家同意，否则不要取消会议。",
+      "reasoning": "",
+      "totalMs": 576.3485009665601,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nDon't cancel the meeting unless everyone agrees."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "除非大家同意，否则不要取消会议。"
+            }
+          }
+        ],
+        "created": 1793691783,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 10,
+          "prompt_tokens": 56,
+          "total_tokens": 66,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-4u1HBS00LLQt2XlQu8LqKSc8qDX7l1kS",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 56,
+          "prompt_ms": 309.972,
+          "prompt_per_token_ms": 5.535214285714285,
+          "prompt_per_second": 180.66147910133822,
+          "predicted_n": 10,
+          "predicted_ms": 249.174,
+          "predicted_per_token_ms": 27.686,
+          "predicted_per_second": 36.11933829372246
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647954432,
+        "footprintBytes": 108679168,
+        "userTime": 48051309343,
+        "systemTime": 1606973348,
+        "pageins": 64
+      },
+      "cpuMs": 2218.130891,
+      "averageCpuPercent": 384.85931468202017
+    },
+    {
+      "id": "en09",
+      "source": "I have been learning Chinese for three months.",
+      "direction": "en-zh",
+      "output": "我正在学习中文三个月。",
+      "reasoning": "",
+      "totalMs": 483.0239309812896,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nI have been learning Chinese for three months."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "我正在学习中文三个月。"
+            }
+          }
+        ],
+        "created": 1793691784,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 56,
+          "total_tokens": 63,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-D9T9UPD2F5RYqU3cLmxzfvefjdz3oCda",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 56,
+          "prompt_ms": 299.825,
+          "prompt_per_token_ms": 5.354017857142857,
+          "prompt_per_second": 186.7756191111482,
+          "predicted_n": 7,
+          "predicted_ms": 165.427,
+          "predicted_per_token_ms": 27.571166666666667,
+          "predicted_per_second": 36.269774583350966
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647974912,
+        "footprintBytes": 108617728,
+        "userTime": 49942594961,
+        "systemTime": 1694946096,
+        "pageins": 64
+      },
+      "cpuMs": 1979.258366,
+      "averageCpuPercent": 409.76403839433544
+    },
+    {
+      "id": "en10",
+      "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+      "direction": "en-zh",
+      "output": "请在周五之前将签署的文件发送给阿丽，并保留一份副本。",
+      "reasoning": "",
+      "totalMs": 863.0414349609055,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nPlease send the signed document to Alice before Friday and keep a copy for yourself."
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "请在周五之前将签署的文件发送给阿丽，并保留一份副本。"
+            }
+          }
+        ],
+        "created": 1793691785,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 18,
+          "prompt_tokens": 63,
+          "total_tokens": 81,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-GRCHnG1ivoJreEdIGkkM0IfRgn26i9AD",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 63,
+          "prompt_ms": 313.803,
+          "prompt_per_token_ms": 4.981,
+          "prompt_per_second": 200.7628990162618,
+          "predicted_n": 18,
+          "predicted_ms": 532.221,
+          "predicted_per_token_ms": 31.307117647058824,
+          "predicted_per_second": 31.941618237536662
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 647983104,
+        "footprintBytes": 108523520,
+        "userTime": 52775332857,
+        "systemTime": 1737060729,
+        "pageins": 64
+      },
+      "cpuMs": 2874.836278,
+      "averageCpuPercent": 333.1052440292425
+    }
+  ],
+  "warmup": [
+    {
+      "id": "zh01",
+      "source": "我想周末和朋友一起玩游戏。",
+      "direction": "zh-en",
+      "output": "I want to play games with friends on weekends.",
+      "reasoning": "",
+      "totalMs": 627.6872039888985,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为英语，直接输出翻译结果，不要进行任何解释。\n\n我想周末和朋友一起玩游戏。"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "I want to play games with friends on weekends."
+            }
+          }
+        ],
+        "created": 1793691770,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 11,
+          "prompt_tokens": 54,
+          "total_tokens": 65,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-9fW9AhtSCplpVDqJ40msxUnrEVsMJq2O",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 54,
+          "prompt_ms": 311.763,
+          "prompt_per_token_ms": 5.7733888888888885,
+          "prompt_per_second": 173.20849491440615,
+          "predicted_n": 11,
+          "predicted_ms": 296.089,
+          "predicted_per_token_ms": 29.6089,
+          "predicted_per_second": 33.77362887510174
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 635748352,
+        "footprintBytes": 107356160,
+        "userTime": 3193904194,
+        "systemTime": 203354066,
+        "pageins": 64
+      },
+      "cpuMs": 2389.765903,
+      "averageCpuPercent": 380.72560469820667
+    },
+    {
+      "id": "en01",
+      "source": "Would you like to go for a walk after dinner?",
+      "direction": "en-zh",
+      "output": "晚饭后想散步吗？",
+      "reasoning": "",
+      "totalMs": 515.8239289885387,
+      "truncated": false,
+      "request": {
+        "model": "qwen-05b",
+        "messages": [
+          {
+            "role": "user",
+            "content": "请将以下文本翻译为中文，直接输出翻译结果，不要进行任何解释。\n\nWould you like to go for a walk after dinner?"
+          }
+        ],
+        "temperature": 0,
+        "max_tokens": 128,
+        "stream": false,
+        "seed": 42,
+        "cache_prompt": false,
+        "chat_template_kwargs": {
+          "enable_thinking": false
+        }
+      },
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "晚饭后想散步吗？"
+            }
+          }
+        ],
+        "created": 1793691771,
+        "model": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+        "system_fingerprint": "b12064-51fe42c5d",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 7,
+          "prompt_tokens": 58,
+          "total_tokens": 65,
+          "prompt_tokens_details": {
+            "cached_tokens": 0
+          }
+        },
+        "id": "chatcmpl-bL4KMNTLTZsOwL3gGcf3C76CCvh1RD39",
+        "timings": {
+          "cache_n": 0,
+          "prompt_n": 58,
+          "prompt_ms": 317.124,
+          "prompt_per_token_ms": 5.467655172413793,
+          "prompt_per_second": 182.89375764685104,
+          "predicted_n": 7,
+          "predicted_ms": 180.284,
+          "predicted_per_token_ms": 30.04733333333333,
+          "predicted_per_second": 33.28082358944776
+        }
+      },
+      "usageAfter": {
+        "rssBytes": 637227008,
+        "footprintBytes": 108797952,
+        "userTime": 5258767289,
+        "systemTime": 271003586,
+        "pageins": 64
+      },
+      "cpuMs": 2132.498615,
+      "averageCpuPercent": 413.4159923874689
+    }
+  ],
+  "peakSampledRssBytes": 647991296,
+  "peakSampledFootprintBytes": 111321088,
+  "processToReadyMs": 900.5492299911566,
+  "readyUsage": {
+    "rssBytes": 609779712,
+    "footprintBytes": 83791872,
+    "userTime": 848445428,
+    "systemTime": 136691199,
+    "pageins": 64
+  },
+  "props": {
+    "default_generation_settings": {
+      "params": {
+        "seed": 4294967295,
+        "temperature": 0.800000011920929,
+        "dynatemp_range": 0.0,
+        "dynatemp_exponent": 1.0,
+        "top_k": 40,
+        "top_p": 0.949999988079071,
+        "min_p": 0.05000000074505806,
+        "top_n_sigma": -1.0,
+        "xtc_probability": 0.0,
+        "xtc_threshold": 0.10000000149011612,
+        "typical_p": 1.0,
+        "repeat_last_n": 64,
+        "repeat_penalty": 1.0,
+        "presence_penalty": 0.0,
+        "frequency_penalty": 0.0,
+        "dry_multiplier": 0.0,
+        "dry_base": 1.75,
+        "dry_allowed_length": 2,
+        "dry_penalty_last_n": 64,
+        "mirostat": 0,
+        "mirostat_tau": 5.0,
+        "mirostat_eta": 0.10000000149011612,
+        "adaptive_target": -1.0,
+        "adaptive_decay": 0.8999999761581421,
+        "max_tokens": -1,
+        "n_predict": -1,
+        "n_keep": 0,
+        "n_discard": 0,
+        "ignore_eos": false,
+        "stream": false,
+        "n_probs": 0,
+        "min_keep": 0,
+        "chat_format": "Content-only",
+        "reasoning_format": "none",
+        "reasoning_in_content": false,
+        "generation_prompt": "",
+        "samplers": [
+          "penalties",
+          "dry",
+          "top_n_sigma",
+          "top_k",
+          "typ_p",
+          "top_p",
+          "min_p",
+          "xtc",
+          "temperature"
+        ],
+        "speculative.types": "none",
+        "timings_per_token": false,
+        "post_sampling_probs": false,
+        "backend_sampling": false,
+        "lora": []
+      },
+      "n_ctx": 1024
+    },
+    "total_slots": 1,
+    "model_alias": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "model_ftype": "Q4_K - Medium",
+    "model_path": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "modalities": {
+      "vision": false,
+      "video": false,
+      "audio": false
+    },
+    "media_marker": "<__media_FC2opmmpVEMk97cgqOrk8me0OWEdN4ik__>",
+    "endpoint_slots": true,
+    "endpoint_props": false,
+    "endpoint_metrics": false,
+    "ui": false,
+    "ui_settings": {},
+    "chat_template": "{%- if tools %}\n    {{- '<|im_start|>system\\n' }}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- messages[0]['content'] }}\n    {%- else %}\n        {{- 'You are Qwen, created by Alibaba Cloud. You are a helpful assistant.' }}\n    {%- endif %}\n    {{- \"\\n\\n# Tools\\n\\nYou may call one or more functions to assist with the user query.\\n\\nYou are provided with function signatures within <tools></tools> XML tags:\\n<tools>\" }}\n    {%- for tool in tools %}\n        {{- \"\\n\" }}\n        {{- tool | tojson }}\n    {%- endfor %}\n    {{- \"\\n</tools>\\n\\nFor each function call, return a json object with function name and arguments within <tool_call></tool_call> XML tags:\\n<tool_call>\\n{{\\\"name\\\": <function-name>, \\\"arguments\\\": <args-json-object>}}\\n</tool_call><|im_end|>\\n\" }}\n{%- else %}\n    {%- if messages[0]['role'] == 'system' %}\n        {{- '<|im_start|>system\\n' + messages[0]['content'] + '<|im_end|>\\n' }}\n    {%- else %}\n        {{- '<|im_start|>system\\nYou are Qwen, created by Alibaba Cloud. You are a helpful assistant.<|im_end|>\\n' }}\n    {%- endif %}\n{%- endif %}\n{%- for message in messages %}\n    {%- if (message.role == \"user\") or (message.role == \"system\" and not loop.first) or (message.role == \"assistant\" and not message.tool_calls) %}\n        {{- '<|im_start|>' + message.role + '\\n' + message.content + '<|im_end|>' + '\\n' }}\n    {%- elif message.role == \"assistant\" %}\n        {{- '<|im_start|>' + message.role }}\n        {%- if message.content %}\n            {{- '\\n' + message.content }}\n        {%- endif %}\n        {%- for tool_call in message.tool_calls %}\n            {%- if tool_call.function is defined %}\n                {%- set tool_call = tool_call.function %}\n            {%- endif %}\n            {{- '\\n<tool_call>\\n{\"name\": \"' }}\n            {{- tool_call.name }}\n            {{- '\", \"arguments\": ' }}\n            {{- tool_call.arguments | tojson }}\n            {{- '}\\n</tool_call>' }}\n        {%- endfor %}\n        {{- '<|im_end|>\\n' }}\n    {%- elif message.role == \"tool\" %}\n        {%- if (loop.index0 == 0) or (messages[loop.index0 - 1].role != \"tool\") %}\n            {{- '<|im_start|>user' }}\n        {%- endif %}\n        {{- '\\n<tool_response>\\n' }}\n        {{- message.content }}\n        {{- '\\n</tool_response>' }}\n        {%- if loop.last or (messages[loop.index0 + 1].role != \"tool\") %}\n            {{- '<|im_end|>\\n' }}\n        {%- endif %}\n    {%- endif %}\n{%- endfor %}\n{%- if add_generation_prompt %}\n    {{- '<|im_start|>assistant\\n' }}\n{%- endif %}",
+    "chat_template_caps": {
+      "supports_object_arguments": true,
+      "supports_parallel_tool_calls": true,
+      "supports_preserve_reasoning": false,
+      "supports_reasoning_effort": false,
+      "supports_string_content": true,
+      "supports_system_role": true,
+      "supports_tool_calls": true,
+      "supports_tools": true,
+      "supports_typed_content": false,
+      "reasoning_effort_levels": []
+    },
+    "bos_token": "<|endoftext|>",
+    "eos_token": "<|im_end|>",
+    "build_info": "b12064-51fe42c5d",
+    "is_sleeping": false,
+    "cors_proxy_enabled": false
+  },
+  "idleUsage": {
+    "rssBytes": 647983104,
+    "footprintBytes": 108523520,
+    "userTime": 52776905757,
+    "systemTime": 1737062440,
+    "pageins": 64
+  },
+  "idleCpuPercent": 26.408555442830906,
+  "status": "complete",
+  "exitCode": 0,
+  "casesSha256": "77373fd2d7deca39a3bd99d2ae63dfbc4fa600b72d4e0624e1bac0b5347d4e3f",
+  "threads": 2
+}

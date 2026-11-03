@@ -51,7 +51,7 @@ def inspect(app):
 def menu_icon(app):
     contents = app / 'Contents'
     info = plistlib.loads((contents / 'Info.plist').read_bytes())
-    assert info.get('TISIconIsTemplate') is False, 'menu icon must be full-color to match system input-source caps'
+    assert info.get('TISIconIsTemplate') is True, 'menu icon must be a template (capsule + knockout, mirrors Qingjian)'
     modes = info['ComponentInputModeDict']['tsInputModeListKey'].values()
     names = {info['tsInputMethodIconFileKey']}
     for mode in modes:

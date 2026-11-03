@@ -40,6 +40,8 @@
 
 中文核心另已完成青简统计配置、Rime 官方小鹤、雾凇小鹤、万象标准版小鹤与 libime 出厂数据的实际装配、候选及逐键实验，见[首轮输入引擎实测](docs/input-engine-benchmark.md)。这里只覆盖核心，不代表候选窗、真实宿主或翻译并发已验收。新增 libpinyin、SunPinyin、Google 开放拼音及不同前端的接口与待测项见[其他路线](docs/research-ime-alternatives.md)。
 
+新增 [20 句翻译对照页](prototypes/translation-comparison.html)：small100、quickmt、Index-Translate-2B、HY-MT1.5-1.8B、Qwen2.5-0.5B（2/4 线程）与 Qwen3-0.6B（2/4 线程）在本机分别运行中→英、英→中各 10 句，展示全部未经修正的真实输出及单次耗时，可切换方向、展开参考译法、保存并导出个人评价。GGUF 模型（官方量化、llama.cpp CPU）实测汇总见 [GGUF 实测记录](probes/results/gguf-translation/summary.md)：质量初观明显改善；4 线程下最快的 Qwen2.5-0.5B 逐句中位 538ms，仍超 500ms 短表达预算；资源占用 0.6–2GiB 级，空闲 CPU 为 0%，不是约束。它是独立的离线推理结果快照，区别于上述预设交互原型；不代表学习模式已开放或质量门槛通过。复跑与数据边界见 [探针说明](probes/README.md#20-句翻译网页对照)。
+
 ## 文档
 
 - [开发版使用说明](docs/native-development.md)：构建、安装、手动启用、语言资源、恢复和卸载。

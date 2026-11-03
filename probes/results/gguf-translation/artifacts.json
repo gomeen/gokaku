@@ -1,0 +1,47 @@
+{
+  "preparedAt": "2026-11-03T08:07:12.408179+00:00",
+  "runtime": {
+    "tag": "b12064",
+    "url": "https://github.com/ggml-org/llama.cpp/releases/download/b12064/llama-b12064-bin-macos-x64.tar.gz",
+    "sha256": "72dd715f245d710d7990467b2712e5033c91bcf33cd7fdd18bf43a76f09348da",
+    "directory": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/runtime-b12064"
+  },
+  "models": [
+    {
+      "id": "index-2b",
+      "repository": "IndexTeam/Index-Translate-2B-GGUF",
+      "revision": "3a0eca6ce931d88d00614d427ab3ed8ff0743902",
+      "file": "Index-Translate-2B.Q4_K_M.gguf",
+      "path": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/index-2b/Index-Translate-2B.Q4_K_M.gguf",
+      "sizeBytes": 1312164352,
+      "sha256": "044b313d29342bd3b2c77cbb64023ca0d209bd9b3247763f9d162767ef2d746a"
+    },
+    {
+      "id": "qwen-05b",
+      "repository": "Qwen/Qwen2.5-0.5B-Instruct-GGUF",
+      "revision": "9217f5db79a29953eb74d5343926648285ec7e67",
+      "file": "qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "path": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen-05b/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+      "sizeBytes": 491400032,
+      "sha256": "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db"
+    },
+    {
+      "id": "qwen3-06b",
+      "repository": "Qwen/Qwen3-0.6B-GGUF",
+      "revision": "23749fefcc72300e3a2ad315e1317431b06b590a",
+      "file": "Qwen3-0.6B-Q8_0.gguf",
+      "path": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/qwen3-06b/Qwen3-0.6B-Q8_0.gguf",
+      "sizeBytes": 639446688,
+      "sha256": "9465e63a22add5354d9bb4b99e90117043c7124007664907259bd16d043bb031"
+    },
+    {
+      "id": "hy-18b",
+      "repository": "tencent/HY-MT1.5-1.8B-GGUF",
+      "revision": "265b2e615a7dc9b06c435dc878829ad99a512ba2",
+      "file": "HY-MT1.5-1.8B-Q4_K_M.gguf",
+      "path": "/Users/gomeen/Library/Caches/Gogaku/models/gguf-translation/hy-18b/HY-MT1.5-1.8B-Q4_K_M.gguf",
+      "sizeBytes": 1133080512,
+      "sha256": "4383ac0c3c8e476de98ff979c2a3f069f8c4fb385e7860cf2d28da896cc477c7"
+    }
+  ]
+}

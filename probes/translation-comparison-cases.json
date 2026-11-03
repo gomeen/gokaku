@@ -1,0 +1,22 @@
+[
+  {"id":"zh01","direction":"zh-en","topic":"日常交流","source":"我想周末和朋友一起玩游戏。","reference":"I want to play games with my friends this weekend."},
+  {"id":"zh02","direction":"zh-en","topic":"常用表达","source":"不用客气，慢慢来，我可以等你。","reference":"You're welcome. Take your time; I can wait for you."},
+  {"id":"zh03","direction":"zh-en","topic":"日常用词","source":"我今天不想做饭，打算点外卖。","reference":"I don't feel like cooking today, so I'm going to order takeout."},
+  {"id":"zh04","direction":"zh-en","topic":"工作用词","source":"这次出差的交通费可以报销吗？","reference":"Can I get reimbursed for the transportation costs of this business trip?"},
+  {"id":"zh05","direction":"zh-en","topic":"品牌与专名","source":"我在淘宝上买了一双耐克鞋。","reference":"I bought a pair of Nike shoes on Taobao."},
+  {"id":"zh06","direction":"zh-en","topic":"时间","source":"会议改到明天下午三点半了。","reference":"The meeting has been moved to 3:30 p.m. tomorrow."},
+  {"id":"zh07","direction":"zh-en","topic":"数量与比较","source":"我要两杯咖啡，一杯加糖，另一杯不加糖。","reference":"I'd like two coffees, one with sugar and the other without."},
+  {"id":"zh08","direction":"zh-en","topic":"否定与条件","source":"如果明天下雨，我们就不去公园了。","reference":"If it rains tomorrow, we won't go to the park."},
+  {"id":"zh09","direction":"zh-en","topic":"时态","source":"我昨天已经把文件发给你了。","reference":"I already sent you the file yesterday."},
+  {"id":"zh10","direction":"zh-en","topic":"信息完整性","source":"请先保存文件，再关闭电脑，别忘了带上充电器。","reference":"Please save the file before shutting down the computer, and don't forget to bring the charger."},
+  {"id":"en01","direction":"en-zh","topic":"日常交流","source":"Would you like to go for a walk after dinner?","reference":"晚饭后你想去散散步吗？"},
+  {"id":"en02","direction":"en-zh","topic":"常用表达","source":"Take your time. There is no need to rush.","reference":"慢慢来，不用着急。"},
+  {"id":"en03","direction":"en-zh","topic":"日常用词","source":"Please put on sunscreen before going outside.","reference":"出门前请涂防晒霜。"},
+  {"id":"en04","direction":"en-zh","topic":"习惯表达","source":"I'm running late. Could you save me a seat?","reference":"我要迟到了，你能帮我留个座位吗？"},
+  {"id":"en05","direction":"en-zh","topic":"品牌与专名","source":"Bob sent me a Google Maps link on WhatsApp.","reference":"鲍勃在 WhatsApp 上给我发了一个谷歌地图链接。"},
+  {"id":"en06","direction":"en-zh","topic":"时间","source":"The train leaves at 10:30 a.m., not 10:30 p.m.","reference":"火车是上午十点半出发，不是晚上十点半。"},
+  {"id":"en07","direction":"en-zh","topic":"数量与比较","source":"This bag costs fifteen dollars less than that one.","reference":"这个包比那个便宜十五美元。"},
+  {"id":"en08","direction":"en-zh","topic":"否定与条件","source":"Don't cancel the meeting unless everyone agrees.","reference":"除非所有人都同意，否则不要取消会议。"},
+  {"id":"en09","direction":"en-zh","topic":"时态","source":"I have been learning Chinese for three months.","reference":"我已经学了三个月中文了。"},
+  {"id":"en10","direction":"en-zh","topic":"信息完整性","source":"Please send the signed document to Alice before Friday and keep a copy for yourself.","reference":"请在星期五之前把签好的文件发给爱丽丝，并给自己留一份副本。"}
+]

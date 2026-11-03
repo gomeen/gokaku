@@ -1,0 +1,2320 @@
+{
+  "casesSha256": "77373fd2d7deca39a3bd99d2ae63dfbc4fa600b72d4e0624e1bac0b5347d4e3f",
+  "variants": [
+    {
+      "key": "quickmt-beam5",
+      "label": "quickmt · beam=5",
+      "config": "CT2 · INT8 · 2 线程 · beam 5",
+      "results": {
+        "zh01": {
+          "id": "zh01",
+          "source": "我想周末和朋友一起玩游戏。",
+          "direction": "zh-en",
+          "output": "I want to play games with friends over the weekend.",
+          "totalMs": 111.753849,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh02": {
+          "id": "zh02",
+          "source": "不用客气，慢慢来，我可以等你。",
+          "direction": "zh-en",
+          "output": "You're welcome, take it slow, I can wait for you.",
+          "totalMs": 130.751033,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh03": {
+          "id": "zh03",
+          "source": "我今天不想做饭，打算点外卖。",
+          "direction": "zh-en",
+          "output": "I didn't want to cook today and was going to order takeout.",
+          "totalMs": 159.980598,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh04": {
+          "id": "zh04",
+          "source": "这次出差的交通费可以报销吗？",
+          "direction": "zh-en",
+          "output": "Can I get paid for this trip?",
+          "totalMs": 110.925493,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh05": {
+          "id": "zh05",
+          "source": "我在淘宝上买了一双耐克鞋。",
+          "direction": "zh-en",
+          "output": "I bought a pair of Nike shoes on Taobao.",
+          "totalMs": 112.818184,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh06": {
+          "id": "zh06",
+          "source": "会议改到明天下午三点半了。",
+          "direction": "zh-en",
+          "output": "The meeting is scheduled for 3:30 tomorrow.",
+          "totalMs": 104.523669,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh07": {
+          "id": "zh07",
+          "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+          "direction": "zh-en",
+          "output": "I want two coffees, one sweetened and the other unsweetened.",
+          "totalMs": 151.383534,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh08": {
+          "id": "zh08",
+          "source": "如果明天下雨，我们就不去公园了。",
+          "direction": "zh-en",
+          "output": "If it rains tomorrow, we won't go to the park.",
+          "totalMs": 150.954672,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh09": {
+          "id": "zh09",
+          "source": "我昨天已经把文件发给你了。",
+          "direction": "zh-en",
+          "output": "I sent you the file yesterday.",
+          "totalMs": 81.687265,
+          "truncated": false,
+          "beam": 5
+        },
+        "zh10": {
+          "id": "zh10",
+          "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+          "direction": "zh-en",
+          "output": "Please save the file, turn off the computer, and don't forget to bring a charger.",
+          "totalMs": 174.865543,
+          "truncated": false,
+          "beam": 5
+        },
+        "en01": {
+          "id": "en01",
+          "source": "Would you like to go for a walk after dinner?",
+          "direction": "en-zh",
+          "output": "你想吃晚饭后出去散步吗?",
+          "totalMs": 148.012817,
+          "truncated": false,
+          "beam": 5
+        },
+        "en02": {
+          "id": "en02",
+          "source": "Take your time. There is no need to rush.",
+          "direction": "en-zh",
+          "output": "花点时间吧 没必要急着急",
+          "totalMs": 124.481854,
+          "truncated": false,
+          "beam": 5
+        },
+        "en03": {
+          "id": "en03",
+          "source": "Please put on sunscreen before going outside.",
+          "direction": "en-zh",
+          "output": "外出前请先涂上防晒霜。",
+          "totalMs": 155.254103,
+          "truncated": false,
+          "beam": 5
+        },
+        "en04": {
+          "id": "en04",
+          "source": "I'm running late. Could you save me a seat?",
+          "direction": "en-zh",
+          "output": "我要迟到了 你能帮我留个座位吗?",
+          "totalMs": 140.432973,
+          "truncated": false,
+          "beam": 5
+        },
+        "en05": {
+          "id": "en05",
+          "source": "Bob sent me a Google Maps link on WhatsApp.",
+          "direction": "en-zh",
+          "output": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+          "totalMs": 163.627817,
+          "truncated": false,
+          "beam": 5
+        },
+        "en06": {
+          "id": "en06",
+          "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+          "direction": "en-zh",
+          "output": "火车在上午10:30开,而不是晚上10:30开。",
+          "totalMs": 217.222904,
+          "truncated": false,
+          "beam": 5
+        },
+        "en07": {
+          "id": "en07",
+          "source": "This bag costs fifteen dollars less than that one.",
+          "direction": "en-zh",
+          "output": "这个袋子的成本比那个少15美元。",
+          "totalMs": 126.063382,
+          "truncated": false,
+          "beam": 5
+        },
+        "en08": {
+          "id": "en08",
+          "source": "Don't cancel the meeting unless everyone agrees.",
+          "direction": "en-zh",
+          "output": "除非每个人都同意,否则不要取消会议。",
+          "totalMs": 115.579293,
+          "truncated": false,
+          "beam": 5
+        },
+        "en09": {
+          "id": "en09",
+          "source": "I have been learning Chinese for three months.",
+          "direction": "en-zh",
+          "output": "我已经学了三个月的中文了。",
+          "totalMs": 116.870019,
+          "truncated": false,
+          "beam": 5
+        },
+        "en10": {
+          "id": "en10",
+          "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+          "direction": "en-zh",
+          "output": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+          "totalMs": 185.695408,
+          "truncated": false,
+          "beam": 5
+        }
+      }
+    },
+    {
+      "key": "quickmt-beam10",
+      "label": "quickmt · beam=10",
+      "config": "CT2 · INT8 · 2 线程 · beam 10",
+      "results": {
+        "zh01": {
+          "id": "zh01",
+          "source": "我想周末和朋友一起玩游戏。",
+          "direction": "zh-en",
+          "output": "I want to play games with friends over the weekend.",
+          "totalMs": 156.718818,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh02": {
+          "id": "zh02",
+          "source": "不用客气，慢慢来，我可以等你。",
+          "direction": "zh-en",
+          "output": "You're welcome, take it slow, I can wait for you.",
+          "totalMs": 208.314421,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh03": {
+          "id": "zh03",
+          "source": "我今天不想做饭，打算点外卖。",
+          "direction": "zh-en",
+          "output": "I didn't want to cook today and was going to order takeout.",
+          "totalMs": 211.592014,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh04": {
+          "id": "zh04",
+          "source": "这次出差的交通费可以报销吗？",
+          "direction": "zh-en",
+          "output": "Can I be reimbursed for this trip?",
+          "totalMs": 133.290265,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh05": {
+          "id": "zh05",
+          "source": "我在淘宝上买了一双耐克鞋。",
+          "direction": "zh-en",
+          "output": "I bought a pair of Nike shoes on Taobao.",
+          "totalMs": 146.073765,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh06": {
+          "id": "zh06",
+          "source": "会议改到明天下午三点半了。",
+          "direction": "zh-en",
+          "output": "The meeting is scheduled for 3:30 tomorrow.",
+          "totalMs": 124.402543,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh07": {
+          "id": "zh07",
+          "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+          "direction": "zh-en",
+          "output": "I want two coffees, one sweetened and the other unsweetened.",
+          "totalMs": 217.165954,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh08": {
+          "id": "zh08",
+          "source": "如果明天下雨，我们就不去公园了。",
+          "direction": "zh-en",
+          "output": "If it rains tomorrow, we won't go to the park.",
+          "totalMs": 175.445434,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh09": {
+          "id": "zh09",
+          "source": "我昨天已经把文件发给你了。",
+          "direction": "zh-en",
+          "output": "I sent you the file yesterday.",
+          "totalMs": 107.284731,
+          "truncated": false,
+          "beam": 10
+        },
+        "zh10": {
+          "id": "zh10",
+          "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+          "direction": "zh-en",
+          "output": "Please save the file, turn off the computer, and don't forget to bring a charger.",
+          "totalMs": 255.505238,
+          "truncated": false,
+          "beam": 10
+        },
+        "en01": {
+          "id": "en01",
+          "source": "Would you like to go for a walk after dinner?",
+          "direction": "en-zh",
+          "output": "你想吃晚饭后出去散步吗?",
+          "totalMs": 204.998609,
+          "truncated": false,
+          "beam": 10
+        },
+        "en02": {
+          "id": "en02",
+          "source": "Take your time. There is no need to rush.",
+          "direction": "en-zh",
+          "output": "花点时间吧 没必要急着急",
+          "totalMs": 158.987918,
+          "truncated": false,
+          "beam": 10
+        },
+        "en03": {
+          "id": "en03",
+          "source": "Please put on sunscreen before going outside.",
+          "direction": "en-zh",
+          "output": "外出前请先涂上防晒霜。",
+          "totalMs": 183.295254,
+          "truncated": false,
+          "beam": 10
+        },
+        "en04": {
+          "id": "en04",
+          "source": "I'm running late. Could you save me a seat?",
+          "direction": "en-zh",
+          "output": "我要迟到了 你能帮我留个座位吗?",
+          "totalMs": 165.555002,
+          "truncated": false,
+          "beam": 10
+        },
+        "en05": {
+          "id": "en05",
+          "source": "Bob sent me a Google Maps link on WhatsApp.",
+          "direction": "en-zh",
+          "output": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+          "totalMs": 200.786977,
+          "truncated": false,
+          "beam": 10
+        },
+        "en06": {
+          "id": "en06",
+          "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+          "direction": "en-zh",
+          "output": "火车在上午10:30开,而不是晚上10:30开。",
+          "totalMs": 249.694885,
+          "truncated": false,
+          "beam": 10
+        },
+        "en07": {
+          "id": "en07",
+          "source": "This bag costs fifteen dollars less than that one.",
+          "direction": "en-zh",
+          "output": "这个袋子的成本比那个少15美元。",
+          "totalMs": 156.570691,
+          "truncated": false,
+          "beam": 10
+        },
+        "en08": {
+          "id": "en08",
+          "source": "Don't cancel the meeting unless everyone agrees.",
+          "direction": "en-zh",
+          "output": "除非每个人都同意,否则不要取消会议。",
+          "totalMs": 139.294662,
+          "truncated": false,
+          "beam": 10
+        },
+        "en09": {
+          "id": "en09",
+          "source": "I have been learning Chinese for three months.",
+          "direction": "en-zh",
+          "output": "我已经学了三个月的中文了。",
+          "totalMs": 131.833489,
+          "truncated": false,
+          "beam": 10
+        },
+        "en10": {
+          "id": "en10",
+          "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+          "direction": "en-zh",
+          "output": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+          "totalMs": 255.293855,
+          "truncated": false,
+          "beam": 10
+        }
+      }
+    },
+    {
+      "key": "quickmt-beam2",
+      "label": "quickmt · beam=2",
+      "config": "CT2 · INT8 · 2 线程 · beam 2",
+      "results": {
+        "zh01": {
+          "id": "zh01",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我想周末和朋友一起玩游戏。",
+          "output": "I want to play games with friends over the weekend.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I want to play games with friends over the weekend.",
+              "score": -0.38426223397254944,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 8,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.38426223397254944,
+          "encodeMs": 0.035949,
+          "generateMs": 88.041066,
+          "decodeMs": 0.101592,
+          "totalMs": 88.178607,
+          "cpuMs": 160.262,
+          "peakRssBytes": 704114688
+        },
+        "zh02": {
+          "id": "zh02",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "不用客气，慢慢来，我可以等你。",
+          "output": "You're welcome, take it slow, I can wait for you.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "You're welcome, take it slow, I can wait for you.",
+              "score": -0.35801756381988525,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 13,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.35801756381988525,
+          "encodeMs": 0.037914,
+          "generateMs": 122.858422,
+          "decodeMs": 0.121209,
+          "totalMs": 123.017545,
+          "cpuMs": 221.571,
+          "peakRssBytes": 704495616
+        },
+        "zh03": {
+          "id": "zh03",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我今天不想做饭，打算点外卖。",
+          "output": "I didn't want to cook today and was going to order takeout.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I didn't want to cook today and was going to order takeout.",
+              "score": -0.4160425662994385,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.4160425662994385,
+          "encodeMs": 0.039797,
+          "generateMs": 129.091484,
+          "decodeMs": 0.107461,
+          "totalMs": 129.238742,
+          "cpuMs": 234.991,
+          "peakRssBytes": 704524288
+        },
+        "zh04": {
+          "id": "zh04",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "这次出差的交通费可以报销吗？",
+          "output": "Can I pay for this trip?",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "Can I pay for this trip?",
+              "score": -0.8570047616958618,
+              "tokens": 7,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 7,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8570047616958618,
+          "encodeMs": 0.039227,
+          "generateMs": 75.169268,
+          "decodeMs": 0.079575,
+          "totalMs": 75.28807,
+          "cpuMs": 136.755,
+          "peakRssBytes": 704638976
+        },
+        "zh05": {
+          "id": "zh05",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我在淘宝上买了一双耐克鞋。",
+          "output": "I bought a pair of Nike shoes on Taobao.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I bought a pair of Nike shoes on Taobao.",
+              "score": -0.25465288758277893,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.25465288758277893,
+          "encodeMs": 0.037621,
+          "generateMs": 93.507002,
+          "decodeMs": 0.088316,
+          "totalMs": 93.632939,
+          "cpuMs": 169.109,
+          "peakRssBytes": 704638976
+        },
+        "zh06": {
+          "id": "zh06",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "会议改到明天下午三点半了。",
+          "output": "The meeting is scheduled for 3:30 tomorrow.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "The meeting is scheduled for 3:30 tomorrow.",
+              "score": -0.8869690895080566,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8869690895080566,
+          "encodeMs": 0.036707,
+          "generateMs": 88.083645,
+          "decodeMs": 0.090156,
+          "totalMs": 88.210508,
+          "cpuMs": 159.943,
+          "peakRssBytes": 704643072
+        },
+        "zh07": {
+          "id": "zh07",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+          "output": "I want two coffees, one sweetened and the other unsweetened.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I want two coffees, one sweetened and the other unsweetened.",
+              "score": -0.41670405864715576,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 16,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.41670405864715576,
+          "encodeMs": 0.043884,
+          "generateMs": 132.363143,
+          "decodeMs": 0.10767,
+          "totalMs": 132.514697,
+          "cpuMs": 241.606,
+          "peakRssBytes": 704659456
+        },
+        "zh08": {
+          "id": "zh08",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "如果明天下雨，我们就不去公园了。",
+          "output": "If it rains tomorrow, we won't go to the park.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "If it rains tomorrow, we won't go to the park.",
+              "score": -0.33393359184265137,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.33393359184265137,
+          "encodeMs": 0.038626,
+          "generateMs": 133.059719,
+          "decodeMs": 0.151769,
+          "totalMs": 133.250114,
+          "cpuMs": 240.719,
+          "peakRssBytes": 704847872
+        },
+        "zh09": {
+          "id": "zh09",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我昨天已经把文件发给你了。",
+          "output": "I sent you the file yesterday.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I sent you the file yesterday.",
+              "score": -0.5405806303024292,
+              "tokens": 7,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 7,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5405806303024292,
+          "encodeMs": 0.044054,
+          "generateMs": 67.345846,
+          "decodeMs": 0.079789,
+          "totalMs": 67.469689,
+          "cpuMs": 122.57,
+          "peakRssBytes": 704983040
+        },
+        "zh10": {
+          "id": "zh10",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+          "output": "Please save the file, then turn off the computer, and don't forget to bring the charger.",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "Please save the file, then turn off the computer, and don't forget to bring the charger.",
+              "score": -0.5023196935653687,
+              "tokens": 21,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 14,
+          "outputTokens": 21,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5023196935653687,
+          "encodeMs": 0.044516,
+          "generateMs": 148.17205,
+          "decodeMs": 0.119364,
+          "totalMs": 148.33593,
+          "cpuMs": 269.08,
+          "peakRssBytes": 704991232
+        },
+        "en01": {
+          "id": "en01",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Would you like to go for a walk after dinner?",
+          "output": "晚饭后你想去散步吗? 吃完饭后,你要不要去散步?",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "晚饭后你想去散步吗? 吃完饭后,你要不要去散步?",
+              "score": -1.1075515747070312,
+              "tokens": 19,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 19,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -1.1075515747070312,
+          "encodeMs": 0.054491,
+          "generateMs": 179.936156,
+          "decodeMs": 0.120949,
+          "totalMs": 180.111596,
+          "cpuMs": 331.214,
+          "peakRssBytes": 777756672
+        },
+        "en02": {
+          "id": "en02",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Take your time. There is no need to rush.",
+          "output": "慢慢来 没必要急着走",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "慢慢来 没必要急着走",
+              "score": -1.1963926553726196,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -1.1963926553726196,
+          "encodeMs": 0.048409,
+          "generateMs": 96.201761,
+          "decodeMs": 0.089625,
+          "totalMs": 96.339795,
+          "cpuMs": 175.026,
+          "peakRssBytes": 777859072
+        },
+        "en03": {
+          "id": "en03",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Please put on sunscreen before going outside.",
+          "output": "外出前请先戴上防晒霜。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "外出前请先戴上防晒霜。",
+              "score": -0.6143051385879517,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6143051385879517,
+          "encodeMs": 0.082429,
+          "generateMs": 144.803183,
+          "decodeMs": 0.089185,
+          "totalMs": 144.974797,
+          "cpuMs": 264.475,
+          "peakRssBytes": 778244096
+        },
+        "en04": {
+          "id": "en04",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "I'm running late. Could you save me a seat?",
+          "output": "我要迟到了 你能帮我留个座位吗?",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "我要迟到了 你能帮我留个座位吗?",
+              "score": -0.6138166785240173,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 14,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6138166785240173,
+          "encodeMs": 0.051041,
+          "generateMs": 103.716562,
+          "decodeMs": 0.088358,
+          "totalMs": 103.855961,
+          "cpuMs": 190.692,
+          "peakRssBytes": 778354688
+        },
+        "en05": {
+          "id": "en05",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Bob sent me a Google Maps link on WhatsApp.",
+          "output": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+              "score": -0.5810146331787109,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5810146331787109,
+          "encodeMs": 0.047512,
+          "generateMs": 110.169056,
+          "decodeMs": 0.092497,
+          "totalMs": 110.309065,
+          "cpuMs": 202.759,
+          "peakRssBytes": 778534912
+        },
+        "en06": {
+          "id": "en06",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+          "output": "火车在上午10:30开,而不是晚上10:30开。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "火车在上午10:30开,而不是晚上10:30开。",
+              "score": -0.46321386098861694,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 17,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.46321386098861694,
+          "encodeMs": 0.052151,
+          "generateMs": 180.109967,
+          "decodeMs": 0.1085,
+          "totalMs": 180.270618,
+          "cpuMs": 328.532,
+          "peakRssBytes": 778612736
+        },
+        "en07": {
+          "id": "en07",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "This bag costs fifteen dollars less than that one.",
+          "output": "这个袋子比那个小15美元。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "这个袋子比那个小15美元。",
+              "score": -0.8476464748382568,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8476464748382568,
+          "encodeMs": 0.053738,
+          "generateMs": 103.224728,
+          "decodeMs": 0.080183,
+          "totalMs": 103.358649,
+          "cpuMs": 190.829,
+          "peakRssBytes": 778612736
+        },
+        "en08": {
+          "id": "en08",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Don't cancel the meeting unless everyone agrees.",
+          "output": "除非每个人都同意,否则不要取消会议。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "除非每个人都同意,否则不要取消会议。",
+              "score": -0.3694574236869812,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.3694574236869812,
+          "encodeMs": 0.050768,
+          "generateMs": 103.132803,
+          "decodeMs": 0.089745,
+          "totalMs": 103.273316,
+          "cpuMs": 189.364,
+          "peakRssBytes": 778821632
+        },
+        "en09": {
+          "id": "en09",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "I have been learning Chinese for three months.",
+          "output": "我学中文已经三个月了,我学中文了。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "我学中文已经三个月了,我学中文了。",
+              "score": -1.0258110761642456,
+              "tokens": 12,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 12,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -1.0258110761642456,
+          "encodeMs": 0.052774,
+          "generateMs": 116.423503,
+          "decodeMs": 0.092177,
+          "totalMs": 116.568454,
+          "cpuMs": 212.755,
+          "peakRssBytes": 778899456
+        },
+        "en10": {
+          "id": "en10",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+          "output": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+          "beam": 2,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+              "score": -0.6003750562667847,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 17,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6003750562667847,
+          "encodeMs": 0.069878,
+          "generateMs": 158.994504,
+          "decodeMs": 0.117176,
+          "totalMs": 159.181558,
+          "cpuMs": 293.129,
+          "peakRssBytes": 778952704
+        }
+      }
+    },
+    {
+      "key": "quickmt-beam4",
+      "label": "quickmt · beam=4",
+      "config": "CT2 · INT8 · 2 线程 · beam 4",
+      "results": {
+        "zh01": {
+          "id": "zh01",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我想周末和朋友一起玩游戏。",
+          "output": "I want to play games with friends over the weekend.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I want to play games with friends over the weekend.",
+              "score": -0.38426223397254944,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 8,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.38426223397254944,
+          "encodeMs": 0.033954,
+          "generateMs": 108.165688,
+          "decodeMs": 0.11086,
+          "totalMs": 108.310502,
+          "cpuMs": 195.503,
+          "peakRssBytes": 688373760
+        },
+        "zh02": {
+          "id": "zh02",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "不用客气，慢慢来，我可以等你。",
+          "output": "You're welcome, take it slow, I can wait for you.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "You're welcome, take it slow, I can wait for you.",
+              "score": -0.3580176830291748,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 13,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.3580176830291748,
+          "encodeMs": 0.042017,
+          "generateMs": 139.309417,
+          "decodeMs": 0.103151,
+          "totalMs": 139.454585,
+          "cpuMs": 252.781,
+          "peakRssBytes": 688447488
+        },
+        "zh03": {
+          "id": "zh03",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我今天不想做饭，打算点外卖。",
+          "output": "I didn't want to cook today and was going to order takeout.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I didn't want to cook today and was going to order takeout.",
+              "score": -0.4160425662994385,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.4160425662994385,
+          "encodeMs": 0.037276,
+          "generateMs": 129.266749,
+          "decodeMs": 0.100651,
+          "totalMs": 129.404676,
+          "cpuMs": 234.273,
+          "peakRssBytes": 688525312
+        },
+        "zh04": {
+          "id": "zh04",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "这次出差的交通费可以报销吗？",
+          "output": "Can I get paid for this trip?",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "Can I get paid for this trip?",
+              "score": -0.8296902775764465,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8296902775764465,
+          "encodeMs": 0.036031,
+          "generateMs": 90.85647,
+          "decodeMs": 0.168903,
+          "totalMs": 91.061404,
+          "cpuMs": 162.43,
+          "peakRssBytes": 688590848
+        },
+        "zh05": {
+          "id": "zh05",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我在淘宝上买了一双耐克鞋。",
+          "output": "I bought a pair of Nike shoes on Taobao.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I bought a pair of Nike shoes on Taobao.",
+              "score": -0.2546529769897461,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.2546529769897461,
+          "encodeMs": 0.041612,
+          "generateMs": 117.861844,
+          "decodeMs": 0.089185,
+          "totalMs": 117.992641,
+          "cpuMs": 210.344,
+          "peakRssBytes": 689598464
+        },
+        "zh06": {
+          "id": "zh06",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "会议改到明天下午三点半了。",
+          "output": "The meeting is scheduled for 3:30 tomorrow.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "The meeting is scheduled for 3:30 tomorrow.",
+              "score": -0.8869690895080566,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8869690895080566,
+          "encodeMs": 0.036706,
+          "generateMs": 89.864739,
+          "decodeMs": 0.083253,
+          "totalMs": 89.984698,
+          "cpuMs": 162.798,
+          "peakRssBytes": 689610752
+        },
+        "zh07": {
+          "id": "zh07",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+          "output": "I want two coffees, one sweetened and the other unsweetened.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I want two coffees, one sweetened and the other unsweetened.",
+              "score": -0.41670411825180054,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 16,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.41670411825180054,
+          "encodeMs": 0.041699,
+          "generateMs": 139.932286,
+          "decodeMs": 0.10805,
+          "totalMs": 140.082035,
+          "cpuMs": 250.964,
+          "peakRssBytes": 689729536
+        },
+        "zh08": {
+          "id": "zh08",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "如果明天下雨，我们就不去公园了。",
+          "output": "If it rains tomorrow, we won't go to the park.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "If it rains tomorrow, we won't go to the park.",
+              "score": -0.33393365144729614,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.33393365144729614,
+          "encodeMs": 0.038323,
+          "generateMs": 141.816088,
+          "decodeMs": 0.104401,
+          "totalMs": 141.958812,
+          "cpuMs": 256.466,
+          "peakRssBytes": 690028544
+        },
+        "zh09": {
+          "id": "zh09",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我昨天已经把文件发给你了。",
+          "output": "I sent you the file yesterday.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I sent you the file yesterday.",
+              "score": -0.5405803918838501,
+              "tokens": 7,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 7,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5405803918838501,
+          "encodeMs": 0.037596,
+          "generateMs": 81.46154,
+          "decodeMs": 0.078302,
+          "totalMs": 81.577438,
+          "cpuMs": 145.884,
+          "peakRssBytes": 690122752
+        },
+        "zh10": {
+          "id": "zh10",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+          "output": "Please save the file, turn off the computer, and don't forget to bring a charger.",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "Please save the file, turn off the computer, and don't forget to bring a charger.",
+              "score": -0.5159928202629089,
+              "tokens": 20,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 14,
+          "outputTokens": 20,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5159928202629089,
+          "encodeMs": 0.043528,
+          "generateMs": 159.634631,
+          "decodeMs": 0.115506,
+          "totalMs": 159.793665,
+          "cpuMs": 288.97,
+          "peakRssBytes": 690188288
+        },
+        "en01": {
+          "id": "en01",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Would you like to go for a walk after dinner?",
+          "output": "晚饭后你想出去散步吗 ? ”",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "晚饭后你想出去散步吗 ? ”",
+              "score": -0.9440088272094727,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.9440088272094727,
+          "encodeMs": 0.053611,
+          "generateMs": 117.192844,
+          "decodeMs": 0.090109,
+          "totalMs": 117.336564,
+          "cpuMs": 213.189,
+          "peakRssBytes": 793948160
+        },
+        "en02": {
+          "id": "en02",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Take your time. There is no need to rush.",
+          "output": "花点时间吧 没必要急着急",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "花点时间吧 没必要急着急",
+              "score": -1.0676699876785278,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -1.0676699876785278,
+          "encodeMs": 0.049124,
+          "generateMs": 113.791969,
+          "decodeMs": 0.085847,
+          "totalMs": 113.92694,
+          "cpuMs": 204.962,
+          "peakRssBytes": 794017792
+        },
+        "en03": {
+          "id": "en03",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Please put on sunscreen before going outside.",
+          "output": "外出前请先涂上防晒霜。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "外出前请先涂上防晒霜。",
+              "score": -0.6096549034118652,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6096549034118652,
+          "encodeMs": 0.046868,
+          "generateMs": 137.461879,
+          "decodeMs": 0.118691,
+          "totalMs": 137.627438,
+          "cpuMs": 251.815,
+          "peakRssBytes": 794607616
+        },
+        "en04": {
+          "id": "en04",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "I'm running late. Could you save me a seat?",
+          "output": "我要迟到了 你能帮我留个座位吗?",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "我要迟到了 你能帮我留个座位吗?",
+              "score": -0.6138166785240173,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 14,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6138166785240173,
+          "encodeMs": 0.056038,
+          "generateMs": 129.529886,
+          "decodeMs": 0.088479,
+          "totalMs": 129.674403,
+          "cpuMs": 235.348,
+          "peakRssBytes": 794947584
+        },
+        "en05": {
+          "id": "en05",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Bob sent me a Google Maps link on WhatsApp.",
+          "output": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+              "score": -0.5810146331787109,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5810146331787109,
+          "encodeMs": 0.047236,
+          "generateMs": 146.336841,
+          "decodeMs": 0.090954,
+          "totalMs": 146.475031,
+          "cpuMs": 268.413,
+          "peakRssBytes": 794959872
+        },
+        "en06": {
+          "id": "en06",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+          "output": "火车在上午10:30开,而不是晚上10:30开。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "火车在上午10:30开,而不是晚上10:30开。",
+              "score": -0.46321386098861694,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 17,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.46321386098861694,
+          "encodeMs": 0.051687,
+          "generateMs": 189.930609,
+          "decodeMs": 0.11668,
+          "totalMs": 190.098976,
+          "cpuMs": 348.001,
+          "peakRssBytes": 795013120
+        },
+        "en07": {
+          "id": "en07",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "This bag costs fifteen dollars less than that one.",
+          "output": "这个袋子的成本比那个少15美元。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "这个袋子的成本比那个少15美元。",
+              "score": -0.7102384567260742,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.7102384567260742,
+          "encodeMs": 0.055068,
+          "generateMs": 124.408508,
+          "decodeMs": 0.08658,
+          "totalMs": 124.550156,
+          "cpuMs": 227.046,
+          "peakRssBytes": 795181056
+        },
+        "en08": {
+          "id": "en08",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Don't cancel the meeting unless everyone agrees.",
+          "output": "除非每个人都同意,否则不要取消会议。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "除非每个人都同意,否则不要取消会议。",
+              "score": -0.3694574236869812,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.3694574236869812,
+          "encodeMs": 0.049938,
+          "generateMs": 108.450336,
+          "decodeMs": 0.084635,
+          "totalMs": 108.584909,
+          "cpuMs": 197.34,
+          "peakRssBytes": 795226112
+        },
+        "en09": {
+          "id": "en09",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "I have been learning Chinese for three months.",
+          "output": "我已经学了三个月的中文了。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "我已经学了三个月的中文了。",
+              "score": -0.7440383434295654,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.7440383434295654,
+          "encodeMs": 0.047102,
+          "generateMs": 108.914955,
+          "decodeMs": 0.081369,
+          "totalMs": 109.043426,
+          "cpuMs": 199.437,
+          "peakRssBytes": 795242496
+        },
+        "en10": {
+          "id": "en10",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+          "output": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+          "beam": 4,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+              "score": -0.6003749370574951,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 17,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6003749370574951,
+          "encodeMs": 0.070624,
+          "generateMs": 176.794837,
+          "decodeMs": 0.129127,
+          "totalMs": 176.994588,
+          "cpuMs": 325.352,
+          "peakRssBytes": 795299840
+        }
+      }
+    },
+    {
+      "key": "quickmt-beam6",
+      "label": "quickmt · beam=6",
+      "config": "CT2 · INT8 · 2 线程 · beam 6",
+      "results": {
+        "zh01": {
+          "id": "zh01",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我想周末和朋友一起玩游戏。",
+          "output": "I want to play games with friends over the weekend.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I want to play games with friends over the weekend.",
+              "score": -0.38426223397254944,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 8,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.38426223397254944,
+          "encodeMs": 0.035396,
+          "generateMs": 112.517721,
+          "decodeMs": 0.111106,
+          "totalMs": 112.664223,
+          "cpuMs": 204.84,
+          "peakRssBytes": 721981440
+        },
+        "zh02": {
+          "id": "zh02",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "不用客气，慢慢来，我可以等你。",
+          "output": "You're welcome, take it slow, I can wait for you.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "You're welcome, take it slow, I can wait for you.",
+              "score": -0.3580176830291748,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 13,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.3580176830291748,
+          "encodeMs": 0.039006,
+          "generateMs": 141.421727,
+          "decodeMs": 0.098841,
+          "totalMs": 141.559574,
+          "cpuMs": 257.45,
+          "peakRssBytes": 722096128
+        },
+        "zh03": {
+          "id": "zh03",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我今天不想做饭，打算点外卖。",
+          "output": "I didn't want to cook today and was going to order takeout.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I didn't want to cook today and was going to order takeout.",
+              "score": -0.4160425662994385,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.4160425662994385,
+          "encodeMs": 0.036394,
+          "generateMs": 147.459558,
+          "decodeMs": 0.102588,
+          "totalMs": 147.59854,
+          "cpuMs": 269.01,
+          "peakRssBytes": 722153472
+        },
+        "zh04": {
+          "id": "zh04",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "这次出差的交通费可以报销吗？",
+          "output": "Can I get paid for this trip?",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "Can I get paid for this trip?",
+              "score": -0.8296902775764465,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8296902775764465,
+          "encodeMs": 0.038581,
+          "generateMs": 103.715548,
+          "decodeMs": 0.088181,
+          "totalMs": 103.84231,
+          "cpuMs": 188.066,
+          "peakRssBytes": 722366464
+        },
+        "zh05": {
+          "id": "zh05",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我在淘宝上买了一双耐克鞋。",
+          "output": "I bought a pair of Nike shoes on Taobao.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I bought a pair of Nike shoes on Taobao.",
+              "score": -0.2546529769897461,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.2546529769897461,
+          "encodeMs": 0.040622,
+          "generateMs": 122.23213,
+          "decodeMs": 0.085241,
+          "totalMs": 122.357993,
+          "cpuMs": 222.894,
+          "peakRssBytes": 722542592
+        },
+        "zh06": {
+          "id": "zh06",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "会议改到明天下午三点半了。",
+          "output": "The meeting is scheduled for 3:30 tomorrow.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "The meeting is scheduled for 3:30 tomorrow.",
+              "score": -0.8869690895080566,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.8869690895080566,
+          "encodeMs": 0.035396,
+          "generateMs": 106.187594,
+          "decodeMs": 0.086216,
+          "totalMs": 106.309206,
+          "cpuMs": 192.921,
+          "peakRssBytes": 722542592
+        },
+        "zh07": {
+          "id": "zh07",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+          "output": "I want two coffees, one sweetened and the other unsweetened.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I want two coffees, one sweetened and the other unsweetened.",
+              "score": -0.41670411825180054,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 16,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.41670411825180054,
+          "encodeMs": 0.042242,
+          "generateMs": 149.124903,
+          "decodeMs": 0.100646,
+          "totalMs": 149.267791,
+          "cpuMs": 273.672,
+          "peakRssBytes": 722558976
+        },
+        "zh08": {
+          "id": "zh08",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "如果明天下雨，我们就不去公园了。",
+          "output": "If it rains tomorrow, we won't go to the park.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "If it rains tomorrow, we won't go to the park.",
+              "score": -0.33393365144729614,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.33393365144729614,
+          "encodeMs": 0.036101,
+          "generateMs": 134.136792,
+          "decodeMs": 0.094202,
+          "totalMs": 134.267095,
+          "cpuMs": 244.619,
+          "peakRssBytes": 722874368
+        },
+        "zh09": {
+          "id": "zh09",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "我昨天已经把文件发给你了。",
+          "output": "I sent you the file yesterday.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "I sent you the file yesterday.",
+              "score": -0.5405803918838501,
+              "tokens": 7,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 7,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5405803918838501,
+          "encodeMs": 0.034023,
+          "generateMs": 83.183764,
+          "decodeMs": 0.075096,
+          "totalMs": 83.292883,
+          "cpuMs": 151.441,
+          "peakRssBytes": 722874368
+        },
+        "zh10": {
+          "id": "zh10",
+          "event": "result",
+          "phase": "compare",
+          "direction": "zh-en",
+          "kind": null,
+          "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+          "output": "Please save the file, turn off the computer, and don't forget to bring a charger.",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "Please save the file, turn off the computer, and don't forget to bring a charger.",
+              "score": -0.5159928202629089,
+              "tokens": 20,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 14,
+          "outputTokens": 20,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5159928202629089,
+          "encodeMs": 0.040451,
+          "generateMs": 191.005891,
+          "decodeMs": 0.115975,
+          "totalMs": 191.162317,
+          "cpuMs": 347.081,
+          "peakRssBytes": 722898944
+        },
+        "en01": {
+          "id": "en01",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Would you like to go for a walk after dinner?",
+          "output": "你想吃晚饭后出去散步吗?",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "你想吃晚饭后出去散步吗?",
+              "score": -0.9105541706085205,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.9105541706085205,
+          "encodeMs": 0.05614,
+          "generateMs": 170.470679,
+          "decodeMs": 0.07791,
+          "totalMs": 170.604729,
+          "cpuMs": 311.675,
+          "peakRssBytes": 789434368
+        },
+        "en02": {
+          "id": "en02",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Take your time. There is no need to rush.",
+          "output": "花点时间吧 没必要急着急",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "花点时间吧 没必要急着急",
+              "score": -1.0676699876785278,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 12,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -1.0676699876785278,
+          "encodeMs": 0.048875,
+          "generateMs": 123.000079,
+          "decodeMs": 0.080864,
+          "totalMs": 123.129818,
+          "cpuMs": 224.236,
+          "peakRssBytes": 789622784
+        },
+        "en03": {
+          "id": "en03",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Please put on sunscreen before going outside.",
+          "output": "外出前请先涂上防晒霜。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "外出前请先涂上防晒霜。",
+              "score": -0.6096549034118652,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6096549034118652,
+          "encodeMs": 0.047181,
+          "generateMs": 150.187363,
+          "decodeMs": 0.083876,
+          "totalMs": 150.31842,
+          "cpuMs": 274.975,
+          "peakRssBytes": 790454272
+        },
+        "en04": {
+          "id": "en04",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "I'm running late. Could you save me a seat?",
+          "output": "我要迟到了 你能帮我留个座位吗?",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "我要迟到了 你能帮我留个座位吗?",
+              "score": -0.6138166785240173,
+              "tokens": 10,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 14,
+          "outputTokens": 10,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6138166785240173,
+          "encodeMs": 0.046774,
+          "generateMs": 145.727101,
+          "decodeMs": 0.08808,
+          "totalMs": 145.861955,
+          "cpuMs": 265.896,
+          "peakRssBytes": 791392256
+        },
+        "en05": {
+          "id": "en05",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Bob sent me a Google Maps link on WhatsApp.",
+          "output": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "鲍勃给我发送了WhatsApp上的谷歌地图链接。",
+              "score": -0.5810146331787109,
+              "tokens": 11,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 11,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.5810146331787109,
+          "encodeMs": 0.04673,
+          "generateMs": 156.766796,
+          "decodeMs": 0.092329,
+          "totalMs": 156.905855,
+          "cpuMs": 286.442,
+          "peakRssBytes": 791523328
+        },
+        "en06": {
+          "id": "en06",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+          "output": "火车在上午10:30开,而不是晚上10:30开。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "火车在上午10:30开,而不是晚上10:30开。",
+              "score": -0.46321386098861694,
+              "tokens": 16,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 17,
+          "outputTokens": 16,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.46321386098861694,
+          "encodeMs": 0.050336,
+          "generateMs": 196.560074,
+          "decodeMs": 0.105347,
+          "totalMs": 196.715757,
+          "cpuMs": 361.19,
+          "peakRssBytes": 791609344
+        },
+        "en07": {
+          "id": "en07",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "This bag costs fifteen dollars less than that one.",
+          "output": "这个袋子的成本比那个少15美元。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "这个袋子的成本比那个少15美元。",
+              "score": -0.7102384567260742,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.7102384567260742,
+          "encodeMs": 0.049612,
+          "generateMs": 136.89286,
+          "decodeMs": 0.083485,
+          "totalMs": 137.025957,
+          "cpuMs": 250.765,
+          "peakRssBytes": 791642112
+        },
+        "en08": {
+          "id": "en08",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Don't cancel the meeting unless everyone agrees.",
+          "output": "除非每个人都同意,否则不要取消会议。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "除非每个人都同意,否则不要取消会议。",
+              "score": -0.3694574236869812,
+              "tokens": 9,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 11,
+          "outputTokens": 9,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.3694574236869812,
+          "encodeMs": 0.049787,
+          "generateMs": 120.937868,
+          "decodeMs": 0.0883,
+          "totalMs": 121.075955,
+          "cpuMs": 222.198,
+          "peakRssBytes": 791654400
+        },
+        "en09": {
+          "id": "en09",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "I have been learning Chinese for three months.",
+          "output": "我已经学了三个月的中文了。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "我已经学了三个月的中文了。",
+              "score": -0.7440383434295654,
+              "tokens": 8,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 10,
+          "outputTokens": 8,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.7440383434295654,
+          "encodeMs": 0.05122,
+          "generateMs": 112.135851,
+          "decodeMs": 0.077635,
+          "totalMs": 112.264706,
+          "cpuMs": 205.539,
+          "peakRssBytes": 791678976
+        },
+        "en10": {
+          "id": "en10",
+          "event": "result",
+          "phase": "compare",
+          "direction": "en-zh",
+          "kind": null,
+          "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+          "output": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+          "beam": 6,
+          "numHypotheses": 1,
+          "candidates": [
+            {
+              "text": "请在周五之前将签名的文件发送给Alice,并保留一份副本。",
+              "score": -0.6003749370574951,
+              "tokens": 15,
+              "ended": true,
+              "truncated": false
+            }
+          ],
+          "inputTokens": 17,
+          "outputTokens": 15,
+          "sourceUnknownTokens": 0,
+          "truncated": false,
+          "generated": true,
+          "score": -0.6003749370574951,
+          "encodeMs": 0.065037,
+          "generateMs": 207.554518,
+          "decodeMs": 0.124435,
+          "totalMs": 207.74399,
+          "cpuMs": 377.412,
+          "peakRssBytes": 791953408
+        }
+      }
+    }
+  ]
+}

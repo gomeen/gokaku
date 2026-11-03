@@ -4,6 +4,39 @@
 
 本次外部源码和编译产物放在 `/tmp/gogaku-validation/`。源码版本见 [environment.json](results/environment.json)。Gogaku 内只保存自行编写的探针、运行结果和测试日志，不包含上游源码、schema 或模型权重。
 
+## GGUF 新模型资源预研与 20 句实测
+
+截图候选与 Index-Translate 的资料复核见 [候选复核](../docs/research-translation-screenshot-candidates.md)；运行内存与协议预研见 [资源预研](../docs/research-translation-resource-prescreen.md)。
+
+```sh
+python3 scripts/prepare-gguf-translation.py   # 固定 revision 下载官方权重与 llama.cpp b12064 x64，LFS SHA256 校验
+python3 probes/benchmark-gguf-translation.py  # 串行启动/停止 llama-server，每模型跑同 20 句
+python3 probes/benchmark-gguf-translation.py --models qwen3-06b --threads 4 --tag t4  # 变体：结果键追加 -t4，不覆盖原运行
+python3 scripts/build-translation-comparison.py --render-only  # 全部完成的结果并入对照页
+```
+
+产物在 [results/gguf-translation/](results/gguf-translation/)：`artifacts.json`（revision、字节数、SHA256）、逐模型 `run.json`／`<model>.json`（原始响应、每句完整请求耗时、CPU、RSS／物理占用采样）与 server 日志。权重缓存在 `~/Library/Caches/Gogaku/models/gguf-translation/`，约 2.94GB，不进仓库。
+
+固定协议：CPU-only（`-ngl 0`）、默认 2 线程（`--threads` 可变，带 `--tag` 的变体如 `-t4` 单独存档）、上下文 1024、batch 128、`--cache-ram 0 --ctx-checkpoints 0`、Index 走 `enable_thinking=false` 官方翻译 prompt，HY 用官方 ZH↔XX 指令句式，greedy 均为实验变体；每模型先预热两条再正式测。耗时是完整本机 HTTP 请求（含分词／prefill／全解码／解析），与 CT2 列口径不同，不能直接互比；内存为每 50ms 采样的 RSS／物理占用峰值，非精确峰值；单模型超过 6GiB 即终止该模型。2026-11-03 首轮实测与线程变体汇总见 [summary.md](results/gguf-translation/summary.md)；词／短语级质量与固定风险集均未覆盖。
+
+## 20 句翻译网页对照
+
+[translation-comparison-cases.json](translation-comparison-cases.json) 在本次推理前固定中→英、英→中各 10 句，覆盖日常、习惯表达、品牌、时间、数量、否定和信息完整性。参考译法由人工编写，仅帮助理解原意，不作唯一答案。
+
+```sh
+python3 scripts/build-translation-comparison.py
+# 只改页面样式时复用已有真实输出，不重新测模型：
+python3 scripts/build-translation-comparison.py --render-only
+# 可直接打开 HTML；浏览器工具不允许 file URL 时只绑定本机服务：
+python3 -m http.server 8767 --bind 127.0.0.1 --directory prototypes
+```
+
+打开 `http://127.0.0.1:8767/translation-comparison.html` 或 [单文件页面](../prototypes/translation-comparison.html)。输出保存在 [comparison.json](results/translation-comparison/comparison.json)，同目录保留各隔离进程 JSONL 与 stderr。默认模型路径沿用 `~/Library/Caches/Gogaku/models/{small100-gate,quickmt-speed}`，可通过参数覆盖；脚本不下载模型。模板为 `prototypes/translation-comparison.template.html`，生成页内嵌数据，无外部依赖；评价仅存当前浏览器本地，可导出 JSON。重新推理后生成时间变化，评价与旧运行隔离。
+
+统一配置为 CPU CT2 INT8、2 线程、每条生成、最大输出 256 tokens，每方向预热一次。quickmt beam 曲线（2026-11-03 同 20 句实测，`ct2-variants.json` 存全部变体，页面对应列）：可选任意正整数（1=贪心，无上限）；本组实测 1→2 大量改写（14/20 相同），重复与 sunscreen 修复出现在 beam≥4，beam5≈6 完全一致，beam10 仅把「报销」修复为 `Can I be reimbursed`；中位耗时 88/117/129/140/142/175ms（beam 1/2/4/5/6/10），均远低于预算。quickmt 为编码器-解码器 NMT，官方 README 无 prompt/formality 接口，beam 与前置资源层是仅有的质量旋钮。两模型分别生成，未经词典、反向评分、繁简转换或人工修正；网页显示的单次耗时包含分词／推理／解码，不包含模型加载或 IPC。此次 40 条输出均非空且未截断，但不等于语义合格；不能用这组有意覆盖风险的 20 句推断总体合格率或正式 p95。截图补充的 OPUS-MT、NLLB、HY-MT1.5、Qwen2.5、Llama 3.2 与 Index-Translate 在本页仅列候选，没有虚构译文。
+
+浏览器检查覆盖 20 卡片、方向筛选到 10 条、参考译法展开、评价计数与撤销；导出的 JSON 已读回核对 20 条记录及对应运行身份，测试评价已清除。页面内嵌的 40 条结果与原始 JSON 一致。这属于独立展示验证，不运行原生输入源验收，也不改变生产学习门禁。
+
 ## 收敛选型测试
 
 结论见[技术选择](../docs/input-selection-decision.md)，范围先冻结于[收敛方案](../docs/input-selection-decision-plan.md)。`input-engine-holdout.json`为看输出前冻结的80条独立样例；其目标命中不等于全部合法中文判断。

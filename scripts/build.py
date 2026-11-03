@@ -244,7 +244,11 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
             # 图标键必须带扩展名且与包内文件一致，否则系统设置的添加列表不显示该输入法。
             # 只声明 Caps Lock 切换能力；系统输入源切换由 macOS 管理。
             'TICapsLockLanguageSwitchCapable': True,
-            'TISIconIsTemplate': False,
+            # 模板图标（对齐青简 qingjian-menu 的 TISIconIsTemplate=true）：系统对
+            # 胶囊＋镂空 PDF 做模板渲染——底板取菜单栏前景色、镂空透背景，深浅色
+            # 菜单栏与切换器都正确。早期 false（全彩）实测被系统按缓存着色成
+            # 蓝色裸笔画（2026-11-03 用户截图），撤销该裁决。
+            'TISIconIsTemplate': True,
             'InputMethodType': 'Keyboard', 'NSPrincipalClass': 'NSApplication',
             'ComponentInputModeDict': {
                 'tsInputModeListKey': {
