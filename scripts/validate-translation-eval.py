@@ -14,7 +14,9 @@ finished. This script pins the guarantees the evaluation must keep:
   4. a known-bad translation that slipped through the hardening filter is
      counted as error-released, never as semantic-qualified;
   5. preserve cases report label conformance only — the report cannot claim
-     real typo/gibberish detection from expectedAction labels.
+     real typo/gibberish detection from expectedAction labels;
+  6. a run with a partial final round (a claimed case missing rows) fails
+     summarisation, never passes as a completed evaluation.
 
 Pure Python, no models needed; synthetic runs are built in a temp directory.
 """
@@ -69,7 +71,7 @@ def make_row(**kw):
     return base
 
 
-def make_run(rows, case_counts, rounds=5, run_id="R1"):
+def make_run(rows, case_counts, rounds=1, run_id="R1"):
     for row in rows:
         row.setdefault("runId", run_id)
     return {
@@ -428,6 +430,68 @@ def test_summarizer_dataset_assertion():
         assert "short en-zh" in str(error), error
     else:
         raise AssertionError("missing short-suite rows did not fail the summarizer")
+
+
+# ── 6. 轮次完整性：残缺末轮不能冒充完整评测 ────────────────────────────
+
+@check("partial-round-cannot-complete")
+def test_partial_round_cannot_complete():
+    fake_counts = synthetic_expected({
+        "risk": {"en-zh": 1}, "holdout": {"en-zh": 1},
+        "short": {"en-zh": 1}, "confirm": {"en-zh": 1},
+    })
+
+    def rows_with_rounds(confirm_rounds):
+        rows = []
+        sequence = 0
+        plan = [
+            ("risk-ok", "risk", "short-expression", 100.0, 5),
+            ("holdout-ok", "holdout", "short-expression", 100.0, 5),
+            ("short-ok", "short", "short-expression", 100.0, 5),
+            ("confirm-ok", "confirm", "short-expression", 100.0, confirm_rounds),
+            ("speed-1", "speed", "short-expression", 100.0, 5),
+            ("speed-2", "speed", "short-sentence", 150.0, 5),
+        ]
+        for case_id, suite, bucket, total_ms, rounds in plan:
+            for round_index in range(rounds):
+                sequence += 1
+                rows.append(make_row(
+                    caseId=case_id, suite=suite, round=round_index + 1,
+                    sequence=sequence, timingBucket=bucket, totalMs=total_ms,
+                    output="你好",
+                    hardening={"verdict": "candidate", "reason": "checks-passed", "normalizedOutput": None},
+                ))
+        return rows
+
+    # (a) a full 5-round run summarises fine.
+    rows = rows_with_rounds(confirm_rounds=5)
+    run = make_run(rows, fake_counts | {"speed": {"total": 2, "byDirection": {"en-zh": 2}}}, rounds=5)
+    latency = SUM.build_latency([(run, rows)], rows)
+    review = {"schemaVersion": 2, "cases": {"fake:%s-ok" % s: {"status": "pass"} for s in ("risk", "holdout", "short", "confirm")}}
+    quality = SUM.build_quality(run, [(run, rows)], rows, review, latency, fake_counts)
+    assert quality["backends"]["fake"]["gate"]["reviewCoverage"]["complete"] is True
+
+    # (b) an interrupted final round (confirm case missing round 5) must fail
+    # the summariser instead of passing as a completed evaluation.
+    rows = rows_with_rounds(confirm_rounds=4)
+    run = make_run(rows, fake_counts | {"speed": {"total": 2, "byDirection": {"en-zh": 2}}}, rounds=5)
+    latency = SUM.build_latency([(run, rows)], rows)
+    try:
+        SUM.build_quality(run, [(run, rows)], rows, review, latency, fake_counts)
+    except SystemExit as error:
+        message = str(error)
+        assert "confirm-ok" in message and "4 rounds of rows, expected 5" in message, message
+    else:
+        raise AssertionError("partial final round did not fail the summariser")
+
+    # (c) a run explicitly marked completeRun=False must fail too.
+    run["completeRun"] = False
+    try:
+        SUM.build_quality(run, [(run, rows)], rows, review, latency, fake_counts)
+    except SystemExit as error:
+        assert "incomplete run" in str(error), error
+    else:
+        raise AssertionError("completeRun=False did not fail the summariser")
 
 
 def main():

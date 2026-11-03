@@ -871,6 +871,11 @@ def main():
             run["workers"][name]["stoppedPeakRssBytes"] = worker.stop()
         run["finishedAt"] = now_utc()
         run["requestCount"] = sequence
+        expected_requests = sum(len(cases_by_unit[unit["id"]]) for unit in units) * args.rounds
+        run["expectedRequestCount"] = expected_requests
+        # A run interrupted mid-round must be marked so the summariser can
+        # refuse to present it as a completed evaluation.
+        run["completeRun"] = sequence == expected_requests
         run["totalRequestsPerWorker"] = {name: worker.requests for name, worker in workers.items()}
         atomic_write(run_path, run)
     print("wrote %s and %s" % (requests_path, run_path), flush=True)

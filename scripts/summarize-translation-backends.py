@@ -17,6 +17,8 @@ resource.json, quality-gate.json, quality-review.md and environment.json.
     keeps the gate blocked instead of complete
   - preserve cases report label conformance only; the benchmark never claims
     real-input typo/gibberish detection from expectedAction labels
+  - every claimed case must have exactly `rounds` rows per (run, backend); an
+    interrupted final round fails summarisation instead of looking complete
 
 The review file is optional. It records semantic judgements a mechanical check
 cannot make (names, meaning drift, user policy). Without it the gate is
@@ -495,7 +497,8 @@ def assert_dataset_counts(runs, rows, expected_counts):
                     "run %s suite %s: %s cases, expected %d"
                     % (run["runId"], suite, total, expected["total"])
                 )
-    # Every quality-suite case the runs claim must actually have request rows.
+    # Union coverage: every quality-suite case the runs claim must actually
+    # have request rows in the merged data (runs may split suites across dirs).
     seen = {}
     for row in rows:
         suite = row.get("suite")
@@ -514,6 +517,29 @@ def assert_dataset_counts(runs, rows, expected_counts):
                     "suite %s %s: %d cases have request rows, expected %d"
                     % (suite, direction, len(got), per_direction)
                 )
+    # Round multiplicity: each claimed case must have exactly `rounds` rows per
+    # (run, backend); an interrupted final round can never be summarized as a
+    # completed evaluation.
+    per_run_rounds = {run["runId"]: run.get("parameters", {}).get("rounds") for run, _ in runs}
+    per_run_claimed = {run["runId"]: set(run.get("caseCounts") or {}) for run, _ in runs}
+    row_rounds = {}
+    for row in rows:
+        suite = row.get("suite")
+        if suite in QUALITY_SUITES or suite == "speed":
+            key = (row.get("runId"), row.get("backend"), suite, row["caseId"])
+            row_rounds[key] = row_rounds.get(key, 0) + 1
+    for (run_id, backend, suite, case_id), count in sorted(row_rounds.items(), key=str):
+        if suite not in per_run_claimed.get(run_id, set()):
+            continue
+        rounds = per_run_rounds.get(run_id)
+        if rounds is not None and count != rounds:
+            problems.append(
+                "run %s %s suite %s case %s: %d rounds of rows, expected %s"
+                % (run_id, backend, suite, case_id, count, rounds)
+            )
+    for run, _ in runs:
+        if run.get("completeRun") is False:
+            problems.append("run %s recorded an incomplete run" % run["runId"])
     if problems:
         raise SystemExit("dataset assertion failed: " + "; ".join(problems))
     return sorted(claimed & set(QUALITY_SUITES))

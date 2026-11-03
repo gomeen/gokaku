@@ -15,8 +15,8 @@
   该类词条只显示释义；其他无合格词性的词条同样只显示释义。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
-- 注释清洗 v5（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
-  分隔符统一为点号 ·（与词库条目样式一致）；
+- 注释清洗 v6（2026-11-03 用户裁决「希望可以显示全」）：同义枚举只取首项、
+  超长静默截断、拼接 ≤46——行内不出现省略号；分隔符统一为点号 ·；
   义项正文内长括号消歧说明（含括号 >18 字符）整体移除、短括号保留；
   分号同义枚举（≥3 项）只保留前 2 项加 …；
   单条超 MAX_SENSE_LEN 时词边界截断加 …（替代旧「整条剔除」）；
@@ -55,8 +55,9 @@ POS_ABBREV = {
 #    截断以 … 显式标记，不制造完整释义假象）；
 # R1.5 分号同义枚举（≥3 项）只保留前 2 项加 …（主义项在前不丢主释义）。
 # R3 拼接总长超 MAX_JOINED_LEN 时只保留第一条义项。
-# R4 行内 … 即行尾：主义项截断后不再追加后续义项（省略号只出现在行尾）。
 # R5 分隔符统一：义项内同义枚举的分号（含全角）统一为点号 · 分隔。
+# R6 行内不出现省略号：同义枚举只取首项、超长静默词边界截断（2026-11-03
+#    用户裁决「希望可以显示全」，限制发生在生成侧而非展示侧）。
 # 规则全部编码在本脚本，重新生成数据时自动按同规则执行（可复现）。
 # 候选窗注释区约容纳 45 个拉丁字符；36 留出词性前缀余量，46 为拼接上限。
 MAX_SENSE_LEN = 36
@@ -135,24 +136,22 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
             # written to) → you）；短括号（≤18 字符）保留。
             text = re.sub(r"\s*\([^)]{18,}\)", "", text)
             text = re.sub(r"\s*（[^）]{18,}）", "", text)
-            # R1.5 分号同义枚举收紧：≥3 项只保留前 2 项（Wiktionary 义项常把
-            # 同义词全排开，候选窗里是噪音；主义项在前，截去尾部不丢主释义）。
-            semi = text.split("; ")
-            if len(semi) >= 3:
-                text = " · ".join(semi[:2]) + " …"
+            # R1.5 分号同义枚举只取第 1 项（Wiktionary 义项常把同义词全排开，
+            # 候选窗里是噪音；首项＝主义项，行内不出现省略号）。
+            text = text.split("; ")[0]
             text = text.strip()
             if not text or PLACEHOLDER_RE.match(text) or not presentable(text):
                 continue
             text = f"{pos} {text}".strip()
             if not re.sub(r"\([^)]*\)|（[^）]*）", "", text).strip():
                 continue  # 纯括号标记（方言／域标签残留）无阅读价值
-            # R2 词边界截断（显式 … 标记，不制造完整释义假象）
+            # R2 词边界截断（静默：候选窗注释是提示不是词典，超长部分截去）
             if len(text) > MAX_SENSE_LEN:
-                cut = text[:MAX_SENSE_LEN - 1]
+                cut = text[:MAX_SENSE_LEN]
                 sp = cut.rfind(" ")
                 if sp > MAX_SENSE_LEN // 2:
                     cut = cut[:sp]
-                text = cut.rstrip(" ;:,") + "…"
+                text = cut.rstrip(" ;:,")
             # R5 分隔符统一为点号（2026-11-03 用户裁决：不同词之间用 · 分隔，
             # 与词库条目的点号样式一致；分号枚举与全角分号一并归一）。
             text = text.replace("; ", " · ").replace("；", " · ")
@@ -228,11 +227,13 @@ def main() -> None:
             if picked[0].endswith("…"):
                 picked = picked[:1]
             joined = " · ".join(picked)
-            # R3 拼接总长上限：放下两条时丢第二条
-            if len(joined) > MAX_JOINED_LEN and len(picked) > 1:
-                joined = picked[0]
-                if joined.endswith("…") is False and len(joined) > MAX_JOINED_LEN:
-                    joined = joined[:MAX_JOINED_LEN - 1].rstrip(" ;:,· ") + "…"
+            # R3 拼接总长上限：放下两条时丢第二条（静默词边界截去）
+            if len(joined) > MAX_JOINED_LEN:
+                cut = joined[:MAX_JOINED_LEN]
+                sp = cut.rfind(" ")
+                if sp > MAX_JOINED_LEN // 2:
+                    cut = cut[:sp]
+                joined = cut.rstrip(" ;:,· ")
             lines.append(f"{key}\t{joined}")
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     manifest = {
@@ -246,11 +247,11 @@ def main() -> None:
                        "url": "https://kaikki.org/dictionary/Chinese/"},
         },
         "entry_count": len(entries),
-        "cleaningRules": {"version": "v5", "date": "2026-11-03",
-                          "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举≥3项只留前2项",
-                                    "单条≤36字符词边界截断+…", "行内…即行尾(不再追加义项)",
-                                    "拼接总长≤46字符只保留第一条", "name词性不展示",
-                                    "分隔符统一为点号·"],
+        "cleaningRules": {"version": "v6", "date": "2026-11-03",
+                          "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举只取首项",
+                                    "单条≤36字符静默词边界截断", "拼接总长≤46字符只保留第一条",
+                                    "name词性不展示", "分隔符统一为点号·",
+                                    "行内不出现省略号"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }

@@ -8,7 +8,7 @@
 
 1. **small100 保持优先验证路线，quickmt 维持性能对照，两者都不合格。** 按预写的决定规则，本轮落在第 1、2 条之间：small100 的固定风险失败仍为 5 条（未清零），但其缺陷集中在词/短语级语义漂移和品牌改写，属于产品路线中「审核过的表达资源＋加固层＋品牌保护」预定处置的范围；尚无「普遍语义错误」或「必须大量拒译才能安全」的证据。
 2. **quickmt 在独立确认集上进一步恶化。** 放行候选中只有 20.3%（16/79）语义合格；词级输入 88.1% 错误、时间表达 83.3% 错误。复读残片问题与第一轮一致，没有出现足以改变选择的新质量证据，速度优势（p95 43–90ms 对 134–300ms）不改变结论。
-3. **评测管线已修复并加回归锁。** 专项集纳入 `all` 并有数量断言；延迟门槛读真实结果，缺数据报 `incomplete` 而非通过；候选放行／语义合格／安全回退／错误放行分开统计；失败请求保留等待与超预算记录；缺失审阅不能报完成。断言脚本 `scripts/validate-translation-eval.py` 已接入 verify fast 档（6 项断言）。
+3. **评测管线已修复并加回归锁。** 专项集纳入 `all` 并有数量断言；延迟门槛读真实结果，缺数据报 `incomplete` 而非通过；候选放行／语义合格／安全回退／错误放行分开统计；失败请求保留等待与超预算记录；缺失审阅不能报完成。断言脚本 `scripts/validate-translation-eval.py` 已接入 verify fast 档（7 项断言）。
 4. **用户盲测材料已就绪、未开始。** [blind-comparison.md](blind-comparison.md)（模型名盲化为 A/B，对应关系在 `blind-comparison.key.json`）覆盖 100 条确认集；盲测完成前不得打开学习模式。
 
 ## 二、范围与同条件对照
@@ -56,18 +56,20 @@
 
 ### 3.3 失败模式（按输入类型，放行候选中）
 
+口径：任一轮放行即计入（每后端判审数与 §3.1 放行合计严格对齐：small100 360、quickmt 316）；typo/unknown 应保留用例不计入。
+
 | 类型 | small100 合格/判审 | 失败率 | quickmt 合格/判审 | 失败率 |
 | --- | --- | ---: | --- | ---: |
 | word（孤立词） | 55/66 | 16.7% | 7/59 | **88.1%** |
-| phrase（短语） | 66/100 | 34.0% | 23/75 | **69.3%** |
+| phrase（短语） | 66/100 | 34.0% | 21/73 | **71.2%** |
 | time（时间表达） | 20/28 | 28.6% | 5/30 | **83.3%** |
 | name（人名/地名） | 24/32 | 25.0% | 9/22 | 59.1% |
 | brand（品牌/术语） | 5/14 | 64.3% | 7/16 | 56.2% |
-| sentence/long（句子） | 89/124 | 28.2% | 98/118 | 16.9% |
+| sentence/long/protected（句子） | 85/120 | 29.2% | 96/116 | 17.2% |
 
-读法：quickmt 句子尚可（16.9% 失败）但**词/短语/时间是重灾区**——而短输入正是输入法学习模式的主场景；small100 全类型都有两三成失败，没有哪一类达到可用，但也没有哪一类崩塌。typo/unknown 应保留用例未被计入质量分（无 reference；两者各只有个位数放行）。
+读法：quickmt 句子尚可（17.2% 失败）但**词/短语/时间是重灾区**——而短输入正是输入法学习模式的主场景；small100 全类型都有两三成失败，没有哪一类达到可用，但也没有哪一类崩塌。typo/unknown 应保留用例未计入质量分（无 reference 参与评分）：35 条应保留输入中，small100／quickmt 分别有 34／35 条模型生成了非空输出，只是被保留策略挡下——这正说明真实输入的错拼／乱码识别必须靠运行时验证，不能靠测试标签。
 
-small100 的代表性错误放行（全部通过加固层进入候选）：`Gogaku v3.2.1`→「古巴 v3.2.1」被拦截但 `Microsoft Teams`→「微软团队」放行；`Huangshan`→「华盛顿」；`invoice`→「账单」；`on time`→「时间」；`辛苦了`→「hardly」；`中午`→「Midnight」；`We are out of coffee`→「我们已经出发了咖啡」；`Please tell Maria…` 丢 Maria 改 Mary。quickmt 的代表性错误：`station`→「联系方式」、`breakfast`/`calendar`→「电子邮件」、`明天下午三点`→「The cast meets…」类 cast 残片、`9 a.m.`→「上午9点 会议」等增义残片。
+small100 的代表性错误放行（全部通过加固层进入候选）：`Gogaku v3.2.1`→「古巴 v3.2.1」（保护扫描未把句首 `Gogaku` 计入保护词）与 `Microsoft Teams`→「微软团队」（`Teams` 只属软保护）都放行，孤立 `Gogaku`→「古古」才被复读规则拦截回退；`Huangshan`→「华盛顿」；`invoice`→「账单」；`on time`→「时间」；`辛苦了`→「hardly」；`中午`→「Midnight」；`We are out of coffee`→「我们已经出发了咖啡」；`Please tell Maria…` 丢 Maria 改 Mary。quickmt 的代表性错误：`station`→「联系方式」、`breakfast`/`calendar`→「电子邮件」、`明天下午三点`→「The cast meets…」类 cast 残片、`9 a.m.`→「上午9点 会议」等增义残片。
 
 ## 四、延迟
 
@@ -94,7 +96,13 @@ small100 的代表性错误放行（全部通过加固层进入候选）：`Goga
 | 应保留标签冒充识别能力 | gate `preservePolicy.basis` 明示按 expectedAction 标签分组、不能证明真实识别；盲测材料中回退行显示「〔安全回退→显示原文〕」而非原始乱码 |
 | 无独立确认集 | 新增 100 条（此前未使用，逐一与既有数据集去重），评分规则先冻结后运行，不用于补词或调规则 |
 
-评测管线回归锁：`python3 scripts/validate-translation-eval.py` 六项断言——专项集确实加载（含篡改检测）、超预算数据不能报通过、缺失审阅不能报完成、已知错误即使通过过滤也不计语义合格、应保留标签不冒充识别、汇总数据量断言。已作为必需项接入 `verify.py` fast／release 档。
+评测管线回归锁：`python3 scripts/validate-translation-eval.py` 七项断言——专项集确实加载（含篡改检测）、超预算数据不能报通过、缺失审阅不能报完成、已知错误即使通过过滤也不计语义合格、应保留标签不冒充识别、汇总数据量断言、轮次完整性（残缺末轮不能冒充完整评测）。已作为必需项接入 `verify.py` fast／release 档。
+
+**同日复核更正（2026-11-03）**：复核发现两处报告错误与一处管线缺口，均已修复——
+
+1. §3.3 原表把 4 条「加固层回退但审阅通过」的风险用例（`en-long`／`zh-long`／`en-url`／`zh-url` 等）计入判审，与本节标题「放行候选中」及 §3.1 合计（360／316）不一致；已按放行口径更正，各后端合计不变（small100 255/360、quickmt 145/316），分类型数字微调（quickmt phrase 23/75→21/73、sentence/long 98/118→96/116 等），不改变任何结论。
+2. 原文「`Gogaku v3.2.1`→「古巴 v3.2.1」被拦截」与请求级数据不符：该用例五轮全部通过加固层进入候选（保护扫描未把句首 `Gogaku` 计入保护词，审阅 fail，已计入错误放行）；真正被拦截的是孤立 `Gogaku`→「古古」（复读回退）。§3.3 代表性错误已改写，第七节「品牌保护接入」的必要性因此更强而非更弱。
+3. 管线缺口：五轮交错运行的「请求总数＝样例数×轮次」此前只有加载断言，汇总侧未验证轮次完整性；本轮起驱动在 `run.json` 记录 `expectedRequestCount`／`completeRun`，汇总侧强制每个声称的用例每（运行，后端）恰好有 `rounds` 轮请求行，残缺末轮直接判失败（回归断言第 7 项）。复跑汇总器两次运行的全部 4,280 行，产物与已提交版本逐字节一致。
 
 ## 六、对照预写决定规则的裁决
 
@@ -138,6 +146,6 @@ small100 的代表性错误放行（全部通过加固层进入候选）：`Goga
 | `validation/translation-confirm-set.json` | 独立确认集（100 条，冻结，含评分规则） |
 | `probes/benchmark-translation-backends.py` | 驱动：套件解析、数量断言、长度分桶、失败等待记录 |
 | `scripts/summarize-translation-backends.py` | 汇总：多运行合并、真实延迟门槛、四类结果统计、审阅覆盖（schema v2） |
-| `scripts/validate-translation-eval.py` | 评测管线回归断言（6 项，接入 verify fast） |
+| `scripts/validate-translation-eval.py` | 评测管线回归断言（7 项，接入 verify fast） |
 | `scripts/assemble-translation-review.py` | 审阅文件合并工具 |
 | `scripts/make-translation-blind-comparison.py` | 盲测材料生成（产品视图，模型名盲化） |
