@@ -15,8 +15,9 @@
   该类词条只显示释义；其他无合格词性的词条同样只显示释义。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
-- 注释清洗 v6（2026-11-03 用户裁决「希望可以显示全」）：同义枚举只取首项、
-  超长静默截断、拼接 ≤46——行内不出现省略号；分隔符统一为点号 ·；
+- 注释清洗 v7（2026-11-03 用户裁决不显示括号）：括号内容一律移除；
+  synonym of／alternative form of 等字形指代义项剔除；截断态即行尾；
+  分隔符统一为点号 ·；
   义项正文内长括号消歧说明（含括号 >18 字符）整体移除、短括号保留；
   分号同义枚举（≥3 项）只保留前 2 项加 …；
   单条超 MAX_SENSE_LEN 时词边界截断加 …（替代旧「整条剔除」）；
@@ -114,11 +115,19 @@ def simplified_key(entry: dict) -> str | None:
     return None
 
 
-def senses_of(entry: dict) -> list[tuple[bool, str]]:
-    """返回 [(是否噪声标签, 文本)]；alt-of／obsolete／archaic 义项剔除。
+REFERENCE_OF_RE = re.compile(
+    r"^(synonym|alternative form|variant|short for|traditional|simplified)\b", re.IGNORECASE)
+# 截断点悬空虚词（截到行尾时把 a／of／the 一类残尾一起去掉）
+DANGLING_WORDS = {"a", "an", "the", "of", "to", "in", "at", "for", "with", "by", "and", "or"}
 
-    义项文本不再携带 (tag) 结构化标签前缀；超长与纯括号标记的义项整条剔除。
-    (Classifier: …) 分类器说明不透传（用户不需要在候选窗里看量词搭配表）。"""
+
+def senses_of(entry: dict) -> list[tuple[bool, str, bool]]:
+    """返回 [(是否噪声标签, 文本, 是否截断态)]；alt-of／obsolete／archaic 义项剔除。
+
+    清洗规则 v7（2026-11-03）：括号内容一律移除（含短括号，用户裁决不显示
+    括号）；synonym of／alternative form of 一类字形指代义项剔除（不是释义）；
+    超长义项静默词边界截断并标记截断态（供 R4「截断即行尾」使用）。
+    (Classifier: …) 分类器说明不透传。"""
     pos = POS_ABBREV.get(entry.get("pos"), "")
     out = []
     for sense in entry.get("senses", []):
@@ -132,10 +141,15 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
         for gloss in sense.get("glosses", []) or sense.get("raw_glosses", []):
             text = CLASSIFIER_RE.sub("", gloss).strip()
             text = LEADING_CLASSIFIER_RE.sub("measure word for ", text).strip()
-            # R1 长括号消歧说明整体移除（如 you (the person spoken to or
-            # written to) → you）；短括号（≤18 字符）保留。
-            text = re.sub(r"\s*\([^)]{18,}\)", "", text)
-            text = re.sub(r"\s*（[^）]{18,}）", "", text)
+            # R1 括号内容一律移除（2026-11-03 用户裁决不显示括号；
+            # 消歧说明属词典细节，核心释义在括号外）；未闭合括号残尾一并去掉。
+            text = re.sub(r"\s*\([^)]*\)", "", text)
+            text = re.sub(r"\s*（[^）]*）", "", text)
+            text = re.sub(r"\([^)]*$", "", text).rstrip()
+            # 字形指代义项剔除（synonym of X／alternative form of X 等，
+            # 与 alt-of 同类：与正文重复，不是释义）
+            if REFERENCE_OF_RE.match(text.strip()):
+                continue
             # R1.5 分号同义枚举只取第 1 项（Wiktionary 义项常把同义词全排开，
             # 候选窗里是噪音；首项＝主义项，行内不出现省略号）。
             text = text.split("; ")[0]
@@ -145,17 +159,21 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
             text = f"{pos} {text}".strip()
             if not re.sub(r"\([^)]*\)|（[^）]*）", "", text).strip():
                 continue  # 纯括号标记（方言／域标签残留）无阅读价值
-            # R2 词边界截断（静默：候选窗注释是提示不是词典，超长部分截去）
-            if len(text) > MAX_SENSE_LEN:
+            # R2 词边界静默截断并标记截断态（截断点悬空虚词一并去掉）
+            truncated = len(text) > MAX_SENSE_LEN
+            if truncated:
                 cut = text[:MAX_SENSE_LEN]
                 sp = cut.rfind(" ")
                 if sp > MAX_SENSE_LEN // 2:
                     cut = cut[:sp]
-                text = cut.rstrip(" ;:,")
+                words = cut.rstrip(" ;:,").split(" ")
+                while words and words[-1].lower() in DANGLING_WORDS:
+                    words.pop()
+                text = " ".join(words)
             # R5 分隔符统一为点号（2026-11-03 用户裁决：不同词之间用 · 分隔，
             # 与词库条目的点号样式一致；分号枚举与全角分号一并归一）。
             text = text.replace("; ", " · ").replace("；", " · ")
-            out.append((noise, text))
+            out.append((noise, text, truncated))
     return out
 
 
@@ -211,22 +229,21 @@ def main() -> None:
     for key in sorted(entries):
         bucket = sorted(entries[key], key=lambda item: item[0])  # 非噪声标签义项优先（稳定排序）
         seen: set[str] = set()
-        picked: list[str] = []
-        for _, text in bucket:
+        picked: list[tuple[str, bool]] = []  # (文本, 是否截断态)
+        for _, text, truncated in bucket:
             # 规范化去重：忽略大小写、连续空白与句尾句号，避免同义变体重复。
             norm = re.sub(r"\s+", " ", text).strip().rstrip(".").lower()
             if norm in seen:
                 continue
             seen.add(norm)
-            picked.append(text)
+            picked.append((text, truncated))
+            # R4 截断态义项即行尾：不再追加后续义项（避免截断残尾后拼接混淆）
+            if truncated:
+                break
             if len(picked) >= MAX_SENSES_PER_WORD:
                 break
         if picked:
-            # R4 行内 … 即行尾：主义项被截断（以 … 结尾）时不再追加后续义项，
-            # 避免「equal; uniform … · all」这类省略号夹在行中的混乱语序。
-            if picked[0].endswith("…"):
-                picked = picked[:1]
-            joined = " · ".join(picked)
+            joined = " · ".join(text for text, _ in picked)
             # R3 拼接总长上限：放下两条时丢第二条（静默词边界截去）
             if len(joined) > MAX_JOINED_LEN:
                 cut = joined[:MAX_JOINED_LEN]
@@ -247,11 +264,12 @@ def main() -> None:
                        "url": "https://kaikki.org/dictionary/Chinese/"},
         },
         "entry_count": len(entries),
-        "cleaningRules": {"version": "v6", "date": "2026-11-03",
-                          "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举只取首项",
-                                    "单条≤36字符静默词边界截断", "拼接总长≤46字符只保留第一条",
-                                    "name词性不展示", "分隔符统一为点号·",
-                                    "行内不出现省略号"],
+        "cleaningRules": {"version": "v7", "date": "2026-11-03",
+                          "rules": ["括号内容一律移除", "分号同义枚举只取首项",
+                                    "synonym of/alternative form of 等字形指代义项剔除",
+                                    "单条≤36字符静默词边界截断(截断态即行尾)",
+                                    "拼接总长≤46字符", "name词性不展示",
+                                    "分隔符统一为点号·"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }
