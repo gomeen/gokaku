@@ -1,0 +1,2016 @@
+{
+ "schemaVersion": 1,
+ "lambdas": [
+  0.0,
+  0.25,
+  0.5,
+  1.0
+ ],
+ "rule": "关键风险错误更少 → 合格译文覆盖更高 → λ 更小",
+ "directions": {
+  "en-zh": {
+   "table": [
+    {
+     "lambda": 0.0,
+     "applicable": 33,
+     "criticalErrors": 3,
+     "coverage": 22,
+     "coverageRate": 0.6667,
+     "details": [
+      {
+       "caseId": "en-url",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "打开 https://example.com/a?x=1。"
+      },
+      {
+       "caseId": "en-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "参加会议"
+      },
+      {
+       "caseId": "en-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "不要发送电子邮件。"
+      },
+      {
+       "caseId": "en-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "明天"
+      },
+      {
+       "caseId": "en-mixed",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "请在星期五之前查看Gogaku v2.1。"
+      },
+      {
+       "caseId": "en-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "我明天会见。"
+      },
+      {
+       "caseId": "en-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议"
+      },
+      {
+       "caseId": "en-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议是明天下午3点。"
+      },
+      {
+       "caseId": "en-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我昨天去了银行。"
+      },
+      {
+       "caseId": "en-names",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "爱丽丝星期五将在北京见面。"
+      },
+      {
+       "caseId": "en-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "早上好"
+      },
+      {
+       "caseId": "en-typo-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "我明天有一个聚会。"
+      },
+      {
+       "caseId": "en-ambiguous",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "银行"
+      },
+      {
+       "caseId": "enToZh-058",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "总额为128.50元。"
+      },
+      {
+       "caseId": "cf-e-phrase-09",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "提前"
+      },
+      {
+       "caseId": "cf-e-time-08",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "明天之后的日子"
+      },
+      {
+       "caseId": "se-e-phrase-15",
+       "suite": "short",
+       "index": 0,
+       "verdict": "fail",
+       "text": "途中"
+      },
+      {
+       "caseId": "cf-e-sent-05",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "喝咖啡,请买更多。"
+      },
+      {
+       "caseId": "se-e-phrase-05",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "你怎么样"
+      },
+      {
+       "caseId": "cf-e-sent-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "请记住明天拿出门票。"
+      },
+      {
+       "caseId": "enToZh-083",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "尽管第一次测试已经过去了,但我们不应该发布更新,直到剩下的两个测试完成。"
+      },
+      {
+       "caseId": "enToZh-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "在二楼"
+      },
+      {
+       "caseId": "enToZh-084",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "请告诉玛丽亚,任命已转移到8月3日,并提醒她带来原始文件而不是副本。"
+      },
+      {
+       "caseId": "enToZh-053",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "只有第一个项目是免费的。"
+      },
+      {
+       "caseId": "enToZh-030",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "尽快"
+      },
+      {
+       "caseId": "enToZh-059",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我的航班于6月12日出发。"
+      },
+      {
+       "caseId": "enToZh-015",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "电梯"
+      },
+      {
+       "caseId": "cf-e-phrase-07",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "做得很好"
+      },
+      {
+       "caseId": "enToZh-038",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "延迟航班"
+      },
+      {
+       "caseId": "enToZh-081",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "如果发货未到周五到达,请取消订单并返回我的原始付款方式。"
+      },
+      {
+       "caseId": "enToZh-071",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "请减少百分之10。"
+      },
+      {
+       "caseId": "enToZh-024",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "做一个休息"
+      },
+      {
+       "caseId": "cf-e-name-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "李教授"
+      }
+     ]
+    },
+    {
+     "lambda": 0.25,
+     "applicable": 33,
+     "criticalErrors": 2,
+     "coverage": 23,
+     "coverageRate": 0.697,
+     "details": [
+      {
+       "caseId": "en-url",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "打开 https://example.com/a?x=1。"
+      },
+      {
+       "caseId": "en-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "参加会议"
+      },
+      {
+       "caseId": "en-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "不要发送电子邮件。"
+      },
+      {
+       "caseId": "en-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "明天"
+      },
+      {
+       "caseId": "en-mixed",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "请在星期五之前查看Gogaku v2.1。"
+      },
+      {
+       "caseId": "en-sentence",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "我明天会面。"
+      },
+      {
+       "caseId": "en-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议"
+      },
+      {
+       "caseId": "en-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议是明天下午3点。"
+      },
+      {
+       "caseId": "en-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我昨天去了银行。"
+      },
+      {
+       "caseId": "en-names",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "爱丽丝星期五将在北京见到鲍勃"
+      },
+      {
+       "caseId": "en-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "早上好"
+      },
+      {
+       "caseId": "en-typo-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "我明天有一个聚会。"
+      },
+      {
+       "caseId": "en-ambiguous",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "银行"
+      },
+      {
+       "caseId": "enToZh-058",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "总额为128.50元。"
+      },
+      {
+       "caseId": "cf-e-phrase-09",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "提前"
+      },
+      {
+       "caseId": "cf-e-time-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "明天后的一天"
+      },
+      {
+       "caseId": "se-e-phrase-15",
+       "suite": "short",
+       "index": 0,
+       "verdict": "fail",
+       "text": "途中"
+      },
+      {
+       "caseId": "cf-e-sent-05",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "喝咖啡,请再买一些。"
+      },
+      {
+       "caseId": "se-e-phrase-05",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "你怎么样"
+      },
+      {
+       "caseId": "cf-e-sent-06",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "请记住明天拿出你的门票。"
+      },
+      {
+       "caseId": "enToZh-083",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "尽管第一次测试已经过去,但我们不应该发布更新,直到剩下的两个测试完成。"
+      },
+      {
+       "caseId": "enToZh-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "在二楼"
+      },
+      {
+       "caseId": "enToZh-084",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "请告诉玛丽亚,任命已转移到8月3日,并提醒她带来原始文件而不是副本。"
+      },
+      {
+       "caseId": "enToZh-053",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "只有第一个项目是免费的。"
+      },
+      {
+       "caseId": "enToZh-030",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "尽快"
+      },
+      {
+       "caseId": "enToZh-059",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我的航班于6月12日出发。"
+      },
+      {
+       "caseId": "enToZh-015",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "电梯"
+      },
+      {
+       "caseId": "cf-e-phrase-07",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "做得很好"
+      },
+      {
+       "caseId": "enToZh-038",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "延迟航班"
+      },
+      {
+       "caseId": "enToZh-081",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "fail",
+       "text": "如果发货未到周五到达,请取消订单并退还我的原始付款方式。"
+      },
+      {
+       "caseId": "enToZh-071",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "pass",
+       "text": "请减少百分之十。"
+      },
+      {
+       "caseId": "enToZh-024",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "做一个休息"
+      },
+      {
+       "caseId": "cf-e-name-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "李教授"
+      }
+     ]
+    },
+    {
+     "lambda": 0.5,
+     "applicable": 33,
+     "criticalErrors": 2,
+     "coverage": 23,
+     "coverageRate": 0.697,
+     "details": [
+      {
+       "caseId": "en-url",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "打开 https://example.com/a?x=1。"
+      },
+      {
+       "caseId": "en-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "参加会议"
+      },
+      {
+       "caseId": "en-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "不要发送电子邮件。"
+      },
+      {
+       "caseId": "en-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "明天"
+      },
+      {
+       "caseId": "en-mixed",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "请在周五之前查看Gogaku v2.1。"
+      },
+      {
+       "caseId": "en-sentence",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "我明天会面。"
+      },
+      {
+       "caseId": "en-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议"
+      },
+      {
+       "caseId": "en-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议是明天下午3点。"
+      },
+      {
+       "caseId": "en-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我昨天去了银行。"
+      },
+      {
+       "caseId": "en-names",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "爱丽丝星期五将在北京见到鲍勃"
+      },
+      {
+       "caseId": "en-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "早上好"
+      },
+      {
+       "caseId": "en-typo-sentence",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "我明天有个聚会。"
+      },
+      {
+       "caseId": "en-ambiguous",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "银行"
+      },
+      {
+       "caseId": "enToZh-058",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "总额为128.50元。"
+      },
+      {
+       "caseId": "cf-e-phrase-09",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "提前"
+      },
+      {
+       "caseId": "cf-e-time-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "明天后的一天"
+      },
+      {
+       "caseId": "se-e-phrase-15",
+       "suite": "short",
+       "index": 0,
+       "verdict": "fail",
+       "text": "途中"
+      },
+      {
+       "caseId": "cf-e-sent-05",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "喝咖啡,请再买一些。"
+      },
+      {
+       "caseId": "se-e-phrase-05",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "你怎么样"
+      },
+      {
+       "caseId": "cf-e-sent-06",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "请记住明天拿出你的门票。"
+      },
+      {
+       "caseId": "enToZh-083",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "尽管第一次测试已经过去,但我们不应该发布更新,直到剩下的两个测试完成。"
+      },
+      {
+       "caseId": "enToZh-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "在二楼"
+      },
+      {
+       "caseId": "enToZh-084",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "请告诉玛丽亚,任命已转移到8月3日,并提醒她带来原始文件而不是副本。"
+      },
+      {
+       "caseId": "enToZh-053",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "只有第一个项目是免费的。"
+      },
+      {
+       "caseId": "enToZh-030",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "尽快"
+      },
+      {
+       "caseId": "enToZh-059",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我的航班于6月12日出发。"
+      },
+      {
+       "caseId": "enToZh-015",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "电梯"
+      },
+      {
+       "caseId": "cf-e-phrase-07",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "做得很好"
+      },
+      {
+       "caseId": "enToZh-038",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "延迟航班"
+      },
+      {
+       "caseId": "enToZh-081",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "fail",
+       "text": "如果发货未到周五到达,请取消订单并退还我的原始付款方式。"
+      },
+      {
+       "caseId": "enToZh-071",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "pass",
+       "text": "请减少百分之十。"
+      },
+      {
+       "caseId": "enToZh-024",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "做一个休息"
+      },
+      {
+       "caseId": "cf-e-name-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "李教授"
+      }
+     ]
+    },
+    {
+     "lambda": 1.0,
+     "applicable": 33,
+     "criticalErrors": 2,
+     "coverage": 23,
+     "coverageRate": 0.697,
+     "details": [
+      {
+       "caseId": "en-url",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "打开 https://example.com/a?x=1。"
+      },
+      {
+       "caseId": "en-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "参加会议"
+      },
+      {
+       "caseId": "en-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "不要发送电子邮件。"
+      },
+      {
+       "caseId": "en-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "明天"
+      },
+      {
+       "caseId": "en-mixed",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "请在周五之前查看Gogaku v2.1。"
+      },
+      {
+       "caseId": "en-sentence",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "我明天会面。"
+      },
+      {
+       "caseId": "en-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议"
+      },
+      {
+       "caseId": "en-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "会议是明天下午3点。"
+      },
+      {
+       "caseId": "en-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我昨天去了银行。"
+      },
+      {
+       "caseId": "en-names",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "爱丽丝星期五将在北京见到鲍勃"
+      },
+      {
+       "caseId": "en-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "早上好"
+      },
+      {
+       "caseId": "en-typo-sentence",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "我明天有个聚会。"
+      },
+      {
+       "caseId": "en-ambiguous",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "银行"
+      },
+      {
+       "caseId": "enToZh-058",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "总额为128.50元。"
+      },
+      {
+       "caseId": "cf-e-phrase-09",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "提前"
+      },
+      {
+       "caseId": "cf-e-time-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "明天后的一天"
+      },
+      {
+       "caseId": "se-e-phrase-15",
+       "suite": "short",
+       "index": 0,
+       "verdict": "fail",
+       "text": "途中"
+      },
+      {
+       "caseId": "cf-e-sent-05",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "喝咖啡,请再买一些。"
+      },
+      {
+       "caseId": "se-e-phrase-05",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "你怎么样"
+      },
+      {
+       "caseId": "cf-e-sent-06",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "请记住明天拿出你的门票。"
+      },
+      {
+       "caseId": "enToZh-083",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "尽管第一次测试已经过去,但我们不应该发布更新,直到剩下的两个测试完成。"
+      },
+      {
+       "caseId": "enToZh-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "在二楼"
+      },
+      {
+       "caseId": "enToZh-084",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "请告诉玛丽亚,任命已转移到8月3日,并提醒她带来原始文件而不是副本。"
+      },
+      {
+       "caseId": "enToZh-053",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "只有第一个项目是免费的。"
+      },
+      {
+       "caseId": "enToZh-030",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "尽快"
+      },
+      {
+       "caseId": "enToZh-059",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "我的航班于6月12日出发。"
+      },
+      {
+       "caseId": "enToZh-015",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "电梯"
+      },
+      {
+       "caseId": "cf-e-phrase-07",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "做得很好"
+      },
+      {
+       "caseId": "enToZh-038",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "延迟航班"
+      },
+      {
+       "caseId": "enToZh-081",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "fail",
+       "text": "如果发货未到周五到达,请取消订单并退还我的原始付款方式。"
+      },
+      {
+       "caseId": "enToZh-071",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "pass",
+       "text": "请减少百分之十。"
+      },
+      {
+       "caseId": "enToZh-024",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "做一片休息"
+      },
+      {
+       "caseId": "cf-e-name-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "李教授"
+      }
+     ]
+    }
+   ],
+   "selected": 0.25,
+   "selectedRow": {
+    "lambda": 0.25,
+    "applicable": 33,
+    "criticalErrors": 2,
+    "coverage": 23,
+    "coverageRate": 0.697
+   }
+  },
+  "zh-en": {
+   "table": [
+    {
+     "lambda": 0.0,
+     "applicable": 35,
+     "criticalErrors": 3,
+     "coverage": 21,
+     "coverageRate": 0.6,
+     "details": [
+      {
+       "caseId": "zh-mixed",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please check Gogaku v2.1 before Friday."
+      },
+      {
+       "caseId": "zh-url",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please open https://example.com/a?x=1"
+      },
+      {
+       "caseId": "zh-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not send mail."
+      },
+      {
+       "caseId": "zh-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I went to the bank yesterday."
+      },
+      {
+       "caseId": "zh-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "meeting"
+      },
+      {
+       "caseId": "zh-names",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Alice met Bob in Beijing on Friday."
+      },
+      {
+       "caseId": "zh-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Good morning"
+      },
+      {
+       "caseId": "zh-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Meeting tomorrow at 3 pm."
+      },
+      {
+       "caseId": "zh-not-yet",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have not eaten yet."
+      },
+      {
+       "caseId": "zh-contrast",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "He is not in Shanghai, but in Beijing."
+      },
+      {
+       "caseId": "zh-condition",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "If it rains, we cancell the meeting."
+      },
+      {
+       "caseId": "zh-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "tomorrow"
+      },
+      {
+       "caseId": "zh-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have a meeting tomorrow."
+      },
+      {
+       "caseId": "zh-bank",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Banking"
+      },
+      {
+       "caseId": "zh-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "The Meeting"
+      },
+      {
+       "caseId": "cf-z-sent-01",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Please open the air conditioning."
+      },
+      {
+       "caseId": "zhToEn-003",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Return"
+      },
+      {
+       "caseId": "cf-z-time-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "every morning"
+      },
+      {
+       "caseId": "se-z-unknown-02",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "qwzx 文本"
+      },
+      {
+       "caseId": "zhToEn-018",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "The crossroads"
+      },
+      {
+       "caseId": "zhToEn-075",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please return the book before Friday."
+      },
+      {
+       "caseId": "cf-z-phrase-12",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not worry."
+      },
+      {
+       "caseId": "cf-z-phrase-08",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Early"
+      },
+      {
+       "caseId": "zhToEn-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "on the second floor."
+      },
+      {
+       "caseId": "zhToEn-068",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have already submitted the form."
+      },
+      {
+       "caseId": "zhToEn-061",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "I will wait until 7:15 pm."
+      },
+      {
+       "caseId": "zhToEn-071",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please reduce the amount by 10 percent."
+      },
+      {
+       "caseId": "cf-z-sent-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "He studied in the library."
+      },
+      {
+       "caseId": "zhToEn-082",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "The old entrance will be closed tomorrow from 9 am to 4 pm, please use the side door at this time."
+      },
+      {
+       "caseId": "cf-z-phrase-02",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Left Turn"
+      },
+      {
+       "caseId": "cf-z-brand-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Rice"
+      },
+      {
+       "caseId": "zhToEn-023",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "missing the train."
+      },
+      {
+       "caseId": "zhToEn-047",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "She was at home on Monday."
+      },
+      {
+       "caseId": "zhToEn-072",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Do I have to arrange in advance?"
+      },
+      {
+       "caseId": "cf-z-name-08",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Yellow Mountain"
+      }
+     ]
+    },
+    {
+     "lambda": 0.25,
+     "applicable": 35,
+     "criticalErrors": 4,
+     "coverage": 21,
+     "coverageRate": 0.6,
+     "details": [
+      {
+       "caseId": "zh-mixed",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please check Gogaku v2.1 before Friday."
+      },
+      {
+       "caseId": "zh-url",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Please open https://example.com/a?x=1."
+      },
+      {
+       "caseId": "zh-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not send mail."
+      },
+      {
+       "caseId": "zh-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I went to the bank yesterday."
+      },
+      {
+       "caseId": "zh-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "meeting"
+      },
+      {
+       "caseId": "zh-names",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Alice met Bob on Friday in Beijing."
+      },
+      {
+       "caseId": "zh-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Good morning"
+      },
+      {
+       "caseId": "zh-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Meeting tomorrow at 3 pm."
+      },
+      {
+       "caseId": "zh-not-yet",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have not eaten yet."
+      },
+      {
+       "caseId": "zh-contrast",
+       "suite": "risk",
+       "index": 2,
+       "verdict": "fail",
+       "text": "He is not in Shanghai, in Beijing."
+      },
+      {
+       "caseId": "zh-condition",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "If it rains, we cancelled the meeting."
+      },
+      {
+       "caseId": "zh-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "tomorrow"
+      },
+      {
+       "caseId": "zh-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have a meeting tomorrow."
+      },
+      {
+       "caseId": "zh-bank",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The Bank"
+      },
+      {
+       "caseId": "zh-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "The Meeting"
+      },
+      {
+       "caseId": "cf-z-sent-01",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Please open the air conditioning."
+      },
+      {
+       "caseId": "zhToEn-003",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Return"
+      },
+      {
+       "caseId": "cf-z-time-06",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "every morning"
+      },
+      {
+       "caseId": "se-z-unknown-02",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "qwzx 文本"
+      },
+      {
+       "caseId": "zhToEn-018",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "The crossroads"
+      },
+      {
+       "caseId": "zhToEn-075",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please return the book before Friday."
+      },
+      {
+       "caseId": "cf-z-phrase-12",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not worry."
+      },
+      {
+       "caseId": "cf-z-phrase-08",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Early"
+      },
+      {
+       "caseId": "zhToEn-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "on the second floor."
+      },
+      {
+       "caseId": "zhToEn-068",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have already submitted the form."
+      },
+      {
+       "caseId": "zhToEn-061",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "I’ll wait until 7:15 pm."
+      },
+      {
+       "caseId": "zhToEn-071",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please reduce the amount by 10 percent."
+      },
+      {
+       "caseId": "cf-z-sent-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "He studied in the library."
+      },
+      {
+       "caseId": "zhToEn-082",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "pass",
+       "text": "Tomorrow from 9 am to 4 pm, the old entrance will be closed, please use side door during this time."
+      },
+      {
+       "caseId": "cf-z-phrase-02",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Left Turn"
+      },
+      {
+       "caseId": "cf-z-brand-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Rice"
+      },
+      {
+       "caseId": "zhToEn-023",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "missing the train."
+      },
+      {
+       "caseId": "zhToEn-047",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "She was at home office on Monday."
+      },
+      {
+       "caseId": "zhToEn-072",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Do I have to book in advance?"
+      },
+      {
+       "caseId": "cf-z-name-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The Yellow Mountain"
+      }
+     ]
+    },
+    {
+     "lambda": 0.5,
+     "applicable": 35,
+     "criticalErrors": 4,
+     "coverage": 21,
+     "coverageRate": 0.6,
+     "details": [
+      {
+       "caseId": "zh-mixed",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please check Gogaku v2.1 before Friday."
+      },
+      {
+       "caseId": "zh-url",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Please open https://example.com/a?x=1."
+      },
+      {
+       "caseId": "zh-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not send mail."
+      },
+      {
+       "caseId": "zh-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I went to the bank yesterday."
+      },
+      {
+       "caseId": "zh-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "meeting"
+      },
+      {
+       "caseId": "zh-names",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Alice met Bob on Friday in Beijing."
+      },
+      {
+       "caseId": "zh-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Good morning"
+      },
+      {
+       "caseId": "zh-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Meeting tomorrow at 3 pm."
+      },
+      {
+       "caseId": "zh-not-yet",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have not eaten yet."
+      },
+      {
+       "caseId": "zh-contrast",
+       "suite": "risk",
+       "index": 2,
+       "verdict": "fail",
+       "text": "He is not in Shanghai, in Beijing."
+      },
+      {
+       "caseId": "zh-condition",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "If it rains, we cancelled the meeting."
+      },
+      {
+       "caseId": "zh-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "tomorrow"
+      },
+      {
+       "caseId": "zh-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have a meeting tomorrow."
+      },
+      {
+       "caseId": "zh-bank",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The Bank"
+      },
+      {
+       "caseId": "zh-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "The Meeting"
+      },
+      {
+       "caseId": "cf-z-sent-01",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Please open the air conditioning."
+      },
+      {
+       "caseId": "zhToEn-003",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Return"
+      },
+      {
+       "caseId": "cf-z-time-06",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Every morning"
+      },
+      {
+       "caseId": "se-z-unknown-02",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "qwzx 文本"
+      },
+      {
+       "caseId": "zhToEn-018",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "The crossroads"
+      },
+      {
+       "caseId": "zhToEn-075",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please return the book before Friday."
+      },
+      {
+       "caseId": "cf-z-phrase-12",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not worry."
+      },
+      {
+       "caseId": "cf-z-phrase-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "Early."
+      },
+      {
+       "caseId": "zhToEn-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "on the second floor."
+      },
+      {
+       "caseId": "zhToEn-068",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have already submitted the form."
+      },
+      {
+       "caseId": "zhToEn-061",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "I’ll wait until 7:15 pm."
+      },
+      {
+       "caseId": "zhToEn-071",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "pass",
+       "text": "Please reduce the amount by ten percent."
+      },
+      {
+       "caseId": "cf-z-sent-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "He studied in the library."
+      },
+      {
+       "caseId": "zhToEn-082",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "pass",
+       "text": "Tomorrow from 9 am to 4 pm, the old entrance will be closed, please use side door during this time."
+      },
+      {
+       "caseId": "cf-z-phrase-02",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The left turn"
+      },
+      {
+       "caseId": "cf-z-brand-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Rice"
+      },
+      {
+       "caseId": "zhToEn-023",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "missing the train."
+      },
+      {
+       "caseId": "zhToEn-047",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "She was at home office on Monday."
+      },
+      {
+       "caseId": "zhToEn-072",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Do I have to book in advance?"
+      },
+      {
+       "caseId": "cf-z-name-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The Yellow Mountain"
+      }
+     ]
+    },
+    {
+     "lambda": 1.0,
+     "applicable": 35,
+     "criticalErrors": 4,
+     "coverage": 21,
+     "coverageRate": 0.6,
+     "details": [
+      {
+       "caseId": "zh-mixed",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please check Gogaku v2.1 before Friday."
+      },
+      {
+       "caseId": "zh-url",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Please open https://example.com/a?x=1."
+      },
+      {
+       "caseId": "zh-negation",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not send mail."
+      },
+      {
+       "caseId": "zh-past",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I went to the bank yesterday."
+      },
+      {
+       "caseId": "zh-word",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "meeting"
+      },
+      {
+       "caseId": "zh-names",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Alice met Bob on Friday in Beijing."
+      },
+      {
+       "caseId": "zh-greeting",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Good morning"
+      },
+      {
+       "caseId": "zh-time",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Meeting tomorrow at 3 pm."
+      },
+      {
+       "caseId": "zh-not-yet",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have not eaten yet."
+      },
+      {
+       "caseId": "zh-contrast",
+       "suite": "risk",
+       "index": 2,
+       "verdict": "fail",
+       "text": "He is not in Shanghai, in Beijing."
+      },
+      {
+       "caseId": "zh-condition",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "If it rains, we cancelled the meeting."
+      },
+      {
+       "caseId": "zh-tomorrow",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "tomorrow"
+      },
+      {
+       "caseId": "zh-sentence",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have a meeting tomorrow."
+      },
+      {
+       "caseId": "zh-bank",
+       "suite": "risk",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The Bank"
+      },
+      {
+       "caseId": "zh-phrase",
+       "suite": "risk",
+       "index": 0,
+       "verdict": "fail",
+       "text": "The Meeting"
+      },
+      {
+       "caseId": "cf-z-sent-01",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Please open the air conditioning."
+      },
+      {
+       "caseId": "zhToEn-003",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "Refunded"
+      },
+      {
+       "caseId": "cf-z-time-06",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Every morning"
+      },
+      {
+       "caseId": "se-z-unknown-02",
+       "suite": "short",
+       "index": 0,
+       "verdict": "pass",
+       "text": "qwzx 文本"
+      },
+      {
+       "caseId": "zhToEn-018",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "The crossroads"
+      },
+      {
+       "caseId": "zhToEn-075",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Please return the book before Friday."
+      },
+      {
+       "caseId": "cf-z-phrase-12",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "pass",
+       "text": "Do not worry."
+      },
+      {
+       "caseId": "cf-z-phrase-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "Early."
+      },
+      {
+       "caseId": "zhToEn-025",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "on the second floor."
+      },
+      {
+       "caseId": "zhToEn-068",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "pass",
+       "text": "I have already submitted the form."
+      },
+      {
+       "caseId": "zhToEn-061",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "I’ll wait until 7:15 pm."
+      },
+      {
+       "caseId": "zhToEn-071",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "pass",
+       "text": "Please reduce the amount by ten percent."
+      },
+      {
+       "caseId": "cf-z-sent-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "He studied in the library."
+      },
+      {
+       "caseId": "zhToEn-082",
+       "suite": "holdout",
+       "index": 2,
+       "verdict": "pass",
+       "text": "Tomorrow from 9 am to 4 pm, the old entrance will be closed, please use side door during this time."
+      },
+      {
+       "caseId": "cf-z-phrase-02",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The left turn"
+      },
+      {
+       "caseId": "cf-z-brand-03",
+       "suite": "confirm",
+       "index": 0,
+       "verdict": "fail",
+       "text": "Rice"
+      },
+      {
+       "caseId": "zhToEn-023",
+       "suite": "holdout",
+       "index": 0,
+       "verdict": "fail",
+       "text": "missing the train."
+      },
+      {
+       "caseId": "zhToEn-047",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "fail",
+       "text": "She was at home office on Monday."
+      },
+      {
+       "caseId": "zhToEn-072",
+       "suite": "holdout",
+       "index": 1,
+       "verdict": "pass",
+       "text": "Do I have to book in advance?"
+      },
+      {
+       "caseId": "cf-z-name-08",
+       "suite": "confirm",
+       "index": 1,
+       "verdict": "fail",
+       "text": "The Yellow Mountain"
+      }
+     ]
+    }
+   ],
+   "selected": 0.0,
+   "selectedRow": {
+    "lambda": 0.0,
+    "applicable": 35,
+    "criticalErrors": 3,
+    "coverage": 21,
+    "coverageRate": 0.6
+   }
+  }
+ },
+ "lambda": {
+  "en-zh": 0.25,
+  "zh-en": 0.0
+ }
+}

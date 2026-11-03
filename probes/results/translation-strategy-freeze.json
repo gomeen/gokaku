@@ -1,0 +1,60 @@
+{
+ "schemaVersion": 1,
+ "frozenAt": "2026-11-03",
+ "purpose": "策略封板：λ、资源、模板、品牌表、编排代码与加固 dylib 的哈希。封板后不再根据最终验收输出改权重。",
+ "lambda": {
+  "en-zh": 0.25,
+  "zh-en": 0.0
+ },
+ "selectionRule": "关键风险错误更少 → 合格译文覆盖更高 → λ 更小",
+ "selectionEvidence": {
+  "devRequests": "probes/results/translation-strategy-dev/requests.jsonl",
+  "devRequestsSha256": "e92799bcb04e9374e82cbe62333ebd5ab993b426e495c7bad637449be4129248",
+  "labels": "probes/results/translation-strategy-dev/labels.json",
+  "labelsSha256": "dedb154099adee99f2d792705ae812c208f2ff12db62a6f736030965b17c4d08",
+  "selection": "probes/results/translation-strategy-dev/lambda-selection.json",
+  "selectionSha256": "aafd89472d70ba13c13f43ccc6926a3c49257de2c3eddb7d557c3f44f8386379",
+  "selectedRows": {
+   "en-zh": {
+    "lambda": 0.25,
+    "applicable": 33,
+    "criticalErrors": 2,
+    "coverage": 23,
+    "coverageRate": 0.697
+   },
+   "zh-en": {
+    "lambda": 0.0,
+    "applicable": 35,
+    "criticalErrors": 3,
+    "coverage": 21,
+    "coverageRate": 0.6
+   }
+  }
+ },
+ "policyPaths": {
+  "resources": "resources/translation/expressions.tsv",
+  "templates": "resources/translation/templates.json",
+  "brands": "resources/translation/brands.tsv",
+  "strategyModule": "probes/translation_strategy.py",
+  "worker": "probes/translation-backend-worker.py",
+  "dylib": ".build/core/libgogaku_core.dylib",
+  "builder": "scripts/build-translation-expressions.py",
+  "driver": "probes/benchmark-translation-strategy.py"
+ },
+ "policy": {
+  "resources": "608baf194f6a247ffba9473b20fa05b855a5e6cd25c2e01d52807701265ffc05",
+  "templates": "49c78c95761bc83c597152ac77478b83a26857e6e2f916aa714394ea21034162",
+  "brands": "e26646ba183c86544335af2fd55130b7f9a66e6a07e556784f4923633c3f990b",
+  "strategyModule": "21d487bf958aec77f906134a926d58df295c2fe2ae9d876027792a93bbf21063",
+  "worker": "377b78982da3aa5e34b565ad34bd313a33d0afaf76d87b3d304855c1945f80ba",
+  "dylib": "b5e1cfda47c86cba0c8f653e375d086b658764bc983215b7cd6bd20055dab9ac",
+  "builder": "4fc78ea84c668a6f52d20d2d453d09a0f34558eb6d3cb403d1c48fe34b8f1394",
+  "driver": "11fd990e0ef3e41f7544d56247188de33c293f6b0952bf83454d0ce8f5b1bb80"
+ },
+ "notes": [
+  "en-zh 选 λ=0.25：固定风险集关键错误 3→2，覆盖 22→23，未引入新的关键错误。",
+  "zh-en 选 λ=0（预先规定的退出路径）：λ>0 时把「他不在上海，在北京」选成丢失对比关系的「He is not in Shanghai, in Beijing.」，关键错误 3→4，覆盖不变。",
+  "λ 只影响排序，不代表正确性；高分与两模型一致都不是正确性证明。",
+  "开发集标注覆盖风险集 32 条 + 分层抽样 40 条；λ 只在这一子集上选择，未用于补词或改规则。"
+ ]
+}

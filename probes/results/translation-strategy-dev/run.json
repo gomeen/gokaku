@@ -210,5 +210,18 @@
    "stderrLog": "/Users/gomeen/code/gomeen/gogaku/probes/results/translation-strategy-dev/worker-scorer.stderr.log"
   }
  },
- "rounds": []
+ "rounds": [
+  {
+   "round": 1,
+   "startedAt": "2026-11-03T05:07:30.358220+00:00",
+   "finishedAt": "2026-11-03T05:09:19.771721+00:00",
+   "rows": 420
+  }
+ ],
+ "small100StoppedPeakRssBytes": 618192896,
+ "scorerStoppedPeakRssBytes": 1316978688,
+ "finishedAt": "2026-11-03T05:09:20.523811+00:00",
+ "requestCount": 420,
+ "expectedRequestCount": 420,
+ "completeRun": true
 }
