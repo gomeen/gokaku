@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>Gogaku 菜单栏图标设计选择</title>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "PingFang SC", -apple-system, sans-serif;
+    background: #f2f2f4; color: #1d1d1f;
+    padding: 32px; max-width: 1280px; margin: 0 auto;
+  }
+  h1 { font-size: 24px; margin-bottom: 6px; }
+  p.desc { color: #666; margin-bottom: 24px; font-size: 14px; }
+  .bar {
+    border-radius: 18px; padding: 22px 26px; margin-bottom: 18px;
+    display: flex; align-items: center; gap: 34px;
+  }
+  .bar.light { background: #fbfbfd; border: 1px solid #e3e3e6; }
+  .bar.dark  { background: #232325; }
+  .bar .tag { width: 110px; font-size: 13px; opacity: .65; flex: none; }
+  .option {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    cursor: pointer; padding: 14px 10px; border-radius: 14px;
+    border: 2px solid transparent; transition: all .15s;
+    user-select: none;
+  }
+  .option:hover { background: rgba(0,0,0,.05); }
+  .dark .option:hover { background: rgba(255,255,255,.07); }
+  .option.selected { border-color: #0a84ff; background: rgba(10,132,255,.1); }
+  .option .name { font-size: 13px; font-weight: 600; }
+  .option .sub  { font-size: 11px; opacity: .6; }
+  svg.icon { display: block; }
+  .realsize { transform-origin: left top; }
+  .realrow { margin-top: 6px; display: flex; align-items: center; gap: 18px; }
+  .reallabel { font-size: 11px; opacity: .55; width: 58px; }
+  #pick {
+    position: sticky; bottom: 18px; margin-top: 22px;
+    background: #fff; border: 1px solid #e3e3e6; border-radius: 14px;
+    padding: 16px 22px; display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.12); font-size: 15px;
+  }
+  #pick b { color: #0a84ff; font-size: 20px; min-width: 28px; display: inline-block; }
+  #pick button {
+    font: inherit; padding: 8px 18px; border-radius: 9px; border: none;
+    background: #0a84ff; color: #fff; cursor: pointer;
+  }
+  .notes { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.7; }
+</style>
+</head>
+<body>
+<h1>Gogaku 菜单栏图标——设计方向选择</h1>
+<p class="desc">每格上方为大样（约 3.2×），下方为菜单栏实际尺寸（16pt）。点击选择，然后在对话框里回复字母。深色菜单栏自动反相＝模板渲染的行为。</p>
+
+<!-- ═══ 浅色菜单栏 ═══ -->
+<div class="bar light">
+  <div class="tag">浅色菜单栏<br>（模板自适应前）</div>
+  <div class="option" data-id="A">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="0.6" y="0.4" width="20.8" height="15.2" rx="4.8" fill="#111114"/>
+      <path d="M5.6 6.6 C7.4 6.3 9.8 6.1 11.6 6.0 C13.4 5.9 15.2 5.9 16.9 6.0" stroke="#fbfbfd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M4.5 9.4 C6.5 10.1 9.2 11.1 11.8 11.7 C13.6 12.1 15.4 12.3 16.9 12.3" stroke="#fbfbfd" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="name">A 现状</div><div class="sub">胶囊＋两笔镂空</div>
+  </div>
+  <div class="option" data-id="B">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="0.5" y="0.35" width="21" height="15.3" rx="4.9" fill="#111114"/>
+      <path d="M5.2 6.3 C7.2 6.0 9.8 5.8 11.8 5.7 C13.8 5.6 15.8 5.6 17.6 5.7" stroke="#fbfbfd" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M4.2 9.7 C6.6 10.5 9.6 11.5 12.4 12.1 C14.3 12.5 16.2 12.7 17.9 12.7" stroke="#fbfbfd" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="name">B 加粗加满</div><div class="sub">笔画更粗更满幅</div>
+  </div>
+  <div class="option" data-id="C">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="1.0" y="0.7" width="20" height="14.6" rx="4.0" fill="#111114"/>
+      <text x="11" y="12.9" text-anchor="middle" font-family="PingFang SC" font-weight="600" font-size="12.2" fill="#fbfbfd">言</text>
+    </svg>
+    <div class="name">C 「言」字镂空</div><div class="sub">像鼠须管的「司」</div>
+  </div>
+  <div class="option" data-id="D">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="1.0" y="0.7" width="20" height="14.6" rx="4.0" fill="#111114"/>
+      <text x="11" y="12.9" text-anchor="middle" font-family="PingFang SC" font-weight="600" font-size="12.2" fill="#fbfbfd">语</text>
+    </svg>
+    <div class="name">D 「语」字镂空</div><div class="sub">Gogaku＝语学</div>
+  </div>
+  <div class="option" data-id="E">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <ellipse cx="11" cy="8" rx="9.4" ry="7.8" fill="#111114"/>
+      <path d="M5.8 6.5 C7.6 6.2 9.9 6.0 11.7 5.9 C13.5 5.8 15.2 5.8 16.8 5.9" stroke="#fbfbfd" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+      <path d="M4.9 9.6 C6.8 10.3 9.4 11.2 12 11.8 C13.7 12.2 15.4 12.4 16.9 12.4" stroke="#fbfbfd" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="name">E 圆形底板</div><div class="sub">圆形＋两笔</div>
+  </div>
+</div>
+
+<!-- ═══ 深色菜单栏 ═══ -->
+<div class="bar dark">
+  <div class="tag" style="color:#eee">深色菜单栏<br>（模板自适应后）</div>
+  <div class="option" data-id="A">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="0.6" y="0.4" width="20.8" height="15.2" rx="4.8" fill="#f5f5f7"/>
+      <path d="M5.6 6.6 C7.4 6.3 9.8 6.1 11.6 6.0 C13.4 5.9 15.2 5.9 16.9 6.0" stroke="#232325" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <path d="M4.5 9.4 C6.5 10.1 9.2 11.1 11.8 11.7 C13.6 12.1 15.4 12.3 16.9 12.3" stroke="#232325" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="name" style="color:#eee">A 现状</div><div class="sub" style="color:#bbb">胶囊＋两笔镂空</div>
+  </div>
+  <div class="option" data-id="B">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="0.5" y="0.35" width="21" height="15.3" rx="4.9" fill="#f5f5f7"/>
+      <path d="M5.2 6.3 C7.2 6.0 9.8 5.8 11.8 5.7 C13.8 5.6 15.8 5.6 17.6 5.7" stroke="#232325" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+      <path d="M4.2 9.7 C6.6 10.5 9.6 11.5 12.4 12.1 C14.3 12.5 16.2 12.7 17.9 12.7" stroke="#232325" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="name" style="color:#eee">B 加粗加满</div><div class="sub" style="color:#bbb">笔画更粗更满幅</div>
+  </div>
+  <div class="option" data-id="C">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="1.0" y="0.7" width="20" height="14.6" rx="4.0" fill="#f5f5f7"/>
+      <text x="11" y="12.9" text-anchor="middle" font-family="PingFang SC" font-weight="600" font-size="12.2" fill="#232325">言</text>
+    </svg>
+    <div class="name" style="color:#eee">C 「言」字镂空</div><div class="sub" style="color:#bbb">像鼠须管的「司」</div>
+  </div>
+  <div class="option" data-id="D">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <rect x="1.0" y="0.7" width="20" height="14.6" rx="4.0" fill="#f5f5f7"/>
+      <text x="11" y="12.9" text-anchor="middle" font-family="PingFang SC" font-weight="600" font-size="12.2" fill="#232325">语</text>
+    </svg>
+    <div class="name" style="color:#eee">D 「语」字镂空</div><div class="sub" style="color:#bbb">Gogaku＝语学</div>
+  </div>
+  <div class="option" data-id="E">
+    <svg class="icon" width="132" height="96" viewBox="0 0 22 16">
+      <ellipse cx="11" cy="8" rx="9.4" ry="7.8" fill="#f5f5f7"/>
+      <path d="M5.8 6.5 C7.6 6.2 9.9 6.0 11.7 5.9 C13.5 5.8 15.2 5.8 16.8 5.9" stroke="#232325" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+      <path d="M4.9 9.6 C6.8 10.3 9.4 11.2 12 11.8 C13.7 12.2 15.4 12.4 16.9 12.4" stroke="#232325" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="name" style="color:#eee">E 圆形底板</div><div class="sub" style="color:#bbb">圆形＋两笔</div>
+  </div>
+</div>
+
+<!-- ═══ 实际尺寸对照 ═══ -->
+<div class="bar light" style="padding: 16px 26px;">
+  <div class="tag">实际尺寸<br>（16pt 高）</div>
+  <div class="realrow"><div class="reallabel">A 现状</div>
+    <svg class="realsize" width="132" height="96" viewBox="0 0 22 16" style="width:22px;height:16px"><rect x="0.6" y="0.4" width="20.8" height="15.2" rx="4.8" fill="#111114"/><path d="M5.6 6.6 C7.4 6.3 9.8 6.1 11.6 6.0 C13.4 5.9 15.2 5.9 16.9 6.0" stroke="#fbfbfd" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M4.5 9.4 C6.5 10.1 9.2 11.1 11.8 11.7 C13.6 12.1 15.4 12.3 16.9 12.3" stroke="#fbfbfd" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
+    <div class="reallabel">B 加粗</div>
+    <svg class="realsize" width="132" height="96" viewBox="0 0 22 16" style="width:22px;height:16px"><rect x="0.5" y="0.35" width="21" height="15.3" rx="4.9" fill="#111114"/><path d="M5.2 6.3 C7.2 6.0 9.8 5.8 11.8 5.7 C13.8 5.6 15.8 5.6 17.6 5.7" stroke="#fbfbfd" stroke-width="3.2" fill="none" stroke-linecap="round"/><path d="M4.2 9.7 C6.6 10.5 9.6 11.5 12.4 12.1 C14.3 12.5 16.2 12.7 17.9 12.7" stroke="#fbfbfd" stroke-width="3.2" fill="none" stroke-linecap="round"/></svg>
+    <div class="reallabel">C 言</div>
+    <svg class="realsize" width="132" height="96" viewBox="0 0 22 16" style="width:22px;height:16px"><rect x="1.0" y="0.7" width="20" height="14.6" rx="4.0" fill="#111114"/><text x="11" y="12.9" text-anchor="middle" font-family="PingFang SC" font-weight="600" font-size="12.2" fill="#fbfbfd">言</text></svg>
+    <div class="reallabel">D 语</div>
+    <svg class="realsize" width="132" height="96" viewBox="0 0 22 16" style="width:22px;height:16px"><rect x="1.0" y="0.7" width="20" height="14.6" rx="4.0" fill="#111114"/><text x="11" y="12.9" text-anchor="middle" font-family="PingFang SC" font-weight="600" font-size="12.2" fill="#fbfbfd">语</text></svg>
+    <div class="reallabel">E 圆</div>
+    <svg class="realsize" width="132" height="96" viewBox="0 0 22 16" style="width:22px;height:16px"><ellipse cx="11" cy="8" rx="9.4" ry="7.8" fill="#111114"/><path d="M5.8 6.5 C7.6 6.2 9.9 6.0 11.7 5.9 C13.5 5.8 15.2 5.8 16.8 5.9" stroke="#fbfbfd" stroke-width="2.3" fill="none" stroke-linecap="round"/><path d="M4.9 9.6 C6.8 10.3 9.4 11.2 12 11.8 C13.7 12.2 15.4 12.4 16.9 12.4" stroke="#fbfbfd" stroke-width="2.3" fill="none" stroke-linecap="round"/></svg>
+  </div>
+</div>
+
+<div id="pick">当前选择：<b id="chosen">（点击上方图标）</b>
+  <span class="notes" id="picknote">选好后把字母发给我，我更新资产并彻底刷新系统缓存。</span>
+</div>
+
+<script>
+  let chosen = null;
+  document.querySelectorAll('.option').forEach(el => {
+    el.addEventListener('click', () => {
+      chosen = el.dataset.id;
+      document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      document.querySelectorAll(`.option[data-id="${chosen}"]`).forEach(o => o.classList.add('selected'));
+      document.getElementById('chosen').textContent = chosen;
+    });
+  });
+</script>
+</body>
+</html>

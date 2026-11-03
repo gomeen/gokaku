@@ -1,16 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024"><defs>
-  <!-- 全出血圆角方块（圆角比例约 22.5%，同 macOS 原生图标栅格），
-       暖纸底＋炭黑两笔＋红浊点，与 Zed 同类的极简白底风格。
-       不烘焙阴影与描边：四角保持真透明，由系统叠在桌面上。 -->
-  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fffaf0"/><stop offset="1" stop-color="#efe4cf"/></linearGradient>
-</defs>
-<rect width="1024" height="1024" rx="230" fill="url(#bg)"/>
-<g fill="none" stroke="#1d1d1f" stroke-width="64" stroke-linecap="round" stroke-linejoin="round">
-<path d="M322 424 C346.7 422.0 425.3 416.0 470 412 C514.7 408.0 570.0 402.0 590 400"/>
-<path d="M246 580 C276.7 593.0 362.7 635.7 430 658 C497.3 680.3 613.3 704.7 650 714"/>
-</g>
-<g fill="none" stroke="#d4253a" stroke-width="36" stroke-linecap="round" stroke-linejoin="round">
-<path d="M692,328 L740,296"/>
-<path d="M744,408 L792,376"/>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- 应用图标（2026-11-03 重设计）：炭黑全出血圆角方块（圆角比例约 22.5%，
+       同 macOS 原生图标栅格）＋镂空两笔＋红浊点点缀。
+       动机：输入法切换浮窗（HUD）读取应用图标而非 gogaku-menu.pdf，旧版
+       暖纸浅底在浅色浮窗里读不出底板（用户反馈「没有背景、中间图标太大」）。
+       新版与菜单栏图标（黑胶囊＋镂空两笔）同构，与青简／鼠须管的应用图标
+       「品牌底板＋镂空字形」模式一致。四角保持真透明。 -->
+  <rect width="1024" height="1024" rx="230" fill="#1d1d1f"/>
+  <g fill="none" stroke="#fbfbfd" stroke-width="64" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M322 424 C346.7 422.0 425.3 416.0 470 412 C514.7 408.0 570.0 402.0 590 400"/>
+    <path d="M246 580 C276.7 593.0 362.7 635.7 430 658 C497.3 680.3 613.3 704.7 650 714"/>
+  </g>
+  <g fill="none" stroke="#d4253a" stroke-width="36" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M692,328 L740,296"/>
+    <path d="M744,408 L792,376"/>
+  </g>
 </svg>
