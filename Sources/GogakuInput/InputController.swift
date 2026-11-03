@@ -972,7 +972,12 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                 self.panel.dismiss(); self.target = nil; return
             }
             guard let current = self.currentTarget(), current == self.target else { self.suspend(); return }
-            // 状态行由 CompositionSession 维护（翻译中／成功／失败提示）；
+            // 学习路径没有 applyNormal：首次显示用锚点矩形（组合首键
+            // currentTarget(readRectangle: true) 已读取）；若首键未读到矩形，
+            // 由位置复查在恢复后补上。后续由位置复查跟随插入点。
+            if self.displayRect == nil, let anchor = self.target, anchor.rect != .zero {
+                self.displayRect = anchor.rect
+            }
             // 拼写检查仅英→中且开发版开关打开时走现有 --spell 通路。
             if self.learningDevEnabled, self.mode == .learning, self.direction == .enToZh, self.requestedSpellStamp != value.stamp {
                 self.requestedSpellStamp = value.stamp
@@ -980,6 +985,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                                                          resource: "NSSpellChecker:en_US", ignoredWords: Array(self.settings.ignoredWords)))
             }
             self.displayed = value
+            startPositionRefresh()
             guard let rect = self.displayRect else { self.panel.dismiss(); return }
             self.panel.render(value, at: rect, targetWindowLevel:
                               GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
