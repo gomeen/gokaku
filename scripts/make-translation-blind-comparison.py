@@ -33,6 +33,29 @@ def read_jsonl(path):
     return rows
 
 
+def product_view(rows):
+    """What the product would show for this case: the released (hardened)
+    candidate when one exists, otherwise the safety fallback to the source.
+
+    Raw outputs that the hardening layer would reject are never shown as if
+    they were candidates; that would misrepresent both systems.
+    """
+    released = [
+        row for row in rows
+        if row.get("error") is None
+        and (row.get("hardening") or {}).get("verdict") in ("candidate", "candidate-normalized")
+    ]
+    if not released:
+        return None, 0, True
+    outputs = [
+        (row.get("hardening") or {}).get("normalizedOutput") or row.get("output") or ""
+        for row in released
+    ]
+    counts = Counter(outputs)
+    output, count = counts.most_common(1)[0]
+    return output, len(counts), False
+
+
 def modal_output(rows):
     outputs = [row.get("output") or "" for row in rows if row.get("error") is None]
     if not outputs:
@@ -72,25 +95,38 @@ def main():
         case = cases_by_id[case_id]
         per_backend = {}
         for backend in backends:
-            output, variants = modal_output([row for row in case_rows if row["backend"] == backend])
-            per_backend[backend] = (output, variants)
-        if per_backend[backends[0]][0] is None or per_backend[backends[1]][0] is None:
-            raise SystemExit("case %s is missing one backend output" % case_id)
+            output, variants, fell_back = product_view([row for row in case_rows if row["backend"] == backend])
+            per_backend[backend] = (output, variants, fell_back)
+        if per_backend[backends[0]][0] is None and per_backend[backends[1]][0] is None:
+            # Both sides fall back to the source: still a valid comparison row
+            # (the product shows the user's own text on both sides).
+            pass
         seed = int(hashlib.sha256(("%s|%s|%s" % (confirm_hash[:16], direction, case_id)).encode()).hexdigest()[:8], 16)
         first, second = backends if seed % 2 == 0 else (backends[1], backends[0])
         assignment[case_id] = {"A": first, "B": second}
+
+        def side_text(backend):
+            output, variants, fell_back = per_backend[backend]
+            if fell_back:
+                return "〔安全回退→显示原文〕", variants
+            return output, variants
+
         items.append({
             "id": case_id,
             "direction": direction,
             "kind": case.get("kind"),
             "source": case["source"],
-            "A": per_backend[first][0],
-            "B": per_backend[second][0],
+            "A": side_text(first)[0],
+            "B": side_text(second)[0],
             "variants": {
                 "A": per_backend[first][1],
                 "B": per_backend[second][1],
             },
-            "note": "variants>1 表示五轮输出不完全一致",
+            "fallback": {
+                "A": per_backend[first][2],
+                "B": per_backend[second][2],
+            },
+            "note": "〔安全回退→显示原文〕表示该侧加固层未放行任何候选，产品会保留用户原文；variants 为放行候选的变体数",
         })
 
     by_direction = {}
@@ -103,12 +139,12 @@ def main():
 
     reviewable = {
         "schemaVersion": 1,
-        "purpose": "用户盲测材料：模型名称隐藏。请对每条选出更合适的译文（或标注两者都不合格）；语义规则与 validation/translation-confirm-set.json 的 scoringRules 一致。",
+        "purpose": "用户盲测材料：模型名称隐藏。请对每条选出更合适的译文（或标注两者都不合格）；语义规则与 validation/translation-confirm-set.json 的 scoringRules 一致。〔安全回退→显示原文〕不是译文：该侧没有放行任何候选，产品会保留用户输入原文。",
         "confirmSetSha256": confirm_hash,
         "labelNote": "A/B 与后端的对应关系只存在于 blind-comparison.key.json；审阅完成前不要打开。",
         "directions": {
             direction: [
-                {key: item[key] for key in ("id", "kind", "source", "A", "B") if key in item}
+                {key: item[key] for key in ("id", "kind", "source", "A", "B", "fallback") if key in item}
                 | {"variants": item["variants"]}
                 for item in direction_items
             ]
@@ -126,7 +162,8 @@ def main():
         "",
         "模型名称已隐藏（A/B）。每条请选出更合适的译文，或标注两者都不合格；",
         "允许同义表达；评分规则见 `validation/translation-confirm-set.json`。",
-        "`variants` 字段大于 1 表示该侧五轮输出不完全一致。",
+        "`〔安全回退→显示原文〕`不是译文：该侧加固层未放行任何候选，产品会保留用户输入原文。",
+        "`variants` 是该侧放行候选的变体数，大于 1 表示五轮输出不完全一致。",
         "",
     ]
     for direction, direction_items in sorted(reviewable["directions"].items()):

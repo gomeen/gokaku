@@ -1,0 +1,1512 @@
+{
+ "schemaVersion": 1,
+ "purpose": "用户盲测材料：模型名称隐藏。请对每条选出更合适的译文（或标注两者都不合格）；语义规则与 validation/translation-confirm-set.json 的 scoringRules 一致。〔安全回退→显示原文〕不是译文：该侧没有放行任何候选，产品会保留用户输入原文。",
+ "confirmSetSha256": "a6f905495750f038d0466eb88f680062dc8cf5efb2d9d507a98c3ca0ef700dd0",
+ "labelNote": "A/B 与后端的对应关系只存在于 blind-comparison.key.json；审阅完成前不要打开。",
+ "directions": {
+  "en-zh": [
+   {
+    "id": "cf-e-phrase-02",
+    "kind": "phrase",
+    "source": "a little tired",
+    "A": "〔安全回退→显示原文〕",
+    "B": "有点累了",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-09",
+    "kind": "phrase",
+    "source": "in advance",
+    "A": "〔安全回退→显示原文〕",
+    "B": "提前",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-05",
+    "kind": "phrase",
+    "source": "right now",
+    "A": "现在, 立即",
+    "B": "现在",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-name-07",
+    "kind": "name",
+    "source": "Teacher Wang",
+    "A": "老师 华",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-sent-03",
+    "kind": "sentence",
+    "source": "Please do not turn off the lights when you leave.",
+    "A": "请不要关掉灯光,当你离开的时候。",
+    "B": "请不要在离开时关闭灯。 敬请谅解。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-04",
+    "kind": "time",
+    "source": "at 6 p.m.",
+    "A": "下午6点 会议",
+    "B": "下午6点。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-name-01",
+    "kind": "name",
+    "source": "Paris",
+    "A": "巴黎",
+    "B": "巴黎人",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-name-03",
+    "kind": "name",
+    "source": "Emma",
+    "A": "艾玛",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-name-05",
+    "kind": "name",
+    "source": "New York",
+    "A": "纽约",
+    "B": "纽约总部",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-word-03",
+    "kind": "word",
+    "source": "weather",
+    "A": "天气",
+    "B": "天气系统",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-01",
+    "kind": "phrase",
+    "source": "long time no see",
+    "A": "〔安全回退→显示原文〕",
+    "B": "久不见",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-name-04",
+    "kind": "name",
+    "source": "David",
+    "A": "戴维",
+    "B": "大卫·泽西",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-07",
+    "kind": "phrase",
+    "source": "well done",
+    "A": "〔安全回退→显示原文〕",
+    "B": "好做",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-word-05",
+    "kind": "word",
+    "source": "hospital",
+    "A": "医院",
+    "B": "医院介绍",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-name-08",
+    "kind": "name",
+    "source": "Huangshan",
+    "A": "华盛顿",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-word-09",
+    "kind": "word",
+    "source": "airport",
+    "A": "机场",
+    "B": "机场班车",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-07",
+    "kind": "time",
+    "source": "last winter",
+    "A": "冬天",
+    "B": "上一个冬天的",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-03",
+    "kind": "time",
+    "source": "yesterday afternoon",
+    "A": "昨天下午 上",
+    "B": "昨天下午",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-06",
+    "kind": "phrase",
+    "source": "be careful",
+    "A": "要小心",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-name-06",
+    "kind": "name",
+    "source": "Professor Li",
+    "A": "李教授",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-phrase-10",
+    "kind": "phrase",
+    "source": "on time",
+    "A": "〔安全回退→显示原文〕",
+    "B": "时间",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-11",
+    "kind": "phrase",
+    "source": "keep in touch",
+    "A": "保持接触 联系",
+    "B": "保持联系",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-08",
+    "kind": "phrase",
+    "source": "see you later",
+    "A": "以后见面",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-word-02",
+    "kind": "word",
+    "source": "ticket",
+    "A": "彩票注册",
+    "B": "票",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-brand-04",
+    "kind": "brand",
+    "source": "USB cable",
+    "A": "〔安全回退→显示原文〕",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": true,
+     "B": true
+    },
+    "variants": {
+     "A": 0,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-word-07",
+    "kind": "word",
+    "source": "calendar",
+    "A": "日历",
+    "B": "电子邮件",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-word-01",
+    "kind": "word",
+    "source": "station",
+    "A": "站",
+    "B": "联系方式",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-05",
+    "kind": "time",
+    "source": "in ten minutes",
+    "A": "十分钟后 开始",
+    "B": "十分钟内",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-sent-01",
+    "kind": "sentence",
+    "source": "The train leaves at 7:30.",
+    "A": "火车7:30开机 出发",
+    "B": "火车在7:30点离开。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-03",
+    "kind": "phrase",
+    "source": "really tasty",
+    "A": "真的好吃的",
+    "B": "真的很美味",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-brand-01",
+    "kind": "brand",
+    "source": "GitHub",
+    "A": "〔安全回退→显示原文〕",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": true,
+     "B": true
+    },
+    "variants": {
+     "A": 0,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-word-06",
+    "kind": "word",
+    "source": "subway",
+    "A": "地铁",
+    "B": "地铁服务",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-brand-02",
+    "kind": "brand",
+    "source": "iOS",
+    "A": "〔安全回退→显示原文〕",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": true,
+     "B": true
+    },
+    "variants": {
+     "A": 0,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-name-02",
+    "kind": "name",
+    "source": "Tokyo",
+    "A": "东京",
+    "B": "东京都",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-word-08",
+    "kind": "word",
+    "source": "wallet",
+    "A": "钱包",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-phrase-12",
+    "kind": "phrase",
+    "source": "good luck",
+    "A": "好运",
+    "B": "好运来娱乐",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-phrase-04",
+    "kind": "phrase",
+    "source": "turn left",
+    "A": "转左转",
+    "B": "转向左",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-word-10",
+    "kind": "word",
+    "source": "neighbor",
+    "A": "邻居",
+    "B": "邻居介绍",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-brand-05",
+    "kind": "brand",
+    "source": "Microsoft Teams",
+    "A": "〔安全回退→显示原文〕",
+    "B": "微软团队",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-sent-04",
+    "kind": "sentence",
+    "source": "She will arrive in Beijing tonight and stay for a week.",
+    "A": "她今天晚上到北京,留下一周。",
+    "B": "她今晚将抵达北京,并停留一周。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-brand-03",
+    "kind": "brand",
+    "source": "Wi-Fi",
+    "A": "无线上网",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-sent-06",
+    "kind": "sentence",
+    "source": "Remember to bring your ticket tomorrow.",
+    "A": "请记住明天拿出你的门票。",
+    "B": "记得明天带上你的票。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-brand-06",
+    "kind": "brand",
+    "source": "Send it via WeChat",
+    "A": "〔安全回退→显示原文〕",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": true,
+     "B": true
+    },
+    "variants": {
+     "A": 0,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-e-time-06",
+    "kind": "time",
+    "source": "every morning",
+    "A": "每一天早晨",
+    "B": "每天早上都灵",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-sent-05",
+    "kind": "sentence",
+    "source": "We are out of coffee, please buy some more.",
+    "A": "我们没咖啡了,请再买点。",
+    "B": "我们已经出发了咖啡,请买更多。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-01",
+    "kind": "time",
+    "source": "tonight",
+    "A": "今晚的节目",
+    "B": "今晚",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-08",
+    "kind": "time",
+    "source": "the day after tomorrow",
+    "A": "明天之后,就",
+    "B": "明天之后的日子",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-time-02",
+    "kind": "time",
+    "source": "this weekend",
+    "A": "本周末",
+    "B": "这个周末的节目",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-word-04",
+    "kind": "word",
+    "source": "breakfast",
+    "A": "电子邮件",
+    "B": "早餐",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-e-sent-02",
+    "kind": "sentence",
+    "source": "I forgot my umbrella at home.",
+    "A": "我把雨伞忘在家里了",
+    "B": "我在家里忘记了我的伞。",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   }
+  ],
+  "zh-en": [
+   {
+    "id": "cf-z-name-04",
+    "kind": "name",
+    "source": "艾玛",
+    "A": "〔安全回退→显示原文〕",
+    "B": "Amy",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-sent-03",
+    "kind": "sentence",
+    "source": "他在图书馆学习。",
+    "A": "He studied at the library.",
+    "B": "He studied in the library.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-01",
+    "kind": "word",
+    "source": "车站",
+    "A": "The Station",
+    "B": "Stations with a",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-11",
+    "kind": "phrase",
+    "source": "没关系",
+    "A": "Never mind the",
+    "B": "No matter",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-03",
+    "kind": "name",
+    "source": "纽约",
+    "A": "New York",
+    "B": "New York City",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-08",
+    "kind": "time",
+    "source": "后天",
+    "A": "The next day",
+    "B": "The Day After",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-01",
+    "kind": "time",
+    "source": "今晚",
+    "A": "This evening",
+    "B": "Tonight the cast",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-04",
+    "kind": "time",
+    "source": "下午六点",
+    "A": "Six p.m. on the 6 p.m.",
+    "B": "at 6 pm",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-brand-02",
+    "kind": "brand",
+    "source": "华为",
+    "A": "Huawei Spin",
+    "B": "Huawei",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-sent-02",
+    "kind": "sentence",
+    "source": "我明天早上七点起床。",
+    "A": "I wake up at 7:00 am tomorrow morning.",
+    "B": "I'll be up at 7am tomorrow morning.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-08",
+    "kind": "word",
+    "source": "老板",
+    "A": "The boss",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-z-phrase-01",
+    "kind": "phrase",
+    "source": "好久不见",
+    "A": "Long time no see the cast.",
+    "B": "Long ago not seen",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-10",
+    "kind": "word",
+    "source": "朋友",
+    "A": "and friends",
+    "B": "Friend the Friend",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-07",
+    "kind": "name",
+    "source": "王老师",
+    "A": "Teacher Wang",
+    "B": "The King Teacher",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-05",
+    "kind": "phrase",
+    "source": "准时",
+    "A": "Timely",
+    "B": "On time to the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-04",
+    "kind": "word",
+    "source": "地铁",
+    "A": "Metro Spin",
+    "B": "The Metro",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-brand-04",
+    "kind": "brand",
+    "source": "蓝牙",
+    "A": "Blue tooth",
+    "B": "Bluetooth to the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-07",
+    "kind": "word",
+    "source": "邻居",
+    "A": "Neighbors by the",
+    "B": "Neighborhood",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-brand-06",
+    "kind": "brand",
+    "source": "用蓝牙连接耳机",
+    "A": "Connect headset with Bluetooth.",
+    "B": "Connect the headset with Bluetooth",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-06",
+    "kind": "name",
+    "source": "李教授",
+    "A": "Professor Lee",
+    "B": "Professor Lee",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-brand-01",
+    "kind": "brand",
+    "source": "支付宝",
+    "A": "Payment of Treasures",
+    "B": "Alipay and Alipay",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-08",
+    "kind": "phrase",
+    "source": "提前",
+    "A": "Early Early Casting",
+    "B": "Pre-",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-03",
+    "kind": "word",
+    "source": "医院",
+    "A": "〔安全回退→显示原文〕",
+    "B": "Hospital",
+    "fallback": {
+     "A": true,
+     "B": false
+    },
+    "variants": {
+     "A": 0,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-12",
+    "kind": "phrase",
+    "source": "别担心",
+    "A": "Don't worry about the",
+    "B": "Do not worry.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-sent-04",
+    "kind": "sentence",
+    "source": "这家餐厅的菜很好吃。",
+    "A": "The food at this restaurant is delicious.",
+    "B": "The cuisine in this restaurant is delicious.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-sent-05",
+    "kind": "sentence",
+    "source": "别忘了给妈妈打电话。",
+    "A": "Don’t forget to call my mom.",
+    "B": "Don't forget to call your mom.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-10",
+    "kind": "phrase",
+    "source": "真可惜",
+    "A": "It is sad.",
+    "B": "〔安全回退→显示原文〕",
+    "fallback": {
+     "A": false,
+     "B": true
+    },
+    "variants": {
+     "A": 1,
+     "B": 0
+    }
+   },
+   {
+    "id": "cf-z-word-09",
+    "kind": "word",
+    "source": "假期",
+    "A": "Holidays In The Box",
+    "B": "vacation",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-02",
+    "kind": "word",
+    "source": "天气",
+    "A": "Weather in the World",
+    "B": "The weather",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-05",
+    "kind": "time",
+    "source": "十分钟后",
+    "A": "10 minutes later",
+    "B": "The ten minutes after the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-02",
+    "kind": "name",
+    "source": "东京",
+    "A": "Tokyo",
+    "B": "Tokyo",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-02",
+    "kind": "phrase",
+    "source": "左转",
+    "A": "Left Turn",
+    "B": "Left to the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-02",
+    "kind": "time",
+    "source": "这个周末",
+    "A": "This weekend the",
+    "B": "This weekend",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-sent-01",
+    "kind": "sentence",
+    "source": "请把空调打开。",
+    "A": "Please turn the air conditioning on.",
+    "B": "Please open the air conditioning.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-04",
+    "kind": "phrase",
+    "source": "做得好",
+    "A": "Well done to the",
+    "B": "Doing well",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-08",
+    "kind": "name",
+    "source": "黄山",
+    "A": "Yellow Mountain",
+    "B": "Yellow Mountain",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-brand-05",
+    "kind": "brand",
+    "source": "二维码",
+    "A": "2D Code Box",
+    "B": "2D code",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-09",
+    "kind": "phrase",
+    "source": "我请客",
+    "A": "I invite you to the",
+    "B": "I am a request.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-07",
+    "kind": "time",
+    "source": "去年冬天",
+    "A": "Last Winter",
+    "B": "Last winter last year",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-03",
+    "kind": "time",
+    "source": "昨天下午",
+    "A": "Yesterday afternoon the",
+    "B": "Yesterday afternoon",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-sent-06",
+    "kind": "sentence",
+    "source": "会议室在三楼。",
+    "A": "The conference room is on the third floor.",
+    "B": "Conference Room is on the 3rd floor.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-05",
+    "kind": "word",
+    "source": "钱包",
+    "A": "The Wallet",
+    "B": "Wallets for the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-06",
+    "kind": "phrase",
+    "source": "保持联系",
+    "A": "Keep in contact",
+    "B": "Stay in touch with the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-05",
+    "kind": "name",
+    "source": "大卫",
+    "A": "David",
+    "B": "David by David",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-time-06",
+    "kind": "time",
+    "source": "每天早上",
+    "A": "Every morning",
+    "B": "Every morning the",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-03",
+    "kind": "phrase",
+    "source": "小心",
+    "A": "Beware of the",
+    "B": "Carefully",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-phrase-07",
+    "kind": "phrase",
+    "source": "祝你好运",
+    "A": "Good luck with the",
+    "B": "Good luck to you.",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-name-01",
+    "kind": "name",
+    "source": "巴黎",
+    "A": "Paris",
+    "B": "Paris by the Paris",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-brand-03",
+    "kind": "brand",
+    "source": "小米",
+    "A": "Xiaomi",
+    "B": "Rice",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   },
+   {
+    "id": "cf-z-word-06",
+    "kind": "word",
+    "source": "机场",
+    "A": "Airports Inject",
+    "B": "Airports",
+    "fallback": {
+     "A": false,
+     "B": false
+    },
+    "variants": {
+     "A": 1,
+     "B": 1
+    }
+   }
+  ]
+ }
+}

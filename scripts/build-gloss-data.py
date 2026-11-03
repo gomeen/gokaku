@@ -15,9 +15,11 @@
   该类词条只显示释义；其他无合格词性的词条同样只显示释义。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
-- 简短义项：单条超过 MAX_SENSE_LEN 的义项不合格，整条剔除（不截断，
-  避免制造错误释义）；在合格义项中按「非标签优先、原顺序优先」取前 2 条。
-  没有合格短义项的词条不入表（等效留空，核心查不到即不显示注释）。
+- 注释清洗 v3（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
+  义项正文内长括号消歧说明（含括号 >18 字符）整体移除、短括号保留；
+  单条超 MAX_SENSE_LEN 时词边界截断加 …（替代旧「整条剔除」）；
+  拼接总长超 MAX_JOINED_LEN 时只保留第一条。在合格义项中按
+  「非标签优先、原顺序优先」取前 2 条；没有合格义项的词条不入表。
 - 重复内容：同一词内按规范化文本（忽略大小写、空白与句尾句号）去重。
 - 纯标点键（、。…）与 ideographic description 序列（⿰…）不收。
 
@@ -44,9 +46,15 @@ POS_ABBREV = {
 }
 # "character" 是词条类别，不进入词性缩写表：显示为纯释义。
 
-# 单条义项长度上限：超过视为不合格短义项，整条剔除（不截断）。
-# 候选窗注释区约容纳 60 个拉丁字符；64 留出词性前缀与分隔余量。
-MAX_SENSE_LEN = 64
+# 清洗规则 v3（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
+# R1 义项正文内的长括号消歧说明（含括号 >18 字符）整体移除，短括号保留；
+# R2 单条超 MAX_SENSE_LEN 时在词边界截断加省略号（替代旧「整条剔除」，
+#    截断以 … 显式标记，不制造完整释义假象）；
+# R3 拼接总长超 MAX_JOINED_LEN 时只保留第一条义项。
+# 规则全部编码在本脚本，重新生成数据时自动按同规则执行（可复现）。
+# 候选窗注释区约容纳 45 个拉丁字符；36 留出词性前缀余量，46 为拼接上限。
+MAX_SENSE_LEN = 36
+MAX_JOINED_LEN = 46
 MAX_SENSES_PER_WORD = 2
 
 # 这些标签的义项降级：常用词的首义经常是方言／语域用法，非标签义项优先。
@@ -117,13 +125,23 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
         for gloss in sense.get("glosses", []) or sense.get("raw_glosses", []):
             text = CLASSIFIER_RE.sub("", gloss).strip()
             text = LEADING_CLASSIFIER_RE.sub("measure word for ", text).strip()
+            # R1 长括号消歧说明整体移除（如 you (the person spoken to or
+            # written to) → you）；短括号（≤18 字符）保留。
+            text = re.sub(r"\s*\([^)]{18,}\)", "", text)
+            text = re.sub(r"\s*（[^）]{18,}）", "", text)
+            text = text.strip()
             if not text or PLACEHOLDER_RE.match(text) or not presentable(text):
                 continue
             text = f"{pos} {text}".strip()
-            if len(text) > MAX_SENSE_LEN:
-                continue  # 不合格短义项（含词性前缀）：整条剔除，不截断
             if not re.sub(r"\([^)]*\)|（[^）]*）", "", text).strip():
                 continue  # 纯括号标记（方言／域标签残留）无阅读价值
+            # R2 词边界截断（显式 … 标记，不制造完整释义假象）
+            if len(text) > MAX_SENSE_LEN:
+                cut = text[:MAX_SENSE_LEN - 1]
+                sp = cut.rfind(" ")
+                if sp > MAX_SENSE_LEN // 2:
+                    cut = cut[:sp]
+                text = cut.rstrip(" ;:,") + "…"
             out.append((noise, text))
     return out
 
@@ -190,7 +208,13 @@ def main() -> None:
             if len(picked) >= MAX_SENSES_PER_WORD:
                 break
         if picked:
-            lines.append(f"{key}\t{' · '.join(picked)}")
+            joined = " · ".join(picked)
+            # R3 拼接总长上限：放下两条时丢第二条（第一条自带截断标记）
+            if len(joined) > MAX_JOINED_LEN and len(picked) > 1:
+                joined = picked[0]
+            if len(joined) > MAX_JOINED_LEN:
+                joined = joined[:MAX_JOINED_LEN - 1].rstrip(" ;:,· ") + "…"
+            lines.append(f"{key}\t{joined}")
     out.write_text("\n".join(lines) + "\n", encoding="utf-8")
     manifest = {
         "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义）",
@@ -203,6 +227,10 @@ def main() -> None:
                        "url": "https://kaikki.org/dictionary/Chinese/"},
         },
         "entry_count": len(entries),
+        "cleaningRules": {"version": "v3", "date": "2026-11-03",
+                          "rules": ["长括号消歧说明(>18字符)移除", "单条≤36字符词边界截断+…",
+                                    "拼接总长≤46字符只保留第一条"],
+                          "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }
     (ROOT / "resources" / "gloss-sources.json").write_text(

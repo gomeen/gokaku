@@ -500,7 +500,7 @@ def assert_dataset_counts(runs, rows, expected_counts):
     for row in rows:
         suite = row.get("suite")
         if suite in QUALITY_SUITES:
-            seen.setdefault(suite, set()).add((row["backend"], row["direction"], row["caseId"]))
+            seen.setdefault((suite, row["direction"]), set()).add(row["caseId"])
     for suite in sorted(claimed & set(QUALITY_SUITES)):
         expected = expected_counts.get(suite)
         if not expected:
@@ -508,7 +508,7 @@ def assert_dataset_counts(runs, rows, expected_counts):
         for direction, per_direction in expected.items():
             if direction == "total":
                 continue
-            got = {key for key in seen.get(suite, set()) if key[1] == direction}
+            got = seen.get((suite, direction), set())
             if len(got) != per_direction:
                 problems.append(
                     "suite %s %s: %d cases have request rows, expected %d"
