@@ -541,7 +541,13 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
 
     @objc private func applicationChanged() { if active { suspend() } }
 
+    /// 自身提交偏好触发的 settings.changed 会同步回到本进程（reloadSettings→
+    /// suspend→toast.hide），刚显示的切换提示会被立即杀掉；切换后的短窗口内
+    /// 忽略自源通知（外部设置变更仍靠后续通知处理）。
+    private var suppressSettingsReloadUntil = Date.distantPast
+
     @objc private func reloadSettings() {
+        guard Date() >= suppressSettingsReloadUntil else { return }
         let previous = settings
         suspend()
         settings = Settings.load()
@@ -1282,6 +1288,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         // quickmt 开发版裁决：开关打开时学习模式可切换；关闭保持门禁态（蜂鸣）。
         guard learningDevEnabled else { NSSound.beep(); return }
         let anchor = freshToastAnchor()   // 在 suspend 清理前读当前插入点
+        suppressSettingsReloadUntil = Date().addingTimeInterval(0.5)
         suspend()
         mode = mode == .normal ? .learning : .normal
         persistPreference()
@@ -1292,6 +1299,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     @objc private func toggleDirection(_ sender: Any?) {
         guard learningDevEnabled else { NSSound.beep(); return }
         let anchor = freshToastAnchor()
+        suppressSettingsReloadUntil = Date().addingTimeInterval(0.5)
         suspend()
         direction = direction == .zhToEn ? .enToZh : .zhToEn
         persistPreference()
