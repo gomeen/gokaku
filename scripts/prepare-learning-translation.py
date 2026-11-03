@@ -161,20 +161,27 @@ def step_worker(root: Path) -> str:
 
 
 def step_manifest(root: Path, assembled: list, worker_sha: str) -> None:
+    existing = {}
+    manifest_path = root / "manifest.json"
+    if manifest_path.exists():
+        existing = json.loads(manifest_path.read_text())
     python = venv_python(root)
-    versions_probe = (
-        "import importlib.metadata as m, json\n"
-        "print(json.dumps({'ctranslate2': m.version('ctranslate2'), "
-        "'sentencepiece': m.version('sentencepiece')}))\n"
-    )
-    versions = json.loads(subprocess.run([str(python), "-c", versions_probe],
-                                         capture_output=True, text=True, check=True).stdout)
+    versions = existing.get("versions") or {"ctranslate2": PINNED_CTRANSLATE2,
+                                            "sentencepiece": PINNED_SENTENCEPIECE}
+    if python.exists():
+        versions_probe = (
+            "import importlib.metadata as m, json\n"
+            "print(json.dumps({'ctranslate2': m.version('ctranslate2'), "
+            "'sentencepiece': m.version('sentencepiece')}))\n"
+        )
+        versions = json.loads(subprocess.run([str(python), "-c", versions_probe],
+                                             capture_output=True, text=True, check=True).stdout)
     manifest = {
         "schemaVersion": 1,
         "preparedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "purpose": "学习模式 quickmt 开发版翻译后端（docs/learning-quickmt-dev-decision.md）",
         "qualityGate": "未过正式质量门槛，仅本机开发版体验；双端交付口径不变",
-        "models": assembled,
+        "models": assembled or existing.get("models") or [],
         "worker": {"source": "scripts/quickmt_worker.py", "sha256": worker_sha},
         "inference": {"computeType": "int8", "threads": 2, "maxDecodingLength": 256,
                       "beam": "来自设置（1–10，默认 1）"},
@@ -193,7 +200,14 @@ def main():
                         help="建 venv 用的系统 python（默认 /usr/bin/python3）")
     parser.add_argument("--skip-venv", action="store_true",
                         help="venv 已就绪时跳过创建与安装（仍做版本核对）")
+    parser.add_argument("--worker-only", action="store_true",
+                        help="仅更新 worker 与 manifest（不校验/复制权重；权重部署完好时用）")
     args = parser.parse_args()
+    if args.worker_only:
+        worker_sha = step_worker(args.root)
+        step_manifest(args.root, [], worker_sha)
+        print(f"worker 已更新：{args.root}", flush=True)
+        return
     # 先核权重（快失败：被篡改／缺失的字节在装 venv 之前就拒绝），
     # 再装 venv、worker，最后写 manifest（记录 venv 版本）。
     assembled = step_models(args.root, args.cache)

@@ -96,6 +96,26 @@ def request_for(source, direction="enToZh", protocol_version=1, resource="quickm
 def cmd_protocol(args):
     print("worker 协议回归（系统 python，无模型）", flush=True)
     assertions = 0
+    # 尾部孤立标点残片剥离（纯函数，导入即可测；含「我想去北京 。 ”」类网页
+    # 模式残片与 attached 正常标点不受影响的反向用例）。
+    sys.path.insert(0, str(WORKER.parent))
+    import quickmt_worker as worker
+    strip_cases = [
+        ("我想去北京 。 ”", "我想去北京"),
+        ("晚饭后你想出去散步吗 ? ”", "晚饭后你想出去散步吗"),
+        ("你好。", "你好。"),
+        ("Hello World.", "Hello World."),
+        ("Hello World. ”", "Hello World."),
+        ("How are you ?", "How are you"),
+        ("", ""),
+    ]
+    for source, expected in strip_cases:
+        actual = worker.strip_trailing_orphan_punctuation(source)
+        assertions += 1
+        if actual != expected:
+            print(f"FAIL strip {source!r} -> {actual!r}（期望 {expected!r}）", flush=True)
+            raise SystemExit(1)
+    print(f"  [PASS] 尾部残片剥离 {len(strip_cases)} 例", flush=True)
     with tempfile.TemporaryDirectory() as tmp:
         worker = Worker(args.python, ["--root", tmp, "--beam", "1"])
         try:

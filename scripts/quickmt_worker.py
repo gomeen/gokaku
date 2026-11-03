@@ -16,6 +16,7 @@ docs/learning-quickmt-dev-decision.md（beam1 的重复句等缺陷被开发版�
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -34,6 +35,21 @@ MAX_RESPONSE_BYTES = 60_000      # 父进程按 64KiB 行上限拒收，留出 J
 
 class ModelMissing(Exception):
     pass
+
+
+# 尾部孤立标点残片：模型会把网页模式的尾部残片（如「我想去北京 。 ”」的
+# 空白分隔句号＋引号）照搬进译文；仅剥离与正文以空白分隔的纯标点尾缀，
+# 直接附在词尾的正常标点（「你好。」/「Hello World.」）不受影响。
+_ORPHAN_TAIL = re.compile(r"\s+[””’'\"」』）)!？?。．，,；;：:…·]+\s*$")
+
+
+def strip_trailing_orphan_punctuation(text):
+    result = text
+    while True:
+        match = _ORPHAN_TAIL.search(result)
+        if not match:
+            return result
+        result = result[: match.start()].rstrip()
 
 
 class BackendError(Exception):
@@ -88,7 +104,8 @@ class QuickmtRuntime:
             max_decoding_length=self.max_decoding_length,
             return_scores=False, return_end_token=True)
         tokens = result[0].hypotheses[0]
-        return tgt.decode([t for t in tokens if t != "</s>"]).strip()
+        return strip_trailing_orphan_punctuation(
+            tgt.decode([t for t in tokens if t != "</s>"]).strip())
 
 
 def read_line(stream):
