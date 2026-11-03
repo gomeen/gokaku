@@ -188,6 +188,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                       let current = self.currentTarget(), current == self.target,
                       let rect = self.displayRect else { return }
                 view.issues = result.issues ?? []; self.displayed = view
+                // 英→中无译文阶段不显示面板（拼写结果入缓存，译文到达后随面板显示）。
+                if view.stamp.mode == .learning, view.stamp.direction == .enToZh, view.candidates.isEmpty { return }
                 self.panel.render(view, at: rect, targetWindowLevel:
                                   GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
             }
@@ -965,6 +967,10 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         let changed = displayRect != current.rect
         displayRect = current.rect
         if changed, let view = displayed {
+            // 英→中无译文阶段只跟踪位置不显示面板（译文到达后由 publish 显示）。
+            if view.stamp.mode == .learning, view.stamp.direction == .enToZh, view.candidates.isEmpty {
+                return
+            }
             panel.enqueue(view, at: current.rect, targetWindowLevel:
                           GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
         }
@@ -1217,6 +1223,12 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             }
             self.displayed = value
             startPositionRefresh()
+            // 英→中无译文结果不显示面板，只输入（2026-11 用户裁决）；
+            // 译文到达后由后续 publish/render 显示，位置由复查定时器持续跟踪。
+            if self.mode == .learning, self.direction == .enToZh, value.candidates.isEmpty {
+                self.panel.dismiss()
+                return
+            }
             guard let rect = self.displayRect else { self.panel.dismiss(); return }
             self.panel.render(value, at: rect, targetWindowLevel:
                               GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
@@ -1486,8 +1498,8 @@ final class ToastWindow: NSPanel {
         orderFrontRegardless()
         let work = DispatchWorkItem { [weak self] in self?.hide() }
         hideWork = work
-        // 2026-11 用户反馈 0.8s 太短，加长到 2s。
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
+        // 2026-11 用户反馈：时长 2s → 1s。
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: work)
     }
 
     func hide() {
