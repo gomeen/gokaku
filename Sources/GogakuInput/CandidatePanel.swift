@@ -3,16 +3,19 @@ import CoreText
 import GogakuCore
 
 private extension NSAttributedString {
-    /// 基线原点绘制（rect.maxY 为行框顶，基线＝行框顶−字体上升高度）。
-    /// 不用 .usesLineFragmentOrigin：该路径会把行框外的细降部墨迹裁平
-    ///（实测 2026-11-03：13pt Fira Code WenKai 的 g／y／j 尾钩被切除，
-    /// 单词 sugar 的 g 只剩短桩；且行框高度增大也不恢复）。
-    /// 视觉位置与旧行为一致：行框顶不变，基线不变。
+    /// 修复降部被裁（2026-11-03）：面板为翻转视图，.usesLineFragmentOrigin 的
+    /// 基线在 minY＋字体 boundingRect 上升高度处（13pt Fira Code WenKai ≈16pt），
+    /// 而墨迹裁切线在矩形底边（minY＋rect.height）——默认行框高度小于
+    /// 「基线＋降部」，g／y／j／p 尾钩只留短桩，增大高度不超过基线＋降部时
+    /// 同样被裁。修复：保持 rect.minY（基线不变）而把高度扩到字体 boundingRect，
+    /// 裁切边界随之下移，降部完整。超宽文本（状态栏长提示）保留旧换行路径。
     func draw(inRect rect: NSRect) {
-        let ascent = (attribute(.font, at: 0, effectiveRange: nil) as? NSFont)?.ascender
-            ?? NSFont.systemFont(ofSize: NSFont.systemFontSize).ascender
-        draw(with: NSRect(x: rect.minX, y: rect.maxY - ascent, width: rect.width, height: rect.height),
-             options: [.usesFontLeading], context: nil)
+        var r = rect
+        if r.height < 30, let font = attribute(.font, at: 0, effectiveRange: nil) as? NSFont {
+            let needed = ceil(font.boundingRectForFont.height) + 2
+            if r.height < needed { r.size.height = needed }
+        }
+        draw(with: r, options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
     }
     var widthPt: CGFloat { ceil(size().width) }
 }

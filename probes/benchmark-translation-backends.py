@@ -32,12 +32,29 @@ DEFAULT_PYTHON = Path.home() / "Library/Caches/Gogaku/models/small100-gate/venv-
 DYLIB = ROOT / ".build/core/libgogaku_core.dylib"
 RISK_PATH = PROBES / "translation-cases.json"
 HOLDOUT_PATH = ROOT / "validation/translation-holdout.json"
+SHORT_PATH = ROOT / "validation/translation-short-expressions.json"
+CONFIRM_PATH = ROOT / "validation/translation-confirm-set.json"
 LANGUAGE_PATH = PROBES / "translation-language-probes.json"
 CHECKS_PATH = PROBES / "translation-risk-checks.json"
 
 DIRECTION_ALIASES = {"enToZh": "en-zh", "zhToEn": "zh-en"}
 BACKENDS = ("small100", "quickmt")
 HARD_BRANDS = {"Gogaku"}
+
+# Suites are explicit; `all` must always contain the frozen 88-item short-text
+# set (2026-11-03 decision: the first `all` run silently missed it).
+SUITES = ("risk", "holdout", "short", "speed", "language", "confirm")
+ALL_SUITES = ("risk", "holdout", "short", "speed")
+# Frozen dataset sizes. The loader fails loudly on any mismatch so a silently
+# missing or truncated dataset can never pass as a completed evaluation.
+EXPECTED_COUNTS = {
+    "risk": {"total": 32},
+    "holdout": {"total": 200},
+    "short": {"total": 88, "en-zh": 44, "zh-en": 44},
+    "speed": {"total": 8},
+    "language": {"total": 24},
+    "confirm": {"total": 100, "en-zh": 50, "zh-en": 50},
+}
 
 # Freeze the model identities that were verified against the local artifacts.
 # The runner re-hashes every file; these values are the expected upstream pins.
@@ -117,10 +134,54 @@ def kind_class(kind):
     return "sentence"
 
 
+def input_width(source):
+    """Rough input length: CJK chars count one by one, latin text by words."""
+    source = source or ""
+    cjk = sum(1 for ch in source if "\u4e00" <= ch <= "\u9fff")
+    words = len([word for word in re.split(r"\s+", source) if word])
+    return cjk + words
+
+
 def timing_bucket(case):
     if case.get("timingBucket"):
         return case["timingBucket"]
-    return "short-expression" if kind_class(case.get("kind")) in ("word", "phrase") else "short-sentence"
+    # 2026-11-03 decision: group by input length first, so short time
+    # expressions, names and brands are not lumped into the sentence bucket
+    # just because of their `kind` label.
+    if kind_class(case.get("kind")) == "word":
+        return "short-expression"
+    return "short-expression" if input_width(case.get("source")) <= 8 else "short-sentence"
+
+
+def assert_loaded_counts(by_suite):
+    """Fail loudly if a frozen dataset does not match its expected size."""
+    problems = []
+    for suite, expected in EXPECTED_COUNTS.items():
+        if not by_suite.get(suite):
+            continue
+        cases = by_suite[suite]
+        if len(cases) != expected["total"]:
+            problems.append("%s: loaded %d cases, expected %d" % (suite, len(cases), expected["total"]))
+        by_direction = {}
+        for case in cases:
+            by_direction[case["direction"]] = by_direction.get(case["direction"], 0) + 1
+        for direction, count in expected.items():
+            if direction == "total":
+                continue
+            if by_direction.get(direction) != count:
+                problems.append(
+                    "%s %s: loaded %d cases, expected %d"
+                    % (suite, direction, by_direction.get(direction, 0), count)
+                )
+    ids = {}
+    for suite, cases in by_suite.items():
+        for case in cases:
+            ids.setdefault(case["id"], []).append(suite)
+    for case_id, suites in sorted(ids.items()):
+        if len(suites) > 1:
+            problems.append("case id %r appears in multiple suites: %s" % (case_id, suites))
+    if problems:
+        raise SystemExit("dataset assertion failed: " + "; ".join(problems))
 
 
 def expected_action(case):
@@ -131,20 +192,40 @@ def expected_action(case):
     return "translate"
 
 
-def load_cases(suite):
-    risk = json.loads(RISK_PATH.read_text())
-    holdout = json.loads(HOLDOUT_PATH.read_text())["cases"]
-    language = json.loads(LANGUAGE_PATH.read_text())["cases"]
+def resolve_suites(spec):
+    """`all` = risk+holdout+short+speed; comma-separated names pick suites."""
+    if spec == "all-language":
+        return list(ALL_SUITES) + ["language"]
+    if spec == "all":
+        return list(ALL_SUITES)
+    names = [name.strip() for name in spec.split(",") if name.strip()]
+    unknown = [name for name in names if name not in SUITES]
+    if unknown:
+        raise SystemExit("unknown suites: %s (choose from %s, all, all-language)" % (unknown, SUITES))
+    if not names:
+        raise SystemExit("no suites selected")
+    return list(dict.fromkeys(names))
+
+
+def load_cases(suite_spec):
+    suites = resolve_suites(suite_spec)
     selected = []
-    if suite in ("all", "risk"):
-        selected.extend((case, "risk") for case in risk)
-    if suite in ("all", "holdout"):
-        selected.extend((case, "holdout") for case in holdout)
-    if suite in ("all", "speed"):
+    if "risk" in suites:
+        selected.extend((case, "risk") for case in json.loads(RISK_PATH.read_text()))
+    if "holdout" in suites:
+        selected.extend((case, "holdout") for case in json.loads(HOLDOUT_PATH.read_text())["cases"])
+    if "short" in suites:
+        selected.extend((case, "short") for case in json.loads(SHORT_PATH.read_text())["cases"])
+    if "speed" in suites:
         selected.extend((case, "speed") for case in SPEED_CASES)
-    if suite in ("language", "all-language"):
-        selected.extend((case, "language") for case in language)
-    cases = []
+    if "language" in suites:
+        selected.extend((case, "language") for case in json.loads(LANGUAGE_PATH.read_text())["cases"])
+    if "confirm" in suites:
+        confirm_data = json.loads(CONFIRM_PATH.read_text())
+        if not confirm_data.get("scoringRules", {}).get("frozenBeforeRun"):
+            raise SystemExit("confirm set scoring rules are not frozen; refusing to run")
+        selected.extend((case, "confirm") for case in confirm_data["cases"])
+    by_suite = {}
     for case, source_suite in selected:
         normalized = dict(case)
         normalized["direction"] = normalize_direction(case.get("direction"))
@@ -152,12 +233,34 @@ def load_cases(suite):
         normalized["expectedAction"] = expected_action(case)
         normalized["kindClass"] = kind_class(case.get("kind"))
         normalized["timingBucket"] = timing_bucket(case)
-        cases.append(normalized)
-    return cases
+        by_suite.setdefault(source_suite, []).append(normalized)
+    assert_loaded_counts({suite: by_suite.get(suite, []) for suite in suites})
+    cases = [case for suite in suites for case in by_suite.get(suite, [])]
+    return cases, by_suite
 
 
 def load_risk_checks():
     return json.loads(CHECKS_PATH.read_text())["cases"]
+
+
+def file_sha256(path):
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def dataset_hashes():
+    paths = [RISK_PATH, HOLDOUT_PATH, SHORT_PATH, CONFIRM_PATH, LANGUAGE_PATH, CHECKS_PATH]
+    hashes = {}
+    for path in paths:
+        if path.is_file():
+            hashes[path.name] = {
+                "sha256": file_sha256(path),
+                "bytes": path.stat().st_size,
+            }
+    return hashes
 
 
 class Worker:
@@ -434,6 +537,28 @@ def semantic_check(case, output, hardening, checks):
     }
 
 
+BUDGETS = {"short-expression": 500.0, "short-sentence": 2000.0}
+
+
+def budget_exceeded_ms(case, row, ipc_ms):
+    """How far the user-visible wait exceeded the bucket budget, or None.
+
+    Uses the model-reported total when present (a generation capped at the
+    length limit still reports it); otherwise the parent-measured wait of a
+    failed request. Preserve-expected rows keep the fact but are excluded from
+    budget gating downstream because production would not call the model.
+    """
+    budget = BUDGETS.get(case["timingBucket"])
+    if budget is None:
+        return None
+    wait_ms = row.get("totalMs")
+    if wait_ms is None:
+        wait_ms = ipc_ms
+    if wait_ms is None:
+        return None
+    return round(wait_ms - budget, 2) if wait_ms > budget else None
+
+
 def build_worker_specs(backends, directions, small100_root, quickmt_root):
     specs = {}
     if "small100" in backends:
@@ -470,7 +595,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--backends", nargs="+", choices=BACKENDS, default=list(BACKENDS))
     parser.add_argument("--directions", default="en-zh,zh-en")
-    parser.add_argument("--cases", choices=["all", "risk", "holdout", "speed", "language"], default="all")
+    parser.add_argument(
+        "--cases",
+        default="all",
+        help="suite list: all (= risk+holdout+short+speed), all-language, or comma-separated "
+        "names from %s" % (SUITES,),
+    )
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--threads", type=int, default=2)
     parser.add_argument("--compute-type", default="int8")
@@ -493,14 +623,18 @@ def main():
     directions = [normalize_direction(value) for value in args.directions.split(",") if value]
     if not directions:
         parser.error("no directions selected")
-    if args.cases == "language":
-        language_directions = sorted({case["direction"] for case in load_cases("language")})
+    selected_suites = resolve_suites(args.cases)
+    if selected_suites == ["language"]:
+        language_directions = sorted({case["direction"] for case in load_cases("language")[0]})
         directions = [direction for direction in directions if direction in language_directions]
         if not directions:
             parser.error("language suite has no requested directions")
 
-    cases = load_cases(args.cases)
+    cases, cases_by_suite = load_cases(args.cases)
     cases = [case for case in cases if case["direction"] in directions]
+    for suite in selected_suites:
+        if not [case for case in cases_by_suite.get(suite, []) if case["direction"] in directions]:
+            parser.error("suite %s has no cases for the selected directions" % suite)
     if not cases:
         parser.error("no cases selected")
     checks = load_risk_checks() if not args.no_hardening else {}
@@ -549,10 +683,21 @@ def main():
         },
         "workers": {},
         "caseCounts": {},
+        "timingBucketCounts": {},
+        "datasetHashes": dataset_hashes(),
         "rounds": [],
     }
+    for suite in selected_suites:
+        suite_cases = [case for case in cases_by_suite.get(suite, []) if case["direction"] in directions]
+        run["caseCounts"][suite] = {
+            "total": len(suite_cases),
+            "byDirection": {
+                direction: sum(1 for case in suite_cases if case["direction"] == direction)
+                for direction in directions
+            },
+        }
     for case in cases:
-        run["caseCounts"][case["suite"]] = run["caseCounts"].get(case["suite"], 0) + 1
+        run["timingBucketCounts"][case["timingBucket"]] = run["timingBucketCounts"].get(case["timingBucket"], 0) + 1
     atomic_write(run_path, run)
 
     workers = {}
@@ -613,6 +758,7 @@ def main():
                     random.Random(701 + round_index * 31 + len(unit["id"])).shuffle(unit_cases)
                     for case in unit_cases:
                         sequence += 1
+                        wait_start = time.perf_counter_ns()
                         if worker.dead:
                             row = {
                                 "event": "result",
@@ -636,6 +782,9 @@ def main():
                                     "errorType": "Protocol",
                                 }
                             except Exception as error:
+                                # Keep the wall-clock wait of failed requests; the
+                                # user waits even when generation fails.
+                                ipc_ms = (time.perf_counter_ns() - wait_start) / 1e6
                                 row = {
                                     "event": "result",
                                     "id": case["id"],
@@ -693,6 +842,8 @@ def main():
                             "peakRssBytes": row.get("peakRssBytes"),
                             "ipcRequestMs": ipc_ms,
                             "ipcOverheadMs": (ipc_ms - row.get("totalMs")) if (ipc_ms is not None and row.get("totalMs") is not None) else None,
+                            "budgetMs": BUDGETS.get(case["timingBucket"]),
+                            "budgetExceededMs": budget_exceeded_ms(case, row, ipc_ms),
                             "hardening": hard,
                             "semantic": semantic,
                             "modelIdentity": worker.ready.get("identity"),
