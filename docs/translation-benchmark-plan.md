@@ -44,3 +44,7 @@
 ## 2026-11-03 统一复测
 
 后续已把本方案的 OPUS／M2M100 比较扩展为 small100 与 quickmt 的统一驱动（模型层＋辅助进程层＋加固层），原始请求、分位数、模型哈希和决定见[统一实测决定](../probes/results/translation-backends/decision.md)。本页原方法仍适用于新后端：先审阅再排序、5 轮交错、保留请求级记录、不把安全回退原文当成译文。
+
+### 同日第二轮：补齐评测缺口（只评测，不接生产）
+
+同一日补齐第一轮缺口：专项短文本集（88 条）纳入 `all` 默认加载并加数量断言；按输入长度预先分桶；延迟门槛改读真实结果，缺数据标未完成；候选放行／语义合格／安全回退／错误放行分开统计，失败请求保留等待与超预算记录；新增每方向 50 条独立确认集（评分规则在运行前冻结，模型名盲化）；加固层误报不改（本轮只评测）；完整语义审阅覆盖两个模型的全部应译样例。产物见 `probes/results/translation-backends-round2/`（最终选择报告 `final-selection.md`、盲测比较材料 `blind-comparison.md`、汇总 `quality-gate.json`）。评测管线自身回归断言在 `scripts/validate-translation-eval.py`，已接入 verify fast 档。

@@ -15,8 +15,9 @@
   该类词条只显示释义；其他无合格词性的词条同样只显示释义。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
-- 注释清洗 v3（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
+- 注释清洗 v3.1（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
   义项正文内长括号消歧说明（含括号 >18 字符）整体移除、短括号保留；
+  分号同义枚举（≥3 项）只保留前 2 项加 …；
   单条超 MAX_SENSE_LEN 时词边界截断加 …（替代旧「整条剔除」）；
   拼接总长超 MAX_JOINED_LEN 时只保留第一条。在合格义项中按
   「非标签优先、原顺序优先」取前 2 条；没有合格义项的词条不入表。
@@ -50,6 +51,7 @@ POS_ABBREV = {
 # R1 义项正文内的长括号消歧说明（含括号 >18 字符）整体移除，短括号保留；
 # R2 单条超 MAX_SENSE_LEN 时在词边界截断加省略号（替代旧「整条剔除」，
 #    截断以 … 显式标记，不制造完整释义假象）；
+# R1.5 分号同义枚举（≥3 项）只保留前 2 项加 …（主义项在前不丢主释义）。
 # R3 拼接总长超 MAX_JOINED_LEN 时只保留第一条义项。
 # 规则全部编码在本脚本，重新生成数据时自动按同规则执行（可复现）。
 # 候选窗注释区约容纳 45 个拉丁字符；36 留出词性前缀余量，46 为拼接上限。
@@ -129,6 +131,11 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
             # written to) → you）；短括号（≤18 字符）保留。
             text = re.sub(r"\s*\([^)]{18,}\)", "", text)
             text = re.sub(r"\s*（[^）]{18,}）", "", text)
+            # R1.5 分号同义枚举收紧：≥3 项只保留前 2 项（Wiktionary 义项常把
+            # 同义词全排开，候选窗里是噪音；主义项在前，截去尾部不丢主释义）。
+            semi = text.split("; ")
+            if len(semi) >= 3:
+                text = "; ".join(semi[:2]) + " …"
             text = text.strip()
             if not text or PLACEHOLDER_RE.match(text) or not presentable(text):
                 continue
@@ -148,10 +155,11 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
 
 def presentable(text: str) -> bool:
     """允许 ASCII、CJK 统一表意、CJK 标点（、。〔〕「」）与全角形式（（）／：）。
-    全角标点出现在 Classifier 标记（如 個／个）里，不能因它丢掉整条义项。"""
+    全角标点出现在 Classifier 标记（如 個／个）里，不能因它丢掉整条义项。
+    …（U+2026）是清洗规则的截断标记，同样放行。"""
     for c in text:
         cp = ord(c)
-        if cp < 128:
+        if cp < 128 or c == "\u2026":
             continue
         if "\u3400" <= c <= "\u9fff" or "\u3000" <= c <= "\u303f" or "\uff00" <= c <= "\uffef":
             continue
@@ -227,9 +235,9 @@ def main() -> None:
                        "url": "https://kaikki.org/dictionary/Chinese/"},
         },
         "entry_count": len(entries),
-        "cleaningRules": {"version": "v3", "date": "2026-11-03",
-                          "rules": ["长括号消歧说明(>18字符)移除", "单条≤36字符词边界截断+…",
-                                    "拼接总长≤46字符只保留第一条"],
+        "cleaningRules": {"version": "v3.1", "date": "2026-11-03",
+                          "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举≥3项只留前2项+…",
+                                    "单条≤36字符词边界截断+…", "拼接总长≤46字符只保留第一条"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }
