@@ -172,10 +172,8 @@ private final class PanelLayout {
         // 3. 文本附属
         let statusString = view.status.isEmpty ? nil
             : NSAttributedString(string: view.status, attributes: attributes(theme.annotationFont, theme.statusText))
-        let headerString = learning
-            ? NSAttributedString(string: "学习 · \(view.stamp.direction == .zhToEn ? "中 → 英" : "英 → 中")",
-                                 attributes: attributes(theme.annotationFont, theme.annotationText))
-            : nil
+        // 顶部「学习 · 方向」标题行已移除（2026-11 用户反馈：不显示）。
+        let headerString: NSAttributedString? = nil
         issueNotice = view.issues.isEmpty ? nil
             : NSAttributedString(string: "疑似拼写问题：词典未识别，可能是专名或新词。可继续输入；忽略词可在设置中添加。",
                                  attributes: attributes(theme.annotationFont, theme.statusText))
