@@ -45,13 +45,13 @@ final class EngineHub {
     func learningSession(_ settings: Settings) -> CompositionSession? {
         guard settings.learningTranslationEnabled else { return nil }
         if let learning { return learning }
-        if learningLogged { return nil }
         do {
             let engine = try ChineseEngine(directory: Paths.engineData)
             learning = CompositionSession(engine: engine)
             learningLogged = false
             return learning
         } catch {
+            // 词库缺失时每次学习键入重试（与共享普通引擎同策略），但只记一次日志。
             if !learningLogged {
                 learningLogged = true
                 NSLog("Gogaku EngineHub: 学习会话创建失败（词库缺失或损坏）")
