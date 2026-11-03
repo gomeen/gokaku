@@ -14,17 +14,18 @@
   },
   "entry_count": 160346,
   "cleaningRules": {
-    "version": "v4",
+    "version": "v5",
     "date": "2026-11-03",
     "rules": [
       "长括号消歧说明(>18字符)移除",
-      "分号同义枚举≥3项只留前2项+…",
+      "分号同义枚举≥3项只留前2项",
       "单条≤36字符词边界截断+…",
       "行内…即行尾(不再追加义项)",
       "拼接总长≤46字符只保留第一条",
-      "name词性不展示"
+      "name词性不展示",
+      "分隔符统一为点号·"
     ],
     "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
   },
-  "output_sha256": "4fd5a08ae6595f2a691f498f26d3490414b95ae60fec30e2aee18f201986dbc0"
+  "output_sha256": "cbf9d756ca9d5b6f4f69897421c6d6049e2c9183edca868d32408cbdaacd74f6"
 }

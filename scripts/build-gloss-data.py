@@ -15,7 +15,8 @@
   该类词条只显示释义；其他无合格词性的词条同样只显示释义。
 - 结构化词典标签不再透传：义项文本不再带 (hakka)／(rare) 一类标签前缀，
   方言／语域信息仅用于排序降级；纯括号标记（无实义正文）整条剔除。
-- 注释清洗 v3.1（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
+- 注释清洗 v5（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
+  分隔符统一为点号 ·（与词库条目样式一致）；
   义项正文内长括号消歧说明（含括号 >18 字符）整体移除、短括号保留；
   分号同义枚举（≥3 项）只保留前 2 项加 …；
   单条超 MAX_SENSE_LEN 时词边界截断加 …（替代旧「整条剔除」）；
@@ -55,6 +56,7 @@ POS_ABBREV = {
 # R1.5 分号同义枚举（≥3 项）只保留前 2 项加 …（主义项在前不丢主释义）。
 # R3 拼接总长超 MAX_JOINED_LEN 时只保留第一条义项。
 # R4 行内 … 即行尾：主义项截断后不再追加后续义项（省略号只出现在行尾）。
+# R5 分隔符统一：义项内同义枚举的分号（含全角）统一为点号 · 分隔。
 # 规则全部编码在本脚本，重新生成数据时自动按同规则执行（可复现）。
 # 候选窗注释区约容纳 45 个拉丁字符；36 留出词性前缀余量，46 为拼接上限。
 MAX_SENSE_LEN = 36
@@ -137,7 +139,7 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
             # 同义词全排开，候选窗里是噪音；主义项在前，截去尾部不丢主释义）。
             semi = text.split("; ")
             if len(semi) >= 3:
-                text = "; ".join(semi[:2]) + " …"
+                text = " · ".join(semi[:2]) + " …"
             text = text.strip()
             if not text or PLACEHOLDER_RE.match(text) or not presentable(text):
                 continue
@@ -151,6 +153,9 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
                 if sp > MAX_SENSE_LEN // 2:
                     cut = cut[:sp]
                 text = cut.rstrip(" ;:,") + "…"
+            # R5 分隔符统一为点号（2026-11-03 用户裁决：不同词之间用 · 分隔，
+            # 与词库条目的点号样式一致；分号枚举与全角分号一并归一）。
+            text = text.replace("; ", " · ").replace("；", " · ")
             out.append((noise, text))
     return out
 
@@ -158,10 +163,10 @@ def senses_of(entry: dict) -> list[tuple[bool, str]]:
 def presentable(text: str) -> bool:
     """允许 ASCII、CJK 统一表意、CJK 标点（、。〔〕「」）与全角形式（（）／：）。
     全角标点出现在 Classifier 标记（如 個／个）里，不能因它丢掉整条义项。
-    …（U+2026）是清洗规则的截断标记，同样放行。"""
+    …（U+2026）是清洗规则的截断标记、·（U+00B7）是分隔符，同样放行。"""
     for c in text:
         cp = ord(c)
-        if cp < 128 or c == "\u2026":
+        if cp < 128 or c in ("\u2026", "\u00b7"):
             continue
         if "\u3400" <= c <= "\u9fff" or "\u3000" <= c <= "\u303f" or "\uff00" <= c <= "\uffef":
             continue
@@ -241,10 +246,11 @@ def main() -> None:
                        "url": "https://kaikki.org/dictionary/Chinese/"},
         },
         "entry_count": len(entries),
-        "cleaningRules": {"version": "v4", "date": "2026-11-03",
-                          "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举≥3项只留前2项+…",
+        "cleaningRules": {"version": "v5", "date": "2026-11-03",
+                          "rules": ["长括号消歧说明(>18字符)移除", "分号同义枚举≥3项只留前2项",
                                     "单条≤36字符词边界截断+…", "行内…即行尾(不再追加义项)",
-                                    "拼接总长≤46字符只保留第一条", "name词性不展示"],
+                                    "拼接总长≤46字符只保留第一条", "name词性不展示",
+                                    "分隔符统一为点号·"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }
