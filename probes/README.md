@@ -214,6 +214,24 @@ python3 scripts/summarize-translation-backends.py --run-dir probes/results/trans
 
 扩展探针每方向 4 条，没有人工参考，不报告语义质量分数；quickmt 扩展方向本轮未下载、未实测。`--allow-short-run` 只用于烟测，不能作为正式成绩。
 
+## 学习翻译开发版后端（2026-11-03 裁决）
+
+quickmt 双向权重从探针缓存装配为输入法外置辅助进程（2026-11-03 用户裁决，范围与风险清单见[开发版裁决](../docs/learning-quickmt-dev-decision.md)；只评测不接生产的历史口径见上节）。准备脚本幂等可重跑；权重 SHA256 与 [models.json](results/translation-backends/models.json) pins 不符即拒绝装配；venv 用 `/usr/bin/python3`（pinned `ctranslate2==4.6.0`＋`sentencepiece==0.2.0`，不装 PyTorch）：
+
+```sh
+python3 scripts/prepare-learning-translation.py        # 装配到 ~/Library/Application Support/Gogaku/translation/
+```
+
+协议适配：`scripts/quickmt_worker.py` 复用探针的 quickmt 官方协议（src spm＋`</s>` → tgt spm decode），但响应对齐输入法 `TranslationRequest`／`TranslationResult` v1（回显请求字段，附 `target`／`error`／`milliseconds`）；beam 来自设置（默认 1，1–10 可调，重建进程生效）。回归：
+
+```sh
+python3 scripts/validate-learning-translation.py protocol   # 回显／invalid_request／model_missing／非法行存活（已接入 verify fast 档）
+python3 scripts/validate-learning-translation.py samples \
+  --python "$HOME/Library/Application Support/Gogaku/translation/venv/bin/python"   # 两方向各 3 条固定样例与探针记录逐字一致＋延迟抽测
+```
+
+样例预期来自 [requests.jsonl](results/translation-backends/requests.jsonl)（2026-11-03 轮次 1，beam1/INT8/2 线程）；预热口径同上节（每方向一次，首次含模型加载 1–2s 不计入逐句延迟）。worker 无端口、无文本日志、无网络访问；缺权重时逐请求返回 `model_missing`，不阻塞普通模式。
+
 ## 翻译组合策略验收（2026-11-04）
 
 固定路线「运行时保留判定 → 品牌映射 → 审核表达资源 → 双向时间模板 → small100 多候选 → 结构检查 → quickmt 反向评分」的评测入口。结论与证据见[翻译组合策略决定](../docs/translation-strategy-decision.md)与[首轮验收报告](results/translation-strategy-final/report.md)。

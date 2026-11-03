@@ -26,7 +26,7 @@
 
 **性能与宿主阻塞未变，仍未到试用阶段**：上一轮 10,035 次真实 IMK 事件主线程 p95 10.35ms／p99 15.38ms（门槛 5ms／10ms）未达标；归因结论（长单行文档的必要同步宿主写入本身超预算）未被本轮工作改变。最终宿主连续两轮、十万序列插桩、两小时稳定性／内存／冷启动未完成；Orca 的 Shift 单击失败待专项追踪；「5.55ms 低于 5ms」等历史文字错误已更正（见[收尾复测报告](docs/validation/pre-user-test.md)）。此前“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回。本轮 Shift 修复在真实宿主复验前，不标宿主通过。
 
-**完整首阶段仍未通过。** 学习路线采用两端统一 small100＋CT2；Mac 分词、转换、速度和离线可行，但模型质量门槛不通过。2026-11-03 统一复测确认 quickmt 速度领先，但加固后固定风险 12 条未处置、en→zh 可用率 77.67%，暂不替换；生产学习辅助和真实学习记录保持关闭（[决定](probes/results/translation-backends/decision.md)）。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
+**完整首阶段仍未通过。** 学习路线采用两端统一模型；2026-11-03 统一复测确认 quickmt 速度领先，但加固后固定风险 12 条未处置、en→zh 可用率 77.67%，**正式质量门槛不通过，双端生产交付口径不变**（[决定](probes/results/translation-backends/decision.md)）。同日用户裁决：**Mac 本机开发版以 quickmt（CT2 INT8 双向、外置 Python 辅助进程、beam 默认 1、设置 1–10 可调）解锁学习模式最小闭环**——菜单解除置灰、双向译文候选带开发版标注、失败保留输入可原文上屏；学习记录与宿主安全矩阵仍关闭，已知风险被显式接受，设置关开关即回门禁态（[开发版裁决](docs/learning-quickmt-dev-decision.md)）。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
 
 已授权当前用户安装开发版，由用户手动启用输入源；设置页不再提供 Apple 语言资源安装或查询入口（Apple Translation 已退出正式链路），随包资源状态与功能开放状态见设置「语言资源」页。构建、安装、恢复和卸载见[开发版使用说明](docs/native-development.md)。
 

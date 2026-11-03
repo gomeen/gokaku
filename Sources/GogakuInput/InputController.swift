@@ -126,10 +126,11 @@ private final class ShiftTapPoller {
 }
 
 @objc(GogakuInputController)
-final class GogakuInputController: IMKInputController {
+final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     /// 共享引擎（词库只加载一次）；本控制器只是调用方。
     private let hub = EngineHub.shared
-    private var session: CompositionSession?   // 学习路径（验收门禁关闭，保持 nil）
+    // 学习会话不再由控制器持有：共享会话在 EngineHub，全部经
+    // hub.learningSession（创建）／existingLearningSession（读）访问。
     private var focus: UInt64 = 0
     private var target: FocusTarget?
     private var active = false
@@ -165,8 +166,11 @@ final class GogakuInputController: IMKInputController {
     private var anchorSuspectStreak = 0
     /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
     private var positionTimer: Timer?
-    // 真实宿主安全矩阵未通过前，不启用学习辅助或采集。
-    private let learningHostValidated = false
+    // 学习功能门禁（quickmt 开发版裁决，docs/learning-quickmt-dev-decision.md）：
+    // 真实宿主安全矩阵仍未验收，但用户已接受开发版风险，由设置开关解锁本机
+    // 自用；关闭开关即回门禁态。与 EngineHub.learningSession 同源（同一设置
+    // 字段），两处口径一致；正式验收口径与双端交付门槛不变。
+    private var learningDevEnabled: Bool { settings.learningTranslationEnabled }
 
     private lazy var spelling: TranslationService = {
         let service = TranslationService(executable: Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/GogakuTranslator"), arguments: ["--spell"])
@@ -193,19 +197,44 @@ final class GogakuInputController: IMKInputController {
     }()
 
     private let records = LearningStore()
-    private lazy var translator: TranslationService = {
-        let path = Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/GogakuTranslator")
-        let service = TranslationService(executable: path)
+    /// 学习翻译后端：quickmt 开发版外置 Python 辅助进程（装配路径与 beam 由
+    /// 设置解析）；设置变更时销毁重建（rebuildLearningTranslatorIfNeeded）。
+    private lazy var translator = makeTranslator()
+
+    private func makeTranslator() -> TranslationService {
+        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize)
+        let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
         service.onResult = { [weak self] result in
             guard let self else { return }
             self.hub.async {
-                // 真实语言资源未经质量确认，不能成为可提交默认结果。
-                self.session?.receive(result, approved: false)
+                // quickmt 开发版豁免（2026-11 裁决）：成功且来源确为开发版 worker
+                // 的结果按 approved 进入候选；失败保留输入并提示原文上屏。
+                // 正式口径（approved 仅由审核资源清单决定）不变。
+                if result.error == nil {
+                    self.hub.existingLearningSession?.receive(result, approved: result.resource == LearningTranslation.resourceID)
+                } else {
+                    self.hub.existingLearningSession?.translationFailed(
+                        result, message: Self.learningFailureMessage(result.error ?? ""))
+                }
                 self.publishLearning(generation: result.stamp.focus)
             }
         }
         return service
-    }()
+    }
+
+    private static func learningFailureMessage(_ error: String) -> String {
+        switch error {
+        case "model_missing":
+            return "quickmt 模型未就绪：请在仓库检出目录运行 " + LearningTranslation.prepareCommand
+                + "；输入已保留，可 ⌘Return 明确原文上屏"
+        case "timeout":
+            return "quickmt 翻译超时；输入已保留，可 ⌘Return 明确原文上屏"
+        case "service_unavailable", "service_exited", "service_eof":
+            return "quickmt 辅助进程不可用；输入已保留，可 ⌘Return 明确原文上屏"
+        default:
+            return "quickmt 开发版翻译失败（\(error)）；输入已保留，可 ⌘Return 明确原文上屏"
+        }
+    }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         super.init(server: server, delegate: delegate, client: inputClient)
@@ -247,8 +276,8 @@ final class GogakuInputController: IMKInputController {
         panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         application = gg_read_host(client())?.application ?? ""
         let preference = settings.applications[application] ?? AppPreference()
-        // 学习模式门禁关闭时忽略历史偏好里的学习标记，普通模式始终可用。
-        mode = learningHostValidated ? preference.mode : .normal
+        // 开发版开关关闭时忽略历史偏好里的学习标记，普通模式始终可用。
+        mode = learningDevEnabled ? preference.mode : .normal
         direction = preference.direction
         configure()
     }
@@ -328,7 +357,7 @@ final class GogakuInputController: IMKInputController {
         let field = currentFieldID(), app = application
         hub.async { [weak self] in
             guard let self else { return }
-            self.session?.configure(focus: generation, mode: selectedMode, direction: selectedDirection)
+            self.hub.existingLearningSession?.configure(focus: generation, mode: selectedMode, direction: selectedDirection)
             // 焦点同步：核心按应用恢复默认英文状态并取消旧组合。
             _ = self.hub.engine(self.settings)?.handle(.focusSync, app: app, field: field, timeMs: Self.nowMs())
         }
@@ -363,7 +392,7 @@ final class GogakuInputController: IMKInputController {
         let generation = focus
         hub.async { [weak self] in
             guard let self else { return }
-            self.session?.configure(focus: generation, mode: oldMode, direction: oldDirection)
+            self.hub.existingLearningSession?.configure(focus: generation, mode: oldMode, direction: oldDirection)
             if let normal = self.hub.engine(self.settings) {
                 _ = normal.handle(.focusSync, app: app, field: "", timeMs: Self.nowMs())
                 normal.flush()
@@ -374,10 +403,27 @@ final class GogakuInputController: IMKInputController {
     @objc private func applicationChanged() { if active { suspend() } }
 
     @objc private func reloadSettings() {
+        let previous = settings
         suspend()
         settings = Settings.load()
+        // 开发版开关关闭即回门禁态：学习组合已随 suspend 结束，模式回普通，
+        // 共享学习会话释放（第二份词库内存一并回收）。
+        if !settings.learningTranslationEnabled, mode == .learning { mode = .normal }
+        rebuildLearningTranslatorIfNeeded(from: previous)
         applyEngineSettings()
         configure()
+        if !settings.learningTranslationEnabled {
+            hub.async { [weak self] in self?.hub.closeLearningSession() }
+        }
+    }
+
+    /// 学习后端配置（启用／beam）变更时销毁重建辅助进程：旧进程由 deinit
+    /// 终止，进行中的组合按现行失效规则处理（invalidate 丢弃迟到结果）。
+    private func rebuildLearningTranslatorIfNeeded(from previous: Settings) {
+        guard previous.learningTranslationEnabled != settings.learningTranslationEnabled
+            || previous.learningBeamSize != settings.learningBeamSize else { return }
+        translator.invalidate()
+        translator = makeTranslator()
     }
 
     private func match(_ shortcut: Shortcut, event: NSEvent) -> Bool {
@@ -818,7 +864,7 @@ final class GogakuInputController: IMKInputController {
     }
 
     private func panelChooseLearning(row: Int) {
-        guard let view = displayed, session != nil else { return }
+        guard let view = displayed, hub.existingLearningSession != nil else { return }
         let pageStart = view.page * CandidatePage.size
         let index = pageStart + row
         if view.candidates.indices.contains(index) { choose(view.candidates[index]) }
@@ -897,13 +943,26 @@ final class GogakuInputController: IMKInputController {
                 }
                 return
             }
+            // 共享会话按需同步代次／模式／方向（首次创建与切向后的安全网；
+            // 已在组合中的会话不被重置）。
+            let stamp = session.view.stamp
+            if stamp.focus != generation || stamp.mode != self.mode || stamp.direction != self.direction {
+                session.configure(focus: generation, mode: self.mode, direction: self.direction)
+            }
+            // quickmt 开发版翻译请求（2026-11 裁决）：sourceID／source 来自
+            // publishLearning 的 source 表；resource 标记开发版豁免。
+            session.translationNeeded = { [weak self] stamp, source in
+                self?.translator.request(TranslationRequest(stamp: stamp, sourceID: source.id,
+                                                            source: source.text,
+                                                            resource: LearningTranslation.resourceID))
+            }
             do { try body(session) } catch { session.viewError() }
             self.publishLearning(generation: generation, completesEdit: true)
         }
     }
 
     private func publishLearning(generation: UInt64, completesEdit: Bool = false) {
-        guard let value = session?.view else { return }
+        guard let value = hub.existingLearningSession?.view else { return }
         DispatchQueue.main.async { [weak self] in
             guard let self, self.focus == generation else { return }
             if completesEdit { self.pendingEdits = max(0, self.pendingEdits - 1) }
@@ -913,18 +972,16 @@ final class GogakuInputController: IMKInputController {
                 self.panel.dismiss(); self.target = nil; return
             }
             guard let current = self.currentTarget(), current == self.target else { self.suspend(); return }
-            var shown = value
-            if self.mode == .learning, !self.learningHostValidated {
-                shown.status = "当前宿主的学习安全路径尚未验收；不执行翻译、拼写辅助或记录。可明确原文上屏。"
-            }
-            if self.learningHostValidated, self.mode == .learning, self.direction == .enToZh, self.requestedSpellStamp != value.stamp {
+            // 状态行由 CompositionSession 维护（翻译中／成功／失败提示）；
+            // 拼写检查仅英→中且开发版开关打开时走现有 --spell 通路。
+            if self.learningDevEnabled, self.mode == .learning, self.direction == .enToZh, self.requestedSpellStamp != value.stamp {
                 self.requestedSpellStamp = value.stamp
                 self.spelling.request(TranslationRequest(stamp: value.stamp, sourceID: "spelling", source: value.raw,
                                                          resource: "NSSpellChecker:en_US", ignoredWords: Array(self.settings.ignoredWords)))
             }
-            self.displayed = shown
+            self.displayed = value
             guard let rect = self.displayRect else { self.panel.dismiss(); return }
-            self.panel.render(shown, at: rect, targetWindowLevel:
+            self.panel.render(value, at: rect, targetWindowLevel:
                               GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
         }
     }
@@ -939,7 +996,15 @@ final class GogakuInputController: IMKInputController {
         let generation = focus
         pendingEdits += 1; displayed = nil
         hub.async { [weak self] in
-            guard let self, let session = self.hub.learningSession(self.settings) else { return }
+            guard let self else { return }
+            guard let session = self.hub.learningSession(self.settings) else {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    self.pendingEdits = max(0, self.pendingEdits - 1)
+                    self.suspend()
+                }
+                return
+            }
             let intent = try? session.choose(candidate)
             DispatchQueue.main.async { [weak self] in
                 guard let self else { return }
@@ -991,7 +1056,7 @@ final class GogakuInputController: IMKInputController {
         pendingEdits = 0; displayed = nil
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
         let m = mode, d = direction
-        hub.async { [weak self] in self?.session?.configure(focus: generation, mode: m, direction: d) }
+        hub.async { [weak self] in self?.hub.existingLearningSession?.configure(focus: generation, mode: m, direction: d) }
     }
 
     private func persistPreference() {
@@ -1002,12 +1067,22 @@ final class GogakuInputController: IMKInputController {
     }
 
     @objc private func toggleMode(_ sender: Any?) {
-        // 正式翻译模型未过质量门槛：学习模式保持关闭（菜单置灰并说明原因）。
-        NSSound.beep()
+        // quickmt 开发版裁决：开关打开时学习模式可切换；关闭保持门禁态（蜂鸣）。
+        guard learningDevEnabled else { NSSound.beep(); return }
+        suspend()
+        mode = mode == .normal ? .learning : .normal
+        persistPreference()
+        toast.show(mode == .learning ? "学习" : "普通")
+        configure()
     }
 
     @objc private func toggleDirection(_ sender: Any?) {
-        NSSound.beep()
+        guard learningDevEnabled else { NSSound.beep(); return }
+        suspend()
+        direction = direction == .zhToEn ? .enToZh : .zhToEn
+        persistPreference()
+        toast.show(direction == .zhToEn ? "中→英" : "英→中")
+        configure()
     }
 
     @objc private func openSettings(_ sender: Any?) {
@@ -1044,10 +1119,23 @@ final class GogakuInputController: IMKInputController {
     @objc private func clearDrafts(_ sender: Any?) { DraftStore.shared.clear() }
 
     override func menu() -> NSMenu! {
-        // 菜单只保留可操作的必要项（用户裁决 2026-11-02：不要过多显示）：
-        // 草稿恢复（仅有草稿时）＋清空＋设置。学习功能关闭状态在设置页与文档
-        // 说明，不再占菜单行；清空动作也仅在存在草稿时出现。
+        // 菜单（quickmt 开发版裁决后）：学习模式／学习方向两项按设置开关解除
+        // 置灰（Ctrl+Shift+K／Ctrl+Shift+J 同款动作）；草稿恢复（仅有草稿时）
+        // ＋清空＋设置。开关关闭时学习两项置灰并说明，不再只留在设置页说明。
         let menu = NSMenu()
+        let learning = NSMenuItem(title: learningDevEnabled
+            ? (mode == .learning ? "返回普通模式" : "进入学习模式")
+            : "学习模式（开发版未启用）",
+            action: #selector(toggleMode(_:)), keyEquivalent: "k")
+        learning.keyEquivalentModifierMask = [.control, .shift]
+        learning.target = self
+        menu.addItem(learning)
+        let directionItem = NSMenuItem(title: direction == .zhToEn ? "学习方向：中→英" : "学习方向：英→中",
+                                       action: #selector(toggleDirection(_:)), keyEquivalent: "j")
+        directionItem.keyEquivalentModifierMask = [.control, .shift]
+        directionItem.target = self
+        menu.addItem(directionItem)
+        menu.addItem(.separator())
         let drafts = DraftStore.shared.drafts.filter { $0.application == application && $0.mode == mode && $0.direction == direction }
         if !drafts.isEmpty {
             for (index, draft) in drafts.enumerated() {
@@ -1065,6 +1153,16 @@ final class GogakuInputController: IMKInputController {
         settings.target = self
         menu.addItem(settings)
         return menu
+    }
+
+    /// 菜单项可用性：学习两项仅在开发版开关打开时可操作，其余保持可用。
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        switch menuItem.action {
+        case #selector(toggleMode(_:)), #selector(toggleDirection(_:)):
+            return learningDevEnabled
+        default:
+            return true
+        }
     }
 }
 

@@ -141,7 +141,7 @@ public final class CompositionSession {
             sources += alternatives.filter { $0.text != decoded }
             view.preedit = decoded
         }
-        view.status = "本地语言资源尚未通过质量验收；输入已保留，可明确原文上屏"
+        view.status = "quickmt 开发版翻译中；输入已保留，可 ⌘Return 明确原文上屏"
         if let first = sources.first { translationNeeded?(view.stamp, first) }
     }
     public func sourceExpressions() -> [SourceExpression] { sources }
@@ -149,15 +149,24 @@ public final class CompositionSession {
         guard sources.indices.contains(index) else { return }
         translationNeeded?(view.stamp, sources[index])
     }
-    /// approved 由经过用户质量确认的独立资源清单决定，不能由翻译成功推导。
+    /// quickmt 成功结果进入候选；开发版资源在注释尾部带固定标注。
+    /// approved 由调用方按裁决传入：开发版豁免（resource == quickmt-ct2-dev）
+    /// 之外的资源仍只接受经审核资源清单批准的结果。
     public func receive(_ result: TranslationResult, approved: Bool) {
         guard approved, result.stamp == view.stamp, !frozen, result.error == nil,
               let target = result.target, !target.isEmpty,
               let source = sources.first(where: { $0.id == result.sourceID && $0.text == result.source }) else { return }
         guard !view.candidates.contains(where: { $0.sourceID == source.id }) else { return }
+        let label = result.resource == LearningTranslation.resourceID ? " · quickmt 开发版" : ""
         view.candidates.append(Candidate(stamp: view.stamp, sourceID: source.id, source: source.text, range: source.range,
-                                         target: target, explanation: source.text, resource: result.resource))
+                                         target: target, explanation: source.text + label, resource: result.resource))
         view.status = ""
+    }
+    /// 开发版失败路径：不创建候选、不清输入；状态行提示保留输入与原文上屏。
+    /// 组合已更新（revision 变化）或已有候选时不覆盖，避免冲掉有效信息。
+    public func translationFailed(_ result: TranslationResult, message: String) {
+        guard result.stamp == view.stamp, view.candidates.isEmpty, !frozen else { return }
+        view.status = message
     }
     public func setIssues(_ issues: [SpellingIssue], stamp: InputStamp) {
         guard stamp == view.stamp, stamp.mode == .learning, stamp.direction == .enToZh else { return }

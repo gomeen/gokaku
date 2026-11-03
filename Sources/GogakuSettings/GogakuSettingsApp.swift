@@ -72,7 +72,7 @@ private struct SettingsView: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         switch page {
-                        case .resources: ResourcesPage()
+                        case .resources: ResourcesPage(settings: $settings)
                         case .normalInput: NormalInputPage(settings: $settings)
                         case .customWords: CustomWordsPage(status: $status)
                         case .shortcuts: ShortcutsPage(settings: $settings)
@@ -218,10 +218,12 @@ private struct SidebarItem: View {
 }
 
 // MARK: - 语言资源页（不提供 Apple Translation 查询与安装入口；
-// 原型为两个 section＋hr：本地翻译资源行、开发版状态）
+// 原型为两个 section＋hr；quickmt 开发版裁决后新增「学习翻译（开发版）」区块）
 
 private struct ResourcesPage: View {
+    @Binding var settings: GogakuCore.Settings
     @State private var bundled: [(name: String, size: String?)] = []
+    @State private var backend = LearningTranslation.Environment(ready: false, missing: [])
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -238,22 +240,79 @@ private struct ResourcesPage: View {
                 }
             }
             SettingsRule()
+            learningTranslationSection
+            SettingsRule()
             section("开发版状态") {
                 VStack(alignment: .leading, spacing: 8) {
                     // .body-text：12.5px。
                     Text("普通输入：已在本机开发范围验证，完整宿主与性能验收仍在进行。")
                         .font(.system(size: 12.5))
                         .foregroundStyle(SettingsPalette.primaryText)
-                    Text("学习功能尚未开放：正式翻译模型未过质量门槛；菜单保持置灰。")
+                    Text("学习功能：quickmt 开发版已按用户裁决解锁本机自用；正式质量门槛与宿主验收未过，双端交付口径不变。")
                         .font(.system(size: 12.5))
                         .foregroundStyle(SettingsPalette.primaryText)
-                    Text("本页不提供系统语言资源安装入口；翻译模型质量与安装流程另行验收。")
+                    Text("本页不提供系统语言资源安装入口；正式翻译模型质量与安装流程另行验收。")
                         .font(.system(size: 11))
                         .foregroundStyle(SettingsPalette.secondaryText)
                 }
             }
         }
-        .onAppear { loadBundled() }
+        .onAppear {
+            loadBundled()
+            backend = LearningTranslation.environment()
+        }
+        .onChange(of: settings.learningTranslationEnabled) { _, _ in
+            backend = LearningTranslation.environment()
+        }
+    }
+
+    /// 学习翻译（开发版）：启用开关＋beam 步进器＋后端状态＋固定说明；
+    /// 改动即时保存并热生效（beam 变更重建辅助进程）。
+    private var learningTranslationSection: some View {
+        section("学习翻译（开发版）") {
+            VStack(alignment: .leading, spacing: 0) {
+                SettingsRow("启用 quickmt 翻译后端",
+                            detail: "关闭即回门禁态：学习菜单置灰、共享学习会话释放。学习记录仍保持关闭。") {
+                    Toggle("", isOn: Binding(get: { settings.learningTranslationEnabled },
+                                             set: { settings.learningTranslationEnabled = $0; submit() }))
+                        .toggleStyle(.switch)
+                        .accessibilityLabel("启用 quickmt 学习翻译后端")
+                }
+                SettingsRowDivider()
+                SettingsRow("beam 大小",
+                            detail: "1＝贪心最快（中位约 88ms）；已知重复句等缺陷随 beam 升高缓解，代价是延迟增加。变更后对新翻译请求生效。") {
+                    Stepper(value: Binding(get: { settings.learningBeamSize },
+                                           set: { settings.learningBeamSize = LearningTranslation.clampedBeam($0); submit() }),
+                            in: LearningTranslation.beamRange) {
+                        Text("\(settings.learningBeamSize)")
+                            .font(.system(size: 13, design: .monospaced))
+                            .foregroundStyle(SettingsPalette.primaryText)
+                            .frame(minWidth: 24)
+                    }
+                    .accessibilityLabel("翻译 beam 大小，1 到 10")
+                }
+                SettingsRowDivider()
+                VStack(alignment: .leading, spacing: 4) {
+                    if backend.ready {
+                        Text("后端状态：模型就绪（quickmt-en-zh／quickmt-zh-en，CT2 INT8）")
+                            .font(.system(size: 12.5))
+                            .foregroundStyle(SettingsPalette.primaryText)
+                    } else {
+                        Text("后端状态：缺失（\(backend.missing.joined(separator: "、"))）")
+                            .font(.system(size: 12.5))
+                            .foregroundStyle(SettingsPalette.primaryText)
+                        Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand)")
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(SettingsPalette.secondaryText)
+                            .textSelection(.enabled)
+                    }
+                    Text("未过质量门槛，仅开发版体验：quickmt 已知固定风险（如短语级复读、en→zh 可用率 77.67%）被开发版接受；候选带「quickmt 开发版」标注。")
+                        .font(.system(size: 11))
+                        .foregroundStyle(SettingsPalette.secondaryText)
+                }
+                .padding(.vertical, 9)
+            }
+        }
     }
 
     /// section 标题（.section__title：15/600）。
@@ -298,6 +357,11 @@ private struct ResourcesPage: View {
             }
             return (name, nil)
         }
+    }
+
+    /// 学习翻译改动即时提交（SettingsStore 通知输入法热生效）。
+    private func submit() {
+        SettingsStore.shared.submit(settings)
     }
 }
 

@@ -202,6 +202,11 @@ public struct Settings: Codable {
     public var appDefaultEnglish: [EnglishAppEntry] = defaultEnglishApps.map { EnglishAppEntry(id: $0) }
     public var quickAddShortcut = Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
     public var quickAddExcludedApplications: Set<String> = []
+    /// 学习翻译（quickmt 开发版，2026-11 裁决 docs/learning-quickmt-dev-decision.md）：
+    /// 默认开启；关闭即回门禁态（菜单置灰、会话释放、正式口径不变）。
+    public var learningTranslationEnabled = true
+    /// quickmt beam（1–10，默认 1）；变更销毁重建辅助进程后生效。
+    public var learningBeamSize = LearningTranslation.defaultBeam
 
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
@@ -210,6 +215,7 @@ public struct Settings: Codable {
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish, quickAddShortcut
         case quickAddExcludedApplications
+        case learningTranslationEnabled, learningBeamSize
     }
 
     public init() {}
@@ -245,6 +251,9 @@ public struct Settings: Codable {
         quickAddShortcut = try container.decodeIfPresent(Shortcut.self, forKey: .quickAddShortcut)
             ?? Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
         quickAddExcludedApplications = try container.decodeIfPresent(Set<String>.self, forKey: .quickAddExcludedApplications) ?? []
+        learningTranslationEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled) ?? true
+        learningBeamSize = LearningTranslation.clampedBeam(
+            try container.decodeIfPresent(Int.self, forKey: .learningBeamSize) ?? LearningTranslation.defaultBeam)
     }
 
     /// 输入法使用的启用中的按应用默认英文 bundle id 列表。
