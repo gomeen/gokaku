@@ -38,7 +38,7 @@
 不添加额外限制），并以空表运行回归确认降级路径。
 
 用法：python3 scripts/build-gloss-data.py kaikki-Chinese.jsonl.gz \
-        [--cedict cedict.txt.gz] [--jieba dict.txt]
+        [--cedict cedict.txt.gz] [--jieba dict.txt] [--collocations 人工组合.tsv]
 """
 import gzip
 import hashlib
@@ -74,6 +74,29 @@ JIEBA_LABELS = {
     "nrt": "n.", "nrfg": "n.",
 }
 CEDICT_GLOSS_SPLIT_RE = re.compile(r"\A(\S+)\s+(\S+)\s+\[([^\]]*)\]\s+(.*)\Z")
+
+
+def load_collocations(path: Path | None) -> dict[str, list[tuple[bool, str, bool]]]:
+    """人工精选语法组合注解表（resources/collocation-gloss.tsv）→ 词 → 就绪桶。
+    词条已含词性前缀，直接作为桶项（不经 senses_of 清洗）；人工数据自查：
+    超 MAX_JOINED_LEN 或不可展示的行拒收并在 stderr 提示。"""
+    if path is None:
+        return {}
+    out: dict[str, list[tuple[bool, str, bool]]] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#"):
+            continue
+        parts = line.rstrip("\n").split("\t")
+        if len(parts) != 2:
+            continue
+        word, text = parts[0].strip(), parts[1].strip()
+        if not word or len(word) > 16 or not all("\u3400" <= c <= "\u9fff" for c in word):
+            continue
+        if not text or not presentable(text) or len(text) > MAX_JOINED_LEN:
+            print(f"collocation-gloss: 拒收超长或不可展示行 {word}", file=sys.stderr)
+            continue
+        out.setdefault(word, []).append((False, text, False))
+    return out
 
 # 清洗规则 v3（2026-11-03 用户裁决「尽量显示全、不遗漏重要信息」）：
 # R1 义项正文内的长括号消歧说明（含括号 >18 字符）整体移除，短括号保留；
@@ -297,6 +320,11 @@ def main() -> None:
         i = args.index("--jieba")
         jieba_path = Path(args[i + 1])
         del args[i:i + 2]
+    collocations_path: Path | None = None
+    if "--collocations" in args:
+        i = args.index("--collocations")
+        collocations_path = Path(args[i + 1])
+        del args[i:i + 2]
     if len(args) != 1:
         print(__doc__)
         sys.exit(2)
@@ -304,6 +332,7 @@ def main() -> None:
     opener = gzip.open if source.suffix == ".gz" else open
     jieba_pos = load_jieba_pos(jieba_path)
     cedict_words = load_cedict_words(cedict_path)
+    collocations = load_collocations(collocations_path)
     entries: dict[str, list[tuple[bool, str]]] = {}
     with opener(source, "rt", encoding="utf-8", errors="replace") as stream:
         for line in stream:
@@ -341,13 +370,23 @@ def main() -> None:
         if bucket:
             entries[key] = bucket
             supplement += 1
+    # 人工精选层：语法组合（我想/很大/坐在类）三源皆无，人工补注。
+    # 只填仍缺失的键（Wiktionary／CC-CEDICT 有词条的以词典为准）。
+    curated = 0
+    for key, bucket in collocations.items():
+        if key in entries:
+            continue
+        entries[key] = bucket
+        curated += 1
     out = ROOT / "resources" / "gloss.tsv"
     out.parent.mkdir(parents=True, exist_ok=True)
     lines = ["# gloss.tsv — 词性＋译文注释（Wiktionary/wiktextract，CC BY-SA 4.0；",
-             "# 词性层 jieba（MIT）；Wiktionary 缺失词（单字＋词组）由 CC-CEDICT（CC BY-SA 4.0）补义项）",
+             "# 词性层 jieba（MIT）；Wiktionary 缺失词（单字＋词组）由 CC-CEDICT（CC BY-SA 4.0）补义项；",
+             "# 语法组合（我想/很大类）由人工精选表补注）",
              f"# 来源：kaikki.org Chinese 提取；文件 {source.name} sha256={sha256(source)}",
              (f"# 词性层：jieba dict.txt sha256={sha256(jieba_path)}" if jieba_path else "# 词性层：未提供"),
              (f"# 补缺源：CC-CEDICT {cedict_path.name} sha256={sha256(cedict_path)}（单字与词组）" if cedict_path else "# 补缺源：未提供"),
+             (f"# 人工组合层：{collocations_path.name} 收录 {len(collocations)} 条" if collocations_path else "# 人工组合层：未提供"),
              "# 义务：署名 Wiktionary／CC-CEDICT 贡献者、声明修改、衍生数据按 CC BY-SA 4.0 分发、不添加额外限制",
              f"# 规则：每词最多 {MAX_SENSES_PER_WORD} 条简短义项（单条 ≤{MAX_SENSE_LEN} 字符，超长整条剔除）；",
              "# character 词条词性由 jieba 补标；结构化标签不透传；非标签义项优先。"]
@@ -396,23 +435,28 @@ def main() -> None:
             **({"cc-cedict": {"file": cedict_path.name, "bytes": cedict_path.stat().st_size,
                               "sha256": sha256(cedict_path),
                               "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"}} if cedict_path else {}),
+            **({"collocations": {"file": collocations_path.name, "bytes": collocations_path.stat().st_size,
+                                 "sha256": sha256(collocations_path),
+                                 "note": "Gogaku 人工整理语法组合注解，无外部来源"}} if collocations_path else {}),
         },
         "entry_count": len(entries),
         "supplement_count": supplement,
-        "cleaningRules": {"version": "v8.1", "date": "2026-11-03",
+        "curated_count": curated,
+        "cleaningRules": {"version": "v8.2", "date": "2026-11-03",
                           "rules": ["括号内容一律移除", "分号同义枚举只取首项",
                                     "synonym of/alternative form of 等字形指代义项剔除",
                                     "单条≤36字符静默词边界截断(截断态即行尾)",
                                     "拼接总长≤46字符",
                                     "分隔符统一为点号·",
                                     "词性层：jieba 补标无词性词条（含多字词）",
-                                    "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成"],
+                                    "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成",
+                                    "人工组合层：语法组合（我想/很大类）人工精选补注"],
                           "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"},
         "output_sha256": sha256(out),
     }
     (ROOT / "resources" / "gloss-sources.json").write_text(
         json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"词条 {len(entries)}；已写出 {out} 与 gloss-sources.json")
+    print(f"词条 {len(entries)}；CC-CEDICT 补缺 {supplement}；人工组合 {curated}；已写出 {out} 与 gloss-sources.json")
 
 
 if __name__ == "__main__":

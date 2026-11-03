@@ -1,0 +1,71 @@
+# collocation-gloss.tsv — 人工整理的常用语法组合注解
+# 背景：拼音词库包含 我想／坐在／很大 这类能产性语法组合（作为候选出现），
+# 但 Wiktionary／CC-CEDICT／jieba 三源皆无词条，候选窗无注解。语料型词典
+# 不收这类组合（无限能产），人工精选高频子集补注。
+# 收录标准（2026-11-03）：① 三源皆无且在拼音词库（会作为候选出现）；
+# ② 日常高频；③ 注解为整组短语的英译而非逐字拼接。量词组合（两个/一条）
+# 与专名不收（合理留白）。
+# 格式：词 <TAB> 注解（与 gloss.tsv 同风格；拼接总长 ≤46 字符）。
+# 来源：Gogaku 项目人工整理，无外部数据来源，无额外许可义务。
+我想	phr. I want to · phr. I think
+你想	phr. you want to · phr. you think
+他想	phr. he wants to
+我说	phr. I say · phr. I mean
+你说	phr. you say · phr. you mean
+他说	phr. he says
+我看	phr. I see · phr. in my view
+你看	phr. you see · phr. look
+我来	phr. I'll do it · phr. I come
+你来	phr. you come · phr. your turn
+他来	phr. he comes
+我要	phr. I want · phr. I will
+你要	phr. you want · phr. you must
+我能	phr. I can
+你会	phr. you can · phr. you will
+他去	phr. he goes
+你去	phr. you go
+我在	phr. I'm here · phr. I am at
+你在	phr. you are at · phr. still there?
+我听	phr. I listen · phr. as I hear
+你听	phr. listen · phr. you listen
+给你	phr. for you · phr. here you are
+给我	phr. give me · phr. for me
+对他	phr. to him · phr. toward him
+对此	phr. regarding this · phr. on this
+很大	phr. very big · phr. very much
+很快	phr. very fast · phr. soon
+很长	phr. very long
+很高	phr. very tall · phr. very high
+太多	phr. too many · phr. too much
+太少	phr. too few · phr. too little
+太快	phr. too fast
+好快	phr. so fast
+不小	phr. not small · phr. considerable
+不远	phr. not far
+不难	phr. not hard · phr. easy
+不冷	phr. not cold
+不热	phr. not hot · phr. lukewarm
+坐在	phr. sitting at · phr. seated in
+放在	phr. put in · phr. place at
+留在	phr. stay in · phr. remain at
+站在	phr. standing at
+写在	phr. write on · phr. written in
+活在	phr. live in · phr. live on
+走到	phr. walk to · phr. arrive at
+送到	phr. deliver to · phr. see sb off
+手上	phr. in hand · phr. on the hand
+脸上	phr. on the face
+墙上	phr. on the wall
+桌上	phr. on the table
+店里	phr. in the shop
+岛上	phr. on the island
+车上	phr. in the car · phr. on the bus
+瞧瞧	phr. have a look
+听听	phr. have a listen
+问问	phr. ask around
+讲讲	phr. talk about it a bit
+却说	phr. meanwhile (in narration)
+所说	phr. what is said · phr. as stated
+般的	phr. like · phr. as if
+这时候	phr. at this moment · phr. now
+这件事	phr. this matter · phr. this issue

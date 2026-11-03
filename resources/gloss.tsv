@@ -1,8 +1,10 @@
 # gloss.tsv — 词性＋译文注释（Wiktionary/wiktextract，CC BY-SA 4.0；
-# 词性层 jieba（MIT）；Wiktionary 缺失词（单字＋词组）由 CC-CEDICT（CC BY-SA 4.0）补义项）
+# 词性层 jieba（MIT）；Wiktionary 缺失词（单字＋词组）由 CC-CEDICT（CC BY-SA 4.0）补义项；
+# 语法组合（我想/很大类）由人工精选表补注）
 # 来源：kaikki.org Chinese 提取；文件 kaikki.org-dictionary-Chinese.jsonl.gz sha256=4e54d7a3d2974b5efb6bf80ec0a6d8c71d916b90b30a350bdd71bdfda0dce36b
 # 词性层：jieba dict.txt sha256=7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8
 # 补缺源：CC-CEDICT cedict_ts.u8.gz sha256=e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb（单字与词组）
+# 人工组合层：collocation-gloss.tsv 收录 62 条
 # 义务：署名 Wiktionary／CC-CEDICT 贡献者、声明修改、衍生数据按 CC BY-SA 4.0 分发、不添加额外限制
 # 规则：每词最多 2 条简短义项（单条 ≤36 字符，超长整条剔除）；
 # character 词条词性由 jieba 补标；结构化标签不透传；非标签义项优先。
@@ -5199,6 +5201,7 @@
 不兴	v. to not go in for · v. to be no longer
 不兼容性	n. incompatibility
 不再	adv. no more · v. to no longer occur
+不冷	phr. not cold
 不冷不热	adj. lukewarm · adj. mild
 不冻港	n. ice-free port
 不准	v. to disallow · v. to be inaccurate
@@ -5492,6 +5495,7 @@
 不对碴儿	n. not proper · n. not fit for the occasion
 不对称	adj. unsymmetrical
 不对茬	adj. not fit for the occasion
+不小	phr. not small · phr. considerable
 不少	adj. many
 不就	conj. will it not be the case that
 不尴不尬	phr. to be caught in a fix
@@ -5803,6 +5807,7 @@
 不灵	adj. not work · adj. be ineffective
 不点	adj. very little
 不烟不酒	phr. to neither smoke nor drink
+不热	phr. not hot · phr. lukewarm
 不然	conj. otherwise · adj. not the case
 不熟	adj. not cooked · adj. unfamiliar
 不爽	adj. unwell · adj. upset
@@ -6147,6 +6152,7 @@
 不过意	phr. to feel apologetic
 不近人情	phr. not amenable to reason
 不进则退	phr. Advance or be left behind.
+不远	phr. not far
 不远万里	phr. to make light of travelling
 不远千里	phr. to make light of travelling
 不违农时	phr. to not miss the farming season
@@ -6196,6 +6202,7 @@
 不降	v. Bu Jiang
 不随意	n. unconscious · n. involuntary
 不随意肌	n. involuntary muscle
+不难	phr. not hard · phr. easy
 不雅	adj. uncouth
 不雅观	n. offensive to the eye · n. unbecoming
 不露声色	phr. to maintain one's composure
@@ -14061,6 +14068,7 @@
 他克莫司	n. tacrolimus
 他加禄语	the Tagalog language
 他动词	n. transitive verb
+他去	phr. he goes
 他唑巴坦	n. tazobactam
 他喵的	n. drat · n. frick
 他国	n. another country
@@ -14072,6 +14080,7 @@
 他律	v. be disciplined by others · n. heteronomy
 他心	n. ulterior motives
 他性	n. otherness
+他想	phr. he wants to
 他意	n. other intention · n. ulterior motive
 他方	n. foreign place · n. another side
 他日	n. another day in the future · n. on another
@@ -14080,6 +14089,7 @@
 他朝君体也相同	phr. you will suffer the same fate
 他杀	v. to commit homicide · n. homicide
 他条	adj. relaxed
+他来	phr. he comes
 他汀	n. statin
 他生	n. next life
 他用	n. other uses
@@ -14088,6 +14098,7 @@
 他者化	v. to other
 他者性	n. otherness
 他莫昔芬	n. tamoxifen
+他说	phr. he says
 他迁	n. to relocate · n. to move elsewhere
 仗	n. weaponry · n. to hold a weapon
 仗义	adj. loyal · v. to uphold justice
@@ -17020,15 +17031,19 @@
 你们	pron. you
 你们俩	pron. the two of you
 你们好	phr. hello
+你会	phr. you can · phr. you will
 你伲	pron. you
 你侬我侬	phr. the intimate relations between
 你做初一我做十五	phr. an eye for an eye
 你兜	pron. you
 你兜人	pron. you
 你出豉油我出鸡	phr. Describes a situation where
+你去	phr. you go
 你叫什么名字	phr. What is your name?
+你听	phr. listen · phr. you listen
 你哋	pron. you
 你国	Used other than figuratively
+你在	phr. you are at · phr. still there?
 你在哪儿	phr. where are you?
 你在哪里	phr. where are you?
 你好	phr. hello
@@ -17037,13 +17052,16 @@
 你好无	phr. are you OK? · phr. how are you?
 你妈	n. fuck you · n. fucking
 你情我愿	phr. consensual, something
+你想	phr. you want to · phr. you think
 你懂的	phr. if you know what I mean
 你我	pron. you and I
 你我他	n. you, me and him
 你早	good morning
 你是谁	phr. who are you?
+你来	phr. you come · phr. your turn
 你死我活	phr. irreconcilable adversaries
 你每	n. you
+你看	phr. you see · phr. look
 你看着办吧	n. You figure it out for yourself. · n. Do as
 你真行	n. you're incredible
 你等	pron. you
@@ -17051,8 +17069,10 @@
 你老	pron. you
 你老人家	pron. you
 你老母	phr. Used other than figuratively
+你要	phr. you want · phr. you must
 你讲嘢呀	phr. Are you kidding me?
 你话呢	phr. Used other than figuratively
+你说	phr. you say · phr. you mean
 你这兜	pron. you
 你追我赶	phr. friendly one-upmanship · phr. to try to
 佡	adv. light
@@ -24434,6 +24454,7 @@
 写出	v. to write out
 写包单	v. to guarantee
 写嘢	phr. A phrase used to ask a waiter
+写在	phr. write on · phr. written in
 写字	v. to write characters · v. to practice
 写字台	n. writing desk
 写字房	n. study room · n. office
@@ -34450,6 +34471,7 @@
 却是	v. is indeed · v. on the contrary
 却步	v. to step back
 却病	n. to ward off illness
+却说	phr. meanwhile (in narration)
 卵	n. egg · n. fertilised egg
 卵仁	n. egg yolk
 卵包	n. poached egg
@@ -40932,6 +40954,7 @@
 听劝	v. to follow someone's advice
 听友	n. listener
 听取	v. to listen to
+听听	phr. have a listen
 听命	v. to obey orders · v. to resign oneself to
 听呾	v. to hear it said that · v. to be obedient
 听唔明	v. to not understand
@@ -48464,6 +48487,7 @@
 坐商	n. shopkeeper
 坐困	v. to be confined
 坐囹仔	v. to be imprisoned
+坐在	phr. sitting at · phr. seated in
 坐地	v. to stay at a fixed place · adv. on the spot
 坐地起价	phr. to raise the price
 坐坐	v. to sit down · v. to ride
@@ -50138,6 +50162,7 @@
 墘头	n. edge
 墘角	n. details, minutiae · adj. detailed
 墙	n. wall · n. to block
+墙上	phr. on the wall
 墙倒众人推	prov. Everyone will seize
 墙内	n. Used other than figuratively
 墙围	n. wall
@@ -54430,6 +54455,7 @@
 太君	n. title for the mother
 太和	n. Tai Wo · n. Taihe
 太和殿	n. Hall of Supreme Harmony
+太多	phr. too many · phr. too much
 太太	n. An honorific for adults, usually
 太太公	n. great-great-grandfather
 太太奶	n. great-great-grandmother
@@ -54458,6 +54484,7 @@
 太宝湖	Taibaohu
 太宰	n. grand chancellor
 太宰府	Dazaifu
+太少	phr. too few · phr. too little
 太岁	n. the twelve or sixty stars
 太岁头上动土	phr. to beard the lion in his den
 太师	n. Grand Preceptor
@@ -54492,6 +54519,7 @@
 太平鸟	n. Bohemian waxwing
 太府寺	Court of the Imperial Treasury
 太康	n. Tai Kang · n. Chinese era name from the
+太快	phr. too fast
 太息	v. to sigh
 太攀蛇	n. taipan
 太极	n. taiji · n. tai chi
@@ -56497,6 +56525,7 @@
 好心没好报	prov. no good deed goes unpunished
 好心着雷劈	prov. no good deed goes unpunished
 好心着雷打	prov. no good deed goes unpunished
+好快	phr. so fast
 好恶	n. likes and dislikes
 好情	n. good intentions
 好惹	v. to be easy to deal with
@@ -62136,6 +62165,7 @@
 对于	prep. concerning
 对亲	n. courting · n. meeting for purpose of
 对仔	n. antithetical couplet, often
+对他	phr. to him · phr. toward him
 对仗	v. to use antithesis
 对付	v. to deal with · v. to make do
 对价	n. consideration
@@ -62264,6 +62294,7 @@
 对桀	v. to bicker
 对案	n. counterproposal
 对歌	n. antiphonal song
+对此	phr. regarding this · phr. on this
 对比	v. to compare · n. ratio
 对比度	n. contrast ratio
 对比温度	phr. reduced temperature
@@ -65641,6 +65672,7 @@
 岚天	Lantian
 岚炭	n. coke
 岛	n. island
+岛上	phr. on the island
 岛原	Shimabara
 岛叶	n. insula
 岛国	n. island country
@@ -69964,6 +69996,7 @@
 店窗	n. shopwindow · n. shop
 店窗枋	n. wooden panels placed
 店肆	n. shop
+店里	phr. in the shop
 店钱	n. room charge in a hotel · n. accommodation
 店铺	n. shop
 店长	n. manager of a shop
@@ -73023,8 +73056,12 @@
 很	adv. very
 很久没见	long time no see
 很多	adj. many
+很大	phr. very big · phr. very much
 很少	adv. seldom
+很快	phr. very fast · phr. soon
 很是	adv. very
+很长	phr. very long
+很高	phr. very tall · phr. very high
 徉	used in 徜徉 and 徉徜 · used in 徉徉
 徊	only used in 徘徊 · those
 徊翔	n. to hover · n. to make no progress in one's
@@ -78159,14 +78196,17 @@
 我去	n. what the ...!
 我司	n. our company
 我各侬	pron. we
+我听	phr. I listen · phr. as I hear
 我听无	phr. I don't understand
 我哋	pron. we, us
 我国	n. my country
+我在	phr. I'm here · phr. I am at
 我好钟意你	phr. I love you, I like you very
 我孙子	Abiko · an orthographic borrowing
 我市	n. our city
 我很好	phr. I'm fine
 我思故我在	phr. I think therefore I am
+我想	phr. I want to · phr. I think
 我慢	adj. arrogant
 我手写我口	phr. "my hand writes [what] my
 我操	n. fuck · n. WTF
@@ -78176,6 +78216,7 @@
 我曹	pron. we
 我有一个问题	phr. I have a question
 我朝	n. our dynasty
+我来	phr. I'll do it · phr. I come
 我爱你	phr. I love you
 我爱侬	phr. I love you
 我爱汝	phr. I like you · phr. I love you
@@ -78184,12 +78225,15 @@
 我的天	wow
 我的天啊	oh my God
 我的妈呀	mamma mia
+我看	phr. I see · phr. in my view
 我空	Expression used to show
 我等	n. we · n. us
 我肏	n. fuck · n. WTF
+我能	phr. I can
 我苦	oh my God
 我蛮好	phr. I'm fine
 我行我素	phr. to persist in one's old ways
+我要	phr. I want · phr. I will
 我说	phr. Used other than figuratively
 我辈	pron. we, us
 我这个人	n. me personally
@@ -78719,6 +78763,7 @@
 所见所闻	phr. what one sees and hears
 所见略同	phr. to hold similar views
 所言非虚	phr. what say is true
+所说	phr. what is said · phr. as stated
 所谓	adj. so-called · adj. what is known as
 所费	n. travel expenses · n. expenses
 所费不赀	phr. to incur a considerable
@@ -78811,6 +78856,7 @@
 手䘼箍	n. armband
 手䘼罱	n. oversleeve
 手䘼边	n. cuff
+手上	phr. in hand · phr. on the hand
 手下	n. under the leadership of · n. subordinate
 手下留情	phr. to show mercy when
 手下节	n. forearm
@@ -89092,6 +89138,7 @@
 放告	n. to release a statement
 放哨	v. to be on sentry
 放囝	v. to abandon a birdling after
+放在	phr. put in · phr. place at
 放在心上	phr. to care about · phr. to take seriously
 放在眼里	v. to have regard for
 放声	v. to raise one's voice to its
@@ -102276,6 +102323,7 @@
 桊	a small iron nose ring or small
 桋	name of a tree
 桌	n. table · n. measure word for tablefuls
+桌上	phr. on the table
 桌上型	n. desktop
 桌上型电脑	n. desktop computer
 桌仔	n. table
@@ -112191,6 +112239,7 @@
 活受罪	v. to suffer a living hell
 活口	v. sb who witnesses a crime and is not killed
 活命	v. to eke out an existence · v. to save a life
+活在	phr. live in · phr. live on
 活地图	n. person who is familiar
 活地狱	n. hell on earth
 活埋	v. to bury alive
@@ -128017,6 +128066,7 @@
 留后	n. to provide an heir
 留后路	phr. to leave oneself a way out
 留园	n. the Lingering Garden
+留在	phr. stay in · phr. remain at
 留坝	n. Liuba
 留堂	v. to be kept in school to serve
 留声机	n. gramophone
@@ -133276,6 +133326,7 @@
 瞧得起	v. to have a good opinion of
 瞧病	v. to see a patient · v. to see a doctor
 瞧着办	v. to do as one sees fit · v. It's up to you.
+瞧瞧	phr. have a look
 瞧见	v. to see
 瞩	v. to gaze at · v. to stare at
 瞩望	v. to look forward to
@@ -139313,6 +139364,7 @@
 站台	n. railway, subway or bus platform · v. to
 站台票	n. railway platform ticket
 站员	n. station attendant
+站在	phr. standing at
 站地	n. stop
 站头	n. distance between stations · n. front part
 站姿	n. stance
@@ -145371,12 +145423,14 @@
 给予	v. to give
 给付	v. to give · n. payment
 给以	v. to give
+给你	phr. for you · phr. here you are
 给你点颜色看看	n. teach you a lesson · n. put you in your
 给养	n. provisions
 给到	v. to successfully give something
 给力	adj. awesome
 给匹千奴	n. cappuccino
 给定	adj. given
+给我	phr. give me · phr. for me
 给排水	abbr. water supply and drainage
 给水	v. to supply water · n. water supply
 给皂器	n. soap dispenser
@@ -152572,6 +152626,7 @@
 脷底丸	n. glyceryl trinitrate sublingual
 脷苔	n. tongue coating
 脸	n. face
+脸上	phr. on the face
 脸上贴金	n. to apply gold leaf to the face of a statue
 脸书	n. Facebook
 脸儿	n. erhua form of 臉／脸
@@ -154611,6 +154666,7 @@
 般乐	n. to play · n. to amuse oneself
 般涅槃	n. parinirvana · v. to attain parinirvana
 般游	n. to amuse oneself
+般的	phr. like · phr. as if
 般舟三昧	an uninterrupted religious practice
 般若	adj. wisdom
 般若波罗密多心经	n. the Heart Sutra
@@ -166991,6 +167047,7 @@
 讲花蓼	v. to tell a lie
 讲解	v. to explain
 讲解员	n. host
+讲讲	phr. talk about it a bit
 讲论	v. to discuss
 讲评	v. to comment on
 讲评话	v. to tell a story
@@ -171555,6 +171612,7 @@
 走内线	n. insider contacts · n. via private channels
 走出	v. to walk out
 走出去	v. to go global
+走到	phr. walk to · phr. arrive at
 走动	v. to walk about · v. to go from place to
 走势	n. direction · n. tendency
 走势图	n. run chart
@@ -174054,6 +174112,7 @@
 轢	to run over with a vehicle · a vandal
 轥	to roll over using the wheels
 车	adv. surname Che · adv. car
+车上	phr. in the car · phr. on the bus
 车主	n. vehicle owner · n. vehicle renter
 车仔	n. two-wheeled flatbed cart · n. bicycle
 车仔子	n. thread used on sewing machines
@@ -176549,6 +176608,7 @@
 这些	pron. these
 这些个	pron. each of these
 这仔	pron. here
+这件事	phr. this matter · phr. this issue
 这会	adv. now
 这会儿	n. erhua form of 這會／这会
 这位	pron. this person · pron. here
@@ -176587,6 +176647,7 @@
 这早晚	n. this moment · n. at this very moment
 这早晚儿	n. this moment · n. at this very moment
 这时	n. now
+这时候	phr. at this moment · phr. now
 这是什么	phr. what is this?
 这来	pron. so
 这样	adv. this way
@@ -177603,6 +177664,7 @@
 送养	n. to place out for adoption
 送分题	n. very easy question
 送别	v. to see someone off · v. to pay one's last
+送到	phr. deliver to · phr. see sb off
 送办	v. to be subjected to a police
 送医	v. to be taken to hospital
 送去	v. to send to · v. to deliver to
@@ -185239,6 +185301,7 @@
 问道	v. to ask
 问道于盲	n. lit. to ask a blind man the way · n. fig.
 问长问短	phr. to ask about the length
+问问	phr. ask around
 问题	n. question · n. problem
 问题化	v. to problematize
 问鼎	v. to aspire to the throne · v. to invade

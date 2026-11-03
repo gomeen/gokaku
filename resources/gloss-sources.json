@@ -24,12 +24,19 @@
       "bytes": 3983033,
       "sha256": "e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb",
       "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
+    },
+    "collocations": {
+      "file": "collocation-gloss.tsv",
+      "bytes": 2825,
+      "sha256": "a573ed33cb62f77f1fb6fe869a60a69414d0c39a246e79bb7b9f267f8d79deb9",
+      "note": "Gogaku 人工整理语法组合注解，无外部来源"
     }
   },
-  "entry_count": 200797,
+  "entry_count": 200858,
   "supplement_count": 39768,
+  "curated_count": 61,
   "cleaningRules": {
-    "version": "v8.1",
+    "version": "v8.2",
     "date": "2026-11-03",
     "rules": [
       "括号内容一律移除",
@@ -39,9 +46,10 @@
       "拼接总长≤46字符",
       "分隔符统一为点号·",
       "词性层：jieba 补标无词性词条（含多字词）",
-      "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成"
+      "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成",
+      "人工组合层：语法组合（我想/很大类）人工精选补注"
     ],
     "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
   },
-  "output_sha256": "19c778df0cfb762acaa420a2fbd77d51e550d6e572f37d0861f3aca0c2ff0005"
+  "output_sha256": "7f3e32be397f9aa2c87457fc207b26fcf10fe911ce9ac6ee4f48a79096cadc5d"
 }
