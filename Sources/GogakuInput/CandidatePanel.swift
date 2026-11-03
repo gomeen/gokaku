@@ -115,7 +115,7 @@ private final class PanelLayout {
         }
         var contents: [RowContent] = []
         // 学习中→英：仅高亮候选显示英文注释；长译文在行内换行不截断
-        //（2026-11 用户反馈：显示不全）。
+        //（2026-11 用户反馈：显示不全）；上限 6 行，超出部分随绘制裁剪。
         let learningZhToEn = learning && view.stamp.direction == .zhToEn
         for (offset, candidate) in shown.enumerated() {
             let selected = (learning ? pageStart + offset : view.page * CandidatePage.size + offset) == view.selected
@@ -136,7 +136,7 @@ private final class PanelLayout {
                 if wrapAnnotation {
                     let available = max(maxInner - fixed, 24)
                     annotationWidth = available
-                    annotationLines = min(3, max(1, Int(ceil(text.widthPt / available))))
+                    annotationLines = min(6, max(1, Int(ceil(text.widthPt / available))))
                     if annotationLines > 1 {
                         rowHeight = m.rowHeight + CGFloat(annotationLines - 1) * m.annotationLineHeight
                     }
