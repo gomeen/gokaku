@@ -113,7 +113,8 @@ private final class PanelLayout {
         var contents: [RowContent] = []
         for (offset, candidate) in shown.enumerated() {
             let selected = (learning ? pageStart + offset : view.page * CandidatePage.size + offset) == view.selected
-            let prefix = learning ? "⌥\(offset + 1)" : "\(offset + 1)"
+            // 学习模式数字直接选词（2026-11 裁决：与普通模式同快捷键，不再用 ⌥数字）。
+            let prefix = "\(offset + 1)"
             let index = NSAttributedString(string: prefix, attributes: attributes(theme.indexFont, selected ? theme.selectedText : theme.indexText))
             let word = NSAttributedString(string: candidate.target, attributes: attributes(theme.candidateFont, selected ? theme.selectedText : theme.candidateText))
             let annotation: NSAttributedString? = candidate.explanation.isEmpty ? nil

@@ -1,0 +1,17 @@
+worker 协议回归（系统 python，无模型）
+  [PASS] 非法 JSON 行被丢弃且进程存活
+  [PASS] 回显 protocolVersion
+  [PASS] 回显 id
+  [PASS] 回显 sourceID
+  [PASS] 回显 source
+  [PASS] 回显 resource
+  [PASS] stamp 原样回传
+  [PASS] milliseconds 为非负数值
+  [PASS] 缺权重按 model_missing 拒绝
+  [PASS] invalid_request：空输入
+  [PASS] invalid_request：纯空白输入
+  [PASS] invalid_request：超 512 标量
+  [PASS] invalid_request：协议版本≠1
+  [PASS] invalid_request：非 learning 方向
+  [PASS] 512 标量边界放行到模型路径
+协议回归通过（15 项断言）

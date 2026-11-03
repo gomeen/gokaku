@@ -197,8 +197,23 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     }()
 
     private let records = LearningStore()
+    /// 学习中→英走普通核心路径时的应用哨兵：绕开按应用默认英文（学习组合
+    /// 始终组中文），与真实应用隔离；核心按键语义与普通模式完全一致。
+    private static let learningCoreApp = "org.gogaku.learning"
+    /// 已知译文（学习中→英）：来自高亮候选预译与历史提交；命中即同步上屏。
+    private var translationMemory: [String: String] = [:]
+    private var lastEagerSource = ""
+    /// 译文未就绪的提交：缓冲后续按键，避免译文异步上屏与新组合交错。
+    private struct PendingTranslatedCommit {
+        let source: String
+        let anchor: FocusTarget
+        var buffer: [NSEvent]
+    }
+    private var pendingTranslatedCommit: PendingTranslatedCommit?
     /// 学习翻译后端：quickmt 开发版外置 Python 辅助进程（装配路径与 beam 由
     /// 设置解析）；设置变更时销毁重建（rebuildLearningTranslatorIfNeeded）。
+    /// 请求按 sourceID 分路：commit＝提交替换（学习模式中→英）、
+    /// eager＝高亮候选预译，其余＝英→中组合会话请求。
     private lazy var translator = makeTranslator()
 
     private func makeTranslator() -> TranslationService {
@@ -206,20 +221,98 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
         service.onResult = { [weak self] result in
             guard let self else { return }
-            self.hub.async {
-                // quickmt 开发版豁免（2026-11 裁决）：成功且来源确为开发版 worker
-                // 的结果按 approved 进入候选；失败保留输入并提示原文上屏。
-                // 正式口径（approved 仅由审核资源清单决定）不变。
-                if result.error == nil {
-                    self.hub.existingLearningSession?.receive(result, approved: result.resource == LearningTranslation.resourceID)
-                } else {
-                    self.hub.existingLearningSession?.translationFailed(
-                        result, message: Self.learningFailureMessage(result.error ?? ""))
+            switch result.sourceID {
+            case "commit":
+                DispatchQueue.main.async { self.finishCommitSwap(result) }
+            case "eager":
+                DispatchQueue.main.async { self.applyEagerTranslation(result) }
+            default:
+                self.hub.async {
+                    // quickmt 开发版豁免（2026-11 裁决）：成功且来源确为开发版 worker
+                    // 的结果按 approved 进入候选；失败保留输入并提示原文上屏。
+                    // 正式口径（approved 仅由审核资源清单决定）不变。
+                    if result.error == nil {
+                        self.hub.existingLearningSession?.receive(result, approved: result.resource == LearningTranslation.resourceID)
+                    } else {
+                        self.hub.existingLearningSession?.translationFailed(
+                            result, message: Self.learningFailureMessage(result.error ?? ""))
+                    }
+                    self.publishLearning(generation: result.stamp.focus)
                 }
-                self.publishLearning(generation: result.stamp.focus)
             }
         }
         return service
+    }
+
+    /// 译文缓存有界；溢出直接清空（预译很快重建）。
+    private func storeTranslationMemory(_ source: String, _ target: String) {
+        if translationMemory.count >= 256 { translationMemory.removeAll() }
+        translationMemory[source] = target
+    }
+
+    /// 高亮候选预译：组合期间提前译当前高亮候选，提交时多数命中缓存同步上屏；
+    /// 译文就绪后在状态行预览（不改候选列表，交互与普通模式一致）。
+    private func applyEagerTranslation(_ result: TranslationResult) {
+        if result.error == nil, let target = result.target, !target.isEmpty {
+            storeTranslationMemory(result.source, target)
+        }
+        guard mode == .learning, direction == .zhToEn,
+              result.error == nil, let translated = result.target, !translated.isEmpty,
+              result.source == lastEagerSource,
+              var view = displayed, view.stamp == result.stamp, pendingEdits == 0,
+              view.status.isEmpty, let rect = displayRect, let anchor = target else { return }
+        view.status = "译文：\(translated)"
+        displayed = view
+        panel.render(view, at: rect, targetWindowLevel:
+                     GGPanelTargetLevel(anchor.windowLevel, anchor.windowLevelValid))
+    }
+
+    /// 提交替换（学习模式中→英）：中文提交文本换成 quickmt 译文上屏。
+    /// 纯非 CJK 提交（原编码、英文候选）按普通语义原样上屏。
+    private func commitLearningSwap(_ text: String, at anchor: FocusTarget, preWriteCheck: FocusTarget?) {
+        let hasCJK = text.unicodeScalars.contains {
+            (0x4E00...0x9FFF).contains($0.value) || (0x3400...0x4DBF).contains($0.value)
+        }
+        guard hasCJK else { insertCommit(text, at: anchor, preWriteCheck: preWriteCheck); return }
+        if let translated = translationMemory[text] {
+            insertCommit(translated, at: anchor, preWriteCheck: preWriteCheck)
+            return
+        }
+        pendingTranslatedCommit = PendingTranslatedCommit(source: text, anchor: anchor, buffer: [])
+        translator.requestImmediately(TranslationRequest(stamp: InputStamp(mode: .learning, direction: .zhToEn),
+                                                         sourceID: "commit", source: text,
+                                                         resource: LearningTranslation.resourceID))
+    }
+
+    private func finishCommitSwap(_ result: TranslationResult) {
+        guard let pending = pendingTranslatedCommit, pending.source == result.source else { return }
+        pendingTranslatedCommit = nil
+        let translated = result.error == nil && result.target != nil && !result.target!.isEmpty
+        let text = translated ? result.target! : pending.source
+        if translated {
+            storeTranslationMemory(pending.source, text)
+        } else {
+            toast.show("译文失败，已上屏原文")
+        }
+        insertLearningCommit(text, at: pending.anchor)
+        // 重放缓冲按键（重放前已清 pending，避免再次入队）。
+        for event in pending.buffer { _ = handleEvent(event) }
+    }
+
+    /// 异步译文上屏：仅核对同应用（缓冲期无新组合，选区仍在提交点）；
+    /// 宿主不可写时按草稿保留。
+    private func insertLearningCommit(_ text: String, at anchor: FocusTarget) {
+        guard let c = client(), let current = currentTarget(),
+              current.application == anchor.application, current.pid == anchor.pid else {
+            DraftStore.shared.save(application: anchor.application, mode: .learning, direction: .zhToEn, raw: text, literal: true)
+            return
+        }
+        markedShown = ""; markedCaret = -1
+        if !gg_insert_text(c, text) {
+            DraftStore.shared.save(application: anchor.application, mode: .learning, direction: .zhToEn, raw: text, literal: true)
+            return
+        }
+        target = currentTarget()
     }
 
     private static func learningFailureMessage(_ error: String) -> String {
@@ -375,6 +468,13 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private func suspend(clearMarked: Bool = true, rawOverride: String? = nil) {
         let app = application, oldMode = mode, oldDirection = direction
         let raw = rawOverride ?? displayed?.raw ?? ""
+        // 待插入译文未落地即失焦：原中文入草稿可恢复，缓冲丢弃。
+        if let pending = pendingTranslatedCommit {
+            pendingTranslatedCommit = nil
+            DraftStore.shared.save(application: app, mode: .learning, direction: .zhToEn,
+                                   raw: pending.source, literal: true)
+        }
+        lastEagerSource = ""
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0
         panel.dismiss(); toast.hide()
@@ -541,9 +641,14 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         guard let current = currentTarget(readRectangle: displayed == nil && markedShown.isEmpty) else { suspend(); return false }
         let fieldChanged = target == nil || target?.application != current.application || target?.pid != current.pid
         target = current; application = current.application
-        if mode == .normal {
-            // 普通模式同步完成核心处理与宿主写入；面板布局排到下一轮。
-            // consumed=false 时透传宿主，保证英文直输等透传语义正确。
+        // 学习模式中→英与普通模式同一条核心路径（同键位、同候选、同上屏规则），
+        // 仅提交时换译译文；英→中保留独立英语缓冲路径。
+        if mode == .normal || (mode == .learning && direction == .zhToEn) {
+            // 消费键期间的待插入译文：缓冲而非直通，防止译文与新组合交错。
+            if event.type == .keyDown, pendingTranslatedCommit != nil {
+                pendingTranslatedCommit?.buffer.append(event)
+                return true
+            }
             return handleNormalSync(event, at: current, fieldChanged: fieldChanged)
         }
         handleLearning(event)
@@ -578,7 +683,10 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         self.target = target
         application = target.application
         let settings = self.settings
-        let app = target.application, field = currentFieldID(), time = Self.nowMs()
+        // 学习模式中→英用应用哨兵：核心始终组中文，绕开按应用默认英文。
+        let learningSwap = mode == .learning && direction == .zhToEn
+        let app = learningSwap ? Self.learningCoreApp : target.application
+        let field = currentFieldID(), time = Self.nowMs()
         #if GOGAKU_VALIDATION
         let coreStart = DispatchTime.now().uptimeNanoseconds
         let enqueueNs = coreStart
@@ -615,6 +723,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
 
     /// 把核心快照落到宿主（提交／字母）与面板。
     private func applyNormal(_ snap: NormalSnapshot, target: FocusTarget) {
+        let learningSwap = mode == .learning && direction == .zhToEn
         guard active, let current = currentTarget(),
               current.application == target.application, current.pid == target.pid else {
             if !snap.commit.isEmpty {
@@ -633,7 +742,11 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         }
         if !snap.composing { panel.dismiss() }
         if !snap.commit.isEmpty {
-            insertCommit(snap.commit, at: target, preWriteCheck: current)
+            if learningSwap {
+                commitLearningSwap(snap.commit, at: target, preWriteCheck: current)
+            } else {
+                insertCommit(snap.commit, at: target, preWriteCheck: current)
+            }
         }
         let caret = PreeditCaret.utf16Offset(in: snap.preedit, utf8Offset: snap.preeditCaret)
         updateMarked(snap.marked, caret: caret, at: target)
@@ -657,6 +770,18 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         }
         view.status = snap.status
         if snap.composing {
+            // 学习中→英：预译当前高亮候选（结果进译文缓存，状态行预览）。
+            if learningSwap {
+                let inPage = snap.selected - snap.page * CandidatePage.size
+                if snap.candidates.indices.contains(inPage) {
+                    let highlight = snap.candidates[inPage].text
+                    if highlight != lastEagerSource {
+                        lastEagerSource = highlight
+                        translator.request(TranslationRequest(stamp: view.stamp, sourceID: "eager",
+                                                              source: highlight, resource: LearningTranslation.resourceID))
+                    }
+                }
+            }
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
             // 否则等待 marked 更新后的合并刷新。无有效坐标时隐藏面板但保留组合
             //（不丢弃文字；恢复有效且字段一致后重新显示）。
@@ -694,6 +819,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             anchorSuspectStreak = 0
             stopPositionRefresh()
             panel.dismiss()
+            lastEagerSource = ""
         }
     }
 
@@ -850,7 +976,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     // MARK: - 面板点击与学习模式（保持既有路径）
 
     private func panelChoose(row: Int) {
-        guard mode == .normal, let snapDisplayed = displayed, pendingEdits == 0 else {
+        // 学习中→英与普通模式同一套点击选词；英→中走学习候选直选。
+        guard mode == .normal || (mode == .learning && direction == .zhToEn),
+              let snapDisplayed = displayed, pendingEdits == 0 else {
             panelChooseLearning(row: row)
             return
         }
@@ -870,6 +998,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         if view.candidates.indices.contains(index) { choose(view.candidates[index]) }
     }
 
+    /// 英→中专用按键（学习中→英走普通核心路径）。快捷键与普通模式一致
+    /// （2026-11 用户裁决）：数字 1–9 直接选编号候选，不再用 ⌥数字；
+    /// 空格保留为英文空格输入（英语短句需要），Enter/数字选中文译文。
     private func handleLearning(_ event: NSEvent) {
         let flags = event.modifierFlags.intersection([.command, .control, .option, .shift])
         if flags.contains(.command) {
@@ -896,19 +1027,16 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         case 121: edit { try $0.page(1) }; return
         case 125, 124: edit { $0.navigate(1) }; return
         case 126, 123: edit { $0.navigate(-1) }; return
-        case 48: suspend(); return
-        case 36:
-            if mode == .normal { commitLearningOriginal() } else { chooseCurrent() }
-            return
-        case 49:
-            if direction == .zhToEn { chooseCurrent(); return }
+        case 36: chooseCurrent(); return
         default: break
         }
-        if let n = Int(event.charactersIgnoringModifiers ?? text), (1...CandidatePage.size).contains(n), flags.contains(.option) {
+        // 数字 1–9 直接选编号候选；无对应候选并入源文（普通模式超页数字的简化）。
+        if let n = Int(event.charactersIgnoringModifiers ?? text), (1...CandidatePage.size).contains(n), flags.isEmpty {
             if let view = displayed, pendingEdits == 0 {
                 let index = view.page * CandidatePage.size + n - 1
-                if view.candidates.indices.contains(index) { choose(view.candidates[index]) }
+                if view.candidates.indices.contains(index) { choose(view.candidates[index]); return }
             }
+            edit { try $0.type(text) }
             return
         }
         if flags.contains(.option) { return }
@@ -1106,8 +1234,11 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             _ = DraftStore.shared.take(id: id)
             return
         }
-        if draft.mode == .normal {
-            let settings = self.settings, app = current.application, field = currentFieldID()
+        if draft.mode == .normal || (draft.mode == .learning && draft.direction == .zhToEn) {
+            // 普通模式与学习中→英同一条核心路径；学习中→英用应用哨兵恢复组合。
+            let settings = self.settings
+            let app = draft.mode == .learning ? Self.learningCoreApp : current.application
+            let field = currentFieldID()
             let snapshot: NormalSnapshot? = hub.sync {
                 guard let engine = self.hub.engine(settings) else { return nil }
                 EngineHub.shared.lastAppField = (app, field)

@@ -58,6 +58,14 @@ public final class TranslationService {
             self.debounce = work; self.queue.asyncAfter(deadline: .now() + .milliseconds(120), execute: work)
         }
     }
+    /// 提交路径免抖动：选词上屏的译文替换不等 120ms。
+    public func requestImmediately(_ request: TranslationRequest) {
+        queue.async {
+            self.valid.removeAll(); self.valid.insert(request.id)
+            self.pending = nil; self.debounce?.cancel()
+            self.enqueue(request)
+        }
+    }
     public func invalidate() {
         queue.async {
             self.valid.removeAll(); self.pending = nil; self.debounce?.cancel()

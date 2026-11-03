@@ -4,8 +4,8 @@
        centered (2026-11-02 user feedback) so the glyph fills the cap like
        Rime's 乎 and Qingjian's bars instead of reading as an empty blob. -->
   <rect x="26" y="26" width="1356" height="972" rx="290" fill="#1d1d1f"/>
-  <path d="M 458.8 380.3 C 489.9 377.8 589.0 370.2 645.3 365.3 C 741.5 360.2 811.3 352.6 836.5 350.2"
+  <path d="M 545.3 380.3 C 576.4 377.8 675.5 370.2 731.8 365.3 C 828.0 360.2 897.8 352.6 923.0 350.2"
         fill="none" stroke="#1d1d1f" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M 363.0 573.8 C 401.7 589.3 510.1 643.1 594.9 671.2 C 679.7 699.3 825.8 730.1 872.1 741.8"
+  <path d="M 449.5 573.8 C 488.2 589.3 596.6 643.1 681.4 671.2 C 766.2 699.3 912.3 730.1 958.6 741.8"
         fill="none" stroke="#1d1d1f" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>
