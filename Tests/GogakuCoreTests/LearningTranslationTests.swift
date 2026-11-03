@@ -72,7 +72,7 @@ final class LearningTranslationTests: XCTestCase {
         return s
     }
 
-    func testDevCandidateCarriesLabelAndApprovedOnlyForDevResource() throws {
+    func testDevCandidateEntersWithCleanAnnotationForEnToZh() throws {
         let s = try session(.enToZh)
         let stamp = s.view.stamp
         let request = TranslationRequest(stamp: stamp, sourceID: "english:full", source: s.view.raw,
@@ -80,11 +80,11 @@ final class LearningTranslationTests: XCTestCase {
         // 非 quickmt 资源即使成功也不进入候选（正式口径不变）。
         s.receive(TranslationResult(request: request, target: "会议"), approved: false)
         XCTAssertTrue(s.view.candidates.isEmpty)
-        // 开发版资源按豁免进入候选，注释带固定标注。
+        // 开发版资源按豁免进入候选；源文已在预编辑行显示，注释留空（2026-11 用户反馈）。
         s.receive(TranslationResult(request: request, target: "会议"), approved: true)
         let candidate = try XCTUnwrap(s.view.candidates.first)
         XCTAssertEqual(candidate.resource, LearningTranslation.resourceID)
-        XCTAssertTrue(candidate.explanation.hasSuffix(" · quickmt 开发版"))
+        XCTAssertEqual(candidate.explanation, "")
         XCTAssertEqual(candidate.target, "会议")
         XCTAssertEqual(s.view.status, "")
     }
