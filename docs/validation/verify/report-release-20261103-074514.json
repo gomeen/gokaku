@@ -1,0 +1,112 @@
+{
+  "profile": "release",
+  "startedAt": "2026-11-03T06:47:59+0800",
+  "finishedAt": "2026-11-03T07:45:14+0800",
+  "commit": "abb775b407ade166f2d221a6463b12524ba8f6c5",
+  "dirty": false,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.1-rc.1",
+    "buildNumber": 7
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.1-rc.1 构建7；拒绝路径 7/7；installed=Gogaku.app 0.1.0 b6;Gogaku Settings.app 0.1.0 b6",
+      "durationMs": 20,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 107,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全过（100% tests passed）",
+      "durationMs": 26915,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "96 项全部通过（Release）",
+      "durationMs": 21211,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/swift-tests.log"
+    },
+    {
+      "name": "clean-build",
+      "required": true,
+      "status": "passed",
+      "detail": "0.1.1-rc.1 构建7 提交 abb775b407ad（两套应用各 13／12 个运行时文件已哈希）",
+      "durationMs": 91382,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/clean-build.log"
+    },
+    {
+      "name": "bundle-check",
+      "required": true,
+      "status": "passed",
+      "detail": "签名、闭包与包内冒烟通过（含输入法与设置应用）",
+      "durationMs": 5327,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/bundle-check.log"
+    },
+    {
+      "name": "quality",
+      "required": true,
+      "status": "passed",
+      "detail": "首选 109/120、前十 112/120（≥109／112）",
+      "durationMs": 8047,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/quality.log"
+    },
+    {
+      "name": "render",
+      "required": true,
+      "status": "passed",
+      "detail": "渲染检查通过（51 项）",
+      "durationMs": 6236,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/panel-render.log"
+    },
+    {
+      "name": "data-reliability",
+      "required": true,
+      "status": "passed",
+      "detail": "40 轮强杀／损坏恢复／删词不复活通过",
+      "durationMs": 14801,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/data-reliability.log"
+    },
+    {
+      "name": "asan-ubsan",
+      "required": true,
+      "status": "passed",
+      "detail": "100000 随机序列 ASan＋UBSan 无错误",
+      "durationMs": 3260110,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261103-064759/asan-ubsan.log"
+    },
+    {
+      "name": "install-preflight",
+      "required": false,
+      "status": "passed",
+      "detail": "双包签名／包内身份／双包版本一致；备份无 .app 暴露",
+      "durationMs": 178,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": true,
+    "notPassed": []
+  }
+}
