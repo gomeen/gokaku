@@ -1335,7 +1335,15 @@ final class GogakuInputController: IMKInputController {
             // 英→中无译文结果不立即隐藏（宽限 0.4s 防逐键闪烁，2026-11 用户裁决）；
             // 期间译文到达即原地刷新；停下且确实无译文才隐藏。
             if self.mode == .learning, self.direction == .enToZh, value.candidates.isEmpty {
-                NSLog("GogakuDiag: empty-candidates schedule-hide busy=%@", self.translator.hasPendingWork ? "Y" : "N")
+                // 首键即显原文（2026-11-04 用户反馈：等译文才显示＝打字无反馈＋
+                // 输入延迟感）；译文到达后原地补候选。持续无译文且停顿时由宽限
+                // 工作项收起（busy 时顺延，自适应云端时延）。
+                NSLog("GogakuDiag: empty-candidates render-source busy=%@",
+                      self.translator.hasPendingWork ? "Y" : "N")
+                if let rect = self.displayRect {
+                    self.panel.render(value, at: rect, targetWindowLevel:
+                        GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
+                }
                 self.scheduleEnToZhHide()
                 return
             }
