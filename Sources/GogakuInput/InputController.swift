@@ -1488,7 +1488,11 @@ final class GogakuInputController: IMKInputController {
         mode = mode == .normal ? .learning : .normal
         persistPreference()
         warmEnToZhWorkerIfNeeded()
-        toast.show(mode == .learning ? "学习" : "普通", anchor: anchor)
+        // 进入学习模式时同屏显示当前学习方向（2026-11-04 用户裁决：一个浮层
+        // 讲完状态，省一次 ⌃⇧J 探视）；退回普通模式方向无意义，仅示普通。
+        toast.show(mode == .learning
+            ? "学习 · \(direction == .zhToEn ? "中→英" : "英→中")"
+            : "普通", anchor: anchor)
         configure()
     }
 
