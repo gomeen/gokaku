@@ -301,7 +301,7 @@ private struct ResourcesPage: View {
                         Text("后端状态：缺失（\(backend.missing.joined(separator: "、"))）")
                             .font(.system(size: 12.5))
                             .foregroundStyle(SettingsPalette.primaryText)
-                        Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand)")
+                        Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand())")
                             .font(.system(size: 11, design: .monospaced))
                             .foregroundStyle(SettingsPalette.secondaryText)
                             .textSelection(.enabled)

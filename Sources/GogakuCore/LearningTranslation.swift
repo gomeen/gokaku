@@ -15,6 +15,16 @@ public enum LearningTranslation {
     public static let beamRange = 1...10
     public static let defaultBeam = 1
 
+    /// 翻译后端选项：quickmt（默认，快）｜small100（2026-11-03 用户裁决：仅换
+    /// 模型的质量试验，功能层不变）。未知值一律回退默认。
+    public static let defaultBackend = "quickmt"
+    public static let backendOptions = ["quickmt", "small100"]
+
+    public static func normalizedBackend(_ value: String?) -> String {
+        guard let value, backendOptions.contains(value) else { return defaultBackend }
+        return value
+    }
+
     /// 装配目录（venv＋两向权重＋worker＋manifest，不进 app bundle）。
     public static func directory(at support: URL = Paths.support) -> URL {
         support.appendingPathComponent("translation", isDirectory: true)
@@ -27,10 +37,20 @@ public enum LearningTranslation {
     /// TranslationService 启动配置：venv Python＋worker 脚本＋beam 启动参数。
     /// 路径缺失不在构造期校验：请求级错误（service_unavailable／model_missing）
     /// 走现行失败路径，设置页负责展示缺失与准备指引。
-    public static func serviceConfiguration(root: URL = directory(), beam: Int) -> (executable: URL, arguments: [String]) {
-        (root.appendingPathComponent("venv/bin/python"),
-         [root.appendingPathComponent("quickmt_worker.py").path,
-          "--beam", String(clampedBeam(beam))])
+    /// small100 装在 translation/small100/ 子目录（独立 venv＋权重＋worker）。
+    public static func serviceConfiguration(root: URL = directory(), beam: Int,
+                                            backend: String = defaultBackend) -> (executable: URL, arguments: [String]) {
+        switch normalizedBackend(backend) {
+        case "small100":
+            let base = root.appendingPathComponent("small100", isDirectory: true)
+            return (base.appendingPathComponent("venv/bin/python"),
+                    [base.appendingPathComponent("small100_worker.py").path,
+                     "--beam", String(clampedBeam(beam))])
+        default:
+            return (root.appendingPathComponent("venv/bin/python"),
+                    [root.appendingPathComponent("quickmt_worker.py").path,
+                     "--beam", String(clampedBeam(beam))])
+        }
     }
 
     /// 设置页后端状态：venv、worker、manifest 与两向权重是否就绪。
@@ -42,26 +62,48 @@ public enum LearningTranslation {
         }
     }
 
-    public static func environment(root: URL = directory()) -> Environment {
+    public static func environment(root: URL = directory(), backend: String = defaultBackend) -> Environment {
         let fm = FileManager.default
         var missing: [String] = []
-        if !fm.isExecutableFile(atPath: root.appendingPathComponent("venv/bin/python").path) {
-            missing.append("venv（python）")
-        }
-        if !fm.fileExists(atPath: root.appendingPathComponent("quickmt_worker.py").path) {
-            missing.append("quickmt_worker.py")
-        }
-        if !fm.fileExists(atPath: root.appendingPathComponent("manifest.json").path) {
-            missing.append("manifest.json")
-        }
-        for name in ["quickmt-en-zh", "quickmt-zh-en"]
-        where !fm.fileExists(atPath: root.appendingPathComponent(name)
-            .appendingPathComponent("model.bin").path) {
-            missing.append("\(name) 权重")
+        switch normalizedBackend(backend) {
+        case "small100":
+            let base = root.appendingPathComponent("small100", isDirectory: true)
+            if !fm.isExecutableFile(atPath: base.appendingPathComponent("venv/bin/python").path) {
+                missing.append("venv（python）")
+            }
+            if !fm.fileExists(atPath: base.appendingPathComponent("small100_worker.py").path) {
+                missing.append("small100_worker.py")
+            }
+            if !fm.fileExists(atPath: base.appendingPathComponent("manifest.json").path) {
+                missing.append("manifest.json")
+            }
+            if !fm.fileExists(atPath: base.appendingPathComponent("ct2-int8/model.bin").path)
+                || !fm.fileExists(atPath: base.appendingPathComponent("source/config.json").path) {
+                missing.append("small100 权重")
+            }
+        default:
+            if !fm.isExecutableFile(atPath: root.appendingPathComponent("venv/bin/python").path) {
+                missing.append("venv（python）")
+            }
+            if !fm.fileExists(atPath: root.appendingPathComponent("quickmt_worker.py").path) {
+                missing.append("quickmt_worker.py")
+            }
+            if !fm.fileExists(atPath: root.appendingPathComponent("manifest.json").path) {
+                missing.append("manifest.json")
+            }
+            for name in ["quickmt-en-zh", "quickmt-zh-en"]
+            where !fm.fileExists(atPath: root.appendingPathComponent(name)
+                .appendingPathComponent("model.bin").path) {
+                missing.append("\(name) 权重")
+            }
         }
         return Environment(ready: missing.isEmpty, missing: missing)
     }
 
     /// 缺失时的准备指引（在仓库检出目录运行）。
-    public static let prepareCommand = "python3 scripts/prepare-learning-translation.py"
+    public static func prepareCommand(backend: String = defaultBackend) -> String {
+        normalizedBackend(backend) == "small100"
+            ? "python3 scripts/prepare-learning-small100.py"
+            : "python3 scripts/prepare-learning-translation.py"
+    }
 }

@@ -207,6 +207,8 @@ public struct Settings: Codable {
     public var learningTranslationEnabled = true
     /// quickmt beam（1–10，默认 1）；变更销毁重建辅助进程后生效。
     public var learningBeamSize = LearningTranslation.defaultBeam
+    /// 学习翻译后端（"quickmt" 默认｜"small100"）；仅换模型，功能层不变。
+    public var learningTranslationBackend = LearningTranslation.defaultBackend
 
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
@@ -215,7 +217,7 @@ public struct Settings: Codable {
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish, quickAddShortcut
         case quickAddExcludedApplications
-        case learningTranslationEnabled, learningBeamSize
+        case learningTranslationEnabled, learningBeamSize, learningTranslationBackend
     }
 
     public init() {}
@@ -254,6 +256,8 @@ public struct Settings: Codable {
         learningTranslationEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled) ?? true
         learningBeamSize = LearningTranslation.clampedBeam(
             try container.decodeIfPresent(Int.self, forKey: .learningBeamSize) ?? LearningTranslation.defaultBeam)
+        learningTranslationBackend = LearningTranslation.normalizedBackend(
+            try container.decodeIfPresent(String.self, forKey: .learningTranslationBackend))
     }
 
     /// 输入法使用的启用中的按应用默认英文 bundle id 列表。

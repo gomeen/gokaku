@@ -235,7 +235,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private lazy var translator = makeTranslator()
 
     private func makeTranslator() -> TranslationService {
-        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize)
+        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize,
+                                                                    backend: settings.learningTranslationBackend)
         // 英→中连续输入防抖 300ms（2026-11 用户反馈）：逐键请求改停顿后单发；
         // 提交替换走 requestImmediately 不受影响。
         let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments,
@@ -256,7 +257,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                         self.hub.existingLearningSession?.receive(result, approved: result.resource == LearningTranslation.resourceID)
                     } else {
                         self.hub.existingLearningSession?.translationFailed(
-                            result, message: Self.learningFailureMessage(result.error ?? ""))
+                            result, message: Self.learningFailureMessage(result.error ?? "",
+                                                                        backend: self.settings.learningTranslationBackend))
                     }
                     self.publishLearning(generation: result.stamp.focus)
                 }
@@ -267,7 +269,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
 
     /// 预译专用服务：独立实例，避免与提交／英→中请求互相顶掉在飞请求。
     private func makeEagerTranslator() -> TranslationService {
-        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize)
+        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize,
+                                                                    backend: settings.learningTranslationBackend)
         let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
         service.onResult = { [weak self] result in
             DispatchQueue.main.async { self?.applyEagerTranslation(result) }
@@ -398,15 +401,17 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         target = currentTarget()
     }
 
-    private static func learningFailureMessage(_ error: String) -> String {
+    private static func learningFailureMessage(_ error: String, backend: String) -> String {
+        let backendName = LearningTranslation.normalizedBackend(backend) == "small100" ? "small100" : "quickmt"
         switch error {
         case "model_missing":
-            return "quickmt 模型未就绪：请在仓库检出目录运行 " + LearningTranslation.prepareCommand
+            return backendName + " 模型未就绪：请在仓库检出目录运行 "
+                + LearningTranslation.prepareCommand(backend: backend)
                 + "；输入已保留，可 ⌘Return 明确原文上屏"
         case "timeout":
-            return "quickmt 翻译超时；输入已保留，可 ⌘Return 明确原文上屏"
+            return backendName + " 翻译超时；输入已保留，可 ⌘Return 明确原文上屏"
         case "service_unavailable", "service_exited", "service_eof":
-            return "quickmt 辅助进程不可用；输入已保留，可 ⌘Return 明确原文上屏"
+            return backendName + " 辅助进程不可用；输入已保留，可 ⌘Return 明确原文上屏"
         default:
             return "quickmt 开发版翻译失败（\(error)）；输入已保留，可 ⌘Return 明确原文上屏"
         }
@@ -613,7 +618,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     /// 终止，进行中的组合按现行失效规则处理（invalidate 丢弃迟到结果）。
     private func rebuildLearningTranslatorIfNeeded(from previous: Settings) {
         guard previous.learningTranslationEnabled != settings.learningTranslationEnabled
-            || previous.learningBeamSize != settings.learningBeamSize else { return }
+            || previous.learningBeamSize != settings.learningBeamSize
+            || previous.learningTranslationBackend != settings.learningTranslationBackend else { return }
         translator.invalidate()
         translator = makeTranslator()
         eagerTranslator.invalidate()
@@ -1508,6 +1514,8 @@ final class ToastWindow: NSPanel {
         box.layer?.cornerRadius = 9
         box.layer?.masksToBounds = true
         label.font = .systemFont(ofSize: 22, weight: .medium)
+        // 固定白字：深色 HUD 底上浅色外观的默认黑字不可读（用户反馈：亮色兼容）。
+        label.textColor = .white
         label.alignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         box.frame = NSRect(x: 0, y: 0, width: 44, height: 36)

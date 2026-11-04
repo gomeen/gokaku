@@ -68,7 +68,8 @@
 | 键 | 默认 | 取值 | 作用 |
 |---|---|---|---|
 | `learningTranslationEnabled` | `true` | 开关 | 学习模式总开关；关闭后切换键不再进入学习模式 |
-| `learningBeamSize` | `1` | 1–10（超界自动钳制） | quickmt beam 大小；越大译文越稳、首译越慢；worker 由该值带 `--beam` 启动 |
+| `learningBeamSize` | `1` | 1–10（超界自动钳制） | beam 大小；越大译文越稳、首译越慢；worker 由该值带 `--beam` 启动（两后端共用） |
+| `learningTranslationBackend` | `"quickmt"` | `"quickmt"`｜`"small100"` | 翻译后端（2026-11-03 用户裁决的质量试验，见五点八）；未知值回退 quickmt |
 
 **2. worker 启动参数（`scripts/quickmt_worker.py`，输入法按设置自动传参，一般不动）**
 
@@ -89,6 +90,35 @@
 | `--python` | 系统 `python3` | venv 基解释器 |
 | `--skip-venv` | — | 跳过 venv 重建 |
 | `--worker-only` | — | 只更新 worker 脚本 |
+
+## 五点八、small100 后端选项（2026-11-03 用户裁决，构建 43）
+
+用户裁决：**仅换模型的质量试验**——新增 small100 后端选项，其余功能层（组合、面板、
+预译、缓存、提交、防抖）一律不动。动机：quickmt en→zh 加固后可用率仅 77.67%
+（固定风险 12 条），small100 实测 95.15%／94.34%、修加固误报后约 97%，逐句
+p50 约 242ms、p95 约 700ms，仍在 2s 预算内（见 [统一实测决定]
+(../probes/results/translation-backends/decision.md)）。
+
+- **模型与许可**：alirezamsh/small100 @ 8ab680e2，MIT（模型卡）；
+  tokenization_small100.py Apache-2.0。CT2 INT8 一次性转换。
+- **装配**：`python3 scripts/prepare-learning-small100.py` →
+  `~/Library/Application Support/Gogaku/translation/small100/`
+  （venv 运行时不含 PyTorch——OpenMP 隔离教训；venv-convert 仅构建期）。
+- **worker**：`scripts/small100_worker.py` 与 quickmt worker 同协议同错误码。
+  运行时差异：显式加载仓库自带 SMALL100Tokenizer（AutoTokenizer 会按
+  tokenizer_config 误选 M2M100Tokenizer，src_lang 语义与 small100 训练协议不符、
+  方向错乱——已实测踩坑）；语言协议对齐 `scripts/validate-small100-gate.py`
+  （目标语言令牌 `__en__`／`__zh__` 作输入前缀＋eos 后缀，解码器从纯 eos 开始，
+  解码过滤 `</s>`／`<pad>`／`<unk>`）。转换环境含 PyTorch 须单线程
+  （OMP_NUM_THREADS=1，Intel Mac 重复 OpenMP runtime 会 SIGSEGV，见
+  conversion-diagnostic.json）。
+- **设置**：`settings.json` 的 `"learningTranslationBackend": "small100"`；
+  变更热生效（销毁重建辅助进程）。未装配时走现行失败路径（提示对应准备命令）。
+- **验证**：`scripts/validate-learning-small100.py`（protocol＋samples）。
+  samples 六条固定样例（beam1/INT8/2 线程）与探针记录逐字一致，6/6 过
+  （2026-11-04 实测：首译含权重懒加载 1550ms，其后 115–270ms，与探针
+  p50 约 242ms 同档）；protocol 15 项断言全过。
+- **状态**：质量结论待用户实测；未过 95% 正式门槛前双端交付口径不变。
 
 ## 六、后续可选路径（均不在本次范围）
 
