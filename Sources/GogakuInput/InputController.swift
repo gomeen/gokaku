@@ -407,8 +407,13 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     }
 
     private static func learningFailureMessage(_ error: String, backend: String) -> String {
-        let backendName = LearningTranslation.normalizedBackend(backend) == "small100" ? "small100" : "quickmt"
+        let backendName = LearningTranslation.normalizedBackend(backend) == "small100" ? "small100"
+            : (LearningTranslation.normalizedBackend(backend) == "volcengine" ? "火山翻译" : "quickmt")
         switch error {
+        case "credentials_missing":
+            return "火山翻译凭据未配置：在仓库检出目录运行 "
+                + LearningTranslation.prepareCommand(backend: backend)
+                + "；输入已保留，可 ⌘Return 明确原文上屏"
         case "model_missing":
             return backendName + " 模型未就绪：请在仓库检出目录运行 "
                 + LearningTranslation.prepareCommand(backend: backend)

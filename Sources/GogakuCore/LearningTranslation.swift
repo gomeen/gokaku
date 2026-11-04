@@ -4,7 +4,10 @@ import Foundation
 ///
 /// 形态：常驻外置 Python 辅助进程（`venv/bin/python`＋`quickmt_worker.py`，位于
 /// `~/Library/Application Support/Gogaku/translation/`），CT2 INT8、双向两份权重，
-/// 协议对齐 TranslationRequest／TranslationResult v1；无端口、无文本日志、无网络。
+/// 协议对齐 TranslationRequest／TranslationResult v1；无端口、无文本日志。
+/// 网络边界（2026-11-04 用户裁决）：quickmt／small100 本地 worker 无网络；
+/// volcengine worker 按设计联网（仅火山翻译 API 域），且只被学习模式拉起——
+/// 普通模式不经任何翻译路径。
 /// 这是「approved 仅由审核资源清单决定」规则的开发版豁免：成功结果以
 /// `resource == quickmt-ct2-dev` 标记并按 approved 进入候选；正式质量门槛与
 /// 双端交付口径不变，宿主安全矩阵与学习记录仍保持关闭。
@@ -38,6 +41,8 @@ public enum LearningTranslation {
     /// 路径缺失不在构造期校验：请求级错误（service_unavailable／model_missing）
     /// 走现行失败路径，设置页负责展示缺失与准备指引。
     /// small100 装在 translation/small100/ 子目录（独立 venv＋权重＋worker）。
+    /// volcengine 用系统 python3＋stdlib worker（无 venv／权重）；凭据从
+    /// translation/volcengine-credentials.json（0600）读取，不进命令行。
     public static func serviceConfiguration(root: URL = directory(), beam: Int,
                                             backend: String = defaultBackend) -> (executable: URL, arguments: [String]) {
         switch normalizedBackend(backend) {
@@ -46,6 +51,10 @@ public enum LearningTranslation {
             return (base.appendingPathComponent("venv/bin/python"),
                     [base.appendingPathComponent("small100_worker.py").path,
                      "--beam", String(clampedBeam(beam))])
+        case "volcengine":
+            return (URL(fileURLWithPath: "/usr/bin/python3"),
+                    [root.appendingPathComponent("volcengine_translate_worker.py").path,
+                     "--credentials", root.appendingPathComponent("volcengine-credentials.json").path])
         default:
             return (root.appendingPathComponent("venv/bin/python"),
                     [root.appendingPathComponent("quickmt_worker.py").path,
@@ -81,6 +90,21 @@ public enum LearningTranslation {
                 || !fm.fileExists(atPath: base.appendingPathComponent("source/config.json").path) {
                 missing.append("small100 权重")
             }
+        case "volcengine":
+            if !fm.fileExists(atPath: root.appendingPathComponent("volcengine_translate_worker.py").path) {
+                missing.append("volcengine_translate_worker.py")
+            }
+            let credentials = root.appendingPathComponent("volcengine-credentials.json")
+            var hasCredentials = false
+            if let data = try? Data(contentsOf: credentials),
+               let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let accessKey = object["accessKeyId"] as? String, !accessKey.isEmpty,
+               let secretKey = object["secretAccessKey"] as? String, !secretKey.isEmpty {
+                hasCredentials = true
+            }
+            if !hasCredentials {
+                missing.append("凭据文件（volcengine-credentials.json）")
+            }
         default:
             if !fm.isExecutableFile(atPath: root.appendingPathComponent("venv/bin/python").path) {
                 missing.append("venv（python）")
@@ -102,8 +126,13 @@ public enum LearningTranslation {
 
     /// 缺失时的准备指引（在仓库检出目录运行）。
     public static func prepareCommand(backend: String = defaultBackend) -> String {
-        normalizedBackend(backend) == "small100"
-            ? "python3 scripts/prepare-learning-small100.py"
-            : "python3 scripts/prepare-learning-translation.py"
+        switch normalizedBackend(backend) {
+        case "small100":
+            return "python3 scripts/prepare-learning-small100.py"
+        case "volcengine":
+            return "python3 scripts/set-volcengine-credentials.py --access-key-id AKLT... --secret-access-key ..."
+        default:
+            return "python3 scripts/prepare-learning-translation.py"
+        }
     }
 }

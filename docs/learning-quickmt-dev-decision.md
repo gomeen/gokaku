@@ -6,7 +6,7 @@
 
 本裁决只覆盖最小闭环：
 
-1. **后端形态**：quickmt 双向（`quickmt-en-zh@f48b69e5`、`quickmt-zh-en@c27cc802`，CC-BY-4.0，原生 CT2 INT8）以**外置 Python 辅助进程**运行（`venv/bin/python`＋`quickmt_worker.py`，位于 `~/Library/Application Support/Gogaku/translation/`，venv＋权重约 900MB，不进 app bundle）。进程常驻、单请求串行、JSON 行协议对齐 `TranslationRequest`／`TranslationResult` v1；无端口、无文本日志、无网络访问。
+1. **后端形态**：quickmt 双向（`quickmt-en-zh@f48b69e5`、`quickmt-zh-en@c27cc802`，CC-BY-4.0，原生 CT2 INT8）以**外置 Python 辅助进程**运行（`venv/bin/python`＋`quickmt_worker.py`，位于 `~/Library/Application Support/Gogaku/translation/`，venv＋权重约 900MB，不进 app bundle）。进程常驻、单请求串行、JSON 行协议对齐 `TranslationRequest`／`TranslationResult` v1；无端口、无文本日志、无网络访问（quickmt／small100；volcengine 见五点九）。
 2. **交互闭环**：输入法菜单「学习模式／学习方向」解除置灰（Ctrl+Shift+K／Ctrl+Shift+J 同款动作）；中→英（小鹤输入中文→候选窗出现英语译文→选择一次上屏）；英→中（英语直输→候选窗出现中文译文→选择上屏）。译文候选带「quickmt 开发版」标注；失败／超时／缺模型保留输入，可 ⌘Return 明确原文上屏。
 3. **设置**：语言资源页新增「学习翻译（开发版）」区块——启用开关（默认开）、beam 步进器（1–10，默认 1）、后端状态（就绪／缺失＋准备指引 `python3 scripts/prepare-learning-translation.py`）、「未过质量门槛，仅开发版体验」固定说明。改动即时保存并热生效。
 4. **拼写检查**：英→中 NSSpellChecker 随学习解锁恢复现有 `--spell` 通路，行为不变。
@@ -61,7 +61,7 @@
 
 ## 五点七、quickmt 配置项清单（2026-11-03 用户问询，构建 41）
 
-全部配置集中在三处，代码内其余行为均为固定实现（双向权重懒加载、单请求串行、无端口/无日志/无网络、尾部孤立标点剥离、源标量上限 512）。
+全部配置集中在三处，代码内其余行为均为固定实现（双向权重懒加载、单请求串行、无端口/无日志、尾部孤立标点剥离、源标量上限 512；本地后端无网络，volcengine 仅学习模式联网——见五点九）。
 
 **1. 输入法设置（`~/Library/Application Support/Gogaku/settings.json`）**
 
@@ -73,7 +73,7 @@
 
 **2. worker 启动参数（输入法按设置自动传参，一般不动）**
 
-quickmt（`scripts/quickmt_worker.py`）与 small100（`scripts/small100_worker.py`）参数面完全一致，设置键两后端通用：
+quickmt（`scripts/quickmt_worker.py`）与 small100（`scripts/small100_worker.py`）参数面完全一致，设置键两后端通用（volcengine 见五点九，无 beam／精度概念）：
 
 | 参数 | 默认 | 作用 |
 |---|---|---|
@@ -125,6 +125,26 @@ p50 约 242ms、p95 约 700ms，仍在 2s 预算内（见 [统一实测决定]
   （2026-11-04 实测：首译含权重懒加载 1550ms，其后 115–270ms，与探针
   p50 约 242ms 同档）；protocol 15 项断言全过。
 - **状态**：质量结论待用户实测；未过 95% 正式门槛前双端交付口径不变。
+
+## 五点九、volcengine 火山翻译后端（2026-11-04 用户裁决，构建 47）
+
+实测（2026-11-04，20 句同口径）：**中位 114ms**（79–272ms），快于本地 small100
+（~240ms），20 句固定失败点全对；每月 200 万字符免费，超出 ¥49/百万字符，10 QPS。
+
+- **架构**：`scripts/volcengine_translate_worker.py`——与 quickmt worker 同协议
+  （TranslationRequest／Result v1），系统 python3＋stdlib（无 venv／权重）；
+  HTTPS 连接跨请求复用；V4 HMAC-SHA256 签名内置。
+- **凭据**：`translation/volcengine-credentials.json`（0600，不进命令行防 ps 泄露）：
+  `python3 scripts/set-volcengine-credentials.py --access-key-id AKLT... --secret-access-key ...`
+  文件内 `requestOverrides` 为**参数口子**——任意 TranslateText 请求体扩展
+  （垂类引擎／术语库 TermRepoID 等未来参数）零代码启用。
+- **网络边界（用户裁决）**：**联网只限学习模式**——volcengine worker 仅被学习翻译
+  服务拉起且只访问火山翻译 API 域；普通模式不经任何翻译路径。quickmt／small100
+  保持无网络。
+- **准确率配置现状**：TranslateText 基础参数仅 SourceLanguage/TargetLanguage/TextList；
+  垂类领域引擎（财经/生物医药/小说网文）与术语库为平台能力，API 侧经
+  `requestOverrides` 留口子，待平台开放参数后配置即用。
+- **状态**：质量结论以用户实测为准；未过 95% 正式门槛前双端交付口径不变。
 
 ## 六、后续可选路径（均不在本次范围）
 
