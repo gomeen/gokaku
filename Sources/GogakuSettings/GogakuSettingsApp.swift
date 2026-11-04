@@ -227,6 +227,9 @@ private struct ResourcesPage: View {
     @State private var volcAccessKey = ""
     @State private var volcSecretKey = ""
     @State private var volcCredentialsDirty = false
+    /// 已保存凭据快照：dirty 改为与快照比较，避免 load 赋值误触发 onChange 造成「有未保存修改」。
+    @State private var volcLoadedAccessKey = ""
+    @State private var volcLoadedSecretKey = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -338,7 +341,14 @@ private struct ResourcesPage: View {
               let credentials = LearningTranslation.volcengineCredentials() else { return }
         volcAccessKey = credentials.accessKey
         volcSecretKey = credentials.secretKey
+        volcLoadedAccessKey = credentials.accessKey
+        volcLoadedSecretKey = credentials.secretKey
         volcCredentialsDirty = false
+    }
+
+    /// 输入框与已保存快照是否不一致（真正被编辑过才显示「有未保存修改」）。
+    private func syncVolcDirty() {
+        volcCredentialsDirty = volcAccessKey != volcLoadedAccessKey || volcSecretKey != volcLoadedSecretKey
     }
 
     /// 后端感知的就绪描述。
@@ -371,8 +381,7 @@ private struct ResourcesPage: View {
                         .accessibilityLabel("启用学习翻译后端")
                 }
                 SettingsRowDivider()
-                SettingsRow("翻译后端",
-                            detail: "本地 quickmt／small100；云端火山翻译。变更热生效。") {
+                SettingsRow("翻译后端") {
                     Picker("", selection: Binding(get: { settings.learningTranslationBackend },
                                                   set: { settings.learningTranslationBackend = $0; submit() })) {
                         Text("quickmt（本地）").tag("quickmt")
@@ -397,7 +406,8 @@ private struct ResourcesPage: View {
                                 .foregroundStyle(backend.ready ? Color.green : Color.red)
                                 .clipShape(Capsule())
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
+                        VStack(alignment: .leading, spacing: 12) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Access Key ID").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
                             SecureField("AKLT…", text: $volcAccessKey)
@@ -408,7 +418,7 @@ private struct ResourcesPage: View {
                                     .fill(SettingsPalette.secondaryText.opacity(0.06)))
                                 .overlay(RoundedRectangle(cornerRadius: 6)
                                     .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
-                                .onChange(of: volcAccessKey) { _, _ in volcCredentialsDirty = true }
+                                .onChange(of: volcAccessKey) { _, _ in syncVolcDirty() }
                         }
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Secret Access Key").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
@@ -420,7 +430,8 @@ private struct ResourcesPage: View {
                                     .fill(SettingsPalette.secondaryText.opacity(0.06)))
                                 .overlay(RoundedRectangle(cornerRadius: 6)
                                     .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
-                                .onChange(of: volcSecretKey) { _, _ in volcCredentialsDirty = true }
+                                .onChange(of: volcSecretKey) { _, _ in syncVolcDirty() }
+                        }
                         }
                         HStack(spacing: 10) {
                             Button("保存凭据") {
@@ -441,7 +452,7 @@ private struct ResourcesPage: View {
                                 Text("有未保存修改").font(.system(size: 11)).foregroundStyle(SettingsPalette.secondaryText)
                             }
                         }
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 12)
                         HStack(spacing: 6) {
                             Image(systemName: "lock.shield").font(.system(size: 11))
                             Text("凭据仅写入本机 0600 文件，不进仓库、同步或云端。")
@@ -454,12 +465,8 @@ private struct ResourcesPage: View {
                     }
                     SettingsRowDivider()
                     volcengineUsageRow
-                        .padding(.vertical, 8)
-                    SettingsRowDivider()
-                    Text("☁️ 云端仅学习模式联网（只访问火山翻译 API）。")
-                        .font(.system(size: 11))
-                        .foregroundStyle(SettingsPalette.secondaryText)
                         .padding(.vertical, 10)
+                    SettingsRowDivider()
                     if !backend.ready {
                         Text("缺失：\(backend.missing.joined(separator: "、"))。填写凭据后保存即可。")
                             .font(.system(size: 11))
