@@ -62,6 +62,11 @@ public final class TranslationService {
             burst != nil || pending != nil || running != nil || debounce != nil || hardDeadline != nil
         }
     }
+    /// worker 进程是否已就绪（冷启动时为 false——云端 worker 首次请求含
+    /// TLS／签名握手，激活期预热可避免首句承担该时延）。
+    public var workerRunning: Bool {
+        queue.sync { process != nil }
+    }
     public init(executable: URL, arguments: [String] = [], debounceInterval: TimeInterval = 0.12) {
         self.executable = executable; self.arguments = arguments; self.debounceInterval = debounceInterval
     }

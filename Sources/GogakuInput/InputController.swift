@@ -495,6 +495,7 @@ final class GogakuInputController: IMKInputController {
         // 不按应用记忆；开发版开关关闭时学习状态不可用，普通模式始终可用。
         mode = learningDevEnabled ? settings.preferredMode : .normal
         direction = settings.preferredDirection
+        warmEnToZhWorkerIfNeeded()
         configure()
     }
 
@@ -1258,6 +1259,20 @@ final class GogakuInputController: IMKInputController {
 
     /// 英→中无译文时的延迟隐藏：防逐键显示/隐藏闪烁（2026-11 用户反馈）。
     /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
+    /// 学习英→中激活／切换时预热 worker（2026-11-04）：云端 worker 冷首请求
+    /// 含 TLS／签名握手（实测 ~470ms），放在激活期而非首组合——首组合期预热
+    /// 曾占住串行通道并取消真实首句请求（b66 已撤）。仅 worker 冷时发一条
+    /// "hi"（计入用量计量，约 2 字符），结果被会话按 sourceID 丢弃。
+    private func warmEnToZhWorkerIfNeeded() {
+        guard learningDevEnabled, mode == .learning, direction == .enToZh,
+              !translator.workerRunning else { return }
+        DiagFile.log("warm enToZh worker")
+        translator.requestImmediately(
+            TranslationRequest(stamp: InputStamp(mode: .learning, direction: .enToZh),
+                               sourceID: "warmup", source: "hi",
+                               resource: LearningTranslation.resourceID))
+    }
+
     private func scheduleEnToZhHide(delay: TimeInterval = 0.7) {
         enToZhHideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -1469,6 +1484,7 @@ final class GogakuInputController: IMKInputController {
         suspend()
         mode = mode == .normal ? .learning : .normal
         persistPreference()
+        warmEnToZhWorkerIfNeeded()
         toast.show(mode == .learning ? "学习" : "普通", anchor: anchor)
         configure()
     }
@@ -1480,6 +1496,7 @@ final class GogakuInputController: IMKInputController {
         suspend()
         direction = direction == .zhToEn ? .enToZh : .zhToEn
         persistPreference()
+        warmEnToZhWorkerIfNeeded()
         toast.show(direction == .zhToEn ? "中→英" : "英→中", anchor: anchor)
         configure()
     }

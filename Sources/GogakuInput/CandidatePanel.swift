@@ -370,8 +370,12 @@ final class PanelContent: NSView {
         layout.preedit?.draw(inRect: layout.preeditTextRect)
         if let caretX = layout.preeditCaretX {
             theme.caretColor.setFill()
-            NSBezierPath(rect: NSRect(x: caretX, y: layout.preeditTextRect.minY + 1,
-                                      width: 1.5, height: m.annotationLineHeight - 2)).fill()
+            // 按字体度量对齐：flipped 视图首行基线在 minY + ascender；光标取
+            // capHeight 高度（旧版整行高，比小写字母高出一截，2026-11-04 反馈）。
+            let font = theme.annotationFont
+            let baselineY = layout.preeditTextRect.minY + font.ascender
+            NSBezierPath(rect: NSRect(x: caretX, y: baselineY - 1,
+                                      width: 1.5, height: font.capHeight + 2)).fill()
         }
         for row in layout.rows {
             if row.selected {
