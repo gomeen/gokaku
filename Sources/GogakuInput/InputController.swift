@@ -228,6 +228,29 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     private var enToZhHideWork: DispatchWorkItem?
     /// 中→英预译的空闲防抖任务（2026-11 用户反馈：连续输入加防抖）。
     private var eagerDebounceWork: DispatchWorkItem?
+    /// 火山免费额度计量：仅 volcengine 后端且成功结果计数（Unicode 标量数，
+    /// 与火山 input_characters 计费口径一致）；自然月自动清零。
+    private func meterVolcengineUsage(_ result: TranslationResult) {
+        guard LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine",
+              result.error == nil, let target = result.target, !target.isEmpty else { return }
+        let month = Self.currentMonthID()
+        if settings.volcengineUsageMonth != month {
+            settings.volcengineUsageMonth = month
+            settings.volcengineUsageCharacters = 0
+        }
+        // 计费口径为输入字符；额外计入译文长度留存口径余量（火山按输入计费，
+        // 输入侧计数为准，译文仅在本字段供 UI 显示原文+译文总量时不误报）。
+        settings.volcengineUsageCharacters += result.source.unicodeScalars.count
+        SettingsStore.shared.submit(settings)
+    }
+
+    /// 当前自然月标识（YYYY-MM，本地时区）。
+    static func currentMonthID() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM"
+        return formatter.string(from: Date())
+    }
+
     /// 学习组合防冷启动：每个组合期首发一个极短预热请求，权重加载与打字并行
     ///（2026-11-04 用户反馈：停顿后长时间不出来——首个真请求承担整段冷启动，
     /// small100 权重加载约 1.4s）；组合结束（suspend）后复位。
@@ -248,6 +271,8 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                                          debounceInterval: 0.30)
         service.onResult = { [weak self] result in
             guard let self else { return }
+            // 计量收敛主线程：settings 状态只允许主线程变更。
+            DispatchQueue.main.async { self.meterVolcengineUsage(result) }
             switch result.sourceID {
             case "commit":
                 DispatchQueue.main.async { self.finishCommitSwap(result) }
@@ -278,7 +303,10 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                                                                     backend: settings.learningTranslationBackend)
         let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
         service.onResult = { [weak self] result in
-            DispatchQueue.main.async { self?.applyEagerTranslation(result) }
+            DispatchQueue.main.async {
+                self?.meterVolcengineUsage(result)
+                self?.applyEagerTranslation(result)
+            }
         }
         return service
     }

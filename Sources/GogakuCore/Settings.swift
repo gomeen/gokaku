@@ -213,6 +213,11 @@ public struct Settings: Codable {
     /// 切换应用保持不变，优先级高于按应用默认英文；取代按应用模式记忆）。
     public var preferredMode: InputMode = .normal
     public var preferredDirection: Direction = .zhToEn
+    /// 火山翻译本月免费额度用量（客户端计量：YYYY-MM ＋ 已发送字符数）。
+    /// 官方无免费用量查询接口（控制台专有），故由输入法按 Unicode 标量数
+    /// 自行累计（与火山计费口径 input_characters 对齐），自然月自动清零。
+    public var volcengineUsageMonth = ""
+    public var volcengineUsageCharacters = 0
 
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
@@ -223,6 +228,7 @@ public struct Settings: Codable {
         case quickAddExcludedApplications
         case learningTranslationEnabled, learningBeamSize, learningTranslationBackend
         case preferredMode, preferredDirection
+        case volcengineUsageMonth, volcengineUsageCharacters
     }
 
     public init() {}
@@ -265,6 +271,8 @@ public struct Settings: Codable {
             try container.decodeIfPresent(String.self, forKey: .learningTranslationBackend))
         preferredMode = InputMode(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredMode) ?? "") ?? .normal
         preferredDirection = Direction(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredDirection) ?? "") ?? .zhToEn
+        volcengineUsageMonth = try container.decodeIfPresent(String.self, forKey: .volcengineUsageMonth) ?? ""
+        volcengineUsageCharacters = try container.decodeIfPresent(Int.self, forKey: .volcengineUsageCharacters) ?? 0
     }
 
     /// 输入法使用的启用中的按应用默认英文 bundle id 列表。

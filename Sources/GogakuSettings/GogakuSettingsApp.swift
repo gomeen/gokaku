@@ -269,6 +269,64 @@ private struct ResourcesPage: View {
         }
     }
 
+    /// 火山翻译免费额度用量条（200 万字符/自然月；到量提示付费或切换）。
+    /// 截图效果：标签 + 进度条 + 百分比 + 重置倒计时。
+    private var volcengineUsageRow: some View {
+        let used = max(0, settings.volcengineUsageCharacters)
+        let quota = 2_000_000
+        let fraction = min(1.0, Double(used) / Double(quota))
+        let percent = Int((fraction * 100).rounded())
+        let daysLeft = Calendar.current.dateComponents([.day],
+            from: Calendar.current.startOfDay(for: Date()),
+            to: Calendar.current.startOfDay(for: Self.nextMonthStart())).day ?? 0
+        let exhausted = used >= quota
+        return VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Text("火山免费额度")
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        Capsule().fill(SettingsPalette.secondaryText.opacity(0.25))
+                        Capsule().fill(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
+                            .frame(width: max(2, geo.size.width * fraction))
+                    }
+                }
+                .frame(height: 6)
+                Text("\(percent)%")
+                    .font(.system(size: 12.5, design: .monospaced))
+                    .foregroundStyle(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
+                    .frame(minWidth: 38, alignment: .trailing)
+            }
+            HStack(spacing: 8) {
+                Text("已用 \(used) / 200 万字符 · \(daysLeft) 天后重置（每月 1 日）")
+                    .font(.system(size: 11))
+                    .foregroundStyle(SettingsPalette.secondaryText)
+                if exhausted {
+                    Button("切换到 small100（本地）") {
+                        settings.learningTranslationBackend = "small100"
+                        submit()
+                    }
+                    .font(.system(size: 11))
+                    .buttonStyle(.link)
+                }
+            }
+            if exhausted {
+                Text("免费额度已用完：继续使用将按 ¥49/百万字符计费（火山引擎账户扣费），或切换后端。")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.red)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    private static func nextMonthStart() -> Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month], from: Date())
+        return calendar.date(from: DateComponents(year: components.year,
+                                                  month: (components.month ?? 1) + 1, day: 1)) ?? Date()
+    }
+
     /// 后端感知的就绪描述。
     private var backendReadyText: String {
         switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
@@ -312,6 +370,10 @@ private struct ResourcesPage: View {
                     .labelsHidden()
                     .frame(width: 190)
                     .accessibilityLabel("学习翻译后端选择")
+                }
+                if LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine" {
+                    SettingsRowDivider()
+                    volcengineUsageRow
                 }
                 SettingsRowDivider()
                 SettingsRow("beam 大小",
