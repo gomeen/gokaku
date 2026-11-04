@@ -443,7 +443,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                           fuzzyMask: settings.fuzzyMask,
                           fullPinyinPreedit: settings.fullPinyinPreedit,
                           freqEnabled: settings.frequencyEnabled)
-            normal.setAppDefaults(settings.effectiveDefaultEnglishApps)
+            normal.setAppDefaults(settings.enabledDefaultEnglishApps)
             normal.setExcludedApps(Array(settings.quickAddExcludedApplications))
             normal.reloadCustomWords()
         }
@@ -456,10 +456,10 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         settings = Settings.load()
         panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         application = gg_read_host(client())?.application ?? ""
-        let preference = settings.applications[application] ?? AppPreference()
-        // 开发版开关关闭时忽略历史偏好里的学习标记，普通模式始终可用。
-        mode = learningDevEnabled ? preference.mode : .normal
-        direction = preference.direction
+        // 全局模式状态（2026-11-04 用户裁决）：切换应用保持一个普通／学习状态，
+        // 不按应用记忆；开发版开关关闭时学习状态不可用，普通模式始终可用。
+        mode = learningDevEnabled ? settings.preferredMode : .normal
+        direction = settings.preferredDirection
         configure()
     }
 
@@ -1361,8 +1361,9 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     }
 
     private func persistPreference() {
-        var p = AppPreference(); p.mode = mode; p.direction = direction
-        settings.applications[application] = p
+        // 全局模式状态：写入设置，切换应用／重启后保持（2026-11-04 用户裁决）。
+        settings.preferredMode = mode
+        settings.preferredDirection = direction
         // 磁盘操作不放入按键回调：串行协调器合并最新改动，失败保留待保存。
         SettingsStore.shared.submit(settings)
     }
@@ -1499,7 +1500,7 @@ final class ToastWindow: NSPanel {
     private var hideWork: DispatchWorkItem?
 
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 36, height: 28),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 32, height: 24),
                    styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         level = .statusBar
         isFloatingPanel = true
@@ -1511,10 +1512,10 @@ final class ToastWindow: NSPanel {
         // 深色圆角背景：白字在任何宿主背景上都可读（用户反馈：加背景）。
         box.wantsLayer = true
         box.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.78).cgColor
-        box.layer?.cornerRadius = 7
+        box.layer?.cornerRadius = 6
         box.layer?.masksToBounds = true
-        // 2026-11 用户反馈：提示整体缩小（22pt → 16pt，盒子与内边距同步）。
-        label.font = .systemFont(ofSize: 16, weight: .medium)
+        // 2026-11 用户反馈：提示整体缩小（22pt → 16pt → 14pt，盒子与内边距同步）。
+        label.font = .systemFont(ofSize: 14, weight: .medium)
         // 固定白字：深色 HUD 底上浅色外观的默认黑字不可读（用户反馈：亮色兼容）。
         label.textColor = .white
         label.alignment = .center
@@ -1532,7 +1533,7 @@ final class ToastWindow: NSPanel {
         hideWork?.cancel()
         // 按文本自适应尺寸（固定 44×36 会截断「中→英」等提示）。
         let textSize = text.size(withAttributes: [.font: label.font!])
-        let size = NSSize(width: max(36, ceil(textSize.width) + 16), height: 28)
+        let size = NSSize(width: max(32, ceil(textSize.width) + 14), height: 24)
         // 用户裁决：提示必须在输入附近；无有效锚点时不显示（不放固定角落）。
         guard let caret = anchor, caret != .zero,
               let origin = PanelPlacement.toastOrigin(

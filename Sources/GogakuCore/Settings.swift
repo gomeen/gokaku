@@ -209,6 +209,10 @@ public struct Settings: Codable {
     public var learningBeamSize = LearningTranslation.defaultBeam
     /// 学习翻译后端（"quickmt" 默认｜"small100"）；仅换模型，功能层不变。
     public var learningTranslationBackend = LearningTranslation.defaultBackend
+    /// 全局输入模式状态（2026-11-04 用户裁决：全局一个普通／学习状态，
+    /// 切换应用保持不变，优先级高于按应用默认英文；取代按应用模式记忆）。
+    public var preferredMode: InputMode = .normal
+    public var preferredDirection: Direction = .zhToEn
 
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
@@ -218,6 +222,7 @@ public struct Settings: Codable {
         case englishCandidatesEnabled, appDefaultEnglish, quickAddShortcut
         case quickAddExcludedApplications
         case learningTranslationEnabled, learningBeamSize, learningTranslationBackend
+        case preferredMode, preferredDirection
     }
 
     public init() {}
@@ -258,6 +263,8 @@ public struct Settings: Codable {
             try container.decodeIfPresent(Int.self, forKey: .learningBeamSize) ?? LearningTranslation.defaultBeam)
         learningTranslationBackend = LearningTranslation.normalizedBackend(
             try container.decodeIfPresent(String.self, forKey: .learningTranslationBackend))
+        preferredMode = InputMode(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredMode) ?? "") ?? .normal
+        preferredDirection = Direction(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredDirection) ?? "") ?? .zhToEn
     }
 
     /// 输入法使用的启用中的按应用默认英文 bundle id 列表。
@@ -265,12 +272,6 @@ public struct Settings: Codable {
         appDefaultEnglish.filter(\.enabled).map(\.id)
     }
 
-    /// 默认英文实际下发生效的应用列表：显式记过模式记忆的应用剔除
-    /// （2026-11-04 用户裁决：切换应用时记住的普通／学习模式优先级高于
-    /// 「默认应用是英文」；从未显式切过的应用仍按默认英文直达）。
-    public var effectiveDefaultEnglishApps: [String] {
-        enabledDefaultEnglishApps.filter { applications[$0] == nil }
-    }
 
     /// 模糊音位标志（与共享核心 GC_FUZZY_* 一致）。
     public var fuzzyMask: UInt32 {

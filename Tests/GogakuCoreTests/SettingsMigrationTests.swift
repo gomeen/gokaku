@@ -27,15 +27,17 @@ final class SettingsMigrationTests: XCTestCase {
         XCTAssertFalse(settings.appDefaultEnglish[0].enabled)
     }
 
-    func testEffectiveDefaultEnglishExcludesAppsWithExplicitModeMemory() throws {
-        // 2026-11-04 用户裁决：切换应用时记住的普通／学习模式优先级高于
-        // 「默认应用是英文」；从未显式切过的应用仍按默认英文直达。
+
+    func testGlobalModePreferenceDecodedAndValidated() throws {
+        // 2026-11-04 用户裁决：全局普通／学习状态持久化；非法值回退默认。
         let settings = try decode("""
-        {"appDefaultEnglish": ["com.a", "com.b", "com.c"],
-         "applications": {"com.a": {"mode": "learning", "direction": "zhToEn"},
-                          "com.b": {"mode": "normal", "direction": "zhToEn"}}}
+        {"preferredMode": "learning", "preferredDirection": "enToZh"}
         """)
-        XCTAssertEqual(settings.effectiveDefaultEnglishApps, ["com.c"])
+        XCTAssertEqual(settings.preferredMode, .learning)
+        XCTAssertEqual(settings.preferredDirection, .enToZh)
+        let fallback = try decode("{}")
+        XCTAssertEqual(fallback.preferredMode, .normal)
+        XCTAssertEqual(fallback.preferredDirection, .zhToEn)
     }
 
     func testLegacyShortcutDefaultsAndDisabledSurvive() throws {
