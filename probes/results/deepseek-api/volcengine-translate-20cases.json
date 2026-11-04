@@ -1,0 +1,173 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-04",
+  "service": "volcengine TranslateText",
+  "latencyMs": {
+    "min": 78.9,
+    "p50": 113.6,
+    "max": 272.3,
+    "mean": 120.2
+  },
+  "records": [
+    {
+      "id": "zh01",
+      "direction": "zh-en",
+      "source": "我想周末和朋友一起玩游戏。",
+      "expected": "I want to play games with my friends this weekend.",
+      "output": "I want to play games with my friends on weekends.",
+      "milliseconds": 120.2
+    },
+    {
+      "id": "zh02",
+      "direction": "zh-en",
+      "source": "不用客气，慢慢来，我可以等你。",
+      "expected": "You're welcome. Take your time; I can wait for you.",
+      "output": "You're welcome, take your time, I can wait for you.",
+      "milliseconds": 82.2
+    },
+    {
+      "id": "zh03",
+      "direction": "zh-en",
+      "source": "我今天不想做饭，打算点外卖。",
+      "expected": "I don't feel like cooking today, so I'm going to order takeout.",
+      "output": "I don't feel like cooking today, I'm going to order takeout.",
+      "milliseconds": 129.7
+    },
+    {
+      "id": "zh04",
+      "direction": "zh-en",
+      "source": "这次出差的交通费可以报销吗？",
+      "expected": "Can I get reimbursed for the transportation costs of this business trip?",
+      "output": "Can the transportation expenses for this business trip be reimbursed?",
+      "milliseconds": 112.5
+    },
+    {
+      "id": "zh05",
+      "direction": "zh-en",
+      "source": "我在淘宝上买了一双耐克鞋。",
+      "expected": "I bought a pair of Nike shoes on Taobao.",
+      "output": "I bought a pair of Nike shoes on Taobao.",
+      "milliseconds": 81.7
+    },
+    {
+      "id": "zh06",
+      "direction": "zh-en",
+      "source": "会议改到明天下午三点半了。",
+      "expected": "The meeting has been moved to 3:30 p.m. tomorrow.",
+      "output": "The meeting has been rescheduled to 3:30 tomorrow afternoon.",
+      "milliseconds": 89.5
+    },
+    {
+      "id": "zh07",
+      "direction": "zh-en",
+      "source": "我要两杯咖啡，一杯加糖，另一杯不加糖。",
+      "expected": "I'd like two coffees, one with sugar and the other without.",
+      "output": "I'll have two cups of coffee, one with sugar and the other without.",
+      "milliseconds": 171.1
+    },
+    {
+      "id": "zh08",
+      "direction": "zh-en",
+      "source": "如果明天下雨，我们就不去公园了。",
+      "expected": "If it rains tomorrow, we won't go to the park.",
+      "output": "If it rains tomorrow, we won't go to the park.",
+      "milliseconds": 96.4
+    },
+    {
+      "id": "zh09",
+      "direction": "zh-en",
+      "source": "我昨天已经把文件发给你了。",
+      "expected": "I already sent you the file yesterday.",
+      "output": "I sent you the file yesterday.",
+      "milliseconds": 89.3
+    },
+    {
+      "id": "zh10",
+      "direction": "zh-en",
+      "source": "请先保存文件，再关闭电脑，别忘了带上充电器。",
+      "expected": "Please save the file before shutting down the computer, and don't forget to bring the charger.",
+      "output": "Please save the file first, then turn off the computer, and don't forget to bring the charger.",
+      "milliseconds": 95.7
+    },
+    {
+      "id": "en01",
+      "direction": "en-zh",
+      "source": "Would you like to go for a walk after dinner?",
+      "expected": "晚饭后你想去散散步吗？",
+      "output": "晚饭后你想去散步吗？",
+      "milliseconds": 272.3
+    },
+    {
+      "id": "en02",
+      "direction": "en-zh",
+      "source": "Take your time. There is no need to rush.",
+      "expected": "慢慢来，不用着急。",
+      "output": "慢慢来。没有必要匆忙。",
+      "milliseconds": 78.9
+    },
+    {
+      "id": "en03",
+      "direction": "en-zh",
+      "source": "Please put on sunscreen before going outside.",
+      "expected": "出门前请涂防晒霜。",
+      "output": "出门前请涂上防晒霜。",
+      "milliseconds": 101.7
+    },
+    {
+      "id": "en04",
+      "direction": "en-zh",
+      "source": "I'm running late. Could you save me a seat?",
+      "expected": "我要迟到了，你能帮我留个座位吗？",
+      "output": "我要迟到了。你能帮我留个座位吗？",
+      "milliseconds": 155.8
+    },
+    {
+      "id": "en05",
+      "direction": "en-zh",
+      "source": "Bob sent me a Google Maps link on WhatsApp.",
+      "expected": "鲍勃在 WhatsApp 上给我发了一个谷歌地图链接。",
+      "output": "Bob在WhatsApp上给我发了一个谷歌地图链接。",
+      "milliseconds": 131.0
+    },
+    {
+      "id": "en06",
+      "direction": "en-zh",
+      "source": "The train leaves at 10:30 a.m., not 10:30 p.m.",
+      "expected": "火车是上午十点半出发，不是晚上十点半。",
+      "output": "火车上午10:30发车，不是晚上10:30。",
+      "milliseconds": 117.2
+    },
+    {
+      "id": "en07",
+      "direction": "en-zh",
+      "source": "This bag costs fifteen dollars less than that one.",
+      "expected": "这个包比那个便宜十五美元。",
+      "output": "这个包比那个包便宜十五美元。",
+      "milliseconds": 114.7
+    },
+    {
+      "id": "en08",
+      "direction": "en-zh",
+      "source": "Don't cancel the meeting unless everyone agrees.",
+      "expected": "除非所有人都同意，否则不要取消会议。",
+      "output": "除非每个人都同意，否则不要取消会议。",
+      "milliseconds": 142.2
+    },
+    {
+      "id": "en09",
+      "direction": "en-zh",
+      "source": "I have been learning Chinese for three months.",
+      "expected": "我已经学了三个月中文了。",
+      "output": "我已经学汉语三个月了。",
+      "milliseconds": 118.1
+    },
+    {
+      "id": "en10",
+      "direction": "en-zh",
+      "source": "Please send the signed document to Alice before Friday and keep a copy for yourself.",
+      "expected": "请在星期五之前把签好的文件发给爱丽丝，并给自己留一份副本。",
+      "output": "请在周五之前将签名的文件发送给Alice，并为自己保留一份副本。",
+      "milliseconds": 103.1
+    }
+  ]
+}
