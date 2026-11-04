@@ -259,10 +259,31 @@ private struct ResourcesPage: View {
         }
         .onAppear {
             loadBundled()
-            backend = LearningTranslation.environment()
+            backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
         }
         .onChange(of: settings.learningTranslationEnabled) { _, _ in
-            backend = LearningTranslation.environment()
+            backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
+        }
+        .onChange(of: settings.learningTranslationBackend) { _, _ in
+            backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
+        }
+    }
+
+    /// 后端感知的就绪描述。
+    private var backendReadyText: String {
+        switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
+        case "small100": return "后端状态：模型就绪（small100 CT2 INT8，本地）"
+        case "volcengine": return "后端状态：凭据就绪（火山翻译 NMT，云端——仅学习模式联网）"
+        default: return "后端状态：模型就绪（quickmt-en-zh／quickmt-zh-en，CT2 INT8，本地）"
+        }
+    }
+
+    /// 后端感知的质量说明。
+    private var backendNoticeText: String {
+        switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
+        case "small100": return "未过质量门槛，仅开发版体验：small100 可用率 95.15%／94.34%（残余 5 条语义失败）；候选带开发版标注。"
+        case "volcengine": return "未过质量门槛，仅开发版体验：火山翻译实测中位 114ms、20 句固定失败点全对；每次学习翻译经火山 API 域联网（仅学习模式）。"
+        default: return "未过质量门槛，仅开发版体验：quickmt 已知固定风险（如短语级复读、en→zh 可用率 77.67%）被开发版接受；候选带「quickmt 开发版」标注。"
         }
     }
 
@@ -271,42 +292,60 @@ private struct ResourcesPage: View {
     private var learningTranslationSection: some View {
         section("学习翻译（开发版）") {
             VStack(alignment: .leading, spacing: 0) {
-                SettingsRow("启用 quickmt 翻译后端",
+                SettingsRow("启用学习翻译",
                             detail: "关闭即回门禁态：学习菜单置灰、共享学习会话释放。学习记录仍保持关闭。") {
                     Toggle("", isOn: Binding(get: { settings.learningTranslationEnabled },
                                              set: { settings.learningTranslationEnabled = $0; submit() }))
                         .toggleStyle(.switch)
-                        .accessibilityLabel("启用 quickmt 学习翻译后端")
+                        .accessibilityLabel("启用学习翻译后端")
+                }
+                SettingsRowDivider()
+                SettingsRow("翻译后端",
+                            detail: "quickmt／small100＝本地（无网络）；火山翻译＝云端 NMT（仅学习模式联网，普通模式不经任何翻译路径）。变更热生效。") {
+                    Picker("", selection: Binding(get: { settings.learningTranslationBackend },
+                                                  set: { settings.learningTranslationBackend = $0; submit() })) {
+                        Text("quickmt（本地）").tag("quickmt")
+                        Text("small100（本地）").tag("small100")
+                        Text("火山翻译（云端）").tag("volcengine")
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .frame(width: 190)
+                    .accessibilityLabel("学习翻译后端选择")
                 }
                 SettingsRowDivider()
                 SettingsRow("beam 大小",
-                            detail: "1＝贪心最快（中位约 88ms）；已知重复句等缺陷随 beam 升高缓解，代价是延迟增加。变更后对新翻译请求生效。") {
+                            detail: settings.learningTranslationBackend == "volcengine"
+                                ? "火山翻译为 NMT，无 beam 概念（此设置对该后端无效）。"
+                                : "1＝贪心最快（中位约 88ms）；已知重复句等缺陷随 beam 升高缓解，代价是延迟增加。变更后对新翻译请求生效。") {
                     Stepper(value: Binding(get: { settings.learningBeamSize },
                                            set: { settings.learningBeamSize = LearningTranslation.clampedBeam($0); submit() }),
                             in: LearningTranslation.beamRange) {
                         Text("\(settings.learningBeamSize)")
                             .font(.system(size: 13, design: .monospaced))
-                            .foregroundStyle(SettingsPalette.primaryText)
+                            .foregroundStyle(settings.learningTranslationBackend == "volcengine"
+                                             ? SettingsPalette.secondaryText : SettingsPalette.primaryText)
                             .frame(minWidth: 24)
                     }
                     .accessibilityLabel("翻译 beam 大小，1 到 10")
+                    .disabled(settings.learningTranslationBackend == "volcengine")
                 }
                 SettingsRowDivider()
                 VStack(alignment: .leading, spacing: 4) {
                     if backend.ready {
-                        Text("后端状态：模型就绪（quickmt-en-zh／quickmt-zh-en，CT2 INT8）")
+                        Text(backendReadyText)
                             .font(.system(size: 12.5))
                             .foregroundStyle(SettingsPalette.primaryText)
                     } else {
                         Text("后端状态：缺失（\(backend.missing.joined(separator: "、"))）")
                             .font(.system(size: 12.5))
                             .foregroundStyle(SettingsPalette.primaryText)
-                        Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand())")
+                        Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand(backend: settings.learningTranslationBackend))")
                             .font(.system(size: 11, design: .monospaced))
                             .foregroundStyle(SettingsPalette.secondaryText)
                             .textSelection(.enabled)
                     }
-                    Text("未过质量门槛，仅开发版体验：quickmt 已知固定风险（如短语级复读、en→zh 可用率 77.67%）被开发版接受；候选带「quickmt 开发版」标注。")
+                    Text(backendNoticeText)
                         .font(.system(size: 11))
                         .foregroundStyle(SettingsPalette.secondaryText)
                 }
