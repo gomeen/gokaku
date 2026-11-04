@@ -498,11 +498,10 @@ final class GogakuInputController: IMKInputController {
         // 不按应用记忆；开发版开关关闭时学习状态不可用，普通模式始终可用。
         mode = learningDevEnabled ? settings.preferredMode : .normal
         direction = settings.preferredDirection
-        ModeStatusItem.shared.show(mode: mode)
         configure()
     }
 
-    override func deactivateServer(_ sender: Any!) { shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false; ModeStatusItem.shared.hide() }
+    override func deactivateServer(_ sender: Any!) { shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false }
     override func commitComposition(_ sender: Any!) { suspend() }
     override func inputControllerWillClose() { shiftPoller.stop(); suspend(); active = false }
     override func hidePalettes() { panel.dismiss(); toast.hide() }
@@ -647,7 +646,6 @@ final class GogakuInputController: IMKInputController {
         // 开发版开关关闭即回门禁态：学习组合已随 suspend 结束，模式回普通，
         // 共享学习会话释放（第二份词库内存一并回收）。
         if !settings.learningTranslationEnabled, mode == .learning { mode = .normal }
-        ModeStatusItem.shared.update(mode: mode)
         rebuildLearningTranslatorIfNeeded(from: previous)
         applyEngineSettings()
         configure()
@@ -1448,7 +1446,6 @@ final class GogakuInputController: IMKInputController {
         suspend()
         mode = mode == .normal ? .learning : .normal
         persistPreference()
-        ModeStatusItem.shared.update(mode: mode)
         toast.show(mode == .learning ? "学习" : "普通", anchor: anchor)
         configure()
     }
