@@ -14,6 +14,7 @@ qlmanage 生成的是白底缩略图，会把透明边距压成不透明白色�
 
 import argparse
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -21,6 +22,9 @@ ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / 'assets/app-icon'
 
 ICONSET_SIZES = [16, 32, 64, 128, 256, 512, 1024]
+ICON_CANVAS = 1024
+MACOS_ICON_GRID_CORNER_RATIO = 0.225
+ICON_CORNER_RADIUS = round(ICON_CANVAS * MACOS_ICON_GRID_CORNER_RATIO)
 
 
 def run(*command: str) -> None:
@@ -35,6 +39,12 @@ def render_png(svg: Path, size: int, destination: Path) -> None:
 
 def make_app_icon(scratch: Path) -> None:
     master = ASSETS / 'icon.svg'
+    svg = master.read_text()
+    if f'rx="{ICON_CORNER_RADIUS}"' not in svg:
+        sys.exit(f'icon.svg 主矩形圆角必须 rx="{ICON_CORNER_RADIUS}"'
+                 f'（{ICON_CANVAS}×{MACOS_ICON_GRID_CORNER_RATIO:.1%}，macOS 图标栅格圆角比例）')
+    if '<filter' in svg or 'drop-shadow' in svg:
+        sys.exit('icon.svg 不得烘焙阴影（macOS 原样合成 icns 位图，投影会原样出现在 Dock／设置／HUD）')
     iconset = scratch / 'AppIcon.iconset'
     iconset.mkdir()
     for size in ICONSET_SIZES:
