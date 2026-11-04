@@ -331,15 +331,13 @@ final class GogakuInputController: IMKInputController {
     private func pumpEagerBacklog() {
         guard mode == .learning, direction == .zhToEn, eagerInFlight == nil,
               let next = eagerBacklog.first(where: { translationMemory[$0] == nil }) else {
-            NSLog("GogakuLearning: eager pump skip mode=%d dir=%d inflight=%d backlog=%d",
-                  mode == .learning ? 1 : 0, direction == .zhToEn ? 1 : 0,
-                  eagerInFlight != nil ? 1 : 0, eagerBacklog.count)
+            DiagFile.log("eager pump skip mode=\(mode.rawValue) dir=\(direction.rawValue) inflight=\(eagerInFlight != nil) backlog=\(eagerBacklog.count)")
             return
         }
         eagerInFlight = next
         // 用当前组合 stamp 发起：applyEagerTranslation 以 stamp 匹配面板代次。
         let stamp = displayed?.stamp ?? InputStamp(mode: .learning, direction: .zhToEn)
-        NSLog("GogakuLearning: eager fire backlog=%d len=%d", eagerBacklog.count, next.unicodeScalars.count)
+        DiagFile.log("eager fire src=\(next.prefix(30))) len=\(next.unicodeScalars.count)")
         eagerTranslator.requestImmediately(TranslationRequest(stamp: stamp, sourceID: "eager", source: next,
                                                               resource: LearningTranslation.resourceID))
     }
@@ -353,9 +351,7 @@ final class GogakuInputController: IMKInputController {
         if stored, let translated = result.target {
             storeTranslationMemory(result.source, translated)
         }
-        NSLog("GogakuLearning: eager done stored=%d err=%@ stampMatch=%d mem=%d",
-              stored ? 1 : 0, result.error ?? "-",
-              displayed?.stamp == result.stamp ? 1 : 0, translationMemory.count)
+        DiagFile.log("eager done stored=\(stored) err=\(result.error ?? "-") stampMatch=\(displayed?.stamp == result.stamp) src=\(result.source.prefix(30))")
         defer { pumpEagerBacklog() }
         guard mode == .learning, direction == .zhToEn,
               var view = displayed, view.stamp == result.stamp, pendingEdits == 0,
@@ -488,6 +484,8 @@ final class GogakuInputController: IMKInputController {
 
     override func activateServer(_ sender: Any!) {
         active = true
+        let hostApp = gg_read_host(client())?.application.description ?? "none"
+        DiagFile.log("activate host=\(hostApp)")
         shiftPoller.start()
         panel.choose = { [weak self] row in self?.panelChoose(row: row) }
         settings = Settings.load()
@@ -500,7 +498,10 @@ final class GogakuInputController: IMKInputController {
         configure()
     }
 
-    override func deactivateServer(_ sender: Any!) { shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false }
+    override func deactivateServer(_ sender: Any!) {
+        DiagFile.log("deactivate")
+        shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false
+    }
     override func commitComposition(_ sender: Any!) { suspend() }
     override func inputControllerWillClose() { shiftPoller.stop(); suspend(); active = false }
     override func hidePalettes() { panel.dismiss(); toast.hide() }
@@ -593,6 +594,7 @@ final class GogakuInputController: IMKInputController {
     /// clearMarked=false：宿主状态无法确认（如组合中宿主自行清空了文本）时，
     /// 对宿主的任何写入（含清除 marked text）都可能崩掉宿主，跳过写入。
     private func suspend(clearMarked: Bool = true, rawOverride: String? = nil) {
+        DiagFile.log("suspend raw=\((rawOverride ?? displayed?.raw ?? "").count)c")
         let app = application, oldMode = mode, oldDirection = direction
         let raw = rawOverride ?? displayed?.raw ?? ""
         // 待插入译文未落地即失焦：原中文入草稿可恢复，缓冲丢弃。
@@ -1005,7 +1007,7 @@ final class GogakuInputController: IMKInputController {
         guard active, displayed != nil, target != nil else { stopPositionRefresh(); return }
         guard let current = currentTarget(readRectangle: true), let anchor = target,
               current.application == anchor.application, current.pid == anchor.pid else {
-            NSLog("GogakuDiag: refresh-hide keep-comp")
+            DiagFile.log("refresh-hide keep-comp")
             hidePanelKeepComposition()
             return
         }
@@ -1262,7 +1264,7 @@ final class GogakuInputController: IMKInputController {
             guard let self, self.mode == .learning, self.direction == .enToZh,
                   self.displayed?.candidates.isEmpty != false else { return }
             let busy = self.translator.hasPendingWork
-            NSLog("GogakuDiag: hide-work fire busy=%@", busy ? "Y" : "N")
+            DiagFile.log("hide-work fire busy=\(busy)")
             if busy {
                 // 在途请求（防抖／排队／在飞）尚未返回：顺延等待，不隐藏。
                 // 云端后端（火山）时延可超固定宽限，按时长猜会复现先隐后显闪烁
@@ -1270,7 +1272,7 @@ final class GogakuInputController: IMKInputController {
                 self.scheduleEnToZhHide(delay: 0.25)
                 return
             }
-            NSLog("GogakuDiag: dismiss hide-work")
+            DiagFile.log("dismiss hide-work")
             self.panel.dismiss()
         }
         enToZhHideWork = work
@@ -1288,21 +1290,18 @@ final class GogakuInputController: IMKInputController {
             if completesEdit { self.pendingEdits = max(0, self.pendingEdits - 1) }
             guard self.pendingEdits == 0 else { return }
             self.displayed = value
-            NSLog("GogakuDiag: publish raw=%dchars cand=%d focus=%@/%@ rect=%d",
-                  value.raw.count, value.candidates.count,
-                  self.focus == generation ? "match" : "MISMATCH",
-                  NSString(format: "%llu", generation), self.displayRect != nil ? 1 : 0)
+            DiagFile.log("publish raw=\(value.raw.count)c cand=\(value.candidates.count) focus=\(self.focus == generation ? "match" : "MISMATCH") rect=\(self.displayRect != nil)")
             if value.raw.isEmpty {
-                NSLog("GogakuDiag: dismiss raw-empty")
+                DiagFile.log("dismiss raw-empty")
                 self.panel.dismiss(); self.target = nil; return
             }
             // 英→中无宿主侧组合：只校验同应用同进程（与 applyNormal 口径一致），
             // 光标漂移跟随新插入点；组合起点全等会误杀组合（每键入一次即 suspend）。
             guard let current = self.currentTarget(strictComposition: false) else {
-                NSLog("GogakuDiag: suspend currentTarget-fail"); self.suspend(); return
+                DiagFile.log("suspend currentTarget-fail"); self.suspend(); return
             }
             guard let previous = self.target else {
-                NSLog("GogakuDiag: suspend target-nil"); self.suspend(); return
+                DiagFile.log("suspend target-nil"); self.suspend(); return
             }
             if current.application != previous.application || current.pid != previous.pid {
                 // 诊断：无原文内容，仅失败原因与选区形状，供真机回归定位。
@@ -1338,8 +1337,7 @@ final class GogakuInputController: IMKInputController {
                 // 首键即显原文（2026-11-04 用户反馈：等译文才显示＝打字无反馈＋
                 // 输入延迟感）；译文到达后原地补候选。持续无译文且停顿时由宽限
                 // 工作项收起（busy 时顺延，自适应云端时延）。
-                NSLog("GogakuDiag: empty-candidates render-source busy=%@",
-                      self.translator.hasPendingWork ? "Y" : "N")
+                DiagFile.log("empty-render busy=\(self.translator.hasPendingWork)")
                 if let rect = self.displayRect {
                     self.panel.render(value, at: rect, targetWindowLevel:
                         GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
@@ -1349,7 +1347,7 @@ final class GogakuInputController: IMKInputController {
             }
             self.cancelEnToZhHide()
             guard let rect = self.displayRect else {
-                NSLog("GogakuDiag: dismiss displayRect-nil-at-render")
+                DiagFile.log("dismiss rect-nil-at-render")
                 self.panel.dismiss(); return
             }
             self.panel.render(value, at: rect, targetWindowLevel:
