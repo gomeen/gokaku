@@ -256,7 +256,6 @@ final class GogakuInputController: IMKInputController {
     ///（2026-11-04 用户反馈：停顿后长时间不出来——首个真请求承担整段冷启动，
     /// small100 权重加载约 1.4s）；组合结束（suspend）后复位。
     private var warmedEager = false
-    private var warmedSession = false
     /// 学习翻译后端：quickmt 开发版外置 Python 辅助进程（装配路径与 beam 由
     /// 设置解析）；设置变更时销毁重建（rebuildLearningTranslatorIfNeeded）。
     /// 请求按 sourceID 分路：commit＝提交替换（学习模式中→英）、
@@ -604,7 +603,7 @@ final class GogakuInputController: IMKInputController {
         }
         eagerBacklog = []
         eagerDebounceWork?.cancel()
-        warmedEager = false; warmedSession = false
+        warmedEager = false
         cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0
@@ -1302,14 +1301,10 @@ final class GogakuInputController: IMKInputController {
                 self.suspend(); return
             }
             self.target = current
-            // 英→中新组合预热：会话辅助进程权重懒加载与打字并行；warmup 的
-            // sourceID 在会话 receive 里按来源丢弃，不产生候选。
-            if self.direction == .enToZh, !self.warmedSession {
-                self.warmedSession = true
-                self.translator.requestImmediately(
-                    TranslationRequest(stamp: value.stamp, sourceID: "warmup", source: "hi",
-                                       resource: LearningTranslation.resourceID))
-            }
+            // 英→中预热已移除（2026-11-04）：旧版首组合发 requestImmediately("hi")
+            // 占住串行 worker 通道，会取消 translationNeeded 刚排入的真实首句
+            // 请求（防抖被清），且 "hi" 结果被 receive 按 sourceID 丢弃——火山
+            // 冷握手 472ms 全花在废请求上。真实首句由 translationNeeded 直发。
             // 学习路径没有 applyNormal：首次显示用锚点矩形（组合首键
             // currentTarget(readRectangle: true) 已读取）；若首键未读到矩形，
             // 由位置复查在恢复后补上。后续由位置复查跟随插入点。
