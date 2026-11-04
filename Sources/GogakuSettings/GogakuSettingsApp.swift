@@ -248,13 +248,13 @@ private struct ResourcesPage: View {
             section("开发版状态") {
                 VStack(alignment: .leading, spacing: 8) {
                     // .body-text：12.5px。
-                    Text("普通输入：已在本机开发范围验证，完整宿主与性能验收仍在进行。")
+                    Text("普通输入：本机开发范围已验证。")
                         .font(.system(size: 12.5))
                         .foregroundStyle(SettingsPalette.primaryText)
-                    Text("学习功能：quickmt 开发版已按用户裁决解锁本机自用；正式质量门槛与宿主验收未过，双端交付口径不变。")
+                    Text("学习功能：开发版自用已解锁，正式质量门槛未过。")
                         .font(.system(size: 12.5))
                         .foregroundStyle(SettingsPalette.primaryText)
-                    Text("本页不提供系统语言资源安装入口；正式翻译模型质量与安装流程另行验收。")
+                    Text("本页不提供系统语言资源安装入口。")
                         .font(.system(size: 11))
                         .foregroundStyle(SettingsPalette.secondaryText)
                 }
@@ -350,12 +350,12 @@ private struct ResourcesPage: View {
         }
     }
 
-    /// 后端感知的质量说明。
+    /// 后端感知的质量说明（一句为限，避免小字堆叠）。
     private var backendNoticeText: String {
         switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
-        case "small100": return "未过质量门槛，仅开发版体验：small100 可用率 95.15%／94.34%（残余 5 条语义失败）；候选带开发版标注。"
-        case "volcengine": return "未过质量门槛，仅开发版体验：火山翻译实测中位 114ms、20 句固定失败点全对；每次学习翻译经火山 API 域联网（仅学习模式）。"
-        default: return "未过质量门槛，仅开发版体验：quickmt 已知固定风险（如短语级复读、en→zh 可用率 77.67%）被开发版接受；候选带「quickmt 开发版」标注。"
+        case "small100": return "开发版：可用率约 95%，候选带开发版标注。"
+        case "volcengine": return "开发版：实测中位延迟 114ms，仅学习模式联网。"
+        default: return "开发版：候选带「quickmt 开发版」标注。"
         }
     }
 
@@ -364,8 +364,7 @@ private struct ResourcesPage: View {
     private var learningTranslationSection: some View {
         section("学习翻译（开发版）") {
             VStack(alignment: .leading, spacing: 0) {
-                SettingsRow("启用学习翻译",
-                            detail: "关闭即回门禁态：学习菜单置灰、共享学习会话释放。学习记录仍保持关闭。") {
+                SettingsRow("启用学习翻译") {
                     Toggle("", isOn: Binding(get: { settings.learningTranslationEnabled },
                                              set: { settings.learningTranslationEnabled = $0; submit() }))
                         .toggleStyle(.switch)
@@ -373,7 +372,7 @@ private struct ResourcesPage: View {
                 }
                 SettingsRowDivider()
                 SettingsRow("翻译后端",
-                            detail: "quickmt／small100＝本地（无网络）；火山翻译＝云端 NMT（仅学习模式联网，普通模式不经任何翻译路径）。变更热生效。") {
+                            detail: "本地 quickmt／small100；云端火山翻译。变更热生效。") {
                     Picker("", selection: Binding(get: { settings.learningTranslationBackend },
                                                   set: { settings.learningTranslationBackend = $0; submit() })) {
                         Text("quickmt（本地）").tag("quickmt")
@@ -445,7 +444,7 @@ private struct ResourcesPage: View {
                         .padding(.vertical, 6)
                         HStack(spacing: 6) {
                             Image(systemName: "lock.shield").font(.system(size: 11))
-                            Text("凭据仅写入本机 0600 权限文件（~/Library/Application Support/Gogaku/translation/），绝不进入代码仓库、设置同步或任何云端。")
+                            Text("凭据仅写入本机 0600 文件，不进仓库、同步或云端。")
                                 .font(.system(size: 11))
                         }
                         .foregroundStyle(Color.green)
@@ -455,13 +454,14 @@ private struct ResourcesPage: View {
                     }
                     SettingsRowDivider()
                     volcengineUsageRow
+                        .padding(.vertical, 8)
                     SettingsRowDivider()
-                    Text("☁️ 云端仅学习模式联网（只访问火山翻译 API 域）；普通模式不经任何翻译路径。实测中位延迟 114ms，20 句固定失败点全对。")
+                    Text("☁️ 云端仅学习模式联网（只访问火山翻译 API）。")
                         .font(.system(size: 11))
                         .foregroundStyle(SettingsPalette.secondaryText)
                         .padding(.vertical, 10)
                     if !backend.ready {
-                        Text("缺失：\(backend.missing.joined(separator: "、"))。可在上方填写凭据后保存。")
+                        Text("缺失：\(backend.missing.joined(separator: "、"))。填写凭据后保存即可。")
                             .font(.system(size: 11))
                             .foregroundStyle(Color.red)
                             .padding(.bottom, 10)
@@ -469,7 +469,7 @@ private struct ResourcesPage: View {
                 } else {
                     SettingsRowDivider()
                     SettingsRow("beam 大小",
-                                detail: "1＝贪心最快（中位约 88ms）；已知重复句等缺陷随 beam 升高缓解，代价是延迟增加。变更后对新翻译请求生效。") {
+                                detail: "默认 1 最快；增大可缓解重复句，延迟略增。") {
                         Stepper(value: Binding(get: { settings.learningBeamSize },
                                                set: { settings.learningBeamSize = LearningTranslation.clampedBeam($0); submit() }),
                                 in: LearningTranslation.beamRange) {
