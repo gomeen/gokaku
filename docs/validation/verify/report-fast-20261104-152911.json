@@ -1,0 +1,72 @@
+{
+  "profile": "fast",
+  "startedAt": "2026-11-04T15:28:10+0800",
+  "finishedAt": "2026-11-04T15:29:11+0800",
+  "commit": "a06730130352b3fc385bb518107c0bf5db91dd17",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.1-rc.1",
+    "buildNumber": 55
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.1-rc.1 构建55；拒绝路径 7/7；installed=Gogaku.app 0.1.1 b54;Gogaku Settings.app 0.1.1 b54",
+      "durationMs": 25,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 105,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全过（100% tests passed）",
+      "durationMs": 26561,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261104-152810/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "113 项全部通过（Release）",
+      "durationMs": 33824,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261104-152810/swift-tests.log"
+    },
+    {
+      "name": "translation-eval-regression",
+      "required": true,
+      "status": "passed",
+      "detail": "评测管线回归通过（11 项断言）",
+      "durationMs": 152,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261104-152810/translation-eval-regression.log"
+    },
+    {
+      "name": "learning-worker-protocol",
+      "required": true,
+      "status": "passed",
+      "detail": "worker 协议回归通过（15 项断言）",
+      "durationMs": 171,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261104-152810/learning-worker-protocol.log"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": true,
+    "notPassed": []
+  }
+}

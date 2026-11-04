@@ -1,0 +1,25 @@
+Another instance of SwiftPM (PID: 69294) is already running using '/Users/gomeen/code/gomeen/gogaku/.build', waiting until that process has finished execution...[0/1] Planning build
+Building for production...
+[0/7] Write swift-version--58304C5D6DBC2206.txt
+[1/7] Write sources
+[2/7] Compiling GogakuHost Host.m
+[4/9] Compiling GogakuCore AnchorPlausibility.swift
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuCore/CustomWordListModel.swift:2:8: warning: file 'CustomWordListModel.swift' is part of module 'GogakuCore'; ignoring import
+ 1 | import Foundation
+ 2 | import GogakuCore
+   |        `- warning: file 'CustomWordListModel.swift' is part of module 'GogakuCore'; ignoring import
+ 3 | 
+ 4 | /// 自定义词语页的行模型（可单元测试）：搜索筛选与排序分离。
+[5/14] Compiling GogakuTranslator GogakuTranslatorApp.swift
+[6/14] Compiling GogakuSettings AppCatalog.swift
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuSettings/GogakuSettingsApp.swift:422:72: error: type 'LearningTranslation' has no member 'directoryAsPath'
+420 |                         HStack(spacing: 10) {
+421 |                             Button("保存凭据") {
+422 |                                 if let root = try? LearningTranslation.directoryAsPath() {
+    |                                                                        `- error: type 'LearningTranslation' has no member 'directoryAsPath'
+423 |                                     try? LearningTranslation.saveVolcengineCredentials(
+424 |                                         LearningTranslation.VolcengineCredentials(accessKey: volcAccessKey, secretKey: volcSecretKey),
+error: input file '/Users/gomeen/code/gomeen/gogaku/Sources/GogakuSettings/GogakuSettingsApp.swift' was modified during the build
+error: input file '/Users/gomeen/code/gomeen/gogaku/Sources/GogakuSettings/GogakuSettingsApp.swift' was modified during the build
+error: cancelled
+error: fatalError
