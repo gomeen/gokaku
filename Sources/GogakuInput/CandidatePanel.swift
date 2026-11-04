@@ -185,9 +185,9 @@ private final class PanelLayout {
             mutable.append(NSAttributedString(string: typed, attributes: attributes(theme.annotationFont, theme.typedText)))
             mutable.append(NSAttributedString(string: rest, attributes: attributes(theme.annotationFont, theme.restText)))
             if enToZhLearning {
-                // 光标作为字形插入（2026-11-04）：与文字同字体同基线流排，
-                // 对齐／换行／截断天然正确，不再做任何基线坐标计算。
-                mutable.append(NSAttributedString(string: "▏",
+                // 光标作为字形插入（2026-11-04）：与文字同字体同基线流排。
+                // 用 ASCII 竖线（块元素 ▏ 占满 em 高且字形格留白，观感脱节）。
+                mutable.append(NSAttributedString(string: "|",
                                                   attributes: attributes(theme.annotationFont, theme.typedText)))
             }
             for issue in view.issues where issue.location + issue.length <= mutable.length {
