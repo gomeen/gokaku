@@ -80,12 +80,12 @@ final class KeyComboTests: XCTestCase {
     func testConflictWithFixedOperations() {
         let ctrl = NSEvent.ModifierFlags.control.rawValue
         // 与固定输入操作相同组合（普通模式 Ctrl＋N 下一候选）即冲突。
-        XCTAssertTrue(KeyCombo.conflict(target: .quickAdd, keyID: "n", modifiers: ctrl,
+        XCTAssertTrue(KeyCombo.conflict(target: .modeSwitch, keyID: "n", modifiers: ctrl,
                                         settings: Settings())?.contains("固定") == true)
         // 学习模式固定原文上屏 ⌘Return 也计入冲突检查。
-        XCTAssertTrue(KeyCombo.conflict(target: .quickAdd, keyID: "return", modifiers: NSEvent.ModifierFlags.command.rawValue,
+        XCTAssertTrue(KeyCombo.conflict(target: .modeSwitch, keyID: "return", modifiers: NSEvent.ModifierFlags.command.rawValue,
                                         settings: Settings()) != nil)
-        XCTAssertNil(KeyCombo.conflict(target: .quickAdd, keyID: "x", modifiers: ctrl,
+        XCTAssertNil(KeyCombo.conflict(target: .modeSwitch, keyID: "x", modifiers: ctrl,
                                        settings: Settings()))
     }
 

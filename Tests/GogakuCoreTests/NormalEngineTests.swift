@@ -4,7 +4,7 @@ import CGogakuCore
 
 /// 共享 C++ 普通模式核心的 Swift 桥接回归。
 /// 详细事件轨迹向量在 native/GogakuCore/tests（348 项检查断言）；这里覆盖桥接层合同：
-/// 配置传递、事件映射、自定义词语读写与校验、快速添加记录。
+/// 配置传递、事件映射、自定义词语读写与校验。
 final class NormalEngineTests: XCTestCase {
     var dir: URL!
     var dictPath: URL!
@@ -126,7 +126,6 @@ final class NormalEngineTests: XCTestCase {
                 XCTAssertEqual(snapshot.candidates.first?.kind, Int32(GC_CAND_PINYIN_WORD))
                 let commit = try XCTUnwrap(engine.handle(.space, app: "test.app", field: "f", timeMs: 0))
                 XCTAssertEqual(commit.commit, "极视角")
-                XCTAssertFalse(engine.quickAddAvailable)
             }
         }
     }

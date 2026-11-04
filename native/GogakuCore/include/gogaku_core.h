@@ -91,14 +91,13 @@ typedef enum GcEventKind {
     GC_EV_CTRL_N,
     GC_EV_CTRL_P,
     GC_EV_SHIFT_CLICK,    /* 单击 Shift（按住期间无其他键且 <600ms 由平台判定）；arg：0 左 1 右 */
-    GC_EV_QUICK_ADD,      /* 快速添加快捷键（默认 Control＋Shift＋A） */
     GC_EV_FOCUS_SYNC      /* 焦点／应用同步：app、field 为当前值 */
 } GcEventKind;
 
 typedef struct GcKeyEvent {
     int32_t kind;
     int64_t arg;          /* 事件参数（如 SHIFT_CLICK 侧别） */
-    int64_t time_ms;      /* 平台单调毫秒时钟，用于快速添加 60 秒窗口 */
+    int64_t time_ms;      /* 平台单调毫秒时钟 */
     const char *text;     /* GC_EV_TEXT 的 UTF-8 内容 */
     const char *app;      /* 当前前台应用标识（bundle id 等），可为 NULL */
     const char *field;    /* 平台给出的不透明字段标识，可为 NULL */
@@ -134,7 +133,7 @@ typedef struct GcSnapshot {
     int32_t english;       /* 0 中文，1 手动临时英文，2 按应用默认英文 */
     int32_t toast;         /* 0 无；1 「中」提示；2 「英」提示（Shift 单击 0.8 秒） */
     int32_t beep;          /* 1 = 平台应提示无效操作 */
-    char *status;          /* 瞬态说明（删词结果、快速添加结果等）；空串 = 无 */
+    char *status;          /* 瞬态说明（删词结果等）；空串 = 无 */
     GcCandidate *candidates;
     size_t count;          /* 本页候选数 */
     size_t selected;       /* 全局高亮下标 */
@@ -177,10 +176,6 @@ GOGAKU_CORE_EXPORT int gc_normal_handle(GcNormalSession *session,
 GOGAKU_CORE_EXPORT int gc_normal_set_app_defaults(GcNormalSession *session,
                                                   const char *const *apps,
                                                   size_t count);
-/* 设置快速添加排除应用列表。返回 0 成功。 */
-GOGAKU_CORE_EXPORT int gc_normal_set_excluded_apps(GcNormalSession *session,
-                                                   const char *const *apps,
-                                                   size_t count);
 /* 运行时更新配置（设置变更；输入法收到通知后调用）。返回 0 成功。 */
 GOGAKU_CORE_EXPORT int gc_normal_update(GcNormalSession *session, int32_t scheme,
                                         uint32_t fuzzy_mask,
@@ -191,9 +186,6 @@ GOGAKU_CORE_EXPORT int gc_normal_reload_custom_words(GcNormalSession *session);
 
 /* 立即持久化调频与已学习词（若脏）。平台 30 秒防抖调用。返回 0 成功。 */
 GOGAKU_CORE_EXPORT int gc_normal_flush(GcNormalSession *session);
-
-/* 最近一次可快速添加的完整上屏是否存在（供菜单态显示）。 */
-GOGAKU_CORE_EXPORT int32_t gc_normal_quick_add_available(GcNormalSession *session);
 
 /* 复制当前组合的原始编码（context 的 userInput，例如小鹤 "nihc"）。
  *

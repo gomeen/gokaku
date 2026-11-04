@@ -4,7 +4,7 @@
 //   快照合法（候选字段自洽）、上屏与预编辑文本是合法 UTF-8 且无控制字符；
 //   组合结束后（Esc／焦点切换到新字段）状态完全清空。
 // 覆盖事件：字母、大写、数字、标点（含引号交替）、Shift 单击、编辑键、翻页、
-// 数字选择、快速添加、焦点切换（换应用／换输入框）、无效 UTF-8、超长输入、emoji。
+// 数字选择、焦点切换（换应用／换输入框）、无效 UTF-8、超长输入、emoji。
 #include "gogaku_core.h"
 
 #include <unistd.h>
@@ -202,8 +202,6 @@ int main(int argc, char **argv) {
                 field = fields[rng() % 3];
                 ev.app = app;
                 ev.field = field;
-            } else if (pick < 89) {
-                ev.kind = GC_EV_QUICK_ADD;
             } else if (pick < 93) {
                 static const int32_t nav[] = {GC_EV_LEFT, GC_EV_RIGHT, GC_EV_UP, GC_EV_DOWN,
                                               GC_EV_HOME, GC_EV_END, GC_EV_PAGE_UP, GC_EV_PAGE_DOWN,

@@ -36,7 +36,6 @@ constexpr size_t kMaxInputScalars = 512;
 constexpr size_t kMaxChineseCandidates = 200;
 constexpr size_t kMaxEnglishPrefixHits = 3;
 constexpr size_t kMaxShortcodeLen = 32;
-constexpr int64_t kQuickAddWindowMs = 60000;
 // 词典下标：0 = 出厂 SystemDict；libime TrieDictionary 仅提供两个槽位
 // （SystemDict／UserDict），自定义拼音词与已学习词共用 idx 1。
 constexpr size_t kUserDictIdx = 1;
@@ -310,7 +309,6 @@ struct GcNormalSession {
     std::unordered_set<size_t> pinyinContentLengths;
     std::unordered_map<std::string, std::string> learnedWords;  // word -> full pinyin
     std::set<std::string> appDefaults;
-    std::set<std::string> excludedApps;
 
     EngMode engMode = EngMode::Off;
     std::string currentApp, currentField;
@@ -323,14 +321,6 @@ struct GcNormalSession {
     // 合并结果按状态缓存：同一状态下只合并一次（跨事件也复用）。
     bool mergedValid = false;
     MergedSet merged;
-    struct QuickAddRecord {
-        bool valid = false;
-        std::string text;
-        std::string pinyin;
-        std::string app;
-        std::string field;
-        int64_t timeMs = 0;
-    } quickAdd;
 };
 
 namespace {
@@ -757,27 +747,8 @@ GcSnapshot *build_snapshot(GcNormalSession &s, const std::string &commit,
     return snap;
 }
 
-// 解码已选词的拼音（撇号连接）；失败返回空串。
-std::string selected_pinyin(GcNormalSession &s) {
-    try {
-        const auto words = s.context->selectedWordsWithPinyin();
-        std::string result;
-        for (const auto &wc : words) {
-            std::string pinyin = libime::PinyinEncoder::decodeFullPinyin(wc.second);
-            if (pinyin.empty()) return "";
-            if (!result.empty()) result += '\'';
-            result += pinyin;
-        }
-        return result;
-    } catch (...) {
-        return "";
-    }
-}
-
 struct CommitResult {
     std::string text;    // 空 = 部分暂存继续组合
-    std::string pinyin;  // 中文完整上屏时的实际拼音（快速添加用）
-    bool learned = false;
 };
 
 // 选中合并候选（中文类走 libime 选择；自定义/英文直接上屏）。
@@ -821,8 +792,6 @@ CommitResult select_merged(GcNormalSession &s, MergedSet &ms, size_t index) {
             }
             s.context->learn();
             s.modelDirty = true;
-            result.pinyin = pinyin;
-            result.learned = true;  // 候选完整上屏即可快速添加（含单字）
             if (scalarCount >= 2 && !pinyin.empty() &&
                 s.learnedWords.find(joined) == s.learnedWords.end()) {
                 s.ime->dict()->addWord(kUserDictIdx, pinyin, joined, kLearnedWordCost);
@@ -869,19 +838,6 @@ std::string mapped_punct(GcNormalSession &s, const std::string &prefix, char ch,
 EngMode base_default(const GcNormalSession &s, const std::string &app) {
     return s.appDefaults.count(app) > 0 ? EngMode::AppDefault : EngMode::Off;
 }
-
-void record_commit(GcNormalSession &s, const GcKeyEvent *ev, const std::string &text, const std::string &pinyin) {
-    s.quickAdd.valid = true;
-    s.quickAdd.text = text;
-    s.quickAdd.pinyin = pinyin;
-    s.quickAdd.app = ev->app == nullptr ? "" : ev->app;
-    s.quickAdd.field = ev->field == nullptr ? "" : ev->field;
-    s.quickAdd.timeMs = ev->time_ms;
-}
-
-// 快速添加只记录「已学习中文候选提交」；原编码上屏、英文等其它提交
-// 使记录失效（规格 docs/product.md「快速添加」：原编码上屏不可添加）。
-void invalidate_quick_add(GcNormalSession &s) { s.quickAdd.valid = false; }
 
 }  // namespace
 
@@ -1003,15 +959,6 @@ extern "C" int gc_normal_set_app_defaults(GcNormalSession *s, const char *const 
     return 0;
 }
 
-extern "C" int gc_normal_set_excluded_apps(GcNormalSession *s, const char *const *apps, size_t count) {
-    if (s == nullptr || (count > 0 && apps == nullptr)) return 1;
-    s->excludedApps.clear();
-    for (size_t i = 0; i < count; ++i) {
-        if (apps[i] != nullptr) s->excludedApps.insert(apps[i]);
-    }
-    return 0;
-}
-
 extern "C" int gc_normal_update(GcNormalSession *s, int32_t scheme, uint32_t fuzzy_mask,
                                 int32_t full_pinyin_preedit, int32_t freq_enabled) {
     if (s == nullptr) return 1;
@@ -1064,10 +1011,6 @@ extern "C" int gc_normal_flush(GcNormalSession *s) {
     } catch (...) {
         return 2;
     }
-}
-
-extern "C" int32_t gc_normal_quick_add_available(GcNormalSession *s) {
-    return s != nullptr && s->quickAdd.valid ? 1 : 0;
 }
 
 extern "C" size_t gc_normal_copy_raw(GcNormalSession *s, char *buffer, size_t capacity) {
@@ -1131,7 +1074,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 s->selected = 0;
                 s->engMode = EngMode::Temp;
                 toast = 2;
-                invalidate_quick_add(*s);  // 原编码上屏不可快速添加
             } else if (s->engMode == EngMode::Off) {
                 s->engMode = EngMode::Temp;
                 toast = 2;
@@ -1158,70 +1100,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 consumed = false;
             }
             *out = build_snapshot(*s, "", status, toast, beep, consumed, nullptr);
-            return 0;
-        }
-        case GC_EV_QUICK_ADD: {
-            bool eligible = s->quickAdd.valid && !s->quickAdd.pinyin.empty() &&
-                            app == s->quickAdd.app && field == s->quickAdd.field &&
-                            event->time_ms >= s->quickAdd.timeMs &&
-                            event->time_ms - s->quickAdd.timeMs <= kQuickAddWindowMs &&
-                            s->excludedApps.count(app) == 0;
-            if (eligible) {
-                // 内容必须满足拼音词规格（1–16 汉字）；否则不可添加。
-                char verr[128] = {0};
-                eligible = gc_custom_words_validate(GC_WORD_PINYIN, "", s->quickAdd.pinyin.c_str(),
-                                                    s->quickAdd.text.c_str(), verr, sizeof(verr)) == 0;
-                (void)verr;
-            }
-            if (eligible) {
-                bool exists = false;
-                for (const auto &w : s->customWords) {
-                    if (w.kind == GC_WORD_PINYIN && w.content == s->quickAdd.text) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists && !s->customWordsPath.empty()) {
-                    std::vector<GcCustomWord> all;
-                    for (const auto &w : s->customWords) {
-                        GcCustomWord cw{};
-                        cw.kind = w.kind;
-                        cw.enabled = w.enabled ? 1 : 0;
-                        cw.code = const_cast<char *>(w.code.c_str());
-                        cw.pinyin = const_cast<char *>(w.pinyin.c_str());
-                        cw.content = const_cast<char *>(w.content.c_str());
-                        all.push_back(cw);
-                    }
-                    GcCustomWord nw{};
-                    nw.kind = GC_WORD_PINYIN;
-                    nw.enabled = 1;
-                    char empty[] = "";
-                    nw.code = empty;
-                    nw.pinyin = const_cast<char *>(s->quickAdd.pinyin.c_str());
-                    nw.content = const_cast<char *>(s->quickAdd.text.c_str());
-                    all.push_back(nw);
-                    GcCustomWordList list{};
-                    list.words = all.data();
-                    list.count = all.size();
-                    if (gc_custom_words_write(s->customWordsPath.c_str(), &list) == 0) {
-                        load_custom_words(*s, false, status);
-                        rebuild_custom_indexes(*s);
-                        sync_custom_dict(*s);
-                        invalidate_merge(*s);
-                        status = "已加入「" + s->quickAdd.text + "」";
-                    } else {
-                        status = "自定义词语保存失败";
-                        beep = true;
-                    }
-                } else if (exists) {
-                    status = "已存在";
-                } else {
-                    consumed = false;
-                }
-            } else {
-                consumed = false;  // 没有可添加内容：交还宿主
-            }
-            *out = build_snapshot(*s, "", status, 0, beep, consumed, nullptr);
             return 0;
         }
         default:
@@ -1312,16 +1190,10 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                             return 0;
                         }
                         commit = r.text;
-                        if (r.learned) {
-                            record_commit(*s, event, r.text, r.pinyin);
-                        } else {
-                            invalidate_quick_add(*s);  // 非已学习中文候选提交不可快速添加
-                        }
                         s->lastChar = last_scalar_codepoint(commit);
                     } else {
                         // 0 或超出页内数量：先上屏高亮候选（完整时）再输出数字。
                         std::string prefix;
-                        bool learnedPrefix = false;
                         if (total > 0) {
                             MergedSet &ms = ensure_view();
                             const MaterializedCandidate &hm =
@@ -1333,8 +1205,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                                     if (s->freqEnabled) {
                                         c.learn();
                                         s->modelDirty = true;
-                                        record_commit(*s, event, prefix, selected_pinyin(*s));
-                                        learnedPrefix = true;
                                     }
                                     c.clear();
                                     c.clearContextWords();
@@ -1352,7 +1222,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                         c.clearContextWords();
                         invalidate_merge(*s);
                         s->lastChar = static_cast<uint32_t>(ch);
-                        if (!learnedPrefix) invalidate_quick_add(*s);  // 原编码前缀上屏不可快速添加
                     }
                     s->literalUsed = false;
                     s->selected = 0;
@@ -1362,7 +1231,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 const bool isPunct = !punct_map(ch).empty() || ch == '"' || ch == '\'';
                 if (isPunct) {
                     std::string prefix;
-                    bool learnedPrefix = false;
                     const size_t total = candidate_count();
                     if (total > 0) {
                         MergedSet &ms = ensure_view();
@@ -1375,8 +1243,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                                 if (s->freqEnabled) {
                                     c.learn();
                                     s->modelDirty = true;
-                                    record_commit(*s, event, prefix, selected_pinyin(*s));
-                                    learnedPrefix = true;
                                 }
                                 c.clear();
                                 c.clearContextWords();
@@ -1393,7 +1259,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     s->lastChar = last_scalar_codepoint(punct);
                     s->literalUsed = false;
                     s->selected = 0;
-                    if (!learnedPrefix) invalidate_quick_add(*s);  // 原编码前缀上屏不可快速添加
                     break;
                 }
                 // 未处理字符（如 - /）：先上屏组合再交还宿主。
@@ -1404,7 +1269,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 s->lastChar = last_scalar_codepoint(commit);
                 s->literalUsed = false;
                 s->selected = 0;
-                invalidate_quick_add(*s);  // 原编码上屏不可快速添加
                 consumed = false;
                 break;
             }
@@ -1443,11 +1307,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     return 0;
                 }
                 commit = r.text;
-                if (r.learned) {
-                    record_commit(*s, event, r.text, r.pinyin);
-                } else {
-                    invalidate_quick_add(*s);  // 非已学习中文候选提交不可快速添加
-                }
                 s->lastChar = last_scalar_codepoint(commit);
             } else {
                 consumed = false;
@@ -1463,7 +1322,6 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 s->lastChar = last_scalar_codepoint(commit);
                 s->literalUsed = false;
                 s->selected = 0;
-                invalidate_quick_add(*s);  // 原编码上屏不可快速添加
             } else {
                 consumed = false;
             }

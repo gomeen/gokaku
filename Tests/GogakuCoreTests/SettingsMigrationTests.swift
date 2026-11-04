@@ -57,21 +57,16 @@ final class SettingsMigrationTests: XCTestCase {
         let missing = try decode("{}")
         XCTAssertEqual(missing.modeShortcut, ConfigurableCommand.modeSwitch.defaultShortcut)
         XCTAssertEqual(missing.directionShortcut, ConfigurableCommand.directionSwitch.defaultShortcut)
-        XCTAssertEqual(missing.quickAddShortcut, ConfigurableCommand.quickAdd.defaultShortcut)
     }
 
-    func testThreeAppListsAreIndependent() throws {
-        // 快速添加排除、学习与隐私排除、按应用默认英文是三个独立设置，互不串值。
+    func testAppListsAreIndependent() throws {
+        // 学习与隐私排除、按应用默认英文是两个独立设置，互不串值。
         var settings = Settings()
-        settings.quickAddExcludedApplications = ["com.quick.added"]
         settings.excludedApplications = ["com.privacy.excluded"]
         settings.appDefaultEnglish = [EnglishAppEntry(id: "com.default.english", enabled: true)]
         let round = try JSONDecoder().decode(Settings.self, from: JSONEncoder().encode(settings))
-        XCTAssertEqual(round.quickAddExcludedApplications, ["com.quick.added"])
         XCTAssertEqual(round.excludedApplications, ["com.privacy.excluded"])
         XCTAssertEqual(round.enabledDefaultEnglishApps, ["com.default.english"])
-        XCTAssertFalse(round.quickAddExcludedApplications.contains("com.privacy.excluded"))
-        XCTAssertFalse(round.excludedApplications.contains("com.quick.added"))
     }
 
     func testFontAndFuzzyDefaultsOnMissingKeys() throws {

@@ -803,8 +803,6 @@ void test_custom_words(const Env &env) {
         check_eq(cand_text(v.p, 0), "早安！新的一天。", "短码内容");
         DelSnap sp{send(s, GC_EV_SPACE)};
         check_eq(sp.p ? sp.p->commit : "", "早安！新的一天。", "短码原样上屏");
-        // 选择自定义词不触发学习：无可快速添加内容
-        check(gc_normal_quick_add_available(s) == 0, "自定义词不进入快速添加记录");
         gc_normal_session_destroy(s);
     }
     { // 拼音词完整匹配置顶（全拼方案）
@@ -874,7 +872,6 @@ void test_factory_custom_pinyin(const Env &env) {
             check_eq(cand_kind(v.p, 0), GC_CAND_PINYIN_WORD, "生僻自定义词保留自定义类别");
             DelSnap sp{send(s, GC_EV_SPACE)};
             check_eq(sp.p ? sp.p->commit : "", "极视角", "生僻自定义词一次上屏");
-            check(gc_normal_quick_add_available(s) == 0, "生僻自定义词不进入快速添加记录");
             for (char k : std::string(c.sentence)) {
                 DelSnap d{send(s, GC_EV_TEXT, std::string(1, k))};
             }
@@ -905,100 +902,6 @@ void test_factory_auto_pinyin(const Env &env) {
     check(gc_custom_pinyin_lookup(env.dictPath.c_str(), "极", &missing) == 2,
           "自动读音确实缺字时明确失败");
     check(missing == nullptr, "缺字不返回部分读音");
-}
-
-void test_quick_add(const Env &env) {
-    write_file(env.wordsPath, "#gogaku-custom-words\tv1\n");
-    auto *s = make_session(env);
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-    DelSnap sp{send(s, GC_EV_SPACE)};
-    check_eq(sp.p ? sp.p->commit : "", "你好", "先完整上屏 你好");
-    check(gc_normal_quick_add_available(s) == 1, "完整上屏后有可快速添加记录");
-    DelSnap add{send(s, GC_EV_QUICK_ADD, "", 0, 1000)};
-    check_eq(add.p ? add.p->status : "", "已加入「你好」", "快速添加成功提示");
-    // 再次添加：已存在。加入自定义词后整码空格走拼音词提交（不可快速添加），
-    // 改用分段暂存（nih 下选不完整覆盖的 你，补 c 后整句提交）触发已学习提交。
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
-    DelSnap vnih{send(s, GC_EV_TEXT, "h")};
-    long ni = -1;
-    for (size_t i = 0; i < vnih.p->count; ++i) {
-        if (cand_text(vnih.p, i) == "你" && vnih.p->candidates[i].completes == 0) { ni = static_cast<long>(i); break; }
-    }
-    check(ni >= 0, "nih 候选中存在不完整覆盖的 你");
-    if (ni >= 0) {
-        send(s, GC_EV_TEXT, std::to_string(ni + 1));  // 暂存 你，剩余 h 继续组合
-        send(s, GC_EV_TEXT, "c");                     // 剩余 hao 完整编码
-        send(s, GC_EV_SPACE);                         // 整句 你好 已学习提交
-        DelSnap dup{send(s, GC_EV_QUICK_ADD, "", 0, 2000)};
-        check_eq(dup.p ? dup.p->status : "", "已存在", "重复添加提示已存在");
-    }
-    // 超过 60 秒：交还宿主
-    send(s, GC_EV_TEXT, "k"); send(s, GC_EV_TEXT, "d"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "v");
-    send(s, GC_EV_SPACE);
-    DelSnap late{send(s, GC_EV_QUICK_ADD, "", 0, 2000 + 61000)};
-    check(late.p != nullptr && late.p->consumed == 0, "超过 60 秒快捷键交还宿主");
-    // 换输入框后交还宿主
-    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-    send(s, GC_EV_SPACE);
-    DelSnap other{send(s, GC_EV_QUICK_ADD, "", 0, 2600, "test.app", "f2")};
-    check(other.p != nullptr && other.p->consumed == 0, "换输入框后交还宿主");
-    // 写入的拼音词已生效
-    DelSnap v{nullptr};
-    {
-        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
-        DelSnap v0{send(s, GC_EV_TEXT, "c")};
-        check_eq(cand_kind(v0.p, 0), GC_CAND_PINYIN_WORD, "快速添加的拼音词完整匹配置顶");
-    }
-    // 排除应用
-    gc_normal_set_excluded_apps(s, std::vector<const char *>{"excluded.app"}.data(), 1);
-    DelSnap sync{send(s, GC_EV_FOCUS_SYNC, "", 0, 0, "excluded.app", "f1")};
-    send(sync.p != nullptr ? s : s, GC_EV_TEXT, "n", 0, 0, "excluded.app", "f1");
-    send(s, GC_EV_TEXT, "i", 0, 0, "excluded.app", "f1");
-    send(s, GC_EV_TEXT, "h", 0, 0, "excluded.app", "f1");
-    send(s, GC_EV_TEXT, "c", 0, 0, "excluded.app", "f1");
-    send(s, GC_EV_SPACE, "", 0, 0, "excluded.app", "f1");
-    DelSnap ex{send(s, GC_EV_QUICK_ADD, "", 0, 4000, "excluded.app", "f1")};
-    check(ex.p != nullptr && ex.p->consumed == 0, "排除应用不可快速添加");
-    // 原编码上屏不可快速添加：非「已学习中文候选提交」的上屏路径使记录失效。
-    // 基线用 jbtm→今天（今天不在自定义表中，空格提交是已学习提交）。
-    { // 中文空格提交后可用；Enter 原编码上屏后不可用。
-        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
-        DelSnap today{send(s, GC_EV_SPACE)};
-        check_eq(today.p ? today.p->commit : "", "今天", "基线：今天已学习提交");
-        check(gc_normal_quick_add_available(s) == 1, "中文空格提交后可快速添加");
-        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-        send(s, GC_EV_ENTER);
-        check(gc_normal_quick_add_available(s) == 0, "Enter 原编码上屏后不可快速添加");
-    }
-    { // 组合中 Shift 原编码上屏后不可用。
-        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
-        send(s, GC_EV_SPACE);
-        check(gc_normal_quick_add_available(s) == 1, "再次中文空格提交后可快速添加");
-        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
-        send(s, GC_EV_SHIFT_CLICK);
-        check(gc_normal_quick_add_available(s) == 0, "Shift 原编码上屏后不可快速添加");
-    }
-    { // 组合中未处理字符先上屏原编码再交还：同样失效。
-        send(s, GC_EV_SHIFT_CLICK);  // 上一块以临时英文结束，先切回中文
-        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
-        send(s, GC_EV_SPACE);
-        check(gc_normal_quick_add_available(s) == 1, "第三次中文空格提交后可快速添加");
-        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
-        DelSnap slash{send(s, GC_EV_TEXT, "/")};
-        check(slash.p != nullptr && slash.p->consumed == 0, "未处理字符交还宿主");
-        check_eq(slash.p ? slash.p->commit : "", "nih", "未处理字符先上屏原编码");
-        check(gc_normal_quick_add_available(s) == 0, "原编码交还前上屏后不可快速添加");
-    }
-    { // 数字 0 走纯原编码前缀上屏（高亮候选不完整覆盖）：同样失效。
-        send(s, GC_EV_TEXT, "j"); send(s, GC_EV_TEXT, "b"); send(s, GC_EV_TEXT, "t"); send(s, GC_EV_TEXT, "m");
-        send(s, GC_EV_SPACE);
-        check(gc_normal_quick_add_available(s) == 1, "第四次中文空格提交后可快速添加");
-        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
-        DelSnap zero{send(s, GC_EV_TEXT, "0")};
-        check_eq(zero.p ? zero.p->commit : "", "nih0", "数字 0 先上屏原编码前缀再输出数字");
-        check(gc_normal_quick_add_available(s) == 0, "数字 0 原编码前缀上屏后不可快速添加");
-    }
-    gc_normal_session_destroy(s);
 }
 
 void test_delete_word(const Env &env) {
@@ -1302,10 +1205,9 @@ void test_marked_matches_preedit(const Env &env) {
     gc_normal_session_destroy(s);
 }
 
-// 写失败注入（目录只读）：flush 保留 dirty、会话仍可用；快速添加明确
-// 报「自定义词语保存失败」并 beep，不显示成功；权限恢复后重试可持久化。
-// 这是「写入失败不能显示保存成功、提交已发生但持久化失败不得错误回退」
-// 的核心反例组（2026-11-02 补）。
+// 写失败注入（目录只读）：flush 保留 dirty、会话仍可用；权限恢复后重试
+// 可持久化（提交已发生但持久化失败不得错误回退；2026-11-02 补）。
+// 设置进程侧「写入失败不能显示保存成功」由 SettingsStoreTests 覆盖。
 void test_write_failure_paths(const Env &env) {
     namespace fs = std::filesystem;
     write_file(env.wordsPath, "#gogaku-custom-words\tv1\n");
@@ -1325,10 +1227,7 @@ void test_write_failure_paths(const Env &env) {
     DelSnap commit{send(s, GC_EV_SPACE)};
     check_eq(commit.p ? commit.p->commit : "", "你好", "只读目录下上屏不受影响");
     check(gc_normal_flush(s) == 0, "flush 写失败不报错（dirty 保留，下次重写）");
-    DelSnap again{send(s, GC_EV_QUICK_ADD)};
-    check_eq(again.p ? again.p->status : "", "自定义词语保存失败", "快速添加写失败明确提示");
-    check(again.p != nullptr && again.p->beep == 1, "写失败伴随 beep");
-    // 会话仍可用：失败后继续输入不卡死。
+    // 会话仍可用：写失败后继续输入不卡死。
     send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
     DelSnap alive{send(s, GC_EV_TEXT, "h")};
     check(alive.p != nullptr && alive.p->composing == 1, "写失败后组合仍可继续");
@@ -1384,7 +1283,6 @@ int main() {
         {"custom_words", test_custom_words},
         {"factory_custom_pinyin", test_factory_custom_pinyin},
         {"factory_auto_pinyin", test_factory_auto_pinyin},
-        {"quick_add", test_quick_add},
         {"delete_word", test_delete_word},
         {"delete_prefixed_learned_word", test_delete_prefixed_learned_word},
         {"flush_persistence", test_flush_and_persistence},
