@@ -31,6 +31,9 @@ DEFAULT_INSTALL = Path.home() / "Library/Application Support/Gogaku/translation"
 DEFAULT_CACHE = Path.home() / "Library/Caches/Gogaku/models/quickmt-speed"
 DEFAULT_PYTHON = "/usr/bin/python3"
 WORKER_SOURCE = ROOT / "scripts" / "quickmt_worker.py"
+# volcengine 云端后端（2026-11-04）：stdlib-only worker 同目录装配；不进 manifest
+#（manifest 是 quickmt 装配记录），由 environment() 按文件存在性校验。
+VOLC_WORKER_SOURCE = ROOT / "scripts" / "volcengine_translate_worker.py"
 
 PINNED_CTRANSLATE2 = "4.6.0"
 PINNED_SENTENCEPIECE = "0.2.0"
@@ -160,6 +163,14 @@ def step_worker(root: Path) -> str:
     return sha256(target)
 
 
+def step_volcengine_worker(root: Path) -> None:
+    if not VOLC_WORKER_SOURCE.is_file():
+        fail(f"volcengine worker 源码缺失：{VOLC_WORKER_SOURCE}")
+    target = root / "volcengine_translate_worker.py"
+    shutil.copy2(VOLC_WORKER_SOURCE, target)
+    print(f"volcengine worker 已装配：{target}", flush=True)
+
+
 def step_manifest(root: Path, assembled: list, worker_sha: str) -> None:
     existing = {}
     manifest_path = root / "manifest.json"
@@ -205,6 +216,7 @@ def main():
     args = parser.parse_args()
     if args.worker_only:
         worker_sha = step_worker(args.root)
+        step_volcengine_worker(args.root)
         step_manifest(args.root, [], worker_sha)
         print(f"worker 已更新：{args.root}", flush=True)
         return
@@ -213,6 +225,7 @@ def main():
     assembled = step_models(args.root, args.cache)
     step_venv(args.root, args.python, args.skip_venv)
     worker_sha = step_worker(args.root)
+    step_volcengine_worker(args.root)
     step_manifest(args.root, assembled, worker_sha)
     print(f"学习翻译后端就绪：{args.root}", flush=True)
 

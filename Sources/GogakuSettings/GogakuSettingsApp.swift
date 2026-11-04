@@ -287,24 +287,24 @@ private struct ResourcesPage: View {
         let exhausted = used >= quota
         return VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
-                Text("火山免费额度")
-                    .font(.system(size: 12.5))
+                Text("火山免费额度（200 万字符 / 自然月）")
+                    .font(.system(size: 12.5, weight: .medium))
                     .foregroundStyle(SettingsPalette.primaryText)
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(SettingsPalette.secondaryText.opacity(0.25))
-                        Capsule().fill(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
-                            .frame(width: max(2, geo.size.width * fraction))
-                    }
-                }
-                .frame(height: 6)
+                Spacer()
                 Text("\(percent)%")
                     .font(.system(size: 12.5, design: .monospaced))
                     .foregroundStyle(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
-                    .frame(minWidth: 38, alignment: .trailing)
             }
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(SettingsPalette.secondaryText.opacity(0.25))
+                    Capsule().fill(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
+                        .frame(width: max(2, geo.size.width * fraction))
+                }
+            }
+            .frame(height: 6)
             HStack(spacing: 8) {
-                Text("已用 \(used) / 200 万字符 · \(daysLeft) 天后重置（每月 1 日）")
+                Text("已用 \(used.formatted()) / 2,000,000 字符 · \(daysLeft) 天后重置（每月 1 日）")
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
                 if exhausted {
@@ -384,10 +384,6 @@ private struct ResourcesPage: View {
                     .labelsHidden()
                     .frame(width: 190)
                     .accessibilityLabel("学习翻译后端选择")
-                }
-                if LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine" {
-                    SettingsRowDivider()
-                    volcengineUsageRow
                 }
                 // 双分区（2026-11-04 方案 A）：本地区（beam＋状态）／云端区（连接卡＋用量）。
                 if LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine" {
