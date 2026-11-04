@@ -30,11 +30,12 @@ enum BuildIdentity {
 }
 
 private enum SettingsPage: String, CaseIterable, Identifiable {
-    case resources, normalInput, customWords, shortcuts, privacy, records
+    // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页。
+    case normalInput, resources, customWords, shortcuts, privacy, records
     var id: Self { self }
     var title: String {
         switch self {
-        case .resources: return "语言资源"
+        case .resources: return "学习翻译"
         case .normalInput: return "普通输入"
         case .customWords: return "自定义词语"
         case .shortcuts: return "快捷键"
@@ -217,7 +218,7 @@ private struct SidebarItem: View {
     }
 }
 
-// MARK: - 语言资源页（不提供 Apple Translation 查询与安装入口；
+// MARK: - 学习翻译页（原「语言资源」；不提供 Apple Translation 查询与安装入口；
 // 原型为两个 section＋hr；quickmt 开发版裁决后新增「学习翻译（开发版）」区块）
 
 private struct ResourcesPage: View {
@@ -243,9 +244,6 @@ private struct ResourcesPage: View {
                     Text("学习功能：开发版自用已解锁，正式质量门槛未过。")
                         .font(.system(size: 12.5))
                         .foregroundStyle(SettingsPalette.primaryText)
-                    Text("本页不提供系统语言资源安装入口。")
-                        .font(.system(size: 11))
-                        .foregroundStyle(SettingsPalette.secondaryText)
                 }
             }
         }
