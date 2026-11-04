@@ -222,7 +222,6 @@ private struct SidebarItem: View {
 
 private struct ResourcesPage: View {
     @Binding var settings: GogakuCore.Settings
-    @State private var bundled: [(name: String, size: String?)] = []
     @State private var backend = LearningTranslation.Environment(ready: false, missing: [])
     @State private var volcAccessKey = ""
     @State private var volcSecretKey = ""
@@ -233,19 +232,6 @@ private struct ResourcesPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            section("本地翻译") {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(Array(bundled.enumerated()), id: \.element.name) { index, item in
-                        resourceRow(item)
-                        if index < bundled.count - 1 { SettingsRowDivider() }
-                    }
-                    Text("以上为实际随包数据。资源缺失时普通输入自动降级，不影响已安装词库。")
-                        .font(.system(size: 11))
-                        .foregroundStyle(SettingsPalette.secondaryText)
-                        .padding(.top, 8)
-                }
-            }
-            SettingsRule()
             learningTranslationSection
             SettingsRule()
             section("开发版状态") {
@@ -264,7 +250,6 @@ private struct ResourcesPage: View {
             }
         }
         .onAppear {
-            loadBundled()
             backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
             loadVolcengineCredentials()
         }
@@ -518,40 +503,6 @@ private struct ResourcesPage: View {
                 .foregroundStyle(SettingsPalette.primaryText)
                 .accessibilityAddTraits(.isHeader)
             content()
-        }
-    }
-
-    /// 资源行（原型 .word：↧ 图标块 32×32＋名称＋尺寸）。
-    private func resourceRow(_ item: (name: String, size: String?)) -> some View {
-        HStack(spacing: 10) {
-            Text("↧")
-                .font(.system(size: 13))
-                .foregroundStyle(SettingsPalette.accentText)
-                .frame(width: 32, height: 32)
-                .background(RoundedRectangle(cornerRadius: 8).fill(SettingsPalette.accentSoft))
-                .accessibilityHidden(true)
-            Text(item.name)
-                .font(.system(size: 13))
-                .foregroundStyle(SettingsPalette.primaryText)
-            Spacer()
-            Text(item.size ?? "—")
-                .font(.system(size: 11))
-                .foregroundStyle(SettingsPalette.secondaryText)
-        }
-        .padding(.vertical, 8)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(item.name)，\(item.size ?? "未随包提供")")
-    }
-
-    private func loadBundled() {
-        let data = Paths.engineData
-        let names = ["sc.dict", "zh_CN.lm", "english-words.txt", "gloss.tsv"]
-        bundled = names.map { name in
-            let url = data.appendingPathComponent(name)
-            if let values = try? url.resourceValues(forKeys: [.fileSizeKey]), let size = values.fileSize {
-                return (name, ByteCountFormatter.string(fromByteCount: Int64(size), countStyle: .file))
-            }
-            return (name, nil)
         }
     }
 
