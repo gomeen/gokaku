@@ -394,5 +394,12 @@ if __name__ == '__main__':
             if path.is_file(): report.append({'path': str(path.relative_to(DIST)), 'bytes': path.stat().st_size, 'sha256': digest(path)})
     (DIST / 'bundle-manifest.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     identity_path = write_dist_identity(apps, meta, args.configuration, bool(args.validation))
+    # dist 产物在仓库路径里会被 Spotlight/LaunchServices 自动注册，与已安装副本
+    # 同输入源 ID 双注册（曾致输入法菜单出现两个 Gogaku，重启后菜单一拖到下次
+    # 登录才收敛）。构建尾统一注销，已安装路径不受影响。
+    lsregister = ('/System/Library/Frameworks/CoreServices.framework/Frameworks/'
+                  'LaunchServices.framework/Support/lsregister')
+    for app in apps:
+        subprocess.run([lsregister, '-u', str(app)], capture_output=True)
     print('\n'.join(str(app) for app in apps))
     print(f'构建身份：{identity_path}')
