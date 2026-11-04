@@ -25,6 +25,23 @@ final class LearningTranslationTests: XCTestCase {
         XCTAssertEqual(LearningTranslation.clampedBeam(7), 7)
     }
 
+    // MARK: 后端白名单（2026-11-04 回归：volcengine 未入白名单被归一化回 quickmt）
+
+    func testBackendNormalizationKeepsVolcengine() {
+        XCTAssertEqual(LearningTranslation.normalizedBackend("volcengine"), "volcengine")
+        XCTAssertEqual(LearningTranslation.normalizedBackend("small100"), "small100")
+        XCTAssertEqual(LearningTranslation.normalizedBackend("quickmt"), "quickmt")
+        XCTAssertEqual(LearningTranslation.normalizedBackend("unknown"), "quickmt")
+        XCTAssertEqual(LearningTranslation.normalizedBackend(nil), "quickmt")
+        XCTAssertTrue(LearningTranslation.backendOptions.contains("volcengine"))
+        // volcengine 走系统 python3＋凭据文件参数，不经 venv
+        let volc = LearningTranslation.serviceConfiguration(root: root, beam: 3, backend: "volcengine")
+        XCTAssertEqual(volc.executable.path, "/usr/bin/python3")
+        XCTAssertEqual(volc.arguments,
+                       [root.appendingPathComponent("volcengine_translate_worker.py").path,
+                        "--credentials", root.appendingPathComponent("volcengine-credentials.json").path])
+    }
+
     // MARK: 后端状态（设置页缺失与就绪口径）
 
     func testEnvironmentReportsMissingParts() {

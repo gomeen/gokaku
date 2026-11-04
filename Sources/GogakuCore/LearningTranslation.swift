@@ -19,9 +19,12 @@ public enum LearningTranslation {
     public static let defaultBeam = 1
 
     /// 翻译后端选项：quickmt（默认，快）｜small100（2026-11-03 用户裁决：仅换
-    /// 模型的质量试验，功能层不变）。未知值一律回退默认。
+    /// 模型的质量试验，功能层不变）｜volcengine（2026-11-04 用户裁决：云端 NMT，
+    /// 仅学习模式联网）。未知值一律回退默认。
+    /// 2026-11-04 修复：volcengine 未入白名单导致设置页/输入法把它归一化回
+    /// quickmt（云端分区不显示、学习翻译实际仍走本地）。
     public static let defaultBackend = "quickmt"
-    public static let backendOptions = ["quickmt", "small100"]
+    public static let backendOptions = ["quickmt", "small100", "volcengine"]
 
     public static func normalizedBackend(_ value: String?) -> String {
         guard let value, backendOptions.contains(value) else { return defaultBackend }
