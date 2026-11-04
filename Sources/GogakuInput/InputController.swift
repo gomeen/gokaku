@@ -1005,6 +1005,7 @@ final class GogakuInputController: IMKInputController {
         guard active, displayed != nil, target != nil else { stopPositionRefresh(); return }
         guard let current = currentTarget(readRectangle: true), let anchor = target,
               current.application == anchor.application, current.pid == anchor.pid else {
+            NSLog("GogakuDiag: refresh-hide keep-comp")
             hidePanelKeepComposition()
             return
         }
@@ -1260,13 +1261,16 @@ final class GogakuInputController: IMKInputController {
         let work = DispatchWorkItem { [weak self] in
             guard let self, self.mode == .learning, self.direction == .enToZh,
                   self.displayed?.candidates.isEmpty != false else { return }
-            if self.translator.hasPendingWork {
+            let busy = self.translator.hasPendingWork
+            NSLog("GogakuDiag: hide-work fire busy=%@", busy ? "Y" : "N")
+            if busy {
                 // 在途请求（防抖／排队／在飞）尚未返回：顺延等待，不隐藏。
                 // 云端后端（火山）时延可超固定宽限，按时长猜会复现先隐后显闪烁
                 //（2026-11-04 用户反馈英→中闪烁回归；本地 0.7s 经验值仅作首延）。
                 self.scheduleEnToZhHide(delay: 0.25)
                 return
             }
+            NSLog("GogakuDiag: dismiss hide-work")
             self.panel.dismiss()
         }
         enToZhHideWork = work
@@ -1284,13 +1288,22 @@ final class GogakuInputController: IMKInputController {
             if completesEdit { self.pendingEdits = max(0, self.pendingEdits - 1) }
             guard self.pendingEdits == 0 else { return }
             self.displayed = value
+            NSLog("GogakuDiag: publish raw=%dchars cand=%d focus=%@/%@ rect=%d",
+                  value.raw.count, value.candidates.count,
+                  self.focus == generation ? "match" : "MISMATCH",
+                  NSString(format: "%llu", generation), self.displayRect != nil ? 1 : 0)
             if value.raw.isEmpty {
+                NSLog("GogakuDiag: dismiss raw-empty")
                 self.panel.dismiss(); self.target = nil; return
             }
             // 英→中无宿主侧组合：只校验同应用同进程（与 applyNormal 口径一致），
             // 光标漂移跟随新插入点；组合起点全等会误杀组合（每键入一次即 suspend）。
-            guard let current = self.currentTarget(strictComposition: false) else { self.suspend(); return }
-            guard let previous = self.target else { self.suspend(); return }
+            guard let current = self.currentTarget(strictComposition: false) else {
+                NSLog("GogakuDiag: suspend currentTarget-fail"); self.suspend(); return
+            }
+            guard let previous = self.target else {
+                NSLog("GogakuDiag: suspend target-nil"); self.suspend(); return
+            }
             if current.application != previous.application || current.pid != previous.pid {
                 // 诊断：无原文内容，仅失败原因与选区形状，供真机回归定位。
                 NSLog("GogakuLearning: publish lost field app=%d pid=%d sel=%ld:%ld anchor=%ld:%ld",
@@ -1322,11 +1335,15 @@ final class GogakuInputController: IMKInputController {
             // 英→中无译文结果不立即隐藏（宽限 0.4s 防逐键闪烁，2026-11 用户裁决）；
             // 期间译文到达即原地刷新；停下且确实无译文才隐藏。
             if self.mode == .learning, self.direction == .enToZh, value.candidates.isEmpty {
+                NSLog("GogakuDiag: empty-candidates schedule-hide busy=%@", self.translator.hasPendingWork ? "Y" : "N")
                 self.scheduleEnToZhHide()
                 return
             }
             self.cancelEnToZhHide()
-            guard let rect = self.displayRect else { self.panel.dismiss(); return }
+            guard let rect = self.displayRect else {
+                NSLog("GogakuDiag: dismiss displayRect-nil-at-render")
+                self.panel.dismiss(); return
+            }
             self.panel.render(value, at: rect, targetWindowLevel:
                               GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
         }
