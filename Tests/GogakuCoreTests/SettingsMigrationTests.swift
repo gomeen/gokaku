@@ -27,6 +27,17 @@ final class SettingsMigrationTests: XCTestCase {
         XCTAssertFalse(settings.appDefaultEnglish[0].enabled)
     }
 
+    func testEffectiveDefaultEnglishExcludesAppsWithExplicitModeMemory() throws {
+        // 2026-11-04 用户裁决：切换应用时记住的普通／学习模式优先级高于
+        // 「默认应用是英文」；从未显式切过的应用仍按默认英文直达。
+        let settings = try decode("""
+        {"appDefaultEnglish": ["com.a", "com.b", "com.c"],
+         "applications": {"com.a": {"mode": "learning", "direction": "zhToEn"},
+                          "com.b": {"mode": "normal", "direction": "zhToEn"}}}
+        """)
+        XCTAssertEqual(settings.effectiveDefaultEnglishApps, ["com.c"])
+    }
+
     func testLegacyShortcutDefaultsAndDisabledSurvive() throws {
         // 旧格式：缺 disabled 字段不等于清除。
         let legacy = try decode("""

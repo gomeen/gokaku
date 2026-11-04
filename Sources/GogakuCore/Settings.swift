@@ -265,6 +265,13 @@ public struct Settings: Codable {
         appDefaultEnglish.filter(\.enabled).map(\.id)
     }
 
+    /// 默认英文实际下发生效的应用列表：显式记过模式记忆的应用剔除
+    /// （2026-11-04 用户裁决：切换应用时记住的普通／学习模式优先级高于
+    /// 「默认应用是英文」；从未显式切过的应用仍按默认英文直达）。
+    public var effectiveDefaultEnglishApps: [String] {
+        enabledDefaultEnglishApps.filter { applications[$0] == nil }
+    }
+
     /// 模糊音位标志（与共享核心 GC_FUZZY_* 一致）。
     public var fuzzyMask: UInt32 {
         var mask: UInt32 = 0

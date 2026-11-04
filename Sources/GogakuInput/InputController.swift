@@ -443,7 +443,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                           fuzzyMask: settings.fuzzyMask,
                           fullPinyinPreedit: settings.fullPinyinPreedit,
                           freqEnabled: settings.frequencyEnabled)
-            normal.setAppDefaults(settings.enabledDefaultEnglishApps)
+            normal.setAppDefaults(settings.effectiveDefaultEnglishApps)
             normal.setExcludedApps(Array(settings.quickAddExcludedApplications))
             normal.reloadCustomWords()
         }
@@ -1499,7 +1499,7 @@ final class ToastWindow: NSPanel {
     private var hideWork: DispatchWorkItem?
 
     init() {
-        super.init(contentRect: NSRect(x: 0, y: 0, width: 44, height: 36),
+        super.init(contentRect: NSRect(x: 0, y: 0, width: 36, height: 28),
                    styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         level = .statusBar
         isFloatingPanel = true
@@ -1511,9 +1511,10 @@ final class ToastWindow: NSPanel {
         // 深色圆角背景：白字在任何宿主背景上都可读（用户反馈：加背景）。
         box.wantsLayer = true
         box.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.78).cgColor
-        box.layer?.cornerRadius = 9
+        box.layer?.cornerRadius = 7
         box.layer?.masksToBounds = true
-        label.font = .systemFont(ofSize: 22, weight: .medium)
+        // 2026-11 用户反馈：提示整体缩小（22pt → 16pt，盒子与内边距同步）。
+        label.font = .systemFont(ofSize: 16, weight: .medium)
         // 固定白字：深色 HUD 底上浅色外观的默认黑字不可读（用户反馈：亮色兼容）。
         label.textColor = .white
         label.alignment = .center
@@ -1531,7 +1532,7 @@ final class ToastWindow: NSPanel {
         hideWork?.cancel()
         // 按文本自适应尺寸（固定 44×36 会截断「中→英」等提示）。
         let textSize = text.size(withAttributes: [.font: label.font!])
-        let size = NSSize(width: max(44, ceil(textSize.width) + 24), height: 40)
+        let size = NSSize(width: max(36, ceil(textSize.width) + 16), height: 28)
         // 用户裁决：提示必须在输入附近；无有效锚点时不显示（不放固定角落）。
         guard let caret = anchor, caret != .zero,
               let origin = PanelPlacement.toastOrigin(
