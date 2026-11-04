@@ -374,8 +374,8 @@ final class PanelContent: NSView {
             // capHeight 高度（旧版整行高，比小写字母高出一截，2026-11-04 反馈）。
             let font = theme.annotationFont
             let baselineY = layout.preeditTextRect.minY + font.ascender
-            NSBezierPath(rect: NSRect(x: caretX, y: baselineY - 1,
-                                      width: 1.5, height: font.capHeight + 2)).fill()
+            NSBezierPath(rect: NSRect(x: caretX, y: baselineY - font.capHeight - 0.5,
+                                      width: 1.5, height: font.capHeight + 1)).fill()
         }
         for row in layout.rows {
             if row.selected {
