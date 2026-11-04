@@ -117,13 +117,11 @@ public struct AppPreference: Codable {
 public enum ConfigurableCommand: String, CaseIterable, Sendable {
     case modeSwitch = "gogaku.mode"
     case directionSwitch = "gogaku.direction"
-    case quickAdd = "gogaku.quickAdd"
 
     public var displayName: String {
         switch self {
         case .modeSwitch: return "普通／学习"
         case .directionSwitch: return "学习方向"
-        case .quickAdd: return "快速添加"
         }
     }
 
@@ -131,7 +129,6 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
         switch self {
         case .modeSwitch: return "切换中文输入与语言学习模式"
         case .directionSwitch: return "切换中文到英语、英语到中文"
-        case .quickAdd: return "把最近上屏的中文存为拼音词"
         }
     }
 
@@ -139,7 +136,6 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
         switch self {
         case .modeSwitch: return settings.modeShortcut
         case .directionSwitch: return settings.directionShortcut
-        case .quickAdd: return settings.quickAddShortcut
         }
     }
 
@@ -147,7 +143,6 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
         switch self {
         case .modeSwitch: settings.modeShortcut = shortcut
         case .directionSwitch: settings.directionShortcut = shortcut
-        case .quickAdd: settings.quickAddShortcut = shortcut
         }
     }
 
@@ -155,7 +150,6 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
         switch self {
         case .modeSwitch: return Shortcut(key: "k", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
         case .directionSwitch: return Shortcut(key: "j", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
-        case .quickAdd: return Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
         }
     }
 }
@@ -200,8 +194,6 @@ public struct Settings: Codable {
     public var englishCandidatesEnabled = true
     /// 按应用默认英文：新格式带启用状态；计算属性输出启用中的 bundle id。
     public var appDefaultEnglish: [EnglishAppEntry] = defaultEnglishApps.map { EnglishAppEntry(id: $0) }
-    public var quickAddShortcut = Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
-    public var quickAddExcludedApplications: Set<String> = []
     /// 学习翻译（quickmt 开发版，2026-11 裁决 docs/learning-quickmt-dev-decision.md）：
     /// 默认开启；关闭即回门禁态（菜单置灰、会话释放、正式口径不变）。
     public var learningTranslationEnabled = true
@@ -224,8 +216,7 @@ public struct Settings: Codable {
         case modeShortcut, directionShortcut, candidateTheme
         case inputScheme, fuzzyPinyin, candidateFontSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
-        case englishCandidatesEnabled, appDefaultEnglish, quickAddShortcut
-        case quickAddExcludedApplications
+        case englishCandidatesEnabled, appDefaultEnglish
         case learningTranslationEnabled, learningBeamSize, learningTranslationBackend
         case preferredMode, preferredDirection
         case volcengineUsageMonth, volcengineUsageCharacters
@@ -261,9 +252,6 @@ public struct Settings: Codable {
             appDefaultEnglish = try container.decodeIfPresent([EnglishAppEntry].self, forKey: .appDefaultEnglish)
                 ?? defaultEnglishApps.map { EnglishAppEntry(id: $0) }
         }
-        quickAddShortcut = try container.decodeIfPresent(Shortcut.self, forKey: .quickAddShortcut)
-            ?? Shortcut(key: "a", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
-        quickAddExcludedApplications = try container.decodeIfPresent(Set<String>.self, forKey: .quickAddExcludedApplications) ?? []
         learningTranslationEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled) ?? true
         learningBeamSize = LearningTranslation.clampedBeam(
             try container.decodeIfPresent(Int.self, forKey: .learningBeamSize) ?? LearningTranslation.defaultBeam)

@@ -5,7 +5,7 @@ import GogakuCore
 /// 头部卡片：标题行（⌨ 图标＋「键盘快捷方式」＋右侧搜索框）与筛选胶囊分行；
 /// 表格统一四列「命令名称 → 键帽（210）→ 来源（90）→ 操作（104）」，
 /// 可编辑行、固定行与空状态行共用同一列宽与对齐。
-/// 三个可配置命令统一纳入（普通／学习、学习方向、快速添加）；固定操作按真实
+/// 两个可配置命令统一纳入（普通／学习、学习方向）；固定操作按真实
 /// 普通／学习语义展示，不可编辑。冲突草稿由页面统一持有：录制产生的冲突
 /// 不写入设置，「冲突」筛选与行内提示都能看到。
 struct ShortcutsPage: View {
@@ -32,7 +32,7 @@ struct ShortcutsPage: View {
         VStack(alignment: .leading, spacing: 0) {
             // 用户裁决 2026-11-02：去掉标题行，筛选胶囊与搜索同行。
             headerCard
-            groupHeader("模式与快速添加")
+            groupHeader("模式切换")
             commandRows
             groupHeader("组合中的操作")
             fixedRows

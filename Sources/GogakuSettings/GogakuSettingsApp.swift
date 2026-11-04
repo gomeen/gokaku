@@ -224,6 +224,9 @@ private struct ResourcesPage: View {
     @Binding var settings: GogakuCore.Settings
     @State private var bundled: [(name: String, size: String?)] = []
     @State private var backend = LearningTranslation.Environment(ready: false, missing: [])
+    @State private var volcAccessKey = ""
+    @State private var volcSecretKey = ""
+    @State private var volcCredentialsDirty = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -260,12 +263,14 @@ private struct ResourcesPage: View {
         .onAppear {
             loadBundled()
             backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
+            loadVolcengineCredentials()
         }
         .onChange(of: settings.learningTranslationEnabled) { _, _ in
             backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
         }
         .onChange(of: settings.learningTranslationBackend) { _, _ in
             backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
+            loadVolcengineCredentials()
         }
     }
 
@@ -327,6 +332,15 @@ private struct ResourcesPage: View {
                                                   month: (components.month ?? 1) + 1, day: 1)) ?? Date()
     }
 
+    /// 火山凭据载入输入框（仅学习后端为 volcengine 时有意义）。
+    private func loadVolcengineCredentials() {
+        guard LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine",
+              let credentials = LearningTranslation.volcengineCredentials() else { return }
+        volcAccessKey = credentials.accessKey
+        volcSecretKey = credentials.secretKey
+        volcCredentialsDirty = false
+    }
+
     /// 后端感知的就绪描述。
     private var backendReadyText: String {
         switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
@@ -375,43 +389,110 @@ private struct ResourcesPage: View {
                     SettingsRowDivider()
                     volcengineUsageRow
                 }
-                SettingsRowDivider()
-                SettingsRow("beam 大小",
-                            detail: settings.learningTranslationBackend == "volcengine"
-                                ? "火山翻译为 NMT，无 beam 概念（此设置对该后端无效）。"
-                                : "1＝贪心最快（中位约 88ms）；已知重复句等缺陷随 beam 升高缓解，代价是延迟增加。变更后对新翻译请求生效。") {
-                    Stepper(value: Binding(get: { settings.learningBeamSize },
-                                           set: { settings.learningBeamSize = LearningTranslation.clampedBeam($0); submit() }),
-                            in: LearningTranslation.beamRange) {
-                        Text("\(settings.learningBeamSize)")
-                            .font(.system(size: 13, design: .monospaced))
-                            .foregroundStyle(settings.learningTranslationBackend == "volcengine"
-                                             ? SettingsPalette.secondaryText : SettingsPalette.primaryText)
-                            .frame(minWidth: 24)
+                // 双分区（2026-11-04 方案 A）：本地区（beam＋状态）／云端区（连接卡＋用量）。
+                if LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine" {
+                    SettingsRowDivider()
+                    VStack(alignment: .leading, spacing: 0) {
+                        HStack(spacing: 8) {
+                            Text("火山翻译").font(.system(size: 14, weight: .semibold))
+                            Text(backend.ready ? "● 凭据已配置" : "● 凭据未配置")
+                                .font(.system(size: 11, weight: .medium))
+                                .padding(.horizontal, 8).padding(.vertical, 2)
+                                .background(backend.ready ? Color.green.opacity(0.12) : Color.red.opacity(0.12))
+                                .foregroundStyle(backend.ready ? Color.green : Color.red)
+                                .clipShape(Capsule())
+                        }
+                        .padding(.vertical, 8)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Access Key ID").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
+                            SecureField("AKLT…", text: $volcAccessKey)
+                                .font(.system(size: 12, design: .monospaced))
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: volcAccessKey) { _, _ in volcCredentialsDirty = true }
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Secret Access Key").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
+                            SecureField("TWp…", text: $volcSecretKey)
+                                .font(.system(size: 12, design: .monospaced))
+                                .textFieldStyle(.roundedBorder)
+                                .onChange(of: volcSecretKey) { _, _ in volcCredentialsDirty = true }
+                        }
+                        HStack(spacing: 10) {
+                            Button("保存凭据") {
+                                do {
+                                    try LearningTranslation.saveVolcengineCredentials(
+                                        LearningTranslation.VolcengineCredentials(accessKey: volcAccessKey, secretKey: volcSecretKey))
+                                    volcCredentialsDirty = false
+                                    backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
+                                } catch {
+                                    NSLog("GogakuSettings: 保存火山凭据失败 \(error)")
+                                }
+                            }
+                            .font(.system(size: 12))
+                            .buttonStyle(.borderedProminent)
+                            .disabled(volcAccessKey.isEmpty || volcSecretKey.isEmpty || !volcCredentialsDirty)
+                            if volcCredentialsDirty {
+                                Text("有未保存修改").font(.system(size: 11)).foregroundStyle(SettingsPalette.secondaryText)
+                            }
+                        }
+                        .padding(.vertical, 6)
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.shield").font(.system(size: 11))
+                            Text("凭据仅写入本机 0600 权限文件（~/Library/Application Support/Gogaku/translation/），绝不进入代码仓库、设置同步或任何云端。")
+                                .font(.system(size: 11))
+                        }
+                        .foregroundStyle(Color.green)
+                        .background(Color.green.opacity(0.1))
+                        .padding(8)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
-                    .accessibilityLabel("翻译 beam 大小，1 到 10")
-                    .disabled(settings.learningTranslationBackend == "volcengine")
-                }
-                SettingsRowDivider()
-                VStack(alignment: .leading, spacing: 4) {
-                    if backend.ready {
-                        Text(backendReadyText)
-                            .font(.system(size: 12.5))
-                            .foregroundStyle(SettingsPalette.primaryText)
-                    } else {
-                        Text("后端状态：缺失（\(backend.missing.joined(separator: "、"))）")
-                            .font(.system(size: 12.5))
-                            .foregroundStyle(SettingsPalette.primaryText)
-                        Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand(backend: settings.learningTranslationBackend))")
-                            .font(.system(size: 11, design: .monospaced))
-                            .foregroundStyle(SettingsPalette.secondaryText)
-                            .textSelection(.enabled)
-                    }
-                    Text(backendNoticeText)
+                    SettingsRowDivider()
+                    volcengineUsageRow
+                    SettingsRowDivider()
+                    Text("☁️ 云端仅学习模式联网（只访问火山翻译 API 域）；普通模式不经任何翻译路径。实测中位延迟 114ms，20 句固定失败点全对。")
                         .font(.system(size: 11))
                         .foregroundStyle(SettingsPalette.secondaryText)
+                        .padding(.vertical, 10)
+                    if !backend.ready {
+                        Text("缺失：\(backend.missing.joined(separator: "、"))。可在上方填写凭据后保存。")
+                            .font(.system(size: 11))
+                            .foregroundStyle(Color.red)
+                            .padding(.bottom, 10)
+                    }
+                } else {
+                    SettingsRowDivider()
+                    SettingsRow("beam 大小",
+                                detail: "1＝贪心最快（中位约 88ms）；已知重复句等缺陷随 beam 升高缓解，代价是延迟增加。变更后对新翻译请求生效。") {
+                        Stepper(value: Binding(get: { settings.learningBeamSize },
+                                               set: { settings.learningBeamSize = LearningTranslation.clampedBeam($0); submit() }),
+                                in: LearningTranslation.beamRange) {
+                            Text("\(settings.learningBeamSize)")
+                                .font(.system(size: 13, design: .monospaced))
+                                .foregroundStyle(SettingsPalette.primaryText)
+                                .frame(minWidth: 24)
+                        }
+                        .accessibilityLabel("翻译 beam 大小，1 到 10")
+                    }
+                    SettingsRowDivider()
+                    VStack(alignment: .leading, spacing: 4) {
+                        if backend.ready {
+                            Text(backendReadyText)
+                                .font(.system(size: 12.5))
+                                .foregroundStyle(SettingsPalette.primaryText)
+                        } else {
+                            Text("后端状态：缺失（\(backend.missing.joined(separator: "、"))）")
+                                .font(.system(size: 12.5))
+                                .foregroundStyle(SettingsPalette.primaryText)
+                            Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand(backend: settings.learningTranslationBackend))")
+                                .font(.system(size: 11, design: .monospaced))
+                                .foregroundStyle(SettingsPalette.secondaryText)
+                                .textSelection(.enabled)
+                        }
+                        Text(backendNoticeText)
+                            .font(.system(size: 11))
+                            .foregroundStyle(SettingsPalette.secondaryText)
+                    }
                 }
-                .padding(.vertical, 9)
             }
         }
     }

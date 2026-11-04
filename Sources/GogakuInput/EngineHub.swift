@@ -85,7 +85,6 @@ final class EngineHub {
         config.englishEnabled = settings.englishCandidatesEnabled
         let engine = NormalEngine(config: config)
         engine?.setAppDefaults(settings.enabledDefaultEnglishApps)
-        engine?.setExcludedApps(Array(settings.quickAddExcludedApplications))
         if let message = engine?.creationError {
             NSLog("Gogaku NormalEngine: %@", message)
         }

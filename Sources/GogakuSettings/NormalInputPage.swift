@@ -4,7 +4,7 @@ import GogakuCore
 /// 普通输入页（2026-11-03 定稿，对应原型 panels）：输入方案（纵向单选＋模糊音
 /// 三列九项 checkbox）、候选窗与输入区（12–16 整数滑块带刻度、左标签右控件行、
 /// 「显示英文释义／显示输入的字母」开关、「展开全拼／原始编码」分段控件）、
-/// 英文候选与调频、按应用默认英文、快速添加（内联录制＋排除应用）。
+/// 英文候选与调频、按应用默认英文。
 /// 所有改动立即提交（连续文本输入合并 300ms）。
 struct NormalInputPage: View {
     @Binding var settings: GogakuCore.Settings
@@ -23,7 +23,6 @@ struct NormalInputPage: View {
             SettingsCardSpacing()
             appDefaultsCard
             SettingsCardSpacing()
-            quickAddCard
             if !freqClearHint.isEmpty {
                 Text(freqClearHint)
                     .font(.system(size: 11))
@@ -192,42 +191,6 @@ struct NormalInputPage: View {
                 addSheetTitle: "添加应用",
                 accessibilityPrefix: "默认英文",
                 catalog: catalog)
-            .padding(.vertical, 4)
-        }
-    }
-
-    // MARK: 快速添加（内联快捷键录制；无长说明）
-
-    private var quickAddCard: some View {
-        SettingsCard("快速添加") {
-            VStack(alignment: .leading, spacing: 8) {
-                // .inline：「快捷键：」＋键帽＋「重新录制」。
-                HStack(spacing: 10) {
-                    Text("快捷键：")
-                        .font(.system(size: 11))
-                        .foregroundStyle(SettingsPalette.secondaryText)
-                    ShortcutEditor(command: .quickAdd,
-                                   shortcut: Binding(get: { settings.quickAddShortcut },
-                                                     set: { settings.quickAddShortcut = $0; submit() }),
-                                   settings: settings,
-                                   layout: .inlineRecord)
-                }
-                .padding(.vertical, 4)
-                .accessibilityElement(children: .contain)
-                Text("排除应用（无开关，加入即排除）")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(SettingsPalette.primaryText)
-                AppListEditor(mode: .excluded(ids: Binding(
-                    get: { settings.quickAddExcludedApplications },
-                    set: { newValue in
-                        settings.quickAddExcludedApplications = newValue
-                        submit()
-                    })),
-                    emptyText: "尚未排除任何应用；加入后这些应用里不能用快速添加。",
-                    addSheetTitle: "添加要排除的应用",
-                    accessibilityPrefix: "快速添加排除",
-                    catalog: catalog)
-            }
             .padding(.vertical, 4)
         }
     }

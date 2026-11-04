@@ -124,6 +124,36 @@ public enum LearningTranslation {
         return Environment(ready: missing.isEmpty, missing: missing)
     }
 
+    /// 火山翻译凭据（读写 0600 凭据文件；绝不进 settings.json／仓库／同步）。
+    public struct VolcengineCredentials: Equatable {
+        public var accessKey: String
+        public var secretKey: String
+        public init(accessKey: String, secretKey: String) {
+            self.accessKey = accessKey; self.secretKey = secretKey
+        }
+    }
+
+    public static func volcengineCredentials(root: URL = directory()) -> VolcengineCredentials? {
+        let path = root.appendingPathComponent("volcengine-credentials.json")
+        guard let data = try? Data(contentsOf: path),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let accessKey = object["accessKeyId"] as? String, !accessKey.isEmpty,
+              let secretKey = object["secretAccessKey"] as? String, !secretKey.isEmpty else { return nil }
+        return VolcengineCredentials(accessKey: accessKey, secretKey: secretKey)
+    }
+
+    public static func saveVolcengineCredentials(_ credentials: VolcengineCredentials, root: URL = directory()) throws {
+        let payload: [String: Any] = ["accessKeyId": credentials.accessKey,
+                                      "secretAccessKey": credentials.secretKey,
+                                      "region": "cn-north-1",
+                                      "host": "translate.volcengineapi.com"]
+        let data = try JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys])
+        let path = root.appendingPathComponent("volcengine-credentials.json")
+        try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+        try data.write(to: path, options: .atomic)
+        try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: path.path)
+    }
+
     /// 缺失时的准备指引（在仓库检出目录运行）。
     public static func prepareCommand(backend: String = defaultBackend) -> String {
         switch normalizedBackend(backend) {

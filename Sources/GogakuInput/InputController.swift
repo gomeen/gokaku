@@ -483,7 +483,6 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
                           fullPinyinPreedit: settings.fullPinyinPreedit,
                           freqEnabled: settings.frequencyEnabled)
             normal.setAppDefaults(settings.enabledDefaultEnglishApps)
-            normal.setExcludedApps(Array(settings.quickAddExcludedApplications))
             normal.reloadCustomWords()
         }
     }
@@ -778,9 +777,6 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         shiftPoller.markOtherKey()
         if match(settings.modeShortcut, event: event) { toggleMode(nil); return true }
         if match(settings.directionShortcut, event: event) { toggleDirection(nil); return true }
-        if match(settings.quickAddShortcut, event: event) && mode == .normal, let current = currentTarget() {
-            return handleNormalSync(.quickAdd, at: current, fieldChanged: false)
-        }
         guard let current = currentTarget(readRectangle: displayed == nil && markedShown.isEmpty) else { suspend(); return false }
         let fieldChanged = target == nil || target?.application != current.application || target?.pid != current.pid
         target = current; application = current.application
@@ -877,7 +873,7 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
         }
         if snap.beep { NSSound.beep() }
         if snap.toast != 0 { toast.show(snap.toast == 1 ? "中" : "英", anchor: freshToastAnchor()) }
-        // 无组合的瞬态说明（如快速添加结果）用提示浮层；组合中状态走面板状态行。
+        // 无组合的瞬态说明（如删词结果）用提示浮层；组合中状态走面板状态行。
         if !snap.composing && !snap.status.isEmpty { toast.show(snap.status, anchor: freshToastAnchor()) }
         if snap.candidates.contains(where: { $0.kind == GC_CAND_LEARNED }) {
             scheduleFlush()

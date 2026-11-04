@@ -10,10 +10,9 @@ import GogakuCore
 /// 页面据此清除其他命令的旧草稿。
 struct ShortcutEditor: View {
     /// 展示形态：快捷键表格行（键帽列 210＋来源列 90＋操作列 104，列宽由
-    /// SettingsPalette 统一常量驱动），或快速添加行的内联录制（键帽＋「重新录制」）。
+    /// SettingsPalette 统一常量驱动）。
     enum Layout {
         case tableRow(source: String)
-        case inlineRecord
     }
 
     let command: ConfigurableCommand
@@ -32,7 +31,7 @@ struct ShortcutEditor: View {
     @State private var recording = false
     @State private var recordingModifiers: UInt = 0
     @State private var hint = ""
-    /// 本次录制裁决出的冲突对象名（内联形态的行内提示来源）。
+    /// 本次录制裁决出的冲突对象名（页面草稿缺失时的行内提示来源）。
     @State private var internalClash = ""
     @State private var monitor: Any?
 
@@ -40,8 +39,6 @@ struct ShortcutEditor: View {
         switch layout {
         case .tableRow(let source):
             tableRowBody(source: source)
-        case .inlineRecord:
-            inlineBody
         }
     }
 
@@ -89,38 +86,6 @@ struct ShortcutEditor: View {
         // 行被筛选移除／页面切换时结束录制并移除事件监视器，避免按键持续被吞。
         .onDisappear { stopRecording() }
         .accessibilityElement(children: .contain)
-    }
-
-    // MARK: 内联形态（快速添加行）：键帽 | 冲突/提示 | 「重新录制」
-
-    private var inlineBody: some View {
-        HStack(spacing: 10) {
-            if recording {
-                recordingCapsule
-            } else {
-                keycaps
-            }
-            if let conflict = conflictDisplay {
-                Text(conflict).font(.system(size: 10.5))
-                    .foregroundStyle(SettingsPalette.danger)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            if !hint.isEmpty {
-                Text(hint).font(.system(size: 10.5))
-                    .foregroundStyle(SettingsPalette.secondaryText)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            if recording {
-                Button("取消录制") { stopRecording() }
-                    .controlSize(.small)
-                    .accessibilityLabel("取消录制\(command.displayName)快捷键")
-            } else {
-                Button("重新录制") { startRecording() }
-                    .controlSize(.small)
-                    .accessibilityLabel("重新录制\(command.displayName)快捷键")
-            }
-        }
-        .onDisappear { stopRecording() }
     }
 
     // MARK: 键帽与录制态

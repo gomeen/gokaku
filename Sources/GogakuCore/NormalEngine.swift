@@ -64,7 +64,6 @@ public enum NormalEvent {
     case left, right, up, down, home, end, pageUp, pageDown
     case ctrlA, ctrlB, ctrlE, ctrlF, ctrlN, ctrlP
     case shiftClick(side: Int64)
-    case quickAdd
     case focusSync
 }
 
@@ -147,7 +146,6 @@ public final class NormalEngine {
         case .shiftClick(let side):
             ev.kind = Int32(GC_EV_SHIFT_CLICK.rawValue)
             ev.arg = Int64(side)
-        case .quickAdd: ev.kind = Int32(GC_EV_QUICK_ADD.rawValue)
         case .focusSync: ev.kind = Int32(GC_EV_FOCUS_SYNC.rawValue)
         }
         var snapshot: UnsafeMutablePointer<GcSnapshot>?
@@ -220,19 +218,6 @@ public final class NormalEngine {
         gc_normal_set_app_defaults(session, &pointers, apps.count)
     }
 
-    public func setExcludedApps(_ apps: [String]) {
-        guard let session else { return }
-        if apps.isEmpty {
-            var dummy: [UnsafePointer<CChar>?] = [nil]
-            gc_normal_set_excluded_apps(session, &dummy, 0)
-            return
-        }
-        let copies = apps.map { $0.unsafeConstUTF8Copy() }
-        defer { copies.forEach { freeConst($0) } }
-        var pointers: [UnsafePointer<CChar>?] = copies.map { $0 }
-        gc_normal_set_excluded_apps(session, &pointers, apps.count)
-    }
-
     public func update(scheme: Int32, fuzzyMask: UInt32, fullPinyinPreedit: Bool, freqEnabled: Bool) {
         guard let session else { return }
         gc_normal_update(session, scheme, fuzzyMask, fullPinyinPreedit ? 1 : 0, freqEnabled ? 1 : 0)
@@ -248,11 +233,6 @@ public final class NormalEngine {
     public func flush() -> Bool {
         guard let session else { return false }
         return gc_normal_flush(session) == 0
-    }
-
-    public var quickAddAvailable: Bool {
-        guard let session else { return false }
-        return gc_normal_quick_add_available(session) != 0
     }
 }
 
