@@ -74,6 +74,7 @@ class VolcengineRuntime:
         self.secret_key = None
         self.overrides = {}
         self.connection = None
+        self.last_characters = None
 
     def _ensure_credentials(self):
         if self.access_key is not None:
@@ -144,8 +145,16 @@ class VolcengineRuntime:
         translation_list = result.get("TranslationList") or []
         if not translation_list:
             raise BackendError(f"missing TranslationList: {json.dumps(result, ensure_ascii=False)[:200]}")
+        entry = translation_list[0]
+        # 服务端计费口径字符数（Extra.input_characters）：带回给父进程做额度计量，
+        # 与官方账本逐字对齐（客户端标量估算仅作回退）。
+        entry_extra = entry.get("Extra") or {}
+        try:
+            self.last_characters = int(entry_extra.get("input_characters"))
+        except (TypeError, ValueError):
+            self.last_characters = None
         return strip_trailing_orphan_punctuation(
-            (translation_list[0].get("Translation") or "").strip())
+            (entry.get("Translation") or "").strip())
 
 
 ACTION = "TranslateText"
@@ -202,7 +211,7 @@ def handle(raw, runtime):
         return response(error="backend_error", target=None)
     if not text:
         return response(error="empty_output", target=None)
-    return response(target=text, error=None)
+    return response(target=text, error=None, characters=runtime.last_characters)
 
 
 def main():

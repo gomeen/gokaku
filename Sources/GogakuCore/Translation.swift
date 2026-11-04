@@ -24,9 +24,12 @@ public struct TranslationResult: Codable, Sendable {
     public let error: String?
     public let milliseconds: Double
     public let issues: [SpellingIssue]?
-    public init(request: TranslationRequest, target: String? = nil, error: String? = nil, milliseconds: Double = 0, issues: [SpellingIssue]? = nil) {
+    /// 云端后端的服务端计费字符数（如火山 Extra.input_characters）；本地后端不发。
+    public var characters: Int?
+    public init(request: TranslationRequest, target: String? = nil, error: String? = nil, milliseconds: Double = 0, issues: [SpellingIssue]? = nil, characters: Int? = nil) {
         id = request.id; stamp = request.stamp; sourceID = request.sourceID; source = request.source
         resource = request.resource; self.target = target; self.error = error; self.milliseconds = milliseconds; self.issues = issues
+        self.characters = characters
     }
 }
 /// 无文本日志、无端口。此对象只能由自己的串行队列访问。

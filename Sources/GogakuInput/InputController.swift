@@ -238,9 +238,10 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
             settings.volcengineUsageMonth = month
             settings.volcengineUsageCharacters = 0
         }
-        // 计费口径为输入字符；额外计入译文长度留存口径余量（火山按输入计费，
-        // 输入侧计数为准，译文仅在本字段供 UI 显示原文+译文总量时不误报）。
-        settings.volcengineUsageCharacters += result.source.unicodeScalars.count
+        // 优先用服务端计费字符数（Extra.input_characters，与官方账本逐字对齐）；
+        // 旧响应缺该字段时回退客户端标量估算。漏计余量：父进程超时杀 worker 时
+        // 若服务端已处理则拿不到回包（少数；控制台用量统计页可核对全量）。
+        settings.volcengineUsageCharacters += result.characters ?? result.source.unicodeScalars.count
         SettingsStore.shared.submit(settings)
     }
 
