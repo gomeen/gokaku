@@ -184,17 +184,27 @@ private final class PanelLayout {
             let mutable = NSMutableAttributedString()
             mutable.append(NSAttributedString(string: typed, attributes: attributes(theme.annotationFont, theme.typedText)))
             mutable.append(NSAttributedString(string: rest, attributes: attributes(theme.annotationFont, theme.restText)))
-            if enToZhLearning {
-                // 光标作为字形插入（2026-11-04）：与文字同字体同基线流排。
-                // 用 ASCII 竖线（块元素 ▏ 占满 em 高且字形格留白，观感脱节）。
-                mutable.append(NSAttributedString(string: "|",
-                                                  attributes: attributes(theme.annotationFont, theme.typedText)))
-            }
             for issue in view.issues where issue.location + issue.length <= mutable.length {
                 mutable.addAttributes([
                     .underlineStyle: NSUnderlineStyle.patternDot.rawValue | NSUnderlineStyle.single.rawValue,
                     .underlineColor: NSColor.systemRed
                 ], range: NSRange(location: issue.location, length: issue.length))
+            }
+            // 光标作为字形插入（2026-11-04）：与文字同字体同基线流排，对齐／换行／
+            // 截断天然正确——几何光标的基线推算与 AppKit 实际排版差 ~3pt（像素
+            // 实测），任何 font-metric 公式都不可靠。普通模式插在宿主插入点，
+            // 学习英→中插在末尾。
+            let caretOffset: Int?
+            if enToZhLearning {
+                caretOffset = mutable.length
+            } else if view.stamp.mode == .normal {
+                caretOffset = max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
+            } else {
+                caretOffset = nil
+            }
+            if let caretOffset {
+                mutable.insert(NSAttributedString(string: "|",
+                                                  attributes: attributes(theme.annotationFont, theme.typedText)), at: caretOffset)
             }
             preeditWidth = mutable.widthPt + 2
             preeditLineCount = max(1, Int(ceil(preeditWidth / max(maxInner, 1))))
@@ -213,13 +223,6 @@ private final class PanelLayout {
                 preeditLineCount = 4
             }
             preeditString = mutable
-            if view.stamp.mode == .normal {
-                // 学习英→中的光标已作为字形插入预编辑串，无需几何光标。
-                let offset = max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
-                let line = CTLineCreateWithAttributedString(mutable)
-                caretX = m.windowPadding + CTLineGetOffsetForStringIndex(line, offset, nil)
-                caretUTF16 = offset
-            }
         }
 
         // 3. 文本附属
@@ -373,17 +376,6 @@ final class PanelContent: NSView {
         background.fill()
         layout.header?.draw(inRect: layout.headerRect)
         layout.preedit?.draw(inRect: layout.preeditTextRect)
-        if let caretX = layout.preeditCaretX {
-            theme.caretColor.setFill()
-            // 基线对齐（像素实测校准 2026-11-04）：AppKit draw(inRect:) 首行
-            // 基线 = rect.minY + ascender + leading（只加 ascender 会悬浮 ~4.5px）。
-            // 光标从字母升部顶画到基线，普通/学习共用此路径。
-            let font = theme.annotationFont
-            let baselineY = layout.preeditTextRect.minY + font.ascender + font.leading
-            let caretTop = baselineY - font.ascender
-            NSBezierPath(rect: NSRect(x: caretX, y: caretTop,
-                                      width: 1.5, height: font.ascender + 1)).fill()
-        }
         for row in layout.rows {
             if row.selected {
                 let highlight = NSBezierPath(
