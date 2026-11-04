@@ -407,14 +407,24 @@ private struct ResourcesPage: View {
                             Text("Access Key ID").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
                             SecureField("AKLT…", text: $volcAccessKey)
                                 .font(.system(size: 12, design: .monospaced))
-                                .textFieldStyle(.roundedBorder)
+                                .textFieldStyle(.plain)
+                                .padding(.horizontal, 8).padding(.vertical, 6)
+                                .background(RoundedRectangle(cornerRadius: 6)
+                                    .fill(SettingsPalette.secondaryText.opacity(0.06)))
+                                .overlay(RoundedRectangle(cornerRadius: 6)
+                                    .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
                                 .onChange(of: volcAccessKey) { _, _ in volcCredentialsDirty = true }
                         }
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Secret Access Key").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
                             SecureField("TWp…", text: $volcSecretKey)
                                 .font(.system(size: 12, design: .monospaced))
-                                .textFieldStyle(.roundedBorder)
+                                .textFieldStyle(.plain)
+                                .padding(.horizontal, 8).padding(.vertical, 6)
+                                .background(RoundedRectangle(cornerRadius: 6)
+                                    .fill(SettingsPalette.secondaryText.opacity(0.06)))
+                                .overlay(RoundedRectangle(cornerRadius: 6)
+                                    .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
                                 .onChange(of: volcSecretKey) { _, _ in volcCredentialsDirty = true }
                         }
                         HStack(spacing: 10) {
@@ -430,6 +440,7 @@ private struct ResourcesPage: View {
                             }
                             .font(.system(size: 12))
                             .buttonStyle(.borderedProminent)
+                            .tint(Color.green)
                             .disabled(volcAccessKey.isEmpty || volcSecretKey.isEmpty || !volcCredentialsDirty)
                             if volcCredentialsDirty {
                                 Text("有未保存修改").font(.system(size: 11)).foregroundStyle(SettingsPalette.secondaryText)
