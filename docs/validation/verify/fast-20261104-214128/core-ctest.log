@@ -1,0 +1,15 @@
+Test project /Users/gomeen/code/gomeen/gogaku/.build/core
+    Start 1: abi_version
+1/5 Test #1: abi_version ......................   Passed    0.02 sec
+    Start 2: normal_session
+2/5 Test #2: normal_session ...................   Passed    2.31 sec
+    Start 3: quality_regression
+3/5 Test #3: quality_regression ...............   Passed    8.11 sec
+    Start 4: translate_safety
+4/5 Test #4: translate_safety .................   Passed    0.02 sec
+    Start 5: fuzz_smoke
+5/5 Test #5: fuzz_smoke .......................   Passed   16.46 sec
+
+100% tests passed out of 5
+
+Total Test time (real) =  26.92 sec

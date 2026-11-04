@@ -375,12 +375,14 @@ final class PanelContent: NSView {
         layout.preedit?.draw(inRect: layout.preeditTextRect)
         if let caretX = layout.preeditCaretX {
             theme.caretColor.setFill()
-            // 按字体度量对齐：flipped 视图首行基线在 minY + ascender；光标取
-            // capHeight 高度（旧版整行高，比小写字母高出一截，2026-11-04 反馈）。
+            // 基线对齐（像素实测校准 2026-11-04）：AppKit draw(inRect:) 首行
+            // 基线 = rect.minY + ascender + leading（只加 ascender 会悬浮 ~4.5px）。
+            // 光标从字母升部顶画到基线，普通/学习共用此路径。
             let font = theme.annotationFont
-            let baselineY = layout.preeditTextRect.minY + font.ascender
-            NSBezierPath(rect: NSRect(x: caretX, y: baselineY - font.capHeight - 0.5,
-                                      width: 1.5, height: font.capHeight + 1)).fill()
+            let baselineY = layout.preeditTextRect.minY + font.ascender + font.leading
+            let caretTop = baselineY - font.ascender
+            NSBezierPath(rect: NSRect(x: caretX, y: caretTop,
+                                      width: 1.5, height: font.ascender + 1)).fill()
         }
         for row in layout.rows {
             if row.selected {
