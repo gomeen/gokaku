@@ -315,9 +315,11 @@ final class GogakuInputController: IMKInputController {
     }
 
     /// 译文缓存有界；溢出直接清空（预译很快重建）。
+    /// 英文输出统一小写（2026-11-04 用户裁决：全小写，不出现大写——
+    /// 译文多在句子中间插入，机翻首字母大写观感不对）。
     private func storeTranslationMemory(_ source: String, _ target: String) {
         if translationMemory.count >= 256 { translationMemory.removeAll() }
-        translationMemory[source] = target
+        translationMemory[source] = target.lowercased()
     }
 
     /// 中→英连续输入防抖：停顿 0.25s 才泵预译（2026-11 用户反馈）。
@@ -403,7 +405,7 @@ final class GogakuInputController: IMKInputController {
         guard let pending = pendingTranslatedCommit, pending.source == result.source else { return }
         pendingTranslatedCommit = nil
         let translated = result.error == nil && result.target != nil && !result.target!.isEmpty
-        let text = translated ? Self.withTrailingSpace(result.target!) : pending.source
+        let text = translated ? Self.withTrailingSpace(result.target!.lowercased()) : pending.source
         if translated {
             storeTranslationMemory(pending.source, result.target!)
         } else {
