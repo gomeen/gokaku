@@ -242,7 +242,10 @@ final class GogakuInputController: IMKInputController {
         // 旧响应缺该字段时回退客户端标量估算。漏计余量：父进程超时杀 worker 时
         // 若服务端已处理则拿不到回包（少数；控制台用量统计页可核对全量）。
         settings.volcengineUsageCharacters += result.characters ?? result.source.unicodeScalars.count
-        SettingsStore.shared.submit(settings)
+        // 仅落盘用量字段（不发设置变更广播）：全量提交曾触发 reloadSettings→
+        // suspend，火山后端下每句翻译成功即面板闪没（2026-11-04）。
+        SettingsStore.shared.submitUsage(characters: settings.volcengineUsageCharacters,
+                                         month: settings.volcengineUsageMonth)
     }
 
     /// 当前自然月标识（YYYY-MM，本地时区）。

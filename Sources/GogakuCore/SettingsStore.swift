@@ -52,6 +52,24 @@ public final class SettingsStore {
         }
     }
 
+    // MARK: - 用量计量专用提交（不发设置变更通知）
+
+    /// 仅合并火山用量两个字段落盘，不广播设置变更——全量提交会在每次翻译
+    /// 成功后经 DistributedNotificationCenter 触发输入法 reloadSettings→
+    /// suspend，致英→中面板每句闪没（2026-11-04 用户报告）。设置应用的用量
+    /// 条在自身下次读取设置时刷新。
+    public func submitUsage(characters: Int, month: String) {
+        queue.async { [weak self] in
+            guard let self else { return }
+            let fields = ["volcengineUsageCharacters": characters,
+                          "volcengineUsageMonth": month]
+            let url = self.fileURL
+            if let written = Self.writeMerged(pending: fields, baseline: self.baseline, to: url) {
+                self.baseline = written
+            }
+        }
+    }
+
     // MARK: - 提交入口（任意线程）
 
     /// 立即提交；`coalesce` 用于连续文本输入（300ms 合并，最后一次胜出）。
@@ -131,9 +149,14 @@ public final class SettingsStore {
     /// NSFileCoordinator 协调，与输入法进程遵守同一文件协调规则。
     /// 返回写入结果（nil＝合并或写入失败，由调用方保留待保存改动）。
     static func writeMerged(value: Settings, baseline: [String: Any]?, to url: URL) -> [String: Any]? {
+        let pendingDict = try? Self.dictionary(of: value)
+        return writeMerged(pending: pendingDict ?? [:], baseline: baseline, to: url)
+    }
+
+    /// 任意字段的最小合并落盘（用量计量专用路径使用）。
+    static func writeMerged(pending pendingDict: [String: Any], baseline: [String: Any]?, to url: URL) -> [String: Any]? {
         do {
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
-            let pendingDict = try Self.dictionary(of: value)
             var mergedResult: [String: Any]?
             var accessorRan = false
             let coordinator = NSFileCoordinator(filePresenter: nil)
