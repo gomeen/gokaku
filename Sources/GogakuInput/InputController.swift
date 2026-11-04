@@ -498,10 +498,11 @@ final class GogakuInputController: IMKInputController {
         // 不按应用记忆；开发版开关关闭时学习状态不可用，普通模式始终可用。
         mode = learningDevEnabled ? settings.preferredMode : .normal
         direction = settings.preferredDirection
+        ModeStatusItem.shared.show(mode: mode)
         configure()
     }
 
-    override func deactivateServer(_ sender: Any!) { shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false }
+    override func deactivateServer(_ sender: Any!) { shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false; ModeStatusItem.shared.hide() }
     override func commitComposition(_ sender: Any!) { suspend() }
     override func inputControllerWillClose() { shiftPoller.stop(); suspend(); active = false }
     override func hidePalettes() { panel.dismiss(); toast.hide() }
@@ -646,6 +647,7 @@ final class GogakuInputController: IMKInputController {
         // 开发版开关关闭即回门禁态：学习组合已随 suspend 结束，模式回普通，
         // 共享学习会话释放（第二份词库内存一并回收）。
         if !settings.learningTranslationEnabled, mode == .learning { mode = .normal }
+        ModeStatusItem.shared.update(mode: mode)
         rebuildLearningTranslatorIfNeeded(from: previous)
         applyEngineSettings()
         configure()
@@ -1446,6 +1448,7 @@ final class GogakuInputController: IMKInputController {
         suspend()
         mode = mode == .normal ? .learning : .normal
         persistPreference()
+        ModeStatusItem.shared.update(mode: mode)
         toast.show(mode == .learning ? "学习" : "普通", anchor: anchor)
         configure()
     }
@@ -1498,24 +1501,13 @@ final class GogakuInputController: IMKInputController {
     @objc private func clearDrafts(_ sender: Any?) { DraftStore.shared.clear() }
 
     override func menu() -> NSMenu! {
-        // 菜单精简（2026-11-04 用户裁决）：只展示当前状态与设置入口。
-        // 模式/方向切换仍走用户自定义热键（keyDown 管线）与设置页；
-        // 草稿恢复入口从菜单移除（旧菜单项曾展示恢复与清空）。
+        // 菜单精简（2026-11-04 用户裁决）：模式状态由菜单栏状态项图标填充态
+        // 承担（kiho 式交互），菜单只留设置入口。
         let menu = NSMenu()
-        let status = NSMenuItem(title: statusText, action: nil, keyEquivalent: "")
-        menu.addItem(status)
-        menu.addItem(.separator())
         let settings = NSMenuItem(title: "设置…", action: #selector(openSettings(_:)), keyEquivalent: "")
         settings.target = self
         menu.addItem(settings)
         return menu
-    }
-
-    /// 当前状态一行：模式＋学习方向（仅展示，不可点）。
-    private var statusText: String {
-        let modeText = mode == .learning ? "学习模式" : "普通模式"
-        let directionText = direction == .zhToEn ? "中→英" : "英→中"
-        return "当前：\(modeText) · \(directionText)"
     }
 }
 
