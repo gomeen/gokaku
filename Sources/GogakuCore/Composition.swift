@@ -141,7 +141,8 @@ public final class CompositionSession {
             sources += alternatives.filter { $0.text != decoded }
             view.preedit = decoded
         }
-        view.status = "quickmt 开发版翻译中；输入已保留，可 ⌘Return 明确原文上屏"
+        // 输入期状态行已移除（2026-11-04 用户裁决：第二行提示去掉）；
+        // ⌘Return 原文上屏功能保留，仅不再展示提示。
         if let first = sources.first { translationNeeded?(view.stamp, first) }
     }
     public func sourceExpressions() -> [SourceExpression] { sources }
