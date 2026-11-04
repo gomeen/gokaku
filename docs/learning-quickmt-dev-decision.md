@@ -71,7 +71,9 @@
 | `learningBeamSize` | `1` | 1–10（超界自动钳制） | beam 大小；越大译文越稳、首译越慢；worker 由该值带 `--beam` 启动（两后端共用） |
 | `learningTranslationBackend` | `"quickmt"` | `"quickmt"`｜`"small100"` | 翻译后端（2026-11-03 用户裁决的质量试验，见五点八）；未知值回退 quickmt |
 
-**2. worker 启动参数（`scripts/quickmt_worker.py`，输入法按设置自动传参，一般不动）**
+**2. worker 启动参数（输入法按设置自动传参，一般不动）**
+
+quickmt（`scripts/quickmt_worker.py`）与 small100（`scripts/small100_worker.py`）参数面完全一致，设置键两后端通用：
 
 | 参数 | 默认 | 作用 |
 |---|---|---|
@@ -80,6 +82,10 @@
 | `--threads` | `2` | CT2 intra 线程数 |
 | `--compute-type` | `int8` | ctranslate2 计算精度（可 `float16`/`int8_float16` 等） |
 | `--max-decoding-length` | `256` | 解码最大 token 数（长译文上限） |
+
+small100 另有模型侧固定项（不开放配置，与质量实测口径绑定）：语言协议锁定
+gate 口径（目标语言令牌作输入前缀、解码器从 eos 开始，见五点八）；输入上限
+`max_position_embeddings` 1024 token（超限按 invalid_request 拒绝）。
 
 **3. 装配脚本（`scripts/prepare-learning-translation.py`，一次性）**
 
