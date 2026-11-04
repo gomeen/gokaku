@@ -126,7 +126,7 @@ private final class ShiftTapPoller {
 }
 
 @objc(GogakuInputController)
-final class GogakuInputController: IMKInputController, NSMenuItemValidation {
+final class GogakuInputController: IMKInputController {
     /// 共享引擎（词库只加载一次）；本控制器只是调用方。
     private let hub = EngineHub.shared
     // 学习会话不再由控制器持有：共享会话在 EngineHub，全部经
@@ -1498,50 +1498,24 @@ final class GogakuInputController: IMKInputController, NSMenuItemValidation {
     @objc private func clearDrafts(_ sender: Any?) { DraftStore.shared.clear() }
 
     override func menu() -> NSMenu! {
-        // 菜单（quickmt 开发版裁决后）：学习模式／学习方向两项按设置开关解除
-        // 置灰（Ctrl+Shift+K／Ctrl+Shift+J 同款动作）；草稿恢复（仅有草稿时）
-        // ＋清空＋设置。开关关闭时学习两项置灰并说明，不再只留在设置页说明。
+        // 菜单精简（2026-11-04 用户裁决）：只展示当前状态与设置入口。
+        // 模式/方向切换仍走用户自定义热键（keyDown 管线）与设置页；
+        // 草稿恢复入口从菜单移除（旧菜单项曾展示恢复与清空）。
         let menu = NSMenu()
-        let learning = NSMenuItem(title: learningDevEnabled
-            ? (mode == .learning ? "返回普通模式" : "进入学习模式")
-            : "学习模式（开发版未启用）",
-            action: #selector(toggleMode(_:)), keyEquivalent: "k")
-        learning.keyEquivalentModifierMask = [.control, .shift]
-        learning.target = self
-        menu.addItem(learning)
-        let directionItem = NSMenuItem(title: direction == .zhToEn ? "学习方向：中→英" : "学习方向：英→中",
-                                       action: #selector(toggleDirection(_:)), keyEquivalent: "j")
-        directionItem.keyEquivalentModifierMask = [.control, .shift]
-        directionItem.target = self
-        menu.addItem(directionItem)
+        let status = NSMenuItem(title: statusText, action: nil, keyEquivalent: "")
+        menu.addItem(status)
         menu.addItem(.separator())
-        let drafts = DraftStore.shared.drafts.filter { $0.application == application && $0.mode == mode && $0.direction == direction }
-        if !drafts.isEmpty {
-            for (index, draft) in drafts.enumerated() {
-                let label = draft.literal ? "恢复未发出文字" : "恢复未完成输入"
-                let i = NSMenuItem(title: "\(label) \(index + 1)（\(draft.raw.count) 字符）", action: #selector(restoreDraft(_:)), keyEquivalent: "")
-                i.target = self; i.representedObject = draft.id; menu.addItem(i)
-            }
-            menu.addItem(.separator())
-            let clear = NSMenuItem(title: "清空未完成输入", action: #selector(clearDrafts(_:)), keyEquivalent: "")
-            clear.target = self
-            menu.addItem(clear)
-            menu.addItem(.separator())
-        }
         let settings = NSMenuItem(title: "设置…", action: #selector(openSettings(_:)), keyEquivalent: "")
         settings.target = self
         menu.addItem(settings)
         return menu
     }
 
-    /// 菜单项可用性：学习两项仅在开发版开关打开时可操作，其余保持可用。
-    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
-        switch menuItem.action {
-        case #selector(toggleMode(_:)), #selector(toggleDirection(_:)):
-            return learningDevEnabled
-        default:
-            return true
-        }
+    /// 当前状态一行：模式＋学习方向（仅展示，不可点）。
+    private var statusText: String {
+        let modeText = mode == .learning ? "学习模式" : "普通模式"
+        let directionText = direction == .zhToEn ? "中→英" : "英→中"
+        return "当前：\(modeText) · \(directionText)"
     }
 }
 
