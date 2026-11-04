@@ -17,12 +17,25 @@ import Foundation
 /// - 可疑 → 冻结在原锚点（不更新、不重排）；连续 escapeAfter 拍仍报新
 ///   位置才接受——窗口真实拖动／滚动到远处的逃生门（真实移动持续稳定，
 ///   瞬时误报一两拍内消失，永远到不了逃生门）。
+///
+/// 宽限窗（2026-11-05 首入错位优化）：组合首键的显示锚点来自 setMarkedText
+/// 之前的一次宿主读取（pre-read），是全流程唯一无条件信任的矩形。宿主在
+/// 点击／滚动／焦点切换后布局未跟上时 pre-read 陈旧，而本过滤器把「错误的
+/// 首锚」也保护起来——真实新位置是 far-jump，原要等满 8 拍（约 0.8s）才
+/// 被采纳。锚点确立后的前 graceReads 次有效读数内逃生门降为
+/// graceEscapeAfter：真实布局更新约 0.2–0.3s 纠正；Orca 瞬时误报一两拍
+/// 内消失（2026-11-03 实测），连续 3 拍才采纳仍拦得住。零矩形冻结不消耗
+/// 宽限窗（无有效读数，谈采纳快慢无意义）。
 public enum AnchorPlausibility {
     /// 同行内允许的最大向左回退（pt）：拼音删字母时插入点小幅左移。
     public static let backstepLimit: CGFloat = 100
     /// 连续可疑达到该次数后接受新锚点（真实移动的逃生门）。100ms 复查＋逐键
     /// 刷新下，约 0.3–0.8 秒的持续新位置才会触发。
     public static let escapeAfter = 8
+    /// 宽限窗长度：锚点确立（displayRect 首次取得有效值）后的有效读数次数。
+    public static let graceReads = 6
+    /// 宽限窗内的逃生门次数（组合起始真实布局更新更快被采纳）。
+    public static let graceEscapeAfter = 3
 
     public enum Decision: Equatable {
         /// 采纳新锚点，清零可疑计数。
@@ -33,8 +46,14 @@ public enum AnchorPlausibility {
         case escapeAccept
     }
 
-    public static func classify(previous: NSRect?, next: NSRect, suspectStreak: Int) -> Decision {
+    /// - Parameters:
+    ///   - anchorAge: 锚点确立以来的有效读数序号（0 起，含本次）；宽限窗按它
+    ///     判定。与 suspectStreak 独立：冻结拍也推进窗龄，逃生门跨窗界沿用
+    ///     已累积的 streak，达到当时生效的阈值即接受。
+    public static func classify(previous: NSRect?, next: NSRect, suspectStreak: Int,
+                                anchorAge: Int = 0) -> Decision {
         guard let previous else { return .accept }
+        let escapeThreshold = anchorAge < graceReads ? graceEscapeAfter : escapeAfter
         let line = max(previous.height, next.height, 12)
         let dy = next.midY - previous.midY
         if abs(dy) <= line * 0.25 {
@@ -46,6 +65,6 @@ public enum AnchorPlausibility {
         } else {
             // 跨多行跳变：打字不产生。
         }
-        return suspectStreak + 1 >= escapeAfter ? .escapeAccept : .freeze
+        return suspectStreak + 1 >= escapeThreshold ? .escapeAccept : .freeze
     }
 }

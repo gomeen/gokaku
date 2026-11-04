@@ -44,7 +44,9 @@ final class AnchorPlausibilityTests: XCTestCase {
     func testSameLineLargeLeftJumpFreezes() {
         XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: fieldOrigin, suspectStreak: 0),
                        .freeze, "同行跳回行首原点＝选择闪断特征")
-        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: fieldOrigin, suspectStreak: 6),
+        // 常规窗龄（超出宽限窗）：未到 escapeAfter 持续冻结。
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: fieldOrigin, suspectStreak: 6,
+                                                   anchorAge: AnchorPlausibility.graceReads),
                        .freeze, "未到逃生门次数持续冻结")
     }
 
@@ -54,9 +56,52 @@ final class AnchorPlausibilityTests: XCTestCase {
     }
 
     func testPersistentTeleportEscapes() {
-        // 连续可疑达到 escapeAfter：接受（窗口真实拖动/滚动的逃生门）。
+        // 常规窗龄下连续可疑达到 escapeAfter：接受（窗口真实拖动/滚动的逃生门）。
         let streak = AnchorPlausibility.escapeAfter - 1
-        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: streak),
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: streak,
+                                                   anchorAge: AnchorPlausibility.graceReads),
+                       .escapeAccept)
+    }
+
+    // MARK: 宽限窗（首入错位优化 2026-11-05）
+
+    func testGraceWindowEscapesFasterAtCompositionStart() {
+        // 首锚（pre-read）陈旧时，真实新位置是持续 far-jump：宽限窗内第 3 拍
+        // 即采纳（约 0.2–0.3s），不再等满 8 拍。
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: 2,
+                                                   anchorAge: 0),
+                       .escapeAccept, "宽限窗内连续 3 拍真实位置应被采纳")
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: fieldOrigin, suspectStreak: 2,
+                                                   anchorAge: 1),
+                       .escapeAccept, "同行原点误报持续到第 3 拍同样视为真实移动")
+    }
+
+    func testTransientMisreportWithinGraceStillFrozen() {
+        // Orca 瞬时误报一两拍内消失：宽限窗内不满 3 连拍仍冻结。
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: 0,
+                                                   anchorAge: 0),
+                       .freeze)
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: 1,
+                                                   anchorAge: 1),
+                       .freeze)
+    }
+
+    func testGraceWindowExpiresByAge() {
+        // 窗龄推进到 graceReads 后恢复常规阈值：同样 2 连拍不再放行。
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: 2,
+                                                   anchorAge: AnchorPlausibility.graceReads),
+                       .freeze, "宽限窗结束后恢复 escapeAfter 阈值")
+        // 窗界内最后一拍仍在宽限内（序号 0 起计）。
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: 2,
+                                                   anchorAge: AnchorPlausibility.graceReads - 1),
+                       .escapeAccept)
+    }
+
+    func testGraceStreakCarriesAcrossWindowBoundary() {
+        // 跨窗界沿用已累积 streak：误报从宽限窗存活到窗后，累计到 8 连拍仍能
+        // 走常规逃生门（不应因换档清零而永远冻住）。
+        XCTAssertEqual(AnchorPlausibility.classify(previous: onLine1, next: bufferStart, suspectStreak: 7,
+                                                   anchorAge: AnchorPlausibility.graceReads),
                        .escapeAccept)
     }
 

@@ -171,6 +171,10 @@ final class GogakuInputController: IMKInputController {
     /// 锚点瞬移过滤器（AnchorPlausibility）的连续可疑计数；组合开始/结束、
     /// 换目标、隐藏面板时随 displayRect 一并清零。
     private var anchorSuspectStreak = 0
+    /// 锚点确立（displayRect 首次取得有效值）以来的有效读数序号，供宽限窗
+    /// （AnchorPlausibility.graceReads）推进首入错位更快自愈；与 streak 同点
+    /// 清零。零矩形冻结不推进（无有效读数）。
+    private var anchorAgeReads = 0
     /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
     private var positionTimer: Timer?
     // 学习功能门禁（quickmt 开发版裁决，docs/learning-quickmt-dev-decision.md）：
@@ -569,7 +573,7 @@ final class GogakuInputController: IMKInputController {
 
     private func configure() {
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
-        displayRect = nil; anchorSuspectStreak = 0; stopPositionRefresh()
+        displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
         markedShown = ""; markedCaret = -1
         panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
@@ -607,7 +611,7 @@ final class GogakuInputController: IMKInputController {
         warmedEager = false
         cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
-        stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0
+        stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0
         panel.dismiss(); toast.hide()
         if clearMarked, !markedShown.isEmpty, let old = target, let facts = hostFacts(),
            facts.application == old.application, facts.pid == old.pid,
@@ -934,7 +938,11 @@ final class GogakuInputController: IMKInputController {
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
             // 否则等待 marked 更新后的合并刷新。无有效坐标时隐藏面板但保留组合
             //（不丢弃文字；恢复有效且字段一致后重新显示）。
-            if displayRect == nil, target.rect != .zero { displayRect = target.rect }
+            if displayRect == nil, target.rect != .zero {
+                displayRect = target.rect
+                // 首键 pre-read 是锚点确立点：宽限窗从这里起算。
+                anchorAgeReads = 0
+            }
             startPositionRefresh()
             #if GOGAKU_VALIDATION
             if displayed == nil { compositionStart = ValidationMonitor.shared.startTime(ValidationMonitor.shared.currentEvent) }
@@ -968,6 +976,7 @@ final class GogakuInputController: IMKInputController {
             displayed = nil
             displayRect = nil
             anchorSuspectStreak = 0
+            anchorAgeReads = 0
             stopPositionRefresh()
             panel.dismiss()
             eagerBacklog = []
@@ -998,6 +1007,7 @@ final class GogakuInputController: IMKInputController {
     private func hidePanelKeepComposition() {
         displayRect = nil
         anchorSuspectStreak = 0
+        anchorAgeReads = 0
         panel.dismiss()
     }
 
@@ -1025,7 +1035,10 @@ final class GogakuInputController: IMKInputController {
         // 为空，第一拍直接采纳。
         let decision = AnchorPlausibility.classify(previous: displayRect,
                                                    next: current.rect,
-                                                   suspectStreak: anchorSuspectStreak)
+                                                   suspectStreak: anchorSuspectStreak,
+                                                   anchorAge: anchorAgeReads)
+        // 有效读数推进宽限窗龄（零矩形冻结已在上方提前返回，不消耗窗龄）。
+        anchorAgeReads += 1
         switch decision {
         case .accept, .escapeAccept:
             anchorSuspectStreak = 0
@@ -1329,6 +1342,8 @@ final class GogakuInputController: IMKInputController {
             // 由位置复查在恢复后补上。后续由位置复查跟随插入点。
             if self.displayRect == nil, let anchor = self.target, anchor.rect != .zero {
                 self.displayRect = anchor.rect
+                // 英→中首次显示锚点确立点：宽限窗从这里起算。
+                self.anchorAgeReads = 0
             }
             // 拼写检查仅英→中且开发版开关打开时走现有 --spell 通路。
             if self.learningDevEnabled, self.mode == .learning, self.direction == .enToZh, self.requestedSpellStamp != value.stamp {
