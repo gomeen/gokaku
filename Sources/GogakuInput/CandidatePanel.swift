@@ -174,7 +174,11 @@ private final class PanelLayout {
         var preeditWidth: CGFloat = 0
         var preeditLineCount = 1
         if !preeditText.isEmpty {
-            let typedCount = view.stamp.mode == .normal ? min(view.typedPrefix.count, preeditText.count) : 0
+            // 学习英→中：整段都是用户已输入的英文，实色＋末尾光标（2026-11-04
+            // 用户反馈：看不到当前输入位置）；中→英预编辑保持原有 faint 风格。
+            let enToZhLearning = view.stamp.mode == .learning && view.stamp.direction == .enToZh
+            let typedCount = enToZhLearning ? preeditText.count
+                : (view.stamp.mode == .normal ? min(view.typedPrefix.count, preeditText.count) : 0)
             let typed = String(preeditText.prefix(typedCount))
             let rest = String(preeditText.dropFirst(typedCount))
             let mutable = NSMutableAttributedString()
@@ -203,8 +207,10 @@ private final class PanelLayout {
                 preeditLineCount = 4
             }
             preeditString = mutable
-            if view.stamp.mode == .normal {
-                let offset = max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
+            if view.stamp.mode == .normal || enToZhLearning {
+                let offset = view.stamp.mode == .normal
+                    ? max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
+                    : mutable.length
                 let line = CTLineCreateWithAttributedString(mutable)
                 caretX = m.windowPadding + CTLineGetOffsetForStringIndex(line, offset, nil)
                 caretUTF16 = offset
