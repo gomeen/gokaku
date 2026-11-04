@@ -184,6 +184,12 @@ private final class PanelLayout {
             let mutable = NSMutableAttributedString()
             mutable.append(NSAttributedString(string: typed, attributes: attributes(theme.annotationFont, theme.typedText)))
             mutable.append(NSAttributedString(string: rest, attributes: attributes(theme.annotationFont, theme.restText)))
+            if enToZhLearning {
+                // 光标作为字形插入（2026-11-04）：与文字同字体同基线流排，
+                // 对齐／换行／截断天然正确，不再做任何基线坐标计算。
+                mutable.append(NSAttributedString(string: "▏",
+                                                  attributes: attributes(theme.annotationFont, theme.typedText)))
+            }
             for issue in view.issues where issue.location + issue.length <= mutable.length {
                 mutable.addAttributes([
                     .underlineStyle: NSUnderlineStyle.patternDot.rawValue | NSUnderlineStyle.single.rawValue,
@@ -207,10 +213,9 @@ private final class PanelLayout {
                 preeditLineCount = 4
             }
             preeditString = mutable
-            if view.stamp.mode == .normal || enToZhLearning {
-                let offset = view.stamp.mode == .normal
-                    ? max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
-                    : mutable.length
+            if view.stamp.mode == .normal {
+                // 学习英→中的光标已作为字形插入预编辑串，无需几何光标。
+                let offset = max(0, min(view.preeditCaretUTF16 ?? mutable.length, mutable.length))
                 let line = CTLineCreateWithAttributedString(mutable)
                 caretX = m.windowPadding + CTLineGetOffsetForStringIndex(line, offset, nil)
                 caretUTF16 = offset
