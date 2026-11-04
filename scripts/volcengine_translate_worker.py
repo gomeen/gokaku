@@ -75,17 +75,24 @@ class VolcengineRuntime:
         self.overrides = {}
         self.connection = None
         self.last_characters = None
+        self.credentials_mtime = None
 
     def _ensure_credentials(self):
-        if self.access_key is not None:
-            return
+        # 按 mtime 热加载：设置页保存凭据后无需重建 worker 即生效。
         path = Path(self.credentials_path)
         if not path.is_file():
             raise CredentialsMissing(str(path))
         try:
+            mtime = path.stat().st_mtime
+        except OSError as error:
+            raise CredentialsMissing(str(error)) from error
+        if self.access_key is not None and self.credentials_mtime == mtime:
+            return
+        try:
             config = json.loads(path.read_text())
         except (OSError, ValueError) as error:
             raise CredentialsMissing(f"{path}: {error}") from error
+        self.credentials_mtime = mtime
         self.access_key = config.get("accessKeyId")
         self.secret_key = config.get("secretAccessKey")
         if not self.access_key or not self.secret_key:
