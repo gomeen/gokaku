@@ -45,6 +45,8 @@ public final class TranslationService {
     private var buffer = Data()
     private var timeout: DispatchWorkItem?
     private var debounce: DispatchWorkItem?
+    private var burst: TranslationRequest?
+    private var hardDeadline: DispatchWorkItem?
     private var cache: [String: (Date, TranslationResult)] = [:]
     private var cacheBytes = 0
     public var onResult: ((TranslationResult) -> Void)?
@@ -57,23 +59,45 @@ public final class TranslationService {
     public func request(_ request: TranslationRequest) {
         queue.async {
             self.valid.removeAll(); self.valid.insert(request.id)
-            self.pending = nil; self.debounce?.cancel()
-            let work = DispatchWorkItem { [weak self] in self?.enqueue(request) }
-            self.debounce = work
-            self.queue.asyncAfter(deadline: .now() + self.debounceInterval, execute: work)
+            self.pending = nil; self.burst = request
+            self.debounce?.cancel()
+            let fire = DispatchWorkItem { [weak self] in self?.fireBurst() }
+            self.debounce = fire
+            self.queue.asyncAfter(deadline: .now() + self.debounceInterval, execute: fire)
+            // 连续输入硬上限：纯空闲防抖在键间隔小于防抖时长时会被每键无限顺延
+            //（2026-11-04 用户反馈：停顿了很长时间不出来）；慢速连续打字期间
+            // 每 2×防抖间隔至少发出一次最新请求。
+            if self.hardDeadline == nil {
+                let hard = DispatchWorkItem { [weak self] in self?.fireBurst() }
+                self.hardDeadline = hard
+                self.queue.asyncAfter(deadline: .now() + self.debounceInterval * 2, execute: hard)
+            }
         }
     }
-    /// 提交路径免抖动：选词上屏的译文替换不等 120ms。
+
+    /// 发出当前 burst 的最新请求（空闲防抖与硬上限共用出口）。
+    private func fireBurst() {
+        debounce?.cancel(); debounce = nil
+        hardDeadline?.cancel(); hardDeadline = nil
+        guard let r = burst else { return }
+        burst = nil
+        enqueue(r)
+    }
+    /// 提交路径免抖动：选词上屏的译文替换不等防抖间隔。
     public func requestImmediately(_ request: TranslationRequest) {
         queue.async {
             self.valid.removeAll(); self.valid.insert(request.id)
-            self.pending = nil; self.debounce?.cancel()
+            self.pending = nil; self.burst = nil
+            self.debounce?.cancel(); self.debounce = nil
+            self.hardDeadline?.cancel(); self.hardDeadline = nil
             self.enqueue(request)
         }
     }
     public func invalidate() {
         queue.async {
-            self.valid.removeAll(); self.pending = nil; self.debounce?.cancel()
+            self.valid.removeAll(); self.pending = nil; self.burst = nil
+            self.debounce?.cancel(); self.debounce = nil
+            self.hardDeadline?.cancel(); self.hardDeadline = nil
             self.cache.removeAll(); self.cacheBytes = 0
             // 逻辑取消不表示当前计算已退出；running 直到收到响应或超时才释放。
         }
