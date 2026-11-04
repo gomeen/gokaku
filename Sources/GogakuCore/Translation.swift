@@ -55,6 +55,13 @@ public final class TranslationService {
     public var onResult: ((TranslationResult) -> Void)?
     /// 连续请求的空闲防抖间隔；requestImmediately 不防抖（提交路径）。
     public var debounceInterval: TimeInterval
+    /// 是否仍有未完成的请求链（防抖定时／排队／在飞）——任一存在都可能有
+    /// 结果随后到达，调用方（面板宽限隐藏）据此顺延，不因云端时延先隐后显。
+    public var hasPendingWork: Bool {
+        queue.sync {
+            burst != nil || pending != nil || running != nil || debounce != nil || hardDeadline != nil
+        }
+    }
     public init(executable: URL, arguments: [String] = [], debounceInterval: TimeInterval = 0.12) {
         self.executable = executable; self.arguments = arguments; self.debounceInterval = debounceInterval
     }

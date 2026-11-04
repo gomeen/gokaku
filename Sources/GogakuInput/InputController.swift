@@ -1256,17 +1256,22 @@ final class GogakuInputController: IMKInputController {
 
     /// 英→中无译文时的延迟隐藏：防逐键显示/隐藏闪烁（2026-11 用户反馈）。
     /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
-    private func scheduleEnToZhHide() {
+    private func scheduleEnToZhHide(delay: TimeInterval = 0.7) {
         enToZhHideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
             guard let self, self.mode == .learning, self.direction == .enToZh,
                   self.displayed?.candidates.isEmpty != false else { return }
+            if self.translator.hasPendingWork {
+                // 在途请求（防抖／排队／在飞）尚未返回：顺延等待，不隐藏。
+                // 云端后端（火山）时延可超固定宽限，按时长猜会复现先隐后显闪烁
+                //（2026-11-04 用户反馈英→中闪烁回归；本地 0.7s 经验值仅作首延）。
+                self.scheduleEnToZhHide(delay: 0.25)
+                return
+            }
             self.panel.dismiss()
         }
         enToZhHideWork = work
-        // 宽限 0.7s：须覆盖防抖 0.3s＋首译时延，否则宽限先到会复现闪烁
-        //（2026-11-03 与防抖同轮调整）。
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7, execute: work)
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
     }
     private func cancelEnToZhHide() {
         enToZhHideWork?.cancel()
