@@ -149,10 +149,18 @@ def data_and_license_smoke(app):
         result['licenses'] = 'not_required_no_data'
     return result
 
+def expected_abi_version():
+    """从头文件读取当前 ABI 版本，避免每次版本迁移都改脚本（v3/v4 教训）。"""
+    header = ROOT / 'native/GogakuCore/include/gogaku_core.h'
+    m = re.search(r'#define GOGAKU_CORE_ABI_VERSION (\d+)', header.read_text())
+    assert m, '头文件缺少 GOGAKU_CORE_ABI_VERSION'
+    return int(m.group(1))
+
 def normal_core_smoke(app):
-    """共享普通模式核心（ABI v2）：包内 dylib 完成 nihc→你好 事件轨迹。"""
+    """共享普通模式核心：包内 dylib 完成 nihc→你好 事件轨迹。"""
     lib = c.CDLL(str(app / 'Contents/Frameworks/libgogaku_core.dylib'))
-    assert lib.gc_abi_version() == 2, '共享核心 ABI 版本应为 2'
+    expected = expected_abi_version()
+    assert lib.gc_abi_version() == expected, f'共享核心 ABI 版本应为 {expected}'
 
     class GcNormalConfig(c.Structure):
         _fields_ = [('dict_path', c.c_char_p), ('model_path', c.c_char_p), ('user_dir', c.c_char_p),
