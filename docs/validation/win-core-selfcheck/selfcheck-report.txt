@@ -1,0 +1,17 @@
+Gogaku core self-check
+host=GOMEEN user=administrator date=2026/11/05 ÷‹Àƒ 16:27:37.88
+=== gogaku_core_abi_test ===
+gogaku_core abi test: all passed
+exitcode=0
+=== gogaku_core_translate_safety_test ===
+translate_safety: 76 checks, 0 failures
+exitcode=0
+=== gogaku_core_normal_test ===
+exitcode=0
+=== gogaku_core_learning_test ===
+gogaku learning test: all passed (144 checks)
+exitcode=0
+=== gogaku_core_quality_test ===
+exitcode=0
+=== gogaku_core_fuzz ===
+exitcode=0

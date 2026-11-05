@@ -1,0 +1,75 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index a562eff..037e5da 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -42,7 +42,17 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+ 
+ include("${FCITX_INSTALL_CMAKECONFIG_DIR}/Fcitx5Utils/Fcitx5CompilerSettings.cmake")
+ 
+-find_package(Boost 1.61 CONFIG REQUIRED COMPONENTS iostreams)
++# Gogaku Windows 交叉构建补丁：Boost iostreams 编译库不可用时退回 header-only。
++# zstdfilter.h 的模板用法不需要 iostreams 编译符号；压缩模型文件在 Gogaku
++# 运行时不会出现（zh_CN.lm 为非压缩 kenlm trie）。macOS 构建不受影响。
++if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
++    set(Boost_NO_BOOST_CMAKE ON)
++    find_package(Boost 1.61 REQUIRED)
++    set(Boost_USE_STATIC_LIBS ON)
++    message(STATUS "Boost iostreams unavailable; building without compressed-model support (Gogaku Windows cross build)")
++else()
++    find_package(Boost 1.61 CONFIG REQUIRED COMPONENTS iostreams)
++endif()
+ 
+ set(LIBIME_INSTALL_PKGDATADIR "${CMAKE_INSTALL_FULL_DATADIR}/libime")
+ set(LIBIME_INSTALL_LIBDATADIR "${CMAKE_INSTALL_FULL_LIBDIR}/libime")
+diff --git a/src/libime/core/CMakeLists.txt b/src/libime/core/CMakeLists.txt
+index 5c089ce..1d72f67 100644
+--- a/src/libime/core/CMakeLists.txt
++++ b/src/libime/core/CMakeLists.txt
+@@ -85,7 +85,12 @@ target_include_directories(IMECore PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_INCLUDEDIR}/LibIME>)
+ 
+-target_link_libraries(IMECore PUBLIC Fcitx5::Utils Boost::boost PRIVATE kenlm Boost::iostreams PkgConfig::ZSTD)
++# Gogaku Windows 交叉构建：iostreams 编译库不可用时只链接头文件用法（见顶层 CMakeLists 注释）。
++if(TARGET Boost::iostreams)
++    target_link_libraries(IMECore PUBLIC Fcitx5::Utils Boost::boost PRIVATE kenlm Boost::iostreams PkgConfig::ZSTD)
++else()
++    target_link_libraries(IMECore PUBLIC Fcitx5::Utils Boost::boost PRIVATE kenlm PkgConfig::ZSTD)
++endif()
+ 
+ install(TARGETS IMECore EXPORT LibIMECoreTargets LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT lib)
+ install(FILES ${LIBIME_HDRS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LibIME/libime/core" COMPONENT header)
+diff --git a/src/libime/pinyin/CMakeLists.txt b/src/libime/pinyin/CMakeLists.txt
+index e8a9306..55654cb 100644
+--- a/src/libime/pinyin/CMakeLists.txt
++++ b/src/libime/pinyin/CMakeLists.txt
+@@ -43,7 +43,11 @@ target_include_directories(IMEPinyin PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_INCLUDEDIR}/LibIME>)
+ 
+-target_link_libraries(IMEPinyin PUBLIC Fcitx5::Utils Boost::boost LibIME::Core PRIVATE Boost::iostreams PkgConfig::ZSTD)
++if(TARGET Boost::iostreams)
++    target_link_libraries(IMEPinyin PUBLIC Fcitx5::Utils Boost::boost LibIME::Core PRIVATE Boost::iostreams PkgConfig::ZSTD)
++else()
++    target_link_libraries(IMEPinyin PUBLIC Fcitx5::Utils Boost::boost LibIME::Core PRIVATE PkgConfig::ZSTD)
++endif()
+ 
+ install(TARGETS IMEPinyin EXPORT LibIMEPinyinTargets LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT lib)
+ install(FILES ${LIBIME_PINYIN_HDRS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LibIME/libime/pinyin" COMPONENT header)
+diff --git a/src/libime/table/CMakeLists.txt b/src/libime/table/CMakeLists.txt
+index b1de265..4cac605 100644
+--- a/src/libime/table/CMakeLists.txt
++++ b/src/libime/table/CMakeLists.txt
+@@ -35,7 +35,11 @@ target_include_directories(IMETable PUBLIC
+     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>
+     $<INSTALL_INTERFACE:${CMAKE_INSTALL_FULL_INCLUDEDIR}/LibIME>)
+ 
+-target_link_libraries(IMETable PUBLIC Fcitx5::Utils Boost::boost LibIME::Core PRIVATE Boost::iostreams PkgConfig::ZSTD)
++if(TARGET Boost::iostreams)
++    target_link_libraries(IMETable PUBLIC Fcitx5::Utils Boost::boost LibIME::Core PRIVATE Boost::iostreams PkgConfig::ZSTD)
++else()
++    target_link_libraries(IMETable PUBLIC Fcitx5::Utils Boost::boost LibIME::Core PRIVATE PkgConfig::ZSTD)
++endif()
+ 
+ install(TARGETS IMETable EXPORT LibIMETableTargets LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}" COMPONENT lib)
+ install(FILES ${LIBIME_TABLE_HDRS} DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/LibIME/libime/table" COMPONENT header)

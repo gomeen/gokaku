@@ -1,0 +1,102 @@
+{
+  "kind": "gogaku-core-selfcheck-manifest",
+  "createdAt": "2026-11-05T08:26:49+00:00",
+  "commit": "89afbf88d60c0b5c88dd58dec83356002e539111",
+  "files": [
+    {
+      "path": "README.txt",
+      "sha256": "f78d5893d7f67165d6b01bb001b8b99885d6cfe0a9704502ff4457edda5495c3",
+      "bytes": 1103
+    },
+    {
+      "path": "data/sc.dict",
+      "sha256": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+      "bytes": 4489669
+    },
+    {
+      "path": "data/zh_CN.lm",
+      "sha256": "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387",
+      "bytes": 34736327
+    },
+    {
+      "path": "gogaku_core_abi_test.exe",
+      "sha256": "3f7c1f4eb82b3ccda044b0ec370de2e8d6cd5f3d39a55d1c1c9c779cfcfa372c",
+      "bytes": 147775
+    },
+    {
+      "path": "gogaku_core_fuzz.exe",
+      "sha256": "ff68f0fd3d4a62c793909f74e58c84ea349ca2991adeed5a39d9f10842451904",
+      "bytes": 2319965
+    },
+    {
+      "path": "gogaku_core_learning_test.exe",
+      "sha256": "3d065e65dd62df274e9a8e2743aa8d846fefcd7b6df2a525fe75b705fa6a24aa",
+      "bytes": 12446509
+    },
+    {
+      "path": "gogaku_core_normal_test.exe",
+      "sha256": "42c4a071afe30800125ff149282242f0548b6a88242686f68a6e287cabdf047b",
+      "bytes": 15502099
+    },
+    {
+      "path": "gogaku_core_quality_test.exe",
+      "sha256": "d41c3881a0a85f442b27ce9c684597c19f48c8aaf55358100b7eb10f77d8a634",
+      "bytes": 12420841
+    },
+    {
+      "path": "gogaku_core_translate_safety_test.exe",
+      "sha256": "8ce2323be330832fb96d3c8dc0a737259dd019b10bc38f419f3bc7c31a05270a",
+      "bytes": 12643158
+    },
+    {
+      "path": "libFcitx5Utils.dll",
+      "sha256": "b8652832d72eb68f07dcde021b4fccf68c1f6afef2b28a4fdb30cc3c35505188",
+      "bytes": 22305043
+    },
+    {
+      "path": "libIMECore.dll",
+      "sha256": "897b6ccb03a8c4ae61451d8b842e17571638bc9ed08a9aeaf420fc9d8600df03",
+      "bytes": 15262964
+    },
+    {
+      "path": "libIMEPinyin.dll",
+      "sha256": "17bbf0f54397bd2664bf84bbae15559805917b2f1347a33279c2d76548d07145",
+      "bytes": 13555233
+    },
+    {
+      "path": "libdl.dll",
+      "sha256": "d8facf0f8816665e6f06b7abced3a6113cefecc315106a135dfadde905a29c17",
+      "bytes": 24576
+    },
+    {
+      "path": "libgogaku_core.dll",
+      "sha256": "09203bca10e08cc8466e448c905934cc789aab749a97ac245e6bcd1b6ecfb25c",
+      "bytes": 16421457
+    },
+    {
+      "path": "libiconv-2.dll",
+      "sha256": "de91a00fc21d31a7a672ab04f44cd86db05d8711e07c873a8d5c57cd4a093d7a",
+      "bytes": 1120768
+    },
+    {
+      "path": "libintl-8.dll",
+      "sha256": "b648dfd190711371bedd58f36cf7bf80cc60be0ff78e574e57f3bd81135eeff5",
+      "bytes": 302592
+    },
+    {
+      "path": "libwinpthread-1.dll",
+      "sha256": "c888e798372d49c42a3dbd6a3a8dec61e308b2c82639e17d623b25e7e1cca499",
+      "bytes": 343646
+    },
+    {
+      "path": "libzstd.dll",
+      "sha256": "a4a29141c6dc489c59c260b5d4f781c195cea11ed231ee0cbfc6d3803b0708b7",
+      "bytes": 1030144
+    },
+    {
+      "path": "run.bat",
+      "sha256": "1db8b6e08d513f070379286d34cf0bdae2dd6ba1a95d08ba3257e6a8e3704561",
+      "bytes": 1516
+    }
+  ]
+}

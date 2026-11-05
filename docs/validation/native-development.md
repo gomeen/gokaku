@@ -1,6 +1,15 @@
 # 原生工程实施验收记录
 
-更新：2026-11-05（学习规则迁入共享 C++ 核心，ABI v3；fast 档全过＋核心插桩学习测试通过。此前的 2026-11-04 轮：移除快速添加功能；翻译组合策略首轮验收未过 95% 门槛，学习模式仍阻塞）。目标机器：Intel Mac、macOS 26.7.2。
+更新：2026-11-05（学习规则迁入共享 C++ 核心，ABI v3；另完成 Windows 交叉构建＋核心自检包并在 Windows 11 VM 全绿。另：翻译组合策略首轮验收未过 95% 门槛，学习模式仍阻塞）。目标机器：Intel Mac、macOS 26.7.2。
+
+## Windows 交叉构建与核心自检包（2026-11-05，工作区，未定版）
+
+按计划 T2.1 的「无本地 Windows」路线推进：Mac 上用 Homebrew mingw-w64（GCC 16.2）交叉编译共享核心，产出 Windows x64 DLL＋测试 exe，打包为一键自检包供真实 Windows 硬件验证。
+
+- **交叉构建流水线**：`scripts/prepare-win-cross.sh`——ECM → 隔离 Fcitx5Utils → IMEPinyin／数据工具 → 共享核心，全部同 pin（libime 5be1300 等）；POSIX 垫片（dlfcn/gettext/libiconv/zstd/zlib）解包 MSYS2 clang64 包到本地 sysroot（与上游 libime Windows CI 同源依赖），.pc 路径改写本机绝对路径；libime 应用 `scripts/patches/libime-win-cross.patch`（Boost iostreams 条件化——MinGW GCC libstdc++ 保留 std::binary_function，无需 kenlm 补丁）。核心从隔离副本构建：副本注入两项 Windows 兼容修正（fsync→_commit；WIN32 输出目录自引用修正），不触碰共享工作区（当天有并行会话的延迟学习 ABI v4 未提交 WIP，中固态不可编译属预期；两项修正待其合入后上游化）。
+- **自检包**：`scripts/package-win-selfcheck.py` → `local/selfcheck/gogaku-core-selfcheck.zip`（70MB）：核心 DLL 链（libgogaku_core/libIMECore/libIMEPinyin/libFcitx5Utils/libwinpthread/libdl/libintl/libiconv/libzstd，导入表逐一二核查）＋6 个测试 exe＋出厂数据（Mac 缓存产物，哈希记录；兼容性由测试本体在 Windows 上验证）＋run.bat 一键运行产出机器可读 JSON 报告（无任何原文文本；测试向量与 Mac 侧同一套）。
+- **验证证据**（`docs/validation/win-core-selfcheck/`）：Windows 11 x64 VM（VMware Fusion；i9-9880H 宿主）内全绿——ABI 合同、翻译加固层 76 项、普通模式轨迹、学习模式轨迹 144 项、质量回归 120 条、2000 随机序列冒烟全部通过；run.bat 双击路径复验通过。**KenLM／词库格式兼容（Mac 产物在 Windows 加载）由此直接验证**。
+- **口径**：VM 是功能级验证环境；T2.1 验收仍以 CI 绿为准（远端未建）；朋友真机结果为真实硬件证据。VM 后续用于 TSF（T2.3）本地调试。
 
 ## 候选窗皮肤（2026-11-05，未定版）
 

@@ -2,6 +2,10 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-05 追加：Windows 交叉构建＋共享核心自检包）
+
+- **Windows 交叉构建流水线＋核心自检包**（计划 T2.1 的「无本地 Windows」路线）：`scripts/prepare-win-cross.sh` 在 Mac 上用 mingw-w64（GCC 16.2）交叉编译共享核心与依赖（同 pin；POSIX 垫片解包 MSYS2 clang64 包到本地 sysroot；libime 补丁 `scripts/patches/libime-win-cross.patch` 使 Boost iostreams 条件化）；核心从隔离副本构建并注入两项 Windows 兼容修正（fsync→_commit、WIN32 输出目录自引用修正——待核心活跃改动合入后上游化）。`scripts/package-win-selfcheck.py` 打包为一键自检 zip（核心 DLL 链＋6 个测试 exe＋出厂数据＋run.bat 产出机器可读 JSON 报告，不含原文文本）。**Windows 11 VM 内全绿**：ABI／翻译加固 76 项／普通轨迹／学习轨迹 144 项／质量回归 120 条／2000 序列冒烟，run.bat 双击路径复验通过；KenLM／词库格式兼容（Mac 产物在 Windows 加载）直接验证。证据：`docs/validation/win-core-selfcheck/`；口径：VM 为功能级验证，T2.1 验收仍以 CI 绿为准，包发给朋友真机为真实硬件证据。
+
 ### 变更（构建 82 追加：学习规则迁入共享 C++ 核心，ABI v3）
 
 - **学习组合状态机／三状态按键语义／翻译调度合同／拼写问题结构迁入共享核心**（`native/GogakuCore/learning_session.cpp`，计划 G1 的 T1.1/T1.2/T1.3）：Swift `CompositionSession` 改为薄封装（事件编组＋epoch→组合 UUID 映射＋候选稳定 ID），行为合同不变；翻译传输（TranslationService／worker）仍在平台侧。英→中英文缓冲、中→英字面/编码片段推导、候选追加不重编号、导航冻结、⌘Return 原文上屏、失败保留输入、拼写问题存取均由核心负责；C ABI 升到 v3（版本 1/2 函数与结构布局不变）。内核拒绝（如撇号开头片段）与历史 decode 抛异常同源走引擎错误路径；回格按字素簇删除（与 Swift `String.removeLast` 同语义：组合标记／VS／肤色／ZWJ 粘接／区域指示符对整簇回退；v1 局限：Tag 旗标不延伸）。共同事件轨迹向量新增学习用例（`tests/learning_session_test.cpp`，144 项检查，与 Swift 行为合同同源出厂数据逐字对齐）；核心插桩构建下学习测试通过。fast 档全过（core ctest 100%、Swift Release 117 项）；ASan 冒烟 2000 序列无错误。Windows 侧验证仍待环境（T2.1）；同轮启动 T2.1 脚手架：MSYS2 Clang64 依赖准备脚本（与 Mac 同 pin 同源数据）＋CMake preset＋windows-core CI workflow——仓库无远端，流水线未经真实 CI 运行，全绿前不标 Windows 验证通过。

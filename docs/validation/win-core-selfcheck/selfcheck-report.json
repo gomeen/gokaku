@@ -1,0 +1,40 @@
+{
+    "kind":  "gogaku-core-selfcheck",
+    "version":  1,
+    "host":  "GOMEEN",
+    "user":  "administrator",
+    "date":  "2026-11-05T16:27:43.8532070+08:00",
+    "allPassed":  true,
+    "checks":  [
+                   {
+                       "test":  "gogaku_core_abi_test",
+                       "exitCode":  0,
+                       "passed":  true
+                   },
+                   {
+                       "test":  "gogaku_core_translate_safety_test",
+                       "exitCode":  0,
+                       "passed":  true
+                   },
+                   {
+                       "test":  "gogaku_core_normal_test",
+                       "exitCode":  0,
+                       "passed":  true
+                   },
+                   {
+                       "test":  "gogaku_core_learning_test",
+                       "exitCode":  0,
+                       "passed":  true
+                   },
+                   {
+                       "test":  "gogaku_core_quality_test",
+                       "exitCode":  0,
+                       "passed":  true
+                   },
+                   {
+                       "test":  "gogaku_core_fuzz",
+                       "exitCode":  0,
+                       "passed":  true
+                   }
+               ]
+}
