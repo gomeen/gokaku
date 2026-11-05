@@ -38,7 +38,7 @@
   1. **MinGW `std::rename` 不覆盖已存在目标**（MSVCRT rename 语义，EEXIST）：`atomic_write` 第二次起静默失败（dirty 滞留）——删词后学习词复活、userlm 重建失败、写失败恢复落盘全由此起。副本注入先 `remove` 再改名；产品化应改 `MoveFileExA + MOVEFILE_REPLACE_EXISTING` 保持原子性，**待 WIP 合入后连同 fsync 项一并上游化到 `normal_session.cpp`**。
   2. **fsync 语义**：前一轮注入的 `fsync→_commit` 对 O_RDONLY 句柄在 Windows 上失败，而写入路径把 fsync 失败当致命错误——改注入为 no-op 内联函数（自检包关注功能兼容而非掉电顺序；正式上游化应对写句柄用 `FlushFileBuffers`）。
 - **验证证据**：同一 VM（Windows 11 x64）全绿——ABI 合同、翻译加固层、普通模式轨迹（含 flush 持久化/损坏重建/删词不复活/写失败恢复）、学习轨迹 144 项、质量回归 120 条、随机序列冒烟，失败 0 项；修复前 4 项持久化用例失败→定位→修复→复验全过的完整闭环在本 VM 完成。调试插桩（rename errno=17 实证）已从正式版剥离。
-- **口径**：VM 功能级验证；exe 双击路径未在真机验证（朋友真机即此包的真实硬件证据）；TSF 前端（T2.3）未开始。
+- **口径**：VM 功能级验证；**朋友真机自检推迟（2026-11-06 用户裁决）：不再单独发自检 exe，待完整功能安装包就绪后一并真实测试**；TSF 前端（T2.3）随即启动。
 
 ## 候选窗皮肤（2026-11-05，未定版）
 
