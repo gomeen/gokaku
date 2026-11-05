@@ -6,6 +6,11 @@ final class EngineTests: XCTestCase {
         let path = ProcessInfo.processInfo.environment["GOGAKU_ENGINE_DATA"] ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/Gogaku/libime-1.1.17/data").path
         return try ChineseEngine(directory: URL(fileURLWithPath: path))
     }
+    /// 学习组合会话（共享 C++ 核心，ABI v3）：与核心测试同源出厂数据。
+    func learningSession() throws -> CompositionSession {
+        let path = ProcessInfo.processInfo.environment["GOGAKU_ENGINE_DATA"] ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/Gogaku/libime-1.1.17/data").path
+        return try CompositionSession(config: .init(dictPath: path + "/sc.dict", modelPath: path + "/zh_CN.lm"))
+    }
     func type(_ keys: String, on engine: ChineseEngine) throws -> EngineSnapshot {
         var result = EngineSnapshot()
         for c in keys.unicodeScalars { result = try engine.apply(.type(c.value)) }
@@ -51,7 +56,7 @@ final class EngineTests: XCTestCase {
         XCTAssertFalse(try e.apply(.cancel).composing)
     }
     func testSessionStaleCandidateAndNoAutomaticCommit() throws {
-        let s = CompositionSession(engine: try engine())
+        let s = try learningSession()
         try s.type("nihc")
         let stale = try XCTUnwrap(s.view.candidates.first)
         try s.type("m")
@@ -63,7 +68,7 @@ final class EngineTests: XCTestCase {
         XCTAssertNil(try s.choose(candidate)); XCTAssertEqual(s.view.raw, "")
     }
     func testEnglishUnicodeAndCompletionAreIndependent() throws {
-        let s = CompositionSession(engine: try engine())
+        let s = try learningSession()
         s.configure(focus: 1, mode: .learning, direction: .enToZh)
         try s.type("metting 👩🏽‍💻 e\u{301} 12!")
         XCTAssertEqual(s.sourceExpressions().first?.text, s.view.raw)
@@ -80,7 +85,7 @@ final class EngineTests: XCTestCase {
         XCTAssertNil(try s.choose(Candidate(stamp: old, sourceID: "english:full", source: "", range: RawRange(start: 0, length: 1), target: "旧", explanation: "", resource: "test-only")))
     }
     func testLiteralChineseSegmentsAndPartialLearningConsumption() throws {
-        let s = CompositionSession(engine: try engine())
+        let s = try learningSession()
         s.configure(focus: 1, mode: .learning, direction: .zhToEn)
         try s.type("nihc,12!kdhv")
         XCTAssertEqual(s.sourceExpressions().first?.text, "你好,12!开会")
@@ -92,7 +97,7 @@ final class EngineTests: XCTestCase {
         XCTAssertEqual(commit.text, "you"); XCTAssertEqual(s.view.raw, "hc,12!kdhv")
     }
     func testCandidateAppendNeverRenumbersAndNavigationFreezes() throws {
-        let s = CompositionSession(engine: try engine())
+        let s = try learningSession()
         s.configure(focus: 1, mode: .learning, direction: .zhToEn); try s.type("nihc")
         let sources = s.sourceExpressions()
         func add(_ source: SourceExpression) {
@@ -105,7 +110,7 @@ final class EngineTests: XCTestCase {
         add(sources[2]); XCTAssertEqual(s.view.candidates.count, count)
     }
     func testFocusModeAndDirectionInvalidateCandidates() throws {
-        let s = CompositionSession(engine: try engine()); try s.type("ni")
+        let s = try learningSession(); try s.type("ni")
         let c = s.view.candidates[0]
         s.configure(focus: 2, mode: .learning, direction: .enToZh)
         XCTAssertNil(try s.choose(c)); XCTAssertNil(s.original())
@@ -113,7 +118,7 @@ final class EngineTests: XCTestCase {
         XCTAssertNotEqual(s.view.stamp.composition, c.stamp.composition)
     }
     func testOriginalOnlyOnceAndScalarLimit() throws {
-        let s = CompositionSession(engine: try engine())
+        let s = try learningSession()
         s.configure(focus: 1, mode: .learning, direction: .enToZh)
         try s.type(String(repeating: "😀", count: 512)); try s.type("x")
         XCTAssertEqual(s.view.raw.unicodeScalars.count, 512)

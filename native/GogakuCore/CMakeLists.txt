@@ -28,7 +28,7 @@ function(gogaku_enable_sanitizers target)
 endfunction()
 
 add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp
-    translate/translate_safety.cpp)
+    learning_session.cpp translate/translate_safety.cpp)
 target_include_directories(GogakuCore
     PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}"
     PUBLIC include)
@@ -79,6 +79,15 @@ target_include_directories(gogaku_core_normal_profile PRIVATE include "${GOGAKU_
 target_link_directories(gogaku_core_normal_profile PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
 target_link_libraries(gogaku_core_normal_profile PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
 gogaku_enable_sanitizers(gogaku_core_normal_profile)
+
+# 学习模式事件轨迹测试（ABI v3）：学习组合状态机＋翻译调度合同＋三状态语义。
+# 词典/模型路径同普通模式测试（GOGAKU_CORE_TEST_DATA）；测试词典临时生成。
+add_executable(gogaku_core_learning_test tests/learning_session_test.cpp)
+target_include_directories(gogaku_core_learning_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_core_learning_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_core_learning_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_core_learning_test)
+add_test(NAME learning_session COMMAND gogaku_core_learning_test)
 
 # 中文质量回归：120 条冻结用例的首选／前十门槛与调频／自定义词不干扰检查。
 add_executable(gogaku_core_quality_test tests/normal_session_quality.cpp)

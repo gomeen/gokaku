@@ -83,7 +83,7 @@ final class LearningTranslationTests: XCTestCase {
     func session(_ direction: Direction) throws -> CompositionSession {
         let path = ProcessInfo.processInfo.environment["GOGAKU_ENGINE_DATA"]
             ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/Gogaku/libime-1.1.17/data").path
-        let s = CompositionSession(engine: try ChineseEngine(directory: URL(fileURLWithPath: path)))
+        let s = try CompositionSession(config: .init(dictPath: path + "/sc.dict", modelPath: path + "/zh_CN.lm"))
         s.configure(focus: 1, mode: .learning, direction: direction)
         try s.type("metting")
         return s

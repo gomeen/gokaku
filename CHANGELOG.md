@@ -2,6 +2,10 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（构建 82 追加：学习规则迁入共享 C++ 核心，ABI v3）
+
+- **学习组合状态机／三状态按键语义／翻译调度合同／拼写问题结构迁入共享核心**（`native/GogakuCore/learning_session.cpp`，计划 G1 的 T1.1/T1.2/T1.3）：Swift `CompositionSession` 改为薄封装（事件编组＋epoch→组合 UUID 映射＋候选稳定 ID），行为合同不变；翻译传输（TranslationService／worker）仍在平台侧。英→中英文缓冲、中→英字面/编码片段推导、候选追加不重编号、导航冻结、⌘Return 原文上屏、失败保留输入、拼写问题存取均由核心负责；C ABI 升到 v3（版本 1/2 函数与结构布局不变）。内核拒绝（如撇号开头片段）与历史 decode 抛异常同源走引擎错误路径；回格按字素簇删除（与 Swift `String.removeLast` 同语义：组合标记／VS／肤色／ZWJ 粘接／区域指示符对整簇回退；v1 局限：Tag 旗标不延伸）。共同事件轨迹向量新增学习用例（`tests/learning_session_test.cpp`，144 项检查，与 Swift 行为合同同源出厂数据逐字对齐）；核心插桩构建下学习测试通过。fast 档全过（core ctest 100%、Swift Release 117 项）；ASan 冒烟 2000 序列无错误。Windows 侧验证仍待环境（T2.1）。
+
 ## 0.1.1-rc.1（构建 7）— 2026-11-02
 
 相对 0.1.0-dev.1（构建 6）的变更：普通输入修复（Orca Shift 单击、候选窗锚点）、设置页布局重排、翻译加固层第一片入共享核心、菜单图标字形放大；学习模式交付仍保持阻塞（模型质量门槛未重跑）。

@@ -1,7 +1,7 @@
 #ifndef GOGAKU_CORE_H
 #define GOGAKU_CORE_H
 /*
- * Gogaku 共享核心 C ABI（版本 2）。
+ * Gogaku 共享核心 C ABI（版本 3）。
  *
  * 合同（见 docs/implementation-plan.md「统一接口与所有权」）：
  * - 显式整数与 UTF-8＋长度；字符串长度以字节计；所有字符串以 NUL 结尾便于跨语言拷贝。
@@ -13,6 +13,9 @@
  * - 会话不是线程安全的：同一会话由一个平台串行队列拥有（输入法主队列）。
  * - 核心不建线程、不起定时器；持久化防抖由平台调用 gc_normal_flush 完成。
  *
+ * 版本 3 新增：学习模式会话（学习组合状态机＋三状态按键语义＋翻译调度合同
+ * ＋拼写问题结构）。会话纯 C++，不含 IMK/TSF/窗口/平台路径；翻译请求的
+ * 进程与传输仍在平台侧（快照只报告「需要请求哪个源」）。
  * 版本 2 新增：普通模式会话（组合状态机＋libime 绑定）、自定义词语存储与校验。
  * 版本 1 函数保持原样。
  *
@@ -36,7 +39,7 @@ extern "C" {
 #  define GOGAKU_CORE_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define GOGAKU_CORE_ABI_VERSION 2
+#define GOGAKU_CORE_ABI_VERSION 3
 
 /* 返回本库实现的 ABI 版本。 */
 GOGAKU_CORE_EXPORT int32_t gc_abi_version(void);
@@ -289,6 +292,155 @@ typedef struct GcTextRange {
 GOGAKU_CORE_EXPORT size_t gc_translate_protection_scan(const char *text, size_t length,
                                                        GcTextRange *out_ranges,
                                                        size_t capacity);
+
+/* ---------- 学习模式会话（版本 3 新增） ----------
+ *
+ * 学习组合状态机（Swift CompositionSession 的 C++ 迁移）：覆盖三种状态——
+ * 普通（内嵌小鹤解码内核，语义与历史 ge_* 桥一致）、学习·中→英（源文按
+ * 字面/编码片段解码）、学习·英→中（独立英文缓冲）。翻译调度合同：会话
+ * 产出源表达式并在发布后置 translation_needed，平台据此发起请求；结果经
+ * RECEIVE 回传，失败经 TRANSLATION_FAILED（文案由平台生成）。拼写检查
+ * 仍由平台执行（NSSpellChecker / Windows Spell Checking API），GcIssue
+ * 只是纯结构：核心存取不解释偏移口径（平台用 UTF-16 单位）。
+ * 内存与异常规则沿用：快照由本库分配并经 gc_learning_snapshot_free 释放；
+ * 异常不跨 ABI（错误以返回码表达）。
+ *
+ * 状态身份：focus（平台代次）＋epoch（configure/cancel 递增，平台映射为
+ * 组合标识）＋revision（组合内每次变更递增）。stamp 匹配按四元组比较，
+ * 平台不需要把 UUID 交给核心。
+ */
+
+typedef struct GcLearningConfig {
+    const char *dict_path;  /* libime 出厂词典（二进制）；必填 */
+    const char *model_path; /* libime 语言模型；必填 */
+} GcLearningConfig;
+
+typedef struct GcLearningSession GcLearningSession;
+
+/* 拼写问题（纯结构；location/length 单位由平台定义并原样往返）。 */
+typedef struct GcIssue {
+    int64_t location; /* UTF-16 单位偏移（NSSpellChecker 口径）；核心不解释 */
+    int64_t length;   /* UTF-16 单位长度 */
+    char *explanation;
+} GcIssue;
+
+/* 学习事件种类。 */
+enum {
+    GC_LEV_CONFIGURE = 0,       /* arg0=focus arg1=mode arg2=direction；重置组合 */
+    GC_LEV_TYPE,                /* text：追加一个或多个标量（学习态任意字符） */
+    GC_LEV_BACKSPACE,
+    GC_LEV_CANCEL,
+    GC_LEV_RESTORE,             /* text：取消后按原始编码重放 */
+    GC_LEV_PAGE,                /* arg0=delta（±1） */
+    GC_LEV_NAVIGATE,            /* arg0=delta */
+    GC_LEV_CHOOSE,              /* arg0=当前快照候选下标；成功时携带提交意图 */
+    GC_LEV_ORIGINAL,            /* ⌘Return 原文上屏；成功时携带提交意图 */
+    GC_LEV_VIEW_ERROR,          /* 状态行置引擎失败提示（无其他效果） */
+    GC_LEV_REQUEST_SOURCE,      /* arg0=源下标；置 translation_needed */
+    GC_LEV_RECEIVE,             /* 翻译成功结果（source_id/source/target/resource/approved） */
+    GC_LEV_TRANSLATION_FAILED,  /* 失败结果；message 为平台生成状态行文案 */
+    GC_LEV_SET_ISSUES           /* issues/issue_count */
+};
+
+/* 模式与方向取值。 */
+enum {
+    GC_LEARN_MODE_NORMAL = 0,
+    GC_LEARN_MODE_LEARNING = 1,
+    GC_LEARN_DIR_ZH_TO_EN = 0,
+    GC_LEARN_DIR_EN_TO_ZH = 1
+};
+
+typedef struct GcLearningEvent {
+    int32_t kind;
+    int64_t arg0;
+    int64_t arg1;
+    int64_t arg2;
+    const char *text;      /* TYPE/RESTORE */
+    /* RECEIVE/TRANSLATION_FAILED/SET_ISSUES 的 stamp 匹配（事件前状态）。 */
+    uint64_t stamp_focus;
+    uint64_t stamp_epoch;
+    uint64_t stamp_revision;
+    int32_t stamp_mode;
+    int32_t stamp_direction;
+    const char *source_id; /* RECEIVE */
+    const char *source;    /* RECEIVE：须与源表达式 id＋text 同时匹配 */
+    const char *target;    /* RECEIVE：译文；NULL/空视为失败路径 */
+    const char *resource;  /* RECEIVE：资源标记 */
+    int32_t approved;      /* RECEIVE：0 = 即使成功也不进入候选 */
+    const char *message;   /* TRANSLATION_FAILED 状态行文案 */
+    const GcIssue *issues; /* SET_ISSUES；核心复制内容 */
+    size_t issue_count;
+} GcLearningEvent;
+
+typedef struct GcLearningCandidate {
+    char *source_id;
+    char *source;         /* 源文（普通模式含已暂存前缀） */
+    char *target;         /* 选中后上屏文本 */
+    char *resource;
+    int64_t start;        /* 源范围起点（Unicode 标量；学习候选从 0 消费） */
+    int64_t length;       /* 源范围长度（Unicode 标量） */
+    int64_t engine_index; /* 普通模式解码下标；学习候选为 -1 */
+    int32_t completes;    /* 普通模式：1 = 覆盖到当前输入末尾 */
+} GcLearningCandidate;
+
+typedef struct GcSourceExpression {
+    char *id;      /* "english:full"／"chinese:full"／"chinese:<start>:<index>" */
+    char *text;    /* 送翻译的源文 */
+    int64_t start; /* Unicode 标量偏移（当前实现从组合起点消费） */
+    int64_t length;
+} GcSourceExpression;
+
+typedef struct GcLearningSnapshot {
+    /* 事件后状态身份。 */
+    uint64_t focus;
+    uint64_t epoch;    /* configure/cancel 递增；平台映射为组合标识 */
+    uint64_t revision;
+    int32_t mode;      /* GC_LEARN_MODE_* */
+    int32_t direction; /* GC_LEARN_DIR_* */
+    char *raw;         /* 学习态原始输入；普通态为原始编码 */
+    char *preedit;     /* 显示形态（中→英为解码后中文） */
+    char *status;      /* 瞬态说明；空串 = 无 */
+    char *typed_prefix;/* 普通态已暂存中文；学习态为空串 */
+    int32_t frozen;    /* 1 = 导航/翻页后冻结：迟到结果不再进入候选 */
+    GcLearningCandidate *candidates;
+    size_t candidate_count;
+    size_t selected;   /* 全局高亮下标（普通态恒 0，与历史行为一致） */
+    size_t page;
+    size_t total_candidates; /* 普通态候选总数（含后续页）；学习态＝当前候选数 */
+    GcSourceExpression *sources;
+    size_t source_count;
+    int32_t translation_needed;       /* 1 = 平台应请求 sources[translation_source_index] */
+    int64_t translation_source_index; /* 无时为 -1 */
+    GcIssue *issues;
+    size_t issue_count;
+    /* 提交意图（CHOOSE/ORIGINAL 成功时非空；id 由平台生成）。 */
+    char *commit_text;
+    char *commit_source;
+    char *commit_resource;
+    int32_t commit_original;
+    char *commit_recovery_raw;
+    uint64_t commit_focus;   /* 意图所属＝事件前状态 */
+    uint64_t commit_epoch;
+    uint64_t commit_revision;
+    int32_t commit_mode;
+    int32_t commit_direction;
+} GcLearningSnapshot;
+
+GOGAKU_CORE_EXPORT void gc_learning_snapshot_free(GcLearningSnapshot *snapshot);
+
+/* 创建会话。err/err_len 可为 NULL；非 NULL 时写入可读问题（资源缺失等）。
+ * 返回 0 成功，1 参数错误，2 资源错误（词典/模型不可用）。 */
+GOGAKU_CORE_EXPORT int gc_learning_session_create(const GcLearningConfig *config,
+                                                  GcLearningSession **out,
+                                                  char *err, size_t err_len);
+GOGAKU_CORE_EXPORT void gc_learning_session_destroy(GcLearningSession *session);
+
+/* 处理一个学习事件；*out 必须用 gc_learning_snapshot_free 释放。
+ * 返回 0 成功；1 请求非法（状态不变，调用方可保留旧视图）；
+ * 2 引擎错误（可能部分推进，与历史 try 序列语义一致）。 */
+GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
+                                          const GcLearningEvent *event,
+                                          GcLearningSnapshot **out);
 
 #ifdef __cplusplus
 }

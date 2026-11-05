@@ -176,7 +176,7 @@ Mac 输入源使用一个隔离翻译进程；Windows 多个宿主中的 TSF 实
 | 阶段 | 状态 | 证据／缺口 |
 | --- | --- | --- |
 | G0 Windows 环境＋模型门槛 | 阻塞／Mac 部分完成 | Windows 桌面环境未提供，Windows libime／C ABI 烟测待环境；Mac small100 技术可行（分词／INT8 转换／速度／离线），**质量门槛不通过**（固定风险集存在未处置意义破坏），双端学习交付保持阻塞，见验收记录与[语义审阅](../probes/results/small100-gate/semantic-review.md)。2026-11-02 裁决解堵路径：加固层处置口径＋宽松许可候选验证流程；2026-11-03 统一复测 quickmt 双向速度领先但质量门槛未过（固定风险 12 条、en→zh 可用率 77.67%），暂不替换，见[决定](../probes/results/translation-backends/decision.md)与[模型解堵调研](research-translation-model-unblock.md)§七。**2026-11-03 用户裁决：Mac 本机开发版以 quickmt 外置辅助进程解锁学习模式最小闭环（beam 默认 1，设置 1–10 可调），显式接受已知风险；双端交付门槛不变**，见[开发版裁决](learning-quickmt-dev-decision.md) |
-| G1 共享核心迁移 | 进行中（普通模式已迁入，学习规则未迁） | 最小共享接口（`native/GogakuCore` C ABI）已建并升到 v2；普通模式行为规格已全部迁入共享 C++ 核心（含自定义词语、英文候选、调频、按应用默认英文，见下行“本阶段”行），Mac Swift 已改为薄调用。共同事件轨迹向量仍只覆盖普通模式；学习模式组合／翻译调度／记录规则仍在 Swift，未迁移；Windows 侧未验证 |
+| G1 共享核心迁移 | 进行中（普通模式＋学习规则已迁入；共同轨迹双端未验证） | 最小共享接口（`native/GogakuCore` C ABI）已建并升到 v3（学习会话新增，版本 1/2 不变）；普通模式行为规格已全部迁入共享 C++ 核心（含自定义词语、英文候选、调频、按应用默认英文），Mac Swift 已改为薄调用。**2026-11-05：学习组合状态机／三状态按键语义／翻译调度合同／拼写问题结构迁入共享核心（`learning_session.cpp`），Swift `CompositionSession` 改为薄封装，翻译传输仍在平台侧；共同事件轨迹向量新增学习用例（tests/learning_session_test.cpp，144 项检查），Mac fast 档全过**。学习记录（LearningStore）仍在 Swift（进程内记录，待正式验收随双端方案再定）；Windows 侧未验证（待 T2.1） |
 | G2 双端普通输入闭环 | Mac 部分有历史证据 | 18 项 AppKit／Orca 检查通过；完整宿主矩阵未过；Windows TSF 未开始 |
 | G3 模型与学习交互 | Mac 开发版体验态／双端门槛阻塞 | Mac 模型质量门槛不通过（2026-11-03 统一复测：small100 5 条、quickmt 12 条固定风险未处置，见[决定](../probes/results/translation-backends/decision.md)）。2026-11-03 用户裁决：Mac 本机开发版以 quickmt（CT2 INT8 双向、外置 Python 辅助进程、beam 默认 1）解锁学习模式与双向翻译流最小闭环，学习记录与宿主矩阵仍关闭，见[开发版裁决](learning-quickmt-dev-decision.md)；**双端生产交付口径不变，Windows 不动** |
 | G4 记录设置安装与最终验收 | 未通过 | Mac 安装恢复脚本已有；双端验收矩阵未执行 |

@@ -51,9 +51,10 @@ final class NormalEngineTests: XCTestCase {
     }
 
     func testBridgeAbiVersion() {
-        XCTAssertEqual(gc_abi_version(), 2)
-        XCTAssertEqual(gc_abi_check(2), 0)
-        XCTAssertEqual(gc_abi_check(1), 1)
+        // v3 新增学习会话；普通会话接口（v2）保持原样。
+        XCTAssertEqual(gc_abi_version(), GOGAKU_CORE_ABI_VERSION)
+        XCTAssertEqual(gc_abi_check(GOGAKU_CORE_ABI_VERSION), 0)
+        XCTAssertEqual(gc_abi_check(GOGAKU_CORE_ABI_VERSION + 1), 1)
     }
 
     func testXiaoheCommitAndEnglishCandidates() throws {

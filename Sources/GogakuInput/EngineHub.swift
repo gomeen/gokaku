@@ -42,14 +42,17 @@ final class EngineHub {
     /// 在用户实际进入学习输入时发生）；关闭返回 nil 即回门禁态。
     /// 与 GogakuInputController.learningDevEnabled 同源（同一设置字段），
     /// 两处口径一致。只能在引擎队列上调用创建；读侧用 existingLearningSession。
+    /// 学习组合状态机在共享 C++ 核心（ABI v3）中；这里只创建薄封装。
     func learningSession(_ settings: Settings) -> CompositionSession? {
         guard settings.learningTranslationEnabled else { return nil }
         if let learning { return learning }
         do {
-            let engine = try ChineseEngine(directory: Paths.engineData)
-            learning = CompositionSession(engine: engine)
+            let session = try CompositionSession(config: CompositionSession.Config(
+                dictPath: Paths.engineData.appendingPathComponent("sc.dict").path,
+                modelPath: Paths.engineData.appendingPathComponent("zh_CN.lm").path))
+            learning = session
             learningLogged = false
-            return learning
+            return session
         } catch {
             // 词库缺失时每次学习键入重试（与共享普通引擎同策略），但只记一次日志。
             if !learningLogged {
