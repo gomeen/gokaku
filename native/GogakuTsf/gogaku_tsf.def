@@ -4,3 +4,4 @@ EXPORTS
     DllCanUnloadNow
     DllRegisterServer
     DllUnregisterServer
+    GogakuActivateProfile

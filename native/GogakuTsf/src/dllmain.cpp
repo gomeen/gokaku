@@ -77,6 +77,72 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void **ppv) {
     return hr;
 }
 
+/* rundll32 导出：激活 Gogaku 为当前输入法（交互会话调用）。
+ * 用 C++ 而非 PowerShell：QI 在 PS 封送下会假失败（2026-11-06 实测）。 */
+extern "C" __declspec(dllexport) void CALLBACK GogakuActivateProfile(HWND, HINSTANCE, LPSTR, int) {
+    HRESULT hrCom = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+    HANDLE logf = CreateFileW(L"C:\\gogaku-test\\activate-profile.log",
+                              FILE_APPEND_DATA, FILE_SHARE_READ, nullptr,
+                              OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    auto log = [&](const wchar_t *msg, unsigned hr) {
+        if (!logf) return;
+        wchar_t line[128] = {};
+        swprintf_s(line, L"%s hr=0x%08X\r\n", msg, hr);
+        DWORD w = 0;
+        WriteFile(logf, line, (DWORD)(wcslen(line) * sizeof(wchar_t)), &w, nullptr);
+        CloseHandle(logf);
+        logf = CreateFileW(L"C:\\gogaku-test\\activate-profile.log",
+                           FILE_APPEND_DATA, FILE_SHARE_READ, nullptr,
+                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    };
+    GUID cat       = {0x34745C63, 0xB2F0, 0x4784, {0x8B, 0x67, 0x5E, 0x12, 0xC8, 0x70, 0x1A, 0x31}};
+    GUID mgrClsid  = {0x33C53A50, 0xF456, 0x4884, {0xB0, 0x49, 0x85, 0xFD, 0x64, 0x3E, 0xCF, 0xED}};
+    GUID mgrModern = {0x71C6E74C, 0x0F28, 0x11D8, {0xA8, 0x2A, 0x00, 0x06, 0x5B, 0x84, 0x43, 0x5C}};
+    GUID clsid     = {0xA3C5D7E9, 0x1B2F, 0x4A6C, {0x8E, 0x0D, 0x2F, 0x4B, 0x6A, 0x8C, 0x0E, 0x12}};
+    GUID profile   = {0xC9E1F3A5, 0x7B8D, 0x4E2F, {0x6A, 0x0C, 0x1D, 0x3E, 0x5F, 0x7A, 0x9B, 0x11}};
+
+    void *pmgr = nullptr;
+    HRESULT hr = CoCreateInstance(mgrClsid, nullptr, CLSCTX_INPROC_SERVER, mgrModern, &pmgr);
+    log(L"create+qi", (unsigned)hr);
+    if (FAILED(hr) || !pmgr) { if (logf) CloseHandle(logf); return; }
+
+    /* vtable 布局同 register_profile_via_api 的 MgrVtbl */
+    struct MgrVtbl {
+        HRESULT (STDMETHODCALLTYPE *ActivateProfile)(void *, DWORD, WORD, GUID &, GUID &, HKL, DWORD);
+        HRESULT (STDMETHODCALLTYPE *DeactivateProfile)(void *, DWORD, WORD, GUID &, GUID &, HKL, DWORD);
+        HRESULT (STDMETHODCALLTYPE *GetProfile)(void *, DWORD, WORD, GUID &, GUID &, HKL, void *);
+        HRESULT (STDMETHODCALLTYPE *EnumProfiles)(void *, WORD, void **);
+        HRESULT (STDMETHODCALLTYPE *ReleaseInputProcessor)(void *, GUID &, DWORD);
+        HRESULT (STDMETHODCALLTYPE *RegisterProfile)(void *, GUID &, WORD, GUID &, const WCHAR *, ULONG, const WCHAR *, ULONG, ULONG, HKL, DWORD, BOOL, DWORD);
+        HRESULT (STDMETHODCALLTYPE *UnregisterProfile)(void *, GUID &, WORD, GUID &, DWORD);
+        HRESULT (STDMETHODCALLTYPE *GetActiveProfile)(void *, GUID &, void *);
+    };
+    void **vtbl = *reinterpret_cast<void ***>(pmgr);
+    MgrVtbl *m = reinterpret_cast<MgrVtbl *>(vtbl);
+
+    /* 激活（TF_PROFILETYPE_INPUTPROCESSOR=0） */
+    hr = m->ActivateProfile(pmgr, 0, 0x0804, clsid, profile, nullptr, 0);
+    log(L"ActivateProfile", (unsigned)hr);
+
+    /* 查询当前活动（TF_INPUTPROCESSORPROFILE 40 字节缓冲） */
+    unsigned char profBuf[64] = {};
+    hr = m->GetActiveProfile(pmgr, cat, profBuf);
+    log(L"GetActiveProfile", (unsigned)hr);
+    if (SUCCEEDED(hr)) {
+        /* CLSID 在偏移 4（DWORD 之后） */
+        GUID activeClsid;
+        memcpy(&activeClsid, profBuf + 4, sizeof(GUID));
+        wchar_t line[80] = {};
+        StringFromGUID2(activeClsid, line, 80);
+        DWORD w = 0;
+        WriteFile(logf, line, (DWORD)(wcslen(line) * sizeof(wchar_t)), &w, nullptr);
+        WriteFile(logf, L"\r\n", 4, &w, nullptr);
+    }
+    reinterpret_cast<IUnknown *>(pmgr)->Release();
+    if (logf) CloseHandle(logf);
+    if (SUCCEEDED(hrCom)) CoUninitialize();
+}
+
 STDAPI DllCanUnloadNow(void) {
     return (g_objects == 0 && g_locks == 0) ? S_OK : S_FALSE;
 }
@@ -126,7 +192,9 @@ static void register_profile_via_api(const std::wstring &modulePath) {
     ICatInformation *catInfo = nullptr; /* 未用；占位避免头文件差异 */
 
     GUID mgrClsid  = {0x33C53A50, 0xF456, 0x4884, {0xB0, 0x49, 0x85, 0xFD, 0x64, 0x3E, 0xCF, 0xED}};
-    GUID mgrLegacy = {0x33C53A50, 0xF456, 0x11D1, {0xB6, 0x41, 0x00, 0xC0, 0x4F, 0xA3, 0x65, 0x47}};
+    /* ITfInputProcessorProfiles 真实 IID（wine/SDK 同源；33C53A50-11D1 会
+     * E_NOINTERFACE——此前启用失败即此因，2026-11-06 对照 Weasel 修正）。 */
+    GUID mgrLegacy = {0x1F02B6C5, 0x7842, 0x4EE6, {0x8A, 0x0B, 0x9A, 0x24, 0x18, 0x3A, 0x95, 0xCA}};
     GUID mgrModern = {0x71C6E74C, 0x0F28, 0x11D8, {0xA8, 0x2A, 0x00, 0x06, 0x5B, 0x84, 0x43, 0x5C}};
     GUID mgrNewSdk = {0x1F02B6C5, 0x7842, 0x4EE6, {0x8A, 0x0B, 0x9A, 0x24, 0x18, 0x3A, 0x95, 0xCA}};
 
@@ -157,7 +225,7 @@ static void register_profile_via_api(const std::wstring &modulePath) {
     {
         void *pold = nullptr;
         hr = unk->QueryInterface(mgrLegacy, &pold);
-        log(L"qi-legacy-11D1", hr);
+        log(L"qi-ipp-1F02B6C5", hr);
         if (SUCCEEDED(hr) && pold) {
             struct RegVtbl {
                 void *qi_addref_release[3];
@@ -258,7 +326,7 @@ static void register_profile_via_api(const std::wstring &modulePath) {
     {
         void *pold = nullptr;
         hr = unk->QueryInterface(mgrLegacy, &pold);
-        log(L"qi-legacy-33C53A50-11D1", hr);
+        log(L"qi-legacy-33C53A50", hr);
         if (SUCCEEDED(hr) && pold) {
             /* 老 SDK 布局（ReactOS/wine 同源）：Register/Unregister/AddLanguageProfile/
              * RemoveLanguageProfile/EnumInputProcessorInfo/GetDefaultLanguageProfile/
