@@ -2,6 +2,11 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：输入源幽灵注册根治，构建 86）
+
+- **用户报告**：添加输入法列表出现两个同名「Gogaku」且「键盘布局不可用」。根因：① dist 产物携带输入源身份键，仓库副本被 LaunchServices 周期扫描注册成同 ID 输入源遮蔽真身（`lsregister -u` 数分钟内被扫回，点目录同样被扫描）；② pkg 的 Scripts 目录里的 .app 被安装沙箱扫描注册，安装后留死路径幽灵。
+- **根治（`scripts/_gogaku_dist.py` 共享约定）**：dist 一律中立（剥离 8 个身份键）；安装时目标位注入身份＋ad-hoc 重签——manage-install（哈希按同一逻辑重算校验）／pkg postinstall（随包 Info-tis plist，App 改 zip 携带）／DMG command 三链路一致；check-bundle 按 bundle ID 重建身份；修 dev 通道中文显示名错位。**TIS 实测：org.gogaku 系输入源注册恰好一套，dist 副本零注册**。已卸载双通道并重装构建 86（配置/学习数据完整保留）。
+
 ### 变更（2026-11-06 追加：标准安装包——pkg＋DMG）
 
 - **`scripts/package-macos-pkg.py`（推荐）**：用户级 .pkg 安装器（Squirrel 同款路线）——双击向导安装、免管理员密码、无隔离标记；postinstall 落位 `~/Library/Input Methods/`＋`~/Applications/` 并重注册 LaunchServices，升级保留学习数据；内置 welcome/readme（含「添加输入源」引导与未签名说明）。

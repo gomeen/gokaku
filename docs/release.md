@@ -49,6 +49,10 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选：uni
 
 **签名现状**：ad-hoc（无 Apple 开发者账号），仅本机安装；公开分发与公证不在本轮范围。
 
+### 输入源身份与 dist 中立化（2026-11-06 事故根治）✅
+
+输入法身份键（`TISInputSourceID`／`ComponentInputModeDict` 等 8 键）**只允许出现在安装目的地**：dist 产物一律中立（剥离身份键），被 LaunchServices 扫描注册也只是普通 App，永不进输入源列表；安装时在目标位注入身份＋ad-hoc 重签（manage-install／pkg postinstall／DMG command 三链路共用 `scripts/_gogaku_dist.py` 的键集合与重建逻辑）。事故经过与两个根因（dist 扫描幽灵＋pkg 沙箱幽灵）见该模块 docstring 与提交 41d5dff。后果约定：仓库里 `dist/*.app` 不能直接当输入法运行（缺身份键）——安装必须走三条链路之一；`check-bundle` 检查时按 bundle ID 重建身份。
+
 ### 标准安装包（2026-11-06）✅
 
 给「双击就能装」的正常体验，构建后打两种包（`scripts/package-macos-pkg.py`／`package-macos-dmg.py`）：
