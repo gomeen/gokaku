@@ -96,8 +96,7 @@ def check_version(ctx):
     # 两套已安装应用版本一致性（存在时）。
     consistency = []
     import plistlib
-    apps = [Path.home() / 'Library/Input Methods/Gogaku.app',
-            Path.home() / 'Applications/Gogaku Settings.app']
+    apps = [INSTALLED_INPUT_APP, INSTALLED_SETTINGS_APP]
     found = []
     for app in apps:
         plist = app / 'Contents/Info.plist'
@@ -243,10 +242,11 @@ def check_clean_build(ctx):
 
 def check_bundle(ctx):
     """安装包检查：签名、依赖闭包、包内核心与 helper 冒烟。"""
-    if not (ROOT / 'dist/Gogaku.app').exists():
-        return BLOCK, '缺少 dist/Gogaku.app；先构建再检查', None
+    if not DIST_INPUT_APP.exists():
+        return BLOCK, f'缺少 {DIST_INPUT_APP.relative_to(ROOT)}；先构建再检查（--channel {CHANNEL}）', None
     report_path = ctx.evidence_path('bundle-check.json')
     result = sh(['python3', 'scripts/check-bundle.py',
+                 '--input-app', str(DIST_INPUT_APP), '--settings-app', str(DIST_SETTINGS_APP),
                  '--report', report_path], timeout=600)
     evidence = report_path.read_text() if Path(report_path).exists() else (result.stdout + result.stderr)
     evidence = ctx.evidence('bundle-check.log', evidence)
@@ -358,7 +358,7 @@ def check_install_preflight(ctx):
     （安装后自动核对运行时哈希），不在本档位隐式接管。"""
     import plistlib
     problems = []
-    apps = [ROOT / 'dist/Gogaku.app', ROOT / 'dist/Gogaku Settings.app']
+    apps = [DIST_INPUT_APP, DIST_SETTINGS_APP]
     versions = set()
     for app in apps:
         if not app.exists():
@@ -386,12 +386,12 @@ def check_install_preflight(ctx):
 
 def check_host_plan(ctx):
     """host 档位预检：安装件存在性与身份说明；真实注入必须显式 --yes。"""
-    installed = (Path.home() / 'Library/Input Methods/Gogaku.app').exists()
-    settings_app = (Path.home() / 'Applications/Gogaku Settings.app').exists()
+    installed = INSTALLED_INPUT_APP.exists()
+    settings_app = INSTALLED_SETTINGS_APP.exists()
     if not installed or not settings_app:
         missing = []
         if not installed:
-            missing.append('~/Library/Input Methods/Gogaku.app')
+            missing.append(str(INSTALLED_INPUT_APP).replace(Path.home().__str__(), '~'))
         if not settings_app:
             missing.append('~/Applications/Gogaku Settings.app')
         return BLOCK, '输入法未安装（缺 ' + '、'.join(missing) + '）；先构建并安装', None
@@ -590,6 +590,25 @@ def check_native_gui(ctx):
 
 # ── 档位定义 ──────────────────────────────────────────────────────────────
 
+# 安装通道（--channel）：stable=Gogaku，dev=Gogaku Dev（bundle ID 带 .dev）。
+# 两通道应用名/路径不同，检查按通道取路径；用户数据两通道共用。
+CHANNEL = 'stable'
+DIST_INPUT_APP = ROOT / 'dist/Gogaku.app'
+DIST_SETTINGS_APP = ROOT / 'dist/Gogaku Settings.app'
+INSTALLED_INPUT_APP = Path.home() / 'Library/Input Methods/Gogaku.app'
+INSTALLED_SETTINGS_APP = Path.home() / 'Applications/Gogaku Settings.app'
+
+
+def set_channel(name):
+    global CHANNEL, DIST_INPUT_APP, DIST_SETTINGS_APP, INSTALLED_INPUT_APP, INSTALLED_SETTINGS_APP
+    CHANNEL = name
+    suffix = ' Dev' if name == 'dev' else ''
+    DIST_INPUT_APP = ROOT / f'dist/Gogaku{suffix}.app'
+    DIST_SETTINGS_APP = ROOT / f'dist/Gogaku Settings{suffix}.app'
+    INSTALLED_INPUT_APP = Path.home() / 'Library/Input Methods' / f'Gogaku{suffix}.app'
+    INSTALLED_SETTINGS_APP = Path.home() / 'Applications' / f'Gogaku Settings{suffix}.app'
+
+
 PROFILES = {
     'fast': [
         ('version', True, check_version),
@@ -657,6 +676,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--profile', choices=sorted(PROFILES), required=True)
+    parser.add_argument('--channel', choices=['stable', 'dev'], default='stable',
+                        help='检查哪个安装通道的包（dev=Gogaku Dev，bundle ID 带 .dev）')
     parser.add_argument('--jobs', type=int, default=2)
     parser.add_argument('--quick', action='store_true',
                         help='ASan/UBSan 用 2000 序列冒烟（不满足十万序列门槛，仅开发用）')
@@ -665,6 +686,7 @@ def main():
     parser.add_argument('--only', default='', help='只运行指定检查（逗号分隔），其余记 skipped')
     parser.add_argument('--report', default='')
     args = parser.parse_args()
+    set_channel(args.channel)
 
     ctx = Ctx(args)
     only = {name.strip() for name in args.only.split(',') if name.strip()}

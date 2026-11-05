@@ -6,6 +6,8 @@
 - buildNumber：单调递增整数，写入两套应用的 CFBundleVersion。
 - CFBundleShortVersionString 只写三段数字；完整版本另存包内 build-identity.json。
 - dev 构建允许带未提交修改（dirty=true 记入身份）；rc／定版构建要求工作区干净。
+- `--channel dev`：构建 Gogaku Dev 双 App（bundle ID 带 .dev 后缀），与 stable
+  通道并存为两个独立输入源；用户数据仍共用 ~/Library/Application Support/Gogaku。
 """
 import argparse
 import hashlib
@@ -317,7 +319,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
     run(['codesign', '--verify', '--deep', '--strict', app])
     return app
 
-def write_dist_identity(apps: list, meta: dict, configuration: str, validation: bool) -> Path:
+def write_dist_identity(apps: list, meta: dict, configuration: str, validation: bool, suffix: str = '') -> Path:
     """外部身份记录：包内身份＋主程序／helper／动态库／安装包哈希（不写入包内）。"""
     def file_hash(path: Path) -> dict:
         return {'sha256': digest(path), 'bytes': path.stat().st_size}
@@ -347,7 +349,7 @@ def write_dist_identity(apps: list, meta: dict, configuration: str, validation: 
         report['apps'][app.name] = {'bundleSha256': bundle_sha, 'files': entries,
                                     'identity': json.loads(
                                         (contents / 'Resources/build-identity.json').read_text())}
-    out = DIST / 'build-identity.json'
+    out = DIST / ('build-identity' + suffix + '.json')
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     return out
 
@@ -355,6 +357,10 @@ def write_dist_identity(apps: list, meta: dict, configuration: str, validation: 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--prepare', action='store_true')
+    parser.add_argument('--channel', choices=['stable', 'dev'], default='stable',
+                        help='安装通道：stable=Gogaku（日常），dev=Gogaku Dev（测试；'
+                             'bundle ID 加 .dev 后缀，独立输入源与安装路径，'
+                             '用户数据与通知仍共用同一份（2026-11-06 裁决））')
     parser.add_argument('--validation', action='store_true', help='包含默认关闭的无文字验收状态接口')
     parser.add_argument('--configuration', choices=['release', 'debug'], default='release',
                         help='Swift 构建配置（默认 release；debug 仅用于开发诊断）')
@@ -385,15 +391,20 @@ if __name__ == '__main__':
     DIST.mkdir(exist_ok=True)
     meta['configuration'] = args.configuration
     meta['validation'] = bool(args.validation)
-    apps = [assemble('Gogaku', 'GogakuInput', 'org.gogaku.inputmethod', True, args.configuration, meta),
-            assemble('Gogaku Settings', 'GogakuSettings', 'org.gogaku.settings',
+    suffix = '.dev' if args.channel == 'dev' else ''
+    name_suffix = ' Dev' if args.channel == 'dev' else ''
+    apps = [assemble('Gogaku' + name_suffix, 'GogakuInput', 'org.gogaku.inputmethod' + suffix,
+                     True, args.configuration, meta),
+            assemble('Gogaku Settings' + name_suffix, 'GogakuSettings', 'org.gogaku.settings' + suffix,
                      configuration=args.configuration, meta=meta)]
     report = []
     for app in apps:
         for path in app.rglob('*'):
             if path.is_file(): report.append({'path': str(path.relative_to(DIST)), 'bytes': path.stat().st_size, 'sha256': digest(path)})
-    (DIST / 'bundle-manifest.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    identity_path = write_dist_identity(apps, meta, args.configuration, bool(args.validation))
+    manifest_name = 'bundle-manifest.json' if args.channel == 'stable' else 'bundle-manifest-dev.json'
+    (DIST / manifest_name).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    identity_path = write_dist_identity(apps, meta, args.configuration, bool(args.validation),
+                                        suffix='' if args.channel == 'stable' else '-dev')
     # dist 产物在仓库路径里会被 Spotlight/LaunchServices 自动注册，与已安装副本
     # 同输入源 ID 双注册（曾致输入法菜单出现两个 Gogaku，重启后菜单一拖到下次
     # 登录才收敛）。构建尾统一注销，已安装路径不受影响。

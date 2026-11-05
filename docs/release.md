@@ -15,6 +15,24 @@
 
 每次**对外提供安装包前递增 `version.json` 的构建号**；rc／定版构建由脚本强制要求干净工作区，标签不可重建。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
 
+## 0.5 双通道安装（stable＋dev 并存）✅
+
+2026-11-06 裁决：日常使用与开发测试隔离，用户数据共用。
+
+| | stable（日常） | dev（测试） |
+| --- | --- | --- |
+| 输入法包 | `Gogaku.app`（`org.gogaku.inputmethod`） | `Gogaku Dev.app`（`org.gogaku.inputmethod.dev`） |
+| 设置包 | `Gogaku Settings.app` | `Gogaku Settings Dev.app` |
+| 输入源菜单 | Gogaku | Gogaku Dev |
+| 用户数据 | `~/Library/Application Support/Gogaku/`（**两通道共用**：学习词、自定义词、设置、备份） | 同左 |
+
+- 构建：`python3 scripts/build.py --channel dev`（dist 产物名区分；清单与身份文件分通道：`bundle-manifest-dev.json`／`build-identity-dev.json`）。
+- 安装：`python3 scripts/manage-install.py install --channel dev`；卸载/诊断/恢复同参数。跨通道装错会被 `own()` 哈希校验拒绝。
+- 验证：`python3 scripts/verify.py --profile fast --channel dev`。
+- 通道检测由 bundle ID 后缀派生（无配置文件）；Darwin 通知（settings.changed 等）两通道共用——数据共用下跨通道热更新是预期行为。
+- 稳定通道建议装 rc／定版；dev 通道装开发构建。**卸载任一通道的 `--purge-data` 会删掉共用数据，影响另一通道**（脚本有显式确认）。
+- Windows（TSF 后）：同一约定——独立 CLSID／档案名「Gogaku Dev」＋`%LOCALAPPDATA%\GogakuDev`，待 T2.3 落地时实现。
+
 ## 1. Mac 构建流程 ✅
 
 ```

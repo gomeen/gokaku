@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""仅管理 Gogaku 自身的当前用户安装；保留其他输入源与用户数据。"""
+"""仅管理 Gogaku 自身的当前用户安装；保留其他输入源与用户数据。
+
+双通道：--channel dev 安装 Gogaku Dev（bundle ID 带 .dev 后缀，独立输入源），
+与 stable 并存；用户数据两通道共用同一份（2026-11-06 裁决）。"""
 import argparse
 import hashlib
 import json
@@ -12,17 +15,41 @@ import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parent.parent
-INPUT = Path.home() / 'Library/Input Methods/Gogaku.app'
-SETTINGS = Path.home() / 'Applications/Gogaku Settings.app'
+# 双通道（2026-11-06 裁决）：stable=Gogaku（日常），dev=Gogaku Dev（测试）。
+# bundle ID 带 .dev 后缀 → 独立输入源与安装路径，可与 stable 并存；
+# 用户数据与 Darwin 通知共用同一份（SUPPORT 不分通道）。
+CHANNELS = {
+    'stable': {
+        'input_name': 'Gogaku.app', 'settings_name': 'Gogaku Settings.app',
+        'input_id': 'org.gogaku.inputmethod', 'settings_id': 'org.gogaku.settings',
+    },
+    'dev': {
+        'input_name': 'Gogaku Dev.app', 'settings_name': 'Gogaku Settings Dev.app',
+        'input_id': 'org.gogaku.inputmethod.dev', 'settings_id': 'org.gogaku.settings.dev',
+    },
+}
+CHANNEL = 'stable'
+INPUT = Path.home() / 'Library/Input Methods' / CHANNELS[CHANNEL]['input_name']
+SETTINGS = Path.home() / 'Applications' / CHANNELS[CHANNEL]['settings_name']
+INPUT_ID = CHANNELS[CHANNEL]['input_id']
 SUPPORT = Path.home() / 'Library/Application Support/Gogaku'
+
+
+def set_channel(name):
+    global CHANNEL, INPUT, SETTINGS, INPUT_ID
+    CHANNEL = name
+    INPUT = Path.home() / 'Library/Input Methods' / CHANNELS[name]['input_name']
+    SETTINGS = Path.home() / 'Applications' / CHANNELS[name]['settings_name']
+    INPUT_ID = CHANNELS[name]['input_id']
 LSREGISTER = '/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister'
 # 开发备份保留份数；更早的备份按时间删除，避免旧二进制无限累积。
 KEEP_BACKUPS = 3
 
-def current_is_gogaku():
+def current_is_gogaku(identifier=None):
     # 只读当前输入源标识，不扫描任何私人输入历史。
+    identifier = identifier or INPUT_ID
     result = subprocess.run(['defaults', 'read', 'com.apple.HIToolbox', 'AppleSelectedInputSources'], capture_output=True, text=True)
-    return 'org.gogaku.inputmethod' in result.stdout
+    return identifier in result.stdout
 
 def own(path, identifier):
     if not path.exists(): return
@@ -59,9 +86,10 @@ def prune_backups():
 def verify_install(source: Path, target: Path):
     """安装后核对：实际安装路径的每个文件与 dist 清单哈希一致。
     防止旧包残留、拷贝损坏或旧备份包冒充新版本。"""
-    manifest_path = ROOT / 'dist' / 'bundle-manifest.json'
+    manifest_path = ROOT / 'dist' / ('bundle-manifest.json' if CHANNEL == 'stable'
+                                     else 'bundle-manifest-dev.json')
     if not manifest_path.exists():
-        raise SystemExit('缺少 dist/bundle-manifest.json；请用 scripts/build.py 构建后再安装。')
+        raise SystemExit(f'缺少 {manifest_path.relative_to(ROOT)}；请用 scripts/build.py（同通道）构建后再安装。')
     manifest = {entry['path']: entry for entry in json.loads(manifest_path.read_text())}
     # build.py 写入的 manifest 路径相对于 dist（如 'Gogaku.app/Contents/...'），
     # 不是绝对路径；前缀必须按同一基准算，否则一个条目都匹配不上。
@@ -86,8 +114,14 @@ def file_digest(path: Path) -> str:
         return hashlib.file_digest(f, 'sha256').hexdigest()
 
 def install():
-    if current_is_gogaku(): raise SystemExit('请先手动切换到 ABC 或其他现有输入源，再更新 Gogaku。')
-    for source, target, identifier in [(ROOT / 'dist/Gogaku.app', INPUT, 'org.gogaku.inputmethod'), (ROOT / 'dist/Gogaku Settings.app', SETTINGS, 'org.gogaku.settings')]:
+    if current_is_gogaku():
+        raise SystemExit(f'当前输入源是本通道（{CHANNEL}）；请先切换到 ABC 或其他输入源，再更新。')
+    other = 'dev' if CHANNEL == 'stable' else 'stable'
+    print(f'安装通道：{CHANNEL}（输入法 {INPUT.name}，bundle ID {INPUT_ID}）')
+    print(f'与 {other} 通道并存：用户数据共用 {SUPPORT}，互不覆盖。')
+    for source, target, identifier in [
+            (ROOT / 'dist' / CHANNELS[CHANNEL]['input_name'], INPUT, INPUT_ID),
+            (ROOT / 'dist' / CHANNELS[CHANNEL]['settings_name'], SETTINGS, CHANNELS[CHANNEL]['settings_id'])]:
         subprocess.run(['codesign', '--verify', '--deep', '--strict', source], check=True)
         own(target, identifier)
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -103,8 +137,9 @@ def install():
     # HUD 进程内缓存的旧图标不会随注册刷新（见 refresh_hud_icon_cache 注释），
     # 重装图标资源后必须让 TextInputSwitcher 重建，切换浮层才显示新键帽图标。
     refresh_hud_icon_cache()
-    print(f'已安装：{INPUT}\n设置：{SETTINGS}')
-    print('如系统输入源列表还没有 Gogaku，运行 python3 scripts/manage-install.py register；')
+    print(f'已安装（{CHANNEL} 通道）：{INPUT}\n设置：{SETTINGS}')
+    flag = ' --channel dev' if CHANNEL == 'dev' else ''
+    print(f'如系统输入源列表还没有本通道，运行 python3 scripts/manage-install.py{flag} register；')
     print('或自行注销后重新登录。然后在 系统设置 → 键盘 → 文本输入 → 编辑 → ＋ 中手动添加并切换。')
 
 def refresh_hud_icon_cache():
@@ -139,12 +174,14 @@ def refresh_hud_icon_cache():
             print(f'提示：未能自动重启输入源切换 HUD（{reason}）；注销并重新登录一次可达到同样效果。')
 
 def uninstall(purge):
-    if current_is_gogaku(): raise SystemExit('请先手动切换到其他输入源，并在系统设置中移除 Gogaku，再卸载。')
-    for path, identifier in [(INPUT, 'org.gogaku.inputmethod'), (SETTINGS, 'org.gogaku.settings')]:
+    if current_is_gogaku():
+        raise SystemExit(f'当前输入源是本通道（{CHANNEL}）；请先切换到其他输入源并在系统设置中移除，再卸载。')
+    for path, identifier in [(INPUT, INPUT_ID), (SETTINGS, CHANNELS[CHANNEL]['settings_id'])]:
         own(path, identifier)
         if path.exists(): shutil.rmtree(path)
-    print('已移除 Gogaku 应用。学习数据与开发备份默认保留。')
+    print(f'已移除 {CHANNEL} 通道应用。学习数据与开发备份默认保留（两通道共用）。')
     if purge and SUPPORT.exists():
+        print('注意：用户数据两通道共用，删除会影响另一个通道。')
         if input(f'将永久删除 {SUPPORT}。输入 DELETE 确认：') != 'DELETE':
             raise SystemExit('已保留数据。')
         shutil.rmtree(SUPPORT)
@@ -158,7 +195,17 @@ def recover():
     print('5. 重新添加输入源。如果系统尚未刷新，可自行选择注销/登录；脚本不擅自注销。')
 
 def diagnose():
-    state = {'input_installed': INPUT.exists(), 'settings_installed': SETTINGS.exists(), 'current_is_gogaku': current_is_gogaku()}
+    other = 'dev' if CHANNEL == 'stable' else 'stable'
+    o = CHANNELS[other]
+    state = {
+        'channel': CHANNEL,
+        'input_installed': INPUT.exists(), 'settings_installed': SETTINGS.exists(),
+        'current_is_gogaku': current_is_gogaku(),
+        'other_channel': {
+            'input_installed': (Path.home() / 'Library/Input Methods' / o['input_name']).exists(),
+            'input_id': o['input_id'],
+        },
+    }
     for app in [INPUT, SETTINGS]:
         if app.exists():
             result = subprocess.run(['codesign', '--verify', '--deep', '--strict', app], capture_output=True, text=True)
@@ -167,7 +214,7 @@ def diagnose():
 
 TIS_SCRIPT = '''import Carbon
 import Foundation
-let identifier = "org.gogaku.inputmethod"
+let identifier = "__INPUT_ID__"
 if CommandLine.arguments.count > 1 {
     let status = TISRegisterInputSource(URL(fileURLWithPath: CommandLine.arguments[1]) as CFURL)
     print("TISRegisterInputSource -> \\(status)")
@@ -194,12 +241,12 @@ exit(rows.isEmpty ? 2 : 0)
 
 def run_tis(args):
     developer_dir = ['/usr/bin/env', 'DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer'] if Path('/Applications/Xcode.app/Contents/Developer').is_dir() else ['/usr/bin/env']
-    script = Path(tempfile.gettempdir()) / 'gogaku-tis.swift'
-    script.write_text(TIS_SCRIPT)
+    script = Path(tempfile.gettempdir()) / ('gogaku-tis-' + CHANNEL + '.swift')
+    script.write_text(TIS_SCRIPT.replace('__INPUT_ID__', INPUT_ID))
     return subprocess.run(developer_dir + ['swift', str(script), *args], text=True, capture_output=True, check=True).stdout
 
 def register():
-    if not INPUT.exists(): raise SystemExit('未找到已安装的输入法，先执行 install。')
+    if not INPUT.exists(): raise SystemExit(f'未找到 {CHANNEL} 通道已安装的输入法，先执行 install。')
     # 只登记已安装的包让系统设置可见；不启用、不选中，切换仍由用户手动完成。
     print(run_tis([str(INPUT)]).strip())
     print(run_tis([]).strip())
@@ -208,5 +255,8 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['install', 'register', 'uninstall', 'recover', 'diagnose'])
     parser.add_argument('--purge-data', action='store_true')
+    parser.add_argument('--channel', choices=sorted(CHANNELS), default='stable',
+                        help='安装通道：stable（默认）／dev；dev 装为 Gogaku Dev，独立输入源，数据共用')
     args = parser.parse_args()
+    set_channel(args.channel)
     {'install': install, 'register': register, 'uninstall': lambda: uninstall(args.purge_data), 'recover': recover, 'diagnose': diagnose}[args.action]()
