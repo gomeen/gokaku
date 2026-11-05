@@ -29,6 +29,17 @@
 - **验证证据**（`docs/validation/win-core-selfcheck/`）：Windows 11 x64 VM（VMware Fusion；i9-9880H 宿主）内全绿——ABI 合同、翻译加固层 76 项、普通模式轨迹、学习模式轨迹 144 项、质量回归 120 条、2000 随机序列冒烟全部通过；run.bat 双击路径复验通过。**KenLM／词库格式兼容（Mac 产物在 Windows 加载）由此直接验证**。
 - **口径**：VM 是功能级验证环境；T2.1 验收仍以 CI 绿为准（远端未建）；朋友真机结果为真实硬件证据。VM 后续用于 TSF（T2.3）本地调试。
 
+## 单文件自检 exe（2026-11-06，工作区，未定版）
+
+应用户「只发一个 exe」的诉求：`scripts/build-win-selfcheck-exe.sh` 在 DLL 自检包之后产出**单文件全静态 exe**（`.build/win-cross/static/combine/gogaku-selfcheck.exe`，62MB，无外部依赖），数据以目标文件嵌入、运行时解包到 %TEMP% 子目录（退出不清理，同 pid 复用），控制台输出结论并回车退出。核心从 **git HEAD** 提取构建（隔离副本），排除工作区里并行会话的未提交 WIP——与版本规则一致：包对应已验证的提交状态。
+
+- **构建要点**：工具链 EXE 链接旗标直加依赖库搜索路径（`link_directories` 在 CMake 4 + Ninja 生成器下未进生成行）；静态归档小写名 `libgogaku_core.a`（`-lGogakuCore` 大小写不匹配，改显式路径）；`CMAKE_CXX_STANDARD_LIBRARIES` 补传递依赖（zstd/intl/iconv/dl/z）到对象之后。
+- **静态链接发现两个真实 Windows 移植 bug**（DLL 构建因混入当天未提交 WIP 的不同写入路径而未暴露）：
+  1. **MinGW `std::rename` 不覆盖已存在目标**（MSVCRT rename 语义，EEXIST）：`atomic_write` 第二次起静默失败（dirty 滞留）——删词后学习词复活、userlm 重建失败、写失败恢复落盘全由此起。副本注入先 `remove` 再改名；产品化应改 `MoveFileExA + MOVEFILE_REPLACE_EXISTING` 保持原子性，**待 WIP 合入后连同 fsync 项一并上游化到 `normal_session.cpp`**。
+  2. **fsync 语义**：前一轮注入的 `fsync→_commit` 对 O_RDONLY 句柄在 Windows 上失败，而写入路径把 fsync 失败当致命错误——改注入为 no-op 内联函数（自检包关注功能兼容而非掉电顺序；正式上游化应对写句柄用 `FlushFileBuffers`）。
+- **验证证据**：同一 VM（Windows 11 x64）全绿——ABI 合同、翻译加固层、普通模式轨迹（含 flush 持久化/损坏重建/删词不复活/写失败恢复）、学习轨迹 144 项、质量回归 120 条、随机序列冒烟，失败 0 项；修复前 4 项持久化用例失败→定位→修复→复验全过的完整闭环在本 VM 完成。调试插桩（rename errno=17 实证）已从正式版剥离。
+- **口径**：VM 功能级验证；exe 双击路径未在真机验证（朋友真机即此包的真实硬件证据）；TSF 前端（T2.3）未开始。
+
 ## 候选窗皮肤（2026-11-05，未定版）
 
 `gomeen/skin-native` 分支按最后原型完成原生主题选择、单／双色、二级固定预览编辑器、字体／布局／透明度／背景图及主题包导入导出；fast 档 6 项全过（Swift Release 152 项），ASan／UBSan quick 2000 序列无错误。隔离设置窗口验证了保存重开、两级高度、隐藏滚动条及预览像素不随左侧滚动变化。未安装此分支输入源，真实宿主热更新／背景图性能及完整发布门槛未验收。细节、截图与报告见[皮肤验收](skin-native-status.md)。

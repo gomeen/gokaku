@@ -2,6 +2,11 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：单文件自检 exe，发现两个 Windows 移植 bug）
+
+- **单文件自检 exe**：`scripts/build-win-selfcheck-exe.sh` 产出全静态单文件 `gogaku-selfcheck.exe`（62MB，零外部依赖），数据目标文件嵌入、运行时解包到 %TEMP%；核心从 git HEAD 隔离副本构建（排除并行会话未提交 WIP）。Windows 11 VM 内**六项全绿**（ABI／翻译加固／普通轨迹／学习轨迹 144 项／质量回归 120 条／随机冒烟）。
+- **发现两个真实 Windows 移植 bug**（修复以构建时注入落地，产品化方案随 WIP 合入后上游化）：① MinGW `std::rename` 不覆盖已存在目标（EEXIST），`atomic_write` 第二次起静默失败——删词复活、userlm 重建失败、写失败恢复落盘均由此起；② `fsync→_commit` 对 O_RDONLY 句柄失败而写入路径把 fsync 失败当致命。两 bug 由自检 exe 在 VM 上从「4 项持久化用例失败→插桩定位（errno=17）→修复→全绿」的完整闭环抓出。
+
 ### 变更（2026-11-06 追加：普通输入十项整改，ABI v4）
 
 - **上屏安全与数据可靠**：宿主插入异常后不再丢失字母跟踪（残留可清理）；调频只在宿主插入确认后学习（新事件 GC_EV_COMMIT_CONFIRMED）——学习模式中→英、上屏失败不再污染普通排序；清空调频真正清空运行中引擎（新接口 gc_normal_clear_user_data）且失败不再伪报成功；自定义词读取失败（权限/I/O）与「文件不存在」区分（gc_custom_words_read 返 2、新增只读 peek），设置页读取失败暂停保存避免覆盖。
