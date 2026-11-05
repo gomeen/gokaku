@@ -1,0 +1,6 @@
+LIBRARY GogakuTsf
+EXPORTS
+    DllGetClassObject
+    DllCanUnloadNow
+    DllRegisterServer
+    DllUnregisterServer

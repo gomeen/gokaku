@@ -2,6 +2,11 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：Windows 落地决策＋TSF 工程就绪）
+
+- **用户裁决四项**：翻译后端与 Mac 同源同栈（嵌入式 Python＋同哈希 small100 模型随包，否决 ONNX 重写）；设置应用 Win32 原生；安装包直接做安装向导（Inno Setup）；不签名。已记入实施计划。
+- **TSF 前端补齐至可编译**：新增 COM 入口与注册（dllmain.cpp——CLSID/CTF TIP/zh-CN 语言档案/键盘类别，regsvr32 对称装卸）、导出定义（.def）、CMake 工程（MSVC/utf-8）；连同此前骨架（按键路由/焦点汇/组合管理/候选窗/核心桥）共 10 文件，待 VM 内 MSVC 就绪后编译。
+
 ### 变更（2026-11-06 追加：输入源幽灵注册根治，构建 86）
 
 - **用户报告**：添加输入法列表出现两个同名「Gogaku」且「键盘布局不可用」。根因：① dist 产物携带输入源身份键，仓库副本被 LaunchServices 周期扫描注册成同 ID 输入源遮蔽真身（`lsregister -u` 数分钟内被扫回，点目录同样被扫描）；② pkg 的 Scripts 目录里的 .app 被安装沙箱扫描注册，安装后留死路径幽灵。
