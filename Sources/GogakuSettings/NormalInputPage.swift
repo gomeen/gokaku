@@ -163,11 +163,21 @@ struct NormalInputPage: View {
                 }
                 SettingsRowDivider()
                 // 清空操作行（无路径说明；反馈文案与原型一致）。
+                // 2026-11 整改：删除失败不再伪报成功；成功后通知输入法清空运行中
+                // 引擎的调频内存（org.gogaku.freqdata.cleared），旧数据不再写回。
                 HStack {
                     Button("清空调频数据") {
                         let dir = Settings.chineseDirectory
-                        try? FileManager.default.removeItem(at: dir)
-                        freqClearHint = "已清空调频数据；自定义词语不受影响。"
+                        do {
+                            try FileManager.default.removeItem(at: dir)
+                            DistributedNotificationCenter.default().postNotificationName(
+                                SettingsStore.frequencyClearedNotification, object: nil, deliverImmediately: true)
+                            freqClearHint = "已清空调频数据；自定义词语不受影响。"
+                        } catch let error as NSError where error.code == 4 /* NSFileNoSuchFileError：目录本就不存在 */ {
+                            freqClearHint = "调频数据本来为空；自定义词语不受影响。"
+                        } catch {
+                            freqClearHint = "清空失败：\(error.localizedDescription)"
+                        }
                     }
                     .accessibilityLabel("清空调频数据，自定义词语不受影响")
                     Spacer()

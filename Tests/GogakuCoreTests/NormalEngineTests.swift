@@ -94,6 +94,73 @@ final class NormalEngineTests: XCTestCase {
         XCTAssertEqual(snap.candidates.first?.text, "你好")
     }
 
+    /// ABI v4：英文候选开关热更新即时生效（2026-11 整改 #11）。
+    func testEnglishCandidatesHotUpdate() throws {
+        let engine = engine()
+        func englishTexts(_ snap: NormalSnapshot?) -> [String] {
+            (snap?.candidates ?? []).filter { $0.kind == Int32(GC_CAND_ENGLISH) }.map { $0.text }
+        }
+        XCTAssertTrue(englishTexts(type("comp", on: engine)).contains("company"))
+        engine.update(scheme: Int32(GC_SCHEME_XIAOHE.rawValue), fuzzyMask: 0,
+                      fullPinyinPreedit: true, freqEnabled: false, englishEnabled: false)
+        _ = engine.handle(.esc, app: "test.app", field: "f", timeMs: 0)
+        XCTAssertTrue(englishTexts(type("comp", on: engine)).isEmpty)
+        engine.update(scheme: Int32(GC_SCHEME_XIAOHE.rawValue), fuzzyMask: 0,
+                      fullPinyinPreedit: true, freqEnabled: false, englishEnabled: true)
+        _ = engine.handle(.esc, app: "test.app", field: "f", timeMs: 0)
+        XCTAssertTrue(englishTexts(type("comp", on: engine)).contains("company"))
+    }
+
+    /// ABI v4：提交意图不学习，确认宿主插入成功后才落盘（2026-11 整改 #14）。
+    func testCommitConfirmedAppliesLearning() throws {
+        var config = NormalEngineConfig(dictPath: dictPath.path, modelPath: engineModelPath())
+        let userDir = dir.appendingPathComponent("user")
+        config.userDir = userDir.path
+        config.freqEnabled = true
+        config.englishEnabled = false
+        let engine = try XCTUnwrap(NormalEngine(config: config))
+        _ = type("nihc", on: engine)
+        _ = engine.handle(.space, app: "test.app", field: "f", timeMs: 0)
+        let learnedPath = userDir.appendingPathComponent("learned.txt").path
+        XCTAssertFalse(FileManager.default.fileExists(atPath: learnedPath))
+        XCTAssertTrue(engine.confirmCommit())
+        XCTAssertTrue(engine.flush())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: learnedPath))
+    }
+
+    /// ABI v4：清空调频清内存＋删文件，重开回到出厂排序（2026-11 整改 #10）。
+    func testClearFrequencyDataRemovesPersistentFiles() throws {
+        var config = NormalEngineConfig(dictPath: dictPath.path, modelPath: engineModelPath())
+        let userDir = dir.appendingPathComponent("user")
+        config.userDir = userDir.path
+        config.freqEnabled = true
+        config.englishEnabled = false
+        let engine = try XCTUnwrap(NormalEngine(config: config))
+        _ = type("nihc", on: engine)
+        _ = engine.handle(.space, app: "test.app", field: "f", timeMs: 0)
+        XCTAssertTrue(engine.confirmCommit())
+        XCTAssertTrue(engine.flush())
+        XCTAssertTrue(FileManager.default.fileExists(atPath: userDir.appendingPathComponent("learned.txt").path))
+        XCTAssertTrue(engine.clearFrequencyData())
+        XCTAssertFalse(FileManager.default.fileExists(atPath: userDir.appendingPathComponent("learned.txt").path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: userDir.appendingPathComponent("model.userlm").path))
+        XCTAssertTrue(engine.flush())   // 无脏数据：不把旧状态写回
+        XCTAssertFalse(FileManager.default.fileExists(atPath: userDir.appendingPathComponent("learned.txt").path))
+    }
+
+    /// ABI v4：词表读取失败与「文件不存在」区分（2026-11 整改 #13）。
+    func testCustomWordReadErrorDistinctFromMissing() throws {
+        let dirPath = dir.appendingPathComponent("dir.tsv")
+        try FileManager.default.createDirectory(at: dirPath, withIntermediateDirectories: true)
+        let errored = CustomWordStore.readRecoveringCorrupt(path: dirPath.path)
+        XCTAssertTrue(errored.readError)
+        XCTAssertFalse(FileManager.default.fileExists(atPath: dir.appendingPathComponent("dir.tsv.corrupt").path))
+        let missing = CustomWordStore.readRecoveringCorrupt(path: dir.appendingPathComponent("absent.tsv").path)
+        XCTAssertTrue(missing.words.isEmpty)
+        XCTAssertFalse(missing.corrupt)
+        XCTAssertFalse(missing.readError)
+    }
+
     func testCustomWordsRoundTripAndValidation() throws {
         let words = [
             CustomWord(kind: Int32(GC_WORD_SHORTCODE), enabled: true, code: "zj", pinyin: "", content: "早安！"),
@@ -116,7 +183,7 @@ final class NormalEngineTests: XCTestCase {
                 XCTAssertTrue(CustomWordStore.write(path: wordsPath.path, words: reload ? [] : [word]))
                 let engine = engine()
                 engine.update(scheme: Int32(scheme.rawValue), fuzzyMask: 0,
-                              fullPinyinPreedit: true, freqEnabled: false)
+                              fullPinyinPreedit: true, freqEnabled: false, englishEnabled: false)
                 if reload {
                     XCTAssertTrue(CustomWordStore.write(path: wordsPath.path, words: [word]))
                     XCTAssertTrue(engine.reloadCustomWords())

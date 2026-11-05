@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <sys/stat.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -246,19 +247,30 @@ bool build_readings(const char *dict_path, char *err, size_t err_len) {
 
 }  // namespace
 
-extern "C" int gc_custom_words_read(const char *path, GcCustomWordList **out) {
+namespace {
+
+// 解析词表共用实现：io 失败返回 2（区别于文件不存在），损坏返回 0＋corrupt=1。
+// rename_on_corrupt=false 时只读解析（peek 备份文件用，无任何副作用）。
+int read_words_file(const char *path, GcCustomWordList **out, bool rename_on_corrupt) {
     if (path == nullptr || out == nullptr) return 1;
     *out = static_cast<GcCustomWordList *>(std::calloc(1, sizeof(GcCustomWordList)));
     if (*out == nullptr) return 1;
+    // 目录不是词表：读取失败而非损坏（目录不能 rename 成 .corrupt 备份）。
+    struct stat st {};
+    if (::stat(path, &st) == 0 && S_ISDIR(st.st_mode)) return 2;
     std::vector<GcCustomWord> words;
     bool corrupt = false;
     FILE *f = fopen(path, "rb");
-    if (f != nullptr) {
+    if (f == nullptr) {
+        if (errno != ENOENT) return 2;   // 权限／描述符耗尽等：读取失败≠空表
+    } else {
         std::string contents;
         char buf[4096];
         size_t n;
         while ((n = fread(buf, 1, sizeof(buf), f)) > 0) contents.append(buf, n);
+        const bool readError = ferror(f) != 0;
         fclose(f);
+        if (readError) return 2;
         size_t start = 0;
         bool first = true;
         while (start <= contents.size()) {
@@ -311,9 +323,11 @@ extern "C" int gc_custom_words_read(const char *path, GcCustomWordList **out) {
                 free(w.content);
             }
             words.clear();
-            // 备份损坏文件并以空表启动；rename 替换已存在的旧备份。
-            std::string backup = std::string(path) + ".corrupt";
-            (void)rename(path, backup.c_str());
+            if (rename_on_corrupt) {
+                // 备份损坏文件并以空表启动；rename 替换已存在的旧备份。
+                std::string backup = std::string(path) + ".corrupt";
+                (void)rename(path, backup.c_str());
+            }
         }
     }
     (*out)->words = static_cast<GcCustomWord *>(std::calloc(words.empty() ? 1 : words.size(), sizeof(GcCustomWord)));
@@ -322,6 +336,16 @@ extern "C" int gc_custom_words_read(const char *path, GcCustomWordList **out) {
     (*out)->count = words.size();
     (*out)->corrupt = corrupt ? 1 : 0;
     return 0;
+}
+
+}  // namespace
+
+extern "C" int gc_custom_words_read(const char *path, GcCustomWordList **out) {
+    return read_words_file(path, out, true);
+}
+
+extern "C" int gc_custom_words_peek(const char *path, GcCustomWordList **out) {
+    return read_words_file(path, out, false);
 }
 
 extern "C" int gc_custom_words_write(const char *path, const GcCustomWordList *list) {

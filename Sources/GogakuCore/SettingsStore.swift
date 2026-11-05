@@ -26,6 +26,9 @@ public final class SettingsStore {
     }
 
     public static let changedNotification = Notification.Name("org.gogaku.settings.changed")
+    /// 设置页「清空调频数据」成功删除目录后发送；输入法进程据此清空运行中
+    /// 引擎的调频内存并删除持久化文件，避免旧数据被写回。
+    public static let frequencyClearedNotification = Notification.Name("org.gogaku.freqdata.cleared")
 
     /// 每进程一个实例；串行队列保证提交顺序。
     public static let shared = SettingsStore()
@@ -110,10 +113,41 @@ public final class SettingsStore {
     }
 
     /// 用户触发的重试；无失败待保存改动时为空操作。
+    /// 有自定义词待重试时先执行词表保存（2026-11 整改：底栏重试必须真正
+    /// 重写词表），再处理待保存的设置快照。
     public func retry(completion: (@MainActor (Outcome) -> Void)? = nil) {
         queue.async { [weak self] in
-            guard let self, self.pendingValue != nil, !self.writing else { return }
+            guard let self else { return }
+            if let custom = self.customRetryHandler {
+                DispatchQueue.main.async(execute: custom)
+                return
+            }
+            guard self.pendingValue != nil, !self.writing else { return }
             self.flush(completion: completion)
+        }
+    }
+
+    // MARK: - 自定义词语保存重试（2026-11 整改）
+
+    /// 词表写入失败时由自定义词语页注册的重试闭包（主线程执行）。
+    /// 注册即把失败原因上报状态栏；成功后调用 clearCustomRetry 恢复状态。
+    private var customRetryHandler: DispatchWorkItem?
+
+    public func registerCustomRetry(failureMessage: String, handler: @escaping () -> Void) {
+        queue.async { [weak self] in
+            guard let self else { return }
+            self.customRetryHandler = DispatchWorkItem(block: handler)
+            self.reportStatus(.failed(failureMessage))
+        }
+    }
+
+    public func clearCustomRetry() {
+        queue.async { [weak self] in
+            guard let self else { return }
+            if self.customRetryHandler != nil {
+                self.customRetryHandler = nil
+                self.reportStatus(.saved)
+            }
         }
     }
 

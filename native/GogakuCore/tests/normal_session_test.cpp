@@ -78,6 +78,9 @@ struct DelSnap {
     ~DelSnap() { if (p) gc_snapshot_free(p); }
 };
 
+// 平台确认宿主插入成功（ABI 版本 4）：提交意图后必须确认才调频学习。
+DelSnap confirm(GcNormalSession *s) { return DelSnap{send(s, GC_EV_COMMIT_CONFIRMED)}; }
+
 std::string cand_text(const GcSnapshot *s, size_t i) {
     return s != nullptr && i < s->count && s->candidates != nullptr ? s->candidates[i].text : "<none>";
 }
@@ -236,6 +239,14 @@ void test_punctuation_table(const Env &env) {
     check_eq(std::string(q1.p ? q1.p->commit : "") + (q2.p ? q2.p->commit : "") +
              (q3.p ? q3.p->commit : "") + (q4.p ? q4.p->commit : ""),
              "\u201c\u201d\u2018\u2019", "引号交替配对");
+    // 单双引号独立配对：先双后单，单引号仍从左引号开始（2026-11 整改）。
+    DelSnap m1{send(s, GC_EV_TEXT, "\"")};
+    DelSnap m2{send(s, GC_EV_TEXT, "'")};
+    DelSnap m3{send(s, GC_EV_TEXT, "'")};
+    DelSnap m4{send(s, GC_EV_TEXT, "\"")};
+    check_eq(std::string(m1.p ? m1.p->commit : "") + (m2.p ? m2.p->commit : "") +
+             (m3.p ? m3.p->commit : "") + (m4.p ? m4.p->commit : ""),
+             "\u201c\u2018\u2019\u201d", "单双引号独立配对");
     // 数字后半角例外：数字后 . : 半角；非数字后恢复全角
     DelSnap d3{send(s, GC_EV_TEXT, "3")};
     check(d3.p != nullptr && d3.p->consumed == 0, "数字交还宿主");
@@ -909,6 +920,7 @@ void test_delete_word(const Env &env) {
     auto *s = make_session(env);
     send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
     send(s, GC_EV_SPACE);  // 学习 你好
+    { DelSnap c{confirm(s)}; }
     send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
     DelSnap v{send(s, GC_EV_TEXT, "c")};
     check_eq(cand_kind(v.p, 0), GC_CAND_LEARNED, "已学习词标记 deletable");
@@ -936,6 +948,7 @@ void test_delete_prefixed_learned_word(const Env &env) {
     if (!s) return;
     for (char k : std::string("nihc")) { DelSnap typed{send(s, GC_EV_TEXT, std::string(1, k))}; }
     { DelSnap committed{send(s, GC_EV_SPACE)}; }
+    { DelSnap c{confirm(s)}; }
     for (char k : std::string("wonih")) { DelSnap typed{send(s, GC_EV_TEXT, std::string(1, k))}; }
     DelSnap before{send(s, GC_EV_TEXT, "c")};
     long prefixIndex = -1;
@@ -983,6 +996,7 @@ void test_flush_and_persistence(const Env &env) {
         check(gc_normal_session_create(&cfg, &s, nullptr, 0) == 0, "带 user_dir 创建");
         send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
         send(s, GC_EV_SPACE);
+        { DelSnap c{confirm(s)}; }
         check(gc_normal_flush(s) == 0, "flush 成功");
         gc_normal_session_destroy(s);
     }
@@ -1056,6 +1070,36 @@ void test_custom_words_store(const Env &env) {
         std::ifstream backup(bad + ".corrupt");
         check(backup.good(), "已备份为 .corrupt");
         gc_custom_word_list_free(list);
+        // peek：只读解析，不再移动文件或产生新备份。
+        GcCustomWordList *peek2 = nullptr;
+        {
+            std::string copy = bad + ".copy";
+            write_file(copy, "#gogaku-custom-words\tv1\nbroken line without tabs\n");
+            check(gc_custom_words_peek(copy.c_str(), &peek2) == 0, "peek 损坏文件返回成功");
+            check(peek2 != nullptr && peek2->corrupt == 1, "peek 报告损坏");
+            std::ifstream still(copy);
+            check(still.good(), "peek 不移动原文件");
+            std::ifstream noBackup(copy + ".corrupt");
+            check(!noBackup.good(), "peek 不产生 .corrupt 备份");
+            gc_custom_word_list_free(peek2);
+        }
+    }
+    { // 目录路径：读取失败（rc=2），不算损坏、不重命名
+        std::string dirPath = env.dir + "/dir.tsv";
+        filesystem_create_dirs(dirPath);
+        GcCustomWordList *list = nullptr;
+        check(gc_custom_words_read(dirPath.c_str(), &list) == 2, "目录读取返回失败码");
+        check(list != nullptr && list->corrupt == 0, "目录不算损坏");
+        std::ifstream renamed(dirPath + ".corrupt");
+        check(!renamed.good(), "目录不被重命名");
+        gc_custom_word_list_free(list);
+    }
+    { // 不存在：空表、无损坏（与读取失败区分）
+        GcCustomWordList *list = nullptr;
+        std::string missing = env.dir + "/absent.tsv";
+        check(gc_custom_words_read(missing.c_str(), &list) == 0, "不存在文件返回空表");
+        check(list != nullptr && list->count == 0 && list->corrupt == 0, "空表无损坏标记");
+        gc_custom_word_list_free(list);
     }
     { // 会话创建时报告损坏
         std::string bad = env.dir + "/bad2.tsv";
@@ -1095,6 +1139,7 @@ void test_corrupt_userlm_recovery(const Env &env) {
             DelSnap v{send(s, GC_EV_TEXT, "c")};
             check_eq(v.p ? v.p->commit : "", "", "降级会话不误上屏");
             send(s, GC_EV_SPACE);
+            { DelSnap c{confirm(s)}; }
             check(gc_normal_flush(s) == 0, "降级会话可 flush");
             gc_normal_session_destroy(s);
         }
@@ -1123,6 +1168,7 @@ void test_delete_not_resurrected(const Env &env) {
         send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
         send(s, GC_EV_TEXT, "c");
         send(s, GC_EV_SPACE);                       // 学习 你好
+        { DelSnap c{confirm(s)}; }
         check(gc_normal_flush(s) == 0, "学习落盘");
         send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
         DelSnap v{send(s, GC_EV_TEXT, "c")};
@@ -1226,6 +1272,7 @@ void test_write_failure_paths(const Env &env) {
     send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
     DelSnap commit{send(s, GC_EV_SPACE)};
     check_eq(commit.p ? commit.p->commit : "", "你好", "只读目录下上屏不受影响");
+    { DelSnap c{confirm(s)}; }   // 待确认学习转脏：flush 在只读目录下保留重试
     check(gc_normal_flush(s) == 0, "flush 写失败不报错（dirty 保留，下次重写）");
     // 会话仍可用：写失败后继续输入不卡死。
     send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
@@ -1239,6 +1286,7 @@ void test_write_failure_paths(const Env &env) {
     check(gc_normal_session_create(&cfg, &s2, nullptr, 0) == 0, "权限恢复后重建会话");
     send(s2, GC_EV_TEXT, "n"); send(s2, GC_EV_TEXT, "i"); send(s2, GC_EV_TEXT, "h"); send(s2, GC_EV_TEXT, "c");
     send(s2, GC_EV_SPACE);
+    { DelSnap c{confirm(s2)}; }
     check(gc_normal_flush(s2) == 0, "恢复后 flush 成功");
     gc_normal_session_destroy(s2);
     GcNormalSession *s3 = nullptr;
@@ -1248,6 +1296,174 @@ void test_write_failure_paths(const Env &env) {
     check_eq(cand_kind(reload.p, 0), GC_CAND_LEARNED, "恢复后学习词已持久化");
     gc_normal_session_destroy(s3);
     fs::permissions(roDir, fs::perms::owner_read | fs::perms::owner_write | fs::perms::owner_exec);
+}
+
+// 延迟学习（ABI 版本 4）：提交意图不写模型；确认后才学；换字段／取消后
+ // 确认无效；学习哨兵提交不学习由平台不发送确认保证（这里测核心侧合同）。
+void test_deferred_learning(const Env &env) {
+    write_file(env.wordsPath, "#gogaku-custom-words\tv1\n");
+    std::string userDir = env.dir + "/defer-user-1";
+    GcNormalConfig cfg{};
+    cfg.dict_path = env.dictPath.c_str();
+    cfg.model_path = env.modelPath.c_str();
+    cfg.user_dir = userDir.c_str();
+    cfg.custom_words_path = env.wordsPath.c_str();
+    cfg.freq_enabled = 1;
+    {
+        // 未确认：flush 无脏数据，文件不落盘；重开后无学习词。
+        GcNormalSession *s = nullptr;
+        check(gc_normal_session_create(&cfg, &s, nullptr, 0) == 0, "延迟学习会话创建");
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        DelSnap commit{send(s, GC_EV_SPACE)};
+        check_eq(commit.p ? commit.p->commit : "", "你好", "延迟学习仍正常上屏");
+        check(gc_normal_flush(s) == 0, "未确认 flush 安全");
+        gc_normal_session_destroy(s);
+        std::ifstream learned(userDir + "/learned.txt");
+        check(!learned.good(), "未确认不写 learned.txt");
+    }
+    {
+        // 确认后才学：确认→flush→重开出现学习词。
+        userDir = env.dir + "/defer-user-2";
+        cfg.user_dir = userDir.c_str();
+        GcNormalSession *s = nullptr;
+        gc_normal_session_create(&cfg, &s, nullptr, 0);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        send(s, GC_EV_SPACE);
+        { DelSnap c{confirm(s)}; }
+        check(gc_normal_flush(s) == 0, "确认后 flush 落盘");
+        gc_normal_session_destroy(s);
+        std::ifstream learned(userDir + "/learned.txt");
+        check(learned.good(), "确认后写 learned.txt");
+        GcNormalSession *s2 = nullptr;
+        gc_normal_session_create(&cfg, &s2, nullptr, 0);
+        send(s2, GC_EV_TEXT, "n"); send(s2, GC_EV_TEXT, "i"); send(s2, GC_EV_TEXT, "h");
+        DelSnap v{send(s2, GC_EV_TEXT, "c")};
+        check_eq(cand_kind(v.p, 0), GC_CAND_LEARNED, "确认后学习词生效");
+        gc_normal_session_destroy(s2);
+    }
+    {
+        // 换字段后旧确认失效：commit→focusSync(新 field)→confirm 不学习。
+        userDir = env.dir + "/defer-user-3";
+        cfg.user_dir = userDir.c_str();
+        GcNormalSession *s = nullptr;
+        gc_normal_session_create(&cfg, &s, nullptr, 0);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+        send(s, GC_EV_SPACE);
+        {
+            GcKeyEvent ev{};
+            ev.kind = GC_EV_FOCUS_SYNC;
+            ev.app = "test.app";
+            ev.field = "f2";
+            GcSnapshot *snap = nullptr;
+            check(gc_normal_handle(s, &ev, &snap) == 0, "focusSync");
+            gc_snapshot_free(snap);
+        }
+        { DelSnap c{confirm(s)}; }
+        check(gc_normal_flush(s) == 0, "失效确认后 flush");
+        gc_normal_session_destroy(s);
+        std::ifstream learned(userDir + "/learned.txt");
+        check(!learned.good(), "换字段后确认不学习");
+    }
+}
+
+// 完整覆盖的自定义短码／拼音词／英文候选在标点与 0／超页数字下同样按
+ // 「候选＋标点／数字」提交，不再回退原编码（2026-11 整改）。
+// 完整覆盖的自定义短码／拼音词／英文候选在标点与 0／超页数字下同样按
+// 「候选＋标点／数字」提交，不再回退原编码（2026-11 整改）。
+void test_custom_candidate_commit(const Env &env) {
+    write_file(env.wordsPath,
+               "#gogaku-custom-words\tv1\n"
+               "0\t1\tgg\t\t复核短语\n"
+               "1\t1\t\thui'yi\t会议\n");
+    auto *s = make_session(env);
+    // 短码：高亮完整短语，? / 0 提交短语＋标点／数字。
+    send(s, GC_EV_TEXT, "g"); send(s, GC_EV_TEXT, "g");
+    DelSnap q{send(s, GC_EV_TEXT, "?")};
+    check_eq(q.p ? q.p->commit : "", "复核短语？", "短码＋问号提交短语");
+    send(s, GC_EV_TEXT, "g"); send(s, GC_EV_TEXT, "g");
+    DelSnap z{send(s, GC_EV_TEXT, "0")};
+    check_eq(z.p ? z.p->commit : "", "复核短语0", "短码＋0 提交短语");
+    // 拼音词：完整匹配时标点提交词＋标点。
+    send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "v"); send(s, GC_EV_TEXT, "y"); send(s, GC_EV_TEXT, "i");
+    DelSnap pq{send(s, GC_EV_TEXT, "?")};
+    check_eq(pq.p ? pq.p->commit : "", "会议？", "拼音词＋问号提交词");
+    // 英文：导航到完整补全 company，标点提交 company＋标点。
+    // 测试词典无中文首选时英文块在候选首，先检查当前高亮再逐步下移。
+    send(s, GC_EV_TEXT, "c"); send(s, GC_EV_TEXT, "o"); send(s, GC_EV_TEXT, "m");
+    bool companyHighlighted = false;
+    {
+        GcSnapshot *cur = send(s, GC_EV_TEXT, "p");
+        for (int steps = 0; steps < 8 && cur != nullptr; ++steps) {
+            const size_t hi = cur->selected;
+            if (hi < cur->count && std::string(cur->candidates[hi].text) == "company") {
+                companyHighlighted = true;
+                break;
+            }
+            gc_snapshot_free(cur);
+            cur = send(s, GC_EV_DOWN);
+        }
+        gc_snapshot_free(cur);
+    }
+    check(companyHighlighted, "英文补全可高亮");
+    DelSnap eq{send(s, GC_EV_TEXT, "?")};
+    check_eq(eq.p ? eq.p->commit : "", "company？", "英文补全＋问号提交补全");
+    gc_normal_session_destroy(s);
+}
+
+// 同音自定义拼音词按设置页顺序排列（2026-11 整改）：反转文件顺序即反转候选顺序。
+void test_pinyin_word_settings_order(const Env &env) {
+    auto top_candidate = [&](const char *first, const char *second) {
+        write_file(env.wordsPath, std::string("#gogaku-custom-words\tv1\n1\t1\t\thui'yi\t") + first +
+                                       "\n1\t1\t\thui'yi\t" + second + "\n");
+        auto *s = make_session(env);
+        { DelSnap d{send(s, GC_EV_TEXT, "h")}; }
+        { DelSnap d{send(s, GC_EV_TEXT, "v")}; }
+        { DelSnap d{send(s, GC_EV_TEXT, "y")}; }
+        DelSnap snap{send(s, GC_EV_TEXT, "i")};
+        std::string top = cand_text(snap.p, 0);
+        gc_normal_session_destroy(s);
+        return top;
+    };
+    check_eq(top_candidate("会意", "会议"), "会意", "设置顺序第一的拼音词排候选第一");
+    check_eq(top_candidate("会议", "会意"), "会议", "反转设置顺序即反转候选顺序");
+}
+
+// 清空调频（ABI 版本 4）：内存历史与已学习词清零，磁盘文件删除，重开回到出厂排序。
+void test_clear_user_data(const Env &env) {
+    write_file(env.wordsPath, "#gogaku-custom-words\tv1\n");
+    std::string userDir = env.dir + "/clear-user";
+    GcNormalConfig cfg{};
+    cfg.dict_path = env.dictPath.c_str();
+    cfg.model_path = env.modelPath.c_str();
+    cfg.user_dir = userDir.c_str();
+    cfg.english_enabled = 0;
+    cfg.custom_words_path = env.wordsPath.c_str();
+    cfg.freq_enabled = 1;
+    GcNormalSession *s = nullptr;
+    check(gc_normal_session_create(&cfg, &s, nullptr, 0) == 0, "清空调频会话创建");
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "c");
+    send(s, GC_EV_SPACE);
+    { DelSnap c{confirm(s)}; }
+    send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
+    DelSnap trained{send(s, GC_EV_TEXT, "c")};
+    check_eq(cand_kind(trained.p, 0), GC_CAND_LEARNED, "训练后学习词生效");
+    check(gc_normal_flush(s) == 0, "训练落盘");
+    check(gc_normal_clear_user_data(s) == 0, "清空成功");
+    send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "a");
+    DelSnap after{send(s, GC_EV_TEXT, "o")};
+    check_eq(cand_kind(after.p, 0), GC_CAND_CHINESE, "清空后同输入无学习词");
+    check(gc_normal_flush(s) == 0, "清空后 flush 安全");
+    gc_normal_session_destroy(s);
+    std::ifstream learned(userDir + "/learned.txt");
+    std::ifstream model(userDir + "/model.userlm");
+    check(!learned.good() && !model.good(), "清空后磁盘无调频文件");
+    GcNormalSession *s2 = nullptr;
+    check(gc_normal_session_create(&cfg, &s2, nullptr, 0) == 0, "清空后重开");
+    send(s2, GC_EV_TEXT, "n"); send(s2, GC_EV_TEXT, "i"); send(s2, GC_EV_TEXT, "h");
+    DelSnap v{send(s2, GC_EV_TEXT, "c")};
+    check_eq(cand_kind(v.p, 0), GC_CAND_CHINESE, "重开后回到出厂排序");
+    check_eq(cand_text(v.p, 0), "你好", "重开后首选＝你好");
+    gc_normal_session_destroy(s2);
 }
 
 struct NamedTest {
@@ -1291,6 +1507,10 @@ int main() {
         {"custom_store", test_custom_words_store},
         {"write_failure", test_write_failure_paths},
         {"esc_misc", test_esc_and_misc},
+        {"deferred_learning", test_deferred_learning},
+        {"custom_candidate_commit", test_custom_candidate_commit},
+        {"pinyin_word_settings_order", test_pinyin_word_settings_order},
+        {"clear_user_data", test_clear_user_data},
     };
     for (const auto &t : tests) {
         int before = g_failures;

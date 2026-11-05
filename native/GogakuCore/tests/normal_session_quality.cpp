@@ -116,6 +116,9 @@ struct DelSnap {
     ~DelSnap() { if (p) gc_snapshot_free(p); }
 };
 
+// 平台确认宿主插入成功（ABI 版本 4）：确认后才调频学习。
+void confirm(GcNormalSession *s, int64_t t) { GcSnapshot *p = send(s, GC_EV_COMMIT_CONFIRMED, "", t); delete p; }
+
 // 只键入按键，返回最后一个按键事件的候选快照（调用方释放）。
 GcSnapshot *type_keys(GcNormalSession *s, const char *keys, int64_t t = 0) {
     GcSnapshot *snap = nullptr;
@@ -204,6 +207,7 @@ int main() {
             delete snap;
             if (!first) { clear_composition(s); continue; }
             DelSnap commit{send(s, GC_EV_SPACE, "", ++t)};
+            confirm(s, ++t);   // 空格上屏成功→确认→调频
             bool ok = commit.p != nullptr;
             if (ok) {
                 ok = false;
@@ -247,6 +251,7 @@ int main() {
             delete snap;
             if (involved[ci]) {
                 DelSnap commit{send(s, GC_EV_SPACE, "", ++t)};  // 确认目标＝调频学习
+                confirm(s, ++t);   // 平台确认上屏成功后才学习
             } else {
                 clear_composition(s);
             }

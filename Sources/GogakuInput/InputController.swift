@@ -465,6 +465,9 @@ final class GogakuInputController: IMKInputController {
             DispatchQueue.main.async { self.engineAvailable = true }
         }
         DistributedNotificationCenter.default().addObserver(self, selector: #selector(reloadSettings), name: Notification.Name("org.gogaku.settings.changed"), object: nil)
+        // 设置页「清空调频数据」成功后通知：引擎队列上清内存＋删持久化文件，
+        // 运行中的引擎不再把旧调频写回（2026-11 整改）。
+        DistributedNotificationCenter.default().addObserver(self, selector: #selector(frequencyDataCleared), name: SettingsStore.frequencyClearedNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(applicationChanged), name: NSWorkspace.didActivateApplicationNotification, object: nil)
     }
 
@@ -482,7 +485,8 @@ final class GogakuInputController: IMKInputController {
             normal.update(scheme: settings.inputScheme == .fullPinyin ? Int32(GC_SCHEME_FULLPINYIN.rawValue) : Int32(GC_SCHEME_XIAOHE.rawValue),
                           fuzzyMask: settings.fuzzyMask,
                           fullPinyinPreedit: settings.fullPinyinPreedit,
-                          freqEnabled: settings.frequencyEnabled)
+                          freqEnabled: settings.frequencyEnabled,
+                          englishEnabled: settings.englishCandidatesEnabled)
             normal.setAppDefaults(settings.enabledDefaultEnglishApps)
             normal.reloadCustomWords()
         }
@@ -637,6 +641,13 @@ final class GogakuInputController: IMKInputController {
 
     @objc private func applicationChanged() { if active { suspend() } }
 
+    @objc private func frequencyDataCleared() {
+        hub.async { [weak self] in
+            guard let self, let normal = self.hub.engine(self.settings) else { return }
+            _ = normal.clearFrequencyData()
+        }
+    }
+
     /// 自身提交偏好触发的 settings.changed 会同步回到本进程（reloadSettings→
     /// suspend→toast.hide），刚显示的切换提示会被立即杀掉；切换后的短窗口内
     /// 忽略自源通知（外部设置变更仍靠后续通知处理）。
@@ -682,9 +693,10 @@ final class GogakuInputController: IMKInputController {
         if flags.contains(.control) {
             switch event.keyCode {
             case 51: return .deleteWord            // Control＋Backspace 删个人学习词
-            case 36: return .enter                 // Ctrl+Enter 同 Enter（上屏原编码）
             default: break
             }
+            // Ctrl+Enter 不再被输入法消费（2026-11 用户裁决：暂时去掉），
+            // 组合中按宿主快捷键规则交还当前应用。
             switch event.charactersIgnoringModifiers?.lowercased() {
             case "a": return .ctrlA
             case "b": return .ctrlB
@@ -1125,12 +1137,23 @@ final class GogakuInputController: IMKInputController {
         let commitStart = DispatchTime.now().uptimeNanoseconds
         defer { ValidationMonitor.shared.commit(DispatchTime.now().uptimeNanoseconds - commitStart) }
         #endif
+        let previousShown = markedShown, previousCaret = markedCaret
         markedShown = ""; markedCaret = -1
         if !gg_insert_text(c, text) {
             // IMK insertText 无成功回执；结果不明不自动重试，也不能重锚。
+            // 宿主在插入前抛异常时字母仍留在正文：恢复字母跟踪，让本事件
+            // 随后的 updateMarked("") 与后续 suspend 仍能尝试清除残留（2026-11 整改）。
+            markedShown = previousShown; markedCaret = previousCaret
             DraftStore.shared.save(application: anchor.application, mode: .normal, direction: direction, raw: text, literal: true)
             return
         }
+        // 上屏成功（ABI v4）：通知核心确认提交，此刻才写入调频与已学习词。
+        let settings = self.settings
+        hub.async { [weak self] in
+            guard let self, let normal = self.hub.engine(settings) else { return }
+            _ = normal.confirmCommit()
+        }
+        DispatchQueue.main.async { [weak self] in self?.scheduleFlush() }
     }
 
     private func scheduleFlush() {

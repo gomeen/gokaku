@@ -312,7 +312,8 @@ struct GcNormalSession {
 
     EngMode engMode = EngMode::Off;
     std::string currentApp, currentField;
-    int quoteState = 0;
+    int doubleQuoteOpen = 0;   // 双引号「“”」交替状态（与单引号互相独立）
+    int singleQuoteOpen = 0;   // 单引号「‘’」交替状态
     uint32_t lastChar = 0;
     size_t selected = 0;         // 合并候选中的高亮（跨事件保持）
     bool literalUsed = false;    // 本次组合使用过大写原样段
@@ -321,6 +322,13 @@ struct GcNormalSession {
     // 合并结果按状态缓存：同一状态下只合并一次（跨事件也复用）。
     bool mergedValid = false;
     MergedSet merged;
+    // 待确认学习（版本 4）：提交意图产生时只捕获，不写模型；平台确认宿主
+    // 插入成功后发 GC_EV_COMMIT_CONFIRMED 才真正学习。上屏失败、学习模式
+    // 哨兵提交、焦点切换都会使待确认内容失效，不再污染普通输入排序。
+    std::vector<libime::HistoryBigram::WordWithCode> pendingContext;
+    std::vector<libime::HistoryBigram::WordWithCode> pendingSentence;
+    std::string pendingJoined, pendingPinyin;
+    bool pendingLearnValid = false;
 };
 
 namespace {
@@ -352,10 +360,20 @@ libime::PinyinFuzzyFlags to_libime_fuzzy(uint32_t mask) {
 }
 
 void load_custom_words(GcNormalSession &s, bool reportError, std::string &error) {
-    s.customWords.clear();
-    if (s.customWordsPath.empty()) return;
+    if (s.customWordsPath.empty()) {
+        s.customWords.clear();
+        return;
+    }
     GcCustomWordList *list = nullptr;
-    if (gc_custom_words_read(s.customWordsPath.c_str(), &list) != 0) return;
+    const int rc = gc_custom_words_read(s.customWordsPath.c_str(), &list);
+    if (rc == 2) {
+        // 读取失败（权限／I／O）：不得当作空表。已有词表保持不变，避免设置页
+        // 或重载流程随后用空表覆盖旧内容；创建时无旧表则空启动并报错。
+        if (reportError) error = "custom-words.tsv 读取失败，本次以现有词表继续（无旧表则空）";
+        return;
+    }
+    s.customWords.clear();
+    if (rc != 0) return;
     if (list->corrupt != 0 && reportError) {
         error = "custom-words.tsv 已损坏，已备份并以空表启动";
     }
@@ -536,29 +554,42 @@ MergedSet build_merged_set(GcNormalSession &s) {
         completes[i] = end == c.size() ? 1 : 0;
     }
 
-    // 拼音词完整匹配提升：首个「完整覆盖且文本等于启用拼音词」的中文候选。
+    // 拼音词完整匹配提升：所有「完整覆盖且文本等于启用拼音词」的中文候选，
+    // 按设置页顺序排列（同音多条不再依赖 libime 内部排序）。
     // 单节点候选直接比对节点词；多节点候选先按字节长度筛，避免无谓的字符串拼接。
-    size_t boostIndex = SIZE_MAX;
+    std::vector<size_t> pinyinBoosts;
+    std::vector<char> boosted(limit, 0);
     if (!s.pinyinContents.empty()) {
-        for (size_t i = 0; i < limit; ++i) {
-            if (completes[i] == 0) continue;
-            const auto &nodes = chinese[i].sentence();
-            if (nodes.size() == 1) {
-                if (s.pinyinContents.count(nodes[0]->word()) != 0) {
-                    boostIndex = i;
+        std::unordered_map<size_t, std::string> candidateWords;
+        auto word_of = [&](size_t i) -> const std::string & {
+            auto it = candidateWords.find(i);
+            if (it == candidateWords.end()) {
+                const auto &nodes = chinese[i].sentence();
+                std::string word;
+                if (nodes.size() == 1) {
+                    word = nodes[0]->word();
+                } else {
+                    size_t len = 0;
+                    for (const auto *node : nodes) len += node->word().size();
+                    if (s.pinyinContentLengths.count(len) != 0) {
+                        word.reserve(len);
+                        for (const auto *node : nodes) word += node->word();
+                    }
+                }
+                it = candidateWords.emplace(i, std::move(word)).first;
+            }
+            return it->second;
+        };
+        for (const auto &cw : s.customWords) {   // customWords 即设置页顺序
+            if (!cw.enabled || cw.kind != GC_WORD_PINYIN) continue;
+            for (size_t i = 0; i < limit; ++i) {
+                if (completes[i] == 0 || boosted[i]) continue;
+                const std::string &word = word_of(i);
+                if (!word.empty() && word == cw.content) {
+                    pinyinBoosts.push_back(i);
+                    boosted[i] = 1;
                     break;
                 }
-                continue;
-            }
-            size_t len = 0;
-            for (const auto *node : nodes) len += node->word().size();
-            if (s.pinyinContentLengths.count(len) == 0) continue;
-            std::string word;
-            word.reserve(len);
-            for (const auto *node : nodes) word += node->word();
-            if (s.pinyinContents.count(word) != 0) {
-                boostIndex = i;
-                break;
             }
         }
     }
@@ -622,18 +653,18 @@ MergedSet build_merged_set(GcNormalSession &s) {
     out.reserve(shortEntries.size() + englishEntries.size() + limit + 1);
     for (auto &e : shortEntries) out.push_back(std::move(e));
     size_t firstChinese = SIZE_MAX;
-    if (boostIndex != SIZE_MAX) {
+    for (size_t i : pinyinBoosts) {
         MergedEntry e;
         e.kind = GC_CAND_CHINESE;
         e.libimeText = true;
         e.pinyinWord = true;
-        e.libimeIndex = boostIndex;
-        e.completes = completes[boostIndex] != 0;
+        e.libimeIndex = i;
+        e.completes = completes[i] != 0;
         out.push_back(std::move(e));
     }
     if (englishAfterFirstChinese) {
         for (size_t i = 0; i < limit; ++i) {
-            if (i == boostIndex) continue;
+            if (boosted[i]) continue;
             firstChinese = i;
             break;
         }
@@ -648,7 +679,7 @@ MergedSet build_merged_set(GcNormalSession &s) {
     }
     for (auto &e : englishEntries) out.push_back(std::move(e));
     for (size_t i = 0; i < limit; ++i) {
-        if (i == boostIndex || i == firstChinese) continue;
+        if (boosted[i] || i == firstChinese) continue;
         MergedEntry e;
         e.kind = GC_CAND_CHINESE;
         e.libimeText = true;
@@ -751,6 +782,67 @@ struct CommitResult {
     std::string text;    // 空 = 部分暂存继续组合
 };
 
+// 待确认学习（版本 4）：与 libime PinyinContext::learn 主路径一致
+// （词＋编码序列，任一词无拼音则不学）；已学习词登记（≥2 字，
+// Control＋Backspace 可删）也延迟到确认后。只学普通模式实际写入宿主的中文：
+// 学习模式哨兵提交不发确认事件，上屏失败转草稿也不发。
+void discard_pending_learn(GcNormalSession &s) {
+    s.pendingContext.clear();
+    s.pendingSentence.clear();
+    s.pendingJoined.clear();
+    s.pendingPinyin.clear();
+    s.pendingLearnValid = false;
+}
+
+void capture_pending_learn(GcNormalSession &s) {
+    discard_pending_learn(s);
+    if (!s.freqEnabled) return;
+    auto &c = *s.context;
+    auto sentence = c.selectedWordsWithPinyin();
+    for (const auto &wc : sentence) {
+        if (wc.second.empty()) return;   // 有非拼音词：不学习
+    }
+    std::string joined, pinyin;
+    size_t scalarCount = 0;
+    for (const auto &wc : sentence) {
+        joined += wc.first;
+        ++scalarCount;
+        std::string p;
+        try {
+            p = libime::PinyinEncoder::decodeFullPinyin(wc.second);
+        } catch (...) {
+            p = "";
+        }
+        if (p.empty()) continue;
+        if (!pinyin.empty()) pinyin += '\'';
+        pinyin += p;
+    }
+    s.pendingContext = c.contextWordsWithPinyin();
+    s.pendingSentence = std::move(sentence);
+    if (scalarCount >= 2 && !pinyin.empty()) {
+        s.pendingJoined = joined;
+        s.pendingPinyin = pinyin;
+    }
+    s.pendingLearnValid = !s.pendingSentence.empty();
+}
+
+void apply_pending_learn(GcNormalSession &s) {
+    const bool valid = s.pendingLearnValid;
+    std::vector<libime::HistoryBigram::WordWithCode> context = std::move(s.pendingContext);
+    std::vector<libime::HistoryBigram::WordWithCode> sentence = std::move(s.pendingSentence);
+    const std::string joined = std::move(s.pendingJoined);
+    const std::string pinyin = std::move(s.pendingPinyin);
+    discard_pending_learn(s);
+    if (!valid || !s.freqEnabled) return;
+    s.ime->model()->history().addWithContext(context, sentence);
+    s.modelDirty = true;
+    if (!joined.empty() && s.learnedWords.find(joined) == s.learnedWords.end()) {
+        s.ime->dict()->addWord(kUserDictIdx, pinyin, joined, kLearnedWordCost);
+        s.learnedWords[joined] = pinyin;
+        s.learnedDirty = true;
+    }
+}
+
 // 选中合并候选（中文类走 libime 选择；自定义/英文直接上屏）。
 CommitResult select_merged(GcNormalSession &s, MergedSet &ms, size_t index) {
     CommitResult result;
@@ -763,6 +855,8 @@ CommitResult select_merged(GcNormalSession &s, MergedSet &ms, size_t index) {
         s.context->clear();
         s.context->clearContextWords();
         invalidate_merge(s);
+        // 自定义词／英文不参与调频；同时作废旧待确认内容，防止被无关确认复活。
+        discard_pending_learn(s);
         result.text = m.text;
         return result;
     default:
@@ -771,34 +865,7 @@ CommitResult select_merged(GcNormalSession &s, MergedSet &ms, size_t index) {
     s.context->selectCandidatesToCursor(entry.libimeIndex);
     if (s.context->selected()) {
         result.text = s.context->selectedSentence();
-        if (s.freqEnabled) {
-            // 整句词＋实际拼音：learn() 负责历史调频；词级条目自行登记，
-            // 保证 Control＋Backspace 可删。
-            std::string joined;
-            std::string pinyin;
-            size_t scalarCount = 0;
-            for (const auto &wc : s.context->selectedWordsWithPinyin()) {
-                joined += wc.first;
-                ++scalarCount;
-                std::string p;
-                try {
-                    p = libime::PinyinEncoder::decodeFullPinyin(wc.second);
-                } catch (...) {
-                    p = "";
-                }
-                if (p.empty()) continue;
-                if (!pinyin.empty()) pinyin += '\'';
-                pinyin += p;
-            }
-            s.context->learn();
-            s.modelDirty = true;
-            if (scalarCount >= 2 && !pinyin.empty() &&
-                s.learnedWords.find(joined) == s.learnedWords.end()) {
-                s.ime->dict()->addWord(kUserDictIdx, pinyin, joined, kLearnedWordCost);
-                s.learnedWords[joined] = pinyin;
-                s.learnedDirty = true;
-            }
-        }
+        capture_pending_learn(s);   // 平台确认上屏成功后才真正学习
         s.context->clear();
         s.context->clearContextWords();
         invalidate_merge(s);
@@ -819,13 +886,14 @@ std::string composition_remainder(GcNormalSession &s) {
 // 组合中以前缀文本末字符为准；未组合时以最近一次交还/上屏的字符为准。
 std::string mapped_punct(GcNormalSession &s, const std::string &prefix, char ch, const std::string &rawText) {
     if (ch == '"') {
-        std::string p = s.quoteState == 0 ? "\u201c" : "\u201d";
-        s.quoteState ^= 1;
+        std::string p = s.doubleQuoteOpen == 0 ? "\u201c" : "\u201d";
+        s.doubleQuoteOpen ^= 1;
         return p;
     }
     if (ch == '\'') {
-        std::string p = s.quoteState == 0 ? "\u2018" : "\u2019";
-        s.quoteState ^= 1;
+        // 单双引号各自独立配对：先双后单时，单引号仍从左引号开始。
+        std::string p = s.singleQuoteOpen == 0 ? "\u2018" : "\u2019";
+        s.singleQuoteOpen ^= 1;
         return p;
     }
     const uint32_t prev = prefix.empty() ? s.lastChar : last_scalar_codepoint(prefix);
@@ -906,7 +974,8 @@ extern "C" int gc_normal_session_create(const GcNormalConfig *config, GcNormalSe
         s->ime->setPreeditMode(libime::PinyinPreeditMode::Pinyin);
         s->context = std::make_unique<libime::PinyinContext>(s->ime.get());
         s->context->setMaxSentenceLength(static_cast<int>(kMaxInputScalars));
-        gc_normal_update(s, s->scheme, s->fuzzyMask, s->fullPinyinPreedit ? 1 : 0, s->freqEnabled ? 1 : 0);
+        gc_normal_update(s, s->scheme, s->fuzzyMask, s->fullPinyinPreedit ? 1 : 0,
+                         s->freqEnabled ? 1 : 0, s->englishEnabled ? 1 : 0);
 
         if (!s->englishWordsPath.empty()) {
             std::string data;
@@ -960,12 +1029,14 @@ extern "C" int gc_normal_set_app_defaults(GcNormalSession *s, const char *const 
 }
 
 extern "C" int gc_normal_update(GcNormalSession *s, int32_t scheme, uint32_t fuzzy_mask,
-                                int32_t full_pinyin_preedit, int32_t freq_enabled) {
+                                int32_t full_pinyin_preedit, int32_t freq_enabled,
+                                int32_t english_enabled) {
     if (s == nullptr) return 1;
     s->scheme = scheme == GC_SCHEME_FULLPINYIN ? GC_SCHEME_FULLPINYIN : GC_SCHEME_XIAOHE;
     s->fuzzyMask = fuzzy_mask;
     s->fullPinyinPreedit = full_pinyin_preedit != 0;
     s->freqEnabled = freq_enabled != 0;
+    s->englishEnabled = english_enabled != 0;
     if (s->ime != nullptr) {
         s->ime->setFuzzyFlags(to_libime_fuzzy(s->fuzzyMask));
         if (s->scheme == GC_SCHEME_XIAOHE) {
@@ -977,6 +1048,29 @@ extern "C" int gc_normal_update(GcNormalSession *s, int32_t scheme, uint32_t fuz
     }
     invalidate_merge(*s);
     return 0;
+}
+
+extern "C" int gc_normal_clear_user_data(GcNormalSession *s) {
+    if (s == nullptr) return 1;
+    try {
+        // 内存：用户语言模型历史与已学习词条目全部清零（出厂模型不动）。
+        s->ime->model()->history().clear();
+        for (const auto &wp : s->learnedWords) {
+            s->ime->dict()->removeWord(kUserDictIdx, wp.second, wp.first);
+        }
+        s->learnedWords.clear();
+        // 磁盘：删除持久化文件并清脏标记，后续 flush 不再把旧数据写回。
+        std::error_code ec;
+        std::filesystem::remove(s->userDir + "/model.userlm", ec);
+        std::filesystem::remove(s->userDir + "/learned.txt", ec);
+        s->modelDirty = false;
+        s->learnedDirty = false;
+        discard_pending_learn(*s);
+        invalidate_merge(*s);
+        return 0;
+    } catch (...) {
+        return 2;
+    }
 }
 
 extern "C" int gc_normal_reload_custom_words(GcNormalSession *s) {
@@ -1048,10 +1142,12 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     c.clear();
                     c.clearContextWords();
                 }
-                s->quoteState = 0;
+                s->doubleQuoteOpen = 0;
+                s->singleQuoteOpen = 0;
                 s->lastChar = 0;
                 s->literalUsed = false;
                 s->selected = 0;
+                discard_pending_learn(*s);   // 换目标后旧提交不得被后续确认复活
                 invalidate_merge(*s);
             }
             if (appChanged) s->engMode = base_default(*s, app);
@@ -1069,6 +1165,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 c.clear();
                 c.clearContextWords();
                 invalidate_merge(*s);
+                discard_pending_learn(*s);   // 组合中原编码上屏不参与调频
                 s->lastChar = last_scalar_codepoint(commit);
                 s->literalUsed = false;
                 s->selected = 0;
@@ -1086,6 +1183,11 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
             *out = build_snapshot(*s, commit, status, toast, beep, consumed, nullptr);
             return 0;
         }
+        case GC_EV_COMMIT_CONFIRMED: {
+            // 平台确认宿主插入成功：此刻才写入调频与已学习词。
+            apply_pending_learn(*s);
+            break;
+        }
         case GC_EV_ESC: {
             if (composing) {
                 c.clear();
@@ -1093,6 +1195,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 invalidate_merge(*s);
                 s->literalUsed = false;
                 s->selected = 0;
+                discard_pending_learn(*s);   // 取消组合＝放弃未确认的提交意图
             } else if (s->engMode != base_default(*s, app)) {
                 s->engMode = base_default(*s, app);
                 toast = s->engMode == EngMode::Off ? 1 : 2;
@@ -1193,22 +1296,29 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                         s->lastChar = last_scalar_codepoint(commit);
                     } else {
                         // 0 或超出页内数量：先上屏高亮候选（完整时）再输出数字。
+                        // 完整覆盖的短码／拼音词／英文候选同样按高亮提交（规格：
+                        // 「先上屏高亮候选再输出数字」不限候选来源）。
                         std::string prefix;
                         if (total > 0) {
                             MergedSet &ms = ensure_view();
-                            const MaterializedCandidate &hm =
-                                materialize_candidate(*s, ms, std::min(s->selected, total - 1));
-                            if ((hm.kind == GC_CAND_CHINESE || hm.kind == GC_CAND_LEARNED) && hm.completes) {
-                                c.selectCandidatesToCursor(ms.entries[std::min(s->selected, total - 1)].libimeIndex);
-                                if (c.selected()) {
-                                    prefix = c.selectedSentence();
-                                    if (s->freqEnabled) {
-                                        c.learn();
-                                        s->modelDirty = true;
+                            const size_t hi = std::min(s->selected, total - 1);
+                            const MaterializedCandidate &hm = materialize_candidate(*s, ms, hi);
+                            if (hm.completes) {
+                                if (hm.kind == GC_CAND_CHINESE || hm.kind == GC_CAND_LEARNED) {
+                                    c.selectCandidatesToCursor(ms.entries[hi].libimeIndex);
+                                    if (c.selected()) {
+                                        prefix = c.selectedSentence();
+                                        capture_pending_learn(*s);
+                                        c.clear();
+                                        c.clearContextWords();
+                                        invalidate_merge(*s);
                                     }
+                                } else {
+                                    prefix = hm.text;
                                     c.clear();
                                     c.clearContextWords();
                                     invalidate_merge(*s);
+                                    discard_pending_learn(*s);   // 自定义词／英文不调频
                                 }
                             }
                         }
@@ -1221,6 +1331,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                         c.clear();
                         c.clearContextWords();
                         invalidate_merge(*s);
+                        if (prefix.empty()) discard_pending_learn(*s);   // 无候选提交不调频
                         s->lastChar = static_cast<uint32_t>(ch);
                     }
                     s->literalUsed = false;
@@ -1228,6 +1339,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     break;
                 }
                 // 组合中标点：完整覆盖→暂存＋候选＋标点；部分覆盖→暂存＋剩余原编码＋标点。
+                // 完整覆盖的短码／拼音词／英文候选同样按「暂存＋候选＋标点」提交。
                 const bool isPunct = !punct_map(ch).empty() || ch == '"' || ch == '\'';
                 if (isPunct) {
                     std::string prefix;
@@ -1236,17 +1348,22 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                         MergedSet &ms = ensure_view();
                         const size_t hi = std::min(s->selected, total - 1);
                         const MaterializedCandidate &hm = materialize_candidate(*s, ms, hi);
-                        if ((hm.kind == GC_CAND_CHINESE || hm.kind == GC_CAND_LEARNED) && hm.completes) {
-                            c.selectCandidatesToCursor(ms.entries[hi].libimeIndex);
-                            if (c.selected()) {
-                                prefix = c.selectedSentence();
-                                if (s->freqEnabled) {
-                                    c.learn();
-                                    s->modelDirty = true;
+                        if (hm.completes) {
+                            if (hm.kind == GC_CAND_CHINESE || hm.kind == GC_CAND_LEARNED) {
+                                c.selectCandidatesToCursor(ms.entries[hi].libimeIndex);
+                                if (c.selected()) {
+                                    prefix = c.selectedSentence();
+                                    capture_pending_learn(*s);
+                                    c.clear();
+                                    c.clearContextWords();
+                                    invalidate_merge(*s);
                                 }
+                            } else {
+                                prefix = hm.text;
                                 c.clear();
                                 c.clearContextWords();
                                 invalidate_merge(*s);
+                                discard_pending_learn(*s);   // 自定义词／英文不调频
                             }
                         }
                     }
@@ -1256,6 +1373,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     c.clear();
                     c.clearContextWords();
                     invalidate_merge(*s);
+                    if (prefix.empty()) discard_pending_learn(*s);   // 无候选提交不调频
                     s->lastChar = last_scalar_codepoint(punct);
                     s->literalUsed = false;
                     s->selected = 0;
@@ -1266,6 +1384,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 c.clear();
                 c.clearContextWords();
                 invalidate_merge(*s);
+                discard_pending_learn(*s);
                 s->lastChar = last_scalar_codepoint(commit);
                 s->literalUsed = false;
                 s->selected = 0;
@@ -1292,6 +1411,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                         c.clear();
                         c.clearContextWords();
                         invalidate_merge(*s);
+                        discard_pending_learn(*s);   // 分段暂存提交不参与调频
                         s->lastChar = last_scalar_codepoint(commit);
                         s->literalUsed = false;
                     } else {
@@ -1319,6 +1439,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 c.clear();
                 c.clearContextWords();
                 invalidate_merge(*s);
+                discard_pending_learn(*s);   // 原编码上屏不参与调频
                 s->lastChar = last_scalar_codepoint(commit);
                 s->literalUsed = false;
                 s->selected = 0;

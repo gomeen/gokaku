@@ -57,6 +57,24 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(try readDisk().candidateFontSize, 16)
     }
 
+    /// 自定义词保存失败注册的重试闭包必须由底栏「重试」真正执行（2026-11 整改 #12）。
+    func testCustomRetryHandlerRunsOnRetry() throws {
+        let store = SettingsStore(directory: directory)
+        let failed = expectation(description: "failed status reported")
+        store.onStatus = { status in
+            if case .failed = status { failed.fulfill() }
+        }
+        store.registerCustomRetry(failureMessage: "自定义词语写入失败") { }
+        wait(for: [failed], timeout: 2)
+        let ran = expectation(description: "custom retry handler ran")
+        store.onStatus = { _ in }
+        store.registerCustomRetry(failureMessage: "自定义词语写入失败") {
+            ran.fulfill()
+        }
+        store.retry()
+        wait(for: [ran], timeout: 2)
+    }
+
     func testWriteFailureKeepsPendingAndRetrySucceeds() throws {
         // 目录不可写：失败保留待保存改动，不伪报成功；修复后重试成功。
         var settings = Settings()

@@ -147,7 +147,7 @@ public struct KeyCombo: Codable, Equatable, Hashable, Sendable {
             FixedOperation("下一／上一候选", "组合中跨页切换候选", keyID: "n", modifiers: ctrl, modes: "普通"),
             FixedOperation("下一／上一候选", "组合中跨页切换候选", keyID: "p", modifiers: ctrl, modes: "普通"),
             FixedOperation("删除个人学习词", "组合中删除选中候选的个人学习记录", keyID: "backspace", modifiers: ctrl, modes: "普通"),
-            FixedOperation("原文上屏", "普通组合中按宿主快捷键规则交还宿主", keyID: "return", modifiers: ctrl, modes: "普通"),
+            FixedOperation("交还宿主", "普通组合中不消费，按宿主快捷键规则处理（2026-11 用户裁决：Ctrl+Enter 暂时去掉）", keyID: "return", modifiers: ctrl, modes: "普通"),
         ]
     }
 

@@ -22,6 +22,7 @@ struct CustomWordsPage: View {
     @Binding var status: SaveStatus
     @State private var model = CustomWordListModel(words: [])
     @State private var corrupt = false
+    @State private var readFailed = false
     @State private var kind: Kind = .shortcode
     @State private var search = ""
     @State private var selectedRowID: String?
@@ -29,7 +30,10 @@ struct CustomWordsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            if corrupt {
+            if readFailed {
+                Label("custom-words.tsv 读取失败；已暂停保存，避免用未知内容覆盖词表。请检查文件权限后重开页面。",
+                      systemImage: "exclamationmark.triangle").foregroundStyle(SettingsPalette.danger)
+            } else if corrupt {
                 Label("custom-words.tsv 已损坏，已备份为 .corrupt 并按空表启动；确认下方内容后保存即可恢复。",
                       systemImage: "exclamationmark.triangle").foregroundStyle(SettingsPalette.danger)
             }
@@ -180,19 +184,34 @@ struct CustomWordsPage: View {
         let result = CustomWordStore.readRecoveringCorrupt(path: Settings.customWordsPath.path)
         model = CustomWordListModel(words: result.words)
         corrupt = result.corrupt
+        readFailed = result.readError
         selectedRowID = nil
     }
 
     /// 写入 TSV v1（不迁移、不丢失词条）；成功后直接通知输入法重载
-    /// （不再「为发通知再保存整份 settings.json」）；失败保留界面改动并提示。
+    /// （不再「为发通知再保存整份 settings.json」）；失败保留界面改动并提示，
+    /// 同时向状态栏注册真正的词表重试（2026-11 整改：底栏重试必须重写词表）。
     private func save() {
+        if readFailed {
+            status = .failed("词表读取失败，未保存；请检查文件权限后重开页面")
+            return
+        }
         if CustomWordStore.write(path: Settings.customWordsPath.path, words: model.words) {
             corrupt = false
             status = .saved
+            SettingsStore.shared.clearCustomRetry()
             DistributedNotificationCenter.default().postNotificationName(
                 SettingsStore.changedNotification, object: nil, userInfo: nil, deliverImmediately: true)
         } else {
             status = .failed("自定义词语写入失败")
+            SettingsStore.shared.registerCustomRetry(failureMessage: "自定义词语写入失败") { [model, status] in
+                // 结构体 View 拷贝：State/Binding 存储由 SwiftUI 引用承载，
+                // 拷贝上的 save() 读取当前词表并把结果写回同一存储。
+                var page = self
+                page.status = status
+                page.model = model
+                page.save()
+            }
         }
     }
 }

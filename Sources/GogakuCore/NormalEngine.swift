@@ -65,6 +65,7 @@ public enum NormalEvent {
     case ctrlA, ctrlB, ctrlE, ctrlF, ctrlN, ctrlP
     case shiftClick(side: Int64)
     case focusSync
+    case commitConfirmed   // 平台确认宿主插入成功（ABI v4：此刻核心才调频学习）
 }
 
 public final class NormalEngine {
@@ -147,6 +148,7 @@ public final class NormalEngine {
             ev.kind = Int32(GC_EV_SHIFT_CLICK.rawValue)
             ev.arg = Int64(side)
         case .focusSync: ev.kind = Int32(GC_EV_FOCUS_SYNC.rawValue)
+        case .commitConfirmed: ev.kind = Int32(GC_EV_COMMIT_CONFIRMED.rawValue)
         }
         var snapshot: UnsafeMutablePointer<GcSnapshot>?
         guard gc_normal_handle(session, &ev, &snapshot) == 0, let snapshot else { return nil }
@@ -218,9 +220,35 @@ public final class NormalEngine {
         gc_normal_set_app_defaults(session, &pointers, apps.count)
     }
 
-    public func update(scheme: Int32, fuzzyMask: UInt32, fullPinyinPreedit: Bool, freqEnabled: Bool) {
+    public func update(scheme: Int32, fuzzyMask: UInt32, fullPinyinPreedit: Bool,
+                       freqEnabled: Bool, englishEnabled: Bool) {
         guard let session else { return }
-        gc_normal_update(session, scheme, fuzzyMask, fullPinyinPreedit ? 1 : 0, freqEnabled ? 1 : 0)
+        gc_normal_update(session, scheme, fuzzyMask, fullPinyinPreedit ? 1 : 0,
+                         freqEnabled ? 1 : 0, englishEnabled ? 1 : 0)
+    }
+
+    /// 平台确认宿主插入成功：核心此刻才写入调频与已学习词（ABI v4）。
+    /// 学习模式哨兵提交与上屏失败不发送本事件，不再污染普通输入排序。
+    @discardableResult
+    public func confirmCommit() -> Bool {
+        guard let session else { return false }
+        var ev = GcKeyEvent()
+        ev.kind = Int32(GC_EV_COMMIT_CONFIRMED.rawValue)
+        let appCopy = "".unsafeConstUTF8Copy()
+        let fieldCopy = "".unsafeConstUTF8Copy()
+        defer { freeConst(appCopy); freeConst(fieldCopy) }
+        ev.app = appCopy
+        ev.field = fieldCopy
+        var snapshot: UnsafeMutablePointer<GcSnapshot>?
+        return gc_normal_handle(session, &ev, &snapshot) == 0
+    }
+
+    /// 清空调频与已学习词的内存状态并删除持久化文件（ABI v4）。
+    /// 设置页删除目录后调用，保证运行中的引擎不再把旧数据写回。
+    @discardableResult
+    public func clearFrequencyData() -> Bool {
+        guard let session else { return false }
+        return gc_normal_clear_user_data(session) == 0
     }
 
     @discardableResult
@@ -271,16 +299,39 @@ public enum CustomWordStore {
         return (words, raw.corrupt != 0)
     }
 
-    /// 修复损坏标记：损坏时用 .corrupt 备份的内容继续（设置页提示后可保存回主文件）。
-    public static func readRecoveringCorrupt(path: String) -> (words: [CustomWord], corrupt: Bool) {
-        if let result = read(path: path) {
-            if !result.corrupt { return result }
-            // 损坏主文件已被核心备份为 .corrupt 并置空；尝试从备份恢复可读内容。
-            if let backup = read(path: path + ".corrupt"), !backup.corrupt {
-                return (backup.words, true)
+    /// 只读解析（ABI v4 peek）：无副作用，用于检查 .corrupt 备份是否仍可读。
+    public static func peek(path: String) -> (words: [CustomWord], corrupt: Bool)? {
+        var list: UnsafeMutablePointer<GcCustomWordList>?
+        guard gc_custom_words_peek(path, &list) == 0, let list else { return nil }
+        defer { gc_custom_word_list_free(list) }
+        let raw = list.pointee
+        var words: [CustomWord] = []
+        if let items = raw.words {
+            for i in 0..<raw.count {
+                let w = items[i]
+                words.append(CustomWord(kind: w.kind, enabled: w.enabled != 0,
+                                        code: String(cString: w.code),
+                                        pinyin: String(cString: w.pinyin),
+                                        content: String(cString: w.content)))
             }
         }
-        return ([], false)
+        return (words, raw.corrupt != 0)
+    }
+
+    /// 修复损坏标记：损坏时用 .corrupt 备份的内容继续（设置页提示后可保存回主文件）。
+    /// ABI v4 起区分第三种结果：readError=词表读取失败（权限／I／O），
+    /// 此时不得让用户在未知数据上继续保存，调用方必须暂停写入并提示。
+    public static func readRecoveringCorrupt(path: String) -> (words: [CustomWord], corrupt: Bool, readError: Bool) {
+        guard let result = read(path: path) else {
+            return ([], true, true)   // 读取失败：当未知处理，页面停止保存
+        }
+        if !result.corrupt { return (result.words, false, false) }
+        // 损坏主文件已被核心备份为 .corrupt 并置空；无副作用地解析备份内容
+        //（peek 不再二次重命名，损坏标志不会被吞掉）。
+        if let backup = peek(path: path + ".corrupt"), !backup.corrupt {
+            return (backup.words, true, false)
+        }
+        return ([], true, false)
     }
 
     public static func write(path: String, words: [CustomWord]) -> Bool {

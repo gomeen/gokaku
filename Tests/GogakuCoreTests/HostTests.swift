@@ -148,4 +148,27 @@ final class HostTests: XCTestCase {
         XCTAssertFalse(gg_insert_text(nil, "你好"))
         XCTAssertFalse(gg_mark_confirmed_text(nil, "m"))
     }
+
+    /// 宿主在 insertText 阶段抛异常（受控注入）：桥返回失败且异常不外泄，
+    /// 随后 clear 仍可用；控制器据此恢复字母跟踪清理宿主残留（2026-11 整改 #3）。
+    private final class ThrowingInsertClient: NSObject {
+        var marked: String?
+        @objc func supportsUnicode() -> Bool { true }
+        @objc func selectedRange() -> NSRange { NSRange(location: 0, length: 0) }
+        @objc func markedRange() -> NSRange { NSRange(location: NSNotFound, length: 0) }
+        @objc func setMarkedText(_ text: Any, selectionRange: NSRange, replacementRange: NSRange) {
+            marked = (text as? NSAttributedString)?.string
+        }
+        @objc func insertText(_ text: Any, replacementRange: NSRange) {
+            NSException(name: NSExceptionName("SyntheticInsertFailure"), reason: "Isolated test", userInfo: nil).raise()
+        }
+    }
+
+    func testInsertThrowReturnsFalseAndClearStillWorks() {
+        let client = ThrowingInsertClient()
+        client.marked = "ni'hao"
+        XCTAssertFalse(gg_insert_text(client, "你好"))
+        XCTAssertTrue(gg_clear_marked_text(client))
+        XCTAssertEqual(client.marked, "")
+    }
 }

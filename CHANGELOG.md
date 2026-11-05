@@ -2,6 +2,14 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：普通输入十项整改，ABI v4）
+
+- **上屏安全与数据可靠**：宿主插入异常后不再丢失字母跟踪（残留可清理）；调频只在宿主插入确认后学习（新事件 GC_EV_COMMIT_CONFIRMED）——学习模式中→英、上屏失败不再污染普通排序；清空调频真正清空运行中引擎（新接口 gc_normal_clear_user_data）且失败不再伪报成功；自定义词读取失败（权限/I/O）与「文件不存在」区分（gc_custom_words_read 返 2、新增只读 peek），设置页读取失败暂停保存避免覆盖。
+- **日常输入正确性**：短码／拼音词／英文补全被高亮时按标点或 0/超页数字提交「候选＋标点/数字」（不再输出原编码）；单双引号独立配对；同音自定义拼音词按设置页顺序排列。
+- **设置生效**：英文候选开关即时生效（gc_normal_update 新增参数）；自定义词保存失败后底栏「重试」真正重写词表。
+- **按键**：Ctrl+Enter 暂时去掉输入法消费，普通组合中交还宿主（用户裁决）；快捷键页文案同步。
+- **验证口径**：核心 ctest 6/6＋新增专项用例、Swift Release 158 项、ABI4 行为向量 23 项、宿主异常注入夹具 3 轮，隔离环境全过；真实宿主验收未开始，详见验收记录 2026-11-06 节。
+
 ### 变更（2026-11-05 追加：Windows 交叉构建＋共享核心自检包）
 
 - **Windows 交叉构建流水线＋核心自检包**（计划 T2.1 的「无本地 Windows」路线）：`scripts/prepare-win-cross.sh` 在 Mac 上用 mingw-w64（GCC 16.2）交叉编译共享核心与依赖（同 pin；POSIX 垫片解包 MSYS2 clang64 包到本地 sysroot；libime 补丁 `scripts/patches/libime-win-cross.patch` 使 Boost iostreams 条件化）；核心从隔离副本构建并注入两项 Windows 兼容修正（fsync→_commit、WIN32 输出目录自引用修正——待核心活跃改动合入后上游化）。`scripts/package-win-selfcheck.py` 打包为一键自检 zip（核心 DLL 链＋6 个测试 exe＋出厂数据＋run.bat 产出机器可读 JSON 报告，不含原文文本）。**Windows 11 VM 内全绿**：ABI／翻译加固 76 项／普通轨迹／学习轨迹 144 项／质量回归 120 条／2000 序列冒烟，run.bat 双击路径复验通过；KenLM／词库格式兼容（Mac 产物在 Windows 加载）直接验证。证据：`docs/validation/win-core-selfcheck/`；口径：VM 为功能级验证，T2.1 验收仍以 CI 绿为准，包发给朋友真机为真实硬件证据。

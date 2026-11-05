@@ -1,7 +1,7 @@
 #ifndef GOGAKU_CORE_H
 #define GOGAKU_CORE_H
 /*
- * Gogaku 共享核心 C ABI（版本 3）。
+ * Gogaku 共享核心 C ABI（版本 4）。
  *
  * 合同（见 docs/implementation-plan.md「统一接口与所有权」）：
  * - 显式整数与 UTF-8＋长度；字符串长度以字节计；所有字符串以 NUL 结尾便于跨语言拷贝。
@@ -13,6 +13,12 @@
  * - 会话不是线程安全的：同一会话由一个平台串行队列拥有（输入法主队列）。
  * - 核心不建线程、不起定时器；持久化防抖由平台调用 gc_normal_flush 完成。
  *
+ * 版本 4 新增：GC_EV_COMMIT_CONFIRMED（平台确认宿主插入成功后才调频学习，
+ * 学习模式哨兵提交与上屏失败不再污染调频）；gc_normal_update 增加
+ * english_enabled 参数（英文候选开关即时生效）；gc_normal_clear_user_data
+ * （清空调频内存状态，配合设置页删除目录）；gc_custom_words_read 返回 2
+ * 区分读取失败与文件不存在；gc_custom_words_peek 只读解析备份。注意
+ * gc_normal_update 签名变化属于 ABI 破坏性变更，两端加载方同步重编译。
  * 版本 3 新增：学习模式会话（学习组合状态机＋三状态按键语义＋翻译调度合同
  * ＋拼写问题结构）。会话纯 C++，不含 IMK/TSF/窗口/平台路径；翻译请求的
  * 进程与传输仍在平台侧（快照只报告「需要请求哪个源」）。
@@ -39,7 +45,7 @@ extern "C" {
 #  define GOGAKU_CORE_EXPORT __attribute__((visibility("default")))
 #endif
 
-#define GOGAKU_CORE_ABI_VERSION 3
+#define GOGAKU_CORE_ABI_VERSION 4
 
 /* 返回本库实现的 ABI 版本。 */
 GOGAKU_CORE_EXPORT int32_t gc_abi_version(void);
@@ -94,7 +100,9 @@ typedef enum GcEventKind {
     GC_EV_CTRL_N,
     GC_EV_CTRL_P,
     GC_EV_SHIFT_CLICK,    /* 单击 Shift（按住期间无其他键且 <600ms 由平台判定）；arg：0 左 1 右 */
-    GC_EV_FOCUS_SYNC      /* 焦点／应用同步：app、field 为当前值 */
+    GC_EV_FOCUS_SYNC,     /* 焦点／应用同步：app、field 为当前值 */
+    GC_EV_COMMIT_CONFIRMED /* 平台确认上屏成功后才调频学习（版本 4；
+                               只学普通模式实际写入宿主的中文） */
 } GcEventKind;
 
 typedef struct GcKeyEvent {
@@ -179,13 +187,20 @@ GOGAKU_CORE_EXPORT int gc_normal_handle(GcNormalSession *session,
 GOGAKU_CORE_EXPORT int gc_normal_set_app_defaults(GcNormalSession *session,
                                                   const char *const *apps,
                                                   size_t count);
-/* 运行时更新配置（设置变更；输入法收到通知后调用）。返回 0 成功。 */
+/* 运行时更新配置（设置变更；输入法收到通知后调用）。返回 0 成功。
+ * 版本 4：新增 english_enabled（中文模式下英文候选开关，立即生效）。 */
 GOGAKU_CORE_EXPORT int gc_normal_update(GcNormalSession *session, int32_t scheme,
                                         uint32_t fuzzy_mask,
                                         int32_t full_pinyin_preedit,
-                                        int32_t freq_enabled);
+                                        int32_t freq_enabled,
+                                        int32_t english_enabled);
 /* custom-words.tsv 变更后重载。返回 0 成功，2 文件损坏（已按空表启动）。 */
 GOGAKU_CORE_EXPORT int gc_normal_reload_custom_words(GcNormalSession *session);
+
+/* 清空调频与已学习词的内存状态（版本 4）：清空用户语言模型历史与已学习词
+ * 词典条目，删除 user_dir 下的持久化文件。设置页删除目录后由输入法进程
+ * 调用，保证运行中的引擎不再把旧数据写回。返回 0 成功。 */
+GOGAKU_CORE_EXPORT int gc_normal_clear_user_data(GcNormalSession *session);
 
 /* 立即持久化调频与已学习词（若脏）。平台 30 秒防抖调用。返回 0 成功。 */
 GOGAKU_CORE_EXPORT int gc_normal_flush(GcNormalSession *session);
@@ -223,8 +238,14 @@ typedef struct GcCustomWordList {
     int32_t corrupt;   /* 读取时文件损坏：已备份为 <path>.corrupt 并从空表启动 */
 } GcCustomWordList;
 
-/* 读取；文件不存在视为空表（corrupt=0）。返回 0 成功，1 参数错误。 */
+/* 读取；文件不存在视为空表（corrupt=0）。返回 0 成功，1 参数错误。
+ * 版本 4：返回 2 = 读取失败（权限／I/O，含路径是目录）；此时 *out 仍分配
+ * 但内容不可信，调用方不得当空表覆盖保存。损坏文件仍备份为 <path>.corrupt
+ * 并置 corrupt=1。 */
 GOGAKU_CORE_EXPORT int gc_custom_words_read(const char *path, GcCustomWordList **out);
+/* 只读解析（版本 4）：与 read 相同的解析规则，但无任何副作用——损坏时不
+ * 重命名、不备份。用于检查 .corrupt 备份是否仍可读。返回码同 read。 */
+GOGAKU_CORE_EXPORT int gc_custom_words_peek(const char *path, GcCustomWordList **out);
 /* 原子写入（临时文件＋rename，权限 0600，带版本行）。返回 0 成功。 */
 GOGAKU_CORE_EXPORT int gc_custom_words_write(const char *path,
                                              const GcCustomWordList *list);

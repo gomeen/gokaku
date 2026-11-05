@@ -51,6 +51,10 @@ int main(int argc, char **argv) {
         GcSnapshot *snap = nullptr;
         if (gc_normal_handle(s, &ev, &snap) != 0) { printf("VERIFY-FAIL space\n"); return 2; }
         gc_snapshot_free(snap);
+        // 平台确认宿主插入成功（ABI 版本 4）：确认后才学习。
+        ev.kind = GC_EV_COMMIT_CONFIRMED; ev.text = nullptr;
+        if (gc_normal_handle(s, &ev, &snap) != 0) { printf("VERIFY-FAIL confirm\n"); return 2; }
+        gc_snapshot_free(snap);
         if (gc_normal_flush(s) != 0) { printf("VERIFY-FAIL flush\n"); return 2; }
         gc_normal_session_destroy(s);
         printf("VERIFY-OK\n");
@@ -77,6 +81,9 @@ int main(int argc, char **argv) {
         }
         ev.kind = GC_EV_SPACE; ev.text = nullptr; ev.time_ms = i * 10 + 1;
         GcSnapshot *snap = nullptr;
+        if (gc_normal_handle(s, &ev, &snap) != 0) return 2;
+        gc_snapshot_free(snap);
+        ev.kind = GC_EV_COMMIT_CONFIRMED; ev.time_ms = i * 10 + 2;
         if (gc_normal_handle(s, &ev, &snap) != 0) return 2;
         gc_snapshot_free(snap);
         if (gc_normal_flush(s) != 0) return 2;
