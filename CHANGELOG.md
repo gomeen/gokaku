@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：标准安装包——pkg＋DMG）
+
+- **`scripts/package-macos-pkg.py`（推荐）**：用户级 .pkg 安装器（Squirrel 同款路线）——双击向导安装、免管理员密码、无隔离标记；postinstall 落位 `~/Library/Input Methods/`＋`~/Applications/` 并重注册 LaunchServices，升级保留学习数据；内置 welcome/readme（含「添加输入源」引导与未签名说明）。
+- **`scripts/package-macos-dmg.py`（备选）**：DMG＋双击安装 command（去隔离＋重注册）。
+- 工程坑：productbuild 手写 distribution 的 choice 结构会静默产出 2KB 空壳，必须 --synthesize 基线＋补丁；脚本内置体积断言防带病产物。构建 85 pkg 在本机 `installer` 实装验证通过（构建号/签名/多通道并存核对）。
+
 ### 变更（2026-11-06 追加：双通道安装——stable 与 dev 并存）
 
 - **构建／安装／验证三脚本支持 `--channel dev|stable`**：dev 通道装为 `Gogaku Dev.app`（bundle ID 带 `.dev` 后缀 → 独立输入源「Gogaku Dev」），与 stable 并存互不覆盖；用户数据与 Darwin 通知两通道共用同一份（用户裁决）；清单与构建身份分通道文件；跨通道覆盖由 `own()` 哈希校验拦截；`--purge-data` 显式警示影响另一通道。稳定通道建议装 rc／定版，dev 通道装开发构建。

@@ -49,6 +49,14 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选：uni
 
 **签名现状**：ad-hoc（无 Apple 开发者账号），仅本机安装；公开分发与公证不在本轮范围。
 
+### 标准安装包（2026-11-06）✅
+
+给「双击就能装」的正常体验，构建后打两种包（`scripts/package-macos-pkg.py`／`package-macos-dmg.py`）：
+
+- **pkg（推荐，Squirrel 同款路线）**：`dist/Gogaku-<版本>-b<构建号>.pkg`——双击 → 安装器向导（欢迎页＋说明页）→ 完成，无需管理员密码（用户级：`domains` 限定当前用户主目录，payload 为空、postinstall 落位＋`lsregister` 重注册）。pkg 装出的文件**不带隔离标记**（DMG 拷出会带，会拦输入法进程——这是输入法普遍用 pkg 而非 DMG 的原因）。落位与 manage-install 一致：输入法 → `~/Library/Input Methods/`，设置 → `~/Applications/`；升级不删学习数据。postinstall 若检测到当前输入源正选着 Gogaku 会提示切换一次加载新版。实测：`installer -pkg … -target CurrentUserHomeDirectory` 成功、构建号/签名/多通道并存全部核对。
+- **DMG（备选）**：内置「安装 Gogaku.command」双击即装（拷贝→去隔离→重注册→打开系统设置键盘面板）＋安装说明；给偏好 DMG 形态的场景。
+- 工程坑记录：productbuild 手写 distribution 的 `choices-root` 结构会**静默产出无组件的 2KB 空壳**——必须 `--synthesize` 生成基线再补丁（domains/welcome/readme/title），脚本内置体积断言（<10MB 拒绝放行）。
+
 ## 2. Windows 构建流程 🚧
 
 四个部件，三条构建线，最后组装：
