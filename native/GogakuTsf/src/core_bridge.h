@@ -31,6 +31,7 @@ public:
     int normalFlush(GcNormalSession *s);
     int normalReloadCustomWords(GcNormalSession *s);
     int normalClearUserData(GcNormalSession *s);
+    void snapshotFree(GcSnapshot *snap);
 
     /* 设置项（settings.txt 简单键值；设置应用之后接入）。 */
     struct Settings {
@@ -64,6 +65,8 @@ private:
     fn_gc_normal_flush p_flush = nullptr;
     fn_gc_normal_reload_custom_words p_reload = nullptr;
     fn_gc_normal_clear_user_data p_clear = nullptr;
+    typedef void (*fn_gc_snapshot_free)(GcSnapshot *);
+    fn_gc_snapshot_free p_snapshot_free = nullptr;
 
     std::string fileUtf8(const std::wstring &dir, const wchar_t *name) const;
     void ensureUserDir() const;

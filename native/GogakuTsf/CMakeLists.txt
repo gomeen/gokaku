@@ -11,6 +11,8 @@ project(GogakuTsf CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+# 静态 CRT：分发不依赖 VC 运行库（用户机器无需装 redist）。
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_library(GogakuTsf SHARED
     src/dllmain.cpp
@@ -29,7 +31,7 @@ target_link_libraries(GogakuTsf PRIVATE
     user32 gdi32 advapi32 ole32 uuid shcore
 )
 
-target_compile_definitions(GogakuTsf PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN)
+target_compile_definitions(GogakuTsf PRIVATE UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN)
 
 if(MSVC)
     # /utf-8：源码含中文注释与字符串；/W3 基线告警。

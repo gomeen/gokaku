@@ -18,8 +18,6 @@ std::wstring Utf8ToUtf16(const std::string &s) {
     return w;
 }
 
-HINSTANCE g_hInst = nullptr;
-
 CoreBridge &CoreBridge::instance() {
     static CoreBridge b;
     return b;
@@ -47,6 +45,12 @@ bool CoreBridge::ensureLoaded() {
     p_flush = (fn_gc_normal_flush)GetProcAddress(m_core, "gc_normal_flush");
     p_reload = (fn_gc_normal_reload_custom_words)GetProcAddress(m_core, "gc_normal_reload_custom_words");
     p_clear = (fn_gc_normal_clear_user_data)GetProcAddress(m_core, "gc_normal_clear_user_data");
+    p_snapshot_free = (fn_gc_snapshot_free)GetProcAddress(m_core, "gc_snapshot_free");
+    if (!p_snapshot_free) {
+        FreeLibrary(m_core);
+        m_core = nullptr;
+        return false;
+    }
     if (!p_create || !p_destroy || !p_handle || !p_flush) {
         FreeLibrary(m_core);
         m_core = nullptr;
@@ -127,6 +131,7 @@ size_t CoreBridge::normalCopyRaw(GcNormalSession *s, char *buf, size_t cap) {
 int CoreBridge::normalFlush(GcNormalSession *s) { return p_flush ? p_flush(s) : 1; }
 int CoreBridge::normalReloadCustomWords(GcNormalSession *s) { return p_reload ? p_reload(s) : 1; }
 int CoreBridge::normalClearUserData(GcNormalSession *s) { return p_clear ? p_clear(s) : 1; }
+void CoreBridge::snapshotFree(GcSnapshot *snap) { if (p_snapshot_free) p_snapshot_free(snap); }
 
 CoreBridge::Settings CoreBridge::readSettings() const {
     ensureUserDir();

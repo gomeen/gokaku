@@ -16,8 +16,8 @@ STDMETHODIMP TextService::QueryInterface(REFIID riid, void **ppv) {
         *ppv = (ITfTextInputProcessor *)this;
     } else if (riid == IID_ITfKeyEventSink) {
         *ppv = (ITfKeyEventSink *)this;
-    } else if (riid == IID_ITfFocusSink) {
-        *ppv = (ITfFocusSink *)this;
+    } else if (riid == IID_ITfThreadMgrEventSink) {
+        *ppv = (ITfThreadMgrEventSink *)this;
     } else if (riid == IID_ITfCompositionSink) {
         *ppv = (ITfCompositionSink *)this;
     }
@@ -38,16 +38,29 @@ STDMETHODIMP_(ULONG) TextService::Release() {
 
 /* ---------- 激活 ---------- */
 
+static void actLog(const char *msg) {
+    HANDLE f = CreateFileW(L"C:\\gogaku-test\\activate-log.txt",
+                           FILE_APPEND_DATA, FILE_SHARE_READ, nullptr,
+                           OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (!f) return;
+    DWORD w = 0;
+    WriteFile(f, msg, (DWORD)strlen(msg), &w, nullptr);
+    CloseHandle(f);
+}
+
 STDMETHODIMP TextService::Activate(ITfThreadMgr *ptim, TfClientId tid) {
-    if (!ptim) return E_INVALIDARG;
+    actLog("activate: enter\r\n");
+    if (!ptim) { actLog("activate: no threadmgr\r\n"); return E_INVALIDARG; }
     m_tm = ptim;
     m_tm->AddRef();
     m_clientId = tid;
 
     if (!initCore()) {
+        actLog("activate: initCore FAILED\r\n");
         Deactivate();
         return E_FAIL; /* 核心缺失/ABI 不匹配：诚实地拒绝激活 */
     }
+    actLog("activate: core ok\r\n");
 
     /* 按键汇：本 TIP 激活期间接收全部按键 */
     ITfKeystrokeMgr *ks = nullptr;
@@ -58,7 +71,7 @@ STDMETHODIMP TextService::Activate(ITfThreadMgr *ptim, TfClientId tid) {
     /* 焦点汇 */
     ITfSource *src = nullptr;
     if (SUCCEEDED(m_tm->QueryInterface(IID_PPV_ARGS(&src)))) {
-        src->AdviseSink(IID_ITfFocusSink, (ITfFocusSink *)this, &m_focusCookie);
+        src->AdviseSink(IID_ITfThreadMgrEventSink, (ITfThreadMgrEventSink *)this, &m_focusCookie);
         src->Release();
     }
     m_win.create(g_hInst);
@@ -119,7 +132,12 @@ void TextService::shutdownCore() {
 
 /* ---------- 焦点 ---------- */
 
-STDMETHODIMP TextService::OnSetFocus(ITfDocumentMgr *pDocMgr) {
+STDMETHODIMP TextService::OnInitDocumentMgr(ITfDocumentMgr *) { return S_OK; }
+STDMETHODIMP TextService::OnUninitDocumentMgr(ITfDocumentMgr *) { return S_OK; }
+STDMETHODIMP TextService::OnPushContext(ITfContext *) { return S_OK; }
+STDMETHODIMP TextService::OnPopContext(ITfContext *) { return S_OK; }
+
+STDMETHODIMP TextService::OnSetFocus(ITfDocumentMgr *pDocMgr, ITfDocumentMgr * /*pdimPrevFocus*/) {
     /* 丢弃旧文档上的组合：清空文本＋核心 Esc（对齐 Mac 焦点丢失语义） */
     if (m_comp) {
         ITfContext *ctx = nullptr;
@@ -178,7 +196,8 @@ bool TextService::buildEvent(WPARAM vk, LPARAM lp, GcKeyEvent *ev, std::string *
     BYTE state[256] = {};
     GetKeyboardState(state);
     wchar_t chars[8] = {};
-    int produced = ToUnicodeEx((UINT)vk, scanCode, state, chars, 8, 0);
+    /* Win10+ SDK 与 mingw 均为 7 参（末位 HKL）。 */
+    int produced = ToUnicodeEx((UINT)vk, scanCode, state, chars, 8, 0, GetKeyboardLayout(0));
 
     bool ctrl = (state[VK_CONTROL] & 0x80) != 0;
     *ev = GcKeyEvent{};
@@ -232,15 +251,23 @@ bool TextService::buildEvent(WPARAM vk, LPARAM lp, GcKeyEvent *ev, std::string *
 }
 
 void TextService::dispatchEvent(const GcKeyEvent &ev, BOOL *pfEaten) {
-    if (!m_normal) return;
+    if (!m_normal) { actLog("dispatch: no session\r\n"); return; }
     GcSnapshot *snap = nullptr;
-    if (CoreBridge::instance().normalHandle(m_normal, &ev, &snap) != 0) {
+    int rc = CoreBridge::instance().normalHandle(m_normal, &ev, &snap);
+    if (rc != 0) {
+        char buf[64]; snprintf(buf, 64, "dispatch: core rc=%d\r\n", rc);
+        actLog(buf);
         if (pfEaten) *pfEaten = FALSE;
         return;
     }
+    char buf[96];
+    snprintf(buf, 96, "dispatch: consumed=%d composing=%d commit_empty=%d marked_empty=%d\r\n",
+             (int)snap->consumed, (int)snap->composing,
+             (int)(!snap->commit || !*snap->commit), (int)(!snap->marked || !*snap->marked));
+    actLog(buf);
     applySnapshot(snap);
     if (pfEaten) *pfEaten = snap->consumed == 1 ? TRUE : FALSE;
-    gc_snapshot_free(snap);
+    CoreBridge::instance().snapshotFree(snap);
 }
 
 void TextService::applySnapshot(const GcSnapshot *snap) {
@@ -302,9 +329,18 @@ STDMETHODIMP TextService::OnTestKeyDown(ITfContext *pic, WPARAM wParam, LPARAM, 
 }
 
 STDMETHODIMP TextService::OnKeyDown(ITfContext *pic, WPARAM wParam, LPARAM lParam, BOOL *pfEaten) {
-    /* Shift 单击检测：非 Shift 按键使当前 Shift 按住失效 */
-    if (wParam != VK_SHIFT && wParam != VK_LSHIFT && wParam != VK_RSHIFT)
-        m_shiftTapValid = false;
+    /* Shift 单击检测（与 Mac 合同 <600ms 无其他键）：按下补记时刻 */
+    if (wParam == VK_SHIFT || wParam == VK_LSHIFT || wParam == VK_RSHIFT) {
+        if (!m_shiftDown) {
+            m_shiftDown = true;
+            m_shiftTapValid = true;
+            m_shiftDownTick = GetTickCount64();
+        }
+        *pfEaten = FALSE;
+        return S_OK;
+    }
+    /* 非 Shift 按键使当前 Shift 按住失效 */
+    m_shiftTapValid = false;
 
     GcKeyEvent ev;
     std::string text;
@@ -313,6 +349,7 @@ STDMETHODIMP TextService::OnKeyDown(ITfContext *pic, WPARAM wParam, LPARAM lPara
         return S_OK;
     }
     ev.app = nullptr; /* app 只在焦点同步给出 */
+    actLog("keydown: dispatch\r\n");
     dispatchEvent(ev, pfEaten);
     return S_OK;
 }
@@ -395,9 +432,9 @@ private:
 };
 
 bool TextService::requestEdit(bool write, const std::function<void(TfEditCookie)> &fn) {
-    if (!m_tm) return false;
+    if (!m_tm) { actLog("reqedit: no tm\r\n"); return false; }
     ITfDocumentMgr *doc = nullptr;
-    if (FAILED(m_tm->GetFocus(&doc)) || !doc) return false;
+    if (FAILED(m_tm->GetFocus(&doc)) || !doc) { actLog("reqedit: no focus doc\r\n"); return false; }
     ITfContext *ctx = nullptr;
     HRESULT hr = doc->GetTop(&ctx);
     doc->Release();
@@ -407,6 +444,8 @@ bool TextService::requestEdit(bool write, const std::function<void(TfEditCookie)
     hr = ctx->RequestEditSession(m_clientId, ses,
                                  TF_ES_SYNC | (write ? TF_ES_READWRITE : TF_ES_READ),
                                  &hrSession);
+    char buf[64]; snprintf(buf, 64, "reqedit: hr=0x%08X ses=0x%08X\r\n", (unsigned)hr, (unsigned)hrSession);
+    actLog(buf);
     ses->Release();
     ctx->Release();
     return SUCCEEDED(hr) && SUCCEEDED(hrSession);
@@ -455,10 +494,7 @@ void TextService::commitText(TfEditCookie ec, ITfContext *ctx, const std::string
         if (ctx->GetSelection(ec, TF_DEFAULT_SELECTION, 1, &sel, &fetched) == S_OK && fetched == 1) {
             sel.range->SetText(ec, 0, w.c_str(), (LONG)w.size());
             sel.range->Collapse(ec, TF_ANCHOR_END);
-            TF_SELECTION ns{};
-            ns.range = sel.range;
-            ns.style = TF_PS_NEVEROFFSET;
-            ctx->SetSelection(ec, 1, &ns);
+            ctx->SetSelection(ec, 1, &sel); /* 原 selection（含原 style）回落到文本尾 */
             sel.range->Release();
         }
     }

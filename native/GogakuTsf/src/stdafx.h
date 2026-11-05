@@ -6,7 +6,12 @@
  */
 #pragma once
 
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX /* windows.h 的 min/max 宏与 std::max 冲突 */
+#endif
 #include <windows.h>
 #include <msctf.h>
 
@@ -16,12 +21,9 @@
 
 #include "../../GogakuCore/include/gogaku_core.h"
 
-/* {A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E12} */
-__declspec(selectany) const GUID CLSID_GogakuTsf = {
-    0xA3C5D7E9, 0x1B2F, 0x4A6C, {0x8E, 0x0D, 0x2F, 0x4B, 0x6A, 0x8C, 0x0E, 0x12}};
-/* {C9E1F3A5-7B8D-4E2F-6A0C-1D3E5F7A9B11}（zh-CN 语言档案） */
-__declspec(selectany) const GUID GUID_GOGAKU_PROFILE = {
-    0xC9E1F3A5, 0x7B8D, 0x4E2F, {0x6A, 0x0C, 0x1D, 0x3E, 0x5F, 0x7A, 0x9B, 0x11}};
+/* GUID 定义在 dllmain.cpp（头文件只声明，避免 selectany/内部链接问题）。 */
+extern const GUID CLSID_GogakuTsf;
+extern const GUID GUID_GOGAKU_PROFILE;
 
 std::string Utf16ToUtf8(const std::wstring &w);
 std::wstring Utf8ToUtf16(const std::string &s);

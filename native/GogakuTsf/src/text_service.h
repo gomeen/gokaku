@@ -10,7 +10,7 @@
 class TextService
     : public ITfTextInputProcessor,
       public ITfKeyEventSink,
-      public ITfFocusSink,
+      public ITfThreadMgrEventSink,
       public ITfCompositionSink {
 public:
     TextService();
@@ -33,8 +33,12 @@ public:
     STDMETHODIMP OnKeyUp(ITfContext *pic, WPARAM wParam, LPARAM lParam, BOOL *pfEaten) override;
     STDMETHODIMP OnPreservedKey(ITfContext *pic, REFGUID rguid, BOOL *pfEaten) override;
 
-    /* ITfFocusSink */
-    STDMETHODIMP OnSetFocus(ITfDocumentMgr *pDocMgr) override;
+    /* ITfThreadMgrEventSink（文档焦点通知的真实接口；SDK 无 ITfFocusSink） */
+    STDMETHODIMP OnInitDocumentMgr(ITfDocumentMgr *pdim) override;
+    STDMETHODIMP OnUninitDocumentMgr(ITfDocumentMgr *pdim) override;
+    STDMETHODIMP OnSetFocus(ITfDocumentMgr *pdimFocus, ITfDocumentMgr *pdimPrevFocus) override;
+    STDMETHODIMP OnPushContext(ITfContext *pic) override;
+    STDMETHODIMP OnPopContext(ITfContext *pic) override;
 
     /* ITfCompositionSink */
     STDMETHODIMP OnCompositionTerminated(TfEditCookie ecWrite, ITfComposition *pComposition) override;

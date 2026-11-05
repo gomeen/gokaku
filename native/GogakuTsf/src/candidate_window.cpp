@@ -95,13 +95,13 @@ void CandidateWindow::layout(const RECT &caretRect) {
             if (!m_glosses[i].empty()) line += L"  " + m_glosses[i];
             SIZE sz{};
             GetTextExtentPoint32W(dc, line.c_str(), (int)line.size(), &sz);
-            maxW = std::max(maxW, sz.cx);
+            maxW = std::max(maxW, (int)sz.cx);
         }
         swprintf_s(tmp, L"%zu/%zu", m_page + 1, m_pageCount ? m_pageCount : 1);
         SIZE sz{};
         SelectObject(dc, m_smallFont);
         GetTextExtentPoint32W(dc, tmp, (int)wcslen(tmp), &sz);
-        maxW = std::max(maxW, sz.cx + 2 * KPadX);
+        maxW = std::max(maxW, (int)sz.cx + 2 * KPadX);
         SelectObject(dc, m_font);
     } else {
         maxW = 64;

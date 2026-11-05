@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：TSF 首次 MSVC 编译成功＋VM 实装测试闭环）
+
+- **里程碑**：GogakuTsf.dll（Windows 输入法接入层）首次在 VM 内用 MSVC 编译链接成功（/MT 静态 CRT，无 redist 依赖）；核心 DLL（HEAD＋rename/fsync 注入）同步构建；VM 内组装运行目录（TIP＋核心＋4 个 MinGW/msys 运行库＋词库数据）并 regsvr32 注册成功；自动化打字测试闭环（交互会话计划任务＋SendKeys＋候选窗探测＋截图）建立。**实测：TIP 在应用内激活成功（DLL 加载、核心会话创建 OK）**。
+- **修复**：键盘类别 GUID 误记（真值 {34745C63-B2F0-4784-8B67-5E12C8701A31}，原误记 {34745CFF...}）；结构镜像微软拼音（Description/IconFile/IconIndex/10 项类别）；接口名勘误（SDK 无 ITfFocusSink，文档焦点通知用 ITfThreadMgrEventSink 双参数 OnSetFocus）。
+- **未解阻塞（下一步主攻）**：Windows CTF 持续把 Gogaku 从用户启用列表剔除（添加后数分钟内消失，Win+Space 永远轮不到）。已排除：TIP 激活失败（实测激活 OK）、注册表结构（已镜像）、COM 注册 API 参数（E_INVALIDARG 全变体）、老接口（现代系统 E_NOINTERFACE）。候选路径：人工 UI 添加验证、CTF 事件日志取证、对 Squirrel 运行时注册做逆向对照。
+
 ### 变更（2026-11-06 追加：Windows 落地决策＋TSF 工程就绪）
 
 - **用户裁决四项**：翻译后端与 Mac 同源同栈（嵌入式 Python＋同哈希 small100 模型随包，否决 ONNX 重写）；设置应用 Win32 原生；安装包直接做安装向导（Inno Setup）；不签名。已记入实施计划。
