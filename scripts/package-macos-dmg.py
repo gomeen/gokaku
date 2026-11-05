@@ -56,7 +56,9 @@ rm -rf "$IM_DIR/$INPUT_APP" "$APPS_DIR/$SETTINGS_APP"
 cp -R "$INPUT_APP" "$IM_DIR/"
 cp -R "$SETTINGS_APP" "$APPS_DIR/"
 
-# DMG 拷出的文件带隔离标记；输入法由 imklaunchagent 拉起，带标记会被拦。
+# dist 中立 → 目标位注入输入源身份＋ad-hoc 重签；再去 DMG 隔离标记。
+cp "$(dirname "$0")/Info-tis-input.plist" "$IM_DIR/$INPUT_APP/Contents/Info.plist"
+codesign --force --deep --sign - "$IM_DIR/$INPUT_APP" 2>/dev/null
 xattr -dr com.apple.quarantine "$IM_DIR/$INPUT_APP" "$APPS_DIR/$SETTINGS_APP" 2>/dev/null || true
 
 # 重新注册 LaunchServices（移包重装会丢登记，否则系统不拉起输入法进程）。
@@ -118,6 +120,15 @@ def main() -> None:
     subprocess.run(['cp', '-R', str(input_app), str(stage / channel['input'])], check=True)
     subprocess.run(['cp', '-R', str(settings_app), str(stage / channel['settings'])], check=True)
 
+    # dist 中立 → 随 DMG 携带身份 plist，安装 command 在目标位注入＋重签。
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _gogaku_dist import apply_tis_identity, deterministic_plist_bytes
+    import plistlib
+    info = plistlib.loads((input_app / 'Contents/Info.plist').read_bytes())
+    (stage / 'Info-tis-input.plist').write_bytes(
+        deterministic_plist_bytes(apply_tis_identity(info, info['CFBundleIdentifier'])))
+
     cmd = stage / ('安装 Gogaku.command' if args.channel == 'stable' else '安装 Gogaku Dev.command')
     cmd.write_text(installer_command(channel))
     cmd.chmod(0o755)
@@ -131,6 +142,12 @@ def main() -> None:
                     '-srcfolder', str(stage), '-format', 'UDZO', '-quiet', str(dmg_path)],
                    check=True)
     subprocess.run(['rm', '-rf', str(stage)], check=True)
+
+    # 卫生：打包阶段的 staging 目录会被 LaunchServices 扫描注册成输入源幽灵；
+    # 已删除 staging，产物路径再注销一次。注意：DMG 挂载卷本身也会被扫描注册，
+    # 输入法分发推荐用 pkg（见 docs/release.md）。
+    for app in (input_app, settings_app):
+        subprocess.run([LSREGISTER, '-u', str(app)], capture_output=True)
 
     digest = sha256(dmg_path)
     (DIST / (dmg_name + '.sha256')).write_text(digest + '  ' + dmg_name + '\n')

@@ -51,6 +51,11 @@ def inspect(app):
 def menu_icon(app):
     contents = app / 'Contents'
     info = plistlib.loads((contents / 'Info.plist').read_bytes())
+    # dist 一律中立（无输入源身份键，见 _gogaku_dist.py）；检查时按 bundle ID 重建身份。
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _gogaku_dist import apply_tis_identity
+    info = apply_tis_identity(info, info['CFBundleIdentifier'])
     assert info.get('TISIconIsTemplate') is True, 'menu icon must be a template (capsule + knockout, mirrors Qingjian)'
     modes = info['ComponentInputModeDict']['tsInputModeListKey'].values()
     names = {info['tsInputMethodIconFileKey']}

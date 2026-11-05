@@ -22,6 +22,8 @@ import re
 import shutil
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _gogaku_dist import strip_tis_identity  # noqa: E402  dist 中立化（见模块 docstring）
 VERSION_FILE = ROOT / 'version.json'
 
 _SEMVER = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
@@ -233,46 +235,20 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
     }
     shutil.copy2(ROOT / 'assets/app-icon/AppIcon.icns', contents / 'Resources/AppIcon.icns')
     if input_method:
+        # dist 一律中立：不携带输入源身份键（TISInputSourceID／
+        # ComponentInputModeDict 等，见 _gogaku_dist.py docstring 的事故记录）。
+        # 身份在安装时注入（manage-install／pkg postinstall／DMG command）。
         info.update({
             'LSBackgroundOnly': True,
             # InputMethodConnectionName 仅对 Apple 白名单输入法生效，三方包写它只会触发
             # imklaunchagent "unrecognized" 噪音；实际连接名由框架派生为 bundleID.Connection。
             'InputMethodServerControllerClass': 'GogakuInputController',
-            'TISInputSourceID': identifier, 'TISIntendedLanguage': 'zh-Hans',
-            'tsInputMethodCharacterRepertoireKey': ['Hans'],
-            'tsInputMethodLanguageKey': 'zh-Hans',
-            'tsInputMethodIconFileKey': 'gogaku-menu.pdf',
-            # TIS 从 ComponentInputModeDict 构建可选输入源；缺失时系统设置找不到该输入法。
-            # 图标键必须带扩展名且与包内文件一致，否则系统设置的添加列表不显示该输入法。
-            # 只声明 Caps Lock 切换能力；系统输入源切换由 macOS 管理。
-            'TICapsLockLanguageSwitchCapable': True,
-            # 模板图标（对齐青简 qingjian-menu 的 TISIconIsTemplate=true）：系统对
-            # 胶囊＋镂空 PDF 做模板渲染——底板取菜单栏前景色、镂空透背景，深浅色
-            # 菜单栏与切换器都正确。早期 false（全彩）实测被系统按缓存着色成
-            # 蓝色裸笔画（2026-11-03 用户截图），撤销该裁决。
-            'TISIconIsTemplate': True,
             'InputMethodType': 'Keyboard', 'NSPrincipalClass': 'NSApplication',
-            'ComponentInputModeDict': {
-                'tsInputModeListKey': {
-                    f'{identifier}.Hans': {
-                        'TISInputSourceID': f'{identifier}.Hans',
-                        'TISIntendedLanguage': 'zh-Hans',
-                        'tsInputModeCharacterRepertoireKey': ['Hans'],
-                        'tsInputModeDefaultStateKey': True,
-                        'tsInputModeIsVisibleKey': True,
-                        'tsInputModeMenuIconFileKey': 'gogaku-menu.pdf',
-                        'tsInputModeAlternateMenuIconFileKey': 'gogaku-menu.pdf',
-                        'tsInputModePaletteIconFileKey': 'gogaku-menu.pdf',
-                        'tsInputModePrimaryInScriptKey': True,
-                        'tsInputModeScriptKey': 'smUnicodeScript',
-                    },
-                },
-                'tsVisibleInputModeOrderedArrayKey': [f'{identifier}.Hans'],
-            },
         })
+        info = strip_tis_identity(info)
         shutil.copy2(ROOT / 'assets/app-icon/gogaku-menu.pdf', contents / 'Resources/gogaku-menu.pdf')
         # 输入模式的显示名按模式 ID 从 InfoPlist.strings 查找；缺失时菜单里显示原始 ID。
-        for folder, name in [('en.lproj', 'Gogaku'), ('zh-Hans.lproj', 'Gogaku')]:
+        for folder in ('en.lproj', 'zh-Hans.lproj'):
             strings = contents / 'Resources' / folder
             strings.mkdir(parents=True)
             (strings / 'InfoPlist.strings').write_bytes(plistlib.dumps(

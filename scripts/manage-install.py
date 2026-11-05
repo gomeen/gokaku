@@ -11,10 +11,13 @@ from pathlib import Path
 import plistlib
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _gogaku_dist import apply_tis_identity, deterministic_plist_bytes  # noqa: E402
 # 双通道（2026-11-06 裁决）：stable=Gogaku（日常），dev=Gogaku Dev（测试）。
 # bundle ID 带 .dev 后缀 → 独立输入源与安装路径，可与 stable 并存；
 # 用户数据与 Darwin 通知共用同一份（SUPPORT 不分通道）。
@@ -83,9 +86,11 @@ def prune_backups():
     for stale in entries[:-KEEP_BACKUPS] if len(entries) > KEEP_BACKUPS else []:
         shutil.rmtree(stale, ignore_errors=True)
 
-def verify_install(source: Path, target: Path):
+def verify_install(source: Path, target: Path, plist_overrides=None):
     """安装后核对：实际安装路径的每个文件与 dist 清单哈希一致。
-    防止旧包残留、拷贝损坏或旧备份包冒充新版本。"""
+    防止旧包残留、拷贝损坏或旧备份包冒充新版本。
+    plist_overrides: {相对路径 -> 期望字节}。输入法 Info.plist 在安装侧注入
+    输入源身份（_gogaku_dist 约定），期望值按同一逻辑重算后比对。"""
     manifest_path = ROOT / 'dist' / ('bundle-manifest.json' if CHANNEL == 'stable'
                                      else 'bundle-manifest-dev.json')
     if not manifest_path.exists():
@@ -94,6 +99,7 @@ def verify_install(source: Path, target: Path):
     # build.py 写入的 manifest 路径相对于 dist（如 'Gogaku.app/Contents/...'），
     # 不是绝对路径；前缀必须按同一基准算，否则一个条目都匹配不上。
     prefix = str(source.relative_to(manifest_path.parent)) + '/'
+    overrides = plist_overrides or {}
     installed = {str(p): p for p in target.rglob('*') if p.is_file()}
     for rel, entry in manifest.items():
         if not rel.startswith(prefix):
@@ -101,8 +107,12 @@ def verify_install(source: Path, target: Path):
         installed_path = target / rel.removeprefix(prefix)
         if not installed_path.is_file():
             raise SystemExit(f'安装不完整：缺少 {rel}')
-        if file_digest(installed_path) != entry['sha256']:
-            raise SystemExit(f'哈希不一致：{installed_path}（期望 {entry["sha256"][:12]}…）')
+        if rel.removeprefix(prefix) in overrides:
+            expected = hashlib.sha256(overrides[rel.removeprefix(prefix)]).hexdigest()
+        else:
+            expected = entry['sha256']
+        if file_digest(installed_path) != expected:
+            raise SystemExit(f'哈希不一致：{installed_path}（期望 {expected[:12]}…）')
         installed.pop(str(installed_path), None)
     extra = [p for p in installed if '__pycache__' not in p]
     if extra:
@@ -119,15 +129,26 @@ def install():
     other = 'dev' if CHANNEL == 'stable' else 'stable'
     print(f'安装通道：{CHANNEL}（输入法 {INPUT.name}，bundle ID {INPUT_ID}）')
     print(f'与 {other} 通道并存：用户数据共用 {SUPPORT}，互不覆盖。')
-    for source, target, identifier in [
-            (ROOT / 'dist' / CHANNELS[CHANNEL]['input_name'], INPUT, INPUT_ID),
-            (ROOT / 'dist' / CHANNELS[CHANNEL]['settings_name'], SETTINGS, CHANNELS[CHANNEL]['settings_id'])]:
+    import plistlib
+    for source, target, identifier, needs_identity in [
+            (ROOT / 'dist' / CHANNELS[CHANNEL]['input_name'], INPUT, INPUT_ID, True),
+            (ROOT / 'dist' / CHANNELS[CHANNEL]['settings_name'], SETTINGS,
+             CHANNELS[CHANNEL]['settings_id'], False)]:
         subprocess.run(['codesign', '--verify', '--deep', '--strict', source], check=True)
         own(target, identifier)
         target.parent.mkdir(parents=True, exist_ok=True)
         backup(target)
         shutil.copytree(source, target, symlinks=True)
-        verify_install(source, target)
+        overrides = None
+        if needs_identity:
+            # 中立 dist → 安装位注入输入源身份（_gogaku_dist 约定）＋ad-hoc 重签。
+            info_path = target / 'Contents/Info.plist'
+            info = plistlib.loads(info_path.read_bytes())
+            patched = deterministic_plist_bytes(apply_tis_identity(info, identifier))
+            info_path.write_bytes(patched)
+            subprocess.run(['codesign', '--force', '--deep', '--sign', '-', target], check=True)
+            overrides = {'Contents/Info.plist': patched}
+        verify_install(source, target, plist_overrides=overrides)
     # imklaunchagent 的输入法启动路径依赖 LaunchServices 数据库；
     # 移包重装会丢失登记，必须重新注册，否则系统不拉起输入法进程。
     subprocess.run([LSREGISTER, '-f', str(INPUT)], check=False)

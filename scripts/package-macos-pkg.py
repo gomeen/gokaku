@@ -47,8 +47,14 @@ def sha256(path: Path) -> str:
 
 def postinstall_script(channel: dict) -> str:
     return f'''#!/bin/bash
-# Gogaku pkg postinstall：把随包携带的双 App 放到当前用户目录并重新注册。
+# Gogaku pkg postinstall：从随包 zip 解包双 App 放到当前用户目录并重新注册。
 # 以安装进程身份运行（本 pkg 为用户级，不提权）；用户数据不受影响。
+#
+# 为什么 App 以 zip 随包而非直接放 Scripts 目录：安装器会把 Scripts 展开
+# 到 PKInstallSandboxManager 沙箱，LaunchServices 会扫描其中的 .app 并注册
+# ——安装结束后沙箱路径失效，输入法列表里就留下指向死路径的幽灵条目
+# （2026-11-06 实测：列表出现两个「Gogaku」且「键盘布局不可用」）。
+# zip 里的 .app 不会被扫描；解包后立刻 mv 到最终位置，窗口极小。
 set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 IM_DIR="$HOME/Library/Input Methods"
@@ -56,16 +62,23 @@ APPS_DIR="$HOME/Applications"
 INPUT_APP="{channel['input']}"
 SETTINGS_APP="{channel['settings']}"
 
-# 若当前输入源正选着 Gogaku，提示但不阻断：旧进程继续用内存中的旧映像，
-# 下次切换输入源时自然拉起新包（与 manage-install 的行为差异：pkg 不中断安装）。
+# 若当前输入源正选着 Gogaku：不阻断（旧进程继续用内存映像，下次切换输入源
+# 自然拉起新包），仅提示。
 if defaults read com.apple.HIToolbox AppleSelectedInputSources 2>/dev/null | grep -q org.gogaku.inputmethod; then
     echo "提示：当前输入源是 Gogaku。安装完成后请切换一次输入源以加载新版本。"
 fi
 
+STAGE="$(mktemp -d)"
+trap 'rm -rf "$STAGE"' EXIT
+ditto -x -k "$SCRIPT_DIR/Gogaku-apps.zip" "$STAGE"
 rm -rf "$IM_DIR/$INPUT_APP" "$APPS_DIR/$SETTINGS_APP"
 mkdir -p "$IM_DIR" "$APPS_DIR"
-cp -R "$SCRIPT_DIR/$INPUT_APP" "$IM_DIR/$INPUT_APP"
-cp -R "$SCRIPT_DIR/$SETTINGS_APP" "$APPS_DIR/$SETTINGS_APP"
+mv "$STAGE/$INPUT_APP" "$IM_DIR/$INPUT_APP"
+mv "$STAGE/$SETTINGS_APP" "$APPS_DIR/$SETTINGS_APP"
+
+# dist 中立 → 在目标位注入输入源身份（随包 Info-tis-input.plist）＋ad-hoc 重签。
+cp "$SCRIPT_DIR/Info-tis-input.plist" "$IM_DIR/$INPUT_APP/Contents/Info.plist"
+codesign --force --deep --sign - "$IM_DIR/$INPUT_APP"
 
 # 重新注册 LaunchServices（移包重装会丢登记，否则系统不拉起输入法进程）。
 {LSREGISTER} -f "$IM_DIR/$INPUT_APP" >/dev/null 2>&1 || true
@@ -121,8 +134,20 @@ def main() -> None:
     (work / 'empty-payload').mkdir(parents=True)
     scripts = work / 'scripts'
     scripts.mkdir()
-    subprocess.run(['cp', '-R', str(input_app), str(scripts / channel['input'])], check=True)
-    subprocess.run(['cp', '-R', str(settings_app), str(scripts / channel['settings'])], check=True)
+    # 双 App 打成单个 zip 放进 scripts（沙箱内无可扫描的 .app，杜绝幽灵注册）。
+    # 注意 ditto -c -k 不接受多源，这里用 zip 并以 dist 为 cwd 保持顶层路径。
+    run(['zip', '-q', '-r', scripts / 'Gogaku-apps.zip',
+         channel['input'], channel['settings']], cwd=DIST)
+    # dist 中立 → 随包携带身份 plist，postinstall 在目标位置注入＋重签
+    # （身份键集合与重建逻辑见 scripts/_gogaku_dist.py）。
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from _gogaku_dist import apply_tis_identity, deterministic_plist_bytes
+    import plistlib
+    info = plistlib.loads((input_app / 'Contents/Info.plist').read_bytes())
+    input_id = info['CFBundleIdentifier']
+    (scripts / 'Info-tis-input.plist').write_bytes(
+        deterministic_plist_bytes(apply_tis_identity(info, input_id)))
     post = scripts / 'postinstall'
     post.write_text(postinstall_script(channel))
     post.chmod(0o755)
@@ -177,6 +202,11 @@ def main() -> None:
         # productbuild 曾静默产出无组件的空壳（见上）；不放过带病产物。
         raise SystemExit(f'pkg 异常：仅 {size_mb:.1f} MB（应为约 45+ MB），组件包未嵌入')
     shutil.rmtree(work)
+
+    # 卫生：dist 内的 .app 会被 LaunchServices 周期扫描重新注册成输入源幽灵
+    # （同 ID 遮蔽真身）。产物打包完即注销；build.py 构建尾同理。
+    for app in (input_app, settings_app):
+        subprocess.run([LSREGISTER, '-u', str(app)], capture_output=True)
 
     digest = sha256(pkg_path)
     (DIST / (pkg_name + '.sha256')).write_text(digest + '  ' + pkg_name + '\n')
