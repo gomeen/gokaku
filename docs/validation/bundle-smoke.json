@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-05T09:46:35.170603+00:00",
+  "checkedAt": "2026-11-05T09:50:39.570776+00:00",
   "apps": [
     {
       "app": "/Users/gomeen/code/gomeen/gogaku/dist/Gogaku.app",
@@ -31,7 +31,7 @@
         "Frameworks/libIMEPinyin.0.dylib": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35",
         "Frameworks/libFcitx5Utils.2.dylib": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62",
         "Frameworks/libGogakuEngine.dylib": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1",
-        "MacOS/GogakuInput": "752164fce7c24313f72cb0844561e1510cf0cf7aaff7acf125d152212ccf60d3",
+        "MacOS/GogakuInput": "50d53bd883729ef562df757a08ded8ec60946b87235d3a5bf051ba4a0eba7840",
         "Helpers/GogakuTranslator": "25842fed6f459d3db10eb59581a00ae390e144eeb62594d0724651d7fedfd0c7"
       }
     },
@@ -64,7 +64,7 @@
         "Frameworks/libIMEPinyin.0.dylib": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35",
         "Frameworks/libFcitx5Utils.2.dylib": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62",
         "Frameworks/libGogakuEngine.dylib": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1",
-        "MacOS/GogakuSettings": "988d96a0ce41d106c954507dce60f490068862746740d011621c5c040b26a21c"
+        "MacOS/GogakuSettings": "ee0591445ac271f1dcec7d057b251b0273203bb9276e53754c87037cbf173f1e"
       }
     }
   ],
