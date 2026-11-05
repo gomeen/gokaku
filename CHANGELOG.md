@@ -2,6 +2,10 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：发布与更新流程总览）
+
+- **新增 [docs/release.md](docs/release.md)**：把版本规则、Mac 构建（build.py＋manage-install.py）、Windows 构建（核心 DLL 交叉构建 ✅／TSF MSVC 🚧／设置与安装器 ⬜）、四个交付等级的门槛、发布 checklist、应用更新流程（现状无自动更新；远端仓库＋GitHub Releases＋Ed25519 签名为待裁决决策点）串成一条流水线总览。当前缺口：远端仓库未建（阻塞 CI 与更新分发）。
+
 ### 变更（2026-11-06 追加：单文件自检 exe，发现两个 Windows 移植 bug）
 
 - **单文件自检 exe**：`scripts/build-win-selfcheck-exe.sh` 产出全静态单文件 `gogaku-selfcheck.exe`（62MB，零外部依赖），数据目标文件嵌入、运行时解包到 %TEMP%；核心从 git HEAD 隔离副本构建（排除并行会话未提交 WIP）。Windows 11 VM 内**六项全绿**（ABI／翻译加固／普通轨迹／学习轨迹 144 项／质量回归 120 条／随机冒烟）。
