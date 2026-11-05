@@ -641,6 +641,9 @@ class Ctx:
     def __getitem__(self, k):
         return getattr(self, k)
 
+    def get(self, k, default=None):
+        return getattr(self, k, default)
+
     def evidence_path(self, name):
         return self._dir / name
 
