@@ -6,7 +6,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(NOT DEFINED GOGAKU_DEPS)
   message(FATAL_ERROR "Pass -DGOGAKU_DEPS with pinned dependency cache (libime 1.1.17)")
 endif()
-find_path(BOOST_INCLUDE boost/version.hpp PATHS /usr/local/opt/boost/include /opt/homebrew/opt/boost/include REQUIRED)
+# Boost 头文件：Mac 用 brew 路径；Windows（MSYS2 Clang64）由环境变量
+# BOOST_INCLUDE 指示（scripts/prepare-libime-windows.py 与 CI 设置），
+# HINTS 优先后仍回退常规查找（Clang64 下 CMAKE_SYSTEM_PREFIX_PATH 含
+# /clang64，通常能自动找到）。
+find_path(BOOST_INCLUDE boost/version.hpp
+    HINTS "$ENV{BOOST_INCLUDE}"
+    PATHS /usr/local/opt/boost/include /opt/homebrew/opt/boost/include
+    REQUIRED)
 
 # 可选 ASan＋UBSan 构建（随机按键模糊测试用；常规构建不受影响）。
 # 插桩必须同时作用于共享核心库与测试可执行：add_compile_options 只对其后

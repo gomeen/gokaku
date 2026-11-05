@@ -1,0 +1,92 @@
+# Windows 共享核心流水线（计划 T2.1 脚手架）
+#
+# 状态：脚手架——尚未在真实 CI 上运行过（仓库当前没有远端）。首跑可能暴露
+# MSYS2 工具链差异（libc++ osyncstream／binary_function 兼容开关／路径形态／
+# tar zstd），按失败逐项修并回写本文件与 docs/validation/native-development.md；
+# 在 CI 全绿之前不得把「核心测试 Windows 全绿」标为已实现。
+#
+# 验收口径（docs 计划 T2.1）：CI 绿；核心测试向量（ABI＋普通＋学习＋加固层
+# ＋质量＋fuzz 冒烟）在 Windows 全部通过；DLL 导出清单与 ABI 版本检查记录在案；
+# KenLM／词库格式兼容验证记录（同源数据在 Windows 侧重新生成产物并记哈希）。
+#
+# 不在本流水线范围：MSVC／TSF／设置程序／翻译代理（T2.2–T2.5 另立工作流）。
+name: windows-core
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'native/GogakuCore/**'
+      - 'scripts/prepare-libime-windows.py'
+      - '.github/workflows/windows-core.yml'
+
+jobs:
+  clang64-core:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    env:
+      GOGAKU_DEPS: ${{ github.workspace }}\deps-libime
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装 MSYS2 Clang64 工具链
+        uses: msys2/setup-action@v2
+        with:
+          msystem: CLANG64
+          update: true
+          install: >-
+            git
+            mingw-w64-clang-x86_64-clang
+            mingw-w64-clang-x86_64-cmake
+            mingw-w64-clang-x86_64-ninja
+            mingw-w64-clang-x86_64-boost
+            mingw-w64-clang-x86_64-python
+            mingw-w64-clang-x86_64-zstd
+            make
+
+      - name: 准备 libime 依赖（同 pin 同源数据；产物哈希记录在案）
+        run: python scripts/prepare-libime-windows.py --jobs 4 --root "$GOGAKU_DEPS"
+
+      - name: 配置与构建共享核心
+        run: |
+          cmake --preset clang64 -S native/GogakuCore
+          cmake --build --preset clang64 -j 4
+
+      - name: 核心测试向量（Windows 全量 ctest）
+        run: |
+          export GOGAKU_CORE_TEST_DATA="$GOGAKU_DEPS/data"
+          ctest --preset clang64
+
+      - name: ABI 版本与 DLL 导出清单
+        run: |
+          DLL=$(ls .build/core-windows/*.dll | head -1)
+          echo "== $DLL =="
+          objdump -p "$DLL" | grep "DLL Name"
+          echo "== 导出符号（gc_*）=="
+          objdump -p "$DLL" | awk '/Export Address Table/,/Ordinal.*Name Table/' | grep -oE '\bgc_[a-z_0-9]+' | sort -u | tee dll-exports.txt
+          echo "== ABI 版本实跑 =="
+          ./.build/core-windows/gogaku_core_abi_test.exe
+
+      - name: 产物哈希清单
+        run: |
+          {
+            echo "== Windows 侧工厂数据（同源数据生成）=="
+            sha256sum "$GOGAKU_DEPS/data/sc.dict" "$GOGAKU_DEPS/data/zh_CN.lm"
+            echo "== 核心 DLL =="
+            sha256sum .build/core-windows/*.dll
+          } | tee artifacts-hash.txt
+          cp "$GOGAKU_DEPS/manifest.json" libime-manifest.json
+
+      - name: 上传证据
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-core-evidence
+          path: |
+            dll-exports.txt
+            artifacts-hash.txt
+            libime-manifest.json
+            deps-libime/manifest.json
+          if-no-files-found: error

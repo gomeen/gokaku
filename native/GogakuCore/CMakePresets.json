@@ -1,0 +1,35 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "clang64",
+      "displayName": "MSYS2 Clang64（Windows 共享核心 DLL＋核心测试）",
+      "description": "依赖由 scripts/prepare-libime-windows.py 准备；GOGAKU_DEPS 指向依赖目录（环境变量）。",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/../../.build/core-windows",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "GOGAKU_DEPS": "$env{GOGAKU_DEPS}"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "clang64", "configurePreset": "clang64" }
+  ],
+  "testPresets": [
+    {
+      "name": "clang64",
+      "configurePreset": "clang64",
+      "output": { "outputOnFailure": true },
+      "environment": {
+        "GOGAKU_CORE_TEST_DATA": "$env{GOGAKU_CORE_TEST_DATA}"
+      }
+    }
+  ]
+}

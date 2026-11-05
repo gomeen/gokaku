@@ -11,6 +11,7 @@
 - **行为对齐细节**：内核拒绝（撇号开头片段）与历史 decode 抛异常同源，走引擎错误路径（状态行「引擎操作失败」）；回格按字素簇删除，与 Swift `String.removeLast` 同语义（组合标记／VS／键帽 20E3／肤色修饰／ZWJ 粘接／区域指示符对整簇回退；v1 局限：Tag 旗标不延伸，注释在实现内）；学习翻页/导航不推进 revision、冻结迟到结果；全部消费不开启新组合身份。
 - **验证**：核心事件轨迹向量新增学习用例（`tests/learning_session_test.cpp`，144 项检查：缓冲/调度/接收语义/失败路径/选择提交/原文上屏/512 标量上限/Unicode 字素/中→英推导/冻结分页/身份失效/拼写守卫/普通态引擎语义/非法请求），与 Swift 行为合同同源出厂数据逐字对齐；ctest 6/6 全过；同一测试在 ASan＋UBSan 插桩构建下通过。fast 档全过（core ctest 100%、Swift Release 117 项含既有 CompositionSession 行为合同与 worker 协议回归），报告 `docs/validation/verify/report-fast-20261105-092040.json`；ASan/UBSan quick 冒烟 2000 序列无错误（`report-release-20261105-092131.json`）。
 - **未完成／待验证**：Windows 侧验证（同一测试集在 Clang64 构建）待 T2.1；学习记录（LearningStore）仍在 Swift，随双端正式方案再定；真实宿主手动清单未重跑（行为合同由 Swift 117 项回归覆盖，但体验级回归待下轮装机自测）；安装包重新打包前按版本规则递增构建号。
+- **T2.1 脚手架（接口冻结后并行启动；未验证）**：共享核心接口随本轮冻结（ABI v3，两套轨迹测试向量就位），按计划并行启动 Windows 构建流水线脚手架——`scripts/prepare-libime-windows.py`（MSYS2 Clang64 依赖准备：与 Mac 同 pin、同源数据、同上游转换命令，产物哈希单独记录，KenLM/词库兼容性以 CI 核心向量全绿为验证口径）、`native/GogakuCore/CMakePresets.json`（clang64 配置/构建/测试 preset）、`.github/workflows/windows-core.yml`（依赖→构建→全量 ctest→DLL 导出清单与 ABI 实跑→哈希证据）。CMakeLists 的 boost 查找增加 BOOST_INCLUDE 环境变量 HINTS（Mac 流程实测不受影响，ctest 6/6 全过）。**仓库当前没有远端，流水线未经真实 CI 运行**；首跑可能暴露工具链差异，按失败逐项修；全绿前不标「Windows 核心测试通过」。推送仓库／CI 归宿属用户决定（远端缺失）。
 
 ## 移除快速添加功能（2026-11-04，工作区，未定版）
 
