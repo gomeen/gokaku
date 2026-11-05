@@ -138,7 +138,12 @@ public final class DraftStore {
     public func clear() { drafts.removeAll() }
 }
 public enum Paths {
-    public static var support: URL { FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Gogaku", isDirectory: true) }
+    public static var support: URL {
+        if let path = ProcessInfo.processInfo.environment["GOGAKU_SUPPORT_DIRECTORY"], !path.isEmpty {
+            return URL(fileURLWithPath: path, isDirectory: true)
+        }
+        return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Gogaku", isDirectory: true)
+    }
     public static var engineData: URL {
         if let path = ProcessInfo.processInfo.environment["GOGAKU_ENGINE_DATA"] { return URL(fileURLWithPath: path) }
         return Bundle.main.resourceURL!.appendingPathComponent("EngineData")

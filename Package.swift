@@ -15,5 +15,5 @@ let package = Package(
         .executableTarget(name: "GogakuInput", dependencies: ["GogakuCore", "GogakuHost"], linkerSettings: nativeFlags + [.linkedFramework("InputMethodKit"), .linkedFramework("Carbon")]),
         .executableTarget(name: "GogakuSettings", dependencies: ["GogakuCore"], linkerSettings: nativeFlags),
         .executableTarget(name: "GogakuTranslator", dependencies: ["GogakuCore"], linkerSettings: nativeFlags),
-        .testTarget(name: "GogakuCoreTests", dependencies: ["GogakuCore", "GogakuHost"], linkerSettings: nativeFlags)
+        .testTarget(name: "GogakuCoreTests", dependencies: ["GogakuCore", "GogakuHost", "GogakuInput", "GogakuSettings"], linkerSettings: nativeFlags)
     ], swiftLanguageModes: [.v5])

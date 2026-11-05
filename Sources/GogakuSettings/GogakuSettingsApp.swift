@@ -21,23 +21,25 @@ enum BuildIdentity {
 }
 
 @main struct GogakuSettingsApp: App {
+    @NSApplicationDelegateAdaptor(SettingsAppDelegate.self) private var appDelegate
     var body: some Scene {
         Window("Gogaku 设置", id: "settings") {
-            SettingsView().frame(minWidth: 760, minHeight: 520)
+            SettingsView().frame(minWidth: 1000, minHeight: 520, maxHeight: 800)
         }
-        .defaultSize(width: 900, height: 620)
+        .defaultSize(width: 1100, height: 800)
     }
 }
 
 private enum SettingsPage: String, CaseIterable, Identifiable {
     // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页。
-    case normalInput, resources, customWords, shortcuts, privacy, records
+    case normalInput, resources, customWords, skin, shortcuts, privacy, records
     var id: Self { self }
     var title: String {
         switch self {
         case .resources: return "学习翻译"
         case .normalInput: return "普通输入"
         case .customWords: return "自定义词语"
+        case .skin: return "皮肤"
         case .shortcuts: return "快捷键"
         case .privacy: return "学习与隐私"
         case .records: return "学习片段"
@@ -55,6 +57,7 @@ private struct SettingsView: View {
     @State private var settings = Settings.load()
     @State private var status: SaveStatus = .idle
     @State private var records: [LearningEvent] = []
+    @StateObject private var skinEditor = SkinEditorSession()
     private let store = LearningStore()
 
     var body: some View {
@@ -64,18 +67,26 @@ private struct SettingsView: View {
             Rectangle().fill(SettingsPalette.border).frame(width: 1)
             VStack(alignment: .leading, spacing: 0) {
                 // 页面只保留标题（原型 .pagehead：22/600，padding 22 26 14）。
-                Text(page.title).font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(SettingsPalette.primaryText)
-                    .accessibilityAddTraits(.isHeader)
-                    .padding(.horizontal, 26)
-                    .padding(.top, 22)
-                    .padding(.bottom, 14)
+                if page != .skin {
+                    Text(page.title).font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(SettingsPalette.primaryText)
+                        .accessibilityAddTraits(.isHeader)
+                        .padding(.horizontal, 26)
+                        .padding(.top, 22)
+                        .padding(.bottom, 14)
+                }
+                if page == .skin {
+                    SkinPage(settings: $settings, editor: skinEditor)
+                        .padding(.horizontal, 36).padding(.top, 30).padding(.bottom, 18)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         switch page {
                         case .resources: ResourcesPage(settings: $settings)
                         case .normalInput: NormalInputPage(settings: $settings)
                         case .customWords: CustomWordsPage(status: $status)
+                        case .skin: EmptyView()
                         case .shortcuts: ShortcutsPage(settings: $settings)
                         case .privacy: PrivacyPage(settings: $settings)
                         case .records: RecordsPage(records: $records) { refreshRecords() }
@@ -87,14 +98,17 @@ private struct SettingsView: View {
                     .padding(.bottom, 18)
                 }
                 .id(page)
+                }
                 statusBar
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .background(SettingsPalette.windowBackground)
+        .background(SkinWindowGuard(editor: skinEditor).frame(width: 0, height: 0))
         .font(.system(size: 13))
         .tint(SettingsPalette.accent)
         .onAppear {
+            SettingsAppDelegate.editor = skinEditor
             SettingsStore.shared.onStatus = { newStatus in
                 status = SaveStatus(storeStatus: newStatus)
                 if case .saved = newStatus {
@@ -128,6 +142,10 @@ private struct SettingsView: View {
             VStack(alignment: .leading, spacing: 1) {
                 ForEach(SettingsPage.allCases) { item in
                     SidebarItem(title: item.title, isSelected: page == item) {
+                        if page == .skin, item != .skin {
+                            guard skinEditor.mayLeave() else { return }
+                            skinEditor.discard()
+                        }
                         page = item
                     }
                 }

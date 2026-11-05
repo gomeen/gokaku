@@ -14,6 +14,7 @@ Gogaku 项目许可尚未决定；当前包仅用于本机开发，不代表可�
 | GNU gettext libintl | 本机 gettext 1.0 的 `libintl.8.dylib` | 安装头文件明确LGPL-2.1-or-later；保留作者声明与LGPL全文，未打包GPL命令行程序 |
 | XZ liblzma | 本机 5.8.4 的 `liblzma.5.dylib`，由Boost间接链接 | 该版本COPYING明确liblzma为0BSD，保留COPYING与COPYING.0BSD |
 | SQLite、Apple 框架 | 操作系统提供 | 不打包系统实现、翻译权重或伪造其哈希 |
+| Mayoi 配色参考 | `sorrycc/Mayoi`，`bddd97f0788237d10a2e3ad06c211d5a1dbf4897`，`cmd/mayoi/theme.go` 的 Claude／Grok Bot／女巫主题 | MIT，Copyright (c) 2026 chencheng；按候选窗语义重映射颜色，未复制其界面、图片或字体。许可全文存于 `resources/licenses/MIT-Mayoi.txt`，由现有构建流程随包附 `Contents/Licenses/` |
 | Fira Code WenKai（候选窗字体） | 用户已安装（`~/Library/Fonts`，OFL） | 仅按字体名引用，不随包分发；缺失时回退系统字体，不产生分发义务 |
 | SCOWL／ESDB en_US 词表 | scowl-2020.12.07 官方发布包（SourceForge wordlist 项目；tarball sha256 `5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc`），经官方 `mk-list -d final en_US 60` 生成 | 集体作品 MIT-like（保留版权与许可声明）；逐来源含公有领域与 Princeton WordNet／Ispell affix 等有条款来源，声明全文随包附 `Licenses/SCOWL-Copyright.txt` |
 | wordfreq 英文词频 | rspeer/wordfreq 3.1.1，`top_n_list('en', 200000)` | 代码 Apache-2.0；内置数据 CC BY-SA 4.0；衍生词表同许可分发，署名 Robyn Speer 及 SUBTLEX 作者（van Heuven et al. 2014），见随包 `Licenses/DATA-ATTRIBUTION.txt` 与 `Licenses/CC-BY-SA-4.0.txt` |

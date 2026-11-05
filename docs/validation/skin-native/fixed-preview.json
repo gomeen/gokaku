@@ -1,0 +1,36 @@
+{
+  "windowSizePoints": [
+    1100,
+    800
+  ],
+  "screenshotSizePixels": [
+    2200,
+    1600
+  ],
+  "scale": 2,
+  "regions": {
+    "preview": {
+      "crop": [
+        1550,
+        320,
+        2190,
+        1250
+      ],
+      "differenceBounds": null
+    },
+    "configuration": {
+      "crop": [
+        470,
+        340,
+        1400,
+        1490
+      ],
+      "differenceBounds": [
+        4,
+        0,
+        930,
+        1150
+      ]
+    }
+  }
+}

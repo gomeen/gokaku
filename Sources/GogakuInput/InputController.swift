@@ -493,7 +493,7 @@ final class GogakuInputController: IMKInputController {
         shiftPoller.start()
         panel.choose = { [weak self] row in self?.panelChoose(row: row) }
         settings = Settings.load()
-        panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
+        panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         application = gg_read_host(client())?.application ?? ""
         // 全局模式状态（2026-11-04 用户裁决）：切换应用保持一个普通／学习状态，
         // 不按应用记忆；开发版开关关闭时学习状态不可用，普通模式始终可用。
@@ -575,7 +575,7 @@ final class GogakuInputController: IMKInputController {
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
         displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
         markedShown = ""; markedCaret = -1
-        panel.updateTheme(settings.candidateTheme, fontSize: CGFloat(settings.candidateFontSize))
+        panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
         records.policy(recording: settings.recording, excludedApplications: settings.excludedApplications)
         let generation = focus, selectedMode = mode, selectedDirection = direction
@@ -652,6 +652,7 @@ final class GogakuInputController: IMKInputController {
         if !settings.learningTranslationEnabled, mode == .learning { mode = .normal }
         rebuildLearningTranslatorIfNeeded(from: previous)
         applyEngineSettings()
+        // configure 更新候选窗主题并沿用既有焦点／组合失效流程。
         configure()
         if !settings.learningTranslationEnabled {
             hub.async { [weak self] in self?.hub.closeLearningSession() }

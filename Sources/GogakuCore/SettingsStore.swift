@@ -48,7 +48,10 @@ public final class SettingsStore {
         // 初始化基线，避免首次提交把磁盘上未被 UI 加载的改动回滚。
         if let data = try? Data(contentsOf: fileURL),
            let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-            baseline = object
+            baseline = Self.normalizedBaseline(object)
+        } else if !FileManager.default.fileExists(atPath: fileURL.path) {
+            // 新建配置时也有默认基线，避免另一进程先创建配置后被旧快照覆盖。
+            baseline = try? Self.dictionary(of: Settings())
         }
     }
 
@@ -65,7 +68,7 @@ public final class SettingsStore {
                           "volcengineUsageMonth": month]
             let url = self.fileURL
             if let written = Self.writeMerged(pending: fields, baseline: self.baseline, to: url) {
-                self.baseline = written
+                self.baseline = Self.normalizedBaseline(written)
             }
         }
     }
@@ -94,6 +97,18 @@ public final class SettingsStore {
         }
     }
 
+    /// 草稿保存失败时撤销对应的待重试快照，避免放弃草稿后被其他操作复活。
+    public func discardPending(_ value: Settings) {
+        queue.async { [weak self] in
+            guard let self, let pending = self.pendingValue,
+                  let a = try? Self.dictionary(of: pending), let b = try? Self.dictionary(of: value),
+                  Self.jsonEqual(a, b) else { return }
+            self.pendingWork?.cancel()
+            self.pendingValue = nil
+            self.reportStatus(.idle)
+        }
+    }
+
     /// 用户触发的重试；无失败待保存改动时为空操作。
     public func retry(completion: (@MainActor (Outcome) -> Void)? = nil) {
         queue.async { [weak self] in
@@ -111,24 +126,22 @@ public final class SettingsStore {
         let url = fileURL
         let previousBaseline = baseline
         if let written = Self.writeMerged(value: value, baseline: previousBaseline, to: url) {
-            baseline = written
+            baseline = Self.normalizedBaseline(written)
             pendingValue = nil
             writing = false
             // 仅成功落盘后通知输入法重载。
-            DistributedNotificationCenter.default().postNotificationName(Self.changedNotification, object: nil, userInfo: nil, deliverImmediately: true)
+            if ProcessInfo.processInfo.environment["GOGAKU_DISABLE_SETTINGS_NOTIFICATIONS"] != "1" {
+                DistributedNotificationCenter.default().postNotificationName(Self.changedNotification, object: nil, userInfo: nil, deliverImmediately: true)
+            }
             reportStatus(.saved)
             reportCompletion(completion, .success)
         } else {
             writing = false   // pendingValue 保留，等待重试或下一次提交
-            reportStatus(.failed("设置写入失败：目录不可写或权限不足"))
-            reportCompletion(completion, .failure("设置写入失败：目录不可写或权限不足"))
+            reportStatus(.failed("设置保存失败：数据无效或无法写入"))
+            reportCompletion(completion, .failure("设置保存失败：数据无效或无法写入"))
         }
-        // 写入期间到达的新改动：排下一次 flush，保证最新改动胜出。
-        if pendingValue != nil {
-            let work = DispatchWorkItem { [weak self] in self?.flush(completion: nil) }
-            pendingWork = work
-            queue.asyncAfter(deadline: .now() + 0.05, execute: work)
-        }
+        // queue 串行执行，写入期间的新提交会在本次 flush 返回后单独排队；
+        // 失败时保留 pendingValue，但不能在这里自动无限重试。
     }
 
     private func reportCompletion(_ completion: (@MainActor (Outcome) -> Void)?, _ outcome: Outcome) {
@@ -149,8 +162,8 @@ public final class SettingsStore {
     /// NSFileCoordinator 协调，与输入法进程遵守同一文件协调规则。
     /// 返回写入结果（nil＝合并或写入失败，由调用方保留待保存改动）。
     static func writeMerged(value: Settings, baseline: [String: Any]?, to url: URL) -> [String: Any]? {
-        let pendingDict = try? Self.dictionary(of: value)
-        return writeMerged(pending: pendingDict ?? [:], baseline: baseline, to: url)
+        guard let pendingDict = try? Self.dictionary(of: value) else { return nil }
+        return writeMerged(pending: pendingDict, baseline: baseline, to: url)
     }
 
     /// 任意字段的最小合并落盘（用量计量专用路径使用）。
@@ -178,6 +191,15 @@ public final class SettingsStore {
     static func readDictionary(at url: URL) -> [String: Any]? {
         guard let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+    }
+
+    /// 旧文件没有新增字段时，把其解码默认值也纳入比较基线；否则未修改的
+    /// 空主题列表会被误判成用户修改，覆盖另一个进程刚写入的主题。
+    static func normalizedBaseline(_ object: [String: Any]) -> [String: Any] {
+        guard let data = try? JSONSerialization.data(withJSONObject: object),
+              let settings = try? JSONDecoder().decode(Settings.self, from: data),
+              let normalized = try? dictionary(of: settings) else { return object }
+        return normalized
     }
 
     static func dictionary(of value: Settings) throws -> [String: Any] {

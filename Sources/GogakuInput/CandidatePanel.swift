@@ -47,6 +47,7 @@ private final class PanelLayout {
 
     /// 长文本尾部截断加省略号（预编辑／注释共用规格）。
     static func truncate(_ text: NSAttributedString, maxWidth: CGFloat) -> (NSAttributedString, CGFloat) {
+        if maxWidth <= 0 { return (NSAttributedString(string: ""), 0) }
         if text.widthPt <= maxWidth { return (text, text.widthPt) }
         let attrs = text.attributes(at: 0, effectiveRange: nil)
         let ellipsis = "…"
@@ -54,14 +55,16 @@ private final class PanelLayout {
         let limit = max(maxWidth - ellipsisWidth, 1)
         var count = max(1, Int((limit / max(text.widthPt, 1) * CGFloat(text.string.count)).rounded()))
         while count > 0 {
-            let candidate = String(text.string.prefix(count)) + ellipsis
-            let width = (candidate as NSString).size(withAttributes: attrs).width
-            if width <= maxWidth {
-                return (NSAttributedString(string: candidate, attributes: attrs), ceil(width))
-            }
+            let end = String(text.string.prefix(count)).utf16.count
+            let candidate = NSMutableAttributedString(attributedString: text.attributedSubstring(from: NSRange(location: 0, length: end)))
+            candidate.append(NSAttributedString(string: ellipsis, attributes: text.attributes(at: max(0, end - 1), effectiveRange: nil)))
+            let width = candidate.widthPt
+            if width <= maxWidth { return (candidate, width) }
             count = max(count - 1, 0)
         }
-        return (NSAttributedString(string: ellipsis, attributes: attrs), ceil(ellipsisWidth))
+        return ellipsisWidth <= maxWidth
+            ? (NSAttributedString(string: ellipsis, attributes: attrs), ceil(ellipsisWidth))
+            : (NSAttributedString(string: ""), 0)
     }
 
     let innerWidth: CGFloat
@@ -121,24 +124,32 @@ private final class PanelLayout {
             let selected = (learning ? pageStart + offset : view.page * CandidatePage.size + offset) == view.selected
             // 学习模式数字直接选词（2026-11 裁决：与普通模式同快捷键，不再用 ⌥数字）。
             let prefix = "\(offset + 1)"
-            let index = NSAttributedString(string: prefix, attributes: attributes(theme.indexFont, selected ? theme.selectedText : theme.indexText))
-            let word = NSAttributedString(string: candidate.target, attributes: attributes(theme.candidateFont, selected ? theme.selectedText : theme.candidateText))
+            let index = NSAttributedString(string: prefix, attributes: attributes(theme.indexFont, selected ? (theme.id == .rimeMacOSLike ? theme.selectedText : theme.selectedAnnotation) : theme.indexText))
+            let fullWord = theme.text(candidate.target, font: theme.candidateFont, englishFont: theme.candidateEnglishFont,
+                                      color: selected ? theme.selectedText : theme.candidateText)
+            let wordLimit = maxInner - m.rowLeftPadding - m.indexLeftMargin - index.widthPt - m.wordLeftMargin
+                - (candidate.explanation.isEmpty ? 0 : m.annotationLeftMargin + 24) - (theme.id == .rimeMacOSLike ? 0 : 5)
+            let (word, measuredWordWidth) = Self.truncate(fullWord, maxWidth: max(1, wordLimit))
             let annotation: NSAttributedString? = candidate.explanation.isEmpty ? nil
-                : NSAttributedString(string: candidate.explanation, attributes: attributes(theme.annotationFont, selected ? theme.selectedAnnotation : theme.annotationText))
-            var indexWidth = index.widthPt, wordWidth = word.widthPt, annotationWidth = annotation?.widthPt ?? 0
+                : theme.text(candidate.explanation, font: theme.annotationFont, englishFont: theme.annotationEnglishFont,
+                             color: selected ? theme.selectedAnnotation : theme.annotationText)
+            let indexWidth = index.widthPt, wordWidth = measuredWordWidth
+            var annotationWidth = annotation?.widthPt ?? 0
             let wrapAnnotation = learningZhToEn && selected
             var annotationLines = 1
-            var rowHeight = m.rowHeight
+            var rowHeight = theme.id == .rimeMacOSLike ? m.rowHeight
+                : max(m.rowHeight, m.candidateLineHeight, m.annotationLineHeight, m.indexLineHeight)
             // 长注释截断（省略号）：行内容不得超过最大内宽，只牺牲注释；
             // 学习中→英高亮行例外：注释在行内换行（最多 6 行），不截断。
             if let text = annotation, annotationWidth > 0 {
                 let fixed = m.rowLeftPadding + m.indexLeftMargin + indexWidth + m.wordLeftMargin + wordWidth + m.annotationLeftMargin
+                    + (theme.id == .rimeMacOSLike ? 0 : 5)
                 if wrapAnnotation {
                     let available = max(maxInner - fixed, 24)
                     annotationWidth = available
                     annotationLines = min(6, max(1, Int(ceil(text.widthPt / available))))
                     if annotationLines > 1 {
-                        rowHeight = m.rowHeight + CGFloat(annotationLines - 1) * m.annotationLineHeight
+                        rowHeight += CGFloat(annotationLines - 1) * m.annotationLineHeight
                     }
                     // 内容宽度必须计入注释区（fixed + available），否则窗口保持
                     // 窄宽、换行注释右缘被窗口裁掉（2026-11-03 用户反馈：超出隐藏）。
@@ -150,7 +161,7 @@ private final class PanelLayout {
                 }
                 let available = maxInner - fixed
                 if available < annotationWidth {
-                    let (truncated, width) = Self.truncate(text, maxWidth: max(available, 24))
+                    let (truncated, width) = Self.truncate(text, maxWidth: max(available, 0))
                     annotationWidth = width
                     contents.append(RowContent(indexOfShown: offset, selected: selected, index: index, indexWidth: indexWidth,
                                                word: word, wordWidth: wordWidth, annotation: truncated, annotationWidth: annotationWidth,
@@ -159,7 +170,7 @@ private final class PanelLayout {
                 }
             }
             let contentWidth = m.rowLeftPadding + m.indexLeftMargin + indexWidth + m.wordLeftMargin + wordWidth
-                + (annotation != nil ? m.annotationLeftMargin + annotationWidth : 0)
+                + (annotation != nil ? m.annotationLeftMargin + annotationWidth : 0) + (theme.id == .rimeMacOSLike ? 0 : 5)
             contents.append(RowContent(indexOfShown: offset, selected: selected, index: index, indexWidth: indexWidth,
                                        word: word, wordWidth: wordWidth, annotation: annotation, annotationWidth: annotationWidth,
                                        contentWidth: contentWidth, annotationLines: 1, rowHeight: rowHeight))
@@ -182,8 +193,8 @@ private final class PanelLayout {
             let typed = String(preeditText.prefix(typedCount))
             let rest = String(preeditText.dropFirst(typedCount))
             let mutable = NSMutableAttributedString()
-            mutable.append(NSAttributedString(string: typed, attributes: attributes(theme.annotationFont, theme.typedText)))
-            mutable.append(NSAttributedString(string: rest, attributes: attributes(theme.annotationFont, theme.restText)))
+            mutable.append(theme.text(typed, font: theme.preeditFont, englishFont: theme.preeditEnglishFont, color: theme.typedText))
+            mutable.append(theme.text(rest, font: theme.preeditFont, englishFont: theme.preeditEnglishFont, color: theme.restText))
             for issue in view.issues where issue.location + issue.length <= mutable.length {
                 mutable.addAttributes([
                     .underlineStyle: NSUnderlineStyle.patternDot.rawValue | NSUnderlineStyle.single.rawValue,
@@ -204,7 +215,7 @@ private final class PanelLayout {
             }
             if let caretOffset {
                 mutable.insert(NSAttributedString(string: "|",
-                                                  attributes: attributes(theme.annotationFont, theme.typedText)), at: caretOffset)
+                                                  attributes: attributes(theme.preeditEnglishFont, theme.typedText)), at: caretOffset)
             }
             preeditWidth = mutable.widthPt + 2
             preeditLineCount = max(1, Int(ceil(preeditWidth / max(maxInner, 1))))
@@ -218,7 +229,7 @@ private final class PanelLayout {
                 while mutable.widthPt + 2 > targetWidth, mutable.length > 1 {
                     mutable.deleteCharacters(in: NSRange(location: 0, length: max(1, mutable.length / 20)))
                 }
-                mutable.insert(NSAttributedString(string: "…", attributes: attributes(theme.annotationFont, theme.restText)), at: 0)
+                mutable.insert(NSAttributedString(string: "…", attributes: attributes(theme.preeditFont, theme.restText)), at: 0)
                 preeditWidth = mutable.widthPt + 2
                 preeditLineCount = 4
             }
@@ -227,12 +238,12 @@ private final class PanelLayout {
 
         // 3. 文本附属
         let statusString = view.status.isEmpty ? nil
-            : NSAttributedString(string: view.status, attributes: attributes(theme.annotationFont, theme.statusText))
+            : theme.text(view.status, font: theme.annotationFont, englishFont: theme.annotationEnglishFont, color: theme.statusText)
         // 顶部「学习 · 方向」标题行已移除（2026-11 用户反馈：不显示）。
         let headerString: NSAttributedString? = nil
         issueNotice = view.issues.isEmpty ? nil
-            : NSAttributedString(string: "疑似拼写问题：词典未识别，可能是专名或新词。可继续输入；忽略词可在设置中添加。",
-                                 attributes: attributes(theme.annotationFont, theme.statusText))
+            : theme.text("疑似拼写问题：词典未识别，可能是专名或新词。可继续输入；忽略词可在设置中添加。",
+                         font: theme.annotationFont, englishFont: theme.annotationEnglishFont, color: theme.statusText)
 
         // 4. 宽度：按内容钳制（行内容已在上面按 maxInner 截断长注释）
         let widestRow = contents.map(\.contentWidth).max() ?? 0
@@ -244,7 +255,7 @@ private final class PanelLayout {
         let totalPages = max(1, (max(total, 1) + CandidatePage.size - 1) / CandidatePage.size)
         pageLabel = "第 \(view.page + 1)/\(totalPages) 页"
         let pageString = totalPages > 1
-            ? NSAttributedString(string: "\(view.page + 1)/\(totalPages)", attributes: attributes(theme.indexFont, theme.pageText))
+            ? NSAttributedString(string: "\(view.page + 1)/\(totalPages)", attributes: attributes(theme.pageFont, theme.pageText))
             : nil
 
         // 6. 纵向排布
@@ -258,7 +269,7 @@ private final class PanelLayout {
             headerRect = .zero
         }
         if preeditString != nil {
-            let preeditHeight = CGFloat(preeditLineCount) * m.annotationLineHeight
+            let preeditHeight = CGFloat(preeditLineCount) * m.preeditLineHeight
             preeditTextRect = NSRect(x: m.windowPadding, y: y, width: innerWidth, height: preeditHeight)
             preeditHitRect = NSRect(x: 0, y: y - m.topLineVerticalPadding, width: panelWidth,
                                     height: preeditHeight + m.topLineVerticalPadding * 2)
@@ -276,7 +287,8 @@ private final class PanelLayout {
                               index: content.index, indexWidth: content.indexWidth,
                               wordX: wordX, word: content.word, wordWidth: content.wordWidth,
                               annotation: content.annotation,
-                              annotationX: wordX + content.wordWidth + m.annotationLeftMargin,
+                              annotationX: theme.id == .rimeMacOSLike ? wordX + content.wordWidth + m.annotationLeftMargin
+                                  : max(wordX + content.wordWidth + m.annotationLeftMargin, m.windowPadding + innerWidth - content.annotationWidth - 5),
                               annotationWidth: content.annotationWidth,
                               annotationLines: content.annotationLines))
             y += content.rowHeight
@@ -293,9 +305,9 @@ private final class PanelLayout {
             statusRect = .zero
         }
         if let pageString {
-            pageRect = NSRect(x: m.windowPadding + innerWidth - pageString.widthPt,
-                              y: y + m.pageFooterTopMargin, width: pageString.widthPt, height: m.indexLineHeight)
-            y += m.pageFooterTopMargin + m.indexLineHeight
+            pageRect = NSRect(x: m.windowPadding + innerWidth - pageString.widthPt - (theme.id == .rimeMacOSLike ? 0 : 5),
+                              y: y + m.pageFooterTopMargin, width: pageString.widthPt, height: m.pageLineHeight)
+            y += m.pageFooterTopMargin + m.pageLineHeight + (theme.id == .rimeMacOSLike ? 0 : 3)
         } else {
             pageRect = .zero
         }
@@ -322,6 +334,8 @@ private final class PanelLayout {
 final class PanelContent: NSView {
     private(set) var theme = CandidatePanelThemeCatalog.resolve(.rimeMacOSLike)
     private var layout: PanelLayout?
+    private var composition: CompositionView?
+    var themeDidChange: (() -> Void)?
     private var issueNoticeVisible = false
     var choose: ((Int) -> Void)?
     var commitOriginal: (() -> Void)?
@@ -331,11 +345,19 @@ final class PanelContent: NSView {
     override var acceptsFirstResponder: Bool { false }
 
     func updateTheme(_ value: CandidatePanelTheme) {
-        theme = value
+        theme = value.resolvingAppearance(effectiveAppearance)
+        if let composition { update(composition) }
         needsDisplay = true
+        themeDidChange?()
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        updateTheme(theme)
     }
 
     func update(_ view: CompositionView) {
+        composition = view
         layout = PanelLayout(view: view, theme: theme,
                              commitOriginal: commitOriginal, switchSource: switchSource)
         setAccessibilityLabel("候选列表，\(layout?.rows.count ?? 0) 项，\(layout?.pageLabel ?? "")")
@@ -348,6 +370,7 @@ final class PanelContent: NSView {
     }
 
     // MARK: 离线渲染检查专用（probes/render-candidate-panel.swift）；输入热路径不调用。
+    var debugRowWords: [NSAttributedString] { layout?.rows.map(\.word) ?? [] }
     var debugRowAnnotations: [String] { layout?.rows.map { $0.annotation?.string ?? "" } ?? [] }
     var debugRowFrames: [NSRect] { layout?.rows.map(\.frame) ?? [] }
     var debugSelectedRow: Int { layout?.rows.first(where: \.selected)?.indexOfShown ?? -1 }
@@ -368,12 +391,34 @@ final class PanelContent: NSView {
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
-        guard let layout else { return }
+        guard let layout, let context = NSGraphicsContext.current?.cgContext else { return }
+        context.saveGState()
+        context.setAlpha(theme.opacity)
+        context.beginTransparencyLayer(auxiliaryInfo: nil)
+        defer {
+            context.endTransparencyLayer()
+            context.restoreGState()
+        }
         let m = theme.metrics
         let background = NSBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5),
                                       xRadius: m.cornerRadius, yRadius: m.cornerRadius)
+        if theme.id != .rimeMacOSLike { background.addClip() }
         theme.panelBackground.setFill()
         background.fill()
+        if let image = theme.backgroundImage {
+            NSGraphicsContext.saveGraphicsState()
+            background.addClip()
+            let scale = max(bounds.width / image.size.width, bounds.height / image.size.height)
+            let size = NSSize(width: image.size.width * scale, height: image.size.height * scale)
+            let destination = NSRect(x: bounds.midX - size.width / 2, y: bounds.midY - size.height / 2,
+                                     width: size.width, height: size.height)
+            image.draw(in: destination, from: .zero, operation: .sourceOver,
+                       fraction: theme.imageOpacity, respectFlipped: true, hints: nil)
+            NSGraphicsContext.restoreGraphicsState()
+        }
+        theme.panelBorder.setStroke()
+        background.lineWidth = 1
+        background.stroke()
         layout.header?.draw(inRect: layout.headerRect)
         layout.preedit?.draw(inRect: layout.preeditTextRect)
         for row in layout.rows {
@@ -391,7 +436,7 @@ final class PanelContent: NSView {
                                           width: row.indexWidth, height: m.indexLineHeight))
             row.word.draw(inRect: NSRect(x: row.wordX, y: row.frame.minY + m.wordTopMargin,
                                          width: row.wordWidth, height: m.candidateLineHeight))
-            row.annotation?.draw(inRect: NSRect(x: row.annotationX, y: row.frame.minY + m.indexTopMargin,
+            row.annotation?.draw(inRect: NSRect(x: row.annotationX, y: row.frame.minY + m.annotationTopMargin,
                                                 width: row.annotationWidth,
                                                 height: m.annotationLineHeight * CGFloat(row.annotationLines)))
         }
@@ -436,7 +481,7 @@ final class CandidatePanel: NSPanel {
     private(set) var renderCount: UInt64 = 0
     private var primed = false
     var stateChanged: (() -> Void)?
-    private(set) var theme: CandidatePanelTheme
+    var theme: CandidatePanelTheme { content.debugTheme }
     private var placementAnchor: NSRect?
     private var placementOrigin: NSPoint?
 
@@ -455,7 +500,7 @@ final class CandidatePanel: NSPanel {
     #endif
 
     init(themeID: CandidateThemeID = .rimeMacOSLike, fontSize: CGFloat = 14) {
-        theme = CandidatePanelThemeCatalog.resolve(themeID, fontSize: fontSize)
+        let theme = CandidatePanelThemeCatalog.resolve(themeID, fontSize: fontSize)
         super.init(
             contentRect: NSRect(x: 0, y: 0, width: theme.metrics.minimumWidth, height: 120),
             styleMask: [.borderless, .nonactivatingPanel],
@@ -478,12 +523,15 @@ final class CandidatePanel: NSPanel {
         content.commitOriginal = { [weak self] in self?.original?() }
         content.switchSource = { [weak self] in self?.switchSource?() }
         contentView = content
+        content.themeDidChange = { [weak self] in
+            guard let self, self.contentVisible else { return }
+            self.setContentSize(self.content.layoutSize)
+        }
     }
 
-    func updateTheme(_ id: CandidateThemeID, fontSize: CGFloat = 14) {
-        if theme.id == id, theme.candidateFont.pointSize == fontSize { return }
-        theme = CandidatePanelThemeCatalog.resolve(id, fontSize: fontSize)
-        content.updateTheme(theme)
+    func updateTheme(_ selected: CandidateTheme, fontSize: CGFloat = 14) {
+        // 同一 ID 的用户主题也可能被编辑；不能仅凭 ID 跳过更新。
+        content.updateTheme(CandidatePanelTheme.resolve(selected, fontSize: fontSize))
         dismiss()
     }
 

@@ -138,6 +138,56 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertNotNil(disk.applications["com.foreign"], "外部进程写入不得被过期基线覆盖")
     }
 
+    func testLegacyBaselineDoesNotEraseConcurrentlyCreatedTheme() throws {
+        let url = directory.appendingPathComponent("settings.json")
+        try Data("{\"recording\":true}".utf8).write(to: url, options: .atomic)
+        let store = SettingsStore(directory: directory)
+        var stale = Settings.load(at: directory)
+        let base = BuiltinCandidateThemes.theme(.claude)
+        let id = try XCTUnwrap(CandidateThemeID(rawValue: UUID().uuidString))
+        let theme = CandidateTheme(id: id, name: "并发主题", light: base.light, dark: nil)
+        var external = stale; external.userCandidateThemes = [theme]; external.candidateTheme = id
+        try external.save(at: directory)
+        stale.recording = false
+        let done = expectation(description: "merge legacy settings")
+        store.submit(stale) { _ in done.fulfill() }
+        wait(for: [done], timeout: 3)
+        let merged = try readDisk()
+        XCTAssertFalse(merged.recording)
+        XCTAssertEqual(merged.candidateTheme, id)
+        XCTAssertEqual(merged.userCandidateThemes, [theme])
+    }
+
+    func testThemeSaveMergesForeignFieldsAndRejectsInvalidData() throws {
+        var original = Settings(); original.recording = true
+        try original.save(at: directory)
+        let store = SettingsStore(directory: directory)
+        let base = BuiltinCandidateThemes.theme(.grok)
+        let id = try XCTUnwrap(CandidateThemeID(rawValue: UUID().uuidString))
+        let custom = CandidateTheme(id: id, name: "自定义", light: base.light, dark: base.dark)
+        var next = original; next.userCandidateThemes = [custom]; next.candidateTheme = id
+        var external = original; external.recording = false
+        try external.save(at: directory)
+        let done = expectation(description: "theme written")
+        store.submit(next) { outcome in
+            guard case .success = outcome else { XCTFail("保存失败"); done.fulfill(); return }
+            done.fulfill()
+        }
+        wait(for: [done], timeout: 3)
+        let written = try readDisk()
+        XCTAssertFalse(written.recording)
+        XCTAssertEqual(written.resolvedCandidateTheme, custom)
+        let before = try Data(contentsOf: directory.appendingPathComponent("settings.json"))
+        var invalid = written; invalid.userCandidateThemes[0].name = " "
+        let failed = expectation(description: "encoding failure")
+        store.submit(invalid) { outcome in
+            if case .success = outcome { XCTFail("非法数据不能报告成功") }
+            failed.fulfill()
+        }
+        wait(for: [failed], timeout: 3)
+        XCTAssertEqual(try Data(contentsOf: directory.appendingPathComponent("settings.json")), before)
+    }
+
     func testMergeOnlyCopiesChangedTopLevelFields() throws {
         let pending = ["a": 1, "b": "same", "c": [1, 2, 3]] as [String: Any]
         let baseline = ["a": 0, "b": "same", "c": [1, 2, 3]] as [String: Any]

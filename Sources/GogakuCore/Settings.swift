@@ -153,8 +153,30 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
         }
     }
 }
-public enum CandidateThemeID: String, Codable, Sendable {
-    case rimeMacOSLike = "rime-macos-like"
+public struct CandidateThemeID: RawRepresentable, Codable, Hashable, Sendable {
+    public let rawValue: String
+    public init?(rawValue: String) {
+        guard !rawValue.isEmpty, rawValue.utf8.count <= 256,
+              !rawValue.unicodeScalars.contains(where: { CharacterSet.controlCharacters.contains($0) }) else { return nil }
+        self.rawValue = rawValue
+    }
+    public init(from decoder: Decoder) throws {
+        let c = try decoder.singleValueContainer()
+        let value = try c.decode(String.self)
+        guard let id = Self(rawValue: value) else {
+            throw DecodingError.dataCorruptedError(in: c, debugDescription: "Invalid theme ID")
+        }
+        self = id
+    }
+    public func encode(to encoder: Encoder) throws {
+        var c = encoder.singleValueContainer()
+        try c.encode(rawValue)
+    }
+    public static let rimeMacOSLike = Self(rawValue: "rime-macos-like")!
+    public static let gogaku = Self(rawValue: "gogaku")!
+    public static let claude = Self(rawValue: "claude")!
+    public static let grok = Self(rawValue: "grok")!
+    public static let witch = Self(rawValue: "witch")!
 }
 /// 普通模式输入方案（共享核心 GcScheme）。
 public enum InputScheme: String, Codable, Sendable {
@@ -183,6 +205,15 @@ public struct Settings: Codable {
     public var directionShortcut = Shortcut(key: "j", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
     /// A stable ID leaves the rendering layer open for user-selectable themes.
     public var candidateTheme: CandidateThemeID = .rimeMacOSLike
+    public var userCandidateThemes: [CandidateTheme] = []
+
+    /// 内置 ID 始终优先；已删除或无效的主题回退到旧默认外观。
+    public var resolvedCandidateTheme: CandidateTheme {
+        if candidateTheme == .rimeMacOSLike { return BuiltinCandidateThemes.theme(.rimeMacOSLike) }
+        if let builtin = BuiltinCandidateThemes.all.first(where: { $0.id == candidateTheme }) { return builtin }
+        return userCandidateThemes.first(where: { $0.id == candidateTheme && $0.isValid })
+            ?? BuiltinCandidateThemes.theme(.rimeMacOSLike)
+    }
     // 普通模式（2026-10-31 输入习惯裁决）。
     public var inputScheme: InputScheme = .xiaohe
     public var fuzzyPinyin: Set<String> = []                       // 默认全关
@@ -213,7 +244,7 @@ public struct Settings: Codable {
 
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
-        case modeShortcut, directionShortcut, candidateTheme
+        case modeShortcut, directionShortcut, candidateTheme, userCandidateThemes
         case inputScheme, fuzzyPinyin, candidateFontSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish
@@ -234,10 +265,11 @@ public struct Settings: Codable {
             ?? Shortcut(key: "k", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
         directionShortcut = try container.decodeIfPresent(Shortcut.self, forKey: .directionShortcut)
             ?? Shortcut(key: "j", modifiers: NSEvent.ModifierFlags([.control, .shift]).rawValue)
-        // Unknown theme IDs (renamed or removed) fall back to the default
-        // instead of invalidating the whole settings file.
-        let themeRaw = try container.decodeIfPresent(String.self, forKey: .candidateTheme)
-        candidateTheme = themeRaw.flatMap(CandidateThemeID.init(rawValue:)) ?? .rimeMacOSLike
+        // 损坏主题单独丢弃，不能导致整份设置回退；内置 ID 不允许被用户主题覆盖。
+        userCandidateThemes = (try? container.decode(LossyCandidateThemes.self, forKey: .userCandidateThemes).values) ?? []
+        let raw = try? container.decode(String.self, forKey: .candidateTheme)
+        let requested = raw.flatMap(CandidateThemeID.init(rawValue:)) ?? .rimeMacOSLike
+        candidateTheme = (BuiltinCandidateThemes.all.contains { $0.id == requested } || userCandidateThemes.contains { $0.id == requested }) ? requested : .rimeMacOSLike
         inputScheme = try container.decodeIfPresent(InputScheme.self, forKey: .inputScheme) ?? .xiaohe
         fuzzyPinyin = try container.decodeIfPresent(Set<String>.self, forKey: .fuzzyPinyin) ?? []
         candidateFontSize = min(16, max(12, try container.decodeIfPresent(Int.self, forKey: .candidateFontSize) ?? 14))
