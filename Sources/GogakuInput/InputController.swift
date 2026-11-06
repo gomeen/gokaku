@@ -602,7 +602,6 @@ final class GogakuInputController: IMKInputController {
         eagerAttempts.removeAll()
         eagerPumpRetryWork?.cancel(); eagerPumpRetryWork = nil
         eagerPumpRetryCount = 0
-        warmedEager = false
         cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0
@@ -1300,15 +1299,6 @@ final class GogakuInputController: IMKInputController {
     /// 含 TLS／签名握手（实测 ~470ms），放在激活期而非首组合——首组合期预热
     /// 曾占住串行通道并取消真实首句请求（b66 已撤）。仅 worker 冷时发一条
     /// "hi"（计入用量计量，约 2 字符），结果被会话按 sourceID 丢弃。
-    private func warmEnToZhWorkerIfNeeded() {
-        guard learningDevEnabled, mode == .learning, direction == .enToZh,
-              !translator.workerRunning else { return }
-        translator.requestImmediately(
-            TranslationRequest(stamp: InputStamp(mode: .learning, direction: .enToZh),
-                               sourceID: "warmup", source: "hi",
-                               resource: LearningTranslation.resourceID))
-    }
-
     private func scheduleEnToZhHide(delay: TimeInterval = 0.7) {
         enToZhHideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
