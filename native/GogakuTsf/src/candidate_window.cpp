@@ -48,7 +48,10 @@ void CandidateWindow::showCandidates(const GcSnapshot &snap, const RECT &caretRe
     m_preedit = Utf8ToUtf16(snap.preedit ? snap.preedit : "");
     m_words.clear();
     m_glosses.clear();
-    m_selected = snap.selected;
+    /* snap.selected 为全局下标；面板高亮需页内下标（整页满时换算精确）。 */
+    const size_t pageStart = snap.page * snap.count;
+    m_selected = (snap.selected >= pageStart && snap.selected < pageStart + snap.count)
+                     ? snap.selected - pageStart : 0;
     m_page = snap.page;
     m_pageCount = snap.page_count;
     for (size_t i = 0; i < snap.count && i < 100; ++i) {

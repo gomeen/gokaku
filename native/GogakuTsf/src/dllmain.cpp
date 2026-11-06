@@ -351,6 +351,8 @@ static void register_profile_via_api(const std::wstring &modulePath) {
                 void *enumLangProfiles;
                 HRESULT (STDMETHODCALLTYPE *EnableLanguageProfile)(void *, GUID &, WORD, GUID &, BOOL);
                 void *isEnabled;
+                HRESULT (STDMETHODCALLTYPE *EnableLanguageProfileByDefault)(void *, GUID &, WORD, GUID &, BOOL);
+                void *substituteLayout;
             };
             void **vtbl = *reinterpret_cast<void ***>(pold);
             OldVtbl *o = reinterpret_cast<OldVtbl *>(vtbl);
@@ -363,6 +365,9 @@ static void register_profile_via_api(const std::wstring &modulePath) {
             log(L"old-AddLanguageProfile", hr);
             hr = o->EnableLanguageProfile(pold, clsid, langid, profile, TRUE);
             log(L"old-EnableLanguageProfile", hr);
+            /* ByDefault：把语言默认输入法指向我们（Weasel enable_profile 同款双调用）。 */
+            hr = o->EnableLanguageProfileByDefault(pold, clsid, langid, profile, TRUE);
+            log(L"old-EnableLanguageProfileByDefault", hr);
             hr = o->SetDefaultLanguageProfile(pold, langid, clsid, profile);
             log(L"old-SetDefaultLanguageProfile", hr);
             unk->Release();

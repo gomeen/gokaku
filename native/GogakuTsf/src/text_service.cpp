@@ -65,8 +65,12 @@ STDMETHODIMP TextService::Activate(ITfThreadMgr *ptim, TfClientId tid) {
     /* 按键汇：本 TIP 激活期间接收全部按键 */
     ITfKeystrokeMgr *ks = nullptr;
     if (SUCCEEDED(m_tm->QueryInterface(IID_PPV_ARGS(&ks)))) {
-        ks->AdviseKeyEventSink(m_clientId, (ITfKeyEventSink *)this, TRUE);
+        HRESULT hrAdv = ks->AdviseKeyEventSink(m_clientId, (ITfKeyEventSink *)this, TRUE);
+        char buf[48]; snprintf(buf, 48, "advise-keys hr=0x%08X\r\n", (unsigned)hrAdv);
+        actLog(buf);
         ks->Release();
+    } else {
+        actLog("advise-keys: QI keystroke mgr FAILED\r\n");
     }
     /* 焦点汇 */
     ITfSource *src = nullptr;
