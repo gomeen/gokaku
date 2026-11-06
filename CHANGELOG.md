@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：中→英预译防抖加固，构建 86）
+
+- **用户报告**：学习模式中→英输入停止后译文（高亮候选的英文注释）有时不出现。排查确认防抖定时本身正常，缺陷在三处周边结构。
+- **修复**：① 预译结果改为先把注释写入组合视图（只受代次门控），坐标不可用时位置复查恢复显示即带出译文——此前渲染只有一次机会，失败后泵按缓存判定完成，译文永不显示（主因）；② 预译泵遇在飞请求加 0.25s 兜底重泵（上限≈10s），消除慢结果／丢结果导致的无限期停摆；③ 预译失败按源文计次（同组合内超 2 次不再自动重发），消除失败无限重试的 busy loop；④ 组合结束（suspend）复位预译泵状态，残留 inFlight 不再阻断新组合。
+- **顺带**：预览口径勘误——仅高亮候选行内注释显示英文（覆盖五点五「状态行显示」旧表述），映射抽为纯函数 `CompositionView.annotatingHighlight` 并新增 5 项回归测试；`TranslationService` 排队请求可被同服务后发请求静默抹除的隐患已记录待评估。fast 验证 6/6 全过。
+
 ### 变更（2026-11-06 追加：TSF 首次 MSVC 编译成功＋VM 实装测试闭环）
 
 - **里程碑**：GogakuTsf.dll（Windows 输入法接入层）首次在 VM 内用 MSVC 编译链接成功（/MT 静态 CRT，无 redist 依赖）；核心 DLL（HEAD＋rename/fsync 注入）同步构建；VM 内组装运行目录（TIP＋核心＋4 个 MinGW/msys 运行库＋词库数据）并 regsvr32 注册成功；自动化打字测试闭环（交互会话计划任务＋SendKeys＋候选窗探测＋截图）建立。**实测：TIP 在应用内激活成功（DLL 加载、核心会话创建 OK）**。
