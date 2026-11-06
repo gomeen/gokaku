@@ -86,11 +86,11 @@ def prune_backups():
     for stale in entries[:-KEEP_BACKUPS] if len(entries) > KEEP_BACKUPS else []:
         shutil.rmtree(stale, ignore_errors=True)
 
-def verify_install(source: Path, target: Path, plist_overrides=None):
+def verify_install(source: Path, target: Path):
     """安装后核对：实际安装路径的每个文件与 dist 清单哈希一致。
     防止旧包残留、拷贝损坏或旧备份包冒充新版本。
-    plist_overrides: {相对路径 -> 期望字节}。输入法 Info.plist 在安装侧注入
-    输入源身份（_gogaku_dist 约定），期望值按同一逻辑重算后比对。"""
+    必须在身份注入前调用：注入后的 ad-hoc 重签会改写主程序内嵌签名，
+    二进制字节偏离 dist 清单（注入后的核对靠 plist 期望字节＋签名有效性）。"""
     manifest_path = ROOT / 'dist' / ('bundle-manifest.json' if CHANNEL == 'stable'
                                      else 'bundle-manifest-dev.json')
     if not manifest_path.exists():
@@ -99,7 +99,6 @@ def verify_install(source: Path, target: Path, plist_overrides=None):
     # build.py 写入的 manifest 路径相对于 dist（如 'Gogaku.app/Contents/...'），
     # 不是绝对路径；前缀必须按同一基准算，否则一个条目都匹配不上。
     prefix = str(source.relative_to(manifest_path.parent)) + '/'
-    overrides = plist_overrides or {}
     installed = {str(p): p for p in target.rglob('*') if p.is_file()}
     for rel, entry in manifest.items():
         if not rel.startswith(prefix):
@@ -107,12 +106,8 @@ def verify_install(source: Path, target: Path, plist_overrides=None):
         installed_path = target / rel.removeprefix(prefix)
         if not installed_path.is_file():
             raise SystemExit(f'安装不完整：缺少 {rel}')
-        if rel.removeprefix(prefix) in overrides:
-            expected = hashlib.sha256(overrides[rel.removeprefix(prefix)]).hexdigest()
-        else:
-            expected = entry['sha256']
-        if file_digest(installed_path) != expected:
-            raise SystemExit(f'哈希不一致：{installed_path}（期望 {expected[:12]}…）')
+        if file_digest(installed_path) != entry['sha256']:
+            raise SystemExit(f'哈希不一致：{installed_path}（期望 {entry["sha256"][:12]}…）')
         installed.pop(str(installed_path), None)
     extra = [p for p in installed if '__pycache__' not in p]
     if extra:
@@ -139,7 +134,12 @@ def install():
         target.parent.mkdir(parents=True, exist_ok=True)
         backup(target)
         shutil.copytree(source, target, symlinks=True)
-        overrides = None
+        # 拷贝完整性先核对（逐字节等于中立 dist：防旧包残留／拷贝损坏／旧备份
+        # 冒充），再做身份注入——注入后的 ad-hoc 重签会改写主程序内嵌签名
+        # （CD 含 Info.plist 哈希），安装位二进制字节必然偏离 dist 清单；
+        # 注入后只按 plist 期望字节与签名有效性核对（2026-11-06 dev 通道
+        # 实装发现：重签后哈希核对必挂）。
+        verify_install(source, target)
         if needs_identity:
             # 中立 dist → 安装位注入输入源身份（_gogaku_dist 约定）＋ad-hoc 重签。
             info_path = target / 'Contents/Info.plist'
@@ -147,8 +147,9 @@ def install():
             patched = deterministic_plist_bytes(apply_tis_identity(info, identifier))
             info_path.write_bytes(patched)
             subprocess.run(['codesign', '--force', '--deep', '--sign', '-', target], check=True)
-            overrides = {'Contents/Info.plist': patched}
-        verify_install(source, target, plist_overrides=overrides)
+            if info_path.read_bytes() != patched:
+                raise SystemExit(f'身份注入失败：{info_path}')
+            subprocess.run(['codesign', '--verify', '--deep', '--strict', target], check=True)
     # imklaunchagent 的输入法启动路径依赖 LaunchServices 数据库；
     # 移包重装会丢失登记，必须重新注册，否则系统不拉起输入法进程。
     subprocess.run([LSREGISTER, '-f', str(INPUT)], check=False)
