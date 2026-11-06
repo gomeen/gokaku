@@ -1084,8 +1084,11 @@ final class GogakuInputController: IMKInputController {
         let changed = displayRect != current.rect
         displayRect = current.rect
         if changed, let view = displayed {
-            // 英→中无译文阶段只跟踪位置不显示面板（译文到达后由 publish 显示）。
-            if view.stamp.mode == .learning, view.stamp.direction == .enToZh, view.candidates.isEmpty {
+            // 宽限隐藏已执行时保持收起（停下且确实无译文）；其余情况面板跟随
+            // 位置刷新（含首键即显的原文无候选阶段——首键矩形不可用时由这里
+            // 在矩形恢复后补显，不再等首条译文。旧守卫「候选为空就不显示」
+            // 属首键即显之前时代，与首键即显矛盾，已删）。
+            if enToZhGraceHidden {
                 return
             }
             panel.enqueue(view, at: current.rect, targetWindowLevel:
@@ -1315,6 +1318,11 @@ final class GogakuInputController: IMKInputController {
 
     /// 英→中无译文时的延迟隐藏：防逐键显示/隐藏闪烁（2026-11 用户反馈）。
     /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
+    /// 宽限隐藏已执行（面板已收起）标志：位置复查据此不再把面板复活。
+    /// （旧守卫「候选为空就不显示」与首键即显原文矛盾：首键矩形不可用时，
+    /// 位置复查拿到矩形也被拦住，面板要等首条译文才出现——打到一半才弹框。）
+    private var enToZhGraceHidden = false
+    /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
     /// 学习英→中激活／切换时预热 worker（2026-11-04）：云端 worker 冷首请求
     /// 含 TLS／签名握手（实测 ~470ms），放在激活期而非首组合——首组合期预热
     /// 曾占住串行通道并取消真实首句请求（b66 已撤）。仅 worker 冷时发一条
@@ -1341,6 +1349,7 @@ final class GogakuInputController: IMKInputController {
                 self.scheduleEnToZhHide(delay: 0.25)
                 return
             }
+            self.enToZhGraceHidden = true
             self.panel.dismiss()
         }
         enToZhHideWork = work
@@ -1349,6 +1358,7 @@ final class GogakuInputController: IMKInputController {
     private func cancelEnToZhHide() {
         enToZhHideWork?.cancel()
         enToZhHideWork = nil
+        enToZhGraceHidden = false
     }
 
     private func publishLearning(generation: UInt64, completesEdit: Bool = false) {
@@ -1405,6 +1415,7 @@ final class GogakuInputController: IMKInputController {
                 // 首键即显原文（2026-11-04 用户反馈：等译文才显示＝打字无反馈＋
                 // 输入延迟感）；译文到达后原地补候选。持续无译文且停顿时由宽限
                 // 工作项收起（busy 时顺延，自适应云端时延）。
+                self.enToZhGraceHidden = false
                 if let rect = self.displayRect {
                     self.panel.render(value, at: rect, targetWindowLevel:
                         GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
