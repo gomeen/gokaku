@@ -2,6 +2,11 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：英→中首键即显回归修复，构建 88 dev）
+
+- **用户报告**：学习英→中输入 hello，打到 o 附近候选窗才弹出（开头输入像没被记录）。缓冲与翻译链路完整（核心轨迹测试保证），是面板显示回归：`refreshDisplayPosition` 残留首键即显之前时代的守卫「en→中候选为空就不显示」——首键矩形不可用时 publish 跳过渲染、位置复查拿到矩形也被拦，要等首条译文才显示。
+- **修复**：以显式「宽限隐藏已执行」标志取代旧守卫；首键即显后位置复查正常补显与跟随，译文到达原地补候选，停下且无译文仍按 0.7s 宽限收起。fast 验证 6/6。
+
 ### 变更（2026-11-06 追加：Windows 记事本兼容与设置展示，构建 91 dev）
 
 - Windows 设置改为七项侧栏、固定页头／状态栏、DPI 缩放和微软雅黑 UI，补齐程序／安装器图标；200% 缩放下七页和最小窗口九条预览有运行证据。
@@ -31,6 +36,12 @@
 - **检查更新（P5，Mac）**：新增 `UpdateContract/UpdatePreferences/UpdateTransport/UpdateEngine/UpdateDownloader` 与设置更新窗口：Ed25519 清单验签、GitHub 列表分页／ETag／限流、通道与构建号比较、平台／架构／minOS、HTTPS 主机白名单、下载大小／SHA-256／原子缓存、取消、安装交接；自动检查默认关闭、24 小时节流、只在设置应用运行。随包 `resources/update/config.json` 带开发公钥；发布脚本 `update-signing.swift`、`make-update-manifest.py`、`publish-release.py`（Draft→上传→真实 asset id→签名清单→人工发布）。
 - **Windows 组装（P4，脚手架）**：新增 `packaging/windows/gogaku.iss.in`（Windows 11 x64、双位数 TSF 注册、Program Files、HKCU 自启、卸载默认保留数据、不强杀宿主）与 `scripts/build-win-app.py`（产物检查、staging、身份哈希、iss 渲染、iscc 调用；缺产物明确失败）。
 - **验证**：Swift Release 192 项全过（新增 Volcengine、Update、设置迁移用例）；`make-update-manifest.py --self-test`、`build-win-app.py --self-test` 通过；火山签名／请求体与 Python 固定向量一致；更新协议用注入传输覆盖分页／304／限流／坏签名／通道隔离／架构与 OS 不支持／下载校验。**未验证**：真实火山凭据实测、真实 GitHub Releases 链路、重打包 pkg 真实安装／升级、Windows Setup 编译与安装、Windows 检查更新、完整宿主矩阵与性能门槛。历史 DMG 条目仅作记录，当前交付不再包含 DMG。
+
+### 变更（2026-11-06 追加：中→英预译防抖加固，构建 87/88 dev）
+
+- **用户报告**：学习模式中→英输入停止后译文（高亮候选的英文注释）有时不出现。排查确认防抖定时本身正常，缺陷在三处周边结构。
+- **修复**：① 预译结果改为先把注释写入组合视图（只受代次门控），坐标不可用时位置复查恢复显示即带出译文——此前渲染只有一次机会，失败后泵按缓存判定完成，译文永不显示（主因）；② 预译泵遇在飞请求加 0.25s 兜底重泵（上限≈10s），消除慢结果／丢结果导致的无限期停摆；③ 预译失败按源文计次（同组合内超 2 次不再自动重发），消除失败无限重试的 busy loop；④ 组合结束（suspend）复位预译泵状态，残留 inFlight 不再阻断新组合。
+- **顺带**：预览口径勘误——仅高亮候选行内注释显示英文（覆盖五点五「状态行显示」旧表述），映射抽为纯函数 `CompositionView.annotatingHighlight` 并新增 5 项回归测试；`TranslationService` 排队请求可被同服务后发请求静默抹除的隐患已记录待评估。fast 验证 6/6 全过。
 
 ### 变更（2026-11-06 追加：TSF 首次 MSVC 编译成功＋VM 实装测试闭环）
 

@@ -470,8 +470,15 @@ func handle(_ request: [String: Any]) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) { key(code, down: false) }
         delay = 0.6
     case "key":
-        let code = CGKeyCode(request["code"] as! Int)
-        key(code, down:true); key(code, down:false)
+        // 逐键前台守卫：非探针前台一律拒发（事件会落进用户正在用的应用）。
+        let verdict = evaluate(guardSpec(request))
+        if verdict.ok {
+            let code = CGKeyCode(request["code"] as! Int)
+            key(code, down:true); key(code, down:false)
+        } else {
+            extra["guardBlocked"] = verdict.reason
+            extra["front"] = verdict.front
+        }
         delay = (request["delay"] as? Double) ?? 0.2
     case "shortcut":
         // Complete modifier transitions are required; setting flags on Space alone
@@ -487,6 +494,35 @@ func handle(_ request: [String: Any]) {
             key(59,down:false)
         }
         delay = 1.0
+    case "chord":
+        // 修饰键和弦：显式 flags 的平衡 CGEvent 序列（修饰逐个按下→主键→逆序
+        // 释放）。System Events 和弦在本机实测会留下悬挂修饰状态，吞掉后续
+        // 全部字母（预译注释回归 2026-11-06）。
+        let chordCode = CGKeyCode(request["code"] as! Int)
+        let modNames = request["modifiers"] as? [String] ?? []
+        let modMap: [String: (CGKeyCode, CGEventFlags)] =
+            ["shift": (56, .maskShift), "control": (59, .maskControl),
+             "option": (58, .maskAlternate), "command": (55, .maskCommand)]
+        var chordFlags: CGEventFlags = []
+        var sequence: [(CGKeyCode, Bool, CGEventFlags)] = []
+        let chordVerdict = evaluate(guardSpec(request))
+        if chordVerdict.ok {
+            for name in modNames {
+                if let (c, f) = modMap[name] { sequence.append((c, true, f)); chordFlags.insert(f) }
+            }
+            sequence.append((chordCode, true, chordFlags))
+            sequence.append((chordCode, false, chordFlags))
+            for name in modNames.reversed() {
+                if let (c, f) = modMap[name] { sequence.append((c, false, f)) }
+            }
+        } else {
+            extra["guardBlocked"] = chordVerdict.reason
+            extra["front"] = chordVerdict.front
+        }
+        for (index, (c, down, f)) in sequence.enumerated() {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.06 * Double(index)) { key(c, down: down, flags: f) }
+        }
+        delay = 0.06 * Double(sequence.count) + 0.6
     case "quit": reply(state()); app.terminate(nil); return
     default: break
     }

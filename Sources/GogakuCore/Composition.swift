@@ -18,6 +18,31 @@ public enum CandidatePage {
     public static let size = 9
 }
 
+public extension CompositionView {
+    /// 学习中→英注释策略（2026-11 用户裁决：仅高亮候选显示英文译文）：
+    /// 高亮行写入译文缓存注释，其余行清空残留注释。纯函数——预译结果
+    /// 应用与面板恢复显示必须共用同一映射，否则恢复显示会把无注释旧视图
+    /// 盖回（2026-11 用户反馈：停止输入后译文不出来）。
+    func annotatingHighlight(memory: [String: String]) -> CompositionView {
+        let inPage = selected - page * CandidatePage.size
+        var updated = self
+        updated.candidates = candidates.enumerated().map { offset, candidate in
+            let translated = memory[candidate.target]
+            if offset == inPage, let translated {
+                if candidate.explanation == translated { return candidate }
+                return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
+                                 source: candidate.source, range: candidate.range, target: candidate.target,
+                                 explanation: translated, resource: candidate.resource, engineIndex: candidate.engineIndex)
+            }
+            if candidate.explanation.isEmpty { return candidate }
+            return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
+                             source: candidate.source, range: candidate.range, target: candidate.target,
+                             explanation: "", resource: candidate.resource, engineIndex: candidate.engineIndex)
+        }
+        return updated
+    }
+}
+
 /// 学习组合会话：共享 C++ 学习核心（ABI v3）的 Swift 薄封装。
 ///
 /// 学习组合状态机、三状态按键语义与翻译调度合同全部在共享核心

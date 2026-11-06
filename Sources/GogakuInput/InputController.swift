@@ -217,6 +217,12 @@ final class GogakuInputController: IMKInputController {
     /// 避免 latest-wins 丢请求）。
     private var eagerInFlight: String?
     private var eagerBacklog: [String] = []
+    /// 预译失败计次（按源文）：达到上限的候选不再自动重发——失败不入服务
+    /// 缓存，曾构成同一候选无限重发的 busy loop。
+    private var eagerAttempts: [String: Int] = [:]
+    /// 在飞未返回时的兜底重泵任务与连续计数（上限≈10s，与服务超时对齐）。
+    private var eagerPumpRetryWork: DispatchWorkItem?
+    private var eagerPumpRetryCount = 0
     /// 预译专用服务：与提交／英→中请求隔离，避免互相顶掉在飞请求。
     private lazy var eagerTranslator = makeEagerTranslator()
     /// 译文未就绪的提交：缓冲后续按键，避免译文异步上屏与新组合交错。
@@ -329,10 +335,23 @@ final class GogakuInputController: IMKInputController {
     /// 顺序泵出预译队列：一次只一个在飞请求；结果回来后续泵下一个。
     /// 用 requestImmediately 逐个发，避免同一服务的 latest-wins 丢请求。
     private func pumpEagerBacklog() {
-        guard mode == .learning, direction == .zhToEn, eagerInFlight == nil,
-              let next = eagerBacklog.first(where: { translationMemory[$0] == nil }) else {
+        eagerPumpRetryWork?.cancel(); eagerPumpRetryWork = nil
+        guard mode == .learning, direction == .zhToEn,
+              let next = eagerBacklog.first(where: {
+                  translationMemory[$0] == nil && (eagerAttempts[$0] ?? 0) < 2
+              }) else { return }
+        guard eagerInFlight == nil else {
+            // 在飞未返回：短延重泵兜底（上限≈10s，与服务超时对齐）。正常路径
+            // 由在飞结果的续链先完成；此前泵遇在飞静默放弃且无重试，慢结果／
+            // 丢结果（如设置重建 invalidate）会让停止后的译文无限期停摆。
+            guard eagerPumpRetryCount < 40 else { return }
+            eagerPumpRetryCount += 1
+            let work = DispatchWorkItem { [weak self] in self?.pumpEagerBacklog() }
+            eagerPumpRetryWork = work
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
             return
         }
+        eagerPumpRetryCount = 0
         eagerInFlight = next
         // 用当前组合 stamp 发起：applyEagerTranslation 以 stamp 匹配面板代次。
         let stamp = displayed?.stamp ?? InputStamp(mode: .learning, direction: .zhToEn)
@@ -340,36 +359,30 @@ final class GogakuInputController: IMKInputController {
                                                               resource: LearningTranslation.resourceID))
     }
 
-    /// 预译结果：入译文缓存；刷新当前面板注释（注释＝真实提交文本）与
-    /// 高亮项状态行预览；续泵下一个。
+    /// 预译结果：入译文缓存；把注释写进当前 displayed（注释＝真实提交文本）；
+    /// 坐标可用时刷新面板；续泵下一个。
     private func applyEagerTranslation(_ result: TranslationResult) {
         let finished = eagerInFlight
         eagerInFlight = nil
         let stored = result.error == nil && result.target != nil && !result.target!.isEmpty && result.source == finished
         if stored, let translated = result.target {
             storeTranslationMemory(result.source, translated)
+            eagerAttempts.removeValue(forKey: result.source)
+        } else if let finished, result.source == finished {
+            // 预译失败（错误或空译文）计次：超限后泵跳过该候选。
+            eagerAttempts[finished, default: 0] += 1
         }
         defer { pumpEagerBacklog() }
+        // 注释入视图只受组合代次门控：渲染条件不满足（坐标暂不可读等）也要
+        // 把注释留在 displayed——位置复查恢复显示时 re-enqueue 的就是已带
+        // 注释的视图。此前渲染只有一次机会，失败后泵按 memory 判定完成，
+        // 旧视图被原样盖回，停止输入后译文永不显示（2026-11 用户反馈）。
         guard mode == .learning, direction == .zhToEn,
-              var view = displayed, view.stamp == result.stamp, pendingEdits == 0,
-              let rect = displayRect, let anchor = target else { return }
-        // 只刷新高亮候选的注释（2026-11 用户裁决：其余行不显示英文）。
-        let inPage = view.selected - view.page * CandidatePage.size
-        view.candidates = view.candidates.enumerated().map { offset, candidate in
-            let translated = translationMemory[candidate.target]
-            if offset == inPage, let translated {
-                if candidate.explanation == translated { return candidate }
-                return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
-                                 source: candidate.source, range: candidate.range, target: candidate.target,
-                                 explanation: translated, resource: candidate.resource, engineIndex: candidate.engineIndex)
-            }
-            // 非高亮行不显示英文；残留注释（旧缓存）清空。
-            if candidate.explanation.isEmpty { return candidate }
-            return Candidate(id: candidate.id, stamp: candidate.stamp, sourceID: candidate.sourceID,
-                             source: candidate.source, range: candidate.range, target: candidate.target,
-                             explanation: "", resource: candidate.resource, engineIndex: candidate.engineIndex)
-        }
+              var view = displayed, view.stamp == result.stamp, pendingEdits == 0 else { return }
+        view = view.annotatingHighlight(memory: translationMemory)
         displayed = view
+        // 实际渲染仍需有效坐标与锚点；不可用时保留组合与已更新视图。
+        guard let rect = displayRect, let anchor = target else { return }
         panel.render(view, at: rect, targetWindowLevel:
                      GGPanelTargetLevel(anchor.windowLevel, anchor.windowLevelValid))
     }
@@ -582,6 +595,14 @@ final class GogakuInputController: IMKInputController {
         }
         eagerBacklog = []
         eagerDebounceWork?.cancel()
+        // 预译泵状态随组合结束复位：eagerInFlight 残留曾让新组合的泵全程
+        // 静默 no-op（只能靠 warmup 结果兜底）。残留请求的迟到结果不再写
+        // memory（commit 路径会重新覆盖），换取泵状态与新组合的干净边界。
+        eagerInFlight = nil
+        eagerAttempts.removeAll()
+        eagerPumpRetryWork?.cancel(); eagerPumpRetryWork = nil
+        eagerPumpRetryCount = 0
+        warmedEager = false
         cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0
@@ -718,7 +739,7 @@ final class GogakuInputController: IMKInputController {
         // keyUp 不是新输入：一律透传（单字符原文提交竞态的历史修复）。
         if event.type == .keyUp { return false }
         if event.type == .flagsChanged {
-            shiftPoller.noteFlagsEvent()   // 轮询兑底互斥：本轮窗口内有事件就不代发
+            shiftPoller.noteFlagsEvent()   // 轮询兜底互斥：本轮窗口内有事件就不代发
             // Shift 单击判定；其他修饰键变化不挂起组合（规格）。
             // Hyper（fn／globe 修饰）不算 Shift 单击：fn 按住时 flags 含 .function，
             // 与 Command／Control／Option 一样取消单击资格；长按（≥600ms）与
@@ -966,6 +987,8 @@ final class GogakuInputController: IMKInputController {
             panel.dismiss()
             eagerBacklog = []
             eagerDebounceWork?.cancel()
+            eagerPumpRetryWork?.cancel(); eagerPumpRetryWork = nil
+            eagerPumpRetryCount = 0
         }
     }
 
@@ -1034,8 +1057,11 @@ final class GogakuInputController: IMKInputController {
         let changed = displayRect != current.rect
         displayRect = current.rect
         if changed, let view = displayed {
-            // 英→中无译文阶段只跟踪位置不显示面板（译文到达后由 publish 显示）。
-            if view.stamp.mode == .learning, view.stamp.direction == .enToZh, view.candidates.isEmpty {
+            // 宽限隐藏已执行时保持收起（停下且确实无译文）；其余情况面板跟随
+            // 位置刷新（含首键即显的原文无候选阶段——首键矩形不可用时由这里
+            // 在矩形恢复后补显，不再等首条译文。旧守卫「候选为空就不显示」
+            // 属首键即显之前时代，与首键即显矛盾，已删）。
+            if enToZhGraceHidden {
                 return
             }
             panel.enqueue(view, at: current.rect, targetWindowLevel:
@@ -1265,6 +1291,24 @@ final class GogakuInputController: IMKInputController {
 
     /// 英→中无译文时的延迟隐藏：防逐键显示/隐藏闪烁（2026-11 用户反馈）。
     /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
+    /// 宽限隐藏已执行（面板已收起）标志：位置复查据此不再把面板复活。
+    /// （旧守卫「候选为空就不显示」与首键即显原文矛盾：首键矩形不可用时，
+    /// 位置复查拿到矩形也被拦住，面板要等首条译文才出现——打到一半才弹框。）
+    private var enToZhGraceHidden = false
+    /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
+    /// 学习英→中激活／切换时预热 worker（2026-11-04）：云端 worker 冷首请求
+    /// 含 TLS／签名握手（实测 ~470ms），放在激活期而非首组合——首组合期预热
+    /// 曾占住串行通道并取消真实首句请求（b66 已撤）。仅 worker 冷时发一条
+    /// "hi"（计入用量计量，约 2 字符），结果被会话按 sourceID 丢弃。
+    private func warmEnToZhWorkerIfNeeded() {
+        guard learningDevEnabled, mode == .learning, direction == .enToZh,
+              !translator.workerRunning else { return }
+        translator.requestImmediately(
+            TranslationRequest(stamp: InputStamp(mode: .learning, direction: .enToZh),
+                               sourceID: "warmup", source: "hi",
+                               resource: LearningTranslation.resourceID))
+    }
+
     private func scheduleEnToZhHide(delay: TimeInterval = 0.7) {
         enToZhHideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -1278,6 +1322,7 @@ final class GogakuInputController: IMKInputController {
                 self.scheduleEnToZhHide(delay: 0.25)
                 return
             }
+            self.enToZhGraceHidden = true
             self.panel.dismiss()
         }
         enToZhHideWork = work
@@ -1286,6 +1331,7 @@ final class GogakuInputController: IMKInputController {
     private func cancelEnToZhHide() {
         enToZhHideWork?.cancel()
         enToZhHideWork = nil
+        enToZhGraceHidden = false
     }
 
     private func publishLearning(generation: UInt64, completesEdit: Bool = false) {
@@ -1342,6 +1388,7 @@ final class GogakuInputController: IMKInputController {
                 // 首键即显原文（2026-11-04 用户反馈：等译文才显示＝打字无反馈＋
                 // 输入延迟感）；译文到达后原地补候选。持续无译文且停顿时由宽限
                 // 工作项收起（busy 时顺延，自适应云端时延）。
+                self.enToZhGraceHidden = false
                 if let rect = self.displayRect {
                     self.panel.render(value, at: rect, targetWindowLevel:
                         GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))

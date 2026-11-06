@@ -1,0 +1,89 @@
+{
+  "checkedAt": "2026-11-06T09:36:01.730137+00:00",
+  "source": "org.gogaku.inputmethod.dev.Hans",
+  "pinyin": "tianqi",
+  "detectPinyin": "nihao",
+  "checks": [
+    {
+      "name": "input_source_ready",
+      "passed": true,
+      "evidence": "you ha oh"
+    },
+    {
+      "name": "learning_mode_active",
+      "passed": true,
+      "evidence": "you ha oh"
+    },
+    {
+      "name": "annotation_appears_after_idle",
+      "passed": true,
+      "evidence": {
+        "attempt": 1,
+        "words": [
+          "propose",
+          "qil",
+          "ts"
+        ],
+        "ocr": [
+          "ti'an'qil",
+          "1 提案其",
+          "：propose 1ts",
+          "2 提案",
+          "3题",
+          "4 提",
+          "5体",
+          "6 替",
+          "7踢",
+          "8梯",
+          "9啼",
+          "1/17"
+        ]
+      }
+    },
+    {
+      "name": "annotation_survives_idle_hold",
+      "passed": false,
+      "evidence": {}
+    }
+  ],
+  "artifacts": {
+    "panelPoll": "/Users/gomeen/code/gomeen/gogaku/worktrees/bug-debounce/docs/validation/verify/eager-annotation-20261106-173601/panel-poll1.png"
+  },
+  "modeShortcut": {
+    "key": "t",
+    "flags": [
+      "shift",
+      "control",
+      "option",
+      "command"
+    ]
+  },
+  "directionShortcut": {
+    "key": "j",
+    "flags": [
+      "shift",
+      "control"
+    ]
+  },
+  "originalSource": "org.gogaku.inputmethod.Hans",
+  "devInputPid": 11781,
+  "annotationWords": [
+    "propose",
+    "qil",
+    "ts"
+  ],
+  "panelOcr": [
+    "ti'an'qil",
+    "1 提案其",
+    "：propose 1ts",
+    "2 提案",
+    "3题",
+    "4 提",
+    "5体",
+    "6 替",
+    "7踢",
+    "8梯",
+    "9啼",
+    "1/17"
+  ]
+}
