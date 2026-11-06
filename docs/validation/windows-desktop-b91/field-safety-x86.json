@@ -1,0 +1,71 @@
+{
+  "checks": [
+    {
+      "actual": true,
+      "expected": true,
+      "name": "plain document"
+    },
+    {
+      "actual": true,
+      "expected": true,
+      "name": "rich document"
+    },
+    {
+      "actual": true,
+      "expected": true,
+      "name": "rich child of document"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "sibling is not document"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "missing document"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "missing focus"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "unknown class"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "plain password"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "rich password"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "rich readonly"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "rich runtime password"
+    },
+    {
+      "actual": true,
+      "expected": true,
+      "name": "rich password removed"
+    },
+    {
+      "actual": false,
+      "expected": false,
+      "name": "disabled rich"
+    }
+  ],
+  "ok": true,
+  "screenshots": []
+}

@@ -154,7 +154,7 @@ final class GogakuInputController: IMKInputController {
     /// 学习模式下的 Shift 单击：切中→英／英→中方向（2026-11 用户裁决），
     /// 不进普通模式的临时英文路径。
     private func handleShiftClickInLearning() {
-        guard learningDevEnabled else { NSSound.beep(); return }
+        guard learningEnabled else { NSSound.beep(); return }
         toggleDirection(nil)
     }
     private lazy var shiftPoller = ShiftTapPoller { [weak self] side in
@@ -177,25 +177,23 @@ final class GogakuInputController: IMKInputController {
     private var anchorAgeReads = 0
     /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
     private var positionTimer: Timer?
-    // 学习功能门禁（quickmt 开发版裁决，docs/learning-quickmt-dev-decision.md）：
-    // 真实宿主安全矩阵仍未验收，但用户已接受开发版风险，由设置开关解锁本机
-    // 自用；关闭开关即回门禁态。与 EngineHub.learningSession 同源（同一设置
-    // 字段），两处口径一致；正式验收口径与双端交付门槛不变。
-    private var learningDevEnabled: Bool { settings.learningTranslationEnabled }
+    // 学习功能门禁（2026-11-06 双端统一计划）：默认关闭；用户保存火山凭据并
+    // 显式启用后才进入学习模式。关闭即回门禁态，与 EngineHub.learningSession
+    // 同源（同一设置字段）。
+    private var learningEnabled: Bool { settings.learningTranslationEnabled }
 
     private lazy var spelling: TranslationService = {
-        let service = TranslationService(executable: Bundle.main.bundleURL.appendingPathComponent("Contents/Helpers/GogakuTranslator"), arguments: ["--spell"])
+        // 与翻译共用同一个随包 helper 及其解析规则（bundle 内 → 已安装通道）。
+        let service = TranslationService(executable: LearningTranslation.serviceConfiguration().executable,
+                                         arguments: ["--spell"])
         service.onResult = { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self, var view = self.displayed, view.stamp == result.stamp,
-                      self.pendingEdits == 0,
-                      let current = self.currentTarget(), current == self.target,
-                      let rect = self.displayRect else { return }
-                view.issues = result.issues ?? []; self.displayed = view
-                // 英→中无译文阶段不显示面板（拼写结果入缓存，译文到达后随面板显示）。
-                if view.stamp.mode == .learning, view.stamp.direction == .enToZh, view.candidates.isEmpty { return }
-                self.panel.render(view, at: rect, targetWindowLevel:
-                                  GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
+            guard let self else { return }
+            // 拼写结果写入共享学习会话（引擎队列），随 publishLearning 渲染。
+            // 结果带结果期 stamp，核心按同修订守卫拒绝过期结果（编辑使旧范围
+            // 失效）；入会话后逐键发布不再覆盖丢失，译文未就绪阶段同样可见。
+            self.hub.async {
+                self.hub.existingLearningSession?.setIssues(result.issues ?? [], stamp: result.stamp)
+                self.publishLearning(generation: result.stamp.focus)
             }
         }
         return service
@@ -232,11 +230,12 @@ final class GogakuInputController: IMKInputController {
     private var enToZhHideWork: DispatchWorkItem?
     /// 中→英预译的空闲防抖任务（2026-11 用户反馈：连续输入加防抖）。
     private var eagerDebounceWork: DispatchWorkItem?
-    /// 火山免费额度计量：仅 volcengine 后端且成功结果计数（Unicode 标量数，
-    /// 与火山 input_characters 计费口径一致）；自然月自动清零。
+    /// 本机本月请求字符统计：成功结果才计数，优先使用服务端计费口径
+    /// `Extra.input_characters`，缺失时按 Unicode 标量估算；自然月自动清零。
+    /// 该统计只代表本机发出且成功的请求，不代表账户余额或官方账本。
     private func meterVolcengineUsage(_ result: TranslationResult) {
-        guard LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine",
-              result.error == nil, let target = result.target, !target.isEmpty else { return }
+        guard result.error == nil, result.cached != true,
+              let target = result.target, !target.isEmpty else { return }
         let month = Self.currentMonthID()
         if settings.volcengineUsageMonth != month {
             settings.volcengineUsageMonth = month
@@ -259,19 +258,14 @@ final class GogakuInputController: IMKInputController {
         return formatter.string(from: Date())
     }
 
-    /// 学习组合防冷启动：每个组合期首发一个极短预热请求，权重加载与打字并行
-    ///（2026-11-04 用户反馈：停顿后长时间不出来——首个真请求承担整段冷启动，
-    /// small100 权重加载约 1.4s）；组合结束（suspend）后复位。
-    private var warmedEager = false
-    /// 学习翻译后端：quickmt 开发版外置 Python 辅助进程（装配路径与 beam 由
-    /// 设置解析）；设置变更时销毁重建（rebuildLearningTranslatorIfNeeded）。
-    /// 请求按 sourceID 分路：commit＝提交替换（学习模式中→英）、
-    /// eager＝高亮候选预译，其余＝英→中组合会话请求。
+    /// 学习翻译：随包 GogakuTranslator 辅助进程（火山 NMT）；设置开关变化时
+    /// 销毁重建（rebuildLearningTranslatorIfNeeded）。请求按 sourceID 分路：
+    /// commit＝提交替换（学习模式中→英）、eager＝高亮候选预译，
+    /// 其余＝英→中组合会话请求。
     private lazy var translator = makeTranslator()
 
     private func makeTranslator() -> TranslationService {
-        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize,
-                                                                    backend: settings.learningTranslationBackend)
+        let configuration = LearningTranslation.serviceConfiguration()
         // 英→中连续输入防抖 300ms（2026-11 用户反馈）：逐键请求改停顿后单发；
         // 提交替换走 requestImmediately 不受影响。
         let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments,
@@ -287,15 +281,13 @@ final class GogakuInputController: IMKInputController {
                 DispatchQueue.main.async { self.applyEagerTranslation(result) }
             default:
                 self.hub.async {
-                    // quickmt 开发版豁免（2026-11 裁决）：成功且来源确为开发版 worker
-                    // 的结果按 approved 进入候选；失败保留输入并提示原文上屏。
-                    // 正式口径（approved 仅由审核资源清单决定）不变。
+                    // 只有火山 NMT 的成功结果按 approved 进入候选；失败保留输入并
+                    // 提示原文上屏。approved 不由「翻译成功」推导到其他资源。
                     if result.error == nil {
                         self.hub.existingLearningSession?.receive(result, approved: result.resource == LearningTranslation.resourceID)
                     } else {
                         self.hub.existingLearningSession?.translationFailed(
-                            result, message: Self.learningFailureMessage(result.error ?? "",
-                                                                        backend: self.settings.learningTranslationBackend))
+                            result, message: LearningTranslation.failureMessage(result.error ?? ""))
                     }
                     self.publishLearning(generation: result.stamp.focus)
                 }
@@ -306,8 +298,7 @@ final class GogakuInputController: IMKInputController {
 
     /// 预译专用服务：独立实例，避免与提交／英→中请求互相顶掉在飞请求。
     private func makeEagerTranslator() -> TranslationService {
-        let configuration = LearningTranslation.serviceConfiguration(beam: settings.learningBeamSize,
-                                                                    backend: settings.learningTranslationBackend)
+        let configuration = LearningTranslation.serviceConfiguration()
         let service = TranslationService(executable: configuration.executable, arguments: configuration.arguments)
         service.onResult = { [weak self] result in
             DispatchQueue.main.async {
@@ -383,7 +374,7 @@ final class GogakuInputController: IMKInputController {
                      GGPanelTargetLevel(anchor.windowLevel, anchor.windowLevelValid))
     }
 
-    /// 提交替换（学习模式中→英）：中文提交文本换成 quickmt 译文上屏。
+    /// 提交替换（学习模式中→英）：中文提交文本换成火山译文上屏。
     /// 纯非 CJK 提交（原编码、英文候选）按普通语义原样上屏。
     /// 中→英译文上屏后补一个尾随空格（2026-11 用户裁决：便于继续输入英文）。
     private static func withTrailingSpace(_ text: String) -> String {
@@ -436,26 +427,6 @@ final class GogakuInputController: IMKInputController {
         target = currentTarget()
     }
 
-    private static func learningFailureMessage(_ error: String, backend: String) -> String {
-        let backendName = LearningTranslation.normalizedBackend(backend) == "small100" ? "small100"
-            : (LearningTranslation.normalizedBackend(backend) == "volcengine" ? "火山翻译" : "quickmt")
-        switch error {
-        case "credentials_missing":
-            return "火山翻译凭据未配置：在仓库检出目录运行 "
-                + LearningTranslation.prepareCommand(backend: backend)
-                + "；输入已保留，可 ⌘Return 明确原文上屏"
-        case "model_missing":
-            return backendName + " 模型未就绪：请在仓库检出目录运行 "
-                + LearningTranslation.prepareCommand(backend: backend)
-                + "；输入已保留，可 ⌘Return 明确原文上屏"
-        case "timeout":
-            return backendName + " 翻译超时；输入已保留，可 ⌘Return 明确原文上屏"
-        case "service_unavailable", "service_exited", "service_eof":
-            return backendName + " 辅助进程不可用；输入已保留，可 ⌘Return 明确原文上屏"
-        default:
-            return "quickmt 开发版翻译失败（\(error)）；输入已保留，可 ⌘Return 明确原文上屏"
-        }
-    }
 
     override init!(server: IMKServer!, delegate: Any!, client inputClient: Any!) {
         super.init(server: server, delegate: delegate, client: inputClient)
@@ -500,10 +471,9 @@ final class GogakuInputController: IMKInputController {
         panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         application = gg_read_host(client())?.application ?? ""
         // 全局模式状态（2026-11-04 用户裁决）：切换应用保持一个普通／学习状态，
-        // 不按应用记忆；开发版开关关闭时学习状态不可用，普通模式始终可用。
-        mode = learningDevEnabled ? settings.preferredMode : .normal
+        // 不按应用记忆；学习开关关闭时学习状态不可用，普通模式始终可用。
+        mode = learningEnabled ? settings.preferredMode : .normal
         direction = settings.preferredDirection
-        warmEnToZhWorkerIfNeeded()
         configure()
     }
 
@@ -612,7 +582,6 @@ final class GogakuInputController: IMKInputController {
         }
         eagerBacklog = []
         eagerDebounceWork?.cancel()
-        warmedEager = false
         cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
         stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0
@@ -658,7 +627,7 @@ final class GogakuInputController: IMKInputController {
         let previous = settings
         suspend()
         settings = Settings.load()
-        // 开发版开关关闭即回门禁态：学习组合已随 suspend 结束，模式回普通，
+        // 学习开关关闭即回门禁态：学习组合已随 suspend 结束，模式回普通，
         // 共享学习会话释放（第二份词库内存一并回收）。
         if !settings.learningTranslationEnabled, mode == .learning { mode = .normal }
         rebuildLearningTranslatorIfNeeded(from: previous)
@@ -670,12 +639,11 @@ final class GogakuInputController: IMKInputController {
         }
     }
 
-    /// 学习后端配置（启用／beam）变更时销毁重建辅助进程：旧进程由 deinit
-    /// 终止，进行中的组合按现行失效规则处理（invalidate 丢弃迟到结果）。
+    /// 学习开关变更时销毁重建辅助进程：旧进程由 deinit 终止，进行中的组合按
+    /// 现行失效规则处理（invalidate 丢弃迟到结果）。凭据由 helper 按请求热读，
+    /// 保存／移除凭据无需重建进程。
     private func rebuildLearningTranslatorIfNeeded(from previous: Settings) {
-        guard previous.learningTranslationEnabled != settings.learningTranslationEnabled
-            || previous.learningBeamSize != settings.learningBeamSize
-            || previous.learningTranslationBackend != settings.learningTranslationBackend else { return }
+        guard previous.learningTranslationEnabled != settings.learningTranslationEnabled else { return }
         translator.invalidate()
         translator = makeTranslator()
         eagerTranslator.invalidate()
@@ -797,9 +765,17 @@ final class GogakuInputController: IMKInputController {
         guard let current = currentTarget(readRectangle: displayed == nil && markedShown.isEmpty) else { suspend(); return false }
         let fieldChanged = target == nil || target?.application != current.application || target?.pid != current.pid
         target = current; application = current.application
-        // 学习模式中→英与普通模式同一条核心路径（同键位、同候选、同上屏规则），
+        // 学习模式中→英与普通模式同一条核心路径（同候选、同上屏规则），
         // 仅提交时换译译文；英→中保留独立英语缓冲路径。
+        // 学习中→英 Enter／⌘Enter（2026-11-06 用户裁决）：Enter 选就绪目标
+        // （译文就绪即上屏英文，未就绪先上屏中文源文再异步换译），不再提交
+        // 剩余原编码；⌘Enter 明确原文上屏（中文源文直接上屏，不换译）。
         if mode == .normal || (mode == .learning && direction == .zhToEn) {
+            if mode == .learning, event.keyCode == 36, displayed?.raw.isEmpty == false {
+                let rawCommit = event.modifierFlags.contains(.command)
+                return handleNormalSync(.space, at: current, fieldChanged: fieldChanged,
+                                        swapTranslation: !rawCommit)
+            }
             // 消费键期间的待插入译文：缓冲而非直通，防止译文与新组合交错。
             if event.type == .keyDown, pendingTranslatedCommit != nil {
                 pendingTranslatedCommit?.buffer.append(event)
@@ -834,7 +810,8 @@ final class GogakuInputController: IMKInputController {
         return handleNormalSync(normalEvent, at: target, fieldChanged: fieldChanged)
     }
 
-    private func handleNormalSync(_ normalEvent: NormalEvent, at target: FocusTarget, fieldChanged: Bool) -> Bool {
+    private func handleNormalSync(_ normalEvent: NormalEvent, at target: FocusTarget, fieldChanged: Bool,
+                                  swapTranslation: Bool = true) -> Bool {
         self.target = target
         application = target.application
         let settings = self.settings
@@ -869,15 +846,16 @@ final class GogakuInputController: IMKInputController {
         ValidationMonitor.shared.core(DispatchTime.now().uptimeNanoseconds - coreStart)
         #endif
         guard let snap = snapshot else { suspend(); return false }
-        applyNormal(snap, target: target)
+        applyNormal(snap, target: target, swapTranslation: swapTranslation)
         if !snap.consumed {
             if snap.composing { suspend() } else { panel.dismiss() }
         }
         return snap.consumed
     }
 
-    /// 把核心快照落到宿主（提交／字母）与面板。
-    private func applyNormal(_ snap: NormalSnapshot, target: FocusTarget) {
+    /// 把核心快照落到宿主（提交／字母）与面板。swapTranslation=false：提交文本
+    /// 不换译直接上屏（学习中→英 ⌘Enter 明确原文上屏）。
+    private func applyNormal(_ snap: NormalSnapshot, target: FocusTarget, swapTranslation: Bool = true) {
         let learningSwap = mode == .learning && direction == .zhToEn
         guard active, let current = currentTarget(),
               current.application == target.application, current.pid == target.pid else {
@@ -897,7 +875,7 @@ final class GogakuInputController: IMKInputController {
         }
         if !snap.composing { panel.dismiss() }
         if !snap.commit.isEmpty {
-            if learningSwap {
+            if learningSwap && swapTranslation {
                 commitLearningSwap(snap.commit, at: target, preWriteCheck: current)
             } else {
                 insertCommit(snap.commit, at: target, preWriteCheck: current)
@@ -921,7 +899,7 @@ final class GogakuInputController: IMKInputController {
                       source: item.text,
                       range: RawRange(start: 0, length: 0),
                       target: item.text,
-                      // 学习中→英：仅高亮候选显示真实提交文本（quickmt 译文，
+                      // 学习中→英：仅高亮候选显示真实提交文本（火山译文，
                       // 2026-11 用户裁决：其余不显示）；历史缓存不外溢。
                       explanation: learningSwap
                           ? (isHighlighted ? (translationMemory[item.text] ?? "") : "")
@@ -930,16 +908,10 @@ final class GogakuInputController: IMKInputController {
         }
         view.status = snap.status
         if snap.composing {
-            // 学习中→英新组合预热：预译辅助进程权重懒加载与打字并行
-            //（2026-11-04 用户反馈：停顿后长时间不出来＝首个请求承担冷启动）。
-            if learningSwap, !warmedEager {
-                warmedEager = true
-                eagerTranslator.requestImmediately(
-                    TranslationRequest(stamp: InputStamp(mode: .learning, direction: .zhToEn),
-                                       sourceID: "warmup", source: "你好",
-                                       resource: LearningTranslation.resourceID))
-            }
             // 学习中→英：只预译高亮候选（2026-11 用户裁决：仅第一个显示英文）。
+            // 不再发送固定文本预热请求（2026-11-06）：云端按请求计费，固定
+            // “你好/hi” 预热会污染本月字符统计且无必要；TLS 复用由 URLSession
+            // 在首次真实请求后保持。
             if learningSwap {
                 let inPage = snap.selected - snap.page * CandidatePage.size
                 if snap.candidates.indices.contains(inPage) {
@@ -1279,8 +1251,8 @@ final class GogakuInputController: IMKInputController {
             if stamp.focus != generation || stamp.mode != self.mode || stamp.direction != self.direction {
                 session.configure(focus: generation, mode: self.mode, direction: self.direction)
             }
-            // quickmt 开发版翻译请求（2026-11 裁决）：sourceID／source 来自
-            // publishLearning 的 source 表；resource 标记开发版豁免。
+            // 火山翻译请求：sourceID／source 来自 publishLearning 的 source 表；
+            // resource 标记火山 NMT（approved 只认该资源）。
             session.translationNeeded = { [weak self] stamp, source in
                 self?.translator.request(TranslationRequest(stamp: stamp, sourceID: source.id,
                                                             source: source.text,
@@ -1293,19 +1265,6 @@ final class GogakuInputController: IMKInputController {
 
     /// 英→中无译文时的延迟隐藏：防逐键显示/隐藏闪烁（2026-11 用户反馈）。
     /// 宽限期内译文到达（candidates 非空）即取消隐藏原地刷新。
-    /// 学习英→中激活／切换时预热 worker（2026-11-04）：云端 worker 冷首请求
-    /// 含 TLS／签名握手（实测 ~470ms），放在激活期而非首组合——首组合期预热
-    /// 曾占住串行通道并取消真实首句请求（b66 已撤）。仅 worker 冷时发一条
-    /// "hi"（计入用量计量，约 2 字符），结果被会话按 sourceID 丢弃。
-    private func warmEnToZhWorkerIfNeeded() {
-        guard learningDevEnabled, mode == .learning, direction == .enToZh,
-              !translator.workerRunning else { return }
-        translator.requestImmediately(
-            TranslationRequest(stamp: InputStamp(mode: .learning, direction: .enToZh),
-                               sourceID: "warmup", source: "hi",
-                               resource: LearningTranslation.resourceID))
-    }
-
     private func scheduleEnToZhHide(delay: TimeInterval = 0.7) {
         enToZhHideWork?.cancel()
         let work = DispatchWorkItem { [weak self] in
@@ -1370,7 +1329,7 @@ final class GogakuInputController: IMKInputController {
                 self.anchorAgeReads = 0
             }
             // 拼写检查仅英→中且开发版开关打开时走现有 --spell 通路。
-            if self.learningDevEnabled, self.mode == .learning, self.direction == .enToZh, self.requestedSpellStamp != value.stamp {
+            if self.learningEnabled, self.mode == .learning, self.direction == .enToZh, self.requestedSpellStamp != value.stamp {
                 self.requestedSpellStamp = value.stamp
                 self.spelling.request(TranslationRequest(stamp: value.stamp, sourceID: "spelling", source: value.raw,
                                                          resource: "NSSpellChecker:en_US", ignoredWords: Array(self.settings.ignoredWords)))
@@ -1496,24 +1455,28 @@ final class GogakuInputController: IMKInputController {
     }
 
     /// 切换提示的输入位置锚点：显示矩形／目标矩形，否则实时读宿主光标矩形（组合外也可用）。
+    /// 全部不可得（密码字段／宿主不支持矩形读取／无选区）时退回鼠标位置：切换
+    /// 本身成功就必须有提示，不能因宿主读不出光标而静默吞掉（2026-11 用户报告
+    /// 「有时切换无提示」；此前的「无锚点不显示」裁决只反对固定角落，鼠标位置
+    /// 仍在操作者注意力附近）。
     private func freshToastAnchor() -> NSRect? {
         if let rect = displayRect, rect != .zero { return rect }
         if let current = currentTarget(readRectangle: true, strictComposition: false), current.rect != .zero {
             return current.rect
         }
         if let rect = target?.rect, rect != .zero { return rect }
-        return nil
+        let mouse = NSEvent.mouseLocation
+        return NSRect(x: mouse.x, y: mouse.y - 8, width: 0, height: 18)
     }
 
     @objc private func toggleMode(_ sender: Any?) {
-        // quickmt 开发版裁决：开关打开时学习模式可切换；关闭保持门禁态（蜂鸣）。
-        guard learningDevEnabled else { NSSound.beep(); return }
+        // 学习开关打开时才可切换；关闭保持门禁态（蜂鸣）。
+        guard learningEnabled else { NSSound.beep(); return }
         let anchor = freshToastAnchor()   // 在 suspend 清理前读当前插入点
         suppressSettingsReloadUntil = Date().addingTimeInterval(0.5)
         suspend()
         mode = mode == .normal ? .learning : .normal
         persistPreference()
-        warmEnToZhWorkerIfNeeded()
         // 进入学习模式时同屏显示当前学习方向（2026-11-04 用户裁决：一个浮层
         // 讲完状态，省一次 ⌃⇧J 探视）；退回普通模式方向无意义，仅示普通。
         toast.show(mode == .learning
@@ -1523,13 +1486,12 @@ final class GogakuInputController: IMKInputController {
     }
 
     @objc private func toggleDirection(_ sender: Any?) {
-        guard learningDevEnabled else { NSSound.beep(); return }
+        guard learningEnabled else { NSSound.beep(); return }
         let anchor = freshToastAnchor()
         suppressSettingsReloadUntil = Date().addingTimeInterval(0.5)
         suspend()
         direction = direction == .zhToEn ? .enToZh : .zhToEn
         persistPreference()
-        warmEnToZhWorkerIfNeeded()
         toast.show(direction == .zhToEn ? "中→英" : "英→中", anchor: anchor)
         configure()
     }
@@ -1624,7 +1586,8 @@ final class ToastWindow: NSPanel {
         // 按文本自适应尺寸（固定 44×36 会截断「中→英」等提示）。
         let textSize = text.size(withAttributes: [.font: label.font!])
         let size = NSSize(width: max(32, ceil(textSize.width) + 14), height: 24)
-        // 用户裁决：提示必须在输入附近；无有效锚点时不显示（不放固定角落）。
+        // 用户裁决：提示必须在输入附近；不放固定角落。宿主光标矩形不可得时
+        // 锚到鼠标位置，保证切换成功必有提示（2026-11 用户报告「有时无提示」）。
         guard let caret = anchor, caret != .zero,
               let origin = PanelPlacement.toastOrigin(
                   anchor: caret, panelSize: size,

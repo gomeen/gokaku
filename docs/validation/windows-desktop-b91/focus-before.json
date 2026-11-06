@@ -1,0 +1,153 @@
+{
+  "activeOpen": {
+    "id": 2,
+    "ok": true,
+    "v": 1,
+    "view": {
+      "candidates": [],
+      "commit": "",
+      "composing": false,
+      "consumed": false,
+      "draftAvailable": false,
+      "english": 0,
+      "issues": [],
+      "learning": false,
+      "marked": "",
+      "page": 0,
+      "pageCount": 0,
+      "pending": false,
+      "preedit": "",
+      "raw": "",
+      "selected": 0,
+      "settingsRevision": 2,
+      "status": "",
+      "toast": 0
+    }
+  },
+  "after": {
+    "error": "焦点已变化，请重新输入",
+    "id": 6,
+    "ok": false,
+    "v": 1
+  },
+  "first": {
+    "id": 4,
+    "ok": true,
+    "v": 1,
+    "view": {
+      "candidates": [
+        {
+          "gloss": "pron. you · pron. your",
+          "text": "你"
+        },
+        {
+          "gloss": "v. doubtful · v. suspicious",
+          "text": "拟"
+        },
+        {
+          "gloss": "n. mud · n. any mush-like substance",
+          "text": "泥"
+        },
+        {
+          "gloss": "v. opposite · v. to go against",
+          "text": "逆"
+        },
+        {
+          "gloss": "v. greasy · v. soft",
+          "text": "腻"
+        },
+        {
+          "gloss": "intj. Sentence-final particle",
+          "text": "呢"
+        },
+        {
+          "gloss": "n. Used in transcription. · n. Buddhist nun",
+          "text": "尼"
+        },
+        {
+          "gloss": "n. small child · n. small and weak",
+          "text": "倪"
+        },
+        {
+          "gloss": "n. You",
+          "text": "祢"
+        }
+      ],
+      "commit": "",
+      "composing": true,
+      "consumed": true,
+      "draftAvailable": false,
+      "english": 0,
+      "issues": [],
+      "learning": false,
+      "marked": "ni",
+      "page": 0,
+      "pageCount": 13,
+      "pending": false,
+      "preedit": "ni",
+      "raw": "ni",
+      "selected": 0,
+      "settingsRevision": 2,
+      "status": "",
+      "toast": 0
+    }
+  },
+  "lateBlur": {
+    "id": 3,
+    "ok": true,
+    "v": 1,
+    "view": {
+      "candidates": [],
+      "commit": "",
+      "composing": false,
+      "consumed": false,
+      "draftAvailable": false,
+      "english": 0,
+      "issues": [],
+      "learning": false,
+      "marked": "",
+      "page": 0,
+      "pageCount": 0,
+      "pending": false,
+      "preedit": "",
+      "raw": "",
+      "selected": 0,
+      "settingsRevision": 2,
+      "status": "",
+      "toast": 0
+    }
+  },
+  "next": {
+    "error": "焦点已变化，请重新输入",
+    "id": 5,
+    "ok": false,
+    "v": 1
+  },
+  "ok": false,
+  "previousOpen": {
+    "id": 2,
+    "ok": true,
+    "v": 1,
+    "view": {
+      "candidates": [],
+      "commit": "",
+      "composing": false,
+      "consumed": false,
+      "draftAvailable": false,
+      "english": 0,
+      "issues": [],
+      "learning": false,
+      "marked": "",
+      "page": 0,
+      "pageCount": 0,
+      "pending": false,
+      "preedit": "",
+      "raw": "",
+      "selected": 0,
+      "settingsRevision": 2,
+      "status": "",
+      "toast": 0
+    }
+  },
+  "screenshots": []
+}

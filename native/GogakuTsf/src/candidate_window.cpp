@@ -1,208 +1,117 @@
 #include "candidate_window.h"
-
 #include <algorithm>
+#include <windowsx.h>
 
-namespace {
-const wchar_t *KWndClass = L"GogakuCandidateWindow";
-const int KLineH = 30;
-const int KPreeditH = 26;
-const int KPadX = 12;
-const int KGlossMax = 24; /* 释义最多显示的 UTF-16 单元数 */
-}
+namespace { constexpr wchar_t WindowClass[] = L"GogakuCandidateWindowV2"; }
 
-bool CandidateWindow::create(HINSTANCE hInst) {
+bool CandidateWindow::create(HINSTANCE instance) {
     if (m_hwnd) return true;
-    WNDCLASSW wc{};
-    wc.lpfnWndProc = s_wndProc;
-    wc.hInstance = hInst;
-    wc.lpszClassName = KWndClass;
-    wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-    wc.hbrBackground = nullptr;
-    if (!RegisterClassW(&wc)) return false;
-    m_hwnd = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
-                             KWndClass, L"", WS_POPUP, 0, 0, 10, 10,
-                             nullptr, nullptr, hInst, nullptr);
+    WNDCLASSW wc{}; wc.lpfnWndProc=s_wndProc; wc.hInstance=instance;
+    wc.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101));
+    wc.lpszClassName=WindowClass; wc.hCursor=LoadCursorW(nullptr,IDC_ARROW);
+    if (!RegisterClassW(&wc) && GetLastError()!=ERROR_CLASS_ALREADY_EXISTS) return false;
+    m_instance=instance;
+    m_hwnd=CreateWindowExW(WS_EX_TOPMOST|WS_EX_TOOLWINDOW|WS_EX_NOACTIVATE|WS_EX_LAYERED,
+        WindowClass,L"Gogaku 候选",WS_POPUP,0,0,1,1,nullptr,nullptr,instance,this);
     if (!m_hwnd) return false;
-    SetWindowLongPtrW(m_hwnd, GWLP_USERDATA, (LONG_PTR)this);
-    m_font = CreateFontW(-16, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET,
-                         OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                         DEFAULT_PITCH, L"Microsoft YaHei UI");
-    m_smallFont = CreateFontW(-12, 0, 0, 0, FW_NORMAL, 0, 0, 0, DEFAULT_CHARSET,
-                              OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                              DEFAULT_PITCH, L"Microsoft YaHei UI");
+    m_renderer=std::make_unique<gw::CandidateRenderer>();
     return true;
 }
-
 void CandidateWindow::destroy() {
-    if (m_hwnd) {
-        DestroyWindow(m_hwnd);
-        m_hwnd = nullptr;
-    }
-    if (m_font) { DeleteObject(m_font); m_font = nullptr; }
-    if (m_smallFont) { DeleteObject(m_smallFont); m_smallFont = nullptr; }
+    if (m_hwnd) { KillTimer(m_hwnd,1); DestroyWindow(m_hwnd); m_hwnd=nullptr; }
+    m_renderer.reset(); m_haveCaret=false;
 }
-
-void CandidateWindow::showCandidates(const GcSnapshot &snap, const RECT &caretRect) {
-    if (!m_hwnd) return;
-    m_toast = false;
-    m_preedit = Utf8ToUtf16(snap.preedit ? snap.preedit : "");
-    m_words.clear();
-    m_glosses.clear();
-    /* snap.selected 为全局下标；面板高亮需页内下标（整页满时换算精确）。 */
-    const size_t pageStart = snap.page * snap.count;
-    m_selected = (snap.selected >= pageStart && snap.selected < pageStart + snap.count)
-                     ? snap.selected - pageStart : 0;
-    m_page = snap.page;
-    m_pageCount = snap.page_count;
-    for (size_t i = 0; i < snap.count && i < 100; ++i) {
-        m_words.push_back(Utf8ToUtf16(snap.candidates[i].text ? snap.candidates[i].text : ""));
-        std::wstring g = Utf8ToUtf16(snap.candidates[i].gloss ? snap.candidates[i].gloss : "");
-        if ((int)g.size() > KGlossMax) g = g.substr(0, KGlossMax) + L"…";
-        m_glosses.push_back(g);
-    }
-    layout(caretRect);
-    InvalidateRect(m_hwnd, nullptr, TRUE);
-    if (!m_words.empty() || !m_preedit.empty()) ShowWindow(m_hwnd, SW_SHOWNOACTIVATE);
-    else ShowWindow(m_hwnd, SW_HIDE);
-}
-
-void CandidateWindow::showToast(const wchar_t *text) {
-    if (!m_hwnd) return;
-    m_toast = true;
-    m_words.clear();
-    m_glosses.clear();
-    m_preedit = text;
-    RECT r = {0, 0, 64, 64};
-    layout(r);
-    InvalidateRect(m_hwnd, nullptr, TRUE);
-    ShowWindow(m_hwnd, SW_SHOWNOACTIVATE);
-    SetTimer(m_hwnd, 1, 800, nullptr); /* WM_TIMER → 隐藏（见 wndProc） */
-}
-
 void CandidateWindow::hide() {
-    if (m_hwnd) {
-        KillTimer(m_hwnd, 1);
-        ShowWindow(m_hwnd, SW_HIDE);
+    if (m_hwnd) { KillTimer(m_hwnd,1); ShowWindow(m_hwnd,SW_HIDE); }
+    m_view=gw::Json::object();
+}
+void CandidateWindow::showView(const gw::Json &view,const RECT &caret,const gw::Json &settings) {
+    if (!m_hwnd || !view.is_object()) return;
+    KillTimer(m_hwnd,1);
+    m_view=view; m_settings=settings; m_caret=caret; m_haveCaret=true;
+    // Core normal snapshots use integer toast/english enums; public views may
+    // already contain the display string. Normalize before entering the renderer.
+    if (m_view.contains("toast") && m_view["toast"].is_number_integer()) {
+        int code=m_view["toast"].get<int>();
+        m_view["toast"]=code==1?"中":code==2?"英":"";
+    }
+    const bool visible=m_view.value("composing",false) || m_view.value("draftAvailable",false) ||
+        !m_view.value("toast",std::string()).empty() ||
+        (m_view.contains("candidates") && m_view["candidates"].is_array() && !m_view["candidates"].empty());
+    if (!visible) { hide(); return; }
+    redraw();
+    if (!m_view.value("composing",false) && !m_view.value("draftAvailable",false) && !m_view.value("toast",std::string()).empty()) SetTimer(m_hwnd,1,800,nullptr);
+}
+void CandidateWindow::showCandidates(const GcSnapshot &snapshot,const RECT &caret) {
+    gw::Json candidates=gw::Json::array();
+    for (size_t i=0;i<snapshot.count && i<9;++i) candidates.push_back({
+        {"text",snapshot.candidates[i].text?snapshot.candidates[i].text:""},
+        {"gloss",snapshot.candidates[i].gloss?snapshot.candidates[i].gloss:""}});
+    showView({{"composing",snapshot.count || (snapshot.preedit && *snapshot.preedit)},
+        {"preedit",snapshot.preedit?snapshot.preedit:""},{"candidates",candidates},
+        {"selected",snapshot.selected},{"page",snapshot.page},{"pageCount",snapshot.page_count}},caret,m_settings);
+}
+void CandidateWindow::showToast(const wchar_t *value) {
+    // Never use mouse position or an unrelated window as a synthetic anchor.
+    // The modern caller can show a first-use toast with showView + its caret.
+    if (!m_hwnd || !m_haveCaret || !value) return;
+    KillTimer(m_hwnd,1);
+    m_view={{"toast",gw::utf8(value)},{"candidates",gw::Json::array()}};
+    redraw(); SetTimer(m_hwnd,1,800,nullptr);
+}
+void CandidateWindow::redraw() {
+    if (!m_renderer || !m_haveCaret) return;
+    try {
+        UINT dpi=GetDpiForWindow(m_hwnd); if (!dpi) dpi=96;
+        m_renderer->render(m_view,gw::resolvedTheme(m_settings),gw::darkAppearance(),m_settings.value("candidateFontSize",14),dpi);
+        auto size=m_renderer->size();
+        MONITORINFO info{}; info.cbSize=sizeof(info);
+        if (!GetMonitorInfoW(MonitorFromRect(&m_caret,MONITOR_DEFAULTTONEAREST),&info)) return;
+        const auto work=info.rcWork;
+        LONG x=m_caret.right+4,y=m_caret.bottom+2;
+        if (x+size.cx>work.right) x=m_caret.left-size.cx;
+        if (y+size.cy>work.bottom) y=m_caret.top-size.cy-2;
+        x=std::max(work.left,std::min(x,work.right-size.cx));
+        y=std::max(work.top,std::min(y,work.bottom-size.cy));
+        POINT destination{x,y},source{};
+        BLENDFUNCTION blend{AC_SRC_OVER,0,m_renderer->opacity(),AC_SRC_ALPHA};
+        if (!UpdateLayeredWindow(m_hwnd,nullptr,&destination,&size,m_renderer->dc(),&source,0,&blend,ULW_ALPHA)) { ShowWindow(m_hwnd,SW_HIDE); return; }
+        SetWindowPos(m_hwnd,HWND_TOPMOST,x,y,size.cx,size.cy,SWP_NOACTIVATE|SWP_SHOWWINDOW);
+    } catch (...) {
+        // Rendering failure cannot cross TSF COM boundaries or alter composition.
+        ShowWindow(m_hwnd,SW_HIDE);
     }
 }
-
-void CandidateWindow::layout(const RECT &caretRect) {
-    if (!m_hwnd) return;
-    HDC dc = GetDC(m_hwnd);
-    HFONT old = (HFONT)SelectObject(dc, m_font);
-    int maxW = 120;
-    wchar_t tmp[64];
-    if (!m_toast) {
-        for (size_t i = 0; i < m_words.size(); ++i) {
-            std::wstring line = std::to_wstring(i + 1) + L" " + m_words[i];
-            if (!m_glosses[i].empty()) line += L"  " + m_glosses[i];
-            SIZE sz{};
-            GetTextExtentPoint32W(dc, line.c_str(), (int)line.size(), &sz);
-            maxW = std::max(maxW, (int)sz.cx);
+LRESULT CALLBACK CandidateWindow::s_wndProc(HWND hwnd,UINT message,WPARAM wp,LPARAM lp) {
+    if (message==WM_NCCREATE) {
+        auto create=reinterpret_cast<CREATESTRUCTW *>(lp);
+        SetWindowLongPtrW(hwnd,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(create->lpCreateParams));
+    }
+    auto self=reinterpret_cast<CandidateWindow *>(GetWindowLongPtrW(hwnd,GWLP_USERDATA));
+    if (message==WM_MOUSEACTIVATE) return MA_NOACTIVATE;
+    if (message==WM_ERASEBKGND) return 1;
+    if (message==WM_PAINT) { PAINTSTRUCT ps{}; BeginPaint(hwnd,&ps); EndPaint(hwnd,&ps); return 0; }
+    if (!self) return DefWindowProcW(hwnd,message,wp,lp);
+    switch (message) {
+    case WM_TIMER: if (wp==1) self->hide(); return 0;
+    case WM_LBUTTONUP:
+        if (self->m_renderer) {
+            const auto hit=self->m_renderer->hitTest({GET_X_LPARAM(lp),GET_Y_LPARAM(lp)});
+            // Callbacks perform their own fresh focus/revision checks in TextService.
+            // Do not SetFocus, SendInput, or directly mutate host text here.
+            switch (hit.action) {
+            case gw::CandidateRenderer::Action::Choose: { auto fn=self->onChoose; if (fn) fn(hit.index); break; }
+            case gw::CandidateRenderer::Action::Original: { auto fn=self->onOriginal; if (fn) fn(); break; }
+            case gw::CandidateRenderer::Action::Restore: { auto fn=self->onRestore; if (fn) fn(); break; }
+            case gw::CandidateRenderer::Action::Explain:
+                self->m_view["status"]=gw::utf8(hit.explanation.empty()?L"疑似拼写问题，不代表一定错误。":hit.explanation);
+                self->redraw(); break;
+            default: break;
+            }
         }
-        swprintf_s(tmp, L"%zu/%zu", m_page + 1, m_pageCount ? m_pageCount : 1);
-        SIZE sz{};
-        SelectObject(dc, m_smallFont);
-        GetTextExtentPoint32W(dc, tmp, (int)wcslen(tmp), &sz);
-        maxW = std::max(maxW, (int)sz.cx + 2 * KPadX);
-        SelectObject(dc, m_font);
-    } else {
-        maxW = 64;
-    }
-    SelectObject(dc, old);
-    ReleaseDC(m_hwnd, dc);
-
-    int w = maxW + 2 * KPadX + 8;
-    int h = m_toast ? 56
-                    : KPadX + (m_preedit.empty() ? 0 : KPreeditH) +
-                          KLineH * (int)m_words.size() + KPadX + 20;
-    RECT work{};
-    HMONITOR mon = MonitorFromRect(&caretRect, MONITOR_DEFAULTTONEAREST);
-    MONITORINFO mi{sizeof(mi)};
-    GetMonitorInfoW(mon, &mi);
-    work = mi.rcWork;
-    int x = caretRect.right + 4, y = caretRect.bottom + 2;
-    if (x + w > work.right) x = caretRect.left - w;
-    if (x < work.left) x = work.left;
-    if (y + h > work.bottom) y = caretRect.top - h - 2;
-    if (y < work.top) y = work.top;
-    SetWindowPos(m_hwnd, HWND_TOPMOST, x, y, w, h,
-                 SWP_NOACTIVATE | SWP_SHOWWINDOW);
-}
-
-LRESULT CALLBACK CandidateWindow::s_wndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
-    if (msg == WM_TIMER) {
-        KillTimer(hwnd, 1);
-        ShowWindow(hwnd, SW_HIDE);
         return 0;
+    case WM_SETTINGCHANGE: case WM_THEMECHANGED: if (IsWindowVisible(hwnd)) self->redraw(); return 0;
+    case WM_DPICHANGED: if (IsWindowVisible(hwnd)) self->redraw(); return 0;
+    default: return DefWindowProcW(hwnd,message,wp,lp);
     }
-    if (msg == WM_MOUSEACTIVATE) return MA_NOACTIVATE;
-    CandidateWindow *self = (CandidateWindow *)GetWindowLongPtrW(hwnd, GWLP_USERDATA);
-    switch (msg) {
-    case WM_PAINT:
-        return self ? self->onPaint() : DefWindowProcW(hwnd, msg, wp, lp);
-    case WM_ERASEBKGND:
-        return 1;
-    default:
-        return DefWindowProcW(hwnd, msg, wp, lp);
-    }
-}
-
-LRESULT CandidateWindow::onPaint() {
-    PAINTSTRUCT ps;
-    HDC dc = BeginPaint(m_hwnd, &ps);
-    RECT rc;
-    GetClientRect(m_hwnd, &rc);
-    FillRect(dc, &rc, (HBRUSH)GetStockObject(WHITE_BRUSH));
-    SetBkMode(dc, TRANSPARENT);
-    SelectObject(dc, m_font);
-
-    if (m_toast) {
-        SetTextColor(dc, RGB(40, 40, 40));
-        HFONT big = CreateFontW(-32, 0, 0, 0, FW_SEMIBOLD, 0, 0, 0, DEFAULT_CHARSET,
-                                OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY,
-                                DEFAULT_PITCH, L"Microsoft YaHei UI");
-        HFONT old = (HFONT)SelectObject(dc, big);
-        RECT rr = rc;
-        DrawTextW(dc, m_preedit.c_str(), -1, &rr,
-                  DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-        SelectObject(dc, old);
-        DeleteObject(big);
-        EndPaint(m_hwnd, &ps);
-        return 0;
-    }
-
-    int y = KPadX / 2;
-    if (!m_preedit.empty()) {
-        SelectObject(dc, m_smallFont);
-        SetTextColor(dc, RGB(120, 120, 120));
-        TextOutW(dc, KPadX, y, m_preedit.c_str(), (int)m_preedit.size());
-        y += KPreeditH;
-        SelectObject(dc, m_font);
-    }
-    for (size_t i = 0; i < m_words.size(); ++i) {
-        bool sel = (i == m_selected);
-        std::wstring line = std::to_wstring(i + 1) + L"  " + m_words[i];
-        if (!m_glosses[i].empty()) line += L"  " + m_glosses[i];
-        int lineW = rc.right - 2 * KPadX;
-        if (sel) {
-            RECT hl = {KPadX - 4, y, rc.right - KPadX + 2, y + KLineH};
-            HBRUSH b = CreateSolidBrush(RGB(0, 122, 255));
-            FillRect(dc, &hl, b);
-            DeleteObject(b);
-            SetTextColor(dc, RGB(255, 255, 255));
-        } else {
-            SetTextColor(dc, RGB(30, 30, 30));
-        }
-        TextOutW(dc, KPadX, y + (KLineH - 20) / 2, line.c_str(), (int)line.size());
-        y += KLineH;
-    }
-    /* 页码 */
-    wchar_t tmp[64];
-    swprintf_s(tmp, L"%zu/%zu", m_page + 1, m_pageCount ? m_pageCount : 1);
-    SelectObject(dc, m_smallFont);
-    SetTextColor(dc, RGB(160, 160, 160));
-    TextOutW(dc, KPadX, rc.bottom - 18, tmp, (int)wcslen(tmp));
-    EndPaint(m_hwnd, &ps);
-    return 0;
 }

@@ -196,6 +196,11 @@ public let defaultEnglishApps = [
     "dev.warp.Warp-Stable", "com.cmux.cmux", "app.otter.otty",
 ]
 
+/// 仅用于迁移读取：旧 `settings.json` 的本地模型后端字段已不再写入。
+private struct LegacyTranslationBackend: Decodable {
+    let learningTranslationBackend: String?
+}
+
 public struct Settings: Codable {
     public var recording = true
     public var excludedApplications: Set<String> = []
@@ -225,13 +230,11 @@ public struct Settings: Codable {
     public var englishCandidatesEnabled = true
     /// 按应用默认英文：新格式带启用状态；计算属性输出启用中的 bundle id。
     public var appDefaultEnglish: [EnglishAppEntry] = defaultEnglishApps.map { EnglishAppEntry(id: $0) }
-    /// 学习翻译（quickmt 开发版，2026-11 裁决 docs/learning-quickmt-dev-decision.md）：
-    /// 默认开启；关闭即回门禁态（菜单置灰、会话释放、正式口径不变）。
-    public var learningTranslationEnabled = true
-    /// quickmt beam（1–10，默认 1）；变更销毁重建辅助进程后生效。
-    public var learningBeamSize = LearningTranslation.defaultBeam
-    /// 学习翻译后端（"quickmt" 默认｜"small100"）；仅换模型，功能层不变。
-    public var learningTranslationBackend = LearningTranslation.defaultBackend
+    /// 学习翻译（火山 NMT，2026-11-06 双端统一计划）：默认关闭。
+    /// 只有用户保存凭据并显式启用后才发送学习源文；关闭即回门禁态。
+    public var learningTranslationEnabled = false
+    /// 设置结构版本：2 起移除本地模型后端/beam。旧配置迁移见 init(from:)。
+    public var schemaVersion = 2
     /// 全局输入模式状态（2026-11-04 用户裁决：全局一个普通／学习状态，
     /// 切换应用保持不变，优先级高于按应用默认英文；取代按应用模式记忆）。
     public var preferredMode: InputMode = .normal
@@ -248,7 +251,7 @@ public struct Settings: Codable {
         case inputScheme, fuzzyPinyin, candidateFontSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish
-        case learningTranslationEnabled, learningBeamSize, learningTranslationBackend
+        case learningTranslationEnabled, schemaVersion
         case preferredMode, preferredDirection
         case volcengineUsageMonth, volcengineUsageCharacters
     }
@@ -284,11 +287,19 @@ public struct Settings: Codable {
             appDefaultEnglish = try container.decodeIfPresent([EnglishAppEntry].self, forKey: .appDefaultEnglish)
                 ?? defaultEnglishApps.map { EnglishAppEntry(id: $0) }
         }
-        learningTranslationEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled) ?? true
-        learningBeamSize = LearningTranslation.clampedBeam(
-            try container.decodeIfPresent(Int.self, forKey: .learningBeamSize) ?? LearningTranslation.defaultBeam)
-        learningTranslationBackend = LearningTranslation.normalizedBackend(
-            try container.decodeIfPresent(String.self, forKey: .learningTranslationBackend))
+        // 迁移（2026-11-06）：旧配置的本地模型后端（quickmt／small100 或缺省）
+        // 一律关闭学习翻译，避免升级后把输入发送到云端；原本已启用火山的
+        // 配置保留启用状态、凭据与用量。新安装默认关闭。
+        let schema = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
+        let storedEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled)
+        if schema < 2 {
+            let legacyBackend = (try? LegacyTranslationBackend(from: decoder))?.learningTranslationBackend
+            learningTranslationEnabled = legacyBackend == "volcengine" ? (storedEnabled ?? true) : false
+            schemaVersion = 2
+        } else {
+            learningTranslationEnabled = storedEnabled ?? false
+            schemaVersion = max(2, schema)
+        }
         preferredMode = InputMode(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredMode) ?? "") ?? .normal
         preferredDirection = Direction(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredDirection) ?? "") ?? .zhToEn
         volcengineUsageMonth = try container.decodeIfPresent(String.self, forKey: .volcengineUsageMonth) ?? ""

@@ -5,3 +5,6 @@ __pycache__/
 dist/
 .swiftpm/
 local/
+
+# 嵌套工作区（bug-debounce 等临时 worktree 挂载点）
+/worktrees/

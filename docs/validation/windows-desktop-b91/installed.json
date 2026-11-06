@@ -1,0 +1,58 @@
+{
+  "icons": [
+    {
+      "path": "bin\\x64\\GogakuSettings.exe",
+      "large": true,
+      "small": true,
+      "count": 2
+    },
+    {
+      "path": "bin\\x64\\GogakuAgent.exe",
+      "large": true,
+      "small": true,
+      "count": 2
+    },
+    {
+      "path": "bin\\x64\\GogakuTsf.dll",
+      "large": true,
+      "small": true,
+      "count": 2
+    },
+    {
+      "path": "bin\\x86\\GogakuTsf.dll",
+      "large": true,
+      "small": true,
+      "count": 2
+    }
+  ],
+  "desktopInstaller": {
+    "path": "C:\\Users\\iixm\\Desktop\\Gogaku-0.1.1-dev.2-b91-dev-windows-x64-setup.exe",
+    "sha256": "0391171f00afbd7a3811354f5aace6c0a302ee5c726468d1a44ce150b1b35050",
+    "bytes": 54385494
+  },
+  "filesMatch": true,
+  "filesChecked": 63,
+  "shortcuts": [
+    {
+      "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Gogaku Dev\\Gogaku Dev 设置.lnk",
+      "target": "C:\\Program Files\\GogakuDev\\bin\\x64\\GogakuSettings.exe",
+      "iconLocation": ",0"
+    },
+    {
+      "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Gogaku Dev\\卸载 Gogaku Dev.lnk",
+      "target": "C:\\Program Files\\GogakuDev\\unins000.exe",
+      "iconLocation": ",0"
+    }
+  ],
+  "comRegistration": [
+    {
+      "view": "Registry64",
+      "path": "C:\\Program Files\\GogakuDev\\bin\\x64\\GogakuTsf.dll"
+    },
+    {
+      "view": "Registry32",
+      "path": "C:\\Program Files\\GogakuDev\\bin\\x86\\GogakuTsf.dll"
+    }
+  ],
+  "buildNumber": 91
+}

@@ -14,11 +14,19 @@
 
 #include <sys/stat.h>
 #include <cerrno>
+#ifdef _WIN32
+#include <fstream>
+#else
 #include <fcntl.h>
 #include <unistd.h>
+#endif
 
 #include <libime/pinyin/pinyinencoder.h>
 #include <libime/pinyin/pinyindictionary.h>
+
+#ifdef _WIN32
+#include "windows_io.h"
+#endif
 
 namespace {
 
@@ -215,7 +223,13 @@ bool parse_dump_line(const std::string &line, std::string &hanzi, std::string &p
 bool build_readings(const char *dict_path, char *err, size_t err_len) {
     try {
         libime::PinyinDictionary dict;
+#ifdef _WIN32
+        std::ifstream dictFile(gogaku::windows_io::file_path(dict_path), std::ios::binary);
+        if (!dictFile) throw std::runtime_error("词典读取失败");
+        dict.load(0, dictFile, libime::PinyinDictFormat::Binary);
+#else
         dict.load(0, dict_path, libime::PinyinDictFormat::Binary);
+#endif
         std::ostringstream out;
         dict.save(0, out, libime::PinyinDictFormat::Text);
         std::unordered_map<std::string, CharReading> readings;
@@ -256,11 +270,19 @@ int read_words_file(const char *path, GcCustomWordList **out, bool rename_on_cor
     *out = static_cast<GcCustomWordList *>(std::calloc(1, sizeof(GcCustomWordList)));
     if (*out == nullptr) return 1;
     // 目录不是词表：读取失败而非损坏（目录不能 rename 成 .corrupt 备份）。
+#ifdef _WIN32
+    std::wstring wide;
+    if (!gogaku::windows_io::utf8_path(path, wide)) return 2;
+    struct _stat64 st {};
+    if (::_wstat64(wide.c_str(), &st) == 0 && (st.st_mode & _S_IFMT) == _S_IFDIR) return 2;
+    FILE *f = _wfopen(wide.c_str(), L"rb");
+#else
     struct stat st {};
     if (::stat(path, &st) == 0 && S_ISDIR(st.st_mode)) return 2;
+    FILE *f = fopen(path, "rb");
+#endif
     std::vector<GcCustomWord> words;
     bool corrupt = false;
-    FILE *f = fopen(path, "rb");
     if (f == nullptr) {
         if (errno != ENOENT) return 2;   // 权限／描述符耗尽等：读取失败≠空表
     } else {
@@ -324,9 +346,13 @@ int read_words_file(const char *path, GcCustomWordList **out, bool rename_on_cor
             }
             words.clear();
             if (rename_on_corrupt) {
-                // 备份损坏文件并以空表启动；rename 替换已存在的旧备份。
+                // Windows 也替换旧备份；失败保留原文件，不能报告已备份后再覆盖。
+#ifdef _WIN32
+                if (!gogaku::windows_io::backup_corrupt(path)) return 2;
+#else
                 std::string backup = std::string(path) + ".corrupt";
                 (void)rename(path, backup.c_str());
+#endif
             }
         }
     }
@@ -365,6 +391,9 @@ extern "C" int gc_custom_words_write(const char *path, const GcCustomWordList *l
         contents += escape_field(w.content == nullptr ? "" : w.content);
         contents += '\n';
     }
+#ifdef _WIN32
+    return gogaku::windows_io::atomic_write(path, contents) ? 0 : 2;
+#else
     std::string temp = std::string(path) + "." + std::to_string(::getpid()) + ".tmp";
     FILE *f = fopen(temp.c_str(), "wb");
     if (f == nullptr) return 2;
@@ -399,6 +428,7 @@ extern "C" int gc_custom_words_write(const char *path, const GcCustomWordList *l
         }
     }
     return 0;
+#endif
 }
 
 extern "C" void gc_custom_word_list_free(GcCustomWordList *list) {

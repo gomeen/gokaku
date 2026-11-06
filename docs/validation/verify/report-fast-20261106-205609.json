@@ -1,0 +1,96 @@
+{
+  "profile": "fast",
+  "channel": "dev",
+  "quick": false,
+  "sourceSha256": "9e08e9bc0a3a51774b640f421669fb0c9f9135728f28e47d8e6aad0b5a9e8f51",
+  "artifacts": {
+    "macos": {
+      "name": "Gogaku-0.1.1-dev.2-b91-dev.pkg",
+      "sha256": "72e671a1a7d99746083c4fbc3ac61c76b810828ec28fb94804b67fea50655d86",
+      "bytes": 49531256
+    },
+    "windows": {
+      "name": "Gogaku-0.1.1-dev.2-b91-dev-windows-x64-setup.exe",
+      "sha256": "9f66c5af59b0935a67a5401ba02dbd6f042fec9bb348341d6e9507445a16e146",
+      "bytes": 54355025
+    }
+  },
+  "artifactError": null,
+  "startedAt": "2026-11-06T20:54:50+0800",
+  "finishedAt": "2026-11-06T20:56:09+0800",
+  "commit": "1349764625ee24d5d98f1dc0f45308383965f254",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 91
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.1-dev.2 构建91；拒绝路径 7/7；installed=Gogaku Dev.app 0.1.1 b87;Gogaku Settings Dev.app 0.1.1 b87",
+      "durationMs": 12,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 243,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全过（100% tests passed）",
+      "durationMs": 47219,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261106-205450/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "201 项全部通过（Release）",
+      "durationMs": 25250,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261106-205450/swift-tests.log"
+    },
+    {
+      "name": "translation-eval-regression",
+      "required": true,
+      "status": "passed",
+      "detail": "评测管线回归通过（11 项断言）",
+      "durationMs": 282,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261106-205450/translation-eval-regression.log"
+    },
+    {
+      "name": "learning-worker-protocol",
+      "required": true,
+      "status": "passed",
+      "detail": "worker 协议回归通过（15 项断言）",
+      "durationMs": 302,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261106-205450/learning-worker-protocol.log"
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "passed",
+      "detail": "更新清单签名/篡改拒绝通过；Windows 安装器布局/iss 渲染通过；pkg postinstall 语法通过；更新源配置 1 个可信公钥（仓库留空＝未配置）；产品源码无本地模型引用",
+      "durationMs": 5451,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261106-205450/delivery-contracts.log"
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 0,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": true,
+    "notPassed": []
+  }
+}

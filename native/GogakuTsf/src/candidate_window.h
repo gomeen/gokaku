@@ -1,31 +1,30 @@
-/* 非激活候选窗（Win32，计划约束：不位于按键性能链、永不夺焦点）。
- * WS_EX_NOACTIVATE + WM_MOUSEACTIVATE 返回 MA_NOACTIVATE。
- * 显示：预编辑行＋本页候选（序号＋词＋释义），高亮选中项；Shift 提示模式
- * 显示单个大字气泡（「中」/「英」）。 */
+// Thread-local non-activating candidate panel. It never inserts host content.
 #pragma once
-
 #include "stdafx.h"
+#include "../../GogakuWindows/appearance.h"
+#include <memory>
 
 class CandidateWindow {
 public:
-    bool create(HINSTANCE hInst);  /* 每线程一次 */
+    bool create(HINSTANCE instance);
     void destroy();
     bool valid() const { return m_hwnd != nullptr; }
-
-    void showCandidates(const GcSnapshot &snap, const RECT &caretRect);
-    void showToast(const wchar_t *text);
     void hide();
-
+    void showToast(const wchar_t *text);
+    void showToast(const std::wstring &text) { showToast(text.c_str()); }
+    void showView(const gw::Json &view, const RECT &caret, const gw::Json &settings);
+    // Compatibility only. The agent-backed TextService should use showView.
+    void showCandidates(const GcSnapshot &snapshot, const RECT &caret);
+    std::function<void(size_t)> onChoose; // page-local index 0...8
+    std::function<void()> onOriginal;
+    std::function<void()> onRestore;      // explicit draft restore only
 private:
     static LRESULT CALLBACK s_wndProc(HWND, UINT, WPARAM, LPARAM);
-    LRESULT onPaint();
-    void layout(const RECT &caretRect);
-
+    void redraw();
     HWND m_hwnd = nullptr;
-    HFONT m_font = nullptr, m_smallFont = nullptr;
-    std::vector<std::wstring> m_words, m_glosses;
-    std::wstring m_preedit;
-    size_t m_selected = 0;
-    size_t m_page = 0, m_pageCount = 0;
-    bool m_toast = false;
+    HINSTANCE m_instance = nullptr;
+    std::unique_ptr<gw::CandidateRenderer> m_renderer;
+    gw::Json m_view = gw::Json::object(), m_settings = gw::Json::object();
+    RECT m_caret{};
+    bool m_haveCaret = false;
 };

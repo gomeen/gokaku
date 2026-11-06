@@ -24,6 +24,7 @@ import shutil
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from _gogaku_dist import strip_tis_identity  # noqa: E402  dist 中立化（见模块 docstring）
+from _gogaku_delivery import file_manifest, source_fingerprint, working_tree_dirty
 VERSION_FILE = ROOT / 'version.json'
 
 _SEMVER = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
@@ -70,12 +71,10 @@ def git_identity() -> dict:
     def git(*args):
         return subprocess.run(['git', *args], cwd=ROOT, capture_output=True, text=True)
     commit = git('rev-parse', 'HEAD')
-    # dirty 只看已跟踪文件的修改：未跟踪的验收产物（verify 报告、日志）不是
-    # 源码身份的一部分，否则验证过程自身会产生 dirty。
-    status = git('status', '--porcelain', '--untracked-files=no')
+    # 忽略未跟踪的验证报告，但把未提交的源码/资源视为 dirty。
     if commit.returncode != 0:
         raise SystemExit('git 不可用或仓库未初始化；构建身份需要提交信息')
-    dirty = bool(status.stdout.strip())
+    dirty = working_tree_dirty(ROOT)
     return {'commit': commit.stdout.strip(), 'dirty': dirty}
 
 
@@ -197,6 +196,8 @@ def write_build_identity(contents: Path, meta: dict) -> None:
         'buildNumber': meta['buildNumber'],
         'commit': meta['git']['commit'],
         'dirty': meta['git']['dirty'],
+        'git': meta['git'], 'channel': meta['channel'],
+        'sourceSha256': meta['sourceSha256'],
         'arch': platform.machine(),
         'configuration': meta['configuration'],
         'validationBuild': meta['validation'],
@@ -237,7 +238,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
     if input_method:
         # dist 一律中立：不携带输入源身份键（TISInputSourceID／
         # ComponentInputModeDict 等，见 _gogaku_dist.py docstring 的事故记录）。
-        # 身份在安装时注入（manage-install／pkg postinstall／DMG command）。
+        # 身份在安装时注入（manage-install／pkg postinstall）。
         info.update({
             'LSBackgroundOnly': True,
             # InputMethodConnectionName 仅对 Apple 白名单输入法生效，三方包写它只会触发
@@ -288,6 +289,11 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
             raise RuntimeError('设置应用词典校验失败 sc.dict')
         shutil.copyfile(source, data / 'sc.dict')
         (data / 'sc.dict').chmod(0o644)
+    # 更新源配置（公开仓库地址＋Ed25519 公钥；不含私钥）。缺失时客户端显示
+    # 「未配置更新源」，不阻塞构建。
+    update_config = ROOT / 'resources/update/config.json'
+    if update_config.exists():
+        shutil.copy2(update_config, contents / 'Resources/update-config.json')
     (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
     write_build_identity(contents, meta)
     licenses(contents / 'Licenses')
@@ -303,21 +309,16 @@ def write_dist_identity(apps: list, meta: dict, configuration: str, validation: 
         fullVersion=meta['version'], buildNumber=meta['buildNumber'],
         stage=version_stage(meta['version']), commit=meta['git']['commit'],
         dirty=meta['git']['dirty'], arch=platform.machine(),
+        git=meta['git'], channel=meta['channel'], sourceSha256=meta['sourceSha256'],
         configuration=configuration, validationBuild=validation,
         toolchain={'swift': output(['swift', '--version']).splitlines()[0].strip(),
                    'cmake': output(['cmake', '--version']).splitlines()[0].strip()},
         apps={},
     )
     for app in apps:
-        entries = {}
+        # 覆盖资源、许可、包内身份及签名，不能只记录可执行文件。
+        entries = file_manifest(app)
         contents = app / 'Contents'
-        for rel in ['MacOS', 'Helpers', 'Frameworks']:
-            folder = contents / rel
-            if folder.exists():
-                for path in sorted(folder.iterdir()):
-                    if path.is_file():
-                        entries[str(path.relative_to(app))] = file_hash(path)
-        entries[str((app / 'Contents/Info.plist').relative_to(app))] = file_hash(app / 'Contents/Info.plist')
         # 安装包是目录，不能直接哈希：对排序后的（相对路径，文件哈希）列表哈希，
         # 内容不变则哈希不变（plimmutable 快照语义）。
         bundle_fingerprint = json.dumps(entries, ensure_ascii=False, sort_keys=True)
@@ -343,6 +344,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     meta = load_version()
     meta['git'] = git_identity()
+    meta['channel'] = args.channel
+    meta['sourceSha256'] = source_fingerprint(ROOT)
     stage = version_stage(meta['version'])
     require_clean_allowed(stage, meta['git']['dirty'])
     if stage == 'final':
@@ -373,6 +376,8 @@ if __name__ == '__main__':
                      True, args.configuration, meta),
             assemble('Gogaku Settings' + name_suffix, 'GogakuSettings', 'org.gogaku.settings' + suffix,
                      configuration=args.configuration, meta=meta)]
+    if source_fingerprint(ROOT) != meta['sourceSha256']:
+        raise SystemExit('构建期间源码／资源变化，未生成有效收据；请重试构建')
     report = []
     for app in apps:
         for path in app.rglob('*'):

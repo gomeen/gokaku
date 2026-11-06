@@ -1,0 +1,74 @@
+{
+  "schema": "gogaku.toggle-toast-matrix.v1",
+  "createdAt": "2026-11-06T02:22:13.564764+00:00",
+  "channel": "stable",
+  "source": "org.gogaku.inputmethod.Hans",
+  "imePid": 624,
+  "modeShortcut": {
+    "key": "t",
+    "modifiers": 1966080
+  },
+  "results": [
+    {
+      "scenario": "probe-idle",
+      "host": "probe",
+      "kind": "idle",
+      "modeBefore": "normal",
+      "modeAfter": "learning",
+      "modeFlipped": true,
+      "toastShown": false,
+      "shownCount": 0,
+      "firstShownMs": null,
+      "lifeMs": null,
+      "events": [],
+      "modeRestored": true
+    },
+    {
+      "scenario": "probe-composing",
+      "host": "probe",
+      "kind": "composing",
+      "modeBefore": "normal",
+      "compositionActive": true,
+      "modeAfter": "learning",
+      "modeFlipped": true,
+      "toastShown": false,
+      "shownCount": 0,
+      "firstShownMs": null,
+      "lifeMs": null,
+      "events": [],
+      "modeRestored": true,
+      "fieldAfterReset": {
+        "marked": "",
+        "raw": "",
+        "text": ""
+      }
+    },
+    {
+      "scenario": "textedit-idle",
+      "host": "textedit",
+      "error": "前台应用不是预期宿主：'org.gogaku.validation.host' ≠ 'com.apple.TextEdit'"
+    },
+    {
+      "scenario": "terminal-idle",
+      "host": "terminal",
+      "skipped": true,
+      "error": "Command '['osascript', '-']' timed out after 25 seconds"
+    },
+    {
+      "scenario": "orca-pty-idle",
+      "host": "orca-pty",
+      "skipped": true,
+      "error": "Command ['orca', 'terminal', 'create', '--worktree', 'path:/Users/gomeen/code/gomeen/gogaku', '--title', 'GOGAKU-PROBE-20261106102123-orca', '--command', 'python3 /Users/gomeen/code/gomeen/gogaku/probes/imk-terminal-receiver.py /var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/gogaku-firstkey-pty-0g97qsi6/received.bin', '--json'] returned non-zero exit status 1."
+    },
+    {
+      "scenario": "mayoi-idle",
+      "host": "mayoi",
+      "skipped": true,
+      "error": "name 'tempfile' is not defined"
+    }
+  ],
+  "missingToastScenarios": [
+    "probe-idle",
+    "probe-composing"
+  ]
+}

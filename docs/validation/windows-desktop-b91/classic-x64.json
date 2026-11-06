@@ -1,0 +1,61 @@
+{
+  "activateHr": 0,
+  "agentPidAfter": 5088,
+  "candidateVisible": true,
+  "candidateWindows": [
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 1704898,
+      "pid": 1764,
+      "rect": [
+        168,
+        205,
+        489,
+        693
+      ],
+      "visible": true
+    }
+  ],
+  "deactivateDevHr": 0,
+  "deactivateStableHr": -2147467259,
+  "foregroundAtCommit": 1835790,
+  "keyForeground": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0
+  },
+  "modules": [
+    "C:\\Program Files\\GogakuDev\\bin\\x64\\GogakuTsf.dll"
+  ],
+  "ok": true,
+  "probePid": 1764,
+  "profile": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0
+  },
+  "screenshots": [
+    "classic-input.png"
+  ],
+  "session": 1,
+  "steps": [
+    {
+      "key": "N",
+      "text": ""
+    },
+    {
+      "key": "I",
+      "text": ""
+    },
+    {
+      "key": "H",
+      "text": ""
+    },
+    {
+      "key": "C",
+      "text": ""
+    }
+  ],
+  "targetHandle": 1835790,
+  "text": "你好",
+  "textAt150ms": "你好"
+}

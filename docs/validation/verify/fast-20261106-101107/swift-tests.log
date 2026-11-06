@@ -1,0 +1,85 @@
+未能载入软件包“GogakuPackageTests.xctest”。 请尝试重新安装软件包。
+(dlopen(/Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests, 0x0109): Library not loaded: @rpath/libIMEPinyin.0.dylib
+  Referenced from: <030E84FD-8961-3479-AB4F-64834C5D77F6> /Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib
+  Reason: tried: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTes<…>)
+swiftpm_testing_helper/Entrypoint.swift:34: Fatal error: Failed to open test bundle at path /Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests: dlopen(/Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests, 0x0101): Library not loaded: @rpath/libIMEPinyin.0.dylib
+  Referenced from: <030E84FD-8961-3479-AB4F-64834C5D77F6> /Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib
+  Reason: tried: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/../../../libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/../../../libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/usr/lib/swift/libIMEPinyin.0.dylib' (no such file, not in dyld cache), '/System/Volumes/Preboot/Cryptexes/OS/usr/lib/swift/libIMEPinyin.0.dylib' (no such file), '/usr/lib/swift/libIMEPinyin.0.dylib' (no such file, not in dyld cache), '/System/Volumes/Preboot/Cryptexes/OS/usr/lib/swift/libIMEPinyin.0.dylib' (no such file)
+[0/1] Planning build
+Building for production...
+[0/6] Write sources
+[1/6] Write swift-version--58304C5D6DBC2206.txt
+[3/5] Compiling GogakuInput CandidatePanel.swift
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuInput/CandidatePanel.swift:183:13: warning: variable 'caretX' was never mutated; consider changing to 'let' constant
+181 |         let preeditText = view.preedit.isEmpty ? view.raw : view.preedit
+182 |         var preeditString: NSAttributedString?
+183 |         var caretX: CGFloat?
+    |             `- warning: variable 'caretX' was never mutated; consider changing to 'let' constant
+184 |         var caretUTF16: Int?
+185 |         var preeditWidth: CGFloat = 0
+
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuInput/CandidatePanel.swift:184:13: warning: variable 'caretUTF16' was never mutated; consider changing to 'let' constant
+182 |         var preeditString: NSAttributedString?
+183 |         var caretX: CGFloat?
+184 |         var caretUTF16: Int?
+    |             `- warning: variable 'caretUTF16' was never mutated; consider changing to 'let' constant
+185 |         var preeditWidth: CGFloat = 0
+186 |         var preeditLineCount = 1
+
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuInput/CandidatePanel.swift:314:13: warning: variable 'placedButtons' was never mutated; consider changing to 'let' constant
+312 |             pageRect = .zero
+313 |         }
+314 |         var placedButtons: [Button] = []
+    |             `- warning: variable 'placedButtons' was never mutated; consider changing to 'let' constant
+315 |         // 原文上屏／切换来源按钮行已移除（2026-11 用户裁决：学习面板底部与
+316 |         // 中→英界面保持一致）；原文上屏保留 ⌘↩ 隐藏快捷键。
+
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuInput/InputController.swift:1229:23: warning: 'where' only applies to the second pattern match in this 'case'
+1227 |         case 116 where composing: edit { try $0.page(-1) }; return true
+1228 |         case 121 where composing: edit { try $0.page(1) }; return true
+1229 |         case 125, 124 where composing: edit { $0.navigate(1) }; return true
+     |              |    |   `- warning: 'where' only applies to the second pattern match in this 'case'
+     |              |    `- note: disambiguate by adding a line break between them if this is desired
+     |              `- note: duplicate the 'where' on both patterns to check both patterns
+1230 |         case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+1231 |         case 36 where composing: chooseCurrent(); return true
+
+/Users/gomeen/code/gomeen/gogaku/Sources/GogakuInput/InputController.swift:1230:23: warning: 'where' only applies to the second pattern match in this 'case'
+1228 |         case 121 where composing: edit { try $0.page(1) }; return true
+1229 |         case 125, 124 where composing: edit { $0.navigate(1) }; return true
+1230 |         case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+     |              |    |   `- warning: 'where' only applies to the second pattern match in this 'case'
+     |              |    `- note: disambiguate by adding a line break between them if this is desired
+     |              `- note: duplicate the 'where' on both patterns to check both patterns
+1231 |         case 36 where composing: chooseCurrent(); return true
+1232 |         default: break
+[3/7] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[4/7] Linking GogakuInput
+[6/8] Compiling GogakuCoreTests AnchorPlausibilityTests.swift
+/Users/gomeen/code/gomeen/gogaku/Tests/GogakuCoreTests/KeyComboTests.swift:71:13: warning: variable 'settings' was never mutated; consider changing to 'let' constant
+ 69 | 
+ 70 |     func testConflictBetweenConfigurableCommands() {
+ 71 |         var settings = Settings()
+    |             `- warning: variable 'settings' was never mutated; consider changing to 'let' constant
+ 72 |         let mode = ConfigurableCommand.modeSwitch
+ 73 |         XCTAssertEqual(KeyCombo.conflict(target: .directionSwitch, keyID: "k",
+
+/Users/gomeen/code/gomeen/gogaku/Tests/GogakuCoreTests/KeyComboTests.swift:72:13: warning: initialization of immutable value 'mode' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+ 70 |     func testConflictBetweenConfigurableCommands() {
+ 71 |         var settings = Settings()
+ 72 |         let mode = ConfigurableCommand.modeSwitch
+    |             `- warning: initialization of immutable value 'mode' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+ 73 |         XCTAssertEqual(KeyCombo.conflict(target: .directionSwitch, keyID: "k",
+ 74 |                                          modifiers: ctrlShift.rawValue, settings: settings),
+[6/8] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[7/8] Linking GogakuPackageTests
+Build complete! (23.95s)
+error: Process '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/swift/pm/swiftpm-testing-helper --test-bundle-path /Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests -c release -j 2 /Users/gomeen/code/gomeen/gogaku/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests --testing-library swift-testing' exited with unexpected signal code 4

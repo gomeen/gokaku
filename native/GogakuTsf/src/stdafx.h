@@ -1,8 +1,8 @@
 /* Gogaku TSF 前端——公共头。
  *
- * 计划约束（docs/implementation-plan.md）：TSF 用 MSVC/Windows SDK 实现，
- * 通过版本化 C ABI 加载共享核心 DLL（Clang64 构建）；不跨编译器传递 C++
- * 类型；核心加载路径仅限安装目录，不依赖系统 PATH 或 MSYS 环境。
+ * TSF 是 Windows SDK COM 薄前端（MSVC／MinGW-w64 均可编译）。
+ * x86 与 x64 通过同一有界、当前用户专用的管道协议连接 x64 代理。
+ * 只有代理加载共享核心；TSF 不联网、不加载模型、不写调频文件。
  */
 #pragma once
 

@@ -11,8 +11,9 @@ ComponentInputModeDict 等）写进 dist 包后，仓库内副本被 LaunchServi
 约定（永久修复）：
 - **dist 产物一律中立**：不携带身份键——被扫描注册也只是普通 App，
   永远不进输入源列表；
-- **安装时在目标位置注入身份**（manage-install／pkg postinstall／DMG
-  command），随后 ad-hoc 重签；
+- **manage-install 在目标位置注入身份**并 ad-hoc 重签；**pkg 在打包阶段**
+  注入身份并用 Developer ID（或 ad-hoc）签名，postinstall 不再重签，
+  以保留公证；Mac 对外只交付 pkg，不再生成 DMG；
 - 身份键集合与重建逻辑只在本模块，各链路共享，避免漂移。
 
 身份键（8 个）：运行必需键（LSBackgroundOnly／InputMethodServerControllerClass／

@@ -2,6 +2,36 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-06 追加：Windows 记事本兼容与设置展示，构建 91 dev）
+
+- Windows 设置改为七项侧栏、固定页头／状态栏、DPI 缩放和微软雅黑 UI，补齐程序／安装器图标；200% 缩放下七页和最小窗口九条预览有运行证据。
+- 修复旧连接迟到失焦清空当前组合、启动时词表监控误触发重置；普通模式不再初始化未使用的学习会话。
+- 缺少 InputScope 时新增受限原生 RichEdit 兜底，修复新版记事本无候选；保留焦点／文档归属、密码／只读／禁用检查。新增双连接焦点和双架构字段安全探针。
+- [构建 91 证据](docs/validation/windows-desktop-b91.json)记录记事本候选与“你好”提交、双位数 Edit、设置和图标；**冷启动第一组输入仍有失败，不是稳定版**。安装前曾人工迁走占用文件，不代表普通升级验收。
+
+### 变更（2026-11-06 追加：Windows 实际安装 EXE，构建 88 dev）
+
+- 补齐 Mac 上 MinGW-w64 双位数 TSF 与 x64 代理／设置／核心的交叉编译链；Wine 仅运行官方 Inno Setup 编译器，生成实际安装向导 EXE，无外装 Python／GCC／Visual Studio 运行要求。
+- Windows TSF 经当前用户／会话／通道命名管道连接代理；接通普通设置、自定义词、持久化、提交确认、非激活候选窗、主题渲染、火山请求、系统拼写、全局模式与方向、托盘和检查更新；普通词库与许可随包。
+- 安装器核对 Windows 11 x64、双架构注册退出码、文件占用、原用户可选自启与卸载清理；保留用户数据，不设置默认输入法、不强杀宿主或自动重启。
+- 新增[Windows 使用说明](docs/windows-testing.md)，同步[功能状态与缺口](docs/feature-parity.md)及[构包证据](docs/validation/windows-setup-build.json)。按用户确认，本轮不执行 Windows 程序、不做 VM／真机验证，安装运行交用户。当前包仍有多候选预译、随包 WebP 解码、版本化升级恢复等实现缺口，不能称为双端完整功能通过。
+- 关键回归 fast 7/7（Swift Release 193 项）；ASan／UBSan 2,000 序列冒烟无错误，完整 release gate 未执行。
+
+### 变更（2026-11-06 追加：学习英→中两处修复，构建 88 dev）
+
+- **拼写波浪线接通**：拼写结果此前只写控制器本地快照，逐键发布（以及译文到达重发布）会用会话视图覆盖丢失，且译文未就绪阶段不渲染——波浪线实际上不可见。修复：结果经引擎队列 `setIssues` 写入共享学习会话（核心按同修订 stamp 拒绝过期结果，编辑使旧范围失效），随 `publishLearning` 渲染；拼写 helper 路径与翻译共用同一解析规则（`LearningTranslation.serviceConfiguration().executable`）。根因佐证：`CompositionSession.setIssues` 自首次提交起无任何调用方（死代码），`--spell` helper 本机实测正常（`helo metting ` 判出两处 issue）。
+- **学习中→英 Enter／⌘Enter（用户裁决落地）**：Enter 改为选就绪目标（不再提交剩余原编码；译文就绪即上屏英文，未就绪先上屏中文源文再异步换译）；⌘Enter 明确原文上屏（中文源文不换译直接上屏，此前交还宿主）。英→中 Enter 选就绪中文／⌘Enter 原文上屏行为不变（规格表本来就一致，未改代码）。
+- **验证**：fast 档 7/7（Swift Release 193 项含新增 `CompositionSession` 拼写范围合同用例：setIssues 入视图、编辑不清空、过期 stamp 拒绝、方向守卫）；构建 88 dev 已本机安装（manage-install dev 通道）。**真实宿主按键／波浪线显示未验收**（host 档需空闲时段执行）。
+
+### 变更（2026-11-06 追加：双端功能统一——火山收敛、事务安装、检查更新）
+
+- **文档与合同（P0）**：新增[双端功能对照](docs/feature-parity.md)、[检查更新合同](docs/update.md)，重写[实施计划](docs/implementation-plan.md)、[发布流程](docs/release.md)、[版本管理](docs/versioning.md)、[第三方边界](docs/third-party.md)、[开发版说明](docs/native-development.md)与 README；明确 Mac 只交付 pkg、不再生成 DMG，Windows 目标 Inno Setup，自动检查默认关闭，本地模型退出产品链路。
+- **翻译收敛（P1）**：移除 quickmt／small100／Python 后端、beam、模型准备与下载入口；新增随包 `GogakuTranslator --volcengine`（CryptoKit HMAC-SHA256 V4 签名＋URLSession）与 `Sources/GogakuCore/Volcengine.swift`；设置页改为火山凭据保存／移除、连接测试、状态与本机字符统计。设置 schema 升 2：旧本地模型配置迁移为**关闭学习翻译**，已启用火山配置保留启用、凭据与用量；新安装默认关闭。请求体与签名用 Python 参考 worker 固定向量逐字节比对；缓存命中带 `cached` 标记，不重复计入本月字符统计。
+- **安装（P4，Mac）**：`package-macos-pkg.py` 改为打包阶段注入输入源身份并由内向外签名（Developer ID 或 ad-hoc），再打 zip；新增 Developer ID Installer 签名、notarytool 公证、stapling 与 `spctl` 评估参数；安装器增加完成页。`scripts/pkg-postinstall.sh` 只校验包内身份／构建号／签名，不再重签（保留 Developer ID 签名），事务式备份／替换／失败恢复，状态留 `~/Library/Application Support/Gogaku/install/transaction.txt`。`manage-install.py` 改为 staging＋备份＋失败恢复并校验构建号；`recover` 读取事务记录。删除 `package-macos-dmg.py` 与 DMG 产物／指引。
+- **检查更新（P5，Mac）**：新增 `UpdateContract/UpdatePreferences/UpdateTransport/UpdateEngine/UpdateDownloader` 与设置更新窗口：Ed25519 清单验签、GitHub 列表分页／ETag／限流、通道与构建号比较、平台／架构／minOS、HTTPS 主机白名单、下载大小／SHA-256／原子缓存、取消、安装交接；自动检查默认关闭、24 小时节流、只在设置应用运行。随包 `resources/update/config.json` 带开发公钥；发布脚本 `update-signing.swift`、`make-update-manifest.py`、`publish-release.py`（Draft→上传→真实 asset id→签名清单→人工发布）。
+- **Windows 组装（P4，脚手架）**：新增 `packaging/windows/gogaku.iss.in`（Windows 11 x64、双位数 TSF 注册、Program Files、HKCU 自启、卸载默认保留数据、不强杀宿主）与 `scripts/build-win-app.py`（产物检查、staging、身份哈希、iss 渲染、iscc 调用；缺产物明确失败）。
+- **验证**：Swift Release 192 项全过（新增 Volcengine、Update、设置迁移用例）；`make-update-manifest.py --self-test`、`build-win-app.py --self-test` 通过；火山签名／请求体与 Python 固定向量一致；更新协议用注入传输覆盖分页／304／限流／坏签名／通道隔离／架构与 OS 不支持／下载校验。**未验证**：真实火山凭据实测、真实 GitHub Releases 链路、重打包 pkg 真实安装／升级、Windows Setup 编译与安装、Windows 检查更新、完整宿主矩阵与性能门槛。历史 DMG 条目仅作记录，当前交付不再包含 DMG。
+
 ### 变更（2026-11-06 追加：TSF 首次 MSVC 编译成功＋VM 实装测试闭环）
 
 - **里程碑**：GogakuTsf.dll（Windows 输入法接入层）首次在 VM 内用 MSVC 编译链接成功（/MT 静态 CRT，无 redist 依赖）；核心 DLL（HEAD＋rename/fsync 注入）同步构建；VM 内组装运行目录（TIP＋核心＋4 个 MinGW/msys 运行库＋词库数据）并 regsvr32 注册成功；自动化打字测试闭环（交互会话计划任务＋SendKeys＋候选窗探测＋截图）建立。**实测：TIP 在应用内激活成功（DLL 加载、核心会话创建 OK）**。

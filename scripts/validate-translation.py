@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""冻结每方向100条保留集，或执行 Apple 已安装资源的盲测；不会安装语言包。"""
+"""历史脚本：冻结每方向 100 条保留集；Apple Translation 已退出产品链路。
+
+2026-11-06 起本地模型与 Apple Translation 均不再可用，`run` 路径只保留为历史
+证据说明；`--freeze` 仍可用于生成当时的冻结验收集。当前翻译见 docs/update.md。
+"""
 import argparse
 import collections
 import hashlib
@@ -97,5 +101,8 @@ if __name__ == '__main__':
     parser.add_argument('--helper', type=Path, default=ROOT / 'dist/Gogaku.app/Contents/Helpers/GogakuTranslator')
     parser.add_argument('--output', type=Path, default=ROOT / 'local/translation-validation')
     args = parser.parse_args()
-    if args.freeze: freeze()
-    else: sys.exit(run(args.helper.resolve(), args.output))
+    if args.freeze:
+        freeze()
+    else:
+        raise SystemExit('历史脚本：Apple Translation 已退出产品链路；当前学习翻译为火山 NMT，'
+                         '见 docs/update.md。保留 --freeze 仅用于历史验收集。')

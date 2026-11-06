@@ -3,8 +3,10 @@
 // 事件轨迹规格见 docs/product.md「普通模式行为规格」与 tests/normal_session_test.cpp。
 #include "gogaku_core.h"
 
+#ifndef _WIN32
 #include <fcntl.h>
 #include <unistd.h>
+#endif
 
 #include <algorithm>
 #include <cctype>
@@ -28,6 +30,11 @@
 #include <libime/pinyin/pinyinencoder.h>
 #include <libime/pinyin/pinyinime.h>
 #include <libime/pinyin/shuangpinprofile.h>
+
+#ifdef _WIN32
+// Windows 的 IN 宏会污染 libime 的音节枚举，需在 libime 头之后引入。
+#include "windows_io.h"
+#endif
 
 namespace {
 
@@ -237,8 +244,16 @@ struct CustomEntry {
     std::string content;
 };
 
+std::filesystem::path file_path(const std::string &path) {
+#ifdef _WIN32
+    return gogaku::windows_io::file_path(path);
+#else
+    return path;
+#endif
+}
+
 bool read_file(const std::string &path, std::string &out) {
-    std::ifstream in(path, std::ios::binary);
+    std::ifstream in(file_path(path), std::ios::binary);
     if (!in) return false;
     std::ostringstream ss;
     ss << in.rdbuf();
@@ -246,12 +261,16 @@ bool read_file(const std::string &path, std::string &out) {
     return true;
 }
 
-// 写临时文件＋fsync＋rename，保证进程被杀或掉电后目标文件要么是完整旧内容、
+// Windows 在同目录创建私有临时文件，写句柄同步后宽字符原子替换（见 windows_io.h）。
+// POSIX 写临时文件＋fsync＋rename，保证进程被杀或掉电后目标文件要么是完整旧内容、
 // 要么是完整新内容，不出现半截文件。rename 后再 fsync 父目录使改名本身落盘。
 // fsync 失败按整体失败处理（复查 C1），调用方保留 dirty 状态下次重写。
 // 临时名带 pid（复查 C2）：输入法与设置进程可能并发写同一文件，固定 .tmp 会
 // 互相覆盖。失败或残留的临时文件下次写入自然覆盖。
 bool atomic_write(const std::string &path, const std::string &data) {
+#ifdef _WIN32
+    return gogaku::windows_io::atomic_write(path, data);
+#else
     std::string temp = path + "." + std::to_string(::getpid()) + ".tmp";
     {
         std::ofstream out(temp, std::ios::binary | std::ios::trunc);
@@ -284,6 +303,7 @@ bool atomic_write(const std::string &path, const std::string &data) {
         }
     }
     return true;
+#endif
 }
 
 }  // namespace
@@ -933,7 +953,8 @@ extern "C" int gc_normal_session_create(const GcNormalConfig *config, GcNormalSe
         if (err != nullptr && err_len > 0) snprintf(err, err_len, "%s", m.c_str());
     };
     try {
-        auto *s = new GcNormalSession();
+        auto session = std::make_unique<GcNormalSession>();
+        auto *s = session.get();
         s->dictPath = config->dict_path;
         s->modelPath = config->model_path;
         s->userDir = config->user_dir == nullptr ? "" : config->user_dir;
@@ -951,7 +972,14 @@ extern "C" int gc_normal_session_create(const GcNormalConfig *config, GcNormalSe
         rebuild_custom_indexes(*s);
 
         auto dict = std::make_unique<libime::PinyinDictionary>();
+#ifdef _WIN32
+        std::ifstream dictFile(file_path(s->dictPath), std::ios::binary);
+        if (!dictFile) throw std::runtime_error("词典读取失败");
+        dict->load(0, dictFile, libime::PinyinDictFormat::Binary);
+#else
         dict->load(0, s->dictPath.c_str(), libime::PinyinDictFormat::Binary);
+#endif
+        // libime 的系统模型构造器仍只提供窄字符文件名（内部 _open），非用户数据 I/O。
         auto model = std::make_unique<libime::UserLanguageModel>(s->modelPath.c_str());
         if (!s->userDir.empty()) {
             std::string userModel;
@@ -962,8 +990,14 @@ extern "C" int gc_normal_session_create(const GcNormalConfig *config, GcNormalSe
                 } catch (const std::exception &) {
                     // 调频历史损坏不能让整个输入法不可用：备份后以空模型继续。
                     const std::string userLm = s->userDir + "/model.userlm";
+#ifdef _WIN32
+                    if (!gogaku::windows_io::backup_corrupt(userLm)) {
+                        throw std::runtime_error("model.userlm 已损坏，备份失败（原文件保留）");
+                    }
+#else
                     std::error_code ec;
                     std::filesystem::rename(userLm, userLm + ".corrupt", ec);
+#endif
                     if (errorMsg.empty()) errorMsg = "model.userlm 已损坏，已备份并以空调频历史启动";
                 }
             }
@@ -1006,7 +1040,7 @@ extern "C" int gc_normal_session_create(const GcNormalConfig *config, GcNormalSe
             }
         }
         if (!errorMsg.empty()) seterr(errorMsg);
-        *out = s;
+        *out = session.release();
         return 0;
     } catch (const std::exception &e) {
         seterr(e.what());
@@ -1061,8 +1095,8 @@ extern "C" int gc_normal_clear_user_data(GcNormalSession *s) {
         s->learnedWords.clear();
         // 磁盘：删除持久化文件并清脏标记，后续 flush 不再把旧数据写回。
         std::error_code ec;
-        std::filesystem::remove(s->userDir + "/model.userlm", ec);
-        std::filesystem::remove(s->userDir + "/learned.txt", ec);
+        std::filesystem::remove(file_path(s->userDir + "/model.userlm"), ec);
+        std::filesystem::remove(file_path(s->userDir + "/learned.txt"), ec);
         s->modelDirty = false;
         s->learnedDirty = false;
         discard_pending_learn(*s);
@@ -1089,7 +1123,7 @@ extern "C" int gc_normal_flush(GcNormalSession *s) {
     try {
         if (!s->userDir.empty()) {
             std::error_code ec;
-            std::filesystem::create_directories(s->userDir, ec);
+            std::filesystem::create_directories(file_path(s->userDir), ec);
         }
         if (s->modelDirty) {
             std::ostringstream out;

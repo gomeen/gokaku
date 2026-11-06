@@ -26,10 +26,13 @@ public struct TranslationResult: Codable, Sendable {
     public let issues: [SpellingIssue]?
     /// 云端后端的服务端计费字符数（如火山 Extra.input_characters）；本地后端不发。
     public var characters: Int?
-    public init(request: TranslationRequest, target: String? = nil, error: String? = nil, milliseconds: Double = 0, issues: [SpellingIssue]? = nil, characters: Int? = nil) {
+    /// 命中父进程内存缓存：不计入本月请求字符统计，也不代表新的服务请求。
+    /// 可选：旧 worker／参考 worker 不返回该字段时按 false 处理。
+    public var cached: Bool?
+    public init(request: TranslationRequest, target: String? = nil, error: String? = nil, milliseconds: Double = 0, issues: [SpellingIssue]? = nil, characters: Int? = nil, cached: Bool? = false) {
         id = request.id; stamp = request.stamp; sourceID = request.sourceID; source = request.source
         resource = request.resource; self.target = target; self.error = error; self.milliseconds = milliseconds; self.issues = issues
-        self.characters = characters
+        self.characters = characters; self.cached = cached
     }
 }
 /// 无文本日志、无端口。此对象只能由自己的串行队列访问。
@@ -121,7 +124,8 @@ public final class TranslationService {
     private func enqueue(_ r: TranslationRequest) {
         guard valid.contains(r.id) else { return }
         if let (date, cached) = cache[key(r)], Date().timeIntervalSince(date) < 300 {
-            onResult?(TranslationResult(request: r, target: cached.target, error: cached.error)); return
+            onResult?(TranslationResult(request: r, target: cached.target, error: cached.error,
+                                        cached: true)); return
         }
         if running != nil || stopping { pending = r; return }
         do {

@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-11-06T11:43:49.172320+00:00",
+  "identity": {
+    "fullVersion": "0.1.1-dev.2",
+    "buildNumber": 91,
+    "channel": "dev",
+    "phase": "dev",
+    "git": {
+      "commit": "1349764625ee24d5d98f1dc0f45308383965f254",
+      "dirty": true
+    }
+  },
+  "status": "limited-runtime-checks-passed-with-known-cold-start-failure",
+  "scope": "用户授权的同一台 Windows 11 x64 VM，普通权限交互会话，200% DPI；不代表完整双端验收。",
+  "installer": {
+    "path": "dist/gogaku-win/Gogaku-0.1.1-dev.2-b91-dev-windows-x64-setup.exe",
+    "bytes": 54385494,
+    "sha256": "0391171f00afbd7a3811354f5aace6c0a302ee5c726468d1a44ce150b1b35050",
+    "absolutePath": "/Users/gomeen/code/gomeen/gogaku/dist/gogaku-win/Gogaku-0.1.1-dev.2-b91-dev-windows-x64-setup.exe",
+    "installerStubPeArchitecture": "x86",
+    "authenticodeSigned": false
+  },
+  "installation": {
+    "exitCode": 0,
+    "preparation": "Moved loaded product files to a temporary backup and stopped only Gogaku processes; existing host apps remain open.",
+    "limitation": "为避免强杀已打开宿主，先将占用中的旧产品文件移到临时备份，再运行安装器；不构成未干预的升级／回滚验收。",
+    "installedFilesMatchPayload": true,
+    "installedFilesChecked": 63,
+    "verification": {
+      "path": "docs/validation/windows-desktop-b91/installed.json",
+      "sha256": "4c9a4e842d8777c7eec218815bc8d1213ddf98f907958fea3df4640b64a938f6"
+    },
+    "desktopInstallerMatchesLocal": true
+  },
+  "settings": {
+    "pages": [
+      "学习翻译",
+      "普通输入",
+      "自定义词语",
+      "皮肤",
+      "快捷键",
+      "学习与隐私",
+      "学习片段"
+    ],
+    "dpi": 192,
+    "largeAndSmallWindowIcons": true,
+    "minimumSkinPreview": "九条候选完整可见；仅此尺寸／DPI，不代表所有字体主题组合",
+    "screenshot": {
+      "path": "docs/validation/windows-desktop-b91/settings-normal.png",
+      "sha256": "f7182aa9331d3085557a20753604d3ff2f6655f5b90e3c8631e9b9523b05dbb7"
+    },
+    "minimumPreviewScreenshot": {
+      "path": "docs/validation/windows-desktop-b91/settings-skin-minimum.png",
+      "sha256": "a3b639c401a32e444bc7761e931c2fe928d2c42d3084a173b5120ba3dbd01a98"
+    }
+  },
+  "classicNativeEdit": {
+    "x64": {
+      "passed": true,
+      "candidateVisible": true,
+      "syntheticText": "你好",
+      "module": "C:\\Program Files\\GogakuDev\\bin\\x64\\GogakuTsf.dll",
+      "evidence": {
+        "path": "docs/validation/windows-desktop-b91/classic-x64.json",
+        "sha256": "c13199307224e59ea357025b0dbe10a4661616bb368657b0652c603a143f611b"
+      }
+    },
+    "x86": {
+      "passed": true,
+      "candidateVisible": true,
+      "syntheticText": "你好",
+      "module": "C:\\Program Files\\GogakuDev\\bin\\x86\\GogakuTsf.dll",
+      "evidence": {
+        "path": "docs/validation/windows-desktop-b91/classic-x86.json",
+        "sha256": "627fcd3c6010a7cd3e4c88c086da2ff3abfce709fb29a86bfd66fe8201c312ed"
+      }
+    }
+  },
+  "notepad": {
+    "version": "Microsoft.WindowsNotepad_11.2607.14.0_x64",
+    "editClass": "RichEditD2DPT",
+    "diagnosis": "没有可用 InputScope 时旧兜底只允许 Edit；新兜底限定已知 Edit/RichEdit，检查当前线程／进程、文档所属、密码字符、只读和禁用状态，显式 private/password scope 仍拒绝。",
+    "loadedModule": [
+      {
+        "path": "C:\\Program Files\\GogakuDev\\bin\\x64\\GogakuTsf.dll",
+        "read": true,
+        "stamp": 1793964553
+      }
+    ],
+    "runs": [
+      {
+        "run": "b91-installed-notepad-second",
+        "candidateVisible": true,
+        "textCommitted": true,
+        "savedSyntheticText": "你好",
+        "pid": 9952
+      },
+      {
+        "run": "b91-final-notepad-1",
+        "candidateVisible": true,
+        "textCommitted": true,
+        "savedSyntheticText": "你好",
+        "pid": 3216
+      },
+      {
+        "run": "b91-final-notepad-2",
+        "candidateVisible": true,
+        "textCommitted": true,
+        "savedSyntheticText": "你好",
+        "pid": 3216
+      },
+      {
+        "run": "b91-final-notepad-3",
+        "candidateVisible": true,
+        "textCommitted": true,
+        "savedSyntheticText": "你好",
+        "pid": 3216
+      },
+      {
+        "run": "b91-final-notepad-visible",
+        "candidateVisible": true,
+        "textCommitted": true,
+        "savedSyntheticText": "你好",
+        "pid": 3216
+      }
+    ],
+    "method": "只在新建合成标签页输入 nihc，空格后保存临时文件并核对你好；关闭测试标签页，不覆盖已有文档。",
+    "candidateScreenshot": {
+      "path": "docs/validation/windows-desktop-b91/notepad-candidate.png",
+      "sha256": "26ba244c85ed97a0f9dcefbdfcaeb64bcf29ec38fcb549c188a8fa35b8eb62a8"
+    }
+  },
+  "nativeFallbackSafety": {
+    "probe": "probes/windows-field-safety.cpp",
+    "scope": "直接调用生产兜底函数的合成原生控件回归，不是完整 TSF 密码宿主矩阵。",
+    "architectures": {
+      "x64": {
+        "passed": 13,
+        "failed": 0,
+        "evidence": {
+          "path": "docs/validation/windows-desktop-b91/field-safety-x64.json",
+          "sha256": "de02d65c6ea226c3cde3157437664d0a64bc9f78327e1703b5a7f1d589ce4b4c"
+        }
+      },
+      "x86": {
+        "passed": 13,
+        "failed": 0,
+        "evidence": {
+          "path": "docs/validation/windows-desktop-b91/field-safety-x86.json",
+          "sha256": "de02d65c6ea226c3cde3157437664d0a64bc9f78327e1703b5a7f1d589ce4b4c"
+        }
+      }
+    }
+  },
+  "delayedBlurRegression": {
+    "probe": "probes/windows-session-focus.cpp",
+    "before": {
+      "passed": false,
+      "error": "焦点已变化，请重新输入"
+    },
+    "after": {
+      "passed": true,
+      "raw": "nihc"
+    },
+    "evidenceBefore": {
+      "path": "docs/validation/windows-desktop-b91/focus-before.json",
+      "sha256": "17332ca5706f18f6a8c044be10c99223e9ff721bbdf0e608ae2221f7985213bc"
+    },
+    "evidenceAfter": {
+      "path": "docs/validation/windows-desktop-b91/focus-after.json",
+      "sha256": "5967f6d857d4aef61e6ff7cd41ad3176681a4d1aea89d39aa53fdea2557f6068"
+    },
+    "scope": "构建 90 已修复并由构建 91 保留；代理合成双连接回归，不等于真实宿主全部焦点时序。"
+  },
+  "knownFailures": [
+    {
+      "case": "b91-installed-notepad-first",
+      "passed": false,
+      "candidateVisible": false,
+      "savedSyntheticText": "nihc ",
+      "evidence": {
+        "path": "docs/validation/windows-desktop-b91/cold-notepad-failure.json",
+        "sha256": "fb112d0fa1f8c0563efe5cb149a0e7e68bf1a0f60e3d30bf1f1c1299158e042c"
+      },
+      "conclusion": "代理尚未就绪时第一组输入会直接落到宿主；后续输入成功不能覆盖本次失败。"
+    },
+    {
+      "case": "b91-fixed-cold-first",
+      "passed": false,
+      "syntheticText": "nihc ",
+      "agentPidAfter": 0,
+      "evidence": {
+        "path": "docs/validation/windows-desktop-b91/cold-native-failure.json",
+        "sha256": "d87ee3ee9462e5eb801175902c3789b98d15af9fde12ddbdf7ed663705ef162b"
+      }
+    }
+  ],
+  "verification": {
+    "fast": "docs/validation/verify/report-fast-20261106-192914.json",
+    "fastPassed": 7,
+    "fastFailed": 0,
+    "asanQuick": "docs/validation/verify/report-release-20261106-151933.json",
+    "asanScope": "此前共享核心 2,000 随机序列冒烟；非完整 release gate。"
+  },
+  "limitations": [
+    "冷启动首组输入未解决，不能称稳定版；代理已运行后本记录的限定输入检查通过。",
+    "构建 89／90 曾出现错误词、空提交／无候选；本轮保留已知失败，不以连续暖启动成功推断冷启动可靠。",
+    "安装器未签名；未跑无干预升级／恢复／卸载、真实火山、真实在线更新、完整宿主与字体主题组合、Windows ARM64、性能或长时稳定性。"
+  ]
+}

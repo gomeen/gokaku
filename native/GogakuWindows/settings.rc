@@ -1,0 +1,3 @@
+// Settings owns its manifest and reuses the shared application icon (ID 101).
+#include "app.rc"
+1 24 "settings.manifest"

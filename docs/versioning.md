@@ -1,6 +1,6 @@
 # 版本与构建管理
 
-Gogaku 的版本管理是**当前用户的本地开发版管理**：本地 Git 提交与标签，不推送、不公开发布。项目公开许可、Developer ID／公证、自动更新与远端托管不在本轮范围（见[产品方向](product.md)「交付与验收边界」）。
+Gogaku 的版本管理覆盖**双端开发测试版**：本地 Git 提交与标签；检查更新使用公开 GitHub Releases 与签名清单（见[检查更新](update.md)）。项目公开许可、Developer ID／公证和 Authenticode 仍未决定；源码仓库是否公开不由发布仓库决定（见[产品方向](product.md)「交付与验收边界」）。
 
 ## 单一版本来源
 
@@ -11,7 +11,7 @@ Gogaku 的版本管理是**当前用户的本地开发版管理**：本地 Git �
 ```
 
 - `version`：完整 SemVer。三段数字，预发布段只允许 `dev.N`／`rc.N`。
-- `buildNumber`：单调递增整数，写入 `CFBundleVersion`；每次对外提供本地安装包都必须递增。
+- `buildNumber`：单调递增整数，写入 `CFBundleVersion`；每次对外提供安装包都必须递增。更新判断只按构建号，不按版本字符串字典序；同版本更高构建号可更新，不自动降级。
 
 macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发布版本另存包内 `Contents/Resources/build-identity.json`，并在设置应用侧栏与诊断输出中显示。
 
@@ -40,8 +40,18 @@ macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发�
 
 ## 版本边界
 
-应用版本（`version.json`）、核心 C ABI 版本（`gc_abi_version`，当前 2）、用户数据格式版本三者独立管理。升到 0.1.0 本身不构成修改 ABI 或存储格式的理由。
+应用版本（`version.json`）、核心 C ABI 版本（`gc_abi_version`，当前 4）、用户数据格式版本、更新清单 schema（当前 1）四者独立管理。升版本不构成修改 ABI、存储格式或清单 schema 的理由。
+
+## 更新身份
+
+- 每个安装通道（stable／dev）使用自己的更新清单 `channel`；stable 只接受正式版本，dev 可接受 dev／rc／正式。
+- 更新清单的 `buildNumber` 必须大于已安装构建号才提示升级；`version` 不参与排序。
+- Ed25519 `keyId` 标识发布公钥；轮换时保留旧 keyId 直到所有受支持版本升级完成。
+- 更新偏好单独存 `update-preferences.json`（schema 1，自动检查默认 false，按通道节流与缓存 ETag）；升级应用不重置用户选择。
+- 设置数据 schema 2 起移除本地翻译后端／beam；旧本地模型配置迁移为关闭学习翻译，已启用火山配置保留凭据与用量。
 
 ## 拒绝路径（由 `scripts/verify.py --profile fast` 自测）
 
 非法版本号、非法／缺失构建号、构建号倒退、dirty 候选构建、两套应用版本不一致、报告指向旧产物（身份提交 ≠ 当前 HEAD）、缺少必需报告——全部拒绝，不允许带病构建或带病验收。
+
+更新清单的拒绝路径：未知 schema、未知 keyId、签名失败、stable 清单含预发布段、通道不符、构建号不递增、平台／架构不支持、`minOS` 高于当前系统、重复 platform/arch、`sha256` 非 64 位十六进制、资产大小／哈希与下载不符——均拒绝，不显示为「已是最新」。

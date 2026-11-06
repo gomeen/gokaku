@@ -37,6 +37,7 @@ import sys
 import tempfile
 import time
 from pathlib import Path
+from _gogaku_delivery import (DeliveryError, source_fingerprint, validate_package, working_tree_dirty)
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'scripts'))
@@ -197,8 +198,8 @@ def check_translation_eval_regression(ctx):
 
 
 def check_learning_worker_protocol(ctx):
-    """quickmt 学习翻译 worker 协议回归：回显、invalid_request、model_missing、
-    非法行存活（仅系统 python3，无需权重；固定样例见 validate 脚本 samples 子命令）。"""
+    """历史参考 worker 协议回归（quickmt）：回显、invalid_request、model_missing、
+    非法行存活。产品已不再使用本地模型；保留此检查防止参考实现与文档漂移。"""
     result = sh(['python3', 'scripts/validate-learning-translation.py', 'protocol'], timeout=120)
     evidence = ctx.evidence('learning-worker-protocol.log', result.stdout + result.stderr)
     if result.returncode != 0:
@@ -207,23 +208,76 @@ def check_learning_worker_protocol(ctx):
     return PASS, 'worker 协议回归通过' + (f'（{m.group(1)} 项断言）' if m else ''), evidence
 
 
+def check_delivery_contracts(ctx):
+    """双端交付合同自测：更新清单签名、Windows 组装布局、pkg 事务脚本与
+    已移除本地模型的静态回归。不联网、不安装、不触碰真实用户目录。"""
+    import base64
+    import subprocess as sp
+    problems, notes = [], []
+    result = sh(['python3', 'scripts/make-update-manifest.py', '--self-test'], timeout=300)
+    if result.returncode != 0:
+        problems.append('更新清单 self-test 失败：' + (result.stdout + result.stderr)[-300:])
+    else:
+        notes.append('更新清单签名/篡改拒绝通过')
+    result = sh(['python3', 'scripts/build-win-app.py', '--self-test'], timeout=120)
+    if result.returncode != 0:
+        problems.append('Windows 组装 self-test 失败：' + (result.stdout + result.stderr)[-300:])
+    else:
+        notes.append('Windows 安装器布局/iss 渲染通过')
+    script = ROOT / 'scripts/pkg-postinstall.sh'
+    if not script.exists():
+        problems.append('缺少 pkg 事务 postinstall 模板')
+    else:
+        result = sp.run(['bash', '-n', str(script)], text=True, capture_output=True)
+        if result.returncode != 0:
+            problems.append('pkg postinstall 语法错误：' + result.stderr[-200:])
+        else:
+            notes.append('pkg postinstall 语法通过')
+    if (ROOT / 'scripts/package-macos-dmg.py').exists():
+        problems.append('DMG 打包脚本仍在（本轮 Mac 只交付 pkg）')
+    config_path = ROOT / 'resources/update/config.json'
+    try:
+        config = json.loads(config_path.read_text())
+        assert config.get('schema') == 1
+        keys = config.get('trustedKeys') or []
+        assert keys and all(len(base64.b64decode(k['publicKey'])) == 32 for k in keys)
+        notes.append(f"更新源配置 {len(keys)} 个可信公钥"
+                     + ('（已配置仓库）' if config.get('owner') and config.get('repo') else '（仓库留空＝未配置）'))
+    except Exception as error:
+        problems.append(f'更新源配置非法：{error}')
+    forbidden = ('learningBeamSize', 'quickmt_worker', 'normalizedBackend', 'small100_worker')
+    hits = []
+    for path in (ROOT / 'Sources').rglob('*.swift'):
+        text = path.read_text(errors='ignore')
+        for token in forbidden:
+            if token in text:
+                hits.append(f'{path.relative_to(ROOT)}:{token}')
+    if hits:
+        problems.append('产品源码仍引用本地模型：' + ', '.join(hits[:5]))
+    else:
+        notes.append('产品源码无本地模型引用')
+    evidence = ctx.evidence('delivery-contracts.log', '\n'.join(notes + problems))
+    if problems:
+        return FAIL, '；'.join(problems), evidence
+    return PASS, '；'.join(notes), evidence
+
+
 def check_clean_build(ctx):
     """干净构建：全新构建根（native/core/swift 互不 reuse）组装安装包，产物身份
     与当前提交绑定。依赖缓存只读复用（不清除用户缓存）。"""
     build_root = ROOT / '.build/verify-clean'
     if build_root.exists():
         shutil.rmtree(build_root)
-    result = sh(['python3', 'scripts/build.py', '--configuration', 'release'],
+    result = sh(['python3', 'scripts/build.py', '--configuration', 'release', '--channel', CHANNEL],
                 env={'GOGAKU_BUILD_ROOT': str(build_root)}, timeout=3600)
     evidence = ctx.evidence('clean-build.log', result.stdout + result.stderr)
     if result.returncode != 0:
         return FAIL, '构建失败：' + result.stdout.strip().splitlines()[-1][:200], evidence
-    identity = ROOT / 'dist/build-identity.json'
+    identity = ROOT / 'dist' / ('build-identity-dev.json' if CHANNEL == 'dev' else 'build-identity.json')
     if not identity.exists():
         return FAIL, '构建未产出 dist/build-identity.json', evidence
     data = json.loads(identity.read_text())
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip()
-    dirty = bool(sh(['git', 'status', '--porcelain', '--untracked-files=no']).stdout.strip())
     if data['commit'] != head:
         # 允许 HEAD 是身份提交的纯文档后代（验证期间改文档不产生新二进制）；
         # 任何源码/脚本/资源差异仍视为「报告指向旧产物」。
@@ -235,9 +289,13 @@ def check_clean_build(ctx):
             return FAIL, f"身份提交 {data['commit'][:12]} ≠ 当前 HEAD {head[:12]}（报告指向旧产物；变更：{changed[:5]}）", evidence
     if data['dirty']:
         return BLOCK, '构建身份标记 dirty；发布门槛要求源码已提交且工作区干净', evidence
+    names = {DIST_INPUT_APP.name, DIST_SETTINGS_APP.name}
+    if (data.get('channel') != CHANNEL or data.get('sourceSha256') != source_fingerprint(ROOT)
+            or set(data.get('apps', {})) != names):
+        return FAIL, '干净构建身份／源码／通道与目标不符', evidence
     return PASS, (f"{data['fullVersion']} 构建{data['buildNumber']} 提交 {head[:12]}"
-                  f"（两套应用各 {len(data['apps']['Gogaku.app']['files'])}／"
-                  f"{len(data['apps']['Gogaku Settings.app']['files'])} 个运行时文件已哈希）"), evidence
+                  f"（两套应用各 {len(data['apps'][DIST_INPUT_APP.name]['files'])}／"
+                  f"{len(data['apps'][DIST_SETTINGS_APP.name]['files'])} 个运行时文件已哈希）"), evidence
 
 
 def check_bundle(ctx):
@@ -617,6 +675,7 @@ PROFILES = {
         ('swift-tests', True, check_swift_tests),
         ('translation-eval-regression', True, check_translation_eval_regression),
         ('learning-worker-protocol', True, check_learning_worker_protocol),
+        ('delivery-contracts', True, check_delivery_contracts),
     ],
     'release': [
         ('version', True, check_version),
@@ -629,6 +688,7 @@ PROFILES = {
         ('quality', True, check_quality),
         ('render', True, check_render),
         ('data-reliability', True, check_data_reliability),
+        ('delivery-contracts', True, check_delivery_contracts),
         ('asan-ubsan', True, check_asan_ubsan),
         ('install-preflight', False, check_install_preflight),
     ],
@@ -711,9 +771,25 @@ def main():
     required_bad = [r for r in results if r['required'] and r['status'] != PASS]
     gate = not required_bad
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip() or 'no-git'
-    dirty = bool(sh(['git', 'status', '--porcelain', '--untracked-files=no']).stdout.strip())
+    dirty = working_tree_dirty(ROOT)
+    artifacts = {}
+    artifact_error = None
+    suffix = '-dev' if CHANNEL == 'dev' else ''
+    version = json.loads(VERSION_FILE.read_text())
+    names = {
+        'macos': ROOT / f'dist/Gogaku-{version["version"]}-b{version["buildNumber"]}{suffix}.pkg',
+        'windows': ROOT / f'dist/gogaku-win/Gogaku-{version["version"]}-b{version["buildNumber"]}{suffix}-windows-x64-setup.exe',
+    }
+    if any(path.is_file() for path in names.values()):
+        try:
+            artifacts = {platform: validate_package(path, platform, CHANNEL)['artifact']
+                         for platform, path in names.items()}
+        except DeliveryError as error:
+            artifact_error = str(error)
     report = {
-        'profile': args.profile, 'startedAt': started,
+        'profile': args.profile, 'channel': CHANNEL, 'quick': args.quick,
+        'sourceSha256': source_fingerprint(ROOT), 'artifacts': artifacts,
+        'artifactError': artifact_error, 'startedAt': started,
         'finishedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
         'commit': head, 'dirty': dirty, 'arch': platform.machine(),
         'version': json.loads(VERSION_FILE.read_text()) if VERSION_FILE.exists() else None,
@@ -724,7 +800,7 @@ def main():
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(f"\n摘要：passed={summary[PASS]} failed={summary[FAIL]} skipped={summary[SKIP]} "
-          f"blocked={summary[BLOCK]}；发布门槛：{'通过' if gate else '未通过（' + '、'.join(r['name'] for r in required_bad) + '）'}")
+          f"blocked={summary[BLOCK]}；发布门槛：{'通过' if gate else '未通过（' + '、'.join(report['gate']['notPassed']) + '）'}")
     print(f"报告：{out}")
     return 0 if gate else 1
 

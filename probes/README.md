@@ -4,6 +4,15 @@
 
 本次外部源码和编译产物放在 `/tmp/gogaku-validation/`。源码版本见 [environment.json](results/environment.json)。Gogaku 内只保存自行编写的探针、运行结果和测试日志，不包含上游源码、schema 或模型权重。
 
+## Windows 原生输入回归（需授权的 Windows 会话）
+
+这两项只使用自行创建的控件／合成协议输入，不读取已有宿主正文，不测试真实翻译：
+
+- `windows-field-safety.cpp`：直接调用生产 `nativeEditFallbackSafe`，检查已知 Edit／RichEdit、文档归属、未知类、密码／只读／禁用及运行时密码字符。分别编译为 x64／x86，在 Windows 运行；各 13 项，结果写到 EXE 同目录 `result.json`。它不等于完整 TSF 密码字段验收。
+- `windows-session-focus.cpp`：连接已运行的同用户／同会话／同通道代理，建立两个连接，在活动连接输入 `ni` 后发送旧连接的失焦，再输入 `hc`，要求仍为 `nihc`。需链接对应通道 `platform.o`；会暂时切焦点及改变代理组合，仅在用户空闲并授权时运行；不确认提交、不写调频、不安装或切换系统输入源。
+
+构建 91 的实际结果、复现失败与范围见[运行证据](../docs/validation/windows-desktop-b91.json)。
+
 ## GGUF 新模型资源预研与 20 句实测
 
 截图候选与 Index-Translate 的资料复核见 [候选复核](../docs/research-translation-screenshot-candidates.md)；运行内存与协议预研见 [资源预研](../docs/research-translation-resource-prescreen.md)。

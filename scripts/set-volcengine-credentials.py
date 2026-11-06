@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""写入火山翻译凭据文件（供 volcengine_translate_worker.py 读取，0600）。
+"""写入火山翻译凭据文件（供随包 GogakuTranslator --volcengine 读取，0600）。
 
 用法（在仓库检出目录）：
   python3 scripts/set-volcengine-credentials.py \
@@ -8,7 +8,7 @@
       [--request-overrides '{"TermRepoID":"..."}']
 
 凭据文件路径：~/Library/Application Support/Gogaku/translation/volcengine-credentials.json
-settings.json 的 learningTranslationBackend 设为 "volcengine" 即启用；
+写入后仍需在设置「学习翻译」打开「启用学习翻译」（默认关闭）；
 仅学习模式联网（普通模式不经任何翻译路径）。
 """
 import argparse
@@ -48,7 +48,7 @@ def main():
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
     os.chmod(path, 0o600)
     print(f"凭据已写入：{path}（权限 0600）")
-    print('启用：settings.json → "learningTranslationBackend": "volcengine"')
+    print('下一步：打开 Gogaku 设置 → 学习翻译 → 启用学习翻译（默认关闭）。')
 
 
 if __name__ == "__main__":

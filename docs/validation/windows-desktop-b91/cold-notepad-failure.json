@@ -1,0 +1,110 @@
+{
+  "activeProfile": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0,
+    "lang": 2052,
+    "profile": "{C9E1F3A5-7B8D-4E2F-6A0C-1D3E5F7A9B12}"
+  },
+  "candidateVisible": false,
+  "candidateWindows": [
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 2163718,
+      "pid": 9952,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    },
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 721600,
+      "pid": 7668,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    },
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 984000,
+      "pid": 9072,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    },
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 852458,
+      "pid": 5468,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    },
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 656590,
+      "pid": 5468,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    },
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 525256,
+      "pid": 5468,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    }
+  ],
+  "ok": false,
+  "profilesResult": 0,
+  "savedBytes": "nihc ",
+  "screenshots": [
+    "notepad-input.png"
+  ],
+  "session": 1,
+  "target": {
+    "class": "Notepad",
+    "dpi": 192,
+    "handle": 1508614,
+    "pid": 9952,
+    "rect": [
+      0,
+      204,
+      2048,
+      1236
+    ],
+    "visible": true
+  },
+  "textCommitted": false
+}

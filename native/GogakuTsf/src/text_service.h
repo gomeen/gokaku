@@ -1,82 +1,64 @@
-/* TSF 文本服务：ITfTextInputProcessor＋按键／焦点／组合事件汇。
- * 按键流：TSF VK → 核心 GcKeyEvent（C ABI）→ 快照 → 组合文本／候选窗／提交。
- * 学习（调频）按版本 4 合同：宿主插入确认后发 GC_EV_COMMIT_CONFIRMED。 */
 #pragma once
-
 #include "stdafx.h"
-#include "candidate_window.h"
 #include "core_bridge.h"
+#include "candidate_window.h"
+#include <map>
 
-class TextService
-    : public ITfTextInputProcessor,
-      public ITfKeyEventSink,
-      public ITfThreadMgrEventSink,
-      public ITfCompositionSink {
+class TextService : public ITfTextInputProcessor, public ITfKeyEventSink,
+                    public ITfThreadMgrEventSink, public ITfCompositionSink {
 public:
     TextService();
-    virtual ~TextService();
-
-    /* IUnknown */
-    STDMETHODIMP QueryInterface(REFIID riid, void **ppv) override;
+    ~TextService();
+    STDMETHODIMP QueryInterface(REFIID,void **) override;
     STDMETHODIMP_(ULONG) AddRef() override;
     STDMETHODIMP_(ULONG) Release() override;
-
-    /* ITfTextInputProcessor */
-    STDMETHODIMP Activate(ITfThreadMgr *ptim, TfClientId tid) override;
+    STDMETHODIMP Activate(ITfThreadMgr *,TfClientId) override;
     STDMETHODIMP Deactivate() override;
-
-    /* ITfKeyEventSink */
-    STDMETHODIMP OnSetFocus(BOOL fForeground) override;
-    STDMETHODIMP OnTestKeyDown(ITfContext *pic, WPARAM wParam, LPARAM lParam, BOOL *pfEaten) override;
-    STDMETHODIMP OnKeyDown(ITfContext *pic, WPARAM wParam, LPARAM lParam, BOOL *pfEaten) override;
-    STDMETHODIMP OnTestKeyUp(ITfContext *pic, WPARAM wParam, LPARAM lParam, BOOL *pfEaten) override;
-    STDMETHODIMP OnKeyUp(ITfContext *pic, WPARAM wParam, LPARAM lParam, BOOL *pfEaten) override;
-    STDMETHODIMP OnPreservedKey(ITfContext *pic, REFGUID rguid, BOOL *pfEaten) override;
-
-    /* ITfThreadMgrEventSink（文档焦点通知的真实接口；SDK 无 ITfFocusSink） */
-    STDMETHODIMP OnInitDocumentMgr(ITfDocumentMgr *pdim) override;
-    STDMETHODIMP OnUninitDocumentMgr(ITfDocumentMgr *pdim) override;
-    STDMETHODIMP OnSetFocus(ITfDocumentMgr *pdimFocus, ITfDocumentMgr *pdimPrevFocus) override;
-    STDMETHODIMP OnPushContext(ITfContext *pic) override;
-    STDMETHODIMP OnPopContext(ITfContext *pic) override;
-
-    /* ITfCompositionSink */
-    STDMETHODIMP OnCompositionTerminated(TfEditCookie ecWrite, ITfComposition *pComposition) override;
-
+    STDMETHODIMP OnSetFocus(BOOL) override;
+    STDMETHODIMP OnTestKeyDown(ITfContext *,WPARAM,LPARAM,BOOL *) override;
+    STDMETHODIMP OnKeyDown(ITfContext *,WPARAM,LPARAM,BOOL *) override;
+    STDMETHODIMP OnTestKeyUp(ITfContext *,WPARAM,LPARAM,BOOL *) override;
+    STDMETHODIMP OnKeyUp(ITfContext *,WPARAM,LPARAM,BOOL *) override;
+    STDMETHODIMP OnPreservedKey(ITfContext *,REFGUID,BOOL *) override;
+    STDMETHODIMP OnInitDocumentMgr(ITfDocumentMgr *) override;
+    STDMETHODIMP OnUninitDocumentMgr(ITfDocumentMgr *) override;
+    STDMETHODIMP OnSetFocus(ITfDocumentMgr *,ITfDocumentMgr *) override;
+    STDMETHODIMP OnPushContext(ITfContext *) override;
+    STDMETHODIMP OnPopContext(ITfContext *) override;
+    STDMETHODIMP OnCompositionTerminated(TfEditCookie,ITfComposition *) override;
 private:
-    long m_ref = 1;
-    ITfThreadMgr *m_tm = nullptr;
-    TfClientId m_clientId = 0;
-    DWORD m_keyCookie = TF_INVALID_COOKIE;
-    DWORD m_focusCookie = TF_INVALID_COOKIE;
-    GcNormalSession *m_normal = nullptr;
-    CandidateWindow m_win;
-
-    ITfComposition *m_comp = nullptr;
-    bool m_composing = false;        /* 核心态：组合进行中 */
-    RECT m_caretRect = {};           /* 最近一次组合文本的屏幕矩形 */
-    bool m_hasCaretRect = false;
-
-    /* Shift 单击切中英（与 Mac 同合同：<600ms 且按住期间无其他键） */
-    bool m_shiftDown = false;
-    bool m_shiftTapValid = false;
-    ULONGLONG m_shiftDownTick = 0;
-
-    bool initCore();
-    void shutdownCore();
-
-    bool claimKey(WPARAM vk) const;
-    bool buildEvent(WPARAM vk, LPARAM lp, GcKeyEvent *ev, std::string *textStorage);
-    void dispatchEvent(const GcKeyEvent &ev, BOOL *pfEaten);
-    void applySnapshot(const GcSnapshot *snap);
-
-    bool requestEdit(bool write, const std::function<void(TfEditCookie)> &fn);
-    void ensureComposition(TfEditCookie ec, ITfContext *ctx);
-    void setCompositionText(TfEditCookie ec, ITfContext *ctx, const std::string &marked);
-    void commitText(TfEditCookie ec, ITfContext *ctx, const std::string &text);
-    void abandonComposition(TfEditCookie ec, ITfContext *ctx);
-    void updateCaretRect(TfEditCookie ec, ITfContext *ctx);
-
-    std::string foregroundApp() const;
-    static LRESULT CALLBACK flushTimerProc(HWND, UINT, WPARAM, LPARAM);
+    LONG refs_=1;
+    ITfThreadMgr *manager_=nullptr;
+    TfClientId client_=0;
+    DWORD focusCookie_=TF_INVALID_COOKIE;
+    ITfContext *context_=nullptr;
+    ITfComposition *composition_=nullptr;
+    ITfRange *anchor_=nullptr;
+    std::map<IUnknown *,uint64_t> fields_;
+    CoreBridge bridge_;
+    CandidateWindow window_;
+    gw::Json view_=gw::Json::object(),settings_=gw::Json::object();
+    HWND timer_=nullptr;
+    RECT caret_{};
+    bool hasCaret_=false,editing_=false,opened_=false;
+    bool shiftDown_=false,shiftValid_=false;
+    ULONGLONG shiftTime_=0;
+    uint64_t settingsRevision_=0;
+    std::string field_,app_,lastCommit_;
+    bool safe(ITfContext *,TfEditCookie = TF_INVALID_COOKIE) const;
+    bool syncContext(ITfContext *);
+    bool buildEvent(WPARAM,LPARAM,gw::Json &);
+    bool shortcut(WPARAM,gw::Json &);
+    bool shouldClaim(ITfContext *,WPARAM,LPARAM);
+    bool dispatch(const gw::Json &);
+    void apply(const gw::Json &);
+    bool edit(ITfContext *,bool,const std::function<HRESULT(TfEditCookie)> &);
+    HRESULT setPreedit(TfEditCookie,const std::string &);
+    HRESULT commit(TfEditCookie,const std::string &);
+    HRESULT clearComposition(TfEditCookie);
+    bool selectionMatches(TfEditCookie) const;
+    void caret(TfEditCookie);
+    void loseFocus();
+    void idle();
+    static LRESULT CALLBACK timerProc(HWND,UINT,WPARAM,LPARAM);
 };

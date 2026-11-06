@@ -109,6 +109,32 @@ final class EngineTests: XCTestCase {
         s.navigate(1); let count = s.view.candidates.count
         add(sources[2]); XCTAssertEqual(s.view.candidates.count, count)
     }
+    /// 拼写问题合同（拼写结果进会话的依据）：setIssues 落进视图并在后续编辑
+    /// 中保留（修订推进不清空），过期 stamp 被拒；范围随编辑残留到下一次
+    /// 结果覆盖。仅英→中学习方向接受。
+    func testSpellingIssuesPersistAcrossEditsAndRejectStale() throws {
+        let s = try learningSession()
+        s.configure(focus: 1, mode: .learning, direction: .enToZh)
+        try s.type("helo world ")
+        let issues = [SpellingIssue(location: 0, length: 4, explanation: "疑似拼写问题")]
+        s.setIssues(issues, stamp: s.view.stamp)
+        XCTAssertEqual(s.view.issues, issues)
+        try s.type("x")
+        XCTAssertEqual(s.view.issues, issues, "编辑推进修订不清空已发布范围")
+        try s.backspace()
+        XCTAssertEqual(s.view.issues, issues)
+        s.setIssues([SpellingIssue(location: 0, length: 9, explanation: "新")], stamp: s.view.stamp)
+        XCTAssertEqual(s.view.issues.count, 1)
+        let stale = s.view.stamp
+        try s.type("more")
+        s.setIssues([], stamp: stale)
+        XCTAssertEqual(s.view.issues.count, 1, "过期 stamp 不覆盖新范围")
+        // 方向守卫：中→英不接受拼写范围。
+        s.configure(focus: 2, mode: .learning, direction: .zhToEn)
+        try s.type("nihc")
+        s.setIssues(issues, stamp: s.view.stamp)
+        XCTAssertTrue(s.view.issues.isEmpty)
+    }
     func testFocusModeAndDirectionInvalidateCandidates() throws {
         let s = try learningSession(); try s.type("ni")
         let c = s.view.candidates[0]

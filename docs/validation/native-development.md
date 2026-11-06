@@ -1,6 +1,94 @@
 # 原生工程实施验收记录
 
-更新：2026-11-06（普通输入十项整改：上屏失败残留、候选完整提交、独立引号、设置顺序、调频清空、英文开关热更新、自定义词读取/重试、延迟学习；ABI 升 v4。隔离验证全过，真实宿主验收未开始）。目标机器：Intel Mac、macOS 26.7.2。
+## 构包与更新审查整改（2026-11-06，当前工作区，未交付新包）
+
+审查记录见 [构包与更新审查报告](../../.build/reviews/delivery-pipeline-review.md)。本轮让 Windows x86／x64 编译写出源码／版本／通道和产物哈希收据；Win Setup 与 Mac pkg 在打包前核对当前源码及 App／DLL 来源并写安装包收据；发布入口要求两个安装包收据与 fast 验证报告哈希一致，rc／定版还需 release 报告。Draft 创建和发布分两段：`release-state.json` 绑定 Release ID，续发时核对远端四份资产，只 PATCH 原 ID。安装包收据不替代代码签名或真实安装验收。
+
+Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构建号重新判断，列表分页不因首个通道不符就停止；小资产 GET 走允许主机白名单。Windows 自动发现新版只在设置窗口显示提示，不激活输入焦点。离线证据：Swift `UpdateTests` 25/25、Windows 打包 self-test、更新清单 self-test、`scripts.test_delivery_pipeline` 七项通过；重定向测试改测同一白名单判定函数（直接传未启动的 URLSessionTask 在本机测试进程 SIGSEGV）。
+
+**实际双端重建（dev b92，当前未提交工作区）**：本机固定 Windows 源码／MSYS2 输入经摘要校验，静态 libime 编译通过（未在全新机器复验下载）；setup 准备时发现并修正 KenLM 许可路径；x64/x86 MinGW 编译、Windows `--check` 与 Inno 6.7.4 编译通过。Mac Release 双 App、核心 ctest 8/8 与用户级 pkg 构建通过；重复构包时清除了暂存出厂数据继承的 `uchg` 问题。中间 b91 仅用于内部构包验证，最终交付候选递增为 b92。[最终 fast 报告](verify/report-fast-20261106-210721.json) 7/7，Swift Release 201 项通过，报告与双端收据的源码、版本、通道和安装包哈希一致。Mac pkg `17f35a9de9675b6d41c64ef4be96dee063c0ad5ea30f5f0d3dfc58aeea8e2e8e`；Windows Setup `8537b80c2087a44e8f6aa91b6c7f147dc5fb96bb5fb1889f646dd08b00b01665`。两包在 `dist/`，非正式签名版；Windows 编译器显示 `Non-commercial use only`，商业分发前须另核授权。
+
+**仍未验收**：本轮 b92 包未在 Mac/Windows 真机安装升级、未在 Windows VM 点过更新提示；更新源 owner/repo 为空，`publish-release.py --dry-run` 在配置门槛处按预期拒绝；无真实 GitHub Draft／发布／下载闭环。构建 91 的早期 VM 记录不能继承到 b92 源码指纹。
+
+## Windows 记事本、设置与图标复验（2026-11-06，工作区，构建 91 dev）
+
+用户在构建 88 安装后授权连接其 Windows 11 x64 VM 排查。本节是后续新增的限定运行证据，不继承早期前端的通过结论；[机器记录与截图](windows-desktop-b91.json)、[本轮构包报告](windows-setup-build.json)绑定构建 91 和安装 EXE 哈希。
+
+- **记事本兼容**：实测 `Microsoft.WindowsNotepad_11.2607.14.0_x64` 的 `RichEditD2DPT` 不提供可用 InputScope，旧兜底只允许 `Edit` 因而拒绝。新增受限 RichEdit 兜底：当前线程／进程、焦点属于该 TSF 文档、已知原生控件、非密码／只读／禁用；显式 private／password scope 仍拒绝。读取进程内 PE 时间戳确认加载正式安装目录的本轮 DLL。五次后续新建测试标签页均显示候选，`nihc`＋空格保存为“你好”；已有文档不覆盖。实际[候选窗截图](windows-desktop-b91/notepad-candidate.png)保留。
+- **焦点与设置时序**：构建 90 修复非激活连接迟到失焦清空当前组合，`probes/windows-session-focus.cpp` 双连接反例修前失败、修后保留 `nihc`；构建 91 保留修复。设置／词表监控以启动时文件状态为基线，避免第一次定时扫描把初始词表当作热更新而重置组合；不把暖启动成功推断为冷启动可靠。
+- **原生控件**：安装目录的 x64／x86 TSF 分别在合成 Edit 中显示候选并提交“你好”。`probes/windows-field-safety.cpp` 两架构各 13 项通过，含普通／RichEdit、文档子控件、兄弟控件拒绝、未知类、密码、运行时密码、只读及禁用；这是生产兜底函数的回归，不替代完整 TSF 密码宿主矩阵。
+- **设置与图标**：200% DPI 下七页切换、窗口大小图标、最小皮肤预览九条完整可见；安装目录的设置／代理／双位数 TSF 大小图标资源可提取，开始菜单设置链接指向随包 EXE。仅覆盖该 DPI／尺寸，不是所有主题字体矩阵。
+- **安装与身份**：安装器返回 0，63 个 payload 文件与身份清单哈希一致，双架构 COM 路径正确，Windows 桌面 EXE 与 Mac 产物 SHA-256 一致。为保留已打开宿主，本次安装前人工把占用的旧产品文件迁至临时备份，因此不是普通升级／恢复的通过证据。无 Authenticode 签名。
+- **关键回归**：[构建 91 fast 7/7](verify/report-fast-20261106-192914.json)，Swift Release 193 项及交付合同通过；共享核心未在本轮修改，沿用先前 ASan／UBSan quick 2,000 序列冒烟。未执行完整 release gate。
+
+**已知未解决：冷启动第一组输入。** 代理完全退出后，正式安装版记事本第一次输入没有候选、保存为 `nihc `；合成 Edit 也有同类失败。代理就绪后的重复成功不抵消该失败；把启动调用提前到激活阶段的诊断尝试也未通过，未纳入本包。使用时可先启动代理、稍候并在空白文档确认候选，但不能称为稳定版。构建 89／90 出现过错误词或空提交，也不能只据后续成功回写为全部通过。
+
+真实火山／GitHub 更新、完整宿主、性能、长时稳定性、无干预升级／恢复／卸载、双端完整功能仍未验收，见[功能对照](../feature-parity.md)。
+
+## Windows 最终 EXE 构建（2026-11-06，工作区，构建 88 dev）
+
+本轮按用户确认只构建安装 EXE，不执行 Windows 产品程序，不进行 VM／真机验证；安装与运行验证交用户。当前 Windows 前端重写不继承历史 VM 证据。
+
+- **真实编译**：Mac 上 MinGW-w64 GCC 16.2；x64 核心 DLL、用户代理 EXE、七页设置 EXE、TSF DLL，以及 x86 TSF DLL 均已编译／链接。两位数 TSF 都经同用户／会话／通道私有管道连接 x64 代理；最终 PE 只依赖 Windows 系统库。
+- **集成**：普通输入配置、自定义词、Windows 原子持久化、提交确认、焦点／字段校验、非激活候选窗、Direct2D／DirectWrite 主题、异步火山签名请求、后台系统拼写、全局模式／方向、托盘与更新窗口已接通。它们只有编译与静态检查证据，未在 Windows 运行。
+- **实际构包**：Wine 仅运行官方 Inno Setup 6.7.4 编译器；双位数 TSF、x64 代理／设置／核心、约 46 MB 普通输入数据、更新配置、第三方许可与逐文件构建身份进入 Setup.exe。产物、SHA-256、组件哈希与检查结果见 [windows-setup-build.json](windows-setup-build.json)。不运行生成的安装器。
+- **关键回归**：[fast 7/7](verify/report-fast-20261106-151839.json)，核心 ctest、Swift Release 193 项、评测与 worker 协议 26 项断言和交付合同通过。[ASan／UBSan quick](verify/report-release-20261106-151933.json) 2,000 随机序列无错误；该报告按 `--only` 跳过其它项目，整体 release gate 为未通过，不能改写为全量发布通过。
+- **未完成／未测**：多候选预译、共享学习等待／缓冲协调、随包 WebP codec、旧 `settings.txt` 迁移、SQLite 历史片段管理、跨通道调频和版本化升级恢复仍是实现缺口；Windows 安装／启用／宿主／UI／翻译／升级卸载与真实 GitHub 更新均待用户验证，详见[功能对照](../feature-parity.md)与[使用说明](../windows-testing.md)。
+
+
+## 学习英→中波浪线与中→英 Enter／⌘Enter（2026-11-06，工作区，构建 88 dev）
+
+用户真机反馈（dev b87）：① 错误单词波浪线不显示；② Enter／空格上屏语义与预期不符，要求统一为 Enter 上屏译文、⌘Enter 原文上屏（两方向）。根因与修复：
+
+- **波浪线**：拼写结果只写控制器本地 `displayed`，逐键 `publishLearning` 用会话视图覆盖（会话从未收到结果，`setIssues` 为死代码）；译文未就绪阶段 onResult 提前返回不渲染。修复：onResult 经引擎队列 `setIssues(issues, stamp:)` 写入共享会话后 `publishLearning`；核心 SET_ISSUES 按同修订 stamp 守卫（编辑使旧范围失效，规格原文）。拼写 helper 路径改用与翻译同一解析规则。
+- **中→英**：Enter 原走普通核心 `.enter`（提交剩余原编码＝原样上屏拼音，违反规格表「选就绪目标」）→ 改为 `.space` 路由（译文就绪即上屏英文，未就绪先中文源文再异步换译）；⌘Enter 原交还宿主 → 改为 `.space` 且 `swapTranslation=false`（中文源文直接上屏，不换译）。英→中未改码（Enter 选就绪中文／⌘Enter 原文本已实现；用户观察到的「Enter 原样上屏」无对应代码路径，推断来自中→英路径或无候选态 ⌘Enter，待真机复验确认）。
+
+**已验证（隔离／离屏）**：
+
+- `python3 scripts/verify.py --profile fast`：7/7 通过；Swift Release 193 项含新增拼写范围合同用例（`setIssues` 入视图、编辑推进修订不清空、过期 stamp 拒绝、中→英方向守卫）；报告 `docs/validation/verify/report-fast-20261106-113359.json`。
+- `--spell` helper 运行时实测（本机已装 stable b86 与 dev b87 两个 helper）：`helo metting ` 返回 location 0/length 4 与 location 11/length 7 两处 issue，JSON 协议 round-trip 正常。
+- 构建 88 dev 本机安装（`manage-install.py install --channel dev`），哈希核对通过。
+
+**未验证**：真实宿主按键路径（Enter／⌘Enter 上屏内容、波浪线实际显示、点击解释）——host 档需空闲时段执行；待下轮 `--profile host` 一并回归。
+
+## 双端统一第一轮（2026-11-06，工作区，构建 87 dev）
+
+按[双端功能统一、安装包与检查更新计划](../implementation-plan.md)推进 P0／P1／P4（Mac）／P5（Mac 客户端）。工作区同时含并行会话的 `version.json`（0.1.1-dev.2／构建 87）与 `probes/` 改动；本记录只覆盖本轮文件。**未做真实宿主、真实安装器、真实火山凭据或真实 GitHub 验收。**
+
+- **翻译收敛**：移除 quickmt／small100／Python 后端、beam、模型准备与下载入口；新增 `Sources/GogakuCore/Volcengine.swift`（V4 HMAC-SHA256 签名、URLSession、凭据热读、尾部孤立标点剥离、错误映射）与随包 `GogakuTranslator --volcengine`；设置「学习翻译」页改为启用开关（默认关）、凭据保存／移除、连接测试、状态与本机字符统计。设置 schema 升 2：旧本地模型配置迁移为关闭学习翻译，已启用火山配置保留启用、凭据与用量。
+- **安装事务**：`package-macos-pkg.py` 在打包阶段把身份注入 staged App 并由内向外签名（Developer ID 或 ad-hoc），再打 zip；`scripts/pkg-postinstall.sh` 解包→校验包内身份／构建号／签名→备份→替换→核对安装后身份／构建号；失败恢复两者；事务状态 `~/Library/Application Support/Gogaku/install/transaction.txt`；`manage-install.py` 改 staging＋备份＋失败恢复＋构建号校验。删除 DMG 打包脚本与产物。
+- **检查更新**：`UpdateContract/UpdatePreferences/UpdateTransport/UpdateEngine/UpdateDownloader`＋设置更新窗口；Ed25519 清单验签、GitHub 分页／ETag／限流、通道／构建号／平台／架构／minOS、HTTPS 白名单、下载大小／SHA-256／原子缓存、取消与安装交接；自动检查默认关闭、24 小时节流、只在设置应用运行。发布脚本 `update-signing.swift`、`make-update-manifest.py`、`publish-release.py`；随包开发公钥。
+- **Windows 脚手架**：`packaging/windows/gogaku.iss.in`＋`scripts/build-win-app.py`（产物检查、staging、身份哈希、iss 渲染、iscc 调用；缺产物明确失败）。未在 Windows 编译。
+
+**已验证（隔离／离屏）**
+
+- `python3 scripts/verify.py --profile fast`：7/7 通过（版本拒绝路径 7/7、资源哈希与依赖锁、核心 ctest 6/6、Swift Release 192 项、评测回归、参考 worker 协议、交付合同自测）；报告 `docs/validation/verify/report-fast-20261106-111047.json`。
+- 核心 ctest 6/6（abi、normal、learning、quality、translate_safety、fuzz 2000 序列）；无共享核心 C++ 改动。
+- `check-bundle.py` 对构建 87 dev 双 App 通过：签名与依赖闭包、包内引擎小鹤上屏、设置自动读音、拼写 helper、`update-config.json`（schema 1、1 个可信公钥、仓库未配置）、火山 helper 无凭据返回 `credentials_missing` 且未联网；报告 `docs/validation/bundle-smoke-dev.json`。
+- 火山签名／请求体与 Python 参考 worker 固定向量逐字节一致（`VolcengineTests`）；错误码映射、凭据 0600 往返、非法 host 拒绝；缓存命中标记 `cached` 且不重复计入本月统计（`TranslationTests`）。
+- 更新合同：有效／篡改／未知 keyId 签名、schema、版本、通道、构建号、架构／minOS、重复资产、分页、304 缓存、限流、500、下载大小／哈希与缓存复用（`UpdateTests`）。
+- 发布与打包自测：`make-update-manifest.py --self-test`（生成、哈希、签名、篡改拒绝）、`build-win-app.py --self-test`（双位数目录、身份、iss 渲染、缺产物检测）、`bash -n scripts/pkg-postinstall.sh`。
+- **pkg 打包阶段签名**：staged 输入法含 `TISInputSourceID=org.gogaku.inputmethod.dev`，`codesign --verify --deep --strict` 通过；zip 内签名保留；postinstall 不再重签。ad-hoc 包 `pkgutil --check-signature` 仍为 no signature，`spctl` 拒绝（开发测试包预期）。Developer ID／公证未跑（无证书）。
+- **真实安装复验**：`installer -pkg dist/Gogaku-0.1.1-dev.2-b87-dev.pkg -target CurrentUserHomeDirectory` 成功；双 App 构建 87、身份正确、`codesign --verify` 通过、`phase=success`；安装后 helper 与 update-config 正常。当前输入源为 stable，dev 进程仍运行旧内存，切源后加载新构建。
+- **pkg postinstall 事务实测（假 HOME，不触碰真实用户与输入源）**：
+  1. 成功：旧双 App（构建 1）→ 新构建 87；两 App 身份／构建号正确；旧包备份为 `input.disabled`／`settings.disabled`；状态 `phase=success`。重打包产物 `dist/Gogaku-0.1.1-dev.2-b87-dev.pkg`（SHA-256 `5f40a471700c4c8258283da543adfe1697e20233cc415023356212a69d88978a`）再次通过成功路径。
+  2. 失败：zip 缺少设置应用 → 退出 1，旧双 App 恢复为构建 1，状态 `phase=failed`，不提示成功。
+  3. 中断恢复：预置 `phase=installing`＋旧备份＋新目标（构建 99），再跑失败安装 → 先恢复旧构建 1，最终仍为构建 1，未留下半装状态。
+- 设置应用从 dist 启动进程存活（约 2.6s 后手动结束）；**屏幕捕获不可用，未取得新页面截图**。
+
+**未验证**
+
+- 真实 `installer -pkg` 升级／恢复与真实用户输入源切换／新进程加载（单次真实安装已通过，未做双构建升级矩阵）。
+- Developer ID Application／Installer 签名、Apple 公证、stapling 与 `spctl` 通过路径（无证书）。
+- 真实火山凭据的连接测试、TLS、计量与双向译文；未配置凭据时不发送已有 helper 级证据。
+- 真实 GitHub Releases 获取／下载／校验／安装；仅注入传输测试。
+- Windows Setup 的 MSVC／iscc 编译、x86 组件、安装／卸载与真实按键。
+- 新设置页真实点击（凭据保存／移除、连接测试、自动检查开关、更新窗口）、候选窗与本轮 UI 变化。
+- 完整宿主安全矩阵、逐键性能 p95≤5ms、两小时稳定性、十万序列插桩、朋友真机。
+
+### 上一轮记录（普通输入十项整改）
+
+2026-11-06：上屏失败残留、候选完整提交、独立引号、设置顺序、调频清空、英文开关热更新、自定义词读取／重试、延迟学习；ABI 升 v4。隔离验证全过，真实宿主验收未开始。目标机器：Intel Mac、macOS 26.7.2。
 
 ## 普通输入十项整改（2026-11-06，工作区，未定版）
 

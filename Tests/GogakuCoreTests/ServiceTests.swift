@@ -40,6 +40,37 @@ final class TranslationTests: XCTestCase {
         XCTAssertEqual(traceText.split(separator: "\n"), ["\"first\"", "\"latest\""])
         withExtendedLifetime(s) {}
     }
+    func testCacheHitIsMarkedAndNotCountedAsNewRequest() throws {
+        let counter = directory.appendingPathComponent("requests.txt")
+        let encoder = JSONEncoder(); encoder.outputFormatting = [.withoutEscapingSlashes]
+        let encoded = String(data: try encoder.encode(counter.path), encoding: .utf8)!
+        let s = try service(script: """
+        import json, sys
+        for line in sys.stdin:
+            r = json.loads(line)
+            with open(\(encoded), 'a') as f: f.write('x')
+            r.update(target='synthetic', error=None, milliseconds=0)
+            print(json.dumps(r), flush=True)
+        """)
+        let first = expectation(description: "first")
+        let second = expectation(description: "second")
+        s.onResult = { result in
+            if result.cached == true {
+                XCTAssertEqual(result.target, "synthetic")
+                second.fulfill()
+            } else {
+                XCTAssertNil(result.error)
+                first.fulfill()
+                s.requestImmediately(self.request("same"))
+            }
+        }
+        s.requestImmediately(request("same"))
+        wait(for: [first, second], timeout: 8)
+        let count = (try? String(contentsOf: counter, encoding: .utf8).count) ?? 0
+        XCTAssertEqual(count, 1)
+        withExtendedLifetime(s) {}
+    }
+
     func testInvalidationPreventsSuccessfulLateResponse() throws {
         let s = try service(script: """
         import json, sys, time

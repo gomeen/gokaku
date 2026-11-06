@@ -120,13 +120,44 @@ def auto_pinyin_smoke(app):
 
 def spelling_smoke(app):
     helper = app / 'Contents/Helpers/GogakuTranslator'
-    status = json.loads(run([helper, '--status']))
     request = {'protocolVersion': 1, 'id': str(uuid.uuid4()), 'stamp': {'session': str(uuid.uuid4()), 'focus': 1, 'composition': str(uuid.uuid4()), 'revision': 1, 'mode': 'learning', 'direction': 'enToZh'}, 'sourceID': 'spelling', 'source': '😀 metting ', 'resource': 'NSSpellChecker:en_US'}
     result = subprocess.run([str(helper), '--spell'], input=json.dumps(request) + '\n', text=True, capture_output=True, check=True, timeout=15)
     response = json.loads(result.stdout)
     assert uuid.UUID(response['id']) == uuid.UUID(request['id']) and response['source'] == request['source']
     assert any(i['location'] == 3 and i['length'] == 7 for i in response['issues'])
-    return {'spelling': 'passed_utf16_from_package', 'systemResources': status}
+    return {'spelling': 'passed_utf16_from_package', 'systemResources': 'NSSpellChecker:en_US'}
+
+
+def volcengine_helper_smoke(app):
+    """随包火山 helper：无凭据时返回 credentials_missing，不发网络请求。"""
+    import tempfile
+    helper = app / 'Contents/Helpers/GogakuTranslator'
+    with tempfile.TemporaryDirectory() as temporary:
+        missing = Path(temporary) / 'no-credentials.json'
+        request = {'protocolVersion': 1, 'id': str(uuid.uuid4()),
+                   'stamp': {'session': str(uuid.uuid4()), 'focus': 1,
+                             'composition': str(uuid.uuid4()), 'revision': 1,
+                             'mode': 'learning', 'direction': 'enToZh'},
+                   'sourceID': 'smoke', 'source': 'hello', 'resource': 'volcengine-nmt'}
+        result = subprocess.run([str(helper), '--volcengine', '--credentials', str(missing)],
+                                input=json.dumps(request) + '\n', text=True,
+                                capture_output=True, check=True, timeout=15)
+        response = json.loads(result.stdout)
+        assert response.get('error') == 'credentials_missing', response
+        assert response.get('source') == 'hello'
+    return 'passed_credentials_missing_without_network'
+
+
+def update_config_smoke(app):
+    path = app / 'Contents/Resources/update-config.json'
+    assert path.is_file(), '设置应用缺少 update-config.json'
+    config = json.loads(path.read_text())
+    assert config.get('schema') == 1
+    assert isinstance(config.get('trustedKeys'), list) and config['trustedKeys']
+    for key in config['trustedKeys']:
+        assert key.get('keyId') and key.get('publicKey')
+    return {'schema': 1, 'configured': bool(config.get('owner') and config.get('repo')),
+            'trustedKeys': len(config['trustedKeys'])}
 
 def data_and_license_smoke(app):
     """英文词表／释义注释数据与随包许可文本：打包时哈希校验，缺失＝降级形态。"""
@@ -219,7 +250,10 @@ if __name__ == '__main__':
     report = {'checkedAt': datetime.now(timezone.utc).isoformat(), 'apps': [inspect(args.input_app), inspect(args.settings_app)],
               'menuIcon': menu_icon(args.input_app), 'engine': engine_smoke(args.input_app), 'normalCore': normal_core_smoke(args.input_app),
               'dataAndLicenses': data_and_license_smoke(args.input_app),
-              'settingsAutoPinyin': auto_pinyin_smoke(args.settings_app), **spelling_smoke(args.input_app),
+              'settingsAutoPinyin': auto_pinyin_smoke(args.settings_app),
+              'updateConfig': update_config_smoke(args.settings_app),
+              'volcengineHelper': volcengine_helper_smoke(args.input_app),
+              **spelling_smoke(args.input_app),
               'hostAcceptance': 'not_tested', 'qualityAcceptance': 'not_tested', 'performanceAcceptance': 'not_tested'}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')

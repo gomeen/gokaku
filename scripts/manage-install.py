@@ -61,8 +61,13 @@ def own(path, identifier):
         raise SystemExit(f'拒绝覆盖非 Gogaku 应用：{path}')
 
 def backup(path):
+    """把旧 app 移到 DeveloperBackups，返回备份路径（不存在则 None）。
+
+    事务语义：调用方在新包落位或校验失败时必须 restore_backup；不先删除
+    唯一可用副本。
+    """
     if not path.exists():
-        return
+        return None
     directory = SUPPORT / 'DeveloperBackups' / time.strftime('%Y%m%d-%H%M%S')
     directory.mkdir(parents=True, exist_ok=True)
     # 备份不能保留 .app 扩展名：LaunchServices 会索引 Application Support 里的
@@ -71,6 +76,15 @@ def backup(path):
     target = directory / (path.name + '.disabled')
     shutil.move(str(path), str(target))
     prune_backups()
+    return target
+
+
+def restore_backup(path, backup_path):
+    """恢复备份；没有备份则删除本次新装的目标。"""
+    if path.exists():
+        shutil.rmtree(path)
+    if backup_path and backup_path.exists():
+        shutil.move(str(backup_path), str(path))
 
 def prune_backups():
     root = SUPPORT / 'DeveloperBackups'
@@ -86,38 +100,47 @@ def prune_backups():
     for stale in entries[:-KEEP_BACKUPS] if len(entries) > KEEP_BACKUPS else []:
         shutil.rmtree(stale, ignore_errors=True)
 
-def verify_install(source: Path, target: Path, plist_overrides=None):
-    """安装后核对：实际安装路径的每个文件与 dist 清单哈希一致。
-    防止旧包残留、拷贝损坏或旧备份包冒充新版本。
-    plist_overrides: {相对路径 -> 期望字节}。输入法 Info.plist 在安装侧注入
-    输入源身份（_gogaku_dist 约定），期望值按同一逻辑重算后比对。"""
-    manifest_path = ROOT / 'dist' / ('bundle-manifest.json' if CHANNEL == 'stable'
-                                     else 'bundle-manifest-dev.json')
-    if not manifest_path.exists():
-        raise SystemExit(f'缺少 {manifest_path.relative_to(ROOT)}；请用 scripts/build.py（同通道）构建后再安装。')
+def manifest_vs_tree(manifest_path: Path, tree: Path):
+    """清单逐文件比对 tree（构建→dist 链路：dist 必须与 build.py 清单一致）。"""
     manifest = {entry['path']: entry for entry in json.loads(manifest_path.read_text())}
-    # build.py 写入的 manifest 路径相对于 dist（如 'Gogaku.app/Contents/...'），
-    # 不是绝对路径；前缀必须按同一基准算，否则一个条目都匹配不上。
-    prefix = str(source.relative_to(manifest_path.parent)) + '/'
-    overrides = plist_overrides or {}
-    installed = {str(p): p for p in target.rglob('*') if p.is_file()}
+    prefix = str(tree.relative_to(manifest_path.parent)) + '/'
+    count = 0
     for rel, entry in manifest.items():
         if not rel.startswith(prefix):
             continue
-        installed_path = target / rel.removeprefix(prefix)
-        if not installed_path.is_file():
+        path = tree / rel.removeprefix(prefix)
+        if not path.is_file():
+            raise SystemExit(f'缺少 {rel}')
+        if file_digest(path) != entry['sha256']:
+            raise SystemExit(f'哈希不一致：{path}（期望 {entry["sha256"][:12]}…）')
+        count += 1
+    if count == 0:
+        raise SystemExit(f'清单不含 {tree.name} 的任何条目：{manifest_path.name}')
+
+
+def tree_digests(root: Path) -> dict:
+    return {str(p.relative_to(root)): file_digest(p)
+            for p in sorted(root.rglob('*')) if p.is_file() and '__pycache__' not in str(p)}
+
+
+def verify_install(source: Path, target: Path, stage_digests: dict):
+    """安装位逐文件等于重签后的 stage 字节。
+
+    防止拷贝损坏、旧包残留或半写状态。不能用 dist 清单直接比安装位：
+    安装侧注入输入源身份后重签会改主程序字节（2026-11-06 实证），清单哈希
+    只在重签前对 dist 校验（manifest_vs_tree）。"""
+    installed = {str(p.relative_to(target)): p for p in target.rglob('*') if p.is_file()}
+    for rel, expected in stage_digests.items():
+        path = target / rel
+        if not path.is_file():
             raise SystemExit(f'安装不完整：缺少 {rel}')
-        if rel.removeprefix(prefix) in overrides:
-            expected = hashlib.sha256(overrides[rel.removeprefix(prefix)]).hexdigest()
-        else:
-            expected = entry['sha256']
-        if file_digest(installed_path) != expected:
-            raise SystemExit(f'哈希不一致：{installed_path}（期望 {expected[:12]}…）')
-        installed.pop(str(installed_path), None)
-    extra = [p for p in installed if '__pycache__' not in p]
+        if file_digest(path) != expected:
+            raise SystemExit(f'哈希不一致：{path}（期望 {expected[:12]}…，重签后 stage 基准）')
+        installed.pop(rel, None)
+    extra = [str(target / rel) for rel in installed if '__pycache__' not in rel]
     if extra:
-        raise SystemExit(f'安装目录含清单外文件：{extra[:3]}')
-    print(f'已核对 {target} 运行时哈希（{sum(1 for r in manifest if r.startswith(prefix))} 个文件与 dist 清单一致）')
+        raise SystemExit(f'安装目录含基准外文件：{extra[:3]}')
+    print(f'已核对 {target} 运行时哈希（{len(stage_digests)} 个文件与重签后 stage 一致）')
 
 def file_digest(path: Path) -> str:
     with path.open('rb') as f:
@@ -130,25 +153,63 @@ def install():
     print(f'安装通道：{CHANNEL}（输入法 {INPUT.name}，bundle ID {INPUT_ID}）')
     print(f'与 {other} 通道并存：用户数据共用 {SUPPORT}，互不覆盖。')
     import plistlib
-    for source, target, identifier, needs_identity in [
-            (ROOT / 'dist' / CHANNELS[CHANNEL]['input_name'], INPUT, INPUT_ID, True),
-            (ROOT / 'dist' / CHANNELS[CHANNEL]['settings_name'], SETTINGS,
-             CHANNELS[CHANNEL]['settings_id'], False)]:
-        subprocess.run(['codesign', '--verify', '--deep', '--strict', source], check=True)
-        own(target, identifier)
-        target.parent.mkdir(parents=True, exist_ok=True)
-        backup(target)
-        shutil.copytree(source, target, symlinks=True)
-        overrides = None
-        if needs_identity:
-            # 中立 dist → 安装位注入输入源身份（_gogaku_dist 约定）＋ad-hoc 重签。
-            info_path = target / 'Contents/Info.plist'
-            info = plistlib.loads(info_path.read_bytes())
-            patched = deterministic_plist_bytes(apply_tis_identity(info, identifier))
-            info_path.write_bytes(patched)
-            subprocess.run(['codesign', '--force', '--deep', '--sign', '-', target], check=True)
-            overrides = {'Contents/Info.plist': patched}
-        verify_install(source, target, plist_overrides=overrides)
+    version_meta = json.loads((ROOT / 'version.json').read_text())
+    expected_build = str(version_meta['buildNumber'])
+    # 事务：先为两个 app 建 staging 副本并校验，再备份旧包、替换；任一步失败
+    # 恢复两者。staging 使用目标同卷临时名，最后 rename 避免半写状态。
+    plan = [
+        (ROOT / 'dist' / CHANNELS[CHANNEL]['input_name'], INPUT, INPUT_ID, True),
+        (ROOT / 'dist' / CHANNELS[CHANNEL]['settings_name'], SETTINGS,
+         CHANNELS[CHANNEL]['settings_id'], False),
+    ]
+    manifest_path = ROOT / 'dist' / ('bundle-manifest.json' if CHANNEL == 'stable'
+                                     else 'bundle-manifest-dev.json')
+    if not manifest_path.exists():
+        raise SystemExit(f'缺少 {manifest_path.relative_to(ROOT)}；请用 scripts/build.py（同通道）构建后再安装。')
+    installed = []  # [(target, backup_path)]
+    try:
+        staged = []
+        for source, target, identifier, needs_identity in plan:
+            subprocess.run(['codesign', '--verify', '--deep', '--strict', source], check=True)
+            # 构建链校验：dist 本体必须与 build.py 清单一致（重签前基准）。
+            manifest_vs_tree(manifest_path, source)
+            own(target, identifier)
+            info = plistlib.loads((source / 'Contents/Info.plist').read_bytes())
+            if str(info.get('CFBundleVersion')) != expected_build:
+                raise SystemExit(f'{source.name} 构建号 {info.get("CFBundleVersion")} '
+                                 f'≠ version.json {expected_build}')
+            target.parent.mkdir(parents=True, exist_ok=True)
+            stage = target.parent / (target.name + '.installing')
+            if stage.exists():
+                shutil.rmtree(stage)
+            shutil.copytree(source, stage, symlinks=True)
+            if needs_identity:
+                # 中立 dist → 安装位注入输入源身份（_gogaku_dist 约定）＋ad-hoc 重签。
+                info_path = stage / 'Contents/Info.plist'
+                info = plistlib.loads(info_path.read_bytes())
+                patched = deterministic_plist_bytes(apply_tis_identity(info, identifier))
+                info_path.write_bytes(patched)
+                subprocess.run(['codesign', '--force', '--deep', '--sign', '-', stage], check=True)
+            subprocess.run(['codesign', '--verify', '--deep', '--strict', stage], check=True)
+            stage_digests = tree_digests(stage)   # 重签后字节基准（见 verify_install）
+            staged.append((source, stage, target, stage_digests))
+
+        # 全部 staging 通过后才动安装位；先备份，再原子替换。
+        for source, stage, target, stage_digests in staged:
+            old = backup(target)
+            installed.append((target, old))
+            shutil.move(str(stage), str(target))
+            verify_install(source, target, stage_digests)
+            info = plistlib.loads((target / 'Contents/Info.plist').read_bytes())
+            if str(info.get('CFBundleVersion')) != expected_build:
+                raise SystemExit(f'安装后构建号不符：{target} = {info.get("CFBundleVersion")}')
+    except BaseException:
+        for target, old in reversed(installed):
+            restore_backup(target, old)
+        for _, stage, _, _ in locals().get('staged', []):
+            if stage.exists():
+                shutil.rmtree(stage, ignore_errors=True)
+        raise
     # imklaunchagent 的输入法启动路径依赖 LaunchServices 数据库；
     # 移包重装会丢失登记，必须重新注册，否则系统不拉起输入法进程。
     subprocess.run([LSREGISTER, '-f', str(INPUT)], check=False)
@@ -209,6 +270,12 @@ def uninstall(purge):
         print('已删除 Gogaku 用户数据。系统语言包仍由系统管理。')
 
 def recover():
+    state = SUPPORT / 'install' / 'transaction.txt'
+    if state.exists():
+        print(f'检测到安装事务记录：{state}')
+        print(state.read_text().strip())
+        print('若上次安装中断，下次运行 pkg 或 install 会先恢复旧版本；也可从'
+              f' {SUPPORT / "DeveloperBackups"} 手动恢复。')
     print('1. 先手动切换到 ABC 或任一已有输入源；Gogaku 不会自动切换输入源。')
     print('2. 在系统设置的键盘/文本输入中暂时移除 Gogaku；不要关闭系统安全机制。')
     print('3. 运行 python3 scripts/manage-install.py diagnose，重新构建后再 install。')

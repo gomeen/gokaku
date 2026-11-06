@@ -8,29 +8,27 @@
 
 - 普通模式保留中文输入、中文上屏。学习模式支持中文输入、英语上屏，以及英语输入、中文上屏。
 - 中文输入需要小鹤双拼，覆盖普通模式与中→英学习路径；英→中需要独立的英语输入路径。
-- 支持快捷键、菜单切换模式，并按应用记住模式。学习输入以选词后立即上屏为默认，不额外要求预览和确认翻译。
+- 支持快捷键、菜单切换模式；模式与方向为全局偏好，切换应用保持当前选择。学习输入以选词后立即上屏为默认，不额外要求预览和确认翻译。
 - 只对用户在英→中方向输入的英语标记疑似问题。点击波浪线查看说明，暂不提供纠正功能。翻译失败时允许保留输入或明确选择原文上屏。
 - 核心能力要求离线可用，联网增强默认关闭。拼写检查优先，语法检查可靠时再加入。
 - 性能与质量优先保证实际输入过程；设置、学习片段等后台管理采用满足需求的简单方案。
 - 默认记录学习片段而非完整输入历史，允许查看、删除和排除误报。工具生成的错误不计为用户的学习错误。
 
-中文引擎和前端路线已选定。普通输入已在独立 AppKit 宿主和 Orca 终端通过限定的上屏与切换检查；完整宿主安全矩阵和学习并发尚未验收，离线翻译尚无合格默认模型。需求边界、建议方案和待验证事项以[产品方向](docs/product.md)为准。
+中文引擎和前端路线已选定。普通输入已在独立 AppKit 宿主和 Orca 终端通过限定的上屏与切换检查；完整宿主安全矩阵和学习并发尚未验收。学习翻译只保留用户配置的火山 NMT（默认关闭），不再随包或下载本地模型。需求边界、建议方案和待验证事项以[产品方向](docs/product.md)为准；双端逐项状态见[功能对照](docs/feature-parity.md)。
 
-## 当前状态
+## 当前状态（2026-11-06）
 
-候选窗皮肤经独立 `gomeen/skin-native` 分支开发，已按最后原型实现[候选窗皮肤](docs/skin-themes.md)：统一主题选择、单／双色、二级编辑器、固定九条预览、字体与透明度／背景图及主题包导入导出。fast 档 6 项全过（Swift Release 152 项），隔离原生设置窗口已验证保存重开与固定预览；尚未安装含此功能的输入源或完成真实宿主外观／性能验收，详见[皮肤验收](docs/validation/skin-native-status.md)。
+**双端工程实施中。Mac 普通输入有历史限定场景证据；Windows TSF 有启用链与键盘输入的 VM 证据；双端完整验收均未通过。** 详细证据与边界见[原生开发验收](docs/validation/native-development.md)，逐功能状态见[双端功能对照](docs/feature-parity.md)。
 
-[首阶段实施总计划](docs/implementation-plan.md)已批准并进入原生工程实施。普通模式已迁入共享 C++ 核心，英文候选与释义数据已随包。2026-11-02 整改轮（构建 6）：**组合中 Shift 改为原样上屏后切英文直输**（用户裁决，替换「上屏不切中英」旧规则；真机探针黄金表同步重写）；候选窗读取宿主 `windowLevel` 并在其上一层显示（修复 Bob 浮窗遮挡），宿主选区未知不再伪造光标矩形；设置页按定稿原型逐项还原并修复快捷键编辑器录制／清除／恢复默认不生效、冲突筛选看不到草稿的问题；系统切换浮层图标根因实证（HUD 进程缓存旧图）并在安装流程重启该代理；原编码／非已学习提交使快速添加失效；菜单「恢复草稿」改「恢复未完成输入」。逐项证据见[验收记录](docs/validation/native-development.md)。
+- **普通输入**：小鹤双拼／全拼、模糊音、候选窗、标点／Shift／数字／编辑键、英文候选与释义、按应用默认英文、调频、自定义词、快捷键、完整皮肤已在共享核心与 Mac 前端实现；完整宿主安全矩阵与性能门槛未过。Windows 已交叉编译 x86／x64 TSF、x64 用户代理和设置应用；普通核心、配置、候选渲染与持久化已接通；按用户后续授权在 Windows VM 验证安装、七页设置、图标及限定的 64／32 位文本宿主，结果见验收记录。
+- **学习翻译**：2026-11-06 裁决后**只保留火山 NMT**，默认关闭；设置页保存凭据、连接测试、本机字符统计。本地模型、CT2、SentencePiece、PyTorch、后端选择、beam 与模型准备入口已移除；旧本地模型配置迁移为关闭云翻译，避免升级后自动上传输入。普通输入完全离线；翻译失败保留输入，可 ⌘Return 明确原文上屏。
+- **安装**：Mac 对外只交付 `.pkg`，不再生成或交付 DMG；pkg postinstall 采用解包校验→备份→替换→失败恢复。Windows 提供实际 Inno Setup `Setup.exe`（Windows 11 x64，含 64／32 位 TSF、x64 代理／设置／核心、普通输入资源及许可），在 Mac 上用 MinGW-w64＋Wine／Inno 编译；当前构包、组件哈希和依赖闭包见[报告](docs/validation/windows-setup-build.json)。最初仅要求构包，用户后续授权直接连接已安装的 Windows VM 排障；安装与限定宿主结果在验收记录中另列。
+- **检查更新**：两端客户端、签名清单合同与发布脚本已实现；Mac 协议用注入传输与临时密钥测试，Windows 已编译并随包。真实 GitHub Releases 链路未验证，owner／repo 留空时明确显示未配置更新源。自动检查默认关闭，只在设置应用内按 24 小时节流；不自动下载／安装／重启。
+- **未通过项**：Mac 完整宿主矩阵、逐键性能 p95≤5ms、双构建 pkg 升级／恢复、真实翻译凭据实测、Windows 完整宿主与升级／卸载矩阵、真实在线更新、朋友真机验收。Windows 构建 91 仍有代理冷启动首组输入未接管的已知失败，不是稳定版；另有主题 WebP codec、共享学习协调及升级恢复等功能缺口，见[功能对照](docs/feature-parity.md)。历史“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回；旧报告不自动代表当前源码通过。
 
-2026-11-03 轮：设置页按[已定稿原型](../prototypes/settings-final.html)完成原生落地（六页外壳、立即保存写入协调器、真实索引的应用列表与可搜索弹层、VS Code 式快捷键表格含录制／冲突检查、自定义词语紧凑列表＋搜索；语言资源页移除 Apple Translation 入口），快捷键模型升级为规范键标识＋修饰键＋明确禁用状态（兼容旧配置），候选窗定位重构（光标矩形三态、100ms 复查、无效位置隐藏保留组合），`verify.py --profile host` 从文字计划改为真实调度（两轮矩阵、Orca Shift 专项、万次性能、新增两小时稳定性浸泡探针）。本轮 fast 档全过（核心 ctest 4/4、Swift Release 87 项），离线渲染 51 项含放置几何，GUI 六页真实点击冒烟截图归档。
+历史证据仍保留：[工程化检查](docs/validation/engineering-readiness.md)（版本、干净构建、备份、测试证据绑定）、[皮肤验收](docs/validation/skin-native-status.md)、[翻译实测](docs/translation-benchmark.md)、[组合策略决定](docs/translation-strategy-decision.md)、[模型解堵调研](docs/research-translation-model-unblock.md)。这些是研究记录，不是当前能力或已验收声明。
 
-2026-11-02 轮：完成[工程化检查与整改](docs/validation/engineering-readiness.md)（版本可追溯、干净构建、备份暴露、/tmp 隐式依赖、测试证据绑定），建立 Git 基线与单一版本来源（`version.json`，见 [版本管理](docs/versioning.md)），新增统一验证入口 `python3 scripts/verify.py`（fast／release／host 三档）；修复 **Shift 提交不更新最近上屏字符**的核心缺陷（Terminal「Shift＋句号」半角根因，上一轮归因平台层有误），释义精简规则落地（`char.` 词性、结构化标签与强语域义项剔除，见[审阅记录](docs/validation/gloss-simplification-review.md)），构建 4 修复自定义拼音词候选剪枝与自动读音解析（详见[验收记录](docs/validation/native-development.md)）。
-
-**性能与宿主阻塞未变，仍未到试用阶段**：上一轮 10,035 次真实 IMK 事件主线程 p95 10.35ms／p99 15.38ms（门槛 5ms／10ms）未达标；归因结论（长单行文档的必要同步宿主写入本身超预算）未被本轮工作改变。最终宿主连续两轮、十万序列插桩、两小时稳定性／内存／冷启动未完成；Orca 的 Shift 单击失败待专项追踪；「5.55ms 低于 5ms」等历史文字错误已更正（见[收尾复测报告](docs/validation/pre-user-test.md)）。此前“漏字已修好”“Chrome 是宿主吞键”“性能条件性达标”等结论已撤回。本轮 Shift 修复在真实宿主复验前，不标宿主通过。
-
-**完整首阶段仍未通过。** 学习路线采用两端统一模型；2026-11-03 统一复测确认 quickmt 速度领先，但加固后固定风险 12 条未处置、en→zh 可用率 77.67%，**正式质量门槛不通过，双端生产交付口径不变**（[决定](probes/results/translation-backends/decision.md)）。同日用户裁决：**Mac 本机开发版以 quickmt（CT2 INT8 双向、外置 Python 辅助进程、beam 默认 1、设置 1–10 可调）解锁学习模式最小闭环**——菜单解除置灰、双向译文候选带开发版标注、失败保留输入可原文上屏；学习记录与宿主安全矩阵仍关闭，已知风险被显式接受，设置关开关即回门禁态（[开发版裁决](docs/learning-quickmt-dev-decision.md)）。Windows 桌面环境尚未提供，Windows 与双端闭环未开始。工程化检查结论：0.1.0 前工程侧阻塞已清零，剩余全部为验收门槛项（见[工程化检查](docs/validation/engineering-readiness.md) §7）。
-
-已授权当前用户安装开发版，由用户手动启用输入源；设置页不再提供 Apple 语言资源安装或查询入口（Apple Translation 已退出正式链路），随包资源状态与功能开放状态见设置「语言资源」页。构建、安装、恢复和卸载见[开发版使用说明](docs/native-development.md)。
+已授权当前用户安装 Mac 开发版，由用户手动启用输入源；安装、恢复与卸载见[开发版使用说明](docs/native-development.md)。Mac 输入源采用双通道（stable／dev），用户数据共用。
 
 已有两个单文件浏览器原型仍只使用预设样例；独立真实模型实验与核心回归不能代替完整输入源验收。[输入习惯原型](docs/prototype-input-habits.md)经六轮迭代定稿，其按键裁决已并入[产品方向](docs/product.md)，但尚未落到原生输入法。
 
@@ -38,22 +36,24 @@
 
 另有一个用于确认输入习惯与候选窗外观的 [输入习惯原型](prototypes/input-habits-demo.html)：候选来自 libime 出厂数据的预生成快照，覆盖标点、Shift、大写、数字、方向键、分段选择、英文候选、按应用默认英文等场景，并可用示例数据演示学习中→英／英→中的交互；说明与边界见[输入习惯原型说明](docs/prototype-input-habits.md)。在确认结果回写正式计划之前，这些行为不代表已实现的输入法能力。
 
-另已完成青简核心的选定测试、本机 librime 小鹤及 macOS 拼写接口探针。结果见[可行性验证](docs/feasibility.md)。真实 OPUS/M2M100 的双向推理、五轮延迟与禁网测试见[翻译实测](docs/translation-benchmark.md)。模型均有质量缺陷，不采用为默认上屏后端。中文底座已选定，但完整离线学习产品仍不通过，见[技术选型决定](docs/input-selection-decision.md)。
+另已完成青简核心的选定测试、本机 librime 小鹤及 macOS 拼写接口探针。结果见[可行性验证](docs/feasibility.md)。真实 OPUS/M2M100 的双向推理、五轮延迟与禁网测试见[翻译实测](docs/translation-benchmark.md)。这些模型均已退出产品链路；历史结果保留为证据。
 
 中文核心另已完成青简统计配置、Rime 官方小鹤、雾凇小鹤、万象标准版小鹤与 libime 出厂数据的实际装配、候选及逐键实验，见[首轮输入引擎实测](docs/input-engine-benchmark.md)。这里只覆盖核心，不代表候选窗、真实宿主或翻译并发已验收。新增 libpinyin、SunPinyin、Google 开放拼音及不同前端的接口与待测项见[其他路线](docs/research-ime-alternatives.md)。
 
-新增 [20 句翻译对照页](prototypes/translation-comparison.html)：small100、quickmt、Index-Translate-2B、HY-MT1.5-1.8B、Qwen2.5-0.5B（2/4 线程）与 Qwen3-0.6B（2/4 线程）在本机分别运行中→英、英→中各 10 句，展示全部未经修正的真实输出及单次耗时，可切换方向、展开参考译法、保存并导出个人评价。GGUF 模型（官方量化、llama.cpp CPU）实测汇总见 [GGUF 实测记录](probes/results/gguf-translation/summary.md)：质量初观明显改善；4 线程下最快的 Qwen2.5-0.5B 逐句中位 538ms，仍超 500ms 短表达预算；资源占用 0.6–2GiB 级，空闲 CPU 为 0%，不是约束。它是独立的离线推理结果快照，区别于上述预设交互原型；不代表学习模式已开放或质量门槛通过。复跑与数据边界见 [探针说明](probes/README.md#20-句翻译网页对照)。
+新增 [20 句翻译对照页](prototypes/translation-comparison.html)：small100、quickmt、Index-Translate-2B、HY-MT1.5-1.8B、Qwen2.5-0.5B（2/4 线程）与 Qwen3-0.6B（2/4 线程）在本机分别运行中→英、英→中各 10 句，展示全部未经修正的真实输出及单次耗时，可切换方向、展开参考译法、保存并导出个人评价。GGUF 模型（官方量化、llama.cpp CPU）实测汇总见 [GGUF 实测记录](probes/results/gguf-translation/summary.md)：质量初观明显改善；4 线程下最快的 Qwen2.5-0.5B 逐句中位 538ms，仍超 500ms 短表达预算；资源占用 0.6–2GiB 级，空闲 CPU 为 0%，不是约束。它是独立的离线推理结果快照，区别于上述预设交互原型；不代表当前火山翻译质量已通过或学习链路已验收。复跑与数据边界见 [探针说明](probes/README.md#20-句翻译网页对照)。
 
 ## 文档
 
-- [开发版使用说明](docs/native-development.md)：构建、安装、手动启用、语言资源、恢复和卸载。
+- [开发版使用说明](docs/native-development.md)：构建、pkg 安装、手动启用、火山翻译配置、检查更新、恢复和卸载。
 - [版本与构建管理](docs/versioning.md)：version.json 单一版本来源、构建身份、阶段规则与拒绝路径。
 - [变更记录](../CHANGELOG.md)：各版本变更摘要。
 - [工程化检查](docs/validation/engineering-readiness.md)：交付链路六项检查、整改与发布阻塞分列。
+- [双端功能对照](docs/feature-parity.md)：逐项实现／验证状态、平台差异与本轮缺口。
+- [检查更新](docs/update.md)：清单 schema、Ed25519 签名、通道／构建号规则、发布与 Draft 流程。
 - [原生开发验收记录](docs/validation/native-development.md)：实际测试证据、状态和阻塞。
 - [第三方许可](docs/third-party.md)：固定组件、实际打包许可和公开分发前义务。
 - [释义词性数据调研](docs/research-gloss-data.md)：候选窗「词性＋译文」注释的数据源选择、许可义务与落地路径。
-- [首阶段实施总计划](docs/implementation-plan.md)：统一执行入口，按原生输入、语言资源、学习交互、真实集成、记录和最终验收推进；明确阻塞与阶段通过条件。
+- [双端实施计划](docs/implementation-plan.md)：P0–P6 执行顺序、共享合同、安装与更新门槛。
 - [技术选型决定](docs/input-selection-decision.md)：libime＋原生前端的采用理由、其他方案不选原因，以及自由句模型与完整产品的未通过结论。
 - [产品方向](docs/product.md)：已确认需求、建议方案、待验证问题与验收方向。
 - [输入习惯原型说明](docs/prototype-input-habits.md)：候选窗外观与比例、标点、Shift、编辑键、分段选择、英文候选与学习演示的六轮迭代定稿；含青简本机配置逐项对照与三项用户裁决。
@@ -65,7 +65,7 @@
 - [离线翻译候选](docs/translation-candidates.md)：OPUS 之外的模型与许可核查。
 - [翻译实测](docs/translation-benchmark.md)：模型质量缺陷、五轮延迟、内存、禁网与失败路径结果。
 - [翻译实验方案](docs/translation-benchmark-plan.md)：真实模型测试的样例、计时范围与判定条件。
-- [翻译后端统一实测决定](probes/results/translation-backends/decision.md)：small100 与 quickmt 的模型层／IPC／加固层性能、质量门槛、扩展成本与暂不替换决定。
+- [翻译后端统一实测决定](probes/results/translation-backends/decision.md)（历史）：small100 与 quickmt 的模型层／IPC／加固层性能与质量门槛；本地模型已退出产品链路。
 - [协作说明](AGENTS.md)：后续开发与文档维护的约定。
 
 ## 许可

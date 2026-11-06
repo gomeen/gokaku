@@ -88,17 +88,22 @@ for (title, action, key) in [("Undo", Selector(("undo:")), "z"),
     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
 }
 app.mainMenu = mainMenu
-let window = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 600, height: 300),
+let window = NSWindow(contentRect: NSRect(x: 200, y: 200, width: 600, height: 430),
     styleMask: [.titled, .closable], backing: .buffered, defer: false)
 window.title = "Gogaku IMK regression host"
-let field = ProbeTextView(frame: NSRect(x: 20, y: 160, width: 560, height: 110))
-let second = ProbeTextView(frame: NSRect(x: 20, y: 20, width: 560, height: 110))
+let field = ProbeTextView(frame: NSRect(x: 20, y: 290, width: 560, height: 110))
+let second = ProbeTextView(frame: NSRect(x: 20, y: 170, width: 560, height: 110))
 for view in [field, second] {
     view.font = .systemFont(ofSize: 22)
     view.isAutomaticSpellingCorrectionEnabled = false
     view.isAutomaticTextReplacementEnabled = false
     window.contentView!.addSubview(view)
 }
+// 安全输入字段（field=3）：聚焦时全局 SecureEventInput 生效，输入法读不到
+// 宿主光标矩形，用于切换提示无锚点场景的真实复现。
+let secureField = NSSecureTextField(frame: NSRect(x: 20, y: 30, width: 560, height: 110))
+secureField.font = .systemFont(ofSize: 22)
+window.contentView!.addSubview(secureField)
 window.makeKeyAndOrderFront(nil)
 window.makeFirstResponder(field)
 app.activate(ignoringOtherApps: true)
@@ -255,13 +260,14 @@ func perform(_ actions: [[String: Any]]) {
         if let name = action["key"] as? String {
             guard let code = KEY_CODES[name] else { continue }
             var flags: CGEventFlags = ((action["shift"] as? Bool) ?? false) ? .maskShift : []
-            var modifierCode: Int? = nil
-            if (action["command"] as? Bool) == true { modifierCode = 55; flags.insert(.maskCommand) }
-            if (action["control"] as? Bool) == true { modifierCode = 59; flags.insert(.maskControl) }
-            if let mc = modifierCode { key(CGKeyCode(mc), down: true, flags: flags) }
+            var modifiers: [Int] = []
+            if (action["command"] as? Bool) == true { modifiers.append(55); flags.insert(.maskCommand) }
+            if (action["control"] as? Bool) == true { modifiers.append(59); flags.insert(.maskControl) }
+            if (action["option"] as? Bool) == true { modifiers.append(58); flags.insert(.maskAlternate) }
+            for mc in modifiers { key(CGKeyCode(mc), down: true, flags: flags) }
             key(CGKeyCode(code), down: true, flags: flags)
             key(CGKeyCode(code), down: false, flags: flags)
-            if let mc = modifierCode { key(CGKeyCode(mc), down: false, flags: []) }
+            for mc in modifiers.reversed() { key(CGKeyCode(mc), down: false, flags: []) }
         } else if let modifier = action["modifier"] as? String {
             let name = modifier == "shift" ? "lshift" : (modifier == "control" ? "lcontrol"
                 : (modifier == "option" ? "loption" : "lcommand"))
@@ -422,7 +428,13 @@ func handle(_ request: [String: Any]) {
         extra["guardFrontPid"] = frontPid
         delay = (request["delay"] as? Double) ?? 0.2
     case "focus":
-        window.makeFirstResponder((request["field"] as? Int) == 2 ? second : field)
+        let target: NSResponder
+        switch request["field"] as? Int {
+        case 2: target = second
+        case 3: target = secureField
+        default: target = field
+        }
+        window.makeFirstResponder(target)
         app.activate(ignoringOtherApps: true)
     case "select":
         let id = request["id"] as! String

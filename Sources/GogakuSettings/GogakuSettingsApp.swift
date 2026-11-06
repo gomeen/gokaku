@@ -27,6 +27,10 @@ enum BuildIdentity {
             SettingsView().frame(minWidth: 1000, minHeight: 520, maxHeight: 800)
         }
         .defaultSize(width: 1100, height: 800)
+        Window("检查更新", id: "updates") {
+            UpdateView()
+        }
+        .defaultSize(width: 560, height: 480)
     }
 }
 
@@ -53,6 +57,8 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
 /// 快捷键改动立即提交，连续文本输入合并 300ms，失焦或关闭窗口时提交剩余有效改动；
 /// 保存状态由 SettingsStore 回调驱动。
 private struct SettingsView: View {
+    @Environment(\.openWindow) private var openWindow
+    @ObservedObject private var updates = UpdateController.shared
     @State private var page: SettingsPage = .normalInput
     @State private var settings = Settings.load()
     @State private var status: SaveStatus = .idle
@@ -109,6 +115,7 @@ private struct SettingsView: View {
         .tint(SettingsPalette.accent)
         .onAppear {
             SettingsAppDelegate.editor = skinEditor
+            updates.startAutoLoop()
             SettingsStore.shared.onStatus = { newStatus in
                 status = SaveStatus(storeStatus: newStatus)
                 if case .saved = newStatus {
@@ -154,13 +161,28 @@ private struct SettingsView: View {
             .accessibilityElement(children: .contain)
             Spacer(minLength: 0)
             // .side__foot：meta 11 / ver mono 10，padding 12 16 14。
-            VStack(alignment: .leading, spacing: 3) {
+            VStack(alignment: .leading, spacing: 5) {
                 Text("本机开发版")
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
                 Text(BuildIdentity.displayVersion)
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(SettingsPalette.tertiaryText)
+                Button {
+                    openWindow(id: "updates")
+                } label: {
+                    HStack(spacing: 6) {
+                        Text("检查更新")
+                            .font(.system(size: 11))
+                        if updates.hasUpdate {
+                            Circle().fill(Color.green).frame(width: 6, height: 6)
+                                .accessibilityLabel("有可用更新")
+                        }
+                    }
+                    .foregroundStyle(SettingsPalette.accentText)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(updates.hasUpdate ? "检查更新，有可用更新" : "检查更新")
             }
             .padding(.horizontal, 16)
             .padding(.top, 12)
@@ -236,283 +258,296 @@ private struct SidebarItem: View {
     }
 }
 
-// MARK: - 学习翻译页（原「语言资源」；不提供 Apple Translation 查询与安装入口；
-// 原型为两个 section＋hr；quickmt 开发版裁决后新增「学习翻译（开发版）」区块）
+// MARK: - 学习翻译页（2026-11-06 双端统一计划：只保留火山 NMT，无本地模型）
 
 private struct ResourcesPage: View {
     @Binding var settings: GogakuCore.Settings
-    @State private var backend = LearningTranslation.Environment(ready: false, missing: [])
-    @State private var volcAccessKey = ""
-    @State private var volcSecretKey = ""
-    @State private var volcCredentialsDirty = false
-    /// 已保存凭据快照：dirty 改为与快照比较，避免 load 赋值误触发 onChange 造成「有未保存修改」。
-    @State private var volcLoadedAccessKey = ""
-    @State private var volcLoadedSecretKey = ""
+    @State private var environment = LearningTranslation.Environment(ready: false, missing: [], hasCredentials: false)
+    @State private var accessKey = ""
+    @State private var secretKey = ""
+    @State private var loadedAccessKey = ""
+    @State private var loadedSecretKey = ""
+    @State private var dirty = false
+    @State private var testing = false
+    @State private var testMessage: String?
+    @State private var testIsError = false
+    @State private var lastFailure: String?
+    @State private var confirmingRemoval = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            learningTranslationSection
+            translationSection
             SettingsRule()
-            section("开发版状态") {
-                VStack(alignment: .leading, spacing: 8) {
-                    // .body-text：12.5px。
-                    Text("普通输入：本机开发范围已验证。")
-                        .font(.system(size: 12.5))
-                        .foregroundStyle(SettingsPalette.primaryText)
-                    Text("学习功能：开发版自用已解锁，正式质量门槛未过。")
-                        .font(.system(size: 12.5))
-                        .foregroundStyle(SettingsPalette.primaryText)
-                }
-            }
+            boundarySection
         }
         .onAppear {
-            backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
-            loadVolcengineCredentials()
+            refreshEnvironment()
+            loadCredentials()
         }
         .onChange(of: settings.learningTranslationEnabled) { _, _ in
-            backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
+            refreshEnvironment()
         }
-        .onChange(of: settings.learningTranslationBackend) { _, _ in
-            backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
-            loadVolcengineCredentials()
-        }
-    }
-
-    /// 火山翻译免费额度用量条（200 万字符/自然月；到量提示付费或切换）。
-    /// 截图效果：标签 + 进度条 + 百分比 + 重置倒计时。
-    private var volcengineUsageRow: some View {
-        let used = max(0, settings.volcengineUsageCharacters)
-        let quota = 2_000_000
-        let fraction = min(1.0, Double(used) / Double(quota))
-        let percent = Int((fraction * 100).rounded())
-        let daysLeft = Calendar.current.dateComponents([.day],
-            from: Calendar.current.startOfDay(for: Date()),
-            to: Calendar.current.startOfDay(for: Self.nextMonthStart())).day ?? 0
-        let exhausted = used >= quota
-        return VStack(alignment: .leading, spacing: 4) {
-            HStack(spacing: 8) {
-                Text("火山免费额度（200 万字符 / 自然月）")
-                    .font(.system(size: 12.5, weight: .medium))
-                    .foregroundStyle(SettingsPalette.primaryText)
-                Spacer()
-                Text("\(percent)%")
-                    .font(.system(size: 12.5, design: .monospaced))
-                    .foregroundStyle(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
-            }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(SettingsPalette.secondaryText.opacity(0.25))
-                    Capsule().fill(fraction > 0.95 ? Color.red : (fraction > 0.8 ? Color.orange : Color.green))
-                        .frame(width: max(2, geo.size.width * fraction))
+        .confirmationDialog("移除已保存的火山翻译凭据？", isPresented: $confirmingRemoval) {
+            Button("移除凭据", role: .destructive) {
+                do {
+                    try LearningTranslation.removeCredentials()
+                    settings.learningTranslationEnabled = false
+                    submit()
+                    accessKey = ""; secretKey = ""
+                    loadedAccessKey = ""; loadedSecretKey = ""
+                    dirty = false
+                    lastFailure = nil
+                    testMessage = nil
+                    refreshEnvironment()
+                } catch {
+                    lastFailure = "移除凭据失败：\(error.localizedDescription)"
                 }
             }
-            .frame(height: 6)
-            HStack(spacing: 8) {
-                Text("已用 \(used.formatted()) / 2,000,000 字符 · \(daysLeft) 天后重置（每月 1 日）")
-                    .font(.system(size: 11))
-                    .foregroundStyle(SettingsPalette.secondaryText)
-                if exhausted {
-                    Button("切换到 small100（本地）") {
-                        settings.learningTranslationBackend = "small100"
-                        submit()
-                    }
-                    .font(.system(size: 11))
-                    .buttonStyle(.link)
-                }
-            }
-            if exhausted {
-                Text("免费额度已用完：继续使用将按 ¥49/百万字符计费（火山引擎账户扣费），或切换后端。")
-                    .font(.system(size: 11))
-                    .foregroundStyle(Color.red)
-            }
-        }
-        .padding(.vertical, 2)
-    }
-
-    private static func nextMonthStart() -> Date {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.year, .month], from: Date())
-        return calendar.date(from: DateComponents(year: components.year,
-                                                  month: (components.month ?? 1) + 1, day: 1)) ?? Date()
-    }
-
-    /// 火山凭据载入输入框（仅学习后端为 volcengine 时有意义）。
-    private func loadVolcengineCredentials() {
-        guard LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine",
-              let credentials = LearningTranslation.volcengineCredentials() else { return }
-        volcAccessKey = credentials.accessKey
-        volcSecretKey = credentials.secretKey
-        volcLoadedAccessKey = credentials.accessKey
-        volcLoadedSecretKey = credentials.secretKey
-        volcCredentialsDirty = false
-    }
-
-    /// 输入框与已保存快照是否不一致（真正被编辑过才显示「有未保存修改」）。
-    private func syncVolcDirty() {
-        volcCredentialsDirty = volcAccessKey != volcLoadedAccessKey || volcSecretKey != volcLoadedSecretKey
-    }
-
-    /// 后端感知的就绪描述。
-    private var backendReadyText: String {
-        switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
-        case "small100": return "后端状态：模型就绪（small100 CT2 INT8，本地）"
-        case "volcengine": return "后端状态：凭据就绪（火山翻译 NMT，云端——仅学习模式联网）"
-        default: return "后端状态：模型就绪（quickmt-en-zh／quickmt-zh-en，CT2 INT8，本地）"
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("移除后学习翻译会立即停用；已保存的设置与学习数据不受影响。")
         }
     }
 
-    /// 后端感知的质量说明（一句为限，避免小字堆叠）。
-    private var backendNoticeText: String {
-        switch LearningTranslation.normalizedBackend(settings.learningTranslationBackend) {
-        case "small100": return "开发版：可用率约 95%，候选带开发版标注。"
-        case "volcengine": return "开发版：实测中位延迟 114ms，仅学习模式联网。"
-        default: return "开发版：候选带「quickmt 开发版」标注。"
-        }
-    }
-
-    /// 学习翻译（开发版）：启用开关＋beam 步进器＋后端状态＋固定说明；
-    /// 改动即时保存并热生效（beam 变更重建辅助进程）。
-    private var learningTranslationSection: some View {
-        section("学习翻译（开发版）") {
+    private var translationSection: some View {
+        section("学习翻译") {
             VStack(alignment: .leading, spacing: 0) {
-                SettingsRow("启用学习翻译") {
+                SettingsRow("启用学习翻译",
+                            detail: "关闭时普通输入完全离线；开启后学习模式会把源文发送到火山翻译 API。") {
                     Toggle("", isOn: Binding(get: { settings.learningTranslationEnabled },
                                              set: { settings.learningTranslationEnabled = $0; submit() }))
                         .toggleStyle(.switch)
-                        .accessibilityLabel("启用学习翻译后端")
+                        .accessibilityLabel("启用学习翻译")
                 }
                 SettingsRowDivider()
-                SettingsRow("翻译后端") {
-                    Picker("", selection: Binding(get: { settings.learningTranslationBackend },
-                                                  set: { settings.learningTranslationBackend = $0; submit() })) {
-                        Text("quickmt（本地）").tag("quickmt")
-                        Text("small100（本地）").tag("small100")
-                        Text("火山翻译（云端）").tag("volcengine")
-                    }
-                    .pickerStyle(.menu)
-                    .labelsHidden()
-                    .frame(width: 190)
-                    .accessibilityLabel("学习翻译后端选择")
-                }
-                // 双分区（2026-11-04 方案 A）：本地区（beam＋状态）／云端区（连接卡＋用量）。
-                if LearningTranslation.normalizedBackend(settings.learningTranslationBackend) == "volcengine" {
-                    SettingsRowDivider()
-                    VStack(alignment: .leading, spacing: 0) {
-                        HStack(spacing: 8) {
-                            Text("火山翻译").font(.system(size: 14, weight: .semibold))
-                            Text(backend.ready ? "● 凭据已配置" : "● 凭据未配置")
-                                .font(.system(size: 11, weight: .medium))
-                                .padding(.horizontal, 8).padding(.vertical, 2)
-                                .background(backend.ready ? Color.green.opacity(0.12) : Color.red.opacity(0.12))
-                                .foregroundStyle(backend.ready ? Color.green : Color.red)
-                                .clipShape(Capsule())
-                        }
-                        .padding(.vertical, 12)
-                        VStack(alignment: .leading, spacing: 12) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Access Key ID").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
-                            SecureField("AKLT…", text: $volcAccessKey)
-                                .font(.system(size: 12, design: .monospaced))
-                                .textFieldStyle(.plain)
-                                .padding(.horizontal, 8).padding(.vertical, 6)
-                                .background(RoundedRectangle(cornerRadius: 6)
-                                    .fill(SettingsPalette.secondaryText.opacity(0.06)))
-                                .overlay(RoundedRectangle(cornerRadius: 6)
-                                    .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
-                                .onChange(of: volcAccessKey) { _, _ in syncVolcDirty() }
-                        }
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Secret Access Key").font(.system(size: 11.5)).foregroundStyle(SettingsPalette.secondaryText)
-                            SecureField("TWp…", text: $volcSecretKey)
-                                .font(.system(size: 12, design: .monospaced))
-                                .textFieldStyle(.plain)
-                                .padding(.horizontal, 8).padding(.vertical, 6)
-                                .background(RoundedRectangle(cornerRadius: 6)
-                                    .fill(SettingsPalette.secondaryText.opacity(0.06)))
-                                .overlay(RoundedRectangle(cornerRadius: 6)
-                                    .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
-                                .onChange(of: volcSecretKey) { _, _ in syncVolcDirty() }
-                        }
-                        }
-                        HStack(spacing: 10) {
-                            Button("保存凭据") {
-                                do {
-                                    try LearningTranslation.saveVolcengineCredentials(
-                                        LearningTranslation.VolcengineCredentials(accessKey: volcAccessKey, secretKey: volcSecretKey))
-                                    volcCredentialsDirty = false
-                                    backend = LearningTranslation.environment(backend: settings.learningTranslationBackend)
-                                } catch {
-                                    NSLog("GogakuSettings: 保存火山凭据失败 \(error)")
-                                }
-                            }
+                SettingsRow("状态") {
+                    HStack(spacing: 8) {
+                        Circle()
+                            .fill(environment.ready ? Color.green : Color.orange)
+                            .frame(width: 7, height: 7)
+                        Text(statusText)
                             .font(.system(size: 12))
-                            .buttonStyle(.borderedProminent)
-                            .tint(Color.green)
-                            .disabled(volcAccessKey.isEmpty || volcSecretKey.isEmpty || !volcCredentialsDirty)
-                            if volcCredentialsDirty {
-                                Text("有未保存修改").font(.system(size: 11)).foregroundStyle(SettingsPalette.secondaryText)
-                            }
-                        }
-                        .padding(.vertical, 12)
-                        HStack(spacing: 6) {
-                            Image(systemName: "lock.shield").font(.system(size: 11))
-                            Text("凭据仅写入本机 0600 文件，不进仓库、同步或云端。")
-                                .font(.system(size: 11))
-                        }
-                        .foregroundStyle(Color.green)
-                        .background(Color.green.opacity(0.1))
-                        .padding(8)
-                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                            .foregroundStyle(SettingsPalette.primaryText)
                     }
-                    SettingsRowDivider()
-                    volcengineUsageRow
-                        .padding(.vertical, 10)
-                    SettingsRowDivider()
-                    if !backend.ready {
-                        Text("缺失：\(backend.missing.joined(separator: "、"))。填写凭据后保存即可。")
-                            .font(.system(size: 11))
-                            .foregroundStyle(Color.red)
-                            .padding(.bottom, 10)
+                }
+                if let lastFailure {
+                    Text(lastFailure)
+                        .font(.system(size: 11))
+                        .foregroundStyle(Color.red)
+                        .padding(.bottom, 8)
+                        .accessibilityLabel("最近一次翻译失败：\(lastFailure)")
+                }
+                SettingsRowDivider()
+                credentialsBlock
+                SettingsRowDivider()
+                usageBlock
+            }
+        }
+    }
+
+    private var credentialsBlock: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Text("火山翻译凭据")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                Text(environment.hasCredentials ? "已配置" : "未配置")
+                    .font(.system(size: 11, weight: .medium))
+                    .padding(.horizontal, 8).padding(.vertical, 2)
+                    .background(environment.hasCredentials ? Color.green.opacity(0.12) : Color.orange.opacity(0.12))
+                    .foregroundStyle(environment.hasCredentials ? Color.green : Color.orange)
+                    .clipShape(Capsule())
+            }
+            .padding(.vertical, 12)
+
+            VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Access Key ID")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(SettingsPalette.secondaryText)
+                    TextField("AKLT…", text: $accessKey)
+                        .font(.system(size: 12, design: .monospaced))
+                        .textFieldStyle(.plain)
+                        .padding(.horizontal, 8).padding(.vertical, 6)
+                        .background(RoundedRectangle(cornerRadius: 6)
+                            .fill(SettingsPalette.secondaryText.opacity(0.06)))
+                        .overlay(RoundedRectangle(cornerRadius: 6)
+                            .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
+                        .onChange(of: accessKey) { _, _ in syncDirty() }
+                }
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Secret Access Key")
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(SettingsPalette.secondaryText)
+                    SecureField("TWp…", text: $secretKey)
+                        .font(.system(size: 12, design: .monospaced))
+                        .textFieldStyle(.plain)
+                        .padding(.horizontal, 8).padding(.vertical, 6)
+                        .background(RoundedRectangle(cornerRadius: 6)
+                            .fill(SettingsPalette.secondaryText.opacity(0.06)))
+                        .overlay(RoundedRectangle(cornerRadius: 6)
+                            .stroke(SettingsPalette.secondaryText.opacity(0.35), lineWidth: 1))
+                        .onChange(of: secretKey) { _, _ in syncDirty() }
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button("保存凭据") {
+                    do {
+                        try LearningTranslation.saveCredentials(
+                            VolcengineCredentials(accessKeyId: accessKey, secretAccessKey: secretKey))
+                        loadedAccessKey = accessKey; loadedSecretKey = secretKey
+                        dirty = false
+                        lastFailure = nil
+                        refreshEnvironment()
+                    } catch {
+                        lastFailure = "保存凭据失败：\(error.localizedDescription)"
                     }
-                } else {
-                    SettingsRowDivider()
-                    SettingsRow("beam 大小",
-                                detail: "默认 1 最快；增大可缓解重复句，延迟略增。") {
-                        Stepper(value: Binding(get: { settings.learningBeamSize },
-                                               set: { settings.learningBeamSize = LearningTranslation.clampedBeam($0); submit() }),
-                                in: LearningTranslation.beamRange) {
-                            Text("\(settings.learningBeamSize)")
-                                .font(.system(size: 13, design: .monospaced))
-                                .foregroundStyle(SettingsPalette.primaryText)
-                                .frame(minWidth: 24)
-                        }
-                        .accessibilityLabel("翻译 beam 大小，1 到 10")
-                    }
-                    SettingsRowDivider()
-                    VStack(alignment: .leading, spacing: 4) {
-                        if backend.ready {
-                            Text(backendReadyText)
-                                .font(.system(size: 12.5))
-                                .foregroundStyle(SettingsPalette.primaryText)
-                        } else {
-                            Text("后端状态：缺失（\(backend.missing.joined(separator: "、"))）")
-                                .font(.system(size: 12.5))
-                                .foregroundStyle(SettingsPalette.primaryText)
-                            Text("准备：在仓库检出目录运行 \(LearningTranslation.prepareCommand(backend: settings.learningTranslationBackend))")
-                                .font(.system(size: 11, design: .monospaced))
-                                .foregroundStyle(SettingsPalette.secondaryText)
-                                .textSelection(.enabled)
-                        }
-                        Text(backendNoticeText)
-                            .font(.system(size: 11))
-                            .foregroundStyle(SettingsPalette.secondaryText)
-                    }
+                }
+                .font(.system(size: 12))
+                .buttonStyle(.borderedProminent)
+                .tint(Color.green)
+                .disabled(accessKey.isEmpty || secretKey.isEmpty || !dirty)
+
+                Button(testing ? "测试中…" : "连接测试") {
+                    runConnectionTest()
+                }
+                .font(.system(size: 12))
+                .disabled(testing || dirty || (!environment.hasCredentials && (accessKey.isEmpty || secretKey.isEmpty)))
+
+                if environment.hasCredentials {
+                    Button("移除凭据", role: .destructive) { confirmingRemoval = true }
+                        .font(.system(size: 12))
+                }
+                if dirty {
+                    Text("有未保存修改")
+                        .font(.system(size: 11))
+                        .foregroundStyle(SettingsPalette.secondaryText)
+                }
+            }
+            .padding(.vertical, 12)
+
+            if let testMessage {
+                Text(testMessage)
+                    .font(.system(size: 11))
+                    .foregroundStyle(testIsError ? Color.red : Color.green)
+                    .padding(.bottom, 8)
+                    .accessibilityLabel(testMessage)
+            }
+
+            HStack(spacing: 6) {
+                Image(systemName: "lock.shield").font(.system(size: 11))
+                Text("凭据仅写入本机 0600 文件，不进设置导出、主题包、日志或安装包。")
+                    .font(.system(size: 11))
+            }
+            .foregroundStyle(Color.green)
+            .background(Color.green.opacity(0.1))
+            .padding(8)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            if !environment.ready {
+                Text("缺失：\(environment.missing.joined(separator: "、"))。")
+                    .font(.system(size: 11))
+                    .foregroundStyle(Color.orange)
+                    .padding(.top, 8)
+            }
+        }
+    }
+
+    private var usageBlock: some View {
+        let month = Self.currentMonthID()
+        let used = settings.volcengineUsageMonth == month ? max(0, settings.volcengineUsageCharacters) : 0
+        return VStack(alignment: .leading, spacing: 6) {
+            Text("本机本月请求字符统计")
+                .font(.system(size: 12.5, weight: .medium))
+                .foregroundStyle(SettingsPalette.primaryText)
+            Text("\(used.formatted()) 字符 · \(month)")
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(SettingsPalette.primaryText)
+            Text("仅统计本机成功请求；不代表账户余额或官方免费额度。失败请求不计入。")
+                .font(.system(size: 11))
+                .foregroundStyle(SettingsPalette.secondaryText)
+        }
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var boundarySection: some View {
+        section("行为与边界") {
+            VStack(alignment: .leading, spacing: 8) {
+                bullet("普通输入不需要网络，也不经过翻译进程。")
+                bullet("只有学习模式且此开关开启时才发送学习源文；不会发送宿主周边正文、学习记录或设备标识。")
+                bullet("翻译失败、超时、限流或凭据失效时保留可编辑输入，不自动提交原文、不弹窗打断；⌘Return 可明确原文上屏。")
+                bullet("学习记录采集仍关闭；本页开关只保存学习翻译偏好，不解除记录门禁。")
+                bullet("不随包本地模型或运行时；不再提供模型下载、后端选择或 beam。")
+            }
+        }
+    }
+
+    private func bullet(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: 7) {
+            Text("·").foregroundStyle(SettingsPalette.secondaryText)
+            Text(text)
+                .font(.system(size: 12))
+                .foregroundStyle(SettingsPalette.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var statusText: String {
+        if !environment.ready {
+            return environment.hasCredentials ? "凭据已配置，但翻译辅助进程缺失" : "未配置凭据"
+        }
+        return settings.learningTranslationEnabled ? "已启用（凭据已配置）" : "凭据已配置；学习翻译未启用"
+    }
+
+    private static func currentMonthID() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM"
+        return formatter.string(from: Date())
+    }
+
+    private func refreshEnvironment() {
+        environment = LearningTranslation.environment()
+    }
+
+    private func loadCredentials() {
+        guard let credentials = LearningTranslation.credentials() else { return }
+        accessKey = credentials.accessKeyId
+        secretKey = credentials.secretAccessKey
+        loadedAccessKey = credentials.accessKeyId
+        loadedSecretKey = credentials.secretAccessKey
+        dirty = false
+    }
+
+    private func syncDirty() {
+        dirty = accessKey != loadedAccessKey || secretKey != loadedSecretKey
+    }
+
+    private func runConnectionTest() {
+        testing = true
+        testMessage = nil
+        Task {
+            do {
+                let result = try await LearningTranslation.testConnection()
+                await MainActor.run {
+                    testing = false
+                    testIsError = false
+                    testMessage = "连接成功：译文「\(result.target)」· \(Int(result.milliseconds.rounded()))ms"
+                    lastFailure = nil
+                }
+            } catch {
+                await MainActor.run {
+                    testing = false
+                    testIsError = true
+                    let message = LearningTranslation.connectionErrorMessage(error)
+                    testMessage = "连接失败：\(message)"
+                    lastFailure = message
                 }
             }
         }
     }
 
-    /// section 标题（.section__title：15/600）。
     private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title).font(.system(size: 15, weight: .semibold))
@@ -522,7 +557,6 @@ private struct ResourcesPage: View {
         }
     }
 
-    /// 学习翻译改动即时提交（SettingsStore 通知输入法热生效）。
     private func submit() {
         SettingsStore.shared.submit(settings)
     }

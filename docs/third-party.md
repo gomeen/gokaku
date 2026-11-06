@@ -21,10 +21,18 @@ Gogaku 项目许可尚未决定；当前包仅用于本机开发，不代表可�
 | 英文释义词性数据（gloss.tsv） | Wiktionary 英文版中文词条，经 wiktextract 提取（kaikki.org Chinese 提取文件；具体文件哈希见 `resources/gloss-sources.json` 与 gloss.tsv 文件头） | CC BY-SA 4.0（双许可取 CC 一支）；署名 Wiktionary contributors、许可／免责链接、逐词条原文 URI、声明修改（wiktextract 提取并改写）；ShareAlike 只约束该数据文件本身，纯文本独立分发不并入主张数据库权的 SQLite；全文随包附 `Licenses/CC-BY-SA-4.0.txt` |
 | 词性标注层（gloss.tsv） | jieba `jieba/dict.txt`（github.com/fxsjy/jieba，master 2026-11-03 拉取；哈希见 `resources/gloss-sources.json`） | MIT（版权 2013 Sun Junyi）；保留版权与许可声明，全文随包附 `Licenses/MIT-jieba.txt`；仅提取词性标注（单字＋多字词）为衍生数据，不改标语义 |
 | Wiktionary 缺失词补义项（gloss.tsv） | CC-CEDICT 当前 dump（`www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz`，2026-11-03 拉取；哈希见 `resources/gloss-sources.json`）；覆盖 Wiktionary 缺失的单字与词组（拼音词库高频词组覆盖 92%→95%，总词条 164k→201k） | CC BY-SA 4.0；署名 CC-CEDICT（MDBG）贡献者、声明修改；ShareAlike 约束同上，全文随包附 `Licenses/CC-BY-SA-4.0.txt` |
-| 翻译表达资源（`resources/translation/expressions.tsv`，尚未随包分发） | CC-CEDICT 当前 dump（`~/Library/Caches/Gogaku/kaikki/cedict_ts.u8.gz`，2026-11-02 版本 125,356 条；哈希见 `resources/translation/manifest.json`）；选词用 jieba 词频（MIT）与既有英文词频表 | CC BY-SA 4.0 衍生数据：署名 CC-CEDICT 贡献者、声明修改（按义项组数与唯一性规则筛选、逐条人工复核）、按 CC BY-SA 4.0 分发；只含词／短语级表达，不含句对；学习模式与生产翻译辅助进程仍未接入，本文件不进入当前安装包 |
+| 翻译表达资源（`resources/translation/expressions.tsv`，尚未随包分发） | CC-CEDICT 当前 dump（`~/Library/Caches/Gogaku/kaikki/cedict_ts.u8.gz`，2026-11-02 版本 125,356 条；哈希见 `resources/translation/manifest.json`）；选词用 jieba 词频（MIT）与既有英文词频表 | CC BY-SA 4.0 衍生数据：署名 CC-CEDICT 贡献者、声明修改（按义项组数与唯一性规则筛选、逐条人工复核）、按 CC BY-SA 4.0 分发；只含词／短语级表达，不含句对；当前翻译走火山 API，本文件不进入安装包，保留为历史研究材料 |
 
 构建将实际许可证据、哈希与上游声明复制到每个 app 的 `Contents/Licenses/`。`scripts/prepare-dependencies.py` 从固定提交构建，`native/EngineBridge/` 是完整桥接源码；动态库可替换并重新进行本机签名。固定源码与数据留在 `~/Library/Caches/Gogaku/libime-1.1.17/`。后续公开分发前仍需完成适用源码提供、重链接/替换说明、全部间接依赖署名和 Gogaku 自身许可决定，不把本机 ad-hoc 签名称为 Developer ID 签名或公证。
 
 `native/licenses/Boost-LICENSE.txt` 对照Boost官方 `https://www.boost.org/LICENSE_1_0.txt`；libintl声明对照本机gettext 1.0的 `libintl.h`，LGPL-2.1全文取本机XZ随附的同一标准许可文本。实际包内共享库、可执行文件及资源的最终哈希在 `dist/bundle-manifest.json`，运行依赖闭包实测见[包检查结果](validation/bundle-smoke.json)。没有复制Homebrew命令行工具；构建时可使用Homebrew，运行时只引用系统或包内库。
 
-当前不含 Tatoeba、ECDICT、small100 权重、tokenizer 或其他释义词性数据（Tatoeba 因本机无副本、许可与署名无法核对，本轮翻译资源未引入句对）；英文词表（SCOWL×wordfreq）与 Wiktionary／jieba／CC-CEDICT 释义词性注释已按上表登记并随包。引入新数据时必须逐项记录文件、revision、许可、署名、来源及质量审阅结果。Apple 语言包由系统授权界面管理，项目不复制权重。
+### 本轮翻译与更新的第三方边界
+
+- **不随包本地翻译模型**：small100／quickmt 权重、CT2、SentencePiece、PyTorch、tokenizer 均不进入安装包，也不提供下载入口；历史实验保留在 `probes/results/`，仅作研究证据。
+- **火山翻译**是用户自行配置凭据后调用的在线服务；项目不分发其模型或服务端代码。用户需自行遵守火山引擎服务条款、计费与数据处理约定。客户端不把凭据写入日志、设置导出、主题包或安装包。
+- **Ed25519 验签**使用 macOS CryptoKit（系统框架）与 Windows 随包固定版本 Monocypher 4.0.2 的官方 Ed25519 实现；Windows CNG 只用于 SHA-256／HMAC／随机数，不承担 Ed25519 验签。Monocypher 取 BSD-2-Clause 分支，许可、上游 tag、各源文件 SHA-256 记于 `native/GogakuWindows/third_party/monocypher-LICENCE.md`；项目不自行实现密码学，不随包私钥。
+- **Windows 前端依赖**：nlohmann/json v3.11.3（MIT）与 miniz 3.0.2（MIT），固定源码与声明在 `native/GogakuWindows/third_party/`；miniz 仅用于有限长主题 ZIP／PNG 解压，不调用外部解压程序。图片由系统 WIC 解码，缺少相应 codec 时明确失败。
+- **Windows 静态运行库**：MinGW-w64 14.0.0_3（ZPL-2.1 与逐文件例外）及 GCC 16.2.0 libgcc／libstdc++（GPL-3.0 ＋ GCC Runtime Library Exception 3.1）；不要求用户安装 GCC／Visual C++ 运行库。包内 `MinGW-w64-COPYING.txt`、`MinGW-w64-AUTHORS.txt`、`GCC-COPYING3`、`GCC-COPYING.RUNTIME` 与 `windows-runtime-sources.json` 保存声明、原文来源与哈希。当前 Windows 核心将 libime／Fcitx／KenLM 等静态链接到可替换的 `libgogaku_core.dll`，有别于 Mac 逐库动态链接；公开分发前仍须补齐适用源码与重新链接材料，不能仅凭这份许可目录宣称全部分发义务已满足。
+- **Inno Setup** 仅作为 Windows 安装器的构建工具；生成的安装器按其许可保留声明。本轮未做 Authenticode 签名。
+- 当前不含 Tatoeba、ECDICT、small100 权重、tokenizer 或其他未登记释义词性数据（Tatoeba 因本机无副本、许可与署名无法核对，未引入句对）；英文词表（SCOWL×wordfreq）与 Wiktionary／jieba／CC-CEDICT 释义词性注释已按上表登记并随包。引入新数据时必须逐项记录文件、revision、许可、署名、来源及质量审阅结果。Apple 语言包由系统授权界面管理，项目不复制权重。

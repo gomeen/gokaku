@@ -308,8 +308,9 @@ public final class CompositionSession {
         _ = try? perform(Int32(GC_LEV_REQUEST_SOURCE), arg0: Int64(index))
     }
 
-    /// quickmt 成功结果进入候选；approved 由调用方按裁决传入：开发版豁免
-    /// （resource == quickmt-ct2-dev）之外的资源仍只接受经审核资源清单批准的结果。
+    /// 火山翻译成功结果进入候选；approved 由调用方传入：只有
+    /// resource == volcengine-nmt 的成功结果按 approved 进入候选，
+    /// 其他资源仍只接受经审核资源清单批准的结果。
     public func receive(_ result: TranslationResult, approved: Bool) {
         guard result.stamp.session == sessionID else { return }
         _ = try? perform(Int32(GC_LEV_RECEIVE),
