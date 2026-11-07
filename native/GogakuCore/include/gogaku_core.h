@@ -477,6 +477,7 @@ GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
  * 开关并删除遗留字段；未知字段原样保留；未来 schema 按已知字段读并输出 2。
  */
 #include "../settings_contract.h"
+#include "../theme_contract.h"
 
 #ifdef __cplusplus
 }

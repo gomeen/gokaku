@@ -1,12 +1,14 @@
 // Candidate theme data, bounded ZIP v1 and real WIC image normalization.
 // miniz 3.0.2 is used only for bounded, in-memory inflate (no archive extraction).
 #include "platform.h"
+#include "../GogakuCore/include/gogaku_core.h"
 #include <wincodec.h>
 #include <objbase.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
+#include <memory>
 #include <stdexcept>
 #include "third_party/miniz.h"
 // Keep the inflate-only implementation in this TU: no additional build target.
@@ -265,12 +267,6 @@ Json normalizedTheme(Json t) {
         t[key]["imageData"] = base64Encode(normalizedImage(base64Decode(t[key]["imageData"].get<std::string>())));
     return t;
 }
-Json palette(std::initializer_list<uint32_t> values) {
-    Json p = Json::object(); size_t i = 0;
-    for (auto c : values) p[Colors[i++]] = c;
-    p["visual"] = {{"radius",8},{"padding",8},{"rowHeight",100},{"opacity",100},{"bgOpacity",100},{"imageOpacity",25}};
-    return p;
-}
 void extra(const std::string &s, size_t p, size_t end) {
     while (p < end) {
         if (end - p < 4) bad("ZIP 附加字段截断。");
@@ -329,19 +325,17 @@ void extension(const fs::path &path) {
 } // namespace
 
 Json builtinThemes() {
-    // Exact semantic palettes from Sources/GogakuCore/CandidateTheme.swift.
+    // 内置主题数据来自共享契约 gc_themes_builtin（theme_contract.cpp），
+    // 调色板与排版只有这一份；本文件保留主题包解析、校验与导入导出。
     static const Json themes = [] {
-        Json all=Json::array();
-        auto add=[&](const char *id,const char *name,Json light,Json dark) {
-            Json t={{"id",id},{"name",name},{"light",light},{"typography",{{"fontCN","system-ui"},{"fontEN","system-ui"},{"fontSize",14},{"indexSize",11}}}};
-            if (!dark.is_null()) t["dark"]=dark;
-            all.push_back(t);
-        };
-        add("gogaku","Gogaku",palette({0xffffff,0xd7dfd9,0x202925,0x7d5800,0x78837d,0x12996a,0xffffff,0xffffff,0x53655a,0x7b8880}),palette({0x202823,0x4b5a50,0xf2f6f3,0xe3a82e,0xa8b3ab,0x168d64,0xffffff,0xffffff,0xb8c7bc,0xaab7ae}));
-        add("claude","Claude",palette({0xf5f4f1,0xdcdad4,0x1a1918,0xb0532f,0x66645f,0xdf9e87,0x1a1918,0x482519,0xc4613f,0x66645f}),palette({0x1a1917,0x34322f,0xecebe6,0xf0a585,0x9a9893,0xa3523c,0xffffff,0xffffff,0xd77757,0x9a9893}));
-        add("grok","Grok Bot",palette({0xf5f5f5,0xe5e5e5,0x1c1c1c,0x0b6dd3,0x656565,0x93bdeb,0x1c1c1c,0x102943,0x1680f3,0x656565}),palette({0x161616,0x262626,0xededed,0x93adff,0xa9a9a9,0x28609b,0xffffff,0xffffff,0x4d9bff,0xa9a9a9}));
-        add("witch","女巫魔药",palette({0x15111c,0x2a2238,0xe4dcef,0xc18cff,0x9d90b3,0x75bc4c,0x0f0b15,0x142a0b,0x8ef04f,0x9d90b3}),nullptr);
-        return all;
+        char *buffer = nullptr;
+        size_t length = 0;
+        const int32_t code = gc_themes_builtin(&buffer, &length);
+        if (code != 0 || !buffer) throw std::runtime_error("共享主题契约不可用");
+        std::unique_ptr<char, void (*)(void *)> holder(buffer, gc_contract_free);
+        Json parsed = Json::parse(buffer, buffer + length);
+        if (!parsed.is_array() || parsed.size() != 4) throw std::runtime_error("共享主题契约输出异常");
+        return parsed;
     }();
     return themes;
 }

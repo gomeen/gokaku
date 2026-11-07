@@ -40,7 +40,8 @@ if(WIN32)
 endif()
 
 add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp
-    learning_session.cpp translate/translate_safety.cpp settings_contract.cpp)
+    learning_session.cpp translate/translate_safety.cpp settings_contract.cpp
+    theme_contract.cpp)
 target_include_directories(GogakuCore
     PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}" "${CMAKE_CURRENT_SOURCE_DIR}/../third_party"
     PUBLIC include)
@@ -149,6 +150,13 @@ target_include_directories(gogaku_core_settings_contract_test PRIVATE include "$
 target_link_libraries(gogaku_core_settings_contract_test PRIVATE GogakuCore)
 gogaku_enable_sanitizers(gogaku_core_settings_contract_test)
 add_test(NAME settings_contract COMMAND gogaku_core_settings_contract_test)
+
+# 内置主题契约向量：四套主题的调色板与排版（共享数据冻结）。
+add_executable(gogaku_core_theme_contract_test tests/theme_contract_test.cpp)
+target_include_directories(gogaku_core_theme_contract_test PRIVATE include "${CMAKE_CURRENT_SOURCE_DIR}/../third_party")
+target_link_libraries(gogaku_core_theme_contract_test PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_theme_contract_test)
+add_test(NAME theme_contract COMMAND gogaku_core_theme_contract_test)
 
 # 数据可靠性测试辅助进程（probes/validate-data-reliability.py 启动／校验）。
 add_executable(gogaku_data_reliability_worker tests/data_reliability_worker.cpp)

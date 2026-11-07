@@ -46,6 +46,7 @@ def compile_arch(args, arch):
     service = ['dllmain', 'text_service', 'candidate_window', 'core_bridge']
     sources = [(windows / f'{name}.cpp', obj / f'{name}.o') for name in common]
     sources += [(ROOT / 'native/GogakuCore/settings_contract.cpp', obj / 'settings_contract.o')]
+    sources += [(ROOT / 'native/GogakuCore/theme_contract.cpp', obj / 'theme_contract.o')]
     sources += [(tsf / 'src' / f'{name}.cpp', obj / f'{name}.o') for name in service]
     if arch == 'x64':
         sources += [(windows / f'{name}.cpp', obj / f'{name}.o')
@@ -69,7 +70,7 @@ def compile_arch(args, arch):
     print(f'链接 {arch} TSF', flush=True)
     run([cxx, '-shared', '-static', '-Wl,--kill-at', '-o', out / 'GogakuTsf.dll',
          *[obj / f'{name}.o' for name in service + common], obj / 'settings_contract.o',
-         app_resource, tsf / 'gogaku_tsf.def', *libs])
+         obj / 'theme_contract.o', app_resource, tsf / 'gogaku_tsf.def', *libs])
     if arch == 'x64':
         for name in ('monocypher', 'monocypher-ed25519'):
             run([cc, '-std=c11', '-O2', '-c', windows / 'third_party' / f'{name}.c',
@@ -82,8 +83,8 @@ def compile_arch(args, arch):
         run([cxx, '-static', '-municode', '-mwindows', '-o', out / 'GogakuSettings.exe',
              *[obj / f'{name}.o' for name in ('settings', 'services', 'update',
                  'platform', 'appearance', 'themes', 'monocypher', 'monocypher-ed25519')],
-             obj / 'settings_contract.o', settings_resource, *libs,
-             '-lwinhttp', '-lcomctl32', '-lcomdlg32', '-luxtheme'])
+             obj / 'settings_contract.o', obj / 'theme_contract.o', settings_resource,
+             *libs, '-lwinhttp', '-lcomctl32', '-lcomdlg32', '-luxtheme'])
     for artifact in sorted(out.glob('*')):
         if artifact.suffix.lower() in ('.dll', '.exe'):
             print(f'产物：{artifact} ({artifact.stat().st_size:,} bytes)', flush=True)

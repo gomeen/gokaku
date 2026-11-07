@@ -319,6 +319,8 @@ $CXX $INC -Dmain=test_main_fuzz      -c $CORE_SRC/tests/normal_session_fuzz.cpp 
 $CC  $INC -Dmain=test_main_abi       -c $CORE_SRC/tests/abi_version_test.c        -o abi.o
 # 设置契约向量：与 Mac ctest 跑同一份源码，Windows 侧不再只靠注释对照。
 $CXX $INC -Dmain=test_main_settings  -c $CORE_SRC/tests/settings_contract_test.cpp -o settings.o
+# 主题契约向量：内置调色板数据冻结（共享数据源）。
+$CXX $INC -Dmain=test_main_themes    -c $CORE_SRC/tests/theme_contract_test.cpp   -o themes.o
 
 # 数据内嵌（短文件名控制符号名）
 cp "$DATA/sc.dict"  embed_sc_dict.bin
@@ -342,6 +344,7 @@ int test_main_normal(void);
 int test_main_learning(void);
 int test_main_quality(void);
 int test_main_settings(void);
+int test_main_themes(void);
 int test_main_fuzz(int argc, char** argv);
 
 extern const unsigned char _binary_embed_sc_dict_bin_start[];
@@ -385,6 +388,7 @@ int main() {
         {"学习模式轨迹",       [] { return test_main_learning(); }},
         {"质量回归（120 条）", [] { return test_main_quality(); }},
         {"设置契约向量",     [] { return test_main_settings(); }},
+        {"主题契约向量",     [] { return test_main_themes(); }},
         {"随机序列冒烟",       [] { char n0[] = "fuzz"; char s0[] = "20261031"; char c0[] = "2000";
                                    char* av[] = {n0, s0, c0}; return test_main_fuzz(3, av); }},
     };
@@ -403,7 +407,7 @@ int main() {
 }
 EOF
 $CXX $INC -c runner.cpp -o runner.o
-$CXX -static runner.o abi.o safety.o normal.o learning.o quality.o settings.o fuzz.o \
+$CXX -static runner.o abi.o safety.o normal.o learning.o quality.o settings.o themes.o fuzz.o \
   embed_sc_dict.bin.o embed_zh_cn_lm.bin.o \
   $BIN/libgogaku_core.a \
   -L$SC/deps-root/build/bin -L$SC/prefix/lib -L$WC/msys-sysroot/clang64/lib \

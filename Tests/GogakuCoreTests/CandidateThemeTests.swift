@@ -93,4 +93,17 @@ final class CandidateThemeTests: XCTestCase {
             XCTAssertEqual(try JSONDecoder().decode(Settings.self, from: JSONEncoder().encode(settings)).candidateTheme, theme.id)
         }
     }
+
+    /// 内置主题来自共享核心的 gc_themes_builtin（theme_contract.cpp），
+    /// 这里验证 Mac 解码链路与锚点色，锚点与两端的 theme_contract_test 同步。
+    func testBuiltinThemesComeFromSharedContract() throws {
+        XCTAssertEqual(BuiltinCandidateThemes.all.map(\.id), [.gogaku, .claude, .grok, .witch])
+        XCTAssertEqual(BuiltinCandidateThemes.all.map(\.name), ["Gogaku", "Claude", "Grok Bot", "女巫魔药"])
+        let gogaku = BuiltinCandidateThemes.theme(.gogaku)
+        XCTAssertEqual(gogaku.light.highlight.rgb, 0x12996a)
+        XCTAssertEqual(gogaku.dark?.highlight.rgb, 0x168d64)
+        XCTAssertNil(BuiltinCandidateThemes.theme(.witch).dark, "单色主题不应有 dark")
+        XCTAssertEqual(BuiltinCandidateThemes.theme(.rimeMacOSLike).id, .rimeMacOSLike)
+        XCTAssertEqual(BuiltinCandidateThemes.theme(.rimeMacOSLike).light, gogaku.light)
+    }
 }

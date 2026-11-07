@@ -1,4 +1,5 @@
 import Foundation
+import CGogakuCore
 
 /// 一种不透明 sRGB 色值；解码时拒绝超出 24 位的数值。
 public struct ThemeColor: Codable, Equatable, Sendable {
@@ -186,19 +187,24 @@ struct LossyCandidateThemes: Decodable {
 }
 
 public enum BuiltinCandidateThemes {
-    public static let all: [CandidateTheme] = [
-        CandidateTheme(id: .gogaku, name: "Gogaku",
-            light: CandidatePalette([0xffffff, 0xd7dfd9, 0x202925, 0x7d5800, 0x78837d, 0x12996a, 0xffffff, 0xffffff, 0x53655a, 0x7b8880]),
-            dark: CandidatePalette([0x202823, 0x4b5a50, 0xf2f6f3, 0xe3a82e, 0xa8b3ab, 0x168d64, 0xffffff, 0xffffff, 0xb8c7bc, 0xaab7ae])),
-        CandidateTheme(id: .claude, name: "Claude",
-            light: CandidatePalette([0xf5f4f1, 0xdcdad4, 0x1a1918, 0xb0532f, 0x66645f, 0xdf9e87, 0x1a1918, 0x482519, 0xc4613f, 0x66645f]),
-            dark: CandidatePalette([0x1a1917, 0x34322f, 0xecebe6, 0xf0a585, 0x9a9893, 0xa3523c, 0xffffff, 0xffffff, 0xd77757, 0x9a9893])),
-        CandidateTheme(id: .grok, name: "Grok Bot",
-            light: CandidatePalette([0xf5f5f5, 0xe5e5e5, 0x1c1c1c, 0x0b6dd3, 0x656565, 0x93bdeb, 0x1c1c1c, 0x102943, 0x1680f3, 0x656565]),
-            dark: CandidatePalette([0x161616, 0x262626, 0xededed, 0x93adff, 0xa9a9a9, 0x28609b, 0xffffff, 0xffffff, 0x4d9bff, 0xa9a9a9])),
-        CandidateTheme(id: .witch, name: "女巫魔药",
-            light: CandidatePalette([0x15111c, 0x2a2238, 0xe4dcef, 0xc18cff, 0x9d90b3, 0x75bc4c, 0x0f0b15, 0x142a0b, 0x8ef04f, 0x9d90b3]), dark: nil),
-    ]
+    /// 数据源是共享核心的 gc_themes_builtin（native/GogakuCore/theme_contract.cpp）。
+    /// 这里只把规范 JSON 解码成本端类型，不携带调色板数据；锚点色由两端的
+    /// theme_contract_test 冻结，改调色板必须改那一份并同步两处向量。
+    public static let all: [CandidateTheme] = {
+        var buffer: UnsafeMutablePointer<CChar>?
+        var length = 0
+        let code = gc_themes_builtin(&buffer, &length)
+        guard code == 0, let output = buffer else {
+            fatalError("内置主题契约不可用（gc_themes_builtin 返回 \(code)）")
+        }
+        defer { gc_contract_free(output) }
+        let data = Data(bytes: output, count: length)
+        guard let themes = try? JSONDecoder().decode([CandidateTheme].self, from: data),
+              themes.count == 4 else {
+            fatalError("内置主题契约输出无法解码为本端主题类型")
+        }
+        return themes
+    }()
 
     public static func theme(_ id: CandidateThemeID) -> CandidateTheme {
         if id == .rimeMacOSLike {
