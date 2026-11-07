@@ -66,7 +66,7 @@
 
 前置动作：先入库一组两端共跑的对拍向量（同一份输入与期望结论），再动第一行。没有向量的抽取不开始。当前端内两份实现（`Sources/GogakuCore/UpdateContract.swift` 与 `native/GogakuWindows/update.cpp` 等）保持原状，不在此轮一边抽取一边加特性。
 
-**进度（2026-11-07）**：第 1 行的共享实现与向量已落地（`native/GogakuCore/settings_contract.cpp` 与 `tests/settings_contract_test.cpp`，ABI 新增 `gc_settings_normalize`／`gc_contract_free`），Mac 读盘与设置合并基线已切换，Swift 侧的 schema 迁移分支已删除。**Windows 已接线（编译验证）**：`platform.cpp` 的 `defaultSettings`／`readSettings` 都走共享契约，平台只补应用身份项（`appDefaultEnglish` 的 Windows 可执行名清单）；四个 Windows 二进制（双位数 TSF、代理、设置应用）把契约实现直接编进自身（`-DGOGAKU_SETTINGS_CONTRACT_STATIC`，x86 TSF 无法加载 x64 核心 DLL），核心 DLL 同时保留导出供 Mac 动态加载。完成判据改为：x64 交叉编译通过、DLL 导出表只含 `gc_*`、自检包含向量；**Windows VM 内运行自检与真实读盘重验仍未做，未跑前不得当作双端已统一**。第 2 到 4 行未开始。
+**进度（2026-11-07）**：第 1 行与第 2 行已落地。第 1 行（设置读侧规范化）见上节；**Windows 已接线（编译验证）**，VM 运行重验待做。第 2 行（内置主题）：`theme_contract.cpp` 经 `gc_themes_builtin` 输出四套主题的规范 JSON，Mac `BuiltinCandidateThemes` 与 Windows `themes.cpp` 都改为消费契约，两端硬编码调色板表与「Exact semantic palettes」式注释对照已删除；向量冻结锚点色（含产品规格 #12996a），并入两端 ctest 与 Windows 自检包。主题包容器（ZIP／PNG／WIC）仍在两端各算一层，属后续。第 3、4 行（清单验签、火山签名）未开始。
 
 已知缺口（未修，不阻塞）：规范化只发生读侧，迁移结果不会主动写回磁盘。旧 schema 1 文件在 Mac 上读到的是「学习翻译关闭」，但文件本身仍是 schema 1；由于合并写盘只写差异字段，它可能长期不动。降到旧版本阅读同一文件时会看成开启。处理方向是让设置应用在读到 `migrated=1` 时做一次规范写盘，按写侧迁移单独验收，不在读契约里做副作用。
 
