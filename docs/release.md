@@ -161,7 +161,7 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 3. **核心有改动时（Windows）**：重跑交叉构建 → VM 跑核心 ctest／自检包全绿。
 4. **Mac**：`build.py` → `package-macos-pkg.py` → 真实 `installer -pkg` 安装→打字→升级→恢复冒烟。
 5. **Windows**：`build-win-app.py` → VM 安装→打字→检查更新→卸载冒烟。
-6. **归档证据**：验证报告、`docs/validation/native-development.md` 对应小节、CHANGELOG 入库；构建身份与安装包收据随包归档（`dist` 生成物不强制入库）。
+6. **归档证据**：验证报告、`docs/validation/native-development.md` 对应小节、CHANGELOG 入库；构建身份与安装包收据随包归档（`dist` 生成物不强制入库）。`docs/validation/verify` 的保留策略：保留被文档／验收记录引用的运行记录、host 档全部运行，以及每个档位最新一份；其余历史运行在收敛时删除（git 历史仍可考）。
 7. **rc 级**：确认工作区干净；全量 `--profile release` 后台跑（约 2.5 小时，不阻塞日常）。
 8. **分发**：把安装包＋构建身份（或哈希清单）发给测试者；记录发放对象与版本。
 9. **定版**：全部验收＋用户试用确认后打 `v0.1.x` 标签（不移动）。

@@ -4,7 +4,8 @@
 两阶段均要求当前安装器收据和验证报告（--verification-report 可重复）。
   python3 scripts/publish-release.py --repo owner/releases --channel dev \
     --macos-pkg dist/example.pkg --windows-setup dist/example.exe \
-    --verification-report dist/verify/report.json --key /private/key --key-id KEY
+    --verification-report docs/validation/verify/report-fast-<时间戳>.json \
+    --key /private/key --key-id KEY
   # 人工审阅后，保留 out 目录中的清单、签名与 release-state.json：
   python3 scripts/publish-release.py ... --publish-existing RELEASE_ID
 

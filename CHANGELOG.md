@@ -2,6 +2,15 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-07 追加：设置与主题契约进共享核心，dev）
+
+- **设置契约只有一份实现**：新增共享核心 `settings_contract.cpp` 与 C ABI `gc_settings_normalize`／`gc_contract_free`（附加接口，不升 ABI 版本）。读侧规范化（默认值、类型饱和、schema 1→2 迁移、未知字段保留）两端统一；Mac `Settings.load` 与设置合并基线改走契约，Swift 侧迁移分支删除；Windows `platform.cpp` 的默认值字面量与迁移删除，四个二进制（双位数 TSF、代理、设置应用）以静态方式编入同一实现。修复三处真问题：清除的快捷键不再被回退复活；缺 `appDefaultEnglish` 不再丢出厂清单；超范围整数不再回绕落盘。
+- **内置主题只有一份数据**：新增 `theme_contract.cpp` 与 `gc_themes_builtin`，四套内置主题（Gogaku／Claude／Grok Bot／女巫魔药）的调色板与排版仅此一份；Mac `BuiltinCandidateThemes` 与 Windows `themes.cpp` 改为消费契约，「Exact semantic palettes from …」式注释对照删除。锚点色（含产品规格 #12996a）由两端共跑的 `theme_contract_test` 冻结。
+- **对拍向量双端共跑**：`settings_contract_test`（35 组）与 `theme_contract_test` 进入 Mac ctest 与 Windows 单文件自检包，同一份 C++ 源码。共享第三方 `json.hpp` 上移 `native/third_party` 供核心与 Windows 共用。
+- **计划裁决**：更新清单验签与火山签名的抽取经用户裁决不执行，两端各自实现维持；已在[实施计划](docs/implementation-plan.md)登记为「共享实现规则」的已登记例外。
+- **外围收敛**：删除 74 个零引用文件（一次性脚本、判废探索原型与截图、退役后端探针），`docs/validation/verify` 按「引用＋档位最新」保留策略收敛（删除 279 个零引用历史运行，文档引用的 18 个与 host 全家族保留）。
+- **验证**：fast 7/7；core ctest 10/10（含两组契约向量）；Swift Release 207 项；x64 交叉编译四产物齐全、DLL 导出表核对；ASan／UBSan 2,000 序列冒烟无错误。**Windows VM 运行自检与真实读盘重验待用户执行，未跑前双端不标统一。**
+
 ### 变更（2026-11-06 追加：英→中首键即显回归修复，构建 88 dev）
 
 - **用户报告**：学习英→中输入 hello，打到 o 附近候选窗才弹出（开头输入像没被记录）。缓冲与翻译链路完整（核心轨迹测试保证），是面板显示回归：`refreshDisplayPosition` 残留首键即显之前时代的守卫「en→中候选为空就不显示」——首键矩形不可用时 publish 跳过渲染、位置复查拿到矩形也被拦，要等首条译文才显示。
