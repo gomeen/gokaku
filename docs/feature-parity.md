@@ -53,7 +53,7 @@
 | 功能 | macOS 现状 | Windows 构建 91 | 合同／边界 |
 | --- | --- | --- | --- |
 | 设置与调频目录 | `~/Library/Application Support/Gogaku/` | `%LOCALAPPDATA%\Gogaku\` | 凭据另存 `translation/`；用户数据不进安装包 |
-| 旧本地模型配置 | schema 2 迁移为关闭 | JSON schema 迁移已实现 | 旧 Windows `settings.txt` 完整迁移仍缺 |
+| 旧本地模型配置 | schema 2 迁移为关闭（共享契约） | 读侧规范化与迁移已接入共享契约，同一实现；已编译，VM 重验待做 | 旧 Windows `settings.txt` 完整迁移仍缺 |
 | stable／dev | 独立身份，共用数据 | 独立 CLSID／语言档案／安装目录／管道 | 每通道代理独立；共享调频并发需继续完善 |
 | 对外安装件 | 仅 `.pkg` | 实际 Inno Setup EXE | 见[Windows 构包报告](validation/windows-setup-build.json) |
 | 安装与注册 | pkg 单次实装、隔离事务有证据 | UAC、双架构注册、失败中止、开始菜单、可选用户自启已编译 | 不设置默认输入法，不修改系统语言 |

@@ -133,6 +133,7 @@ mkdir -p core-src core-src.tmp
 git -C $ROOT archive HEAD native/GogakuCore native/third_party | tar -x -C core-src.tmp
 mv core-src.tmp/native/GogakuCore/* core-src/
 # 共享第三方（json.hpp）必须与 core-src 平级，CMake 从 core-src/../third_party 找。
+rm -rf $SC/third_party
 mv core-src.tmp/native/third_party $SC/third_party
 rm -rf core-src.tmp
 python3 - "$SC/core-src" <<'PYEOF'

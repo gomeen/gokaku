@@ -1,10 +1,12 @@
 #include "platform.h"
+#include "../GogakuCore/settings_contract.h"
 #include <bcrypt.h>
 #include <wincrypt.h>
 #include <sddl.h>
 #include <shlobj.h>
 #include <algorithm>
 #include <fstream>
+#include <memory>
 #include <mutex>
 #include <stdexcept>
 
@@ -151,25 +153,38 @@ void atomicWrite(const fs::path &path, const std::string &bytes, bool privateFil
     if (!ok || !MoveFileExW(temp.c_str(), path.c_str(), MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH)) { DeleteFileW(temp.c_str()); ioError("保存失败，旧文件保持不变"); }
 }
 Json defaultSettings() {
-    return Json{{"schemaVersion",2},{"recording",true},{"excludedApplications",Json::array()},{"ignoredWords",Json::array()},
-      {"applications",Json::object()},{"modeShortcut",{{"key","k"},{"modifiers",393216}}},{"directionShortcut",{{"key","j"},{"modifiers",393216}}},
-      {"candidateTheme","rime-macos-like"},{"userCandidateThemes",Json::array()},{"inputScheme","xiaohe"},{"fuzzyPinyin",Json::array()},
-      {"candidateFontSize",14},{"glossEnabled",true},{"inputLettersEnabled",true},{"fullPinyinPreedit",true},{"frequencyEnabled",true},
-      {"englishCandidatesEnabled",true},{"appDefaultEnglish",Json::array({"code.exe","obsidian.exe","cursor.exe","zed.exe","windowsterminal.exe","warp.exe"})},
-      {"learningTranslationEnabled",false},{"preferredMode","normal"},{"preferredDirection","zhToEn"}};
+    // 默认值来自共享契约（空对象规范化），字段语义见 settings_contract.cpp；
+    // 平台只补应用身份项：按应用默认英文的出厂清单是 Windows 可执行文件名。
+    char *buffer = nullptr;
+    size_t length = 0;
+    if (gc_settings_normalize(nullptr, 0, &buffer, &length, nullptr) != 0 || !buffer)
+        ioError("共享设置契约不可用");
+    std::unique_ptr<char, void (*)(void *)> holder(buffer, gc_contract_free);
+    Json base = Json::parse(buffer, buffer + length);
+    base["appDefaultEnglish"] = Json::array(
+        {"code.exe", "obsidian.exe", "cursor.exe", "zed.exe", "windowsterminal.exe", "warp.exe"});
+    return base;
 }
 Json readSettings() {
     auto path = userRoot() / L"settings.json";
     if (!fs::exists(path)) return defaultSettings();
-    Json value = Json::parse(readFile(path));
+    // 读侧规范化在共享核心：默认值、类型鉗制、schema 迁移与 Mac 走同一个
+    // gc_settings_normalize（编译期把实现直接链进本进程，x86 TSF 同样生效）。
+    const auto bytes = readFile(path);
+    char *normalized = nullptr;
+    size_t length = 0;
+    int32_t migrated = 0;
+    const int32_t code =
+        gc_settings_normalize(bytes.data(), bytes.size(), &normalized, &length, &migrated);
+    if (code == 2) ioError("设置文件损坏，请先恢复备份");
+    if (code != 0 || !normalized) ioError("设置规范化失败，请先恢复备份");
+    std::unique_ptr<char, void (*)(void *)> holder(normalized, gc_contract_free);
+    Json value = Json::parse(normalized, normalized + length);
     if (!value.is_object()) ioError("设置文件损坏，请先恢复备份");
-    Json defaults = defaultSettings();
-    for (auto it = value.begin(); it != value.end(); ++it) defaults[it.key()] = it.value();
-    if (value.value("schemaVersion",1) < 2) {
-        defaults["learningTranslationEnabled"] = value.value("learningTranslationBackend",std::string()) == "volcengine" && value.value("learningTranslationEnabled",true);
-        defaults["schemaVersion"] = 2;
-    }
-    return defaults;
+    // 契约对缺键不写 appDefaultEnglish（缺键≠用户删光），这里补出厂清单。
+    if (!value.contains("appDefaultEnglish"))
+        value["appDefaultEnglish"] = defaultSettings()["appDefaultEnglish"];
+    return value;
 }
 void saveSettings(const Json &settings) {
     if (!settings.is_object() || settings.value("schemaVersion",2) != 2) ioError("不支持的设置版本");

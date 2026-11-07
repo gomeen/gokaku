@@ -1,8 +1,9 @@
 // 设置契约的读侧规范化。两端共用，规则由 tests/settings_contract_test.cpp
 // 的向量冻结；这里不碰平台路径、不写盘、不建线程。
-#include "gogaku_core.h"
-
-#include "json.hpp"
+// gogaku_core.h 经相对路径引用，避免平台构建脚本为它加 -I。
+#include "include/gogaku_core.h"
+// 相对路径引用共享第三方（native/third_party），平台构建无需额外 -I。
+#include "../third_party/json.hpp"
 
 #include <cstdlib>
 #include <cstring>

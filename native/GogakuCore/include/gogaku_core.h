@@ -469,30 +469,14 @@ GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
                                           GcLearningSnapshot **out);
 
 /* ── 设置契约 ────────────────────────────────────────────────
- * 读侧规范化：平台各自的 settings.json 读取都经这里，得到同一份 schema 2
- * 规范对象，再各自按自己的类型模型解码。写侧仍由平台合并写回，未知字段
- * 原样保留，不因读侧规范化丢数据。
- *
- * 规范化规则（由 tests/settings_contract_test.cpp 的向量冻结）：
- * - 缺失或类型不对的字段回落到默认值；候选字号钳制到 12..16。
- * - appDefaultEnglish 的旧形状（字符串数组）升级为 [{id,enabled}]。
- * - schemaVersion < 2：按 learningTranslationBackend 迁移学习翻译开关，
- *   并删除该遗留字段；已启用火山保留启用，其余一律关闭。
- * - 未知字段原样保留；未来版本（schemaVersion > 2）按已知字段读取并输出 2。
+ * 声明与合同在 ../settings_contract.h（唯一声明处，含导出归属）；
+ * 实现在 settings_contract.cpp，行为向量在 tests/settings_contract_test.cpp。
+ * 规范化规则：缺失或类型不对的字段回落默认值；候选字号钳制 12..16；
+ * appDefaultEnglish 旧字符串形状升级为 [{id,enabled}]，缺键不输出、由平台补
+ * 出厂清单；schemaVersion < 2 时按 learningTranslationBackend 迁移学习翻译
+ * 开关并删除遗留字段；未知字段原样保留；未来 schema 按已知字段读并输出 2。
  */
-#define GC_SETTINGS_SCHEMA_VERSION 2
-
-/* raw/raw_len 为磁盘原始字节；raw 为 NULL 且 raw_len==0 时按空对象规范化。
- * 成功时 *out 为库内分配的 NUL 结尾 UTF-8 规范 JSON，用 gc_contract_free 释放。
- * migrated 可为 NULL；非 NULL 时写入 1 表示读到的数据确实需要迁移。
- * appDefaultEnglish 在输入里缺键时不写入结果，由平台补自己的出厂清单；
- * 输入里是空数组时原样保留（用户删光了应用，不得复活）。
- * 返回 0 成功；1 参数错误；2 不是 JSON 对象；4 内存不足；
- * 5 内部错误（异常已被拦下，不跨 ABI）。 */
-GOGAKU_CORE_EXPORT int32_t gc_settings_normalize(const char *raw, size_t raw_len,
-                                                 char **out, size_t *out_len,
-                                                 int32_t *migrated);
-GOGAKU_CORE_EXPORT void gc_contract_free(void *buffer);
+#include "../settings_contract.h"
 
 #ifdef __cplusplus
 }

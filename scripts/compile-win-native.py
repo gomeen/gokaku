@@ -35,6 +35,8 @@ def compile_arch(args, arch):
     obj.mkdir(parents=True, exist_ok=True)
     flags = ['-std=c++20', '-O2', '-DNDEBUG', '-DNOMINMAX', '-D_WIN32_WINNT=0x0A00',
              '-DUNICODE', '-D_UNICODE', '-fmax-errors=3', '-fdiagnostics-plain-output',
+             # 设置契约实现直接编进各 Windows 二进制（x86 TSF 无法加载 x64 核心 DLL）。
+             '-DGOGAKU_SETTINGS_CONTRACT_STATIC',
              f'-DGOGAKU_CHANNEL="{args.channel}"']
     if args.channel == 'dev':
         flags.append('-DGOGAKU_DEV')
@@ -43,6 +45,7 @@ def compile_arch(args, arch):
     common = ['platform', 'appearance', 'themes']
     service = ['dllmain', 'text_service', 'candidate_window', 'core_bridge']
     sources = [(windows / f'{name}.cpp', obj / f'{name}.o') for name in common]
+    sources += [(ROOT / 'native/GogakuCore/settings_contract.cpp', obj / 'settings_contract.o')]
     sources += [(tsf / 'src' / f'{name}.cpp', obj / f'{name}.o') for name in service]
     if arch == 'x64':
         sources += [(windows / f'{name}.cpp', obj / f'{name}.o')
@@ -65,21 +68,22 @@ def compile_arch(args, arch):
             '-lwindowscodecs', '-lmsimg32']
     print(f'链接 {arch} TSF', flush=True)
     run([cxx, '-shared', '-static', '-Wl,--kill-at', '-o', out / 'GogakuTsf.dll',
-         *[obj / f'{name}.o' for name in service + common], app_resource,
-         tsf / 'gogaku_tsf.def', *libs])
+         *[obj / f'{name}.o' for name in service + common], obj / 'settings_contract.o',
+         app_resource, tsf / 'gogaku_tsf.def', *libs])
     if arch == 'x64':
         for name in ('monocypher', 'monocypher-ed25519'):
             run([cc, '-std=c11', '-O2', '-c', windows / 'third_party' / f'{name}.c',
                  '-o', obj / f'{name}.o'])
         run([cxx, '-static', '-municode', '-mwindows', '-o', out / 'GogakuAgent.exe',
              *[obj / f'{name}.o' for name in ('agent', 'services', 'platform')],
-             app_resource, *libs, '-lwinhttp'])
+             obj / 'settings_contract.o', app_resource, *libs, '-lwinhttp'])
         settings_resource = obj / 'settings-resource.o'
         run([windres, '-I', windows, '-i', windows / 'settings.rc', '-o', settings_resource])
         run([cxx, '-static', '-municode', '-mwindows', '-o', out / 'GogakuSettings.exe',
              *[obj / f'{name}.o' for name in ('settings', 'services', 'update',
                  'platform', 'appearance', 'themes', 'monocypher', 'monocypher-ed25519')],
-             settings_resource, *libs, '-lwinhttp', '-lcomctl32', '-lcomdlg32', '-luxtheme'])
+             obj / 'settings_contract.o', settings_resource, *libs,
+             '-lwinhttp', '-lcomctl32', '-lcomdlg32', '-luxtheme'])
     for artifact in sorted(out.glob('*')):
         if artifact.suffix.lower() in ('.dll', '.exe'):
             print(f'产物：{artifact} ({artifact.stat().st_size:,} bytes)', flush=True)
