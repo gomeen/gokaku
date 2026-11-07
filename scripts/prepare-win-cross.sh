@@ -120,6 +120,8 @@ ln -sfn $WC/deps/libime $WC/deps-root/source
 ln -sfn $WC/libime-build $WC/deps-root/build
 ln -sfn $WC/prefix $WC/deps-root/prefix
 rsync -a --delete $ROOT/native/GogakuCore/ $WC/core-src/ --exclude '*.o' --exclude 'bin'
+# 共享第三方向量要跟着核心走：core-src/../third_party 是 CMake 的 include 路径。
+rsync -a --delete $ROOT/native/third_party/ $WC/third_party/
 # 注入 1：fsync → _commit（MinGW；open/close/chmod 经 oldnames 可用）。
 python3 - "$WC/core-src" <<'PYEOF'
 import re, sys

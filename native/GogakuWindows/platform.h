@@ -11,7 +11,7 @@
 #include <filesystem>
 #include <string>
 #include <vector>
-#include "third_party/json.hpp"
+#include "../third_party/json.hpp"
 
 // Windows 平台接缝。IPC 只传限长 UTF-8 JSON，不跨位数传指针或 C++ 对象。
 namespace gw {

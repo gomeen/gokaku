@@ -338,8 +338,9 @@ def prepare_setup(args, lock):
         files['libime/src/libime/core/kenlm/util/integer_to_string.cc'] = 'kenlm/util/integer_to_string.cc'
         for source, target in files.items():
             copy(SOURCES / source, licenses / target)
-        for name in ('json-LICENSE.MIT', 'miniz-LICENSE.txt', 'monocypher-LICENCE.md'):
+        for name in ('miniz-LICENSE.txt', 'monocypher-LICENCE.md'):
             copy(ROOT / 'native/GogakuWindows/third_party' / name, licenses / 'windows' / name)
+        copy(ROOT / 'native/third_party/json-LICENSE.MIT', licenses / 'windows' / 'json-LICENSE.MIT')
         for entry in lock['runtime_licenses']:
             candidate = Path('/usr/local/opt/mingw-w64') / {
                 'MinGW-w64-COPYING.txt': 'COPYING', 'MinGW-w64-AUTHORS.txt': 'AUTHORS'}.get(entry['file'], entry['file'])

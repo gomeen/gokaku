@@ -310,8 +310,11 @@ def resource_plan(args):
     }
     result += [(source / name, Path('licenses') / target) for name, target in required_licenses.items()]
     windows = Path(args.windows_source_dir)
-    for name in ('json-LICENSE.MIT', 'miniz-LICENSE.txt', 'monocypher-LICENCE.md'):
+    for name in ('miniz-LICENSE.txt', 'monocypher-LICENCE.md'):
         result.append((windows / 'third_party' / name, Path('licenses/windows') / name))
+    # json.hpp 与共享核心共用一份（native/third_party），许可文本跟着走。
+    result.append((Path(args.third_party_dir) / 'json-LICENSE.MIT',
+                   Path('licenses/windows') / 'json-LICENSE.MIT'))
     for path, _ in result:
         if not path.is_file() or not path.stat().st_size:
             raise InputError(f'缺少资源或实际许可文本：{path}')
@@ -462,6 +465,7 @@ def make_parser():
     parser.add_argument('--deps-source-dir', default=str(ROOT / '.build/win-cross/static'),
                         help='包含 libime/、fcitx5/ 的实际原生依赖源码许可根目录')
     parser.add_argument('--windows-source-dir', default=str(ROOT / 'native/GogakuWindows'))
+    parser.add_argument('--third-party-dir', default=str(ROOT / 'native/third_party'))
     parser.add_argument('--out', help='默认 dist/gogaku-win')
     parser.add_argument('--iscc', help='ISCC.exe 或仅编译 Inno 的本机 wrapper')
     return parser
@@ -521,6 +525,7 @@ def self_test(iscc=None):
         args.resources_dir = str(root / 'resources')
         args.deps_source_dir = str(root / 'deps')
         args.windows_source_dir = str(root / 'windows')
+        args.third_party_dir = str(root / 'third_party')
         args.license_dir = [str(root / 'licenses')]
         paths = ['resources/english-wordlist-sources.json', 'resources/gloss-sources.json',
                  'resources/update/config.json', 'resources/licenses/DATA.txt', 'licenses/COPYING',
@@ -530,7 +535,8 @@ def self_test(iscc=None):
         paths += ['deps/libime/src/libime/core/kenlm/' + name
                   for name in ('COPYING', 'COPYING.3', 'COPYING.LESSER.3', 'LICENSE')]
         paths += ['windows/third_party/' + name for name in
-                  ('json-LICENSE.MIT', 'miniz-LICENSE.txt', 'monocypher-LICENCE.md')]
+                  ('miniz-LICENSE.txt', 'monocypher-LICENCE.md')]
+        paths += ['third_party/json-LICENSE.MIT']
         for relative in paths:
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)

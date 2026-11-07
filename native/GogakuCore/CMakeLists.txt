@@ -42,7 +42,7 @@ endif()
 add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp
     learning_session.cpp translate/translate_safety.cpp)
 target_include_directories(GogakuCore
-    PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}"
+    PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}" "${CMAKE_CURRENT_SOURCE_DIR}/../third_party"
     PUBLIC include)
 target_link_directories(GogakuCore PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
 target_link_libraries(GogakuCore PRIVATE IMEPinyin IMECore Fcitx5Utils)
