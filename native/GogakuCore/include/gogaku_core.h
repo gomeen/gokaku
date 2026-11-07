@@ -484,8 +484,11 @@ GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
 
 /* raw/raw_len 为磁盘原始字节；raw 为 NULL 且 raw_len==0 时按空对象规范化。
  * 成功时 *out 为库内分配的 NUL 结尾 UTF-8 规范 JSON，用 gc_contract_free 释放。
- * migrated 可为 NULL；非 NULL 时写入 1 表示发生了 schema 迁移。
- * 返回 0 成功；1 参数错误；2 不是 JSON 对象（含空缓冲以外的畸形输入）。 */
+ * migrated 可为 NULL；非 NULL 时写入 1 表示读到的数据确实需要迁移。
+ * appDefaultEnglish 在输入里缺键时不写入结果，由平台补自己的出厂清单；
+ * 输入里是空数组时原样保留（用户删光了应用，不得复活）。
+ * 返回 0 成功；1 参数错误；2 不是 JSON 对象；4 内存不足；
+ * 5 内部错误（异常已被拦下，不跨 ABI）。 */
 GOGAKU_CORE_EXPORT int32_t gc_settings_normalize(const char *raw, size_t raw_len,
                                                  char **out, size_t *out_len,
                                                  int32_t *migrated);

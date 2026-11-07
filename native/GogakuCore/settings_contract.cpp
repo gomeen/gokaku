@@ -6,6 +6,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <unordered_set>
 
@@ -27,7 +28,7 @@ const std::unordered_set<std::string> &knownKeys() {
 }
 
 // 出厂默认值只含两端语义相同的字段。按应用默认英文的应用清单是平台身份
-// （macOS bundle id 与 Windows 可执行文件名），由平台在空列表上自行补默认。
+// （macOS bundle id 与 Windows 可执行文件名），缺键时由平台在空列表上自行补默认。
 Json defaults() {
     return Json{
         {"schemaVersion", GC_SETTINGS_SCHEMA_VERSION},
@@ -47,7 +48,6 @@ Json defaults() {
         {"fullPinyinPreedit", true},
         {"frequencyEnabled", true},
         {"englishCandidatesEnabled", true},
-        {"appDefaultEnglish", Json::array()},
         {"learningTranslationEnabled", false},
         {"preferredMode", "normal"},
         {"preferredDirection", "zhToEn"},
@@ -102,26 +102,46 @@ Json appEntries(const Json &value) {
     return out;
 }
 
+// 读整数时先归一为 int64 并饱和：nlohmann 的 get<int>()／get<int64_t>() 对超出范围
+// 的值会回绕，回绕后的负数会被当成合法值写回设置。
+int64_t integerOr(const Json &value, int64_t fallback) {
+    if (!value.is_number_integer()) return fallback;
+    if (value.is_number_unsigned()) {
+        uint64_t raw = value.get<uint64_t>();
+        const uint64_t ceiling = static_cast<uint64_t>(std::numeric_limits<int64_t>::max());
+        return raw > ceiling ? std::numeric_limits<int64_t>::max() : static_cast<int64_t>(raw);
+    }
+    return value.get<int64_t>();
+}
+
 Json shortcut(const Json &value, const Json &fallback) {
     if (!value.is_object()) return fallback;
     const Json *key = member(value, "key");
-    const Json *modifiers = member(value, "modifiers");
-    if (!key || !key->is_string() || !modifiers || !modifiers->is_number_integer()) return fallback;
+    if (!key || !key->is_string()) return fallback;
     std::string text = key->get<std::string>();
-    if (text.empty() || text.size() > 64) return fallback;
-    Json out{{"key", text}, {"modifiers", modifiers->get<uint64_t>()}};
-    if (const Json *disabled = member(value, "disabled"); disabled && booleanOr(*disabled, false)) {
-        out["disabled"] = true;
+    if (text.size() > 64) return fallback;
+    // modifiers 是 NSEvent 位标志或 Windows 修饰键掩码；负数与超范围不写回。
+    uint64_t mask = 0;
+    if (const Json *modifiers = member(value, "modifiers")) {
+        if (!modifiers->is_number_integer()) return fallback;
+        int64_t raw = integerOr(*modifiers, 0);
+        if (raw < 0 || raw > 0xFFFFFFFFll) return fallback;
+        mask = static_cast<uint64_t>(raw);
     }
+    bool disabled = false;
+    if (const Json *flag = member(value, "disabled")) disabled = booleanOr(*flag, false);
+    // 用户「清除快捷键」写的是空 key ＋ disabled：这是合法状态，不能回退成默认绑定。
+    if (text.empty() && !disabled) return fallback;
+    Json out{{"key", text}, {"modifiers", mask}};
+    if (disabled) out["disabled"] = true;
     return out;
 }
 
 int clampInt(const Json &value, int fallback, int low, int high) {
-    if (!value.is_number_integer()) return fallback;
-    int number = value.get<int>();
+    int64_t number = integerOr(value, fallback);
     if (number < low) return low;
     if (number > high) return high;
-    return number;
+    return static_cast<int>(number);
 }
 
 // 形如 YYYY-MM；不合形状一律清空，避免设置页显示无意义的月份。
@@ -158,8 +178,10 @@ Json themeObjects(const Json &value) {
 
 }  // namespace
 
-extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char **out,
-                                         size_t *out_len, int32_t *migrated) {
+namespace {
+
+int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
+                          size_t *out_len, int32_t *migrated) {
     if (!out || !out_len || (!raw && raw_len != 0)) return 1;
     *out = nullptr;
     *out_len = 0;
@@ -179,9 +201,9 @@ extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char *
     // 缺 schemaVersion 视为 schema 1（与两端历史行为一致）：新安装写盘时
     // 两步都会写 2，缺这个字段的就是旧文件。
     int schema = 1;
-    if (const Json *value = member(input, "schemaVersion"); value && value->is_number_integer()) {
-        schema = value->get<int>();
-        if (schema < 1) schema = 1;
+    if (const Json *value = member(input, "schemaVersion")) {
+        int64_t declared = integerOr(*value, 1);
+        schema = declared < 1 ? 1 : static_cast<int>(declared > 1000 ? 1000 : declared);
     }
 
     // 类型不对一律回到默认值，不让一份坏字段把整份设置打成默认。
@@ -227,6 +249,8 @@ extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char *
         canonical["candidateFontSize"] = clampInt(*value, 14, 12, 16);
     }
     if (const Json *value = member(input, "appDefaultEnglish")) {
+        // 缺这个键与「用户把列表清空」不是同一件事：缺键时下面不写这个键，
+        // 交给平台补自己的出厂清单；空数组原样保留，不复活已删应用。
         canonical["appDefaultEnglish"] = appEntries(*value);
     }
     if (const Json *value = member(input, "preferredMode"); value && value->is_string()) {
@@ -238,10 +262,10 @@ extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char *
     if (const Json *value = member(input, "volcengineUsageMonth")) {
         canonical["volcengineUsageMonth"] = monthOrEmpty(*value);
     }
-    if (const Json *value = member(input, "volcengineUsageCharacters");
-        value && value->is_number_integer()) {
-        int characters = value->get<int>();
-        canonical["volcengineUsageCharacters"] = characters < 0 ? 0 : characters;
+    if (const Json *value = member(input, "volcengineUsageCharacters"); value) {
+        int64_t characters = integerOr(*value, 0);
+        canonical["volcengineUsageCharacters"] =
+            characters < 0 ? 0 : static_cast<int>(characters > 2147483647ll ? 2147483647ll : characters);
     }
 
     // 迁移（2026-11-06 裁决）：schema 1 的本地模型后端一律关闭学习翻译，
@@ -263,7 +287,8 @@ extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char *
         }
         bool enabled = backend == "volcengine" ? (storedKnown ? storedEnabled : true) : false;
         canonical["learningTranslationEnabled"] = enabled;
-        // migrated 只在结果真的变了时置 1：缺 schemaVersion 的普通文件不算迁移。
+        // 显式声明旧版本、带遗留后端键、或开关值与旧读法不同，都算迁移；
+        // 缺 schemaVersion 且值等价的普通文件不算，避免每次读都报迁移。
         bool declared = false;
         if (const Json *value = member(input, "schemaVersion"); value && value->is_number_integer()) {
             declared = true;
@@ -286,6 +311,21 @@ extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char *
     *out = buffer;
     *out_len = text.size();
     return 0;
+}
+
+}  // namespace
+
+extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char **out,
+                                         size_t *out_len, int32_t *migrated) {
+    // C++ 异常不能跨 C ABI：归一化内部任何抛出都在这里转成返回码。
+    try {
+        return settingsNormalize(raw, raw_len, out, out_len, migrated);
+    } catch (...) {
+        if (out) *out = nullptr;
+        if (out_len) *out_len = 0;
+        if (migrated) *migrated = 0;
+        return 5;
+    }
 }
 
 extern "C" void gc_contract_free(void *buffer) {
