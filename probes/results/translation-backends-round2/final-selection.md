@@ -147,5 +147,6 @@ small100 的代表性错误放行（全部通过加固层进入候选）：`Goga
 | `probes/benchmark-translation-backends.py` | 驱动：套件解析、数量断言、长度分桶、失败等待记录 |
 | `scripts/summarize-translation-backends.py` | 汇总：多运行合并、真实延迟门槛、四类结果统计、审阅覆盖（schema v2） |
 | `scripts/validate-translation-eval.py` | 评测管线回归断言（7 项，接入 verify fast） |
-| `scripts/assemble-translation-review.py` | 审阅文件合并工具 |
 | `scripts/make-translation-blind-comparison.py` | 盲测材料生成（产品视图，模型名盲化） |
+
+审阅文件合并工具 `scripts/assemble-translation-review.py` 是一次性脚本，本轮合并结果已在上表入库，脚本于 2026-11-07 随外围收敛删除。
