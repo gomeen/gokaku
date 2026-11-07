@@ -27,6 +27,11 @@
  *
  * 附加只读接口（不改动任何已有结构布局与函数签名，旧加载方不受影响）：
  * gc_normal_copy_raw —— 取当前组合的原始编码，供平台存草稿与恢复。
+ *
+ * 契约接口（同样为附加项，不升 ABI 版本）：gc_settings_normalize 与
+ * gc_contract_free。它们不依赖会话、不碰平台框架，两端读同一份
+ * settings.json 时得到同一个规范化结果；解析、默认值、迁移与范围钳制
+ * 只有这一份实现。
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -462,6 +467,29 @@ GOGAKU_CORE_EXPORT void gc_learning_session_destroy(GcLearningSession *session);
 GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
                                           const GcLearningEvent *event,
                                           GcLearningSnapshot **out);
+
+/* ── 设置契约 ────────────────────────────────────────────────
+ * 读侧规范化：平台各自的 settings.json 读取都经这里，得到同一份 schema 2
+ * 规范对象，再各自按自己的类型模型解码。写侧仍由平台合并写回，未知字段
+ * 原样保留，不因读侧规范化丢数据。
+ *
+ * 规范化规则（由 tests/settings_contract_test.cpp 的向量冻结）：
+ * - 缺失或类型不对的字段回落到默认值；候选字号钳制到 12..16。
+ * - appDefaultEnglish 的旧形状（字符串数组）升级为 [{id,enabled}]。
+ * - schemaVersion < 2：按 learningTranslationBackend 迁移学习翻译开关，
+ *   并删除该遗留字段；已启用火山保留启用，其余一律关闭。
+ * - 未知字段原样保留；未来版本（schemaVersion > 2）按已知字段读取并输出 2。
+ */
+#define GC_SETTINGS_SCHEMA_VERSION 2
+
+/* raw/raw_len 为磁盘原始字节；raw 为 NULL 且 raw_len==0 时按空对象规范化。
+ * 成功时 *out 为库内分配的 NUL 结尾 UTF-8 规范 JSON，用 gc_contract_free 释放。
+ * migrated 可为 NULL；非 NULL 时写入 1 表示发生了 schema 迁移。
+ * 返回 0 成功；1 参数错误；2 不是 JSON 对象（含空缓冲以外的畸形输入）。 */
+GOGAKU_CORE_EXPORT int32_t gc_settings_normalize(const char *raw, size_t raw_len,
+                                                 char **out, size_t *out_len,
+                                                 int32_t *migrated);
+GOGAKU_CORE_EXPORT void gc_contract_free(void *buffer);
 
 #ifdef __cplusplus
 }

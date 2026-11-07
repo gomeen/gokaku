@@ -230,8 +230,10 @@ public final class SettingsStore {
     /// 旧文件没有新增字段时，把其解码默认值也纳入比较基线；否则未修改的
     /// 空主题列表会被误判成用户修改，覆盖另一个进程刚写入的主题。
     static func normalizedBaseline(_ object: [String: Any]) -> [String: Any] {
+        // 基线也要过共享核心：否则一份 schema 1 文件会在合并基线里保留已迁移前的开关。
         guard let data = try? JSONSerialization.data(withJSONObject: object),
-              let settings = try? JSONDecoder().decode(Settings.self, from: data),
+              let canonical = Settings.normalize(data),
+              let settings = try? JSONDecoder().decode(Settings.self, from: canonical),
               let normalized = try? dictionary(of: settings) else { return object }
         return normalized
     }

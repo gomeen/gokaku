@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import CGogakuCore
 
 /// 可配置快捷键的规范绑定。
 /// - `key` 是规范键标识（小写字母、数字、`f1`…`f19`、`return`、标点等），
@@ -196,10 +197,7 @@ public let defaultEnglishApps = [
     "dev.warp.Warp-Stable", "com.cmux.cmux", "app.otter.otty",
 ]
 
-/// 仅用于迁移读取：旧 `settings.json` 的本地模型后端字段已不再写入。
-private struct LegacyTranslationBackend: Decodable {
-    let learningTranslationBackend: String?
-}
+/// 旧 `settings.json` 的本地模型后端字段已在共享核心的迁移里消耗，Swift 侧不再读它。
 
 public struct Settings: Codable {
     public var recording = true
@@ -287,19 +285,11 @@ public struct Settings: Codable {
             appDefaultEnglish = try container.decodeIfPresent([EnglishAppEntry].self, forKey: .appDefaultEnglish)
                 ?? defaultEnglishApps.map { EnglishAppEntry(id: $0) }
         }
-        // 迁移（2026-11-06）：旧配置的本地模型后端（quickmt／small100 或缺省）
-        // 一律关闭学习翻译，避免升级后把输入发送到云端；原本已启用火山的
-        // 配置保留启用状态、凭据与用量。新安装默认关闭。
-        let schema = try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 1
-        let storedEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled)
-        if schema < 2 {
-            let legacyBackend = (try? LegacyTranslationBackend(from: decoder))?.learningTranslationBackend
-            learningTranslationEnabled = legacyBackend == "volcengine" ? (storedEnabled ?? true) : false
-            schemaVersion = 2
-        } else {
-            learningTranslationEnabled = storedEnabled ?? false
-            schemaVersion = max(2, schema)
-        }
+        // 迁移（2026-11-06）：schema 1 的本地模型后端一律关闭学习翻译。
+        // 规则已搬到共享核心（gc_settings_normalize），读盘前先规范化；这里
+        // 只把规范结果解成类型，不再自己判版本。
+        learningTranslationEnabled = try container.decodeIfPresent(Bool.self, forKey: .learningTranslationEnabled) ?? false
+        schemaVersion = max(2, try container.decodeIfPresent(Int.self, forKey: .schemaVersion) ?? 2)
         preferredMode = InputMode(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredMode) ?? "") ?? .normal
         preferredDirection = Direction(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredDirection) ?? "") ?? .zhToEn
         volcengineUsageMonth = try container.decodeIfPresent(String.self, forKey: .volcengineUsageMonth) ?? ""
@@ -323,8 +313,26 @@ public struct Settings: Codable {
     public static var chineseDirectory: URL { Paths.support.appendingPathComponent("chinese", isDirectory: true) }
     public static var customWordsPath: URL { Paths.support.appendingPathComponent("custom-words.tsv") }
 
+    /// 读盘前先过共享核心的读侧规范化：默认值、类型鉗制、schema 迁移只有
+    /// 一份实现（`native/GogakuCore/settings_contract.cpp`）。规范化失败时
+    /// 按无配置处理，与之前的解码失败一致。
+    public static func normalize(_ data: Data) -> Data? {
+        var buffer: UnsafeMutablePointer<CChar>?
+        var length = 0
+        var migrated: Int32 = 0
+        let code = data.withUnsafeBytes { raw -> Int32 in
+            guard let base = raw.bindMemory(to: CChar.self).baseAddress else { return 2 }
+            return gc_settings_normalize(base, raw.count, &buffer, &length, &migrated)
+        }
+        guard code == 0, let output = buffer else { return nil }
+        defer { gc_contract_free(output) }
+        return Data(bytes: output, count: length)
+    }
+
     public static func load(at directory: URL = Paths.support) -> Settings {
-        guard let data = try? Data(contentsOf: directory.appendingPathComponent("settings.json")), let value = try? JSONDecoder().decode(Settings.self, from: data) else { return Settings() }
+        guard let data = try? Data(contentsOf: directory.appendingPathComponent("settings.json")),
+              let canonical = normalize(data),
+              let value = try? JSONDecoder().decode(Settings.self, from: canonical) else { return Settings() }
         return value
     }
 

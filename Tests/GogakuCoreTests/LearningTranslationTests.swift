@@ -47,6 +47,13 @@ final class LearningTranslationTests: XCTestCase {
 
     // MARK: 设置迁移（旧本地模型默认关闭云翻译；已启用火山的保留）
 
+    /// 迁移规则现在住在共享核心（`gc_settings_normalize`），所以这里走真实读盘路径：
+    /// 写 settings.json → Settings.load → 规范化 → 解码。
+    private func load(_ json: String) throws -> Settings {
+        try Data(json.utf8).write(to: root.appendingPathComponent("settings.json"))
+        return Settings.load(at: root)
+    }
+
     func testNewSettingsDefaultOff() {
         let defaults = Settings()
         XCTAssertFalse(defaults.learningTranslationEnabled)
@@ -54,7 +61,7 @@ final class LearningTranslationTests: XCTestCase {
     }
 
     func testEmptyLegacyConfigMigratesToOff() throws {
-        let decoded = try JSONDecoder().decode(Settings.self, from: Data("{}".utf8))
+        let decoded = try load("{}")
         XCTAssertFalse(decoded.learningTranslationEnabled)
         XCTAssertEqual(decoded.schemaVersion, 2)
     }
@@ -62,7 +69,7 @@ final class LearningTranslationTests: XCTestCase {
     func testLegacyLocalBackendMigratesToOff() throws {
         for backend in ["quickmt", "small100"] {
             let json = #"{"learningTranslationEnabled": true, "learningTranslationBackend": "\#(backend)"}"#
-            let decoded = try JSONDecoder().decode(Settings.self, from: Data(json.utf8))
+            let decoded = try load(json)
             XCTAssertFalse(decoded.learningTranslationEnabled, backend)
             XCTAssertEqual(decoded.schemaVersion, 2)
         }
@@ -72,7 +79,7 @@ final class LearningTranslationTests: XCTestCase {
         let credentials = VolcengineCredentials(accessKeyId: "AK", secretAccessKey: "SK")
         try credentials.save(at: root.appendingPathComponent("volcengine-credentials.json"))
         let json = #"{"learningTranslationEnabled": true, "learningTranslationBackend": "volcengine", "volcengineUsageMonth": "2026-11", "volcengineUsageCharacters": 42}"#
-        let decoded = try JSONDecoder().decode(Settings.self, from: Data(json.utf8))
+        let decoded = try load(json)
         XCTAssertTrue(decoded.learningTranslationEnabled)
         XCTAssertEqual(decoded.volcengineUsageMonth, "2026-11")
         XCTAssertEqual(decoded.volcengineUsageCharacters, 42)
@@ -81,7 +88,7 @@ final class LearningTranslationTests: XCTestCase {
 
     func testLegacyVolcengineDisabledStaysDisabled() throws {
         let json = #"{"learningTranslationEnabled": false, "learningTranslationBackend": "volcengine"}"#
-        let decoded = try JSONDecoder().decode(Settings.self, from: Data(json.utf8))
+        let decoded = try load(json)
         XCTAssertFalse(decoded.learningTranslationEnabled)
     }
 

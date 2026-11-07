@@ -66,6 +66,10 @@
 
 前置动作：先入库一组两端共跑的对拍向量（同一份输入与期望结论），再动第一行。没有向量的抽取不开始。当前端内两份实现（`Sources/GogakuCore/UpdateContract.swift` 与 `native/GogakuWindows/update.cpp` 等）保持原状，不在此轮一边抽取一边加特性。
 
+**进度（2026-11-07）**：第 1 行的共享实现与向量已落地（`native/GogakuCore/settings_contract.cpp` 与 `tests/settings_contract_test.cpp`，ABI 新增 `gc_settings_normalize`／`gc_contract_free`），Mac 读盘与设置合并基线已切换，Swift 侧的 schema 迁移分支已删除。Windows 的 `platform.cpp` 仍用自己的默认值合并与迁移，需接线并在 Windows VM 重新验证后删除；未完成前不得当作双端已统一。第 2 到 4 行未开始。
+
+设计上的两个取舍：出厂默认值只看两端语义相同的字段，按应用默认英文的应用清单由平台在空列表上自行补（平台身份允许差异）；未来版本（`schemaVersion` > 2）按已知字段读取并输出 2，未知字段原样保留，避免降级时丢数据。
+
 ### 学习提交协调
 
 计划将 Mac 控制器中剩余的学习提交协调抽为共享模块，统一预译缓存、等待期间按键缓冲、失败恢复、取消、焦点代次及一次提交规则。**当前状态：预译缓存、翻译调度合同与一次提交在共享核心／薄封装；等待期间按键缓冲仍在 Mac `InputController`，Windows 尚无对应实现。** 这是 P1 的剩余项，不作为已完成宣称。
