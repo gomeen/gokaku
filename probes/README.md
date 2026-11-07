@@ -272,3 +272,12 @@ python3 scripts/summarize-translation-strategy.py \
 边界：`translation_strategy.py` 与驱动只在隔离辅助进程里编排，不接入生产 C ABI、不改设置与输入行为。驱动校验封板哈希，策略文件改动后必须重新封板并重跑，不能沿用旧验收。汇总要求每条放行译文都有语义标注（缺一即 `blocked`），并把回退、错误放行、分路径与超预算记录分开统计。
 
 
+
+## 已删除的一次性探针（2026-11-07）
+
+外围收敛删除了六个已退役后端探针与三个一次性脚本，结果仍在 `probes/results/` 保留为历史证据，不再有可用的驱动：
+
+- 后端探针：`baidu-probe.py`、`deepseek-api-probe.py`、`minimax-api-probe.py`、`niutrans-probe.py`、`zhipu-api-probe.py`、`siliconflow-api-probe.py`。产品已裁决学习翻译只保留火山 NMT，这些探针对应 `probes/results/{deepseek-api,minimax-api,niutrans,zhipu-api,siliconflow-api}` 的历史数据。
+- 脚本：`scripts/mouse-click.swift`、`scripts/assemble-translation-review.py`、`scripts/validate-hardening-demo.py`。
+
+保留的 `volcengine-translate-probe.py` 是现役后端的签名参照。
