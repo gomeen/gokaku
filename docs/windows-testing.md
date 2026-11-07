@@ -1,6 +1,6 @@
 # Windows 开发测试安装包
 
-当前构建：`0.1.1-dev.2`，构建 `91`，dev 通道。支持 Windows 11 x64，安装包同时包含 64 位和 32 位 TSF；Windows ARM64 和 Windows 10 不在本轮支持范围。
+本页描述的安装包：`0.1.1-dev.2`，构建 `91`，dev 通道（当前工作区为构建 92，尚未重新构包，安装步骤不变）。支持 Windows 11 x64，安装包同时包含 64 位和 32 位 TSF；Windows ARM64 和 Windows 10 不在本轮支持范围。
 
 这是标准 Inno Setup 安装向导 EXE，双击安装，不需要运行脚本或预装 Python、GCC、Visual Studio。可交付文件的路径、大小与 SHA-256 以[构包报告](validation/windows-setup-build.json)为准。
 

@@ -4,7 +4,7 @@
 
 ## 后续采用决定
 
-后续已明确保留CTranslate2独立进程工程路线，但**拒绝将本页OPUS/M2M100作为默认翻译模型**；完整离线学习产品不通过。后续链路：第一轮 small100 门槛 → [统一后端复测](research-translation-model-unblock.md)（small100 优先、quickmt 对照）→ [第二轮评测](../probes/results/translation-backends-round2/final-selection.md) → [组合策略首轮验收](../probes/results/translation-strategy-final/report.md)（2026-11-04，未通过 95% 门槛，学习模式继续关闭）。详见[技术选型决定](input-selection-decision.md)。本页保留原始翻译事实和当时建议，不代表继续无限扩展模型比较。
+后续曾保留 CTranslate2 独立进程工程路线，该路线已于 2026-11-06 裁决退出产品链路，学习翻译只保留用户配置的火山 NMT。本页仍拒绝将 OPUS／M2M100 作为默认翻译模型，完整离线学习产品不通过。当时的后续链路：第一轮 small100 门槛 → [统一后端复测](research-translation-model-unblock.md)（small100 优先、quickmt 对照）→ [第二轮评测](../probes/results/translation-backends-round2/final-selection.md) → [组合策略首轮验收](../probes/results/translation-strategy-final/report.md)（2026-11-04，未通过 95% 门槛，学习模式继续关闭）。详见[技术选型决定](input-selection-decision.md)。本页保留原始翻译事实和当时建议，不代表继续无限扩展模型比较。
 
 ## 结论
 

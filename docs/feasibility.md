@@ -1,6 +1,6 @@
 # macOS 输入与离线能力验证
 
-目标是在真实 macOS 环境核实 Gogaku 的可行性，首阶段包含小鹤双拼、中英双向学习输入、选词即上屏和用户英语错误提示。本页主要记录首轮源码核查、核心单元测试和隔离 API 探针。后续已完成[真实离线翻译实验](translation-benchmark.md)与[五套小鹤配置的候选／逐键核心实测](input-engine-benchmark.md)。候选持续扩展，libpinyin、SunPinyin、Google 开放拼音及不同前端的接口核查见[其他路线](research-ime-alternatives.md)。尚未安装或启用 Gogaku 输入法，也没有改动用户现有输入法配置。
+目标是在真实 macOS 环境核实 Gogaku 的可行性，首阶段包含小鹤双拼、中英双向学习输入、选词即上屏和用户英语错误提示。本页主要记录首轮源码核查、核心单元测试和隔离 API 探针。后续已完成[真实离线翻译实验](translation-benchmark.md)与[五套小鹤配置的候选／逐键核心实测](input-engine-benchmark.md)。候选持续扩展，libpinyin、SunPinyin、Google 开放拼音及不同前端的接口核查见[其他路线](research-ime-alternatives.md)。本文写作时尚未安装或启用 Gogaku 输入法，也未改动用户现有输入法配置。当前安装与启用状态以[原生开发验收](validation/native-development.md)为准；后续已授权当前用户手动启用 Mac 开发版输入源，仍不改动其他输入法配置。
 
 ## 结论
 

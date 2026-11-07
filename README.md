@@ -46,6 +46,9 @@
 
 - [开发版使用说明](docs/native-development.md)：构建、pkg 安装、手动启用、火山翻译配置、检查更新、恢复和卸载。
 - [版本与构建管理](docs/versioning.md)：version.json 单一版本来源、构建身份、阶段规则与拒绝路径。
+- [发布与构包](docs/release.md)：日常 fast 档、release 与 host 验证、双端构包、publish-release 与 Draft 发布步骤。
+- [Windows 安装说明](docs/windows-testing.md)：Setup.exe 安装、启用输入法、限定验证边界。
+- [主题与皮肤规格](docs/skin-themes.md)：四套内置主题、单／双色、主题包格式与预览几何。
 - [变更记录](../CHANGELOG.md)：各版本变更摘要。
 - [工程化检查](docs/validation/engineering-readiness.md)：交付链路六项检查、整改与发布阻塞分列。
 - [双端功能对照](docs/feature-parity.md)：逐项实现／验证状态、平台差异与本轮缺口。
@@ -67,6 +70,7 @@
 - [翻译实验方案](docs/translation-benchmark-plan.md)：真实模型测试的样例、计时范围与判定条件。
 - [翻译后端统一实测决定](probes/results/translation-backends/decision.md)（历史）：small100 与 quickmt 的模型层／IPC／加固层性能与质量门槛；本地模型已退出产品链路。
 - [协作说明](AGENTS.md)：后续开发与文档维护的约定。
+- [Windows 实现调研](docs/research/windows-implementation-research.md)（历史，未完成）：安装向导／设置应用／翻译部署的 C 线结论已并入[发布与构包](docs/release.md)，TSF 注册对照的 A、B 线未写完。
 
 ## 许可
 
