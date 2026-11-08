@@ -1,5 +1,0 @@
-WARNING: Logging before InitGoogleLogging() is written to STDERR
-I20261030 14:58:38.300051 0x7ff85a51dd00 modules.cc:96] registering components from module 'lua'.
-I20261030 14:58:38.304439 0x7ff85a51dd00 modules.cc:87] rime.lua info: rime.lua should be either in the rime user data directory or in the rime shared data directory
-WARNING: Logging before InitGoogleLogging() is written to STDERR
-I20261030 14:58:38.307495 0x7ff85a51dd00 grammar_module.cc:15] registering components from module 'grammar'.

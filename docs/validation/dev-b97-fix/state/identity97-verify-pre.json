@@ -1,0 +1,25 @@
+{
+  "agentManifestSha256": "fa3b62473522ac00d8d626944f61c3b4a56d87b0e3b764ace99a23c65d9cf60c",
+  "agents": [
+    {
+      "pid": 8440,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuAgent.exe",
+      "sha256": "7bc1a85a7f9739efdb0d7ebd77a5fe67c2534841475c0fbe3709f30e79ab7d17"
+    }
+  ],
+  "previousRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b96-dev",
+  "correct": false,
+  "hashMatch": false,
+  "ok": false,
+  "pathMatch": false,
+  "pathLengths": [
+    92,
+    92
+  ],
+  "rootLength": 68,
+  "pipePresent": true,
+  "manifestKey": "bin/x64/GogakuAgent.exe",
+  "tsfPeTimestamp": 1794122451,
+  "single": true,
+  "activeRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b97-dev"
+}

@@ -2,6 +2,8 @@
 
 Windows 开发测试安装包已打通本机构包链，用户双击 EXE 安装即可；安装与启用见[Windows 使用说明](windows-testing.md)，编译／组件哈希见[构包报告](validation/windows-setup-build.json)。用户后续授权在已安装的 Windows VM 中排查普通输入、候选窗、设置与图标，限定结果见[原生验收记录](validation/native-development.md)；构包流程仍不要求 VM，以下本机安装与宿主操作指 macOS。
 
+当前 dev b94 已重建双端包并通过 fast；Windows 在旧 DLL 保持加载时完成默认升级，双架构冷／暖启动和七页设置回归通过，详见 [b94 记录](validation/dev-b94.json)。Mac b94 本轮未安装；Mac PKG 实装、安装后检查与 14 项 IMK 冒烟仍属于 [b93 历史记录](validation/dev-b93.json)。完整宿主与升级失败恢复／卸载矩阵尚未验收。
+
 这是首阶段实施中的本机开发版，完整产品尚未通过。已验证能力与待验收矩阵见[验收记录](validation/native-development.md)，产品行为以[产品方向](product.md)为准。
 
 ## 构建与检查
@@ -11,7 +13,7 @@ Windows 开发测试安装包已打通本机构包链，用户双击 EXE 安装�
 ```sh
 python3 scripts/prepare-dependencies.py --jobs 2
 python3 scripts/build.py
-DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -j 2
+DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -j 2 --package-path macos
 ```
 
 若默认 Command Line Tools 缺少 XCTest，使用上面的单次 `DEVELOPER_DIR`，无需改全局 `xcode-select`。构建脚本在已有 `/Applications/Xcode.app` 时也使用该目录。测试与交付构建同为 **Release 配置**；Debug 测试结果不作为验收证据。
@@ -22,16 +24,16 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -
 
 | 场景 | 命令 | 耗时 | 内容 |
 | --- | --- | --- | --- |
-| 平时开发（每轮改动） | `python3 scripts/verify.py --profile fast` | 约 2 分钟 | 关键测试：核心 ctest＋Release Swift＋版本＋资源 |
-| 核心／内存敏感改动后（可选） | `python3 scripts/verify.py --profile release --only asan-ubsan --quick` | 约 4 分钟 | ASan/UBSan 2000 序列冒烟（注明不满足十万门槛） |
-| 发版本／交付 rc／定版／疑难排查 | `python3 scripts/verify.py --profile release` | 约 2.5 小时 | 全量：干净构建＋包检查＋质量＋渲染＋数据可靠性＋十万序列插桩＋安装预检；**后台运行，不阻塞迭代** |
+| 平时开发(每轮改动) | `python3 scripts/verify.py --profile fast` | 约 2 分钟 | 关键测试：核心 ctest＋Release Swift＋版本／资源＋通用翻译数据＋验证／交付门禁负例 |
+| 核心/内存敏感改动后(可选) | `python3 scripts/verify.py --profile release --only asan-ubsan --quick` | 约 4 分钟 | ASan／UBSan 2000 序列冒烟（单项报告，不满足十万门槛） |
+| 发版本/交付 rc/定版/疑难排查 | `python3 scripts/verify.py --profile release` | 约 2.5 小时 | 全量：fast 内容＋干净构建＋包检查＋质量＋渲染＋数据可靠性＋十万序列插桩；安装预检可选;**后台运行,不阻塞迭代** |
 | 真实宿主／性能／稳定性 | `python3 scripts/verify.py --profile host --yes` | 数小时 | 两轮宿主矩阵、Orca Shift 专项、万次性能、两小时稳定性；仅用户空闲时段执行 |
 
-约定：全量档只在「要对外提供安装包」或「出现难以定位的问题需要全面排查」时运行；开发阶段不允许为等待全量结果阻塞迭代（后台跑完再归档证据）。历史报告不自动代表当前源码通过，源码改变后按受影响范围补跑。
+约定:全量档只在「要对外提供安装包」或「出现难以定位的问题需要全面排查」时运行;开发阶段不允许为等待全量结果阻塞迭代(后台跑完再归档证据)。历史报告不自动代表当前源码通过。报告策略版本、必需检查清单、产品源码指纹和测试指纹都必须匹配；源码改变后按受影响范围补跑。`--only` 的缺项与 quick 插桩会使完整档位不通过，单项成功不能用作完整发布报告。host 探针目前仅支持 stable，dev 明确 blocked；GUI 人工证据须绑定当前源码和包，并覆盖七页×两尺寸×浅深截图矩阵；键盘与 VoiceOver 等交互仍需人工核对。宿主报告须覆盖完整计划及逐轮记录；性能须一万条原始样本重算达标。
 
 产物为 `dist/Gogaku.app` 与 `dist/Gogaku Settings.app`。输入源包含固定libime数据及重定位共享库，运行不需Homebrew或源码目录。依赖锁与许可在包内；ad-hoc签名只用于本机，不代表已公证或可公开分发。正式公开前仍须处理GPL／LGPL源码及重新链接义务。
 
-图标源头是 `assets/app-icon/`：`icon.svg`（应用图标，全出血暖纸底圆角方块＋炭黑「こ」＋红浊点，四角保持真透明、不烘焙阴影描边，与 Zakki 图标同一套视觉语法）和 `menu.svg`（输入源菜单用黑色圆角键帽，内部两笔为真正透明镂空）。`python3 scripts/make-icons.py` 生成 `AppIcon.icns`、预览 PNG 与一个 22×16pt 的纯矢量 `gogaku-menu.pdf`；应用图标各尺寸由 NSImage（`scripts/render-svg.swift`）从 SVG 直出并保留透明通道——qlmanage 生成的是 Finder 白底缩略图，会把透明边距压成不透明白色，导致 dock 图标外多一圈白框，已弃用。页面尺寸与青简一致，键帽几乎撑满页面，系统菜单里与 ABC、青简等输入源图标同宽同高；笔画用 even-odd 镂空而非白色填充，避免系统按模板染色后字形消失。`build.py` 和包检查都会渲染 PDF，断言页面为 22×16、墨迹撑满页面且内部存在透明笔画。重新安装会刷新注册元数据；若系统菜单仍缓存旧图，可在退出菜单后运行 `killall TextInputMenuAgent` 让它自动重建。
+图标源头是 `shared/branding/`：`icon.svg`（应用图标，全出血暖纸底圆角方块＋炭黑「こ」＋红浊点，四角保持真透明、不烘焙阴影描边，与 Zakki 图标同一套视觉语法）和 `menu.svg`（输入源菜单用黑色圆角键帽，内部两笔为真正透明镂空）。`python3 scripts/make-icons.py` 在 `macos/assets/app-icon/` 生成 `AppIcon.icns`、预览 PNG 与一个 22×16pt 的纯矢量 `gogaku-menu.pdf`；Windows 侧引用 `windows/assets/Gogaku.ico`。应用图标各尺寸由 NSImage（`scripts/render-svg.swift`）从 SVG 直出并保留透明通道——qlmanage 生成的是 Finder 白底缩略图，会把透明边距压成不透明白色，导致 dock 图标外多一圈白框，已弃用。页面尺寸与青简一致，键帽几乎撑满页面，系统菜单里与 ABC、青简等输入源图标同宽同高；笔画用 even-odd 镂空而非白色填充，避免系统按模板染色后字形消失。`build.py` 和包检查都会渲染 PDF，断言页面为 22×16、墨迹撑满页面且内部存在透明笔画。重新安装会刷新注册元数据；若系统菜单仍缓存旧图，可在退出菜单后运行 `killall TextInputMenuAgent` 让它自动重建。
 
 ## 安装和手动启用
 
@@ -55,6 +57,8 @@ open "$HOME/Applications/Gogaku Settings.app"
 ```sh
 python3 probes/validate-imk-host.py
 python3 probes/validate-imk-host.py --orca
+# dev 通道的限定 AppKit 冒烟；不会解除完整 host 档的 dev 限制
+python3 probes/validate-imk-host.py --channel dev --report local/imk-host-smoke-dev.json
 ```
 
 脚本短暂切换焦点和输入源，在新建 AppKit 窗口及专用 Orca 测试终端中仅输入合成文字，结束后恢复。Orca 部分直接核对 PTY 字节，报告写入 `docs/validation/imk-host-smoke.json`；不会向已有 agent 终端发送文字。已覆盖普通上屏、原文回车、Control＋空格、选区替换、连续按键与部分撤销场景，完整安全矩阵仍见[验收记录](validation/native-development.md)。
@@ -84,7 +88,7 @@ python3 probes/validate-imk-host.py --orca
 4. 学习模式下失败、超时、限流、认证错误或空结果都会保留可编辑输入并短暂提示；⌘Return 明确原文上屏。不会自动提交原文、不会自动切换语言。
 5. 「本机本月请求字符统计」只统计本机成功请求，不代表账户余额或官方免费额度。
 
-2026-11-06 起不再提供 Apple Translation、本地模型、CT2、SentencePiece、PyTorch、后端选择、beam 或模型准备／下载入口。旧 quickmt／small100 配置会在首次读取时迁移为关闭学习翻译，避免升级后自动上传；原本已启用火山的配置保留启用状态、凭据与用量。历史 Apple 语言资源与本地模型说明只保留在实施验收记录与 `probes/`，不是当前使用说明。
+2026-11-06 起不再提供 Apple Translation、本地模型、CT2、SentencePiece、PyTorch、后端选择、beam 或模型准备/下载入口。旧 quickmt/small100 配置会在首次读取时迁移为关闭学习翻译,避免升级后自动上传;原本已启用火山的配置保留启用状态、凭据与用量。旧 Apple／本地模型选型工具、结果和研究已退役，可从 Git 历史追溯；通用测试输入与当前产品探针继续保留。
 
 ### 检查更新
 

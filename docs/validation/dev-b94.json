@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "date": "2026-11-08",
+  "scope": "dev Windows cold-start and default-upgrade fixes; followed by failed expanded host acceptance",
+  "acceptanceStatus": "failed",
+  "expandedAcceptance": "dev-b94-acceptance.json",
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 94
+  },
+  "channel": "dev",
+  "sourceSha256": "d311b0712672c4ff0d7a77681cafac9b16358dc665a3edad87c566e8fc816db5",
+  "testSha256": "04ec8ea95f15b4bc51d159b0cbdf7cd9e57e4ad789501c2944c60d7655f039b6",
+  "dirty": true,
+  "packages": {
+    "macos": {
+      "path": "dist/Gogaku-0.1.1-dev.2-b94-dev.pkg",
+      "name": "Gogaku-0.1.1-dev.2-b94-dev.pkg",
+      "sha256": "d587368bd1c27c973bd922aec0e3d9733dc7f36138d2ff783523d973cd04961e",
+      "bytes": 49654079
+    },
+    "windows": {
+      "path": "dist/gogaku-win/Gogaku-0.1.1-dev.2-b94-dev-windows-x64-setup.exe",
+      "name": "Gogaku-0.1.1-dev.2-b94-dev-windows-x64-setup.exe",
+      "sha256": "93db5798767e05a865780f98d6d687cfc113b39d5fc994439ecf8b038a5f679d",
+      "bytes": 54525489
+    }
+  },
+  "fast": {
+    "report": "verify/report-fast-dev-b94.json",
+    "passed": true,
+    "checks": 7
+  },
+  "macos": {
+    "packageBuilt": true,
+    "thisBuildInstalled": false,
+    "previousInstalledEvidence": "dev-b93.json"
+  },
+  "windows": {
+    "installed": true,
+    "installation": "dev-b94/windows-installation.json",
+    "defaultUpgradeLog": "dev-b94/windows-default-upgrade.log",
+    "upgrade": {
+      "passed": true,
+      "installerExitCode": 0,
+      "customDirArgumentUsed": false,
+      "oldLoadedDllRemainedAlive": true,
+      "manifestFilesVerified": 71,
+      "autostartMigrationPassed": true,
+      "autostartPreferenceRestored": true,
+      "allUserFilesUnchangedBeforeTyping": true
+    },
+    "installRoot": "C:\\Program Files\\GogakuDev\\versions\\b93",
+    "payloadRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev",
+    "installRootNote": "b93 used a diagnostic custom installation root. b94 preserved that existing root without /DIR and created its own managed versions child.",
+    "beforeFix": "dev-b94/windows-b93-cold-baseline.json",
+    "coldStart": [
+      {
+        "arch": "x64",
+        "evidence": "dev-b94/windows-cold-x64-1.json",
+        "activationMilliseconds": 656,
+        "text": "你好"
+      },
+      {
+        "arch": "x64",
+        "evidence": "dev-b94/windows-cold-x64-2.json",
+        "activationMilliseconds": 734,
+        "text": "你好"
+      },
+      {
+        "arch": "x86",
+        "evidence": "dev-b94/windows-cold-x86-1.json",
+        "activationMilliseconds": 703,
+        "text": "你好"
+      },
+      {
+        "arch": "x86",
+        "evidence": "dev-b94/windows-cold-x86-2.json",
+        "activationMilliseconds": 750,
+        "text": "你好"
+      }
+    ],
+    "warmStart": [
+      {
+        "arch": "x64",
+        "evidence": "dev-b94/windows-warm-x64.json",
+        "activationMilliseconds": 15
+      },
+      {
+        "arch": "x86",
+        "evidence": "dev-b94/windows-warm-x86.json",
+        "activationMilliseconds": 0
+      }
+    ],
+    "settings": "dev-b94/windows-settings.json",
+    "sameBuildReinstallBlocked": "dev-b94/windows-same-build-blocked.json",
+    "sameBuildReinstallLog": "dev-b94/windows-same-build-blocked.log",
+    "testCleanup": "dev-b94/windows-test-cleanup.json",
+    "finalState": "dev-b94/windows-final-state.json",
+    "userDataNote": "All files unchanged immediately after upgrade; settings unchanged and all files retained after synthetic input. Chinese frequency model changed as expected after successful commits.",
+    "baselineHost": "Earlier checks used dedicated Win32 Edit in the logged-in VM session, x64 and x86. Subsequent expanded acceptance tested Notepad and Chrome, found repeated cross-field commits, and stopped; see expandedAcceptance. Windows Terminal/Electron remain untested."
+  },
+  "limits": [
+    "Cold activation waits for the broker handshake for up to 5000ms; this is separate from per-key candidate latency. Timeout cannot guarantee first-key takeover; no key capture/replay was added.",
+    "Versioned upgrade and previous registration/pointer recovery implemented. Registration-failure rollback matrix, complete uninstall and automatic retired-version cleanup not validated.",
+    "Healthy previous-broker compatibility implemented, but previous-broker lifetime handoff was not independently exercised in this final VM run.",
+    "Loaded older hosts can retain their older DLL until users save and reopen them. No user hosts were killed or files moved aside.",
+    "No full release/host, 100000-sequence sanitizer, performance/stability, actual cloud translation, online update or clean-machine installation acceptance in this run.",
+    "Mac b94 package built and checked, not installed in this Windows-fix run; Mac b93 host results remain historical."
+  ]
+}

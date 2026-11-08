@@ -78,7 +78,7 @@ def main() -> int:
            "HOME": str(Path.home()),
            "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer"}
     build = subprocess.run(["xcrun", "c++", "-std=gnu++20",
-                            f"-I{ROOT}/native/GogakuCore/include",
+                            f"-I{ROOT}/shared/GogakuCore/include",
                             str(src), "-L", str(ROOT / ".build/core"),
                             "-lgogaku_core", "-Wl,-rpath", str(ROOT / ".build/core"),
                             "-o", str(binary)], env=env, capture_output=True, text=True)

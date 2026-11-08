@@ -7,7 +7,7 @@
 # libime 源码应用 scripts/patches/libime-win-cross.patch（Boost iostreams
 # 条件化——MinGW GCC libstdc++ 保留 std::binary_function，无需 kenlm 补丁）。
 #
-# 核心（native/GogakuCore）从隔离副本构建：副本注入两项 Windows 兼容
+# 核心（shared/GogakuCore）从隔离副本构建：副本注入两项 Windows 兼容
 # 修正（见下），不触碰共享工作区（可能存在并行会话的未提交 WIP）。
 # 这两项修正待共享核心的活跃改动合入后应上游化进 git，本脚本的自检
 # （grep）会跳过已含修正的副本。
@@ -119,9 +119,9 @@ mkdir -p $WC/deps-root $WC/core-src
 ln -sfn $WC/deps/libime $WC/deps-root/source
 ln -sfn $WC/libime-build $WC/deps-root/build
 ln -sfn $WC/prefix $WC/deps-root/prefix
-rsync -a --delete $ROOT/native/GogakuCore/ $WC/core-src/ --exclude '*.o' --exclude 'bin'
+rsync -a --delete $ROOT/shared/GogakuCore/ $WC/core-src/ --exclude '*.o' --exclude 'bin'
 # 共享第三方向量要跟着核心走：core-src/../third_party 是 CMake 的 include 路径。
-rsync -a --delete $ROOT/native/third_party/ $WC/third_party/
+rsync -a --delete $ROOT/shared/third_party/ $WC/third_party/
 # 注入 1：fsync → _commit（MinGW；open/close/chmod 经 oldnames 可用）。
 python3 - "$WC/core-src" <<'PYEOF'
 import re, sys

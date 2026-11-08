@@ -104,17 +104,20 @@
 ## 五、发布流程
 
 ```sh
-# 1. 两端安装包和收据就绪后，运行相同通道的 fast、release 验证
+# 1. rc／定版：两端包和收据就绪后，运行相同通道的 fast、release、host
 python3 scripts/verify.py --profile fast --channel stable
 python3 scripts/verify.py --profile release --channel stable
+# 仅在用户空闲并授权后运行；当前 host 探针只支持 stable
+python3 scripts/verify.py --profile host --channel stable --yes
 
 # 2. 本地检查（不联网；实际报告文件名以 verify.py 输出为准）
 python3 scripts/publish-release.py --dry-run \
   --repo owner/gogaku-releases --channel stable \
   --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
   --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
-  --verification-report dist/verify/report-fast-YYYYMMDD-HHMMSS.json \
-  --verification-report dist/verify/report-release-YYYYMMDD-HHMMSS.json \
+  --verification-report docs/validation/verify/report-fast-YYYYMMDD-HHMMSS.json \
+  --verification-report docs/validation/verify/report-release-YYYYMMDD-HHMMSS.json \
+  --verification-report docs/validation/verify/report-host-YYYYMMDD-HHMMSS.json \
   --notes-file dist/update/notes.md
 
 # 3. 创建 Draft、上传 pkg／setup、生成并上传清单与签名
@@ -122,8 +125,9 @@ GITHUB_TOKEN=... python3 scripts/publish-release.py \
   --repo owner/gogaku-releases --channel stable \
   --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
   --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
-  --verification-report dist/verify/report-fast-YYYYMMDD-HHMMSS.json \
-  --verification-report dist/verify/report-release-YYYYMMDD-HHMMSS.json \
+  --verification-report docs/validation/verify/report-fast-YYYYMMDD-HHMMSS.json \
+  --verification-report docs/validation/verify/report-release-YYYYMMDD-HHMMSS.json \
+  --verification-report docs/validation/verify/report-host-YYYYMMDD-HHMMSS.json \
   --notes-file dist/update/notes.md \
   --key ~/Library/Application\ Support/Gogaku/update-signing/prod-private-key.txt \
   --key-id gogaku-prod-2026
@@ -136,7 +140,7 @@ GITHUB_TOKEN=... python3 scripts/publish-release.py \
 
 - 先上传安装包，取得 GitHub `asset id`；`scripts/make-update-manifest.py` 用真实 ID 生成清单，避免清单指向不存在的资产。
 - 上传顺序：pkg／setup → 本地 `asset-ids.json` → `update-manifest.json` → `.sig`。全部成功后仅写 `release-state.json`，必须另行人工审阅并指定同一 Draft ID 发布。
-- 发布脚本对缺失配置、私钥、许可材料、编译／打包收据或验证证据明确失败，不制作看似可更新的假发布。rc／定版需同时提供 fast 与 release 验证报告。
+- 发布脚本对缺失配置、私钥、许可材料、编译／打包收据或验证证据明确失败，不制作看似可更新的假发布。dev 至少 fast；rc／定版需 fast＋release＋host。报告必须匹配当前策略、必需检查清单、源码／测试指纹和双端安装包哈希，旧报告、缺项、跳过、单项或 quick ASan 报告不能放行。
 - 清单与签名生成后可用 `scripts/update-signing.swift verify` 独立复核。
 - 发布前递增 `version.json` 构建号；rc／定版要求工作区干净。
 
@@ -158,7 +162,7 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 下载／SHA-256／大小／缓存复用 | 已实现（本地文件） | `UpdateDownloader.swift`；测试覆盖复用、大小不符、哈希不符 |
 | 安装交接 | 已实现（`open` pkg） | 未在真实安装器上点过 |
 | 设置页更新窗口／自动检查 | 已实现 | `UpdateWindow.swift`；未做真实点击验收 |
-| Windows 客户端 | 已编译，尚未运行 | `native/GogakuWindows/update.cpp`；Monocypher Ed25519、WinHTTP、窗口与自动检查；真实链路由用户验证 |
+| Windows 客户端 | 已编译，尚未运行 | `windows/GogakuWindows/update.cpp`；Monocypher Ed25519、WinHTTP、窗口与自动检查；真实链路由用户验证 |
 | 真实 GitHub Releases E2E | 未验证 | 需要发布仓库、token、正式或开发公钥；本地无远端 |
 
 已做的协议回归不访问真实网络：使用注入传输模拟 GitHub API 与资产下载；签名用临时 Ed25519 密钥。**未完成真实链路前不得把在线更新标为已验收。**

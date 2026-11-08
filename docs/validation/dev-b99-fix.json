@@ -1,0 +1,114 @@
+{
+  "schema": 1,
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 99
+  },
+  "channel": "dev",
+  "recordedAt": "2026-11-08T09:25:48.134087+00:00",
+  "sourceSha256": "467d11698c19529abcee3ffa0f24f2de6599e1507ef244ba5badfb4915d82e6d",
+  "testSha256": "2d07182c801960c661da73f65a13cbd9ee3b38e414c9d79da4737317e0dc55f6",
+  "status": "pending-shift-tap-fix-verified-vscode-host-matrix-deferred",
+  "fullAcceptancePassed": false,
+  "change": {
+    "id": "pending-shift-tap",
+    "summary": "默认英文应用的恢复 Shift 点击若落在会话可用前（syncContext 失败）则挂起，下一次按键 600ms 内补发 SHIFT_CLICK；失焦即清除。修复 sink 已见到 Shift 键对但会话未就绪的丢失场景",
+    "scope": "窄场景修复：TIP 激活完成前到达的按键对仍无法捕获（TSF 激活时序固有窗口）"
+  },
+  "packages": [
+    {
+      "platform": "macos",
+      "artifact": {
+        "name": "Gogaku-0.1.1-dev.2-b99-dev.pkg",
+        "sha256": "443e28bce3aac19e572834b617a36bf536c9896e38230ad12f1514a91fecdc7a",
+        "bytes": 49653993
+      }
+    },
+    {
+      "platform": "windows",
+      "artifact": {
+        "name": "Gogaku-0.1.1-dev.2-b99-dev-windows-x64-setup.exe",
+        "sha256": "5e92c3f1ce09068aea2271533163c9aa7647433696db47f1b25f7ab66036592a",
+        "bytes": 54522121
+      }
+    }
+  ],
+  "installation": {
+    "evidence": "dev-b99-fix/install.json",
+    "defaultUpgradePassed": true,
+    "fileCount": 71,
+    "previousRoot": "0.1.1-dev.2-b98-dev"
+  },
+  "fast": {
+    "passed": true,
+    "evidence": "dev-b99-fix/build/report-fast-dev-b99.json"
+  },
+  "asanUbsanQuick": {
+    "passed": true,
+    "sequenceCount": 2000,
+    "fullReleaseGatePassed": false,
+    "evidence": "dev-b99-fix/build/report-asan-ubsan-quick-dev-b99.json"
+  },
+  "sanity": {
+    "evidence": [
+      "dev-b99-fix/cases/b99-matrix-chrome-focus-1.json",
+      "dev-b99-fix/cases/b99-matrix-chrome-password-1.json",
+      "dev-b99-fix/cases/b99-matrix-notepad-basic-1.json"
+    ],
+    "results": "Chrome 切框通过；密码 nihc 无候选；记事本「你好」且有候选。模块身份均为 b99（PE 1794128481）"
+  },
+  "vscodeFindings": {
+    "appDefaultEnglishConfigured": [
+      "code.exe",
+      "obsidian.exe",
+      "cursor.exe",
+      "zed.exe",
+      "windowsterminal.exe",
+      "warp.exe"
+    ],
+    "evidence": [
+      "dev-b99-fix/cases/b99-matrix-code-1.json",
+      "dev-b99-fix/cases/b99-matrix-code-ready-1.json",
+      "dev-b99-fix/cases/b99-matrix-code-settle-1.json"
+    ],
+    "observations": [
+      "默认英文应用在 VS Code 中按文档行为先处于临时英文，字母直通（nihc ）符合预期回退",
+      "激活后立即按下的恢复 Shift 点击可能落在 TIP 激活完成前而整对丢失；b99 挂起补发仅在 sink 已见到 Shift 键对时有效",
+      "GetForeground 轮询 14.3s 从未匹配 dev CLSID，不能作为就绪探针；3 秒稳定等待后按键全部进入窗口但编辑器缓冲为空（首启 UI 抢占编辑焦点，夹具目标状态问题）"
+    ],
+    "decision": "VS Code／Electron 类宿主矩阵记为受限项；Windows Terminal 未安装（wt.exe 不存在）同样受限。需要专用 VS Code 诊断（CDP／工作区隔离）另立轮次"
+  },
+  "finalState": {
+    "evidence": "dev-b99-fix/state/cleanup99.json",
+    "settingsUnchanged": true,
+    "allUserFilesRetained": true,
+    "autostartUnchanged": true,
+    "modelFrequencyChangedBySyntheticCommits": true,
+    "formalComRestored": true,
+    "temporaryTasksRemoved": true,
+    "securityKeptEnabled": true,
+    "agent": {
+      "pid": 4236,
+      "path": "b99\\bin\\x64\\GogakuAgent.exe"
+    }
+  },
+  "notCompleted": [
+    "Windows Terminal（未安装）与 VS Code／Electron 类宿主矩阵",
+    "真实 32 位应用矩阵",
+    "完整安装故障恢复／卸载",
+    "万次级延迟／长时稳定性",
+    "真实翻译／在线更新"
+  ],
+  "macosInstall": {
+    "evidence": "docs/validation/imk-host-smoke-dev.json",
+    "installedBuild": 99,
+    "smokeChecks": 14,
+    "smokePassed": 14,
+    "note": "重装后输入源注册需 manage-install.py --channel dev register 刷新，随后 14/14 一次通过"
+  },
+  "release": {
+    "status": "blocked-by-update-source-config",
+    "detail": "publish-release.py 收据／许可／报告校验通过后，被「随包更新源未配置」门禁拒绝（产品决策留空）。真实 Draft 需先决策 GitHub 仓库、配置更新源并重建安装包，再提供 GITHUB_TOKEN 与签名私钥",
+    "dryRunAttempted": true
+  }
+}

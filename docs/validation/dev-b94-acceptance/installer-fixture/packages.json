@@ -1,0 +1,416 @@
+{
+  "schema": 1,
+  "fixtureOnly": true,
+  "executedPayloadOrInstaller": false,
+  "template": "/Users/gomeen/code/gomeen/gogaku/windows/packaging/gogaku.iss.in",
+  "templateSha256": "10f6afdad1bcee5f13b5f91780065a43e3f347ccff5be36e3c4ab5abebb357d8",
+  "identity": {
+    "appId": "{B74D13D2-0952-4B54-B124-671170C7A294}",
+    "channel": "acceptance-b94",
+    "tsfClsid": "{B74D13D2-0952-4B54-B124-671170C7A295}",
+    "runValue": "GogakuAcceptanceB94Agent",
+    "mutex": "GogakuAcceptanceB94Settings",
+    "defaultDirName": "{autopf}\\GogakuAcceptanceB94",
+    "channelKey64": "HKLM\\Software\\Gogaku\\acceptance-b94",
+    "clsidKeyBothViews": "HKLM\\Software\\Classes\\CLSID\\{B74D13D2-0952-4B54-B124-671170C7A295}",
+    "uninstallKey64": "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{B74D13D2-0952-4B54-B124-671170C7A294}_is1"
+  },
+  "staticChecks": {
+    "x64": {
+      "arch": "x64",
+      "dll": true,
+      "sha256": "8dacf020c513ada580762ba0b7a2f78a201edb7b8096c2342b8b37eed9b61a73",
+      "bytes": 110983,
+      "imports": [
+        "ADVAPI32.dll",
+        "KERNEL32.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll",
+        "api-ms-win-crt-private-l1-1-0.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll",
+        "api-ms-win-crt-string-l1-1-0.dll"
+      ],
+      "exports": [
+        "DllRegisterServer",
+        "DllUnregisterServer"
+      ]
+    },
+    "x86": {
+      "arch": "x86",
+      "dll": true,
+      "sha256": "bd7bb7100fe1a0cc7551542f24a76dc3555d78e347fe2a92c27dadc09c20baf0",
+      "bytes": 101475,
+      "imports": [
+        "ADVAPI32.dll",
+        "KERNEL32.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll",
+        "api-ms-win-crt-private-l1-1-0.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll",
+        "api-ms-win-crt-string-l1-1-0.dll"
+      ],
+      "exports": [
+        "DllRegisterServer",
+        "DllUnregisterServer"
+      ]
+    },
+    "noop": {
+      "arch": "x64",
+      "dll": false,
+      "sha256": "df09eea07e0daa6342b0fed3e3a4c8f43be7d0e496dc2ae2bb8fd4ee0d9e51de",
+      "bytes": 147850,
+      "imports": [
+        "KERNEL32.dll",
+        "api-ms-win-crt-environment-l1-1-0.dll",
+        "api-ms-win-crt-heap-l1-1-0.dll",
+        "api-ms-win-crt-locale-l1-1-0.dll",
+        "api-ms-win-crt-math-l1-1-0.dll",
+        "api-ms-win-crt-private-l1-1-0.dll",
+        "api-ms-win-crt-runtime-l1-1-0.dll",
+        "api-ms-win-crt-stdio-l1-1-0.dll",
+        "api-ms-win-crt-string-l1-1-0.dll"
+      ],
+      "exports": []
+    }
+  },
+  "packages": {
+    "A": {
+      "path": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/A.exe",
+      "relativePath": "packages/A.exe",
+      "sha256": "7b58eb74016d092db38243e230198d726dedc2afdfaf87ca68a215340cd9d802",
+      "bytes": 2308480,
+      "version": "1.0.0",
+      "build": 1,
+      "channel": "acceptance-b94",
+      "expectedVersionRoot": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94",
+      "expectedInstallExit": 0,
+      "failureMarker": null,
+      "iss": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/scripts/A.iss",
+      "issSha256": "b8d570504a8e9fe5c2c0115bf07d8503a364e7420801d922731d73b2d65dedeb",
+      "payload": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/payloads/A",
+      "identitySha256": "805f64a0a656954a692e6a786ea2b6015db8605460f6a70bf191d685e1f85645",
+      "codeTransactionUnchanged": true,
+      "codeSha256": "3ee104e90fe943018988abd780961effed3a138f09f733a3d1c21225906ed851"
+    },
+    "B-success": {
+      "path": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/B-success.exe",
+      "relativePath": "packages/B-success.exe",
+      "sha256": "e5a2b30fbd52b8af961a1c835dec9dc11e3750efba528d4c57aefd52d15349c4",
+      "bytes": 2308491,
+      "version": "1.0.0",
+      "build": 2,
+      "channel": "acceptance-b94",
+      "expectedVersionRoot": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b2-acceptance-b94",
+      "expectedInstallExit": 0,
+      "failureMarker": null,
+      "iss": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/scripts/B-success.iss",
+      "issSha256": "914fe04426c01bc58fafd3b14fe759625afeb25f6577b4493a7f209c41dcf7f0",
+      "payload": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/payloads/B-success",
+      "identitySha256": "51660d0aec669bc283e6e78e1af193bdfe06c31fb1e16795e48127d3d91f8f18",
+      "codeTransactionUnchanged": true,
+      "codeSha256": "3ee104e90fe943018988abd780961effed3a138f09f733a3d1c21225906ed851"
+    },
+    "B-fail-x64": {
+      "path": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/B-fail-x64.exe",
+      "relativePath": "packages/B-fail-x64.exe",
+      "sha256": "f8d33db9f2c921aaa04eac614eb9d8e72dbb43419bc0b12b6fef06c395622021",
+      "bytes": 2308637,
+      "version": "1.0.0",
+      "build": 2,
+      "channel": "acceptance-b94",
+      "expectedVersionRoot": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b2-acceptance-b94",
+      "expectedInstallExit": "nonzero",
+      "failureMarker": "data/fail-register-x64.flag",
+      "iss": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/scripts/B-fail-x64.iss",
+      "issSha256": "c0f2de5afeaaf8954431073420d3d3d87deb5a2aa884306ab9c46880b38d4737",
+      "payload": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/payloads/B-fail-x64",
+      "identitySha256": "d64797a9a05e09e395cdefc220f2ee6b0e2527858895b6fc7a13e15386f22b33",
+      "codeTransactionUnchanged": true,
+      "codeSha256": "3ee104e90fe943018988abd780961effed3a138f09f733a3d1c21225906ed851"
+    },
+    "B-fail-x86": {
+      "path": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/B-fail-x86.exe",
+      "relativePath": "packages/B-fail-x86.exe",
+      "sha256": "17967129d753dcc78dbde2675aebbe37c3a41715fdc7d83c0cf0183443f65d1b",
+      "bytes": 2308639,
+      "version": "1.0.0",
+      "build": 2,
+      "channel": "acceptance-b94",
+      "expectedVersionRoot": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b2-acceptance-b94",
+      "expectedInstallExit": "nonzero",
+      "failureMarker": "data/fail-register-x86.flag",
+      "iss": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/scripts/B-fail-x86.iss",
+      "issSha256": "67e4f88460eb82b105b5d0edac72bc5ef1e16738b217791301b590b459f61d51",
+      "payload": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/payloads/B-fail-x86",
+      "identitySha256": "791dfd1ff64f3978c29d20e0b04d9bc0a4ce8c9a2d87e013c7b96a5abd650c7a",
+      "codeTransactionUnchanged": true,
+      "codeSha256": "3ee104e90fe943018988abd780961effed3a138f09f733a3d1c21225906ed851"
+    }
+  },
+  "tools": {
+    "wine": "/Users/gomeen/code/gomeen/gogaku/.build/win-tools/wine/Wine Stable.app/Contents/Resources/wine/bin/wine",
+    "iscc": "/Users/gomeen/code/gomeen/gogaku/.build/win-tools/inno/ISCC.exe",
+    "isccSha256": "f02fa0e5f237b47d7ed1edae9b991866ec94fe02af61eb6a73e94f92fe8e0604"
+  },
+  "runtimeLog": "%ProgramW6432%\\GogakuAcceptanceB94\\fixture-register.log",
+  "vmExecution": {
+    "platform": "Windows 11 x64, elevated administrator; runtime NOT executed by this generator",
+    "root_resolution": "Expand %ProgramW6432% on the target. Never infer a user-selected production install root.",
+    "preflight": [
+      "Refuse if either isolated CLSID registry view, isolated channel key, fixture AppId uninstall record, install directory, or isolated Run value already exists in any loaded user hive. Do not overwrite unknown state.",
+      "Read-only baseline: both production dev/stable COM and TSF registrations, pointers, uninstall keys, loaded-hive Run values and user-data file sets/hashes.",
+      "Keep startmenu/autostartagent tasks unselected and do not launch settings. The EXE stubs intentionally do not implement --set-autostart.",
+      "Create only an external scratch sentinel under %ProgramData%\\GogakuAcceptanceB94; retain it through uninstall as a control for data preservation."
+    ],
+    "common_assertions": [
+      "Wait for each process to terminate; read its ExitCode; record the full Inno /LOG output.",
+      "After each step compare both registry views of dev/stable CLSIDs, channel pointers, Run values and uninstall records against the read-only baseline.",
+      "User data directory names, file sets and SHA-256 values must equal baseline; do not launch any production Gogaku process.",
+      "Read fixture-register.log from the install root and assert ordered new event slices, including architecture, operation, HRESULT, injected flag and full module path.",
+      "Verify installed fixture files using the selected payload build-identity.json artifacts; fixture logs and installer bookkeeping are not payload artifacts."
+    ],
+    "sequence": [
+      {
+        "package": "A",
+        "file": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/A.exe",
+        "sha256": "7b58eb74016d092db38243e230198d726dedc2afdfaf87ca68a215340cd9d802",
+        "arguments": [
+          "/SP-",
+          "/VERYSILENT",
+          "/SUPPRESSMSGBOXES",
+          "/NORESTART",
+          "/TASKS=\"\"",
+          "/LOG=\"<absolute-unique-step-log>\""
+        ],
+        "override_dir": false,
+        "expect_exit": 0,
+        "active_root": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94",
+        "previous_root": "",
+        "assertions": [
+          "Both isolated InprocServer32 values equal A/bin/<arch>/GogakuTsf.dll; ThreadingModel=Apartment.",
+          "HKLM64 channel ActiveRoot=A, PreviousRoot exists as empty string; isolated uninstall record and unins000.exe exist.",
+          "No isolated Run value appears automatically. Snapshot A files and uninstall bookkeeping.",
+          "After assertion, seed only the isolated Run value in the operator loaded user hive with the exactly quoted A agent path; remember the SID."
+        ],
+        "expected_events": [
+          {
+            "arch": "x64",
+            "operation": "register",
+            "payload": "A",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x86",
+            "operation": "register",
+            "payload": "A",
+            "hr": "0x00000000",
+            "injected": false
+          }
+        ]
+      },
+      {
+        "package": "B-fail-x64",
+        "file": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/B-fail-x64.exe",
+        "sha256": "f8d33db9f2c921aaa04eac614eb9d8e72dbb43419bc0b12b6fef06c395622021",
+        "arguments": [
+          "/SP-",
+          "/VERYSILENT",
+          "/SUPPRESSMSGBOXES",
+          "/NORESTART",
+          "/TASKS=\"\"",
+          "/LOG=\"<absolute-unique-step-log>\""
+        ],
+        "override_dir": false,
+        "expect_exit": "nonzero",
+        "active_root": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94",
+        "previous_root": "",
+        "assertions": [
+          "First B/x64 register reports E_FAIL after its isolated InprocServer32 write.",
+          "No B/x86 register event; template still invokes B/x86 unregister followed by B/x64 unregister.",
+          "A x64/x86 restored successfully; pointers and seeded Run value exactly equal pre-attempt state.",
+          "All B payload files removed by rollback; empty directories may remain. A hashes and uninstall usability preserved."
+        ],
+        "expected_events": [
+          {
+            "arch": "x64",
+            "operation": "register",
+            "payload": "B",
+            "hr": "0x80004005",
+            "injected": true
+          },
+          {
+            "arch": "x86",
+            "operation": "unregister",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x64",
+            "operation": "unregister",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x64",
+            "operation": "register",
+            "payload": "A",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x86",
+            "operation": "register",
+            "payload": "A",
+            "hr": "0x00000000",
+            "injected": false
+          }
+        ]
+      },
+      {
+        "package": "B-fail-x86",
+        "file": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/B-fail-x86.exe",
+        "sha256": "17967129d753dcc78dbde2675aebbe37c3a41715fdc7d83c0cf0183443f65d1b",
+        "arguments": [
+          "/SP-",
+          "/VERYSILENT",
+          "/SUPPRESSMSGBOXES",
+          "/NORESTART",
+          "/TASKS=\"\"",
+          "/LOG=\"<absolute-unique-step-log>\""
+        ],
+        "override_dir": false,
+        "expect_exit": "nonzero",
+        "active_root": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94",
+        "previous_root": "",
+        "assertions": [
+          "B/x64 registration succeeds, B/x86 reports E_FAIL after writing its registration.",
+          "Both B registrations cleaned, both A registrations restored, pointers and seeded Run exactly preserved.",
+          "All B payload files removed by rollback; A artifact hashes unchanged."
+        ],
+        "expected_events": [
+          {
+            "arch": "x64",
+            "operation": "register",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x86",
+            "operation": "register",
+            "payload": "B",
+            "hr": "0x80004005",
+            "injected": true
+          },
+          {
+            "arch": "x86",
+            "operation": "unregister",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x64",
+            "operation": "unregister",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x64",
+            "operation": "register",
+            "payload": "A",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x86",
+            "operation": "register",
+            "payload": "A",
+            "hr": "0x00000000",
+            "injected": false
+          }
+        ]
+      },
+      {
+        "package": "B-success",
+        "file": "/Users/gomeen/code/gomeen/gogaku/local/windows-acceptance/installer-fixture/packages/B-success.exe",
+        "sha256": "e5a2b30fbd52b8af961a1c835dec9dc11e3750efba528d4c57aefd52d15349c4",
+        "arguments": [
+          "/SP-",
+          "/VERYSILENT",
+          "/SUPPRESSMSGBOXES",
+          "/NORESTART",
+          "/TASKS=\"\"",
+          "/LOG=\"<absolute-unique-step-log>\""
+        ],
+        "override_dir": false,
+        "expect_exit": 0,
+        "active_root": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b2-acceptance-b94",
+        "previous_root": "%ProgramW6432%\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94",
+        "assertions": [
+          "Both isolated COM views point to B; ActiveRoot=B and PreviousRoot=A.",
+          "Seeded loaded-user Run value migrated to exactly quoted B agent path; initially absent Run values in other hives remain absent.",
+          "No failure markers in B-success; B artifact hashes verified; A files retained."
+        ],
+        "expected_events": [
+          {
+            "arch": "x64",
+            "operation": "register",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x86",
+            "operation": "register",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          }
+        ]
+      },
+      {
+        "action": "uninstall",
+        "file": "%ProgramW6432%\\GogakuAcceptanceB94\\unins000.exe",
+        "arguments": [
+          "/VERYSILENT",
+          "/SUPPRESSMSGBOXES",
+          "/NORESTART",
+          "/LOG=\"<absolute-uninstall-log>\""
+        ],
+        "expect_exit": 0,
+        "expected_events": [
+          {
+            "arch": "x64",
+            "operation": "unregister",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          },
+          {
+            "arch": "x86",
+            "operation": "unregister",
+            "payload": "B",
+            "hr": "0x00000000",
+            "injected": false
+          }
+        ],
+        "assertions": [
+          "Both isolated CLSID keys absent; channel ActiveRoot/PreviousRoot absent (empty channel key allowed).",
+          "Seeded owned Run value absent; fixture uninstall record and all A/B installed payload files removed.",
+          "Scratch sentinel retained; production snapshots unchanged. Copy fixture-register.log out before optional cleanup of the isolated residual log/root."
+        ]
+      }
+    ],
+    "limitations": [
+      "These packages cover real Inno/regsvr32 rollback and successful uninstall with a controlled DLL, not TSF/CTF registration or keyboard input.",
+      "Unregister-failure and ACL/pointer-write-failure injections are not included in these four variants.",
+      "Failure occurs before pointer/Run migration; these two cases assert their preservation, not rollback after a partially completed migration.",
+      "Do not run B-success before failure cases: all B variants intentionally share the same installed version root."
+    ]
+  }
+}

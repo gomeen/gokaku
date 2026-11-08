@@ -1,0 +1,323 @@
+{
+  "schema": 1,
+  "date": "2026-11-08",
+  "scope": "Windows b94 real-host acceptance; stopped after repeated cross-field commit",
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 94
+  },
+  "channel": "dev",
+  "sourceSha256": "d311b0712672c4ff0d7a77681cafac9b16358dc665a3edad87c566e8fc816db5",
+  "testSha256": "04ec8ea95f15b4bc51d159b0cbdf7cd9e57e4ad789501c2944c60d7655f039b6",
+  "package": {
+    "path": "dist/gogaku-win/Gogaku-0.1.1-dev.2-b94-dev-windows-x64-setup.exe",
+    "name": "Gogaku-0.1.1-dev.2-b94-dev-windows-x64-setup.exe",
+    "sha256": "93db5798767e05a865780f98d6d687cfc113b39d5fc994439ecf8b038a5f679d",
+    "bytes": 54525489
+  },
+  "status": "failed",
+  "accepted": false,
+  "environment": {
+    "os": "Windows 11 x64 build 26300",
+    "notepad": "11.2607.14.0",
+    "chrome": "Google Chrome for Testing 157.0.8103.38, dedicated temporary profile",
+    "details": "dev-b94-acceptance/environment.json",
+    "portableTools": "dev-b94-acceptance/portable-hosts-verification.json"
+  },
+  "blockers": [
+    {
+      "id": "WIN-B94-FOCUS",
+      "severity": "blocking",
+      "reproduced": 2,
+      "steps": [
+        "Activate Gogaku Dev in a dedicated Chrome page",
+        "SendInput N, I to source textarea",
+        "Call target.focus() through CDP; wait 250 ms",
+        "SendInput Space; read both DOM values"
+      ],
+      "expected": {
+        "source": "",
+        "target": " "
+      },
+      "actual": {
+        "source": "ni",
+        "target": "你"
+      },
+      "evidence": [
+        "dev-b94-acceptance/chrome-focus-first-result.json",
+        "dev-b94-acceptance/chrome-focus-repeat-result.json"
+      ],
+      "cause": "not yet established; runtime counterexample confirmed"
+    }
+  ],
+  "hostChecks": [
+    {
+      "case": "Notepad first attempt",
+      "status": "anomaly-retained-harness-flaw",
+      "actual": "ni好",
+      "expected": "你好",
+      "evidence": [
+        "dev-b94-acceptance/notepad-initial-harness-result.json"
+      ],
+      "limit": "Trailing whitespace in mode skipped the intended broker-cold branch; excluded from cold-start conclusions."
+    },
+    {
+      "case": "Notepad warm/new-process and broker-absent retests",
+      "status": "passed-limited",
+      "actual": "你好",
+      "evidence": [
+        "dev-b94-acceptance/notepad-basic-result.json",
+        "dev-b94-acceptance/notepad-cold-result.json",
+        "dev-b94-acceptance/notepad-fresh1-result.json",
+        "dev-b94-acceptance/notepad-fresh-cold-result.json"
+      ],
+      "limit": "Broker-absent checks reported 0 ms ActivateProfile; they are not equivalent to the earlier new Edit/TSF activation timing experiment."
+    },
+    {
+      "case": "Chrome initial ordinary input",
+      "status": "intermittent-failure",
+      "actual": "nih次",
+      "expected": "你好",
+      "evidence": [
+        "dev-b94-acceptance/chrome-first1-result.json",
+        "dev-b94-acceptance/chrome-first2-result.json"
+      ],
+      "limit": "New browser retest produced 你好. Cause and failure rate not established."
+    },
+    {
+      "case": "Chrome synthetic password field",
+      "status": "passed-limited",
+      "actual": "nihc ",
+      "candidateVisible": false,
+      "evidence": [
+        "dev-b94-acceptance/chrome-password-result.json"
+      ],
+      "limit": "Only checks raw input and absence of candidates; not a complete privacy/recording acceptance."
+    },
+    {
+      "case": "Chrome cross-field commit",
+      "status": "failed",
+      "blocker": "WIN-B94-FOCUS"
+    }
+  ],
+  "installerRollback": {
+    "status": "blocked-by-windows-security",
+    "fixtureOnly": true,
+    "runtimeExecuted": false,
+    "mutationStarted": false,
+    "detection": "Trojan:Win32/Bearfoos.B!ml",
+    "affectedArtifact": "isolated fixture packages/A.exe",
+    "evidence": "dev-b94-acceptance/installer-fixture/runtime-result.json",
+    "securityEvents": "dev-b94-acceptance/final-state.json",
+    "unexecuted": [
+      "install A",
+      "x64 registration-failure rollback",
+      "x86 registration-failure rollback",
+      "upgrade to B",
+      "uninstall"
+    ],
+    "limit": "The attempted package was an isolated fixture, not the product Setup.exe. No false-positive conclusion or protection exclusion was applied."
+  },
+  "notRunAfterBlocker": [
+    "Remaining Enter/Esc/number/selection-replacement checks",
+    "Windows Terminal",
+    "Electron / VS Code",
+    "Real 32-bit application beyond the previously controlled x86 Edit",
+    "Full learning/translation/focus/privacy matrix",
+    "Performance and stability"
+  ],
+  "cleanup": {
+    "taskRemoved": true,
+    "fixtureInstalled": false,
+    "fixtureRegistryPresent": [],
+    "fixtureSentinelCreated": false,
+    "devAutostart": null,
+    "stableAutostart": null,
+    "settingsUnchanged": true,
+    "allPriorUserFilesRetained": true,
+    "changedUserFiles": [
+      "\\chinese\\model.userlm"
+    ],
+    "note": "Chinese frequency model changed after synthetic ordinary input; settings and other previously inventoried files retained. Notepad state backups were preserved.",
+    "evidence": [
+      "dev-b94-acceptance/final-state.json",
+      "dev-b94-acceptance/user-final-state.json"
+    ]
+  },
+  "reproducer": "dev-b94-acceptance/reproducer",
+  "limits": [
+    "This is a failed acceptance, not an implementation fix. No product code or version was changed in this acceptance round.",
+    "Earlier dedicated x64/x86 Edit and default upgrade evidence remains scoped to those cases.",
+    "No actual user text, cloud credentials, security exclusions, system restart or user-host force termination was used. The owned broker was stopped for broker-absent checks."
+  ],
+  "artifacts": {
+    "README.md": {
+      "sha256": "797ed6b1a2c6f206e9ca43962227bc15c69fb3011630f99e9a07cd2e2e3dcf75",
+      "bytes": 6073
+    },
+    "chrome-first1-candidate.png": {
+      "sha256": "059945d902f7cc11fd7a932c54c121db42b9e3d4b4aa91c609b07d922f068ffb",
+      "bytes": 40755
+    },
+    "chrome-first1-result.json": {
+      "sha256": "a3ea879c163626ec2ff0c148d3d935257b220583a92c6395f1d8c401cdeff35d",
+      "bytes": 1987
+    },
+    "chrome-first2-candidate.png": {
+      "sha256": "602de3e7ff2143417c83305b32b841441fe098250211d13709e553ecae992e27",
+      "bytes": 20659
+    },
+    "chrome-first2-result.json": {
+      "sha256": "0964f05f623b44cd984a71e1a93727532a12566373a4066d985efe5abf2c5e95",
+      "bytes": 1987
+    },
+    "chrome-focus-first-result.json": {
+      "sha256": "778e87c3304e37122ee776d7fba3dacd0c4b570213ff4df4f5a1999ec65f36c6",
+      "bytes": 1463
+    },
+    "chrome-focus-repeat-result.json": {
+      "sha256": "bbd8d5f33bed90b93671726209cee89fa5a02d79b58b36331cb162f415fc13c3",
+      "bytes": 1463
+    },
+    "chrome-password-result.json": {
+      "sha256": "ead4df4127db3dae1cc842d5690df6dc04956896253e056f3f984a819471c2d2",
+      "bytes": 1747
+    },
+    "environment.json": {
+      "sha256": "155715ef8dffbabbcb9743ed5db5d3af037930e0564849700b86a17deac36e3f",
+      "bytes": 25247
+    },
+    "final-state.json": {
+      "sha256": "4e3d2e4ca50e54b628b5d7fd582c0eb52cffe031946c79b8d628b6371709117d",
+      "bytes": 3793
+    },
+    "installer-fixture/README.md": {
+      "sha256": "318e47d99ef34aab014372414d1f340ed651d70e850d01e75dea608bb1eeb657",
+      "bytes": 5081
+    },
+    "installer-fixture/failure-fixture.json": {
+      "sha256": "c6d9fc7c4c07e219fd634fc702fc9d99db8c785b8ffd2cfaf1e281fb09fc3c3f",
+      "bytes": 10011
+    },
+    "installer-fixture/generate.py": {
+      "sha256": "aaeafb56ad8040f7dbe27edd0bd6846cd671dc26b8b88f6966cb9cb5bb9555ba",
+      "bytes": 17901
+    },
+    "installer-fixture/noop.c": {
+      "sha256": "d75c32827e6ab3081f5b0a59f4a710ead0b421eb28b029cffa8370d6aff96058",
+      "bytes": 268
+    },
+    "installer-fixture/packages.json": {
+      "sha256": "6e32f4bd74a8ea11debcf313edaa527d5e2f600858dd79f9fc1b45c9bc57845b",
+      "bytes": 17870
+    },
+    "installer-fixture/register.c": {
+      "sha256": "f8e7a0d994050d13e0385d1d9904d1ad3d3b9ec3d70f36c04d3f2e178825b851",
+      "bytes": 4368
+    },
+    "installer-fixture/register.def": {
+      "sha256": "b3f1240d8eccea6018822d80c1e64117abbf5aa6b897b2321c4fbbb1bb3e8e14",
+      "bytes": 72
+    },
+    "installer-fixture/runtime-result.json": {
+      "sha256": "0dd67e4593bbd75af94020d32c259316f6f0bde8c8ea126c41892c614bb715a1",
+      "bytes": 13616
+    },
+    "installer-fixture/runtime.ps1": {
+      "sha256": "0dedc706a40e15072da25c384100bd2fba748118985d1501bdeae6e3d6953369",
+      "bytes": 45926
+    },
+    "installer-fixture/verification.json": {
+      "sha256": "f416dfc1c4bb170c4d9de9444356549fa05692853e3417626fb4a8b7e62ff513",
+      "bytes": 1159
+    },
+    "installer-fixture/verify.py": {
+      "sha256": "88967b041147802f1a8d92b6fa630b805eb9d694710ff3534e26f74a66b3db83",
+      "bytes": 5843
+    },
+    "notepad-basic-notepad-candidate.png": {
+      "sha256": "26ba244c85ed97a0f9dcefbdfcaeb64bcf29ec38fcb549c188a8fa35b8eb62a8",
+      "bytes": 20872
+    },
+    "notepad-basic-result.json": {
+      "sha256": "c4bb6f393c02f03e06ada52a9e431fb1f7a424129a69029fd640dbb2e7894025",
+      "bytes": 2497
+    },
+    "notepad-close-b94-result.json": {
+      "sha256": "a57d37d4ab55cfa29aeeb9bd623bd98e1ae10b432443acd40f3506cb9dde2b71",
+      "bytes": 271
+    },
+    "notepad-close-fresh1-result.json": {
+      "sha256": "131f5d4514e35c28e082db4331c3bcdf277b89c3dcdf9a0736198b74dca1ae70",
+      "bytes": 271
+    },
+    "notepad-cold-notepad-candidate.png": {
+      "sha256": "26ba244c85ed97a0f9dcefbdfcaeb64bcf29ec38fcb549c188a8fa35b8eb62a8",
+      "bytes": 20872
+    },
+    "notepad-cold-result.json": {
+      "sha256": "e702677acb87a5be244350f79d53b87b7f43aad28618478e17b4414911bddd97",
+      "bytes": 2563
+    },
+    "notepad-fresh-cold-notepad-candidate.png": {
+      "sha256": "26ba244c85ed97a0f9dcefbdfcaeb64bcf29ec38fcb549c188a8fa35b8eb62a8",
+      "bytes": 20872
+    },
+    "notepad-fresh-cold-result.json": {
+      "sha256": "c6bee51f8309e31f70fe7450110548cf80af16979c49545207c268d7cc9296dd",
+      "bytes": 2563
+    },
+    "notepad-fresh1-notepad-candidate.png": {
+      "sha256": "26ba244c85ed97a0f9dcefbdfcaeb64bcf29ec38fcb549c188a8fa35b8eb62a8",
+      "bytes": 20872
+    },
+    "notepad-fresh1-result.json": {
+      "sha256": "76c1e2bd7c2c827a36558dfdd0131d9b3235d5f4df428042d7cf0957ed8dd7d6",
+      "bytes": 2496
+    },
+    "notepad-initial-harness-notepad-candidate.png": {
+      "sha256": "b2b1a07220472772d8caa48ed3fed7ee3b5f45b709fd4008c8573adf9fbccf34",
+      "bytes": 40921
+    },
+    "notepad-initial-harness-result.json": {
+      "sha256": "243b675167c2156705070aee8e46ba7caaa1dc916e887b7f2d851059ab57d12d",
+      "bytes": 1381
+    },
+    "notepad-reopen-result.json": {
+      "sha256": "c5672133d3a749e463d37f143367fedfbbcbe7f2e835a782d615fd0163ae7757",
+      "bytes": 265
+    },
+    "portable-hosts-verification.json": {
+      "sha256": "f2f5fa586649402a62528e6cf3161249c977deb4099128c774d81b23c17e3abe",
+      "bytes": 881
+    },
+    "portable-hosts.json": {
+      "sha256": "690788e0dfa1558b05cab96810c258b2935b9095bfcf45f0969b9dba69374844",
+      "bytes": 3019
+    },
+    "reproducer/browser-cases.h": {
+      "sha256": "2636a0883333cfe4479e5152ad9b809d9279bebc589726a5cf448c6e6bd7c04a",
+      "bytes": 9753
+    },
+    "reproducer/helpers.cpp": {
+      "sha256": "0e4706a02eba30854b1b4ebf5da68252f242abbaae13a66e6b1cb2cd4ccfd15f",
+      "bytes": 18038
+    },
+    "reproducer/host-acceptance.cpp": {
+      "sha256": "2c232ffbf86326ecf5e72482885ae6d1aa9d5583cdc856ba3a888c21aed6c074",
+      "bytes": 6778
+    },
+    "reproducer/run-case.py": {
+      "sha256": "a04cb0255f0b5c85ba279ac64bffc0f42bdf93ac7ab3f9e71acb07902d7c0848",
+      "bytes": 1470
+    },
+    "reproducer/run-interactive.py": {
+      "sha256": "76a36000294d06af070d8ce13b4860fe614c7002c410baf2fdfbbbed8941687f",
+      "bytes": 4062
+    },
+    "user-final-state.json": {
+      "sha256": "3c4ca6be455bc8947939c63633a08548389b85fcf2b88cd245f5c1039f6d9962",
+      "bytes": 575
+    }
+  }
+}

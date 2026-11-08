@@ -1,0 +1,6 @@
+[PASSED ] asan-ubsan（54080ms）：2000 随机序列 ASan＋UBSan 无错误（quick 冒烟，不满足十万门槛）
+
+摘要：passed=1 failed=0 skipped=13 blocked=0；本档位检查：未通过（version、resources、core-tests、swift-tests、translation-data、verification-contracts、clean-build、bundle-check、quality、render、data-reliability、delivery-contracts）
+发布就绪须由 publish-release.py 另行核对全部必需档位、当前双端包及收据；本档位通过不等于可发布。
+未绑定当前双端安装包，本报告仅为开发检查结果，不能用于发布。
+报告：/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/report-release-20261108-152026.json

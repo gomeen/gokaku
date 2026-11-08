@@ -6,7 +6,7 @@
 
 ## 1. 模块边界与接口
 
-**检查**：共享核心（`native/GogakuCore`，C ABI v2）不含 Apple 框架头文件（`grep AppKit|Foundation|CoreFoundation|Darwin/` 于全部 `.cpp`／头文件无匹配）；平台接入（IMK／AppKit）全部在 `Sources/GogakuInput`／`Sources/GogakuHost`；宿主 IMK 调用全部 `@try/@catch` 包裹（`Host.m` 全部 5 个入口）。UTF-8→UTF-16 转换集中在 `PreeditCaret`（越界裁剪＋半标量回退，有单测）；核心报告 UTF-8 字节偏移，平台不混用原始偏移（线程／所有权合同见 `gogaku_core.h` 头注释：会话非线程安全、单串行队列拥有、库内分配库内释放、异常与 STL 不跨 ABI——`gc_normal_handle`／`create`／`flush` 均有 try/catch 边界）。
+**检查**：共享核心（`shared/GogakuCore`，C ABI v2）不含 Apple 框架头文件（`grep AppKit|Foundation|CoreFoundation|Darwin/` 于全部 `.cpp`／头文件无匹配）；平台接入（IMK／AppKit）全部在 `macos/Sources/GogakuInput`／`macos/Sources/GogakuHost`；宿主 IMK 调用全部 `@try/@catch` 包裹（`Host.m` 全部 5 个入口）。UTF-8→UTF-16 转换集中在 `PreeditCaret`（越界裁剪＋半标量回退，有单测）；核心报告 UTF-8 字节偏移，平台不混用原始偏移（线程／所有权合同见 `gogaku_core.h` 头注释：会话非线程安全、单串行队列拥有、库内分配库内释放、异常与 STL 不跨 ABI——`gc_normal_handle`／`create`／`flush` 均有 try/catch 边界）。
 
 **发现**：
 

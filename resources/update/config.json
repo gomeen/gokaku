@@ -1,8 +1,7 @@
 {
   "schema": 1,
-  "owner": "",
-  "repo": "",
-  "note": "发布环境填写 owner/repo；留空表示本机构建未配置更新源。私钥不得进入仓库。",
+  "owner": "gomeen",
+  "repo": "gokaku",
   "trustedKeys": [
     {
       "keyId": "gogaku-dev-2026-11",

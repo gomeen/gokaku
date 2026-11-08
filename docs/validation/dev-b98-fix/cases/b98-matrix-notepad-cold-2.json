@@ -1,0 +1,118 @@
+{
+  "activateHr": 0,
+  "activationMilliseconds": 0,
+  "agentAbsentBeforeActivation": true,
+  "agentImageAfter": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev\\bin\\x64\\GogakuAgent.exe",
+  "agentPidsAfter": [
+    10456
+  ],
+  "candidateVisible": true,
+  "candidateWindows": [
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 5833916,
+      "pid": 11976,
+      "rect": [
+        134,
+        425,
+        489,
+        693
+      ],
+      "visible": true
+    }
+  ],
+  "documentMarker": "GogakuAcceptanceB94-1644",
+  "expectedText": "你好",
+  "foregroundRestored": true,
+  "keyTrace": [
+    {
+      "control": false,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171116250,
+      "virtualKey": 78
+    },
+    {
+      "control": false,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171116406,
+      "virtualKey": 73
+    },
+    {
+      "control": false,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171116562,
+      "virtualKey": 72
+    },
+    {
+      "control": false,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171116718,
+      "virtualKey": 67
+    },
+    {
+      "control": false,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171117218,
+      "virtualKey": 32
+    },
+    {
+      "control": true,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171117375,
+      "virtualKey": 83
+    },
+    {
+      "control": true,
+      "focusClass": "RichEditD2DPT",
+      "keyboardLayout": 134481924,
+      "tick": 171117859,
+      "virtualKey": 87
+    }
+  ],
+  "mode": "notepad-cold",
+  "modulesAfter": [
+    {
+      "memoryPeTimestamp": 1794123559,
+      "memoryRead": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev\\bin\\x64\\GogakuTsf.dll"
+    }
+  ],
+  "modulesBefore": [
+    {
+      "memoryPeTimestamp": 1794123559,
+      "memoryRead": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev\\bin\\x64\\GogakuTsf.dll"
+    }
+  ],
+  "ok": true,
+  "savedText": "你好",
+  "screenshots": [
+    "notepad-candidate.png"
+  ],
+  "stoppedAgentPids": [
+    4816
+  ],
+  "syntheticDocumentClosed": true,
+  "target": {
+    "class": "Notepad",
+    "dpi": 192,
+    "handle": 4916210,
+    "pid": 11976,
+    "rect": [
+      0,
+      204,
+      2048,
+      1236
+    ],
+    "visible": true
+  },
+  "textMatched": true,
+  "zombieRestartRounds": 0
+}

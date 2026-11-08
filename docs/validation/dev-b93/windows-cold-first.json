@@ -1,0 +1,69 @@
+{
+  "activateHr": 0,
+  "agentAbsentBeforeActivation": true,
+  "agentPidAfter": 0,
+  "agentsStopped": [
+    {
+      "path": "C:\\Program Files\\GogakuDev\\bin\\x64\\GogakuAgent.exe",
+      "pid": 1936
+    }
+  ],
+  "candidateVisible": false,
+  "candidateWindows": [
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 2294472,
+      "pid": 604,
+      "rect": [
+        0,
+        0,
+        1,
+        1
+      ],
+      "visible": false
+    }
+  ],
+  "coldStartTick": 152583296,
+  "deactivateDevHr": 0,
+  "deactivateStableHr": -2147467259,
+  "foregroundAtCommit": 3081124,
+  "keyForeground": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0
+  },
+  "modules": [
+    "C:\\Program Files\\GogakuDev\\versions\\b93\\bin\\x64\\GogakuTsf.dll"
+  ],
+  "ok": false,
+  "probePid": 604,
+  "profile": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0
+  },
+  "screenshots": [
+    "classic-input.png"
+  ],
+  "session": 1,
+  "steps": [
+    {
+      "key": "N",
+      "text": "n"
+    },
+    {
+      "key": "I",
+      "text": "ni"
+    },
+    {
+      "key": "H",
+      "text": "nih"
+    },
+    {
+      "key": "C",
+      "text": "nihc"
+    }
+  ],
+  "targetHandle": 3081124,
+  "text": "nihc ",
+  "textAt150ms": "nihc "
+}

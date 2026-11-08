@@ -3,7 +3,7 @@
 
 数据来源：本机 OpenCC（`opencc -c t2s`，Apache-2.0）。逐字符转换 CJK 统一表意
 文字、扩展 A、兼容表意文字与 U+3007，保留「转换后发生变化」的字，按码点排序
-输出为 native/GogakuCore/translate/t2s_table.inc。产物入库，两端同一字节；
+输出为 shared/GogakuCore/translate/t2s_table.inc。产物入库，两端同一字节；
 再生成时用 --check 对比差异，不静默改表。
 
 注意：这是单字级映射（OpenCC TSCharacters），不含词组级（TSPhrases）转换；
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "native/GogakuCore/translate/t2s_table.inc"
+OUT = ROOT / "shared/GogakuCore/translate/t2s_table.inc"
 HEADER = """// 由 scripts/build-t2s-table.py 生成，勿手改；{n} 个条目，生成于 {date}。
 // 数据来源：OpenCC {ocver} `t2s` 配置（https://github.com/BYVoid/OpenCC，Apache-2.0）。
 // 单字级繁→简映射（不含词组级）；条目按码点升序，二分查找。

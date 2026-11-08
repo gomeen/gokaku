@@ -1,9 +1,0 @@
-WARNING: Logging before InitGoogleLogging() is written to STDERR
-I20261030 14:32:48.371193 0x7ff85a51dd00 modules.cc:96] registering components from module 'lua'.
-I20261030 14:32:48.376537 0x7ff85a51dd00 modules.cc:87] rime.lua info: rime.lua should be either in the rime user data directory or in the rime shared data directory
-WARNING: Logging before InitGoogleLogging() is written to STDERR
-I20261030 14:32:48.376713 0x7ff85a51dd00 grammar_module.cc:15] registering components from module 'grammar'.
-E20261030 14:32:48.420584 0x7ff85a51dd00 mapped_file.cc:78] attempt to open non-existent file '/tmp/gogaku-ime-benchmark/rime/R1/users/user-qdQ2Ro/lua/lunar.db'.
-E20261030 14:32:48.425216 0x7ff85a51dd00 reverse_lookup_dictionary.cc:39] Error opening reversedb '/tmp/gogaku-ime-benchmark/rime/R1/users/user-qdQ2Ro/lua/lunar.db'.
-E20261030 14:32:48.446576 0x7ff85a51dd00 mapped_file.cc:78] attempt to open non-existent file '/tmp/gogaku-ime-benchmark/rime/R1/users/user-qdQ2Ro/lua/lunar.db'.
-E20261030 14:32:48.450613 0x7ff85a51dd00 reverse_lookup_dictionary.cc:39] Error opening reversedb '/tmp/gogaku-ime-benchmark/rime/R1/users/user-qdQ2Ro/lua/lunar.db'.

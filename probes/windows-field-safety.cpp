@@ -1,6 +1,6 @@
 // Native field fallback regression. Synthetic controls only; no host text read.
-#include "../native/GogakuTsf/src/native_edit_safety.h"
-#include "../native/GogakuWindows/third_party/json.hpp"
+#include "../windows/GogakuTsf/src/native_edit_safety.h"
+#include "../windows/GogakuWindows/third_party/json.hpp"
 #include <richedit.h>
 #include <filesystem>
 #include <fstream>

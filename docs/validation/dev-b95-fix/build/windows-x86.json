@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/compile-win-native.py",
+      "--arch",
+      "x86",
+      "--jobs",
+      "3"
+    ],
+    "exitCode": 0,
+    "seconds": 28.9
+  }
+]

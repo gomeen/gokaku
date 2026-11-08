@@ -1,0 +1,20 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/build-win-app.py",
+      "--channel",
+      "dev",
+      "--data-dir",
+      ".build/win-app/dev/data",
+      "--license-dir",
+      ".build/win-app/dev/licenses",
+      "--deps-source-dir",
+      ".build/win-cross/setup-sources",
+      "--iscc",
+      ".build/win-tools/iscc"
+    ],
+    "exitCode": 0,
+    "seconds": 31.51
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "milliseconds": 657,
+      "name": "activation_waits_for_cold_broker",
+      "passed": true
+    },
+    {
+      "milliseconds": 0,
+      "name": "key_path_does_not_wait_for_startup",
+      "passed": true
+    },
+    {
+      "milliseconds": 125,
+      "name": "startup_wait_has_deadline",
+      "passed": true
+    }
+  ],
+  "ok": true,
+  "screenshots": []
+}

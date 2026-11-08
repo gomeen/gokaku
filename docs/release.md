@@ -10,7 +10,7 @@
 | --- | --- | --- | --- | --- |
 | 开机构建 | `0.1.x-dev.N`（构建号递增） | 自己 | `verify.py --profile fast`（约 2 分钟） | Mac 两 App＋Windows 组装输入（若产物齐全） |
 | 功能交付包 | dev 版 | 自己＋朋友（测试用途） | fast＋构建身份＋安装冒烟 | Mac pkg；Windows Setup.exe（产物齐全时） |
-| 候选版 rc | `0.1.x-rc.N` | 朋友正式试用 | **工作区干净**＋`--profile release` 全量＋双端安装／功能证据 | 双端安装包＋身份记录＋验证报告 |
+| 候选版 rc | `0.1.x-rc.N` | 朋友正式试用 | **工作区干净**＋fast／release／host 三档通过＋双端安装／功能证据 | 双端安装包＋身份记录＋验证报告 |
 | 定版 | `0.1.x`＋标签 `v0.1.x` | 归档 | rc 全过＋用户试用确认 | 标签一经创建不移动 |
 
 每次**对外提供安装包前递增 `version.json` 构建号**；rc／定版构建由脚本强制要求干净工作区。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
@@ -58,7 +58,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 - 用户级安装，无需管理员密码；`domains` 限定当前用户主目录，payload 为空，postinstall 落位＋`lsregister` 重注册。
 - pkg 装出的文件不带隔离标记（DMG 拷出会带，会拦输入法进程——这是输入法普遍用 pkg 而非 DMG 的原因）。**本轮不再生成或交付 DMG。**
 - 落位与 manage-install 一致：输入法 → `~/Library/Input Methods/`，设置 → `~/Applications/`；升级不删学习数据。
-- **事务式 postinstall**（`scripts/pkg-postinstall.sh`）：解包 → 校验包内已注入身份／构建号／签名 → 备份旧包 → 替换 → 核对安装后身份／构建号 → 注册。任一步失败恢复两者；不先删除唯一可用副本。
+- **事务式 postinstall**（`macos/packaging/pkg-postinstall.sh`）：解包 → 校验包内已注入身份／构建号／签名 → 备份旧包 → 替换 → 核对安装后身份／构建号 → 注册。任一步失败恢复两者；不先删除唯一可用副本。
 - **包内 App 的身份与签名在打包阶段完成**：`package-macos-pkg.py` 复制 dist 中立 App 到 staging、注入输入源身份、由内向外签名（Developer ID 或 ad-hoc），再打成 zip。postinstall 不再重签，因此 Developer ID 签名不会被降级。
 - 安装器含欢迎页、说明页与**安装完成页**（添加输入源／打开设置／检查更新指引）。
 - 事务状态写入 `~/Library/Application Support/Gogaku/install/transaction.txt`；中断后下次 pkg 安装先恢复旧版本；备份保留最近两份（`.disabled` 后缀防 LaunchServices 误启动）。
@@ -96,7 +96,7 @@ python3 scripts/package-macos-pkg.py --channel stable \
 
 ## 3. Windows 构建（Setup.exe）
 
-构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。用户后续授权连接其已安装的 Windows VM 排查输入、候选窗、设置与图标；限定运行结果见[验收记录](validation/native-development.md)。当前工作区新生成 dev b92 双端安装包与 fast 报告（仅构包验证）见[原生开发验收](validation/native-development.md)；构建 91 的历史构包结果仍见 [windows-setup-build.json](validation/windows-setup-build.json)，功能缺口见[对照表](feature-parity.md)。[构建 91 的限定运行证据](validation/windows-desktop-b91.json)保留了冷启动首组输入失败，不能据此标为稳定版，更不能用作 b92 的 VM 验收；安装前曾人工迁走占用文件，不是无干预升级验收。
+构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。用户后续授权连接其已安装的 Windows VM 排查输入、候选窗、设置与图标；限定运行结果见[验收记录](validation/native-development.md)。当前 dev b94 双端包与 fast 报告见 [b94 记录](validation/dev-b94.json)；Windows 已在旧 DLL 保持加载时默认升级，并通过双架构冷／暖启动与七页设置回归，构包结果见 [windows-setup-build.json](validation/windows-setup-build.json)。Mac b94 本轮未安装；Mac b93 和 Windows b91 的宿主结果保留为历史，完整宿主、升级故障恢复／卸载及在线更新仍未验收，功能缺口见[对照表](feature-parity.md)。
 
 | 部件 | 构建线 | 工具链 | 状态 |
 | --- | --- | --- | --- |
@@ -130,12 +130,12 @@ python3 scripts/build-win-app.py --channel dev \
 
 两架构编译完成时分别写入 `build-receipt.json`，打包前逐文件校验编译来源、通道、源码指纹及锁定数据；Mac 打包同样强制校验两 App 的构建身份和当前源码。安装包旁的 `*.receipt.json` 记录安装包大小及哈希；打包脚本不会把旧二进制仅改名冒充新构建。`--check` 只检查，不生成安装包。收据和本地构建可防误用缓存，不等同于代码签名或真机验收。
 
-安装器（`packaging/windows/gogaku.iss.in`）：
+安装器（`windows/packaging/gogaku.iss.in`）：
 
 - Windows 11 x64；同时带 x64 与 x86 TSF，仅 x64 代理持有业务核心。
 - UAC 完成机器级注册；注册错误在文件安装事务内中止，不以 `[Run]` 忽略退出码。自启为可选项，按原用户身份写 HKCU。
 - 程序与只读资源装入 Program Files；数据由程序写 `%LOCALAPPDATA%\Gogaku`；卸载默认保留数据。
-- 当前使用固定目录；升级／卸载先检查已加载程序，要求用户退出代理和宿主，无法替换时中止。版本目录与上一版本恢复尚未完成。
+- 固定安装根下按版本保存 payload；升级只检查新目标，旧宿主可继续持有旧 DLL。同构建重装／卸载仍检查占用并提示手动退出。注册失败恢复旧双架构注册／路径指针已实现；b94 默认升级、既有自启动迁移与数据保留有 VM 证据，完整故障恢复／卸载和旧版本自动清理未验收。
 - 不设置默认输入法，不强杀宿主，不自动注销／重启，不安排锁定文件下次重启替换。
 - 未做 Authenticode 签名；不关闭系统安全机制。
 
@@ -146,8 +146,8 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 完整合同见[检查更新](update.md)。发布顺序：
 
 1. 递增 `version.json` 构建号，构建双端安装包及两份 `*.receipt.json`；rc／定版要求工作区干净。
-2. 使用与发布通道相同的验证报告（`verify.py --profile fast --channel dev`；rc／定版额外跑 release 档）。验证报告绑定源码指纹和两个安装包哈希；不通过门槛的报告不能发布。
-3. `python3 scripts/publish-release.py --dry-run ... --verification-report <fast报告> ...` 离线核对收据、许可、报告、文件名与哈希；rc／定版同时传 `--verification-report <release报告>`。
+2. 使用与发布通道相同的验证报告：dev 至少 fast；rc／定版要求 fast＋release＋host。报告绑定当前策略、必需检查清单、产品源码／测试指纹和两个安装包哈希；测试期间身份改变、缺项、跳过或 blocked 均不能冒充完整通过。host 仅在用户空闲并授权时执行，目前探针只支持 stable，dev 的 host 明确阻塞。
+3. `python3 scripts/publish-release.py --dry-run ... --verification-report <fast报告> ...` 离线核对收据、许可、报告、文件名与哈希；rc／定版同时传 `--verification-report <release报告> --verification-report <host报告>`。
 4. `GITHUB_TOKEN=... python3 scripts/publish-release.py ...`：创建 Draft → 上传 pkg／setup → 取得 asset id → 生成并签名清单 → 上传清单与签名，生成 `release-state.json`。**不自动发布。**
 5. 人工审阅 Draft 后，用原参数与原 `--out` 目录，加 `--publish-existing <Draft ID>`。脚本重新验证本地收据、报告、清单签名和远端 Draft 的四份资产，再只对指定 ID 执行 PATCH；若审阅期间资产变化，拒绝发布。也可在 GitHub 手动发布，但不会经过这一门槛。
 6. 用两个构建验证旧版发现新版、下载、校验、安装、重开显示新版本、保留数据；记录报告。
@@ -162,16 +162,24 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 4. **Mac**：`build.py` → `package-macos-pkg.py` → 真实 `installer -pkg` 安装→打字→升级→恢复冒烟。
 5. **Windows**：`build-win-app.py` → VM 安装→打字→检查更新→卸载冒烟。
 6. **归档证据**：验证报告、`docs/validation/native-development.md` 对应小节、CHANGELOG 入库；构建身份与安装包收据随包归档（`dist` 生成物不强制入库）。`docs/validation/verify` 的保留策略：保留被文档／验收记录引用的运行记录、host 档全部运行，以及每个档位最新一份；其余历史运行在收敛时删除（git 历史仍可考）。
-7. **rc 级**：确认工作区干净；全量 `--profile release` 后台跑（约 2.5 小时，不阻塞日常）。
+7. **rc 级**：确认工作区干净；fast＋完整 release＋host 三档均通过。全量 release 后台跑（约 2.5 小时，不阻塞日常），host 另在用户空闲并授权后执行；`--only` 与 quick 冒烟不满足完整档位。
 8. **分发**：把安装包＋构建身份（或哈希清单）发给测试者；记录发放对象与版本。
 9. **定版**：全部验收＋用户试用确认后打 `v0.1.x` 标签（不移动）。
+
+`build.py` 和打包脚本仍可生成开发安装包；它们不会自动执行全部发布测试。`publish-release.py` 消费已有报告，不重新跑测试。Windows 原生运行、双端升级恢复／卸载、真实云翻译和在线更新尚未全部接入机器门禁，需逐项留证；手工发送安装包或在 GitHub 手动发布也会绕过发布脚本。
+
+### 人工 GUI 证据格式
+
+`host` 读取 `docs/validation/verify/native-gui-acceptance-stable.json`（dev 探针尚未支持）。顶层必须包含当前 `commit`、`sourceSha256`、`testSha256`、`version`（version.json 的完整对象）、`channel`、输入法主二进制的 `installedSHA256`、`pass: true` 及 `screens`。身份字段取本轮 host 报告；在真实点击／键盘导航、快捷键录制、应用选择、配置读回及 VoiceOver 检查后人工确认。
+
+`screens` 必须覆盖七页 `learning-translation`、`normal-input`、`custom-words`、`skin`、`shortcuts`、`learning-privacy`、`learning-snippets`，各含 `[900,620]`／`[760,520]` 和 `light`／`dark`，共 28 项。每项包含 `page`、`size`、`appearance`、`passed: true`、报告同目录内的截图相对路径 `screenshot` 及实际 `screenshotSha256`。校验器核对矩阵完整性、身份和截图哈希；操作结果仍依赖人工验收，截图不能代替行为验证。
 
 ## 6. CI 与当前缺口
 
 - `windows-core.yml`：脚手架，**从未真实运行**（仓库无远端）。建远端后首跑预期要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
 - Mac 侧 CI：无。候选 `mac-core.yml` 可后置。
 - ⬜ 远端仓库（阻塞：CI、Releases 更新、多人协作）。
-- 🚧 Windows 安装／运行由用户验证；多候选预译、版本化升级恢复等实现缺口见[功能对照](feature-parity.md)。
+- 🚧 Windows b94 默认升级与限定双架构冷／暖启动已验证；完整宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
 - 🚧 Mac 双构建 pkg 升级／恢复复验（单次真实安装已有证据）。
 - 🚧 真实 GitHub Releases 更新链路（P5）。
 - ⬜ rc 级真机矩阵（朋友完整试用）。

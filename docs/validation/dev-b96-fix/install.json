@@ -1,0 +1,834 @@
+{
+    "identity":  {
+                     "fullVersion":  "0.1.1-dev.2",
+                     "buildNumber":  96,
+                     "phase":  "dev",
+                     "channel":  "dev",
+                     "platform":  "windows",
+                     "arch":  "x86_64",
+                     "builtOn":  "macOS-26.7.2-x86_64-i386-64bit-Mach-O",
+                     "git":  {
+                                 "commit":  "a3b076e0301dfddbef96099288689b9ad4944875",
+                                 "dirty":  true
+                             },
+                     "gitCommit":  "a3b076e0301dfddbef96099288689b9ad4944875",
+                     "dirty":  true,
+                     "sourceSha256":  "e26f632f1eae310f67e3dfc12219df1ae578f7e6d73ba81006b3d4c07ea24d1f",
+                     "compileReceipts":  {
+                                             "x64":  {
+                                                         "schema":  1,
+                                                         "fullVersion":  "0.1.1-dev.2",
+                                                         "buildNumber":  96,
+                                                         "channel":  "dev",
+                                                         "arch":  "x64",
+                                                         "configuration":  "release",
+                                                         "git":  {
+                                                                     "commit":  "a3b076e0301dfddbef96099288689b9ad4944875",
+                                                                     "dirty":  true
+                                                                 },
+                                                         "sourceSha256":  "e26f632f1eae310f67e3dfc12219df1ae578f7e6d73ba81006b3d4c07ea24d1f",
+                                                         "dependencies":  {
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libasprintf.a":  "7d1fb5c8c59c4e879f9b9b45f2e5af8b9d34a35204f2d9f88aecc4b3c8e484a2",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libasprintf.dll.a":  "675b53dfd257483bdc3632a326f28ba788fcb5da80d5fe4e4834970c0af678fb",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libcharset.a":  "a9e90b455eb2f8f65b0e21614d8391dbc8085b39a3e31649115dbd37cbfcd670",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libcharset.dll.a":  "6e885da069be36b6231bc6a063b46bdc3ec955bcc2e1709155cd972d6f11912f",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libdl.a":  "4df3c9afc3bf9b8410199bb73124fddf10f0cd5c97aec13b6188765cdb5e2314",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libdl.dll.a":  "350143c8676b52ae86ad9b641d527fc1d23187aade3b50496aba094fbafa6502",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libiconv.a":  "4ef18795d0369c612c1c4eafdef755e691153da1fd31a83be06a2a5e14379833",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libiconv.dll.a":  "bd20064608a48a081255777e4ce70727b5454fef0be988de39da2fbbed7ce87e",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libintl.a":  "74194d3deecdd8b86318776153a16996fca4c47f55ad7eee8b024666dc307a7c",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libintl.dll.a":  "9c58463e15a98b341e741609bc03704aa1c1198530fbffbb672ef23749e32766",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libz.a":  "e08d3bbacb9293e31219c12082872d722809ea2bdcdb4d53d490ca33ef8da9b1",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libz.dll.a":  "bc962e3d8122f09578b32f9fa7de9c3e510b532b7ae979df4c73223e16539e2e",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libzstd.a":  "40cd65d0a6444c75078b030dd905068b8dc8e4fbacc01455e26d50eacce9c772",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libzstd.dll.a":  "1ee6d25afd3e86fa4d5d214743231fa4f89d479654cec3ee82563c9c259b0679",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libFcitx5Utils.a":  "3ee7ed271337121b79d6a3d2dc3955e039267878da3f2f2204fafd274efee1c1",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libIMECore.a":  "b9aa933a704e2b2f6684e1b7d3b00d8a198c4af208db25dbb2ddcbc381d846ae",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libIMEPinyin.a":  "616a784052c91600865bd2febd8210e13f38577f8e2d8972f97aedd2119f8b9d",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/prefix/lib/libFcitx5Utils.a":  "3ee7ed271337121b79d6a3d2dc3955e039267878da3f2f2204fafd274efee1c1",
+                                                                              "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/toolchain-dll.cmake":  "a907f1cf49d428515b879cbe7b465671c50c9b526d6b99236bca11a6a68bb631"
+                                                                          },
+                                                         "artifacts":  {
+                                                                           "GogakuTsf.dll":  {
+                                                                                                 "sha256":  "6573a482bdb7cfa4c0bd93a35f9e3e8e26d161b381f4f571b27b5c835979bd04",
+                                                                                                 "bytes":  16989910
+                                                                                             },
+                                                                           "GogakuAgent.exe":  {
+                                                                                                   "sha256":  "385a1430a01f33fb942cce7e45cec0d4733c08ddbe4fc6b189b8223a7ccd9827",
+                                                                                                   "bytes":  17337586
+                                                                                               },
+                                                                           "GogakuSettings.exe":  {
+                                                                                                      "sha256":  "6779b38739bb4f2b6f0f41201b206a70ff5906409649c99d7336848e71e96bbb",
+                                                                                                      "bytes":  19261406
+                                                                                                  },
+                                                                           "libgogaku_core.dll":  {
+                                                                                                      "sha256":  "46f57d6339e8a1d09200dfba40ef8eeab1f3ad78c1296d1e1ad3251aa24ecfb8",
+                                                                                                      "bytes":  25461314
+                                                                                                  }
+                                                                       }
+                                                     },
+                                             "x86":  {
+                                                         "schema":  1,
+                                                         "fullVersion":  "0.1.1-dev.2",
+                                                         "buildNumber":  96,
+                                                         "channel":  "dev",
+                                                         "arch":  "x86",
+                                                         "configuration":  "release",
+                                                         "git":  {
+                                                                     "commit":  "a3b076e0301dfddbef96099288689b9ad4944875",
+                                                                     "dirty":  true
+                                                                 },
+                                                         "sourceSha256":  "e26f632f1eae310f67e3dfc12219df1ae578f7e6d73ba81006b3d4c07ea24d1f",
+                                                         "dependencies":  {
+
+                                                                          },
+                                                         "artifacts":  {
+                                                                           "GogakuTsf.dll":  {
+                                                                                                 "sha256":  "89b5c64f6ec752a293fcae8bb7a803f083e9f4ff51b4c1c0ad96ee56b9fd7f95",
+                                                                                                 "bytes":  15203567
+                                                                                             }
+                                                                       }
+                                                     }
+                                         },
+                     "versionSourceSha256":  "d1937f870c7a47641c03bcfcc7776a32472e69f114113c736aed8ec8addb0d36",
+                     "peDependencies":  {
+                                            "x64":  {
+                                                        "GogakuAgent.exe":  {
+                                                                                "arch":  "x64",
+                                                                                "dll":  false,
+                                                                                "imports":  [
+                                                                                                "advapi32.dll",
+                                                                                                "api-ms-win-crt-convert-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-environment-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-filesystem-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-heap-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-locale-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-math-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-private-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-runtime-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-stdio-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-string-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-time-l1-1-0.dll",
+                                                                                                "api-ms-win-crt-utility-l1-1-0.dll",
+                                                                                                "bcrypt.dll",
+                                                                                                "crypt32.dll",
+                                                                                                "kernel32.dll",
+                                                                                                "ole32.dll",
+                                                                                                "shell32.dll",
+                                                                                                "user32.dll",
+                                                                                                "winhttp.dll"
+                                                                                            ],
+                                                                                "sha256":  "385a1430a01f33fb942cce7e45cec0d4733c08ddbe4fc6b189b8223a7ccd9827",
+                                                                                "bytes":  17337586
+                                                                            },
+                                                        "GogakuSettings.exe":  {
+                                                                                   "arch":  "x64",
+                                                                                   "dll":  false,
+                                                                                   "imports":  [
+                                                                                                   "advapi32.dll",
+                                                                                                   "api-ms-win-crt-convert-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-environment-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-filesystem-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-heap-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-locale-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-math-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-private-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-runtime-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-stdio-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-string-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-time-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-utility-l1-1-0.dll",
+                                                                                                   "bcrypt.dll",
+                                                                                                   "comctl32.dll",
+                                                                                                   "comdlg32.dll",
+                                                                                                   "crypt32.dll",
+                                                                                                   "d2d1.dll",
+                                                                                                   "dwrite.dll",
+                                                                                                   "gdi32.dll",
+                                                                                                   "kernel32.dll",
+                                                                                                   "msimg32.dll",
+                                                                                                   "ole32.dll",
+                                                                                                   "shell32.dll",
+                                                                                                   "user32.dll",
+                                                                                                   "uxtheme.dll",
+                                                                                                   "winhttp.dll"
+                                                                                               ],
+                                                                                   "sha256":  "6779b38739bb4f2b6f0f41201b206a70ff5906409649c99d7336848e71e96bbb",
+                                                                                   "bytes":  19261406
+                                                                               },
+                                                        "GogakuTsf.dll":  {
+                                                                              "arch":  "x64",
+                                                                              "dll":  true,
+                                                                              "imports":  [
+                                                                                              "advapi32.dll",
+                                                                                              "api-ms-win-crt-convert-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-environment-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-filesystem-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-heap-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-locale-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-math-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-private-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-runtime-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-stdio-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-string-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-time-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-utility-l1-1-0.dll",
+                                                                                              "bcrypt.dll",
+                                                                                              "crypt32.dll",
+                                                                                              "d2d1.dll",
+                                                                                              "dwrite.dll",
+                                                                                              "gdi32.dll",
+                                                                                              "kernel32.dll",
+                                                                                              "msimg32.dll",
+                                                                                              "ole32.dll",
+                                                                                              "oleaut32.dll",
+                                                                                              "shell32.dll",
+                                                                                              "user32.dll"
+                                                                                          ],
+                                                                              "sha256":  "6573a482bdb7cfa4c0bd93a35f9e3e8e26d161b381f4f571b27b5c835979bd04",
+                                                                              "bytes":  16989910
+                                                                          },
+                                                        "libgogaku_core.dll":  {
+                                                                                   "arch":  "x64",
+                                                                                   "dll":  true,
+                                                                                   "imports":  [
+                                                                                                   "advapi32.dll",
+                                                                                                   "api-ms-win-crt-convert-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-environment-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-filesystem-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-heap-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-locale-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-math-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-private-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-runtime-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-stdio-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-string-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-time-l1-1-0.dll",
+                                                                                                   "api-ms-win-crt-utility-l1-1-0.dll",
+                                                                                                   "bcrypt.dll",
+                                                                                                   "kernel32.dll"
+                                                                                               ],
+                                                                                   "sha256":  "46f57d6339e8a1d09200dfba40ef8eeab1f3ad78c1296d1e1ad3251aa24ecfb8",
+                                                                                   "bytes":  25461314
+                                                                               }
+                                                    },
+                                            "x86":  {
+                                                        "GogakuTsf.dll":  {
+                                                                              "arch":  "x86",
+                                                                              "dll":  true,
+                                                                              "imports":  [
+                                                                                              "advapi32.dll",
+                                                                                              "api-ms-win-crt-convert-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-environment-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-filesystem-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-heap-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-locale-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-math-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-private-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-runtime-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-stdio-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-string-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-time-l1-1-0.dll",
+                                                                                              "api-ms-win-crt-utility-l1-1-0.dll",
+                                                                                              "bcrypt.dll",
+                                                                                              "crypt32.dll",
+                                                                                              "d2d1.dll",
+                                                                                              "dwrite.dll",
+                                                                                              "gdi32.dll",
+                                                                                              "kernel32.dll",
+                                                                                              "msimg32.dll",
+                                                                                              "ole32.dll",
+                                                                                              "oleaut32.dll",
+                                                                                              "shell32.dll",
+                                                                                              "user32.dll"
+                                                                                          ],
+                                                                              "sha256":  "89b5c64f6ec752a293fcae8bb7a803f083e9f4ff51b4c1c0ad96ee56b9fd7f95",
+                                                                              "bytes":  15203567
+                                                                          }
+                                                    }
+                                        },
+                     "artifacts":  {
+                                       "bin/x64/GogakuAgent.exe":  {
+                                                                       "sha256":  "385a1430a01f33fb942cce7e45cec0d4733c08ddbe4fc6b189b8223a7ccd9827",
+                                                                       "bytes":  17337586
+                                                                   },
+                                       "bin/x64/GogakuSettings.exe":  {
+                                                                          "sha256":  "6779b38739bb4f2b6f0f41201b206a70ff5906409649c99d7336848e71e96bbb",
+                                                                          "bytes":  19261406
+                                                                      },
+                                       "bin/x64/GogakuTsf.dll":  {
+                                                                     "sha256":  "6573a482bdb7cfa4c0bd93a35f9e3e8e26d161b381f4f571b27b5c835979bd04",
+                                                                     "bytes":  16989910
+                                                                 },
+                                       "bin/x64/libgogaku_core.dll":  {
+                                                                          "sha256":  "46f57d6339e8a1d09200dfba40ef8eeab1f3ad78c1296d1e1ad3251aa24ecfb8",
+                                                                          "bytes":  25461314
+                                                                      },
+                                       "bin/x86/GogakuTsf.dll":  {
+                                                                     "sha256":  "89b5c64f6ec752a293fcae8bb7a803f083e9f4ff51b4c1c0ad96ee56b9fd7f95",
+                                                                     "bytes":  15203567
+                                                                 },
+                                       "data/english-wordlist-sources.json":  {
+                                                                                  "sha256":  "5233dd91f1ccfd103df9b406e2f97b8fb2f52da47ba82befda1c36e5ffe909f8",
+                                                                                  "bytes":  929
+                                                                              },
+                                       "data/english-words.txt":  {
+                                                                      "sha256":  "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+                                                                      "bytes":  433760
+                                                                  },
+                                       "data/gloss-sources.json":  {
+                                                                       "sha256":  "e9b88618b5e82719ff5ec9e5c08c404157da171c7c7bccf7b528fa5fe7d2aee3",
+                                                                       "bytes":  2423
+                                                                   },
+                                       "data/gloss.tsv":  {
+                                                              "sha256":  "7f3e32be397f9aa2c87457fc207b26fcf10fe911ce9ac6ee4f48a79096cadc5d",
+                                                              "bytes":  6435711
+                                                          },
+                                       "data/sc.dict":  {
+                                                            "sha256":  "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+                                                            "bytes":  4489669
+                                                        },
+                                       "data/zh_CN.lm":  {
+                                                             "sha256":  "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387",
+                                                             "bytes":  34736327
+                                                         },
+                                       "licenses/00-licenses/GCC-COPYING.RUNTIME":  {
+                                                                                        "sha256":  "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+                                                                                        "bytes":  3324
+                                                                                    },
+                                       "licenses/00-licenses/GCC-COPYING3":  {
+                                                                                 "sha256":  "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+                                                                                 "bytes":  35147
+                                                                             },
+                                       "licenses/00-licenses/MinGW-w64-AUTHORS.txt":  {
+                                                                                          "sha256":  "8f308316e7a94b8410f871868bd3948f126526dc1775aeee97a0e365f9a0fd9f",
+                                                                                          "bytes":  2398
+                                                                                      },
+                                       "licenses/00-licenses/MinGW-w64-COPYING.txt":  {
+                                                                                          "sha256":  "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+                                                                                          "bytes":  2326
+                                                                                      },
+                                       "licenses/00-licenses/THIRD-PARTY.md":  {
+                                                                                   "sha256":  "ec0eb28475e26510f5a45db4bed9f339ca6a9063e2891ce0427ced8a8e34066e",
+                                                                                   "bytes":  8452
+                                                                               },
+                                       "licenses/00-licenses/ecm/COPYING-CMAKE-SCRIPTS":  {
+                                                                                              "sha256":  "46cde7dc11e64c78d650b4851b88f6704b4665ff60f22a1caf68ceb15e217e5b",
+                                                                                              "bytes":  1327
+                                                                                          },
+                                       "licenses/00-licenses/fcitx5/LGPL-2.1-or-later.txt":  {
+                                                                                                 "sha256":  "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+                                                                                                 "bytes":  25906
+                                                                                             },
+                                       "licenses/00-licenses/fcitx5/Unicode-DFS-2016.txt":  {
+                                                                                                "sha256":  "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+                                                                                                "bytes":  2858
+                                                                                            },
+                                       "licenses/00-licenses/inno/license.txt":  {
+                                                                                     "sha256":  "2e5346868c2a18434489824e11d65c3031620f792fefc415d05f19cd441abf5c",
+                                                                                     "bytes":  1521
+                                                                                 },
+                                       "licenses/00-licenses/kenlm/COPYING":  {
+                                                                                  "sha256":  "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+                                                                                  "bytes":  26530
+                                                                              },
+                                       "licenses/00-licenses/kenlm/COPYING.3":  {
+                                                                                    "sha256":  "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+                                                                                    "bytes":  35147
+                                                                                },
+                                       "licenses/00-licenses/kenlm/COPYING.LESSER.3":  {
+                                                                                           "sha256":  "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+                                                                                           "bytes":  7637
+                                                                                       },
+                                       "licenses/00-licenses/kenlm/LICENSE":  {
+                                                                                  "sha256":  "6d9f8894586896ee3b383c962e141f527edeb54f561a6bd189d0eb08380c4cc2",
+                                                                                  "bytes":  1150
+                                                                              },
+                                       "licenses/00-licenses/kenlm/util/getopt.c":  {
+                                                                                        "sha256":  "0a523a06b49384ace3cff98b60b45063299d3ca642de46e0e47ccc51d8cb08f4",
+                                                                                        "bytes":  1441
+                                                                                    },
+                                       "licenses/00-licenses/kenlm/util/integer_to_string.cc":  {
+                                                                                                    "sha256":  "368848d6b70e5537d7bd8a4942a9fd2ba8ad0f78dec67bc7b2436129dc8dfae0",
+                                                                                                    "bytes":  22498
+                                                                                                },
+                                       "licenses/00-licenses/kenlm/util/murmur_hash.cc":  {
+                                                                                              "sha256":  "77c4cd0fb91f67d9f1149964180cf1cf5c80793ab810f8bbce55ede1b980412b",
+                                                                                              "bytes":  4074
+                                                                                          },
+                                       "licenses/00-licenses/kenlm/util/string_piece.hh":  {
+                                                                                               "sha256":  "cc4de0949793b958fa6da1eecd4335b58fdf779dc6652ac323502ba9e0a58d8b",
+                                                                                               "bytes":  9185
+                                                                                           },
+                                       "licenses/00-licenses/libime/LGPL-2.1-or-later.txt":  {
+                                                                                                 "sha256":  "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+                                                                                                 "bytes":  25906
+                                                                                             },
+                                       "licenses/00-licenses/libime/REUSE.toml":  {
+                                                                                      "sha256":  "d314176a91e08c0affc0017c9994d9440a4ac1c18ddf8eab1842117c0d6c806e",
+                                                                                      "bytes":  805
+                                                                                  },
+                                       "licenses/00-licenses/libime/data-CMakeLists.txt":  {
+                                                                                               "sha256":  "c73cbe828525a0c3f9da52d483d2a7edc3cad6211afdc5ce61b4878624cd7c73",
+                                                                                               "bytes":  3375
+                                                                                           },
+                                       "licenses/00-licenses/msys2/dlfcn/LICENSE":  {
+                                                                                        "sha256":  "4cc7ac997b9293db5919baf630100cc09b3508efdfe6a6611c95511fb863b3c7",
+                                                                                        "bytes":  1040
+                                                                                    },
+                                       "licenses/00-licenses/msys2/gettext-runtime/COPYING":  {
+                                                                                                  "sha256":  "7ef2cdfe58e0c0460657b6598b49af29d4e03c1e41cbaf0e1da1eb8ad74b95d0",
+                                                                                                  "bytes":  495
+                                                                                              },
+                                       "licenses/00-licenses/msys2/gettext-runtime/intl/COPYING.LIB":  {
+                                                                                                           "sha256":  "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+                                                                                                           "bytes":  26419
+                                                                                                       },
+                                       "licenses/00-licenses/msys2/gettext-runtime/libasprintf/COPYING":  {
+                                                                                                              "sha256":  "03133addae5b99a6148c538300e6d97074453089be1423b741bd081f18e2b298",
+                                                                                                              "bytes":  65
+                                                                                                          },
+                                       "licenses/00-licenses/msys2/gettext-runtime/libasprintf/COPYING.LIB":  {
+                                                                                                                  "sha256":  "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+                                                                                                                  "bytes":  26419
+                                                                                                              },
+                                       "licenses/00-licenses/msys2/libiconv/COPYING":  {
+                                                                                           "sha256":  "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+                                                                                           "bytes":  35147
+                                                                                       },
+                                       "licenses/00-licenses/msys2/libiconv/COPYING.LIB":  {
+                                                                                               "sha256":  "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+                                                                                               "bytes":  26419
+                                                                                           },
+                                       "licenses/00-licenses/msys2/libiconv/README":  {
+                                                                                          "sha256":  "ff0400ffb0c3dace1a64012f4125f292a3fef58c5b8486c7f9ba0c01a0637f3c",
+                                                                                          "bytes":  5743
+                                                                                      },
+                                       "licenses/00-licenses/msys2/libiconv/libcharset/COPYING.LIB":  {
+                                                                                                          "sha256":  "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+                                                                                                          "bytes":  26419
+                                                                                                      },
+                                       "licenses/00-licenses/msys2/zlib/LICENSE":  {
+                                                                                       "sha256":  "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+                                                                                       "bytes":  1002
+                                                                                   },
+                                       "licenses/00-licenses/msys2/zstd/LICENSE":  {
+                                                                                       "sha256":  "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8",
+                                                                                       "bytes":  1549
+                                                                                   },
+                                       "licenses/00-licenses/native/Boost-LICENSE.txt":  {
+                                                                                             "sha256":  "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+                                                                                             "bytes":  1338
+                                                                                         },
+                                       "licenses/00-licenses/native/libintl-NOTICE.txt":  {
+                                                                                              "sha256":  "0be40e3c9d326bee38ccdd96a82bb39caddd923c27d67e6beeee91e08abbe0b0",
+                                                                                              "bytes":  1001
+                                                                                          },
+                                       "licenses/00-licenses/resources/CC-BY-SA-4.0.txt":  {
+                                                                                               "sha256":  "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+                                                                                               "bytes":  20138
+                                                                                           },
+                                       "licenses/00-licenses/resources/DATA-ATTRIBUTION.txt":  {
+                                                                                                   "sha256":  "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+                                                                                                   "bytes":  3645
+                                                                                               },
+                                       "licenses/00-licenses/resources/MIT-Mayoi.txt":  {
+                                                                                            "sha256":  "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+                                                                                            "bytes":  1086
+                                                                                        },
+                                       "licenses/00-licenses/resources/MIT-jieba.txt":  {
+                                                                                            "sha256":  "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+                                                                                            "bytes":  1075
+                                                                                        },
+                                       "licenses/00-licenses/resources/SCOWL-Copyright.txt":  {
+                                                                                                  "sha256":  "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+                                                                                                  "bytes":  11758
+                                                                                              },
+                                       "licenses/00-licenses/windows/json-LICENSE.MIT":  {
+                                                                                             "sha256":  "59a5abff0cf2deaf76ea12790c7c42256331aa5fbd6478f95b303edf76e67e6b",
+                                                                                             "bytes":  1623
+                                                                                         },
+                                       "licenses/00-licenses/windows/miniz-LICENSE.txt":  {
+                                                                                              "sha256":  "8a77c33cd389c8ed4e81b11e4cb2aeac5c5b816a3648d35ebcc6bccfe2a02d8a",
+                                                                                              "bytes":  1392
+                                                                                          },
+                                       "licenses/00-licenses/windows/monocypher-LICENCE.md":  {
+                                                                                                  "sha256":  "093f8980c0ac0e6e4709dd3a6baf85a24dbec14b3c8130fc1fb97630e8681dce",
+                                                                                                  "bytes":  10613
+                                                                                              },
+                                       "licenses/00-licenses/windows-runtime-sources.json":  {
+                                                                                                 "sha256":  "6b2e3f4ae60eb98a7de9614626851f0fd23b922227b0aa405baddc14189797fd",
+                                                                                                 "bytes":  859
+                                                                                             },
+                                       "licenses/00-licenses/windows-setup-dependencies.lock.json":  {
+                                                                                                         "sha256":  "db02a3fe312a3e96521b7a4e1b460f90f43f0e092ef9638f63641689b3e4c26a",
+                                                                                                         "bytes":  3779
+                                                                                                     },
+                                       "licenses/01-licenses/CC-BY-SA-4.0.txt":  {
+                                                                                     "sha256":  "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+                                                                                     "bytes":  20138
+                                                                                 },
+                                       "licenses/01-licenses/DATA-ATTRIBUTION.txt":  {
+                                                                                         "sha256":  "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+                                                                                         "bytes":  3645
+                                                                                     },
+                                       "licenses/01-licenses/MIT-Mayoi.txt":  {
+                                                                                  "sha256":  "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+                                                                                  "bytes":  1086
+                                                                              },
+                                       "licenses/01-licenses/MIT-jieba.txt":  {
+                                                                                  "sha256":  "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+                                                                                  "bytes":  1075
+                                                                              },
+                                       "licenses/01-licenses/SCOWL-Copyright.txt":  {
+                                                                                        "sha256":  "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+                                                                                        "bytes":  11758
+                                                                                    },
+                                       "licenses/THIRD-PARTY.md":  {
+                                                                       "sha256":  "0e94a75f64bdd5e9b2d9b55ba3fe2ed7c4b8eaede4f990612e922df4388d09eb",
+                                                                       "bytes":  8585
+                                                                   },
+                                       "licenses/fcitx5/LGPL-2.1-or-later.txt":  {
+                                                                                     "sha256":  "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+                                                                                     "bytes":  25906
+                                                                                 },
+                                       "licenses/fcitx5/Unicode-DFS-2016.txt":  {
+                                                                                    "sha256":  "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+                                                                                    "bytes":  2858
+                                                                                },
+                                       "licenses/kenlm/COPYING":  {
+                                                                      "sha256":  "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+                                                                      "bytes":  26530
+                                                                  },
+                                       "licenses/kenlm/COPYING.3":  {
+                                                                        "sha256":  "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+                                                                        "bytes":  35147
+                                                                    },
+                                       "licenses/kenlm/COPYING.LESSER.3":  {
+                                                                               "sha256":  "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+                                                                               "bytes":  7637
+                                                                           },
+                                       "licenses/kenlm/LICENSE":  {
+                                                                      "sha256":  "6d9f8894586896ee3b383c962e141f527edeb54f561a6bd189d0eb08380c4cc2",
+                                                                      "bytes":  1150
+                                                                  },
+                                       "licenses/libime/LGPL-2.1-or-later.txt":  {
+                                                                                     "sha256":  "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+                                                                                     "bytes":  25906
+                                                                                 },
+                                       "licenses/windows/json-LICENSE.MIT":  {
+                                                                                 "sha256":  "59a5abff0cf2deaf76ea12790c7c42256331aa5fbd6478f95b303edf76e67e6b",
+                                                                                 "bytes":  1623
+                                                                             },
+                                       "licenses/windows/miniz-LICENSE.txt":  {
+                                                                                  "sha256":  "8a77c33cd389c8ed4e81b11e4cb2aeac5c5b816a3648d35ebcc6bccfe2a02d8a",
+                                                                                  "bytes":  1392
+                                                                              },
+                                       "licenses/windows/monocypher-LICENCE.md":  {
+                                                                                      "sha256":  "093f8980c0ac0e6e4709dd3a6baf85a24dbec14b3c8130fc1fb97630e8681dce",
+                                                                                      "bytes":  10613
+                                                                                  },
+                                       "resources/update/windows.json":  {
+                                                                             "sha256":  "612de6941e48e781e595f80621f3afb08657f3287cf4c7febd2ff81c51f6af79",
+                                                                             "bytes":  304
+                                                                         }
+                                   }
+                 },
+    "com32":  "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b96-dev\\bin\\x86\\GogakuTsf.dll",
+    "com64":  "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b96-dev\\bin\\x64\\GogakuTsf.dll",
+    "activeRoot":  "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b96-dev",
+    "oldRoot":  "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev",
+    "previousRoot":  "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev",
+    "customDirArgumentUsed":  false,
+    "ok":  true,
+    "exitCode":  0,
+    "installerSha256":  "0de73e8442ed517d2cb7bf45ff767c19bf90a637c817abf0a5543a325a17a357",
+    "previousOldRoot":  "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev",
+    "fileChecks":  [
+                       {
+                           "path":  "bin/x64/GogakuAgent.exe",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "bin/x64/GogakuSettings.exe",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "bin/x64/GogakuTsf.dll",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "bin/x64/libgogaku_core.dll",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "bin/x86/GogakuTsf.dll",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "data/english-wordlist-sources.json",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "data/english-words.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "data/gloss-sources.json",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "data/gloss.tsv",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "data/sc.dict",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "data/zh_CN.lm",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/GCC-COPYING.RUNTIME",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/GCC-COPYING3",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/MinGW-w64-AUTHORS.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/MinGW-w64-COPYING.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/THIRD-PARTY.md",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/ecm/COPYING-CMAKE-SCRIPTS",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/fcitx5/LGPL-2.1-or-later.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/fcitx5/Unicode-DFS-2016.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/inno/license.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/COPYING",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/COPYING.3",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/COPYING.LESSER.3",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/LICENSE",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/util/getopt.c",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/util/integer_to_string.cc",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/util/murmur_hash.cc",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/kenlm/util/string_piece.hh",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/libime/LGPL-2.1-or-later.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/libime/REUSE.toml",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/libime/data-CMakeLists.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/dlfcn/LICENSE",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/gettext-runtime/COPYING",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/gettext-runtime/intl/COPYING.LIB",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/gettext-runtime/libasprintf/COPYING",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/gettext-runtime/libasprintf/COPYING.LIB",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/libiconv/COPYING",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/libiconv/COPYING.LIB",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/libiconv/README",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/libiconv/libcharset/COPYING.LIB",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/zlib/LICENSE",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/msys2/zstd/LICENSE",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/native/Boost-LICENSE.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/native/libintl-NOTICE.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/resources/CC-BY-SA-4.0.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/resources/DATA-ATTRIBUTION.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/resources/MIT-Mayoi.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/resources/MIT-jieba.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/resources/SCOWL-Copyright.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/windows/json-LICENSE.MIT",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/windows/miniz-LICENSE.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/windows/monocypher-LICENCE.md",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/windows-runtime-sources.json",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/00-licenses/windows-setup-dependencies.lock.json",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/01-licenses/CC-BY-SA-4.0.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/01-licenses/DATA-ATTRIBUTION.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/01-licenses/MIT-Mayoi.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/01-licenses/MIT-jieba.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/01-licenses/SCOWL-Copyright.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/THIRD-PARTY.md",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/fcitx5/LGPL-2.1-or-later.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/fcitx5/Unicode-DFS-2016.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/kenlm/COPYING",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/kenlm/COPYING.3",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/kenlm/COPYING.LESSER.3",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/kenlm/LICENSE",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/libime/LGPL-2.1-or-later.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/windows/json-LICENSE.MIT",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/windows/miniz-LICENSE.txt",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "licenses/windows/monocypher-LICENCE.md",
+                           "passed":  true
+                       },
+                       {
+                           "path":  "resources/update/windows.json",
+                           "passed":  true
+                       }
+                   ]
+}
+

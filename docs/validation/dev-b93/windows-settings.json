@@ -1,0 +1,59 @@
+{
+  "largeIcon": 2491751,
+  "ok": true,
+  "pages": [
+    {
+      "heading": "学习翻译",
+      "index": 0
+    },
+    {
+      "heading": "普通输入",
+      "index": 1
+    },
+    {
+      "heading": "自定义词语",
+      "index": 2
+    },
+    {
+      "heading": "皮肤",
+      "index": 3
+    },
+    {
+      "heading": "快捷键",
+      "index": 4
+    },
+    {
+      "heading": "学习与隐私",
+      "index": 5
+    },
+    {
+      "heading": "学习片段",
+      "index": 6
+    }
+  ],
+  "screenshots": [
+    "settings-page-0.png",
+    "settings-page-1.png",
+    "settings-page-2.png",
+    "settings-page-3.png",
+    "settings-page-4.png",
+    "settings-page-5.png",
+    "settings-page-6.png",
+    "settings-skin-minimum.png"
+  ],
+  "session": 1,
+  "settings": {
+    "class": "GogakuNativeSettings",
+    "dpi": 192,
+    "handle": 2622714,
+    "pid": 6752,
+    "rect": [
+      40,
+      40,
+      2000,
+      1400
+    ],
+    "visible": true
+  },
+  "smallIcon": 2622259
+}

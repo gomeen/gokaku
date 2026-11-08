@@ -1,0 +1,66 @@
+{
+  "activateHr": 0,
+  "activationMilliseconds": 0,
+  "candidateVisibleAfterFocus": false,
+  "candidateWindows": [],
+  "foregroundRestored": true,
+  "keyTrace": [
+    {
+      "control": false,
+      "focusClass": "Chrome_WidgetWin_1",
+      "keyboardLayout": 134481924,
+      "tick": 165364687,
+      "virtualKey": 78
+    },
+    {
+      "control": false,
+      "focusClass": "Chrome_WidgetWin_1",
+      "keyboardLayout": 134481924,
+      "tick": 165364875,
+      "virtualKey": 73
+    },
+    {
+      "control": false,
+      "focusClass": "Chrome_WidgetWin_1",
+      "keyboardLayout": 134481924,
+      "tick": 165365671,
+      "virtualKey": 32
+    }
+  ],
+  "mode": "chrome-focus",
+  "modulesAfter": [
+    {
+      "memoryPeTimestamp": 1794118901,
+      "memoryRead": true,
+      "path": "C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuTsfDiagnosis\\GogakuTsf.dll"
+    }
+  ],
+  "modulesBefore": [
+    {
+      "memoryPeTimestamp": 1794118901,
+      "memoryRead": true,
+      "path": "C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuTsfDiagnosis\\GogakuTsf.dll"
+    }
+  ],
+  "ok": true,
+  "screenshots": [],
+  "syntheticWindowClosed": true,
+  "target": {
+    "class": "Chrome_WidgetWin_1",
+    "dpi": 192,
+    "handle": 5506132,
+    "pid": 10948,
+    "rect": [
+      20,
+      20,
+      2008,
+      1400
+    ],
+    "visible": true
+  },
+  "values": {
+    "active": "target",
+    "source": "",
+    "target": " "
+  }
+}

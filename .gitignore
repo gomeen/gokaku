@@ -1,10 +1,50 @@
+# 系统与编辑器的个人状态
 .DS_Store
+.idea/
+.vs/
+xcuserdata/
+*.xcuserstate
+*.swp
+*.swo
+
+# Python 与本地工具缓存
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# 双端构建缓存与安装包；任意层级均适用
 .build/
 dist/
 .swiftpm/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+build.ninja
+.ninja_deps
+.ninja_log
+compile_commands.json
+
+# 本机调试、下载、临时材料
 local/
+
+# 本机配置与私钥；可公开的配置模板继续入库
+.env
+.env.*
+!.env.example
+!.env.template
+volcengine-credentials.json
+*.private.pem
+*-private.pem
+*.key
+*.p8
+*.p12
+*.pfx
 
 # 嵌套工作区（bug-debounce 等临时 worktree 挂载点）
 /worktrees/
+
+# docs/validation/ 与 probes/results/ 是按保留策略归档的证据，不整体忽略。
+# .vscode/ 可保存共享任务与调试配置，不整体忽略。

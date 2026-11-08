@@ -1,0 +1,14 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/verify.py",
+      "--profile",
+      "fast",
+      "--channel",
+      "dev"
+    ],
+    "exitCode": 0,
+    "seconds": 72.83
+  }
+]

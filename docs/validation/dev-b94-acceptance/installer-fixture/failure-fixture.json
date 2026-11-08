@@ -1,0 +1,255 @@
+{
+    "com":  [
+                {
+                    "view":  "Registry64",
+                    "key":  {
+                                "present":  false,
+                                "values":  [
+
+                                           ],
+                                "children":  [
+
+                                             ]
+                            },
+                    "inproc":  {
+                                   "present":  false,
+                                   "kind":  null,
+                                   "data":  null
+                               },
+                    "threadingModel":  {
+                                           "present":  false,
+                                           "kind":  null,
+                                           "data":  null
+                                       }
+                },
+                {
+                    "view":  "Registry32",
+                    "key":  {
+                                "present":  false,
+                                "values":  [
+
+                                           ],
+                                "children":  [
+
+                                             ]
+                            },
+                    "inproc":  {
+                                   "present":  false,
+                                   "kind":  null,
+                                   "data":  null
+                               },
+                    "threadingModel":  {
+                                           "present":  false,
+                                           "kind":  null,
+                                           "data":  null
+                                       }
+                }
+            ],
+    "uninstall":  [
+                      {
+                          "view":  "Registry64",
+                          "key":  {
+                                      "present":  false,
+                                      "values":  [
+
+                                                 ],
+                                      "children":  [
+
+                                                   ]
+                                  }
+                      },
+                      {
+                          "view":  "Registry32",
+                          "key":  {
+                                      "present":  false,
+                                      "values":  [
+
+                                                 ],
+                                      "children":  [
+
+                                                   ]
+                                  }
+                      }
+                  ],
+    "active":  {
+                   "present":  false,
+                   "kind":  null,
+                   "data":  null
+               },
+    "previous":  {
+                     "present":  false,
+                     "kind":  null,
+                     "data":  null
+                 },
+    "run":  [
+                {
+                    "view":  "Registry64",
+                    "sid":  ".DEFAULT",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-18",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-19",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-20",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-1001",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-1001_Classes",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-500",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry64",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-500_Classes",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  ".DEFAULT",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-18",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-19",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-20",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-1001",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-1001_Classes",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-500",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                },
+                {
+                    "view":  "Registry32",
+                    "sid":  "S-1-5-21-2161532568-202614849-456035553-500_Classes",
+                    "name":  "GogakuAcceptanceB94Agent",
+                    "value":  {
+                                  "present":  false,
+                                  "kind":  null,
+                                  "data":  null
+                              }
+                }
+            ],
+    "files":  {
+                  "present":  false,
+                  "directories":  [
+
+                                  ],
+                  "files":  [
+
+                            ]
+              }
+}

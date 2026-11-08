@@ -1,0 +1,16 @@
+{
+  "result": {
+    "checks": [
+      {
+        "name": "external-termination",
+        "passed": true
+      },
+      {
+        "name": "clear-failed-still-revokes",
+        "passed": true
+      }
+    ],
+    "ok": true
+  },
+  "exitCode": 0
+}

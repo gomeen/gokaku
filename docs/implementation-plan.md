@@ -34,13 +34,13 @@
 
 ### 共享范围的划法与重复实现（2026-11-07 复盘）
 
-本节记录一个已发生的事实及其根因。设置迁移、更新清单验签、火山请求签名、主题调色板目前在 Swift 与 C++ 各有一份实现（`Sources/GogakuCore/Settings.swift`、`Sources/GogakuCore/UpdateContract.swift`、`Sources/GogakuCore/Volcengine.swift`、`Sources/GogakuCore/CandidateTheme.swift` 与 `native/GogakuWindows/platform.cpp`、`update.cpp`、`services.cpp`、`themes.cpp`）。两端不会因为改错一端而变红，只能靠注释对照维持：`themes.cpp` 的「Exact semantic palettes from Sources/GogakuCore/CandidateTheme.swift」与 `services.cpp` 的「须与 Swift 逐字节一致」就是这种状态的自述。
+本节记录一个已发生的事实及其根因。设置迁移、更新清单验签、火山请求签名、主题调色板目前在 Swift 与 C++ 各有一份实现（`macos/Sources/GogakuKit/Settings.swift`、`macos/Sources/GogakuKit/UpdateContract.swift`、`macos/Sources/GogakuKit/Volcengine.swift`、`macos/Sources/GogakuKit/CandidateTheme.swift` 与 `windows/GogakuWindows/platform.cpp`、`update.cpp`、`services.cpp`、`themes.cpp`）。两端不会因为改错一端而变红，只能靠注释对照维持：`themes.cpp` 的「Exact semantic palettes from macos/Sources/GogakuKit/CandidateTheme.swift」与 `services.cpp` 的「须与 Swift 逐字节一致」就是这种状态的自述。
 
 根因不是某一条规则要求写两遍，而是三条规则叠加后让写两遍成为合法且最省事的路径。
 
 1. 共享范围只划到输入会话。`docs/product.md` 规定「业务核心迁移为共享 C++ 实现」并把 Windows 端描述为「以 C++／Windows SDK 实现 TSF 文本服务和 Win32 界面」，没有把设置、更新、主题、翻译凭据这些非会话逻辑划进共享范围。
 2. 一致性只要求可观察行为与格式，不要求单一实现。上文「功能一致」的定义是入口、规则、效果、格式和失败行为一致，两份实现只要行为对齐就算合规。
-3. C ABI 只覆盖会话，非会话合同没有落点。`native/GogakuCore/include/gogaku_core.h` 导出的 30 个函数全部是 `gc_normal_*` 与 `gc_learning_*`，设置、清单验签、请求签名、主题数据都没有共享入口，Windows 侧要复用只能自己写一份。
+3. C ABI 只覆盖会话，非会话合同没有落点。`shared/GogakuCore/include/gogaku_core.h` 导出的 30 个函数全部是 `gc_normal_*` 与 `gc_learning_*`，设置、清单验签、请求签名、主题数据都没有共享入口，Windows 侧要复用只能自己写一份。
 4. 验收按端列状态，完成判据是「已编译」。`docs/feature-parity.md` 每行一列一端，P3 的完成条件是编译通过，于是照 Swift 再写一遍 C++ 是达成验收的最短路径。
 5. 没有对拍检查。两端测试各测各的，没有一组共享输入与期望结论同时约束两边，所以漂移不可见。
 
@@ -64,7 +64,7 @@
 | 3（不执行） | 更新清单验签 | 清单原始字节、签名、公钥、当前通道与构建号、平台与架构 | 下载、缓存、UI 状态机留在平台 | 同一组篡改样本两端得出相同的拒绝原因 |
 | 4（不执行） | 火山请求签名 | 方法、主机、路径、查询、请求体、密钥与时间戳 | 传输、超时、取消与计量留在平台 | 与已入库的固定向量逐字节相等 |
 
-前置动作：先入库一组两端共跑的对拍向量（同一份输入与期望结论），再动第一行。没有向量的抽取不开始。当前端内两份实现（`Sources/GogakuCore/UpdateContract.swift` 与 `native/GogakuWindows/update.cpp` 等）保持原状，不在此轮一边抽取一边加特性。
+前置动作：先入库一组两端共跑的对拍向量（同一份输入与期望结论），再动第一行。没有向量的抽取不开始。当前端内两份实现（`macos/Sources/GogakuKit/UpdateContract.swift` 与 `windows/GogakuWindows/update.cpp` 等）保持原状，不在此轮一边抽取一边加特性。
 
 **进度（2026-11-07）**：第 1 行与第 2 行已落地。第 1 行（设置读侧规范化）见上节；**Windows 已接线（编译验证）**，VM 运行重验待做。第 2 行（内置主题）：`theme_contract.cpp` 经 `gc_themes_builtin` 输出四套主题的规范 JSON，Mac `BuiltinCandidateThemes` 与 Windows `themes.cpp` 都改为消费契约，两端硬编码调色板表与「Exact semantic palettes」式注释对照已删除；向量冻结锚点色（含产品规格 #12996a），并入两端 ctest 与 Windows 自检包。主题包容器（ZIP／PNG／WIC）仍在两端各算一层，属后续。**第 3、4 行（清单验签、火山签名）经用户裁决不执行（2026-11-07）**：不把 monocypher 上移共享核心，Mac 保留 CryptoKit、Windows 保留 monocypher＋CNG，两端各自实现维持原状。这两处因此是「共享实现规则」的已登记例外——将来任何一端改动清单验签或请求签名前，必须先入库两端共跑的对拍向量，否则不得合入。
 
@@ -200,6 +200,6 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 | P2 Windows TSF／代理 | x86／x64 TSF、x64 代理／核心已编译 | 私有管道、焦点／字段、提交确认、原子持久化已接通；当前 Windows 运行验证交用户 |
 | P3 Windows 设置／主题／拼写 | 已编译，存在功能缺口 | Win32 七页、Direct2D／DirectWrite／WIC、主题 ZIP、自定义词、系统拼写；缺口见[对照表](feature-parity.md) |
 | P4 Mac PKG | 打包阶段注入身份＋签名；真实 `installer -pkg` 单次安装通过；假 HOME 成功／失败／中断通过；Developer ID／公证未执行（无证书） | `scripts/package-macos-pkg.py`、`pkg-postinstall.sh`、`docs/validation/native-development.md` |
-| P4 Windows Setup | 已实际构包；安装／升级未验收 | [构包报告](validation/windows-setup-build.json)；固定目录＋占用中止，版本化升级恢复仍缺 |
-| P5 检查更新 | 两端客户端已实现；Windows 已编译；真实 GitHub 未验证 | `Update*.swift`、`native/GogakuWindows/update.cpp`、发布脚本 |
+| P4 Windows Setup | b94 默认升级与保留数据通过；完整恢复／卸载未验收 | [b94 证据](validation/dev-b94.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐 |
+| P5 检查更新 | 两端客户端已实现；Windows 已编译；真实 GitHub 未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本 |
 | P6 最终验收 | 核心关键回归通过；完整产品未验收 | Windows VM 限定安装／宿主／UI 结果另列；真机与完整矩阵未验收 |

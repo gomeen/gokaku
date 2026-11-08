@@ -41,7 +41,7 @@ CHANNELS = {
             'settings_id': 'org.gogaku.settings.dev'},
 }
 
-POSTINSTALL_TEMPLATE = ROOT / 'scripts/pkg-postinstall.sh'
+POSTINSTALL_TEMPLATE = ROOT / 'macos/packaging/pkg-postinstall.sh'
 
 
 def sha256(path: Path) -> str:
@@ -103,7 +103,7 @@ def sign_app(app: Path, identity: str) -> None:
 
 
 def postinstall_script(channel: dict, build: int) -> str:
-    """事务式 postinstall（模板见 scripts/pkg-postinstall.sh）。
+    """事务式 postinstall（模板见 macos/packaging/pkg-postinstall.sh）。
 
     为什么 App 以 zip 随包而非直接放 Scripts 目录：安装器会把 Scripts 展开
     到 PKInstallSandboxManager 沙箱，LaunchServices 会扫描其中的 .app 并注册

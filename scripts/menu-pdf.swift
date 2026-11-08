@@ -13,8 +13,8 @@ final class MenuSVG: NSObject, XMLParserDelegate {
         }
     }
 }
-let destination = URL(fileURLWithPath: CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "assets/app-icon/gogaku-menu.pdf")
-let svg = URL(fileURLWithPath: CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : "assets/app-icon/menu.svg")
+let destination = URL(fileURLWithPath: CommandLine.arguments.count > 1 ? CommandLine.arguments[1] : "macos/assets/app-icon/gogaku-menu.pdf")
+let svg = URL(fileURLWithPath: CommandLine.arguments.count > 2 ? CommandLine.arguments[2] : "shared/branding/menu.svg")
 let parser = XMLParser(data: try Data(contentsOf: svg))
 let source = MenuSVG(); parser.delegate = source
 guard parser.parse(), source.paths.count == 2 else {

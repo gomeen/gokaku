@@ -1,0 +1,31 @@
+{
+  "activateHr": 0,
+  "activationMilliseconds": 0,
+  "documentMarker": "GogakuAcceptanceB94-11560",
+  "error": "Notepad did not load installed b94 TSF; no keys sent",
+  "foregroundRestored": true,
+  "keyTrace": [],
+  "mode": "notepad-basic",
+  "modulesBefore": [
+    {
+      "memoryPeTimestamp": 1794109130,
+      "memoryRead": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuTsf.dll"
+    }
+  ],
+  "ok": false,
+  "screenshots": [],
+  "target": {
+    "class": "Notepad",
+    "dpi": 192,
+    "handle": 2556686,
+    "pid": 11496,
+    "rect": [
+      0,
+      204,
+      2048,
+      1236
+    ],
+    "visible": true
+  }
+}

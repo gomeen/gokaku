@@ -2,6 +2,33 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-08：Windows 冷启动与版本目录升级，构建 94 dev）
+
+- TSF 激活阶段预热代理，最多等待 5 秒连接与握手；逐键路径不新增启动等待，不缓存或重放按键。增加独立延迟假代理的双架构连接回归。
+- Inno 将程序、数据和许可放入受管理版本目录，保留固定安装根和卸载入口；双架构注册失败时恢复旧注册与路径指针，迁移已启用的既有自启动项。新 TSF 从受保护的当前／上一根解析代理，旧版本文件保留。
+- b94 双端包重建、fast 7/7；Windows 默认升级在旧 b93 DLL 保持加载时成功，71 个文件、注册、迁移与数据保留通过。双架构各两次冷启动及各一次暖启动提交“你好”，七页设置回归通过。完整恢复／卸载矩阵与其它宿主未验收，Mac b94 本轮未安装；详见 [b94 证据](docs/validation/dev-b94.json)。
+
+### 变更（2026-11-08：双端开发安装包重建，构建 93 dev）
+
+- `.gitignore` 补充本地凭据、私钥／证书及 IDE 用户文件规则；构建缓存、安装包和本机数据继续留在忽略目录，现役源码和验证证据保留。
+- 退役早期 `input-flow.html` 及 10 张旧／重复截图；保留输入习惯、设置和皮肤三份定稿原型及输入习惯生成链，补充 `prototypes/README.md` 说明边界。
+- 重建双端 b93 安装包；Mac PKG 实际安装、安装后包检查和 dev 通道 14 项 IMK 冒烟通过。Windows 在独立目录安装，71 个清单文件核对通过，双架构新建 Edit 暖启动和七页设置检查通过。fast 7/7、核心 10 项、Swift Release 217 项通过。
+- Windows 冷启动第一组仍失败，默认目录升级因旧宿主占用返回 7，均保留失败证据；完整 release／host、在线翻译／更新及升级恢复／卸载未验收，未公开发布。详见[原生验收](docs/validation/native-development.md)。
+
+### 变更（2026-11-08：退役旧选型与修补验证门禁，工作区）
+
+- 删除旧引擎／本地翻译模型的比较、下载转换、排名、运行结果和展示页；保留 libime 采用理由、固定依赖消费者、通用双向考题和现役输入法测试。当前火山结果归位 `probes/results/volcengine/`。
+- fast／release 退役旧评测和 quickmt worker 检查，改为通用翻译数据及验证门禁正负例；发布报告须匹配策略版本、必需清单、源码／测试身份和当前双端包。CTest 跳过／零测试、缺 GUI、测试期间源码变化均不能冒充通过。host 目前仅支持 stable，dev 明确 blocked。
+- 生产火山客户端新增离线 HTTP 异常回归，覆盖认证／限流／服务错误、空／坏／超大响应、超时／断网、凭据热读和重定向拒绝。空 TranslationList 明确返回 emptyOutput。
+- 修复迁移后的渲染模块／构建路径、隔离构建根与 Windows CI 路径；离屏光标断言更新为当前字形排版。fast 七项、Swift Release 217 项与渲染 53 项通过；完整 release、真实 host、Windows 运行、安装升级和真实在线调用未执行，不标完整发布通过。详情见[清理与测试审查](docs/validation/testing-cleanup-audit.md)。
+
+### 变更（2026-11-07 追加：仓库按 shared／macos／windows 分层重组，dev）
+
+- **目录按功能分层**：双端共享的契约核心迁至 `shared/GogakuCore`（连带 `shared/third_party`、`shared/licenses`）；Mac 全部 Swift 源码（含 `Package.swift`、`Tests`、libime 桥 `EngineBridge`、pkg postinstall）集中到 `macos/`；`GogakuTsf`、`GogakuWindows`、Inno 安装器模板与 `Gogaku.ico` 迁至 `windows/`。`native/`、根级 `packaging/`、根级 `assets/` 取消。
+- **消除一名三义**：Swift 包装层 target 由 `GogakuCore` 改名 `GogakuKit`（目录、target、测试 target 同步改名），此后「GogakuCore」只指共享 C++ 核心与其 C ABI（`CGogakuCore`）。测试 target 更名 `GogakuKitTests`。
+- **引用同步**：构建与验证脚本、CI 路径过滤、Windows 侧相对 include 与 `app.rc` 图标路径、探针与文档指针全部更新；Swift `swift build`／`swift test` 需带 `--package-path macos`。历史研究记录（`docs/research-translation-quality-*`、`probes/results/**`）与历史变更条目保持原样，不改写。
+- **行为不变**：本变更只移动文件与更新指针，不改动任何契约逻辑与产物形态；构建输出仍在仓库根 `.build/`（native／core／swift 三个子目录），dist 产物布局不变。
+
 ### 变更（2026-11-07 追加：设置与主题契约进共享核心，dev）
 
 - **设置契约只有一份实现**：新增共享核心 `settings_contract.cpp` 与 C ABI `gc_settings_normalize`／`gc_contract_free`（附加接口，不升 ABI 版本）。读侧规范化（默认值、类型饱和、schema 1→2 迁移、未知字段保留）两端统一；Mac `Settings.load` 与设置合并基线改走契约，Swift 侧迁移分支删除；Windows `platform.cpp` 的默认值字面量与迁移删除，四个二进制（双位数 TSF、代理、设置应用）以静态方式编入同一实现。修复三处真问题：清除的快捷键不再被回退复活；缺 `appDefaultEnglish` 不再丢出厂清单；超范围整数不再回绕落盘。
@@ -124,7 +151,7 @@
 
 ### 变更（构建 13 追加，无二进制变更：翻译评测第二轮补齐）
 
-- **评测缺口修复＋独立确认集（只评测，不接生产）**：修复第一轮缺口——88 条专项短文本集纳入 `all` 默认加载并加数量断言；按输入长度分桶；延迟门槛改读真实结果（缺数据标未完成，超预算记录逐条保留）；候选放行／语义合格／安全回退／错误放行分开统计；缺失审阅不得报完成。新增每方向 50 条独立确认集（`validation/translation-confirm-set.json`，评分规则运行前冻结）与确认集盲测比较材料（模型名盲化）。两个模型全部应译样例语义审阅完成：small100 放行候选合格率 70.8%（确认集 67.4%，固定风险仍 5 条错误放行），quickmt 确认集仅 20.3%（词级失败 88.1%）。**维持 small100 优先、quickmt 仍为性能对照，学习模式继续阻塞**；最终报告见 [final-selection.md](probes/results/translation-backends-round2/final-selection.md)。评测管线回归断言 7 项接入 verify fast 档（`scripts/validate-translation-eval.py`）。
+- **评测缺口修复＋独立确认集（只评测，不接生产）**：修复第一轮缺口——88 条专项短文本集纳入 `all` 默认加载并加数量断言；按输入长度分桶；延迟门槛改读真实结果（缺数据标未完成，超预算记录逐条保留）；候选放行／语义合格／安全回退／错误放行分开统计；缺失审阅不得报完成。新增每方向 50 条独立确认集（`validation/translation-confirm-set.json`，评分规则运行前冻结）与确认集盲测比较材料（模型名盲化）。两个模型全部应译样例语义审阅完成：small100 放行候选合格率 70.8%（确认集 67.4%，固定风险仍 5 条错误放行），quickmt 确认集仅 20.3%（词级失败 88.1%）。**维持 small100 优先、quickmt 仍为性能对照，学习模式继续阻塞**；最终报告见 final-selection.md（旧报告已退役，见 Git 历史）。评测管线回归断言 7 项接入 verify fast 档（`scripts/validate-translation-eval.py`）。
 - **同日复核勘误（无二进制变更）**：更正最终报告两处事实错误——§3.3 分类型表误把 4 条回退但审阅通过的用例计入判审（已按放行口径更正，合计 255/360、145/316 不变，结论不变）；`Gogaku v3.2.1`→「古巴 v3.2.1」实际五轮全部放行进入候选（保护扫描未识别句首 `Gogaku`），原文「被拦截」与请求级数据不符。另补轮次完整性断言：残缺末轮的运行不得冒充完整评测（驱动记录 `completeRun`，汇总强制每用例恰好 `rounds` 轮请求行）。
 
 ### 变更（构建 14 追加：清洗规则 v5——分隔符统一）
@@ -143,7 +170,7 @@
 
 - **加固层第二片（共享 C++，`translate_safety_test` 76 项断言）**：时间检查改为逐条「数值＋时段」对比——合法区间（上午九点到下午四点）不再误判、英文动词 `am` 不再当午前标记、未被时间表达解释的数字必须保留且顺序不变（新增返回码 4）；合法叠词（看看／试试／哈哈／多多少少／一个一个）不再当复读；脚本校验与长度比率排除 URL 跨度；句首已知品牌（29 个无歧义专名）进入保护扫描，与审阅品牌表双向一致。ASan／UBSan quick 冒烟 2000 序列无错误。
 - **组合策略首轮验收（只评策略，不接生产）**：固定路线「运行时保留判定 → 品牌映射 → 审核表达资源 → 双向时间模板 → small100 候选（短表达 beam=2／短句 beam=5，最多 2／3 候选）→ 结构检查 → quickmt 反向评分 → 排序」。新增 `resources/translation/`（CC-CEDICT 衍生审核资源：en→zh 180 条、zh→en 300 条，103 条复核改写；双向时间模板；品牌处理表；manifest 记录来源哈希与许可）、`probes/translation_strategy.py`、`probes/benchmark-translation-strategy.py`、`scripts/build-translation-expressions.py`、`scripts/select-translation-lambda.py`、`scripts/summarize-translation-strategy.py`，以及 worker 的多候选生成与 `score_batch` 反向评分协议。
-- **结果：未通过，学习模式继续关闭。** 冻结验收集（每方向 100 条应译＋12 条未标注保留探针，运行前冻结并与四个开发集去重）上 en→zh 合格 46.0%、zh→en 53.0%（门槛 95%），错误放行 47／44 条；资源路径 8/9、模板 5/6、模型路径 86/176；短表达 p95 354ms、短句 p95 528ms（达标）；固定风险集 5 条意义破坏进入候选。反向评分只在 en→zh 有效（λ=0.25），zh→en 按预先规定的退出路径 λ=0。新发现受保护串污染语言／长度统计导致 5 条正确译文被误拒，本轮未追改封板证据。决定见 [翻译组合策略决定](docs/translation-strategy-decision.md)，证据见[首轮验收报告](probes/results/translation-strategy-final/report.md)。
+- **结果：未通过，学习模式继续关闭。** 冻结验收集（每方向 100 条应译＋12 条未标注保留探针，运行前冻结并与四个开发集去重）上 en→zh 合格 46.0%、zh→en 53.0%（门槛 95%），错误放行 47／44 条；资源路径 8/9、模板 5/6、模型路径 86/176；短表达 p95 354ms、短句 p95 528ms（达标）；固定风险集 5 条意义破坏进入候选。反向评分只在 en→zh 有效（λ=0.25），zh→en 按预先规定的退出路径 λ=0。新发现受保护串污染语言／长度统计导致 5 条正确译文被误拒，本轮未追改封板证据。决定见 [翻译组合策略决定](docs/translation-strategy-decision.md)，证据见首轮验收报告（已退役，见 Git 历史）。
 - **评测回归锁扩到 11 项**：资源哈希／署名／去重、品牌表与 C++ 扫描一致、验收集冻结与去重、验收证据自洽（缺标注即 blocked、门槛算术、风险集与轮次稳定性），已接入 verify fast 与 release 档。
 
 ### 变更（构建 22 追加：学习模式 quickmt 开发版后端）
@@ -177,9 +204,9 @@
 
 ### 变更（模型路线与翻译加固，2026-11-02 裁决）
 
-- **翻译模型路线解堵裁决落地文档**：主路线改为 small100＋翻译加固层（处置口径：修正或安全拦截含回退均算已处置）；解除「不扩模型名单」——宽松许可新候选开放验证（quickmt 双向为首选，Mac 门槛机速度实测 p95 41.7–82.2ms，约为预算 1/6–1/8，比 small100 快 2–2.8 倍；质量待门槛）；LLM／llama.cpp 出局（死守 500ms）；详见 [模型解堵调研](docs/research-translation-model-unblock.md)、[quickmt 速度探针](probes/results/quickmt-speed/report.md)。
+- **翻译模型路线解堵裁决落地文档**：主路线改为 small100＋翻译加固层（处置口径：修正或安全拦截含回退均算已处置）；解除「不扩模型名单」——宽松许可新候选开放验证（quickmt 双向为首选，Mac 门槛机速度实测 p95 41.7–82.2ms，约为预算 1/6–1/8，比 small100 快 2–2.8 倍；质量待门槛）；LLM／llama.cpp 出局（死守 500ms）；详见 模型解堵调研（已退役，见 Git 历史）、quickmt 速度探针（已退役，见 Git 历史）。
 - **自建短文本评测集**（[validation/translation-short-expressions.json](validation/translation-short-expressions.json)）：双方向各 44 例冻结，覆盖短语／时间／人名／品牌／错拼／乱码／繁简陷阱；reference 为草案待用户审阅。
-- **翻译加固层第一片入共享核心**（`native/GogakuCore/translate/`，附加 ABI 接口）：重复分类（含 181 Q 类乱码）、繁→简归一（内嵌 OpenCC 生成表 3616 字，脚本 `scripts/build-t2s-table.py` 可重生成）、时间一致性（时段翻转／丢半点）、脚本校验、长度比率、专名保护候选扫描；`gogaku_core_translate_safety_test` 55 项断言入 ctest。处置效果验证：[hardening-demo.json](probes/results/quickmt-speed/hardening-demo.json)——15 条真实失败样本中重复／时段／繁体／乱码四类被回退或归一，语义跑偏、多余尾部、短源截断、人名丢失、品牌改写五类属第二片（覆盖检查／专名对齐）未拦住，已如实记录。
+- **翻译加固层第一片入共享核心**（`native/GogakuCore/translate/`，附加 ABI 接口）：重复分类（含 181 Q 类乱码）、繁→简归一（内嵌 OpenCC 生成表 3616 字，脚本 `scripts/build-t2s-table.py` 可重生成）、时间一致性（时段翻转／丢半点）、脚本校验、长度比率、专名保护候选扫描；`gogaku_core_translate_safety_test` 55 项断言入 ctest。处置效果验证：hardening-demo.json（旧结果已退役，见 Git 历史）——15 条真实失败样本中重复／时段／繁体／乱码四类被回退或归一，语义跑偏、多余尾部、短源截断、人名丢失、品牌改写五类属第二片（覆盖检查／专名对齐）未拦住，已如实记录。
 
 ### 变更（用户裁决）
 
@@ -201,7 +228,7 @@
 
 ### 变更（设置页）
 
-- 设置页按 [prototypes/settings-final.html](../prototypes/settings-final.html) 逐项还原：19 个浅／深色 token（窗口／侧栏／卡片／描边／分隔线／强调色体系）、自绘侧栏导航、卡片与行度量、键帽／录制态样式、快捷键页搜索与筛选分行、四列表格（命令名称→键帽→来源→操作）统一列宽；删除实现自加的路径与重复说明文案；英文释义开关改名「显示英文释义」＋帮助「候选词的英文词义参考，不随中文上屏」。
+- 设置页按 [prototypes/settings-final.html](prototypes/settings-final.html) 逐项还原：19 个浅／深色 token（窗口／侧栏／卡片／描边／分隔线／强调色体系）、自绘侧栏导航、卡片与行度量、键帽／录制态样式、快捷键页搜索与筛选分行、四列表格（命令名称→键帽→来源→操作）统一列宽；删除实现自加的路径与重复说明文案；英文释义开关改名「显示英文释义」＋帮助「候选词的英文词义参考，不随中文上屏」。
 - 系统输入源切换浮层图标修复：实证根因为 TextInputSwitcher 进程内 NSImage 缓存跨安装不失效（TIS 映射、磁盘缓存、包内资源均正确）；安装流程现在重启该 HUD 代理（失败仅提示），菜单图标光栅校验增加键帽边带与字形镂空守卫。
 - 菜单「恢复草稿」改名「恢复未完成输入」，字面文本项改「恢复未发出文字」。
 
@@ -209,7 +236,7 @@
 
 ### 新增
 
-- **设置页原生落地**（按 [prototypes/settings-final.html](../prototypes/settings-final.html) 已选视觉，规格定稿见[产品方向](docs/product.md)）：六页外壳（200pt 侧栏、内容滚动区、固定底部状态栏）；普通输入页字号 12–16 整数滑块带刻度、显示内容分段控件、模糊音三列九项；应用列表（按应用默认英文／快速添加排除／学习与隐私排除共用图标＋名称列表与可搜索添加弹层，后台索引系统应用目录，未安装应用保留记录并显示通用图标）；快捷键页 VS Code 式表格（三个可配置命令统一录制／清除／恢复默认，搜索与全部／我修改的／冲突筛选，固定操作按真实语义展示不可编辑）；自定义词语紧凑列表（分段＋搜索，选中行工具栏与右键菜单操作，双击打开既有编辑表单）；语言资源页不再提供 Apple Translation 查询与安装入口，展示实际随包资源状态。
+- **设置页原生落地**（按 [prototypes/settings-final.html](prototypes/settings-final.html) 已选视觉，规格定稿见[产品方向](docs/product.md)）：六页外壳（200pt 侧栏、内容滚动区、固定底部状态栏）；普通输入页字号 12–16 整数滑块带刻度、显示内容分段控件、模糊音三列九项；应用列表（按应用默认英文／快速添加排除／学习与隐私排除共用图标＋名称列表与可搜索添加弹层，后台索引系统应用目录，未安装应用保留记录并显示通用图标）；快捷键页 VS Code 式表格（三个可配置命令统一录制／清除／恢复默认，搜索与全部／我修改的／冲突筛选，固定操作按真实语义展示不可编辑）；自定义词语紧凑列表（分段＋搜索，选中行工具栏与右键菜单操作，双击打开既有编辑表单）；语言资源页不再提供 Apple Translation 查询与安装入口，展示实际随包资源状态。
 - **设置立即保存**：串行写入协调器（最新改动胜出），每次落盘前重新读盘并按顶层字段差异合并，避免旧整份快照覆盖其他页或输入法写入的偏好；连续文本输入合并 300ms，失焦／关窗提交剩余改动；仅成功落盘后发送变更通知，失败保留待保存改动并在状态栏重试。自定义词语写入成功后直接通知重载，不再「为发通知再保存整份 settings.json」。
 - **快捷键模型 v2**：规范键标识（含 F 键、带修饰键的标点）＋修饰键＋明确禁用状态；无修饰键可打印字符与单独修饰键不可绑定，录制中 Esc 取消、Delete 清除；冲突检查覆盖三个可配置命令及适用状态下的固定输入操作，冲突草稿只提示不写入；兼容读取旧 `key/modifiers`（缺省非禁用），明确清除不复活；新字段默认不写入，保持旧二进制可读。
 - **验收入口真实化**：`verify.py --profile host` 从文字计划改为真实参数数组调度——连续两轮宿主矩阵、Orca Shift 专项、万次事件性能、两小时稳定性浸泡（新增 `probes/stability-soak.py`：逐轮报告＋输入法进程内存趋势）；每项核对用例结果、完成数量与安装件身份，缺证据记 blocked；原生 GUI 验收证据归档项（`native-gui-acceptance.json`）。

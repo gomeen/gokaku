@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """火山翻译（Volcengine TranslateText）延迟探针。
 
-与 GGUF/DeepSeek 探针同 20 句口径；火山 V4 签名（service=translate,
+使用提供商无关的固定 20 句；火山 V4 签名（service=translate,
 region=cn-north-1），HMAC-SHA256。密钥从环境变量读取，不落盘：
   VOLC_ACCESS_KEY / VOLC_SECRET_KEY
 前置条件（见 Bob 文档 bobtranslate.com/service/translate/volcengine.html）：
@@ -93,11 +93,12 @@ for index, case in enumerate(cases):
 ok = [r for r in records if "milliseconds" in r]
 if ok:
     latencies = [r["milliseconds"] for r in ok]
-    summary = {"schemaVersion": 1, "date": "2026-11-04", "service": "volcengine TranslateText",
+    summary = {"schemaVersion": 1, "date": datetime.now(timezone.utc).isoformat(), "service": "volcengine TranslateText",
                "latencyMs": {"min": round(min(latencies), 1), "p50": round(statistics.median(latencies), 1),
                              "max": round(max(latencies), 1), "mean": round(statistics.mean(latencies), 1)},
                "records": records}
-    out = ROOT / "probes" / "results" / "deepseek-api" / "volcengine-translate-20cases.json"
+    out = ROOT / "probes" / "results" / "volcengine" / "volcengine-translate-20cases.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps(summary["latencyMs"], ensure_ascii=False))
     print("saved:", out)

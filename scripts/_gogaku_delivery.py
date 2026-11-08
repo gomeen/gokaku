@@ -3,14 +3,25 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from pathlib import Path
 import plistlib
 import re
 import subprocess
 
+from _gogaku_verification import (POLICY_VERSION, VerificationError, summarize_checks,
+                                  validate_checks)
+
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE_PATHS = ('Sources', 'native', 'resources', 'assets', 'packaging', 'scripts',
-                'Package.swift', 'version.json', 'docs/third-party.md')
+SOURCE_PATHS = ('macos', 'shared', 'windows', 'resources', 'scripts',
+                'version.json', 'docs/third-party.md')
+TEST_PATHS = ('scripts', 'probes', 'macos/Tests', 'shared/GogakuCore/tests',
+              'validation', '.github/workflows')
+# 在 os.walk 下行前剪枝；不能先 rglob 整个 Swift 缓存再过滤结果。
+GENERATED_DIRS = frozenset({'.build', '.swiftpm', '__pycache__', '.cache',
+                            '.pytest_cache', '.mypy_cache', '.ruff_cache',
+                            '.git', '.venv', 'venv', '.tox', '.nox',
+                            'node_modules', 'build', 'dist', 'CMakeFiles'})
 
 
 class DeliveryError(ValueError):
@@ -47,16 +58,31 @@ def file_manifest(folder):
             and '__pycache__' not in p.parts and p.name != '.DS_Store'}
 
 
-def source_fingerprint(root=ROOT):
+def _fingerprint(root, relatives, excluded_dirs=GENERATED_DIRS, excluded_paths=()):
     root = Path(root)
     entries = {}
-    for relative in SOURCE_PATHS:
+    for relative in relatives:
         path = root / relative
-        paths = sorted(path.rglob('*')) if path.is_dir() else [path]
-        for item in paths:
-            if item.is_file() and '__pycache__' not in item.parts and item.name != '.DS_Store':
-                entries[str(item.relative_to(root))] = sha256(item)
+        if path.is_dir():
+            for folder, dirs, files in os.walk(path):
+                dirs[:] = sorted(name for name in dirs if name not in excluded_dirs
+                                 and (Path(folder) / name).relative_to(root).as_posix() not in excluded_paths)
+                for name in sorted(files):
+                    item = Path(folder) / name
+                    if name != '.DS_Store' and not name.endswith(('.pyc', '.pyo')) and item.is_file():
+                        entries[item.relative_to(root).as_posix()] = sha256(item)
+        elif path.is_file():
+            entries[path.relative_to(root).as_posix()] = sha256(path)
     return hashlib.sha256(json.dumps(entries, sort_keys=True).encode()).hexdigest()
+
+
+def source_fingerprint(root=ROOT):
+    return _fingerprint(root, SOURCE_PATHS)
+
+
+def test_fingerprint(root=ROOT):
+    """独立绑定测试实现／探针输入，不包含运行结果或文档证据。"""
+    return _fingerprint(root, TEST_PATHS, excluded_paths={'probes/results'})
 
 
 def current_meta(root=ROOT):
@@ -193,24 +219,70 @@ def validate_package(package, platform, channel, *, root=ROOT):
     return receipt
 
 
+def _valid_artifact(value):
+    return (isinstance(value, dict) and set(value) == {'name', 'sha256', 'bytes'}
+            and isinstance(value['name'], str) and bool(value['name'])
+            and isinstance(value['sha256'], str)
+            and re.fullmatch(r'[0-9a-f]{64}', value['sha256']) is not None
+            and type(value['bytes']) is int and value['bytes'] > 0)
+
+
 def validate_reports(paths, packages, channel, *, root=ROOT):
     meta = current_meta(root)
     required_profiles = {'fast'} if '-dev.' in meta['version'] else {'fast', 'release', 'host'}
+    if (not isinstance(packages, (list, tuple)) or len(packages) != 2
+            or any(not isinstance(p, dict) for p in packages)
+            or {p.get('platform') for p in packages if isinstance(p.get('platform'), str)} != {'macos', 'windows'}
+            or any(not _valid_artifact(p.get('artifact')) for p in packages)):
+        raise DeliveryError('验证报告必须绑定本轮双端安装包哈希')
     expected = {p['platform']: p['artifact'] for p in packages}
+    source, tests = source_fingerprint(root), test_fingerprint(root)
     profiles = set()
     for path in paths:
         report = read_json(path)
-        if (report.get('version') != meta or report.get('channel') != channel
-                or report.get('sourceSha256') != source_fingerprint(root)
-                or report.get('gate', {}).get('passed') is not True
-                or not report.get('checks')
-                or any(c.get('status') != 'passed' for c in report['checks'] if c.get('required'))
-                or (required_profiles != {'fast'} and report.get('quick'))):
-            raise DeliveryError(f'验证报告缺失、未通过或指向其他源码／版本：{path}')
-        if report.get('artifacts') != expected:
+        if not isinstance(report, dict):
+            raise DeliveryError(f'验证报告必须是对象：{path}')
+        try:
+            gate = validate_checks(report.get('profile'), report.get('checks'))
+        except VerificationError as error:
+            raise DeliveryError(f'验证报告策略不符：{path}：{error}') from error
+        version = report.get('version')
+        declared_gate = report.get('gate')
+        if (not isinstance(version, dict) or set(version) != set(meta)
+                or type(version.get('buildNumber')) is not int or version != meta
+                or report.get('channel') != channel
+                or type(report.get('policyVersion')) is not int or report['policyVersion'] != POLICY_VERSION
+                or report.get('sourceSha256') != source or report.get('testSha256') != tests
+                or report.get('runIdentityStable') is not True
+                or type(report.get('quick')) is not bool or type(report.get('dirty')) is not bool
+                or not isinstance(report.get('commit'), str)
+                or not re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', report['commit'])
+                or not isinstance(declared_gate, dict) or set(declared_gate) != {'passed', 'notPassed'}
+                or type(declared_gate.get('passed')) is not bool
+                or not isinstance(declared_gate.get('notPassed'), list)
+                or declared_gate != gate or not gate['passed']
+                or (required_profiles != {'fast'} and report['quick'])):
+            raise DeliveryError(f'验证报告缺失、未通过或指向其他源码／版本／测试身份：{path}')
+        if 'summary' in report:
+            summary = report['summary']
+            if (not isinstance(summary, dict) or any(type(n) is not int for n in summary.values())
+                    or summary != summarize_checks(report['checks'])):
+                raise DeliveryError(f'验证报告 summary 不符：{path}')
+        for key in ('startedAt', 'finishedAt', 'arch'):
+            if key in report and not isinstance(report[key], str):
+                raise DeliveryError(f'验证报告 {key} 类型非法：{path}')
+        if report.get('artifactError') is not None:
+            raise DeliveryError(f'验证报告产物核验失败：{path}')
+        artifacts = report.get('artifacts')
+        if (not isinstance(artifacts, dict) or set(artifacts) != set(expected)
+                or any(not _valid_artifact(value) for value in artifacts.values())
+                or artifacts != expected):
             raise DeliveryError(f'验证报告未绑定本轮双端安装包哈希：{path}')
-        if required_profiles != {'fast'} and report.get('dirty'):
+        if required_profiles != {'fast'} and report['dirty']:
             raise DeliveryError('rc／定版验证报告必须来自干净工作区')
-        profiles.add(report.get('profile'))
+        profile = report['profile']
+        if profile in profiles:
+            raise DeliveryError(f'重复验证 profile：{profile}')
+        profiles.add(profile)
     if not required_profiles <= profiles:
         raise DeliveryError(f'缺少必需验证报告：{sorted(required_profiles - profiles)}')

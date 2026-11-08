@@ -1,0 +1,22 @@
+[
+  {
+    "command": [
+      "python3",
+      "scripts/build.py",
+      "--channel",
+      "dev"
+    ],
+    "exitCode": 0,
+    "seconds": 61.12
+  },
+  {
+    "command": [
+      "python3",
+      "scripts/package-macos-pkg.py",
+      "--channel",
+      "dev"
+    ],
+    "exitCode": 0,
+    "seconds": 13.71
+  }
+]

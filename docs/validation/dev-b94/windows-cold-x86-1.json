@@ -1,0 +1,72 @@
+{
+  "activateHr": 0,
+  "activationMilliseconds": 703,
+  "agentAbsentBeforeActivation": true,
+  "agentImageAfter": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe",
+  "agentPidAfter": 11656,
+  "agentsStopped": [
+    {
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe",
+      "pid": 3128
+    }
+  ],
+  "candidateVisible": true,
+  "candidateWindows": [
+    {
+      "class": "GogakuCandidateWindowV2",
+      "dpi": 192,
+      "handle": 2294706,
+      "pid": 7036,
+      "rect": [
+        168,
+        205,
+        489,
+        693
+      ],
+      "visible": true
+    }
+  ],
+  "coldStartTick": 156024765,
+  "deactivateDevHr": 0,
+  "deactivateStableHr": -2147467259,
+  "foregroundAtCommit": 2818424,
+  "installedRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev",
+  "keyForeground": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0
+  },
+  "modules": [
+    "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x86\\GogakuTsf.dll"
+  ],
+  "ok": true,
+  "probePid": 7036,
+  "profile": {
+    "clsid": "{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}",
+    "hr": 0
+  },
+  "screenshots": [
+    "windows-cold-x86-1.png"
+  ],
+  "session": 1,
+  "steps": [
+    {
+      "key": "N",
+      "text": ""
+    },
+    {
+      "key": "I",
+      "text": ""
+    },
+    {
+      "key": "H",
+      "text": ""
+    },
+    {
+      "key": "C",
+      "text": ""
+    }
+  ],
+  "targetHandle": 2818424,
+  "text": "你好",
+  "textAt150ms": "你好"
+}

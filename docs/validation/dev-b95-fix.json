@@ -1,0 +1,271 @@
+{
+  "schema": 1,
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 95
+  },
+  "channel": "dev",
+  "recordedAt": "2026-11-08T06:28:40.911292+00:00",
+  "sourceSha256": "7840b7be90acc4187818c55e7c902a52fe62b721de09fa66dad9e0e81c4cc97f",
+  "testSha256": "2d07182c801960c661da73f65a13cbd9ee3b38e414c9d79da4737317e0dc55f6",
+  "status": "targeted-fix-verified-intermittent-input-still-open",
+  "fullAcceptancePassed": false,
+  "crossFieldCommitFix": {
+    "implemented": true,
+    "syntheticBeforeFails": true,
+    "syntheticAfterBothArchitecturesPass": true,
+    "formalSameVersionFocusPasses": 2,
+    "temporaryStoreInlinePreeditDisabled": true
+  },
+  "packages": [
+    {
+      "platform": "macos",
+      "artifact": {
+        "name": "Gogaku-0.1.1-dev.2-b95-dev.pkg",
+        "sha256": "5f855ae522314934a76239a36ad76b29d5fed0d3037b4663750ad6fa6a619b25",
+        "bytes": 49654013
+      }
+    },
+    {
+      "platform": "windows",
+      "artifact": {
+        "name": "Gogaku-0.1.1-dev.2-b95-dev-windows-x64-setup.exe",
+        "sha256": "6bd53d42f870900a8cbebf354670c9003ce8aa96dfcd09ca392d1594b194bfa9",
+        "bytes": 54518690
+      }
+    }
+  ],
+  "installation": {
+    "evidence": "dev-b95-fix/install.json",
+    "defaultUpgradePassed": true,
+    "fileCount": 71,
+    "allUserFilesUnchangedBeforeInput": true
+  },
+  "fast": {
+    "passed": true,
+    "evidence": "verify/report-fast-dev-b95.json"
+  },
+  "asanUbsanQuick": {
+    "passed": true,
+    "sequenceCount": 2000,
+    "fullReleaseGatePassed": false,
+    "evidence": "verify/report-asan-ubsan-quick-dev-b95.json",
+    "initialCacheFailurePreserved": true
+  },
+  "formalHostCases": [
+    {
+      "id": "b95-pure-chrome-focus-1",
+      "mode": "chrome-focus",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-focus-1/result.json",
+      "hostPid": 6744,
+      "values": {
+        "active": "target",
+        "source": "",
+        "target": " "
+      },
+      "text": null,
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-chrome-focus-2",
+      "mode": "chrome-focus",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-focus-2/result.json",
+      "hostPid": 11696,
+      "values": {
+        "active": "target",
+        "source": "",
+        "target": " "
+      },
+      "text": null,
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-chrome-basic-1",
+      "mode": "chrome-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-basic-1/result.json",
+      "hostPid": 736,
+      "values": null,
+      "text": "你好",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-chrome-basic-2",
+      "mode": "chrome-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-basic-2/result.json",
+      "hostPid": 5088,
+      "values": null,
+      "text": "你好",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-chrome-basic-3",
+      "mode": "chrome-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-basic-3/result.json",
+      "hostPid": 436,
+      "values": null,
+      "text": "你好",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-chrome-basic-4",
+      "mode": "chrome-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-basic-4/result.json",
+      "hostPid": 8640,
+      "values": null,
+      "text": "你好",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-chrome-password",
+      "mode": "chrome-password",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-chrome-password/result.json",
+      "hostPid": 11316,
+      "values": null,
+      "text": "nihc ",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-notepad-fresh-1",
+      "mode": "notepad-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-notepad-fresh-1/result.json",
+      "hostPid": 9160,
+      "values": null,
+      "text": "你好",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-notepad-fresh-2",
+      "mode": "notepad-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-notepad-fresh-2/result.json",
+      "hostPid": 9160,
+      "values": null,
+      "text": "你好",
+      "cold": false,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-notepad-cold-retry1",
+      "mode": "notepad-cold",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-notepad-cold-retry1/result.json",
+      "hostPid": 11808,
+      "values": null,
+      "text": "你好",
+      "cold": true,
+      "moduleIdentityConfirmed": true
+    },
+    {
+      "id": "b95-pure-notepad-cold-2",
+      "mode": "notepad-cold",
+      "passed": true,
+      "evidence": "dev-b95-fix/cases/b95-pure-notepad-cold-2/result.json",
+      "hostPid": 4020,
+      "values": null,
+      "text": "你好",
+      "cold": true,
+      "moduleIdentityConfirmed": true
+    }
+  ],
+  "formalHostPassedCount": 11,
+  "retainedFailuresAndToolBlocks": [
+    {
+      "id": "b95-chrome-focus-1",
+      "kind": "real-input-mismatch-with-previous-broker",
+      "evidence": "dev-b95-fix/observations/b95-chrome-focus-1.json",
+      "values": {
+        "active": "target",
+        "source": "i",
+        "target": " "
+      },
+      "error": null,
+      "keyCount": 3
+    },
+    {
+      "id": "b95-pure-notepad-basic-1",
+      "kind": "preflight-old-host-module-no-keys-sent",
+      "evidence": "dev-b95-fix/observations/b95-pure-notepad-basic-1.json",
+      "values": null,
+      "error": "Notepad did not load installed b94 TSF; no keys sent",
+      "keyCount": 0
+    },
+    {
+      "id": "b95-pure-notepad-cold-1",
+      "kind": "fixture-post-stop-zombie-process-check-no-keys-sent",
+      "evidence": "dev-b95-fix/observations/b95-pure-notepad-cold-1.json",
+      "values": null,
+      "error": "unexpected broker image, no stop attempted",
+      "keyCount": 0
+    }
+  ],
+  "diagnosticCases": [
+    {
+      "id": "b95-diag-current-focus",
+      "passed": true,
+      "evidence": "dev-b95-fix/diagnostics/b95-diag-current-focus.json",
+      "trace": "dev-b95-fix/diagnostics/trace-b95-diag-current-focus.json"
+    },
+    {
+      "id": "b95-diag-previous-focus",
+      "passed": true,
+      "evidence": "dev-b95-fix/diagnostics/b95-diag-previous-focus.json",
+      "trace": "dev-b95-fix/diagnostics/trace-b95-diag-previous-focus.json"
+    },
+    {
+      "id": "b95-diag-previous-basic",
+      "passed": true,
+      "evidence": "dev-b95-fix/diagnostics/b95-diag-previous-basic.json",
+      "trace": "dev-b95-fix/diagnostics/trace-b95-diag-previous-basic.json"
+    }
+  ],
+  "unresolved": [
+    {
+      "kind": "intermittent-initial-input",
+      "detail": "b95 DLL + long-running b94 broker once left i in source. Later same-version and fresh previous-broker diagnostics passed; independent root cause not established. Do not erase the failure or attribute it solely to mixed versions.",
+      "b94HistoricalSymptoms": [
+        "nih次",
+        "ni好"
+      ]
+    }
+  ],
+  "finalState": {
+    "evidence": "dev-b95-fix/state/cleanup95.json",
+    "settingsUnchanged": true,
+    "allUserFilesRetained": true,
+    "autostartUnchanged": true,
+    "modelFrequencyChangedBySyntheticCommits": true,
+    "formalComRestored": true,
+    "temporaryTasksRemoved": true,
+    "securityKeptEnabled": true,
+    "agent": [
+      {
+        "ProcessId": 5976,
+        "SessionId": 1,
+        "ExecutablePath": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuAgent.exe"
+      }
+    ]
+  },
+  "notCompleted": [
+    "Windows Terminal / Electron / real 32-bit application matrix",
+    "full installer rollback / uninstall matrix",
+    "10k-event latency / long-run stability",
+    "real translation / online updates",
+    "macOS b95 installation / runtime verification"
+  ]
+}

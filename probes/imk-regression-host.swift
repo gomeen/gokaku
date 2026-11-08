@@ -369,7 +369,13 @@ func handle(_ request: [String: Any]) {
         field.inserts = 0
         window.makeFirstResponder(field)
     case "burst":
+        let spec = guardSpec(request)
         for raw in request["codes"] as! [Any] {
+            let verdict = evaluate(spec)
+            if !verdict.ok {
+                extra["guardBlocked"] = verdict.reason
+                break
+            }
             postCodeSpec(raw)
         }
         delay = 0.5
@@ -481,6 +487,11 @@ func handle(_ request: [String: Any]) {
         }
         delay = (request["delay"] as? Double) ?? 0.2
     case "shortcut":
+        let verdict = evaluate(guardSpec(request))
+        if !verdict.ok {
+            extra["guardBlocked"] = verdict.reason
+            break
+        }
         // Complete modifier transitions are required; setting flags on Space alone
         // is not a faithful system-shortcut reproduction.
         let option = request["option"] as? Bool ?? false

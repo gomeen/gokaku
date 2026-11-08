@@ -1,0 +1,34 @@
+{
+  "readOnly": true,
+  "ok": true,
+  "agents": [
+    {
+      "sha256": "54ea9b97c9891d18d8c9f058229f0d5aaa8d6f8fc5f42ccafe620426dd5019a2",
+      "bytesMatchB95": false,
+      "processId": 11940,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe",
+      "sessionId": 1,
+      "b95ExpectedSha256": "7bc1a85a7f9739efdb0d7ebd77a5fe67c2534841475c0fbe3709f30e79ab7d17"
+    }
+  ],
+  "activeRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev",
+  "modules": [
+    {
+      "sha256": "eb83d812416936dec84b80a79984284278fa0a2b21ae80a130ad8a8996a5cd72",
+      "sha256Matched": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll",
+      "arch": "x64",
+      "diskPeTimestamp": 1794117231,
+      "expectedSha256": "eb83d812416936dec84b80a79984284278fa0a2b21ae80a130ad8a8996a5cd72"
+    },
+    {
+      "sha256": "f88a1d651c10147c64610490f958739731050600464929052655e92fcfbc4b7b",
+      "sha256Matched": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x86\\GogakuTsf.dll",
+      "arch": "x86",
+      "diskPeTimestamp": 1794117194,
+      "expectedSha256": "f88a1d651c10147c64610490f958739731050600464929052655e92fcfbc4b7b"
+    }
+  ],
+  "buildNumber": 95
+}

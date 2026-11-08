@@ -1,5 +1,82 @@
 # 原生工程实施验收记录
 
+## Windows 挂起 Shift 补发与宿主受限项（2026-11-08，dev b99）
+
+[修复说明与复现源码](dev-b99-fix/README.md)、[机器汇总](dev-b99-fix.json)。默认英文应用（code.exe 等）的恢复 Shift 点击若落在会话可用前会被静默丢失；b99 挂起该点击并在下一次按键 600ms 内补发，失焦清除。Chrome 切框、密码 `nihc `、记事本「你好」三轮无回归验证通过（模块身份 b99，PE 1794128481）。
+
+VS Code／Electron 类宿主矩阵记为受限项：激活后立即输入按预期以临时英文直通，恢复 Shift 点击可整对落在 TIP 激活完成前（TSF 固有窗口，输入法收不到即无法补发）；GetForeground 轮询不可作就绪探针；3 秒稳定等待后按键进入窗口但编辑器缓冲为空（首启 UI 抢占焦点，夹具目标状态问题）。Windows Terminal 未安装（wt.exe 不存在）。此两项未通过，需专用 VS Code 诊断另立轮次；b98 及之前的矩阵结论不受影响。
+
+- **正式安装与本机更新**：b99 默认升级返回 0，71 个文件与双架构 COM 匹配，上一根指向 b98；用户授权下 `manage-install.py --channel dev install` 更新本 Mac，重装后按文档 `register` 刷新输入源注册，[14 项 IMK 冒烟](imk-host-smoke-dev.json)全部通过。
+- **检查与清理**：[fast 7/7](verify/report-fast-dev-b99.json)；[ASan／UBSan quick](verify/report-asan-ubsan-quick-dev-b99.json) 2,000 序列通过，整体 release gate 未过。发布门禁在「随包更新源未配置」处按设计拒绝（收据／许可／报告校验已过），真实 Draft 待仓库决策与 Token／私钥。本地测试目录 `local/` 已按用户要求移除，源码／测试指纹不变，档案证据均在 docs/validation。
+
+**仍未完成**：完整 Windows Terminal（未安装）／VS Code／Electron／真实 32 位应用矩阵、性能／稳定性、真实翻译／在线更新、安装故障恢复／卸载。完整双端验收仍未通过。以下历史章节保留当时失败与边界。
+
+## Windows 三个输入缺陷修复与限定矩阵（2026-11-08，dev b98）
+
+[修复说明与复现源码](dev-b98-fix/README.md)、[机器汇总](dev-b98-fix.json)。依次修复并复测：
+
+1. **跨字段旧提交资格**（b95）：`OnCompositionTerminated` 撤销代理旧组合、刷新字段身份；临时文本存储仅在候选窗显示编码。修前合成负例失败，修后双架构通过；b95-b98 各轮矩阵持续通过。
+2. **InputScope 滞后吞首键**（b97 修复）：宿主复用上下文切换字段后新 scope 延迟生效，首次读取若为「允许」时 40ms 复核，不一致则本键放行；读取瞬时失败沿用上一键结论。b96 密码轮 `ihc ` 失败证据保留，b98 密码 3/3 通过 `nihc `。
+3. **调频落盘阻塞请求**（b98 修复）：代理曾持全局锁逐 30 秒做模型序列化＋写盘，打字中请求响应超过 TSF 截止，已处理按键被放行宿主重复出字。改为管道空闲 3 秒才落盘，单键截止 200→400ms。b97 `hc你好` 失败证据保留，b98 basic 4/4 通过。
+
+- **正式安装与身份**：b98 默认升级返回 0，71 个文件与双架构 COM 匹配，上一根指向 b97。打字前设置与数据哈希未变；最终正式 b98 代理运行，临时任务已清理，安全防护保持开启。
+- **限定矩阵 13/13**：正式 b98 DLL／代理，两次 Chrome 切框、四次新宿主首组、三次密码采样、记事本两暖／两冷全部通过；逐轮模块身份为 b98（内存 PE timestamp 1794123559）。冷启动第 2 轮复活代理已独立核验哈希；第 1 轮路径由夹具记录。
+- **环境新发现**：旧 DLL 宿主会按自身模块路径复活旧代理（explorer 持 b91 时代诊断副本、msedge 持 b97）；混合版本态由此持续存在。新代理持互斥量期间僵尸秒退，冷启动停止窗口存在竞态；夹具已放宽为停止全部 GogakuDev 自有代理并复查复活，文档同步记录。
+- **检查与清理**：[fast 7/7](verify/report-fast-dev-b98.json)；[ASan／UBSan quick](verify/report-asan-ubsan-quick-dev-b98.json) 2,000 序列通过，整体 release gate 未过。b95/b96/b97 失败证据全部保留，未宣称覆盖全部历史间歇个案。
+
+**仍未完成**：完整 Windows Terminal（未安装）／VS Code／Electron／真实 32 位应用矩阵、性能／稳定性、真实翻译／在线更新、安装故障恢复／卸载。完整双端验收仍未通过。以下历史章节保留当时失败与边界。
+
+## Windows 组合终止修复与限定回归（2026-11-08，dev b95）
+
+[修复说明与复现源码](dev-b95-fix/README.md)、[机器汇总](dev-b95-fix.json)。`OnCompositionTerminated` 原先未通知代理撤销旧组合，新回调使用旧范围与 cookie 清理、失焦并刷新字段身份。Chromium 临时文本存储会先确认 DOM 预编辑，再交付终止通知，因此这类存储仅在浮动候选窗显示编码，明确选词才写正文；原生持久存储仍遵循字母设置。上下文无法确认原字段时，不向新字段暴露旧草稿恢复。
+
+- **修前／修后回归**：同一生产回调的合成 COM 夹具，用旧回调时失败，修后 Windows x64／x86 各两条路径通过；覆盖清理成功／拒绝、代理资格撤销、身份更新、重复／无关／自身通知与引用释放。它不等于真实宿主矩阵，也未加入 fast 自动项。
+- **正式安装与版本身份**：双端 b95 包重建，Windows 默认升级返回 0，71 个文件、双架构注册及当前／上一根一致。打字前用户文件哈希均未变。Mac b95 未安装，仍保留 b93 的历史实装结论。
+- **同版本正式安装件限定回归 11 次通过**：Chrome 两次切字段（原框空、新框仅一个空格，无候选／旧草稿）、四个新宿主首组“你好”、一次合成密码原样 `nihc ` 且无候选；记事本两次暖启动、两次确认代理进程缺席后的新进程首组均提交“你好”。逐轮记录正式 b95 DLL 路径及内存 PE timestamp `1794117231`。
+- **失败仍保留**：首轮 b95 DLL＋长期运行的 b94 代理在原框留下 `i`、新框只有空格，已停测并记录。随后正式 b95 代理复测和新启动 b94 代理的诊断对照通过，不能证明失败由混合版本导致，也不能宣称首组间歇异常已修。记事本旧进程仍加载 b94 时，驱动在发送按键前拒绝；备份会话并正常关闭后才重新测。冷启动夹具曾将已终止但仍在快照中的进程误判为异常，未发送输入，修正存活检查后重测；不把工具阻塞当产品通过。
+- **检查与清理**：[fast 7/7](verify/report-fast-dev-b95.json)，核心 CTest 与 Swift Release 217 项通过；[ASan／UBSan quick](verify/report-asan-ubsan-quick-dev-b95.json) 2,000 序列通过，整体 release gate 未过。首次旧目录 CMake 缓存失败保留。最终正式 b95 代理运行、双架构注册恢复、临时安装与已识别探针任务清理；设置和自启值未变，全部用户文件保留，中文调频随合成提交变化。Windows 安全保持开启。
+
+**仍未完成**：间歇首组异常根因、完整 Windows Terminal／Electron／真实 32 位应用矩阵、性能／稳定性、真实翻译／在线更新和安装故障恢复／卸载。完整双端验收仍未通过。以下历史章节保留当时失败与边界。
+
+## Windows 扩大宿主验收不通过（2026-11-08，dev b94）
+
+[本轮说明与复现](dev-b94-acceptance/README.md)、[身份与机器汇总](dev-b94-acceptance.json)。Chrome 连续两次在第一个字段输入 `ni`、切到第二个字段后按空格，实际第一个字段留下 `ni`、第二个字段收到 `你`，构成跨字段提交阻塞项。已按产品要求停止后续输入兼容性测试；隐藏候选窗不能替代取消旧提交资格。Chrome 首组输入还曾出现 `nih次`，新开浏览器复测为“你好”；记事本首轮 `ni好` 的驱动含 mode 尾空格，不能算代理冷启动测试通过，修正后四次限定复测为“你好”。原因尚未确定。
+
+Chrome 合成密码字段保留原样 `nihc ` 且没有候选，仅该项通过。Windows Terminal、Electron、真实 32 位应用及其余输入矩阵未完成。隔离安装回滚夹具在读取 A.exe 哈希时被 Defender 隔离，`mutationStarted=false`、`runtimeExecuted=false`；未运行安装／回滚／卸载，不据此标通过。临时安装任务已清理，夹具未安装，防护保持开启，用户设置哈希未变，b94 代理运行。先前默认升级和受控 Edit 证据仍只适用于原场景。
+
+## Windows 冷启动与默认升级修复（2026-11-08，dev b94）
+
+当前 `0.1.1-dev.2 / b94 / dev` 双端安装包已重建，[汇总与身份](dev-b94.json)和 [fast 7/7](verify/report-fast-dev-b94.json)绑定同一源码／测试指纹及安装包哈希；核心 CTest 10/10、Swift Release 217/217。工作区为 dirty 开发状态，未公开发布。Mac b94 本轮只构包，未安装，不继承以下 b93 IMK 结果。
+
+- **修前复现**：[b93 新建 x64 Edit](dev-b94/windows-b93-cold-baseline.json)在移除自有代理后首组输入留下 `nihc`，候选不可见，且实际加载 b93 TSF。不是根据旧报告推断失败。
+- **冷启动修复**：`TSF Activate` 提前启动代理，最多等待 5 秒建立管道和 `hello`；不在预热阶段调用字段／焦点／组合操作。逐键连接不新增启动等待，不缓存或重放按键，超时正常返回并保留后续重试。独立假代理回归的 [x64](dev-b94/windows-rpc-x64.json)／[x86](dev-b94/windows-rpc-x86.json)检查启动等待、默认连接立即返回、120ms 截止和后续重连。
+- **新安装件真实冷启动**：专属原生 Edit 的 [x64 第一次](dev-b94/windows-cold-x64-1.json)／[第二次](dev-b94/windows-cold-x64-2.json)、[x86 第一次](dev-b94/windows-cold-x86-1.json)／[第二次](dev-b94/windows-cold-x86-2.json)均先确认代理不存在，再激活并立即输入 `nihc`＋空格；全部候选可见、正文为“你好”，每步按键未泄入正文，150ms 后正文不变。激活分别耗时 656、734、703、750ms；记录了实际 b94 DLL、代理路径和 PID。[双架构暖启动](dev-b94/windows-warm-x64.json)／[x86](dev-b94/windows-warm-x86.json)也通过，激活耗时 15／0ms。这是受控真实文本宿主证据；当前未复验记事本、Chrome、Windows Terminal 或 Electron，激活耗时也不等于逐键 p95 达标。
+- **默认升级通过**：[安装日志](dev-b94/windows-default-upgrade.log)返回 0；未传 `/DIR`，未迁走占用文件，未关闭用户宿主。测试进程确实加载 b93 DLL，写入探针确认文件被占用，安装完成后该进程仍存活。[71 个文件与注册检查](dev-b94/windows-installation.json)全部匹配，双架构 COM、`ActiveRoot` 指向 b94，`PreviousRoot` 指向 b93。b93 曾以诊断目录 `C:\Program Files\GogakuDev\versions\b93` 安装，b94 保留这个既有安装根并自动创建其 `versions\0.1.1-dev.2-b94-dev` 子目录；这次没有再手动旁置。后续升级继续使用固定安装根。
+- **保留与回归**：升级后、打字前，原有用户文件哈希全部未变；用临时的“原已启用”Run 值验证自启动路径迁移成功，再恢复用户原先关闭状态。输入测试后，[最终检查](dev-b94/windows-final-state.json)确认设置哈希未变、全部数据文件保留、代理运行自 b94；中文调频模型因合成提交发生预期变化。[同一构建重装](dev-b94/windows-same-build-blocked.json)在 b94 文件仍被占用时返回 7，活动根指针不变。[七页设置与大小图标](dev-b94/windows-settings.json)通过，200% 下[最小皮肤预览](dev-b94/windows-settings-skin-minimum.png)九条可见；[翻译页截图](dev-b94/windows-settings-translation.png)归档。
+
+**边界**：注册失败恢复旧双架构注册／路径指针、健康上一代理兼容均已实现，但完整故障恢复与代理生命周期交接未在本轮逐项运行；卸载、旧版本自动清理、慢机超过 5 秒的首键、完整宿主／性能／稳定性、真实翻译与在线更新仍未验收。已打开应用可能继续持有旧 DLL，需要时由用户保存并重新打开。没有强杀用户宿主、自动注销或重启。以下保留历史发生时的结论。
+
+## 双端开发安装包重建与限定宿主复验（2026-11-08，dev b93）
+
+本轮在目录重组、旧选型清理和验证门禁修补后重建 `0.1.1-dev.2 / b93 / dev` 双端安装包，并实际安装。工作区仍为 dirty 开发状态，未上传 GitHub 或公开发布。[汇总与身份](dev-b93.json)、[最终 fast](verify/report-fast-dev-b93.json)绑定同一源码／测试指纹和双端安装包哈希。
+
+- **构包与关键回归**：Mac Release 双 App／PKG、MinGW x64／x86 编译与 Windows Inno Setup 成功；fast 7/7、共享核心 CTest 10/10、Swift Release 217/217。包内依赖与资源检查通过。未执行完整 release／十万序列。
+- **Mac 实际安装**：通过用户级 `installer -pkg` 安装 b93；输入法与设置 App 的签名、依赖闭包、构建身份和输入程序哈希通过[安装后检查](dev-b93/mac-installed-bundle-check.json)。实际运行路径为用户 `Library/Input Methods/Gogaku Dev.app`，加载随包核心。IMK 冒烟入口新增 `--channel dev`，在专属 AppKit 窗口完成 [14 项检查](dev-b93/mac-imk-smoke.json)，覆盖切源、普通输入、原文上屏、选区替换、字段切换、数字选词与翻页；结束后恢复 stable 输入源。这里只是限定冒烟；完整 host 档仍拒绝 dev，未执行完整矩阵、Orca 或性能／稳定性验收。
+- **Windows 默认目录升级受阻**：旧代理及已打开宿主持有 b91 TSF，[正常安装返回 7](dev-b93/windows-default-upgrade-blocked.log)，拒绝覆盖占用文件。旧 b91 代理没有可用托盘窗口，曾仅停止自有代理；它随后被既有宿主重新拉起，因此该动作没有解决覆盖障碍。未关闭用户的记事本／Explorer／浏览器，也未人工迁走 Program Files 文件。
+- **Windows 独立目录安装**：使用安装器已有 `/DIR` 参数安装到 `C:\Program Files\GogakuDev\versions\b93`，[返回 0](dev-b93/windows-versioned-install.log)。71 个清单文件的大小／SHA-256 全部匹配；双架构 COM 注册和实际代理路径均指向 b93。设置文件哈希未变，现有数据文件保留；中文调频模型因合成上屏测试发生预期变化。这是旁置目录安装成功，**不是默认目录升级／失败恢复通过**，版本化升级管理尚未实现。
+- **Windows 新宿主暖启动**：[x64](dev-b93/windows-warm-x64.json)与 [x86](dev-b93/windows-warm-x86.json)专属原生 Edit 均明确加载 b93 安装目录 DLL，显示候选并将 `nihc`＋空格提交为“你好”。[七页设置与大小图标](dev-b93/windows-settings.json)通过，200% DPI 最小皮肤预览九条可见；[翻译页](dev-b93/windows-settings-translation.png)与[皮肤页](dev-b93/windows-settings-skin-minimum.png)截图归档。该结果不继承 b91 记事本证据，也不代表完整 Windows 宿主／GUI 矩阵。
+- **Windows 冷启动仍失败**：[移除自有代理后第一次输入](dev-b93/windows-cold-first.json)，新 x64 宿主确实加载 b93 TSF，却没有候选，正文为 `nihc `，见[截图](dev-b93/windows-cold-first.png)。随后暖启动成功不能抵消该失败。冷启动第一组输入尚未修复，不能标为稳定版。
+
+**后续阻塞**：Windows 冷启动输入、无干预默认目录升级／恢复／卸载、真实云翻译与 GitHub 更新、完整双端宿主／性能／稳定性矩阵。当前只完成构包、实际安装与限定测试取证，产品验收未闭环。以下历史章节保留各自发生时的状态。
+
+## 旧选型清理与验证门禁修补（2026-11-08，工作区，未交付新包）
+
+旧引擎／本地模型选型工具、研究、排名和结果已退役，保留简短采用理由、固定 libime 构建消费者、通用翻译考题及现役产品测试。数据检查和门禁负例进入 fast；发布报告按当前策略与源码／测试指纹核对，拒绝缺项、跳过、旧策略、运行中身份改变；缺 GUI 明确 blocked，host 目前仅支持 stable，dev 不复用 stable 验收。
+
+本轮 [fast 七项通过](verify/report-fast-20261108-095255.json)，共享核心 CTest 10/10、Swift Release 217/217；验证与交付门禁单测合计 32 项通过，生产火山客户端的双向成功、HTTP／网络异常、凭据热读、空结果和重定向拒绝均有离线回归。迁移后的离屏渲染单项 53 项通过，完整 release gate 因其它项跳过仍为 false。工具修改与证据见[清理与测试审查](testing-cleanup-audit.md)。
+
+未跑完整 release／十万序列、真实 host、Windows CI／VM、真实在线翻译或安装升级；未重新构包或发布，旧安装包不再绑定当前源码。Windows 冷启动失败、双端完整宿主、正式性能、升级恢复及在线更新等既有未验收项继续保留。
+
 ## 构包与更新审查整改（2026-11-06，当前工作区，未交付新包）
 
 审查记录见 [构包与更新审查报告](../../.build/reviews/delivery-pipeline-review.md)。本轮让 Windows x86／x64 编译写出源码／版本／通道和产物哈希收据；Win Setup 与 Mac pkg 在打包前核对当前源码及 App／DLL 来源并写安装包收据；发布入口要求两个安装包收据与 fast 验证报告哈希一致，rc／定版还需 release 报告。Draft 创建和发布分两段：`release-state.json` 绑定 Release ID，续发时核对远端四份资产，只 PATCH 原 ID。安装包收据不替代代码签名或真实安装验收。
@@ -55,10 +132,10 @@ Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构
 
 按[双端功能统一、安装包与检查更新计划](../implementation-plan.md)推进 P0／P1／P4（Mac）／P5（Mac 客户端）。工作区同时含并行会话的 `version.json`（0.1.1-dev.2／构建 87）与 `probes/` 改动；本记录只覆盖本轮文件。**未做真实宿主、真实安装器、真实火山凭据或真实 GitHub 验收。**
 
-- **翻译收敛**：移除 quickmt／small100／Python 后端、beam、模型准备与下载入口；新增 `Sources/GogakuCore/Volcengine.swift`（V4 HMAC-SHA256 签名、URLSession、凭据热读、尾部孤立标点剥离、错误映射）与随包 `GogakuTranslator --volcengine`；设置「学习翻译」页改为启用开关（默认关）、凭据保存／移除、连接测试、状态与本机字符统计。设置 schema 升 2：旧本地模型配置迁移为关闭学习翻译，已启用火山配置保留启用、凭据与用量。
-- **安装事务**：`package-macos-pkg.py` 在打包阶段把身份注入 staged App 并由内向外签名（Developer ID 或 ad-hoc），再打 zip；`scripts/pkg-postinstall.sh` 解包→校验包内身份／构建号／签名→备份→替换→核对安装后身份／构建号；失败恢复两者；事务状态 `~/Library/Application Support/Gogaku/install/transaction.txt`；`manage-install.py` 改 staging＋备份＋失败恢复＋构建号校验。删除 DMG 打包脚本与产物。
+- **翻译收敛**：移除 quickmt／small100／Python 后端、beam、模型准备与下载入口；新增 `macos/Sources/GogakuKit/Volcengine.swift`（V4 HMAC-SHA256 签名、URLSession、凭据热读、尾部孤立标点剥离、错误映射）与随包 `GogakuTranslator --volcengine`；设置「学习翻译」页改为启用开关（默认关）、凭据保存／移除、连接测试、状态与本机字符统计。设置 schema 升 2：旧本地模型配置迁移为关闭学习翻译，已启用火山配置保留启用、凭据与用量。
+- **安装事务**：`package-macos-pkg.py` 在打包阶段把身份注入 staged App 并由内向外签名（Developer ID 或 ad-hoc），再打 zip；`macos/packaging/pkg-postinstall.sh` 解包→校验包内身份／构建号／签名→备份→替换→核对安装后身份／构建号；失败恢复两者；事务状态 `~/Library/Application Support/Gogaku/install/transaction.txt`；`manage-install.py` 改 staging＋备份＋失败恢复＋构建号校验。删除 DMG 打包脚本与产物。
 - **检查更新**：`UpdateContract/UpdatePreferences/UpdateTransport/UpdateEngine/UpdateDownloader`＋设置更新窗口；Ed25519 清单验签、GitHub 分页／ETag／限流、通道／构建号／平台／架构／minOS、HTTPS 白名单、下载大小／SHA-256／原子缓存、取消与安装交接；自动检查默认关闭、24 小时节流、只在设置应用运行。发布脚本 `update-signing.swift`、`make-update-manifest.py`、`publish-release.py`；随包开发公钥。
-- **Windows 脚手架**：`packaging/windows/gogaku.iss.in`＋`scripts/build-win-app.py`（产物检查、staging、身份哈希、iss 渲染、iscc 调用；缺产物明确失败）。未在 Windows 编译。
+- **Windows 脚手架**：`windows/packaging/gogaku.iss.in`＋`scripts/build-win-app.py`（产物检查、staging、身份哈希、iss 渲染、iscc 调用；缺产物明确失败）。未在 Windows 编译。
 
 **已验证（隔离／离屏）**
 
@@ -67,7 +144,7 @@ Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构
 - `check-bundle.py` 对构建 87 dev 双 App 通过：签名与依赖闭包、包内引擎小鹤上屏、设置自动读音、拼写 helper、`update-config.json`（schema 1、1 个可信公钥、仓库未配置）、火山 helper 无凭据返回 `credentials_missing` 且未联网；报告 `docs/validation/bundle-smoke-dev.json`。
 - 火山签名／请求体与 Python 参考 worker 固定向量逐字节一致（`VolcengineTests`）；错误码映射、凭据 0600 往返、非法 host 拒绝；缓存命中标记 `cached` 且不重复计入本月统计（`TranslationTests`）。
 - 更新合同：有效／篡改／未知 keyId 签名、schema、版本、通道、构建号、架构／minOS、重复资产、分页、304 缓存、限流、500、下载大小／哈希与缓存复用（`UpdateTests`）。
-- 发布与打包自测：`make-update-manifest.py --self-test`（生成、哈希、签名、篡改拒绝）、`build-win-app.py --self-test`（双位数目录、身份、iss 渲染、缺产物检测）、`bash -n scripts/pkg-postinstall.sh`。
+- 发布与打包自测：`make-update-manifest.py --self-test`（生成、哈希、签名、篡改拒绝）、`build-win-app.py --self-test`（双位数目录、身份、iss 渲染、缺产物检测）、`bash -n macos/packaging/pkg-postinstall.sh`。
 - **pkg 打包阶段签名**：staged 输入法含 `TISInputSourceID=org.gogaku.inputmethod.dev`，`codesign --verify --deep --strict` 通过；zip 内签名保留；postinstall 不再重签。ad-hoc 包 `pkgutil --check-signature` 仍为 no signature，`spctl` 拒绝（开发测试包预期）。Developer ID／公证未跑（无证书）。
 - **真实安装复验**：`installer -pkg dist/Gogaku-0.1.1-dev.2-b87-dev.pkg -target CurrentUserHomeDirectory` 成功；双 App 构建 87、身份正确、`codesign --verify` 通过、`phase=success`；安装后 helper 与 update-config 正常。当前输入源为 stable，dev 进程仍运行旧内存，切源后加载新构建。
 - **pkg postinstall 事务实测（假 HOME，不触碰真实用户与输入源）**：
@@ -136,12 +213,12 @@ Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构
 
 按[首阶段实施总计划](../implementation-plan.md) G1 的 T1.1–T1.3 推进：学习规则从 Swift 迁入共享 C++ 核心（ABI v3），为 Windows 前置；Mac 行为合同不变。
 
-- **范围**：学习组合状态机（英→中英文缓冲、中→英字面/编码片段源文推导、部分消费）、三状态按键语义、翻译调度合同（源表达式＋发布旗标＋接收/失败语义）、拼写问题结构（纯存取，偏移口径由平台定义）迁入 `native/GogakuCore/learning_session.cpp`；C ABI 升到 v3，版本 1/2 函数与结构布局不变。内嵌小鹤解码内核与历史 ge_* 桥同语义（预编辑展开全拼、候选带解码下标与范围）。
+- **范围**：学习组合状态机（英→中英文缓冲、中→英字面/编码片段源文推导、部分消费）、三状态按键语义、翻译调度合同（源表达式＋发布旗标＋接收/失败语义）、拼写问题结构（纯存取，偏移口径由平台定义）迁入 `shared/GogakuCore/learning_session.cpp`；C ABI 升到 v3，版本 1/2 函数与结构布局不变。内嵌小鹤解码内核与历史 ge_* 桥同语义（预编辑展开全拼、候选带解码下标与范围）。
 - **Mac 切换**：`CompositionSession` 改为薄封装（事件编组、核心 epoch→组合 UUID 映射、候选稳定 ID、翻译请求回调触发）；`EngineHub` 直接按词典/模型路径创建；TranslationService／worker 传输不动；InputController 调用面无改动。候选追加不重编号（迟到结果不替换已显示编号）由封装按候选值键保持 ID 稳定。
 - **行为对齐细节**：内核拒绝（撇号开头片段）与历史 decode 抛异常同源，走引擎错误路径（状态行「引擎操作失败」）；回格按字素簇删除，与 Swift `String.removeLast` 同语义（组合标记／VS／键帽 20E3／肤色修饰／ZWJ 粘接／区域指示符对整簇回退；v1 局限：Tag 旗标不延伸，注释在实现内）；学习翻页/导航不推进 revision、冻结迟到结果；全部消费不开启新组合身份。
 - **验证**：核心事件轨迹向量新增学习用例（`tests/learning_session_test.cpp`，144 项检查：缓冲/调度/接收语义/失败路径/选择提交/原文上屏/512 标量上限/Unicode 字素/中→英推导/冻结分页/身份失效/拼写守卫/普通态引擎语义/非法请求），与 Swift 行为合同同源出厂数据逐字对齐；ctest 6/6 全过；同一测试在 ASan＋UBSan 插桩构建下通过。fast 档全过（core ctest 100%、Swift Release 117 项含既有 CompositionSession 行为合同与 worker 协议回归），报告 `docs/validation/verify/report-fast-20261105-092040.json`；ASan/UBSan quick 冒烟 2000 序列无错误（`report-release-20261105-092131.json`）。
 - **未完成／待验证**：Windows 侧验证（同一测试集在 Clang64 构建）待 T2.1；学习记录（LearningStore）仍在 Swift，随双端正式方案再定；真实宿主手动清单未重跑（行为合同由 Swift 117 项回归覆盖，但体验级回归待下轮装机自测）；安装包重新打包前按版本规则递增构建号。
-- **T2.1 脚手架（接口冻结后并行启动；未验证）**：共享核心接口随本轮冻结（ABI v3，两套轨迹测试向量就位），按计划并行启动 Windows 构建流水线脚手架——`scripts/prepare-libime-windows.py`（MSYS2 Clang64 依赖准备：与 Mac 同 pin、同源数据、同上游转换命令，产物哈希单独记录，KenLM/词库兼容性以 CI 核心向量全绿为验证口径）、`native/GogakuCore/CMakePresets.json`（clang64 配置/构建/测试 preset）、`.github/workflows/windows-core.yml`（依赖→构建→全量 ctest→DLL 导出清单与 ABI 实跑→哈希证据）。CMakeLists 的 boost 查找增加 BOOST_INCLUDE 环境变量 HINTS（Mac 流程实测不受影响，ctest 6/6 全过）。**仓库当前没有远端，流水线未经真实 CI 运行**；首跑可能暴露工具链差异，按失败逐项修；全绿前不标「Windows 核心测试通过」。推送仓库／CI 归宿属用户决定（远端缺失）。
+- **T2.1 脚手架（接口冻结后并行启动；未验证）**：共享核心接口随本轮冻结（ABI v3，两套轨迹测试向量就位），按计划并行启动 Windows 构建流水线脚手架——`scripts/prepare-libime-windows.py`（MSYS2 Clang64 依赖准备：与 Mac 同 pin、同源数据、同上游转换命令，产物哈希单独记录，KenLM/词库兼容性以 CI 核心向量全绿为验证口径）、`shared/GogakuCore/CMakePresets.json`（clang64 配置/构建/测试 preset）、`.github/workflows/windows-core.yml`（依赖→构建→全量 ctest→DLL 导出清单与 ABI 实跑→哈希证据）。CMakeLists 的 boost 查找增加 BOOST_INCLUDE 环境变量 HINTS（Mac 流程实测不受影响，ctest 6/6 全过）。**仓库当前没有远端，流水线未经真实 CI 运行**；首跑可能暴露工具链差异，按失败逐项修；全绿前不标「Windows 核心测试通过」。推送仓库／CI 归宿属用户决定（远端缺失）。
 
 ## 移除快速添加功能（2026-11-04，工作区，未定版）
 
@@ -151,29 +228,11 @@ Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构
 - **验证**：fast 档全过——核心 ctest 全过（事件轨迹测试删除快速添加向量）、Swift Release 112 项全过、版本与资源检查（`report-fast-20261104-115923.json`）；ASan＋UBSan quick 冒烟 2000 随机序列无错误（`report-release-20261104-120013.json`）。C++ 测试向量和 fuzz 事件分布同步收缩（fuzz 不再生成 `GC_EV_QUICK_ADD`）。
 - **待验证**：真实宿主中菜单／候选窗回归未重跑（本次仅删除不新增交互路径）；安装包重新打包前按版本规则递增构建号。
 
-## 翻译组合策略首轮验收（2026-11-04，工作区，未定版）
+## 旧本地翻译选型（已退役）
 
-按「固定路线、一次建立、一次验收」推进，**结论未通过；学习模式继续关闭，不接生产翻译辅助进程**。全部证据来自隔离辅助进程。
+2026-11-06 起产品只保留用户配置的火山 NMT。此前 small100、quickmt 与组合策略实验均未形成正式质量／宿主验收，本轮删除其模型准备、排名、逐请求输出和重复研究；详细历史从 Git 追溯，不沿用其结论作为当前发布证据。
 
-- **加固层第二片**（`native/GogakuCore/translate/translate_safety.cpp`，`gogaku_core_translate_safety_test` 76 项断言）：时间检查改为逐条「数值＋时段」对比（合法区间不再误判、英文动词 `am` 不再当午前标记、未解释的数字必须保留且顺序不变，新增返回码 4）；合法叠词白名单；脚本校验与长度比率排除 URL；句首已知品牌进入保护扫描（与 `resources/translation/brands.tsv` 双向一致）。ASan／UBSan quick 冒烟 2000 序列无错误（`report-release-20261103-132022.json`）。
-- **审核资源首片**：`resources/translation/`（CC-CEDICT 衍生，en→zh 180 条、zh→en 300 条、103 条复核改写；双向时间模板；品牌处理表；`manifest.json` 记录来源哈希与许可）。Tatoeba 句对本机无副本、许可与署名无法核对，本轮未引入。
-- **验收结果**（[报告](../../probes/results/translation-strategy-final/report.md)、[决定](../translation-strategy-decision.md)）：冻结验收集每方向 100 条应译＋12 条未标注探针（与四个开发集去重），5 轮 1,280 请求全部完成、跨轮决策一致。en→zh 合格 46/100、zh→en 53/100（门槛 95%）；放行精度 49.5%／54.6%，错误放行 47／44；资源路径 8/9、模板 5/6、模型路径 86/176。短表达 p95 353.8ms、短句 p95 527.7ms（达标），超预算 2 条保留在案；生成进程峰值 614MB、双向评分进程 1.31GB。
-- **λ 分方向**：en→zh 0.25（固定风险关键错误 3→2）、zh→en 0（λ>0 会让「他不在上海，在北京」丢失对比关系）。反向评分不是方向中立的改进。
-- **新发现缺陷（未追改封板证据）**：品牌／版本号未从语言主导与长度比率统计排除，5 条正确译文被误拒；区间第二个时间点渲染成 `o'clock` 被时间检查拒绝；`a.m.` 尾点与英文数词不在模板范围。修法与复验要求见决定文档 §八。
-- **未完成／待验证**：用户盲测未进行；Windows、真实 IMK 候选窗、宿主插字、取消／焦点／迟到结果未测；未接入生产 C ABI 与设置页；微调或更换模型属另一个需明确决定的工作项。
-
-## 翻译模型解堵：裁决落地与加固层第一片（2026-11-02，工作区，未定版）
-
-按用户当日裁决（处置口径、宽松许可候选验证、死守 500ms）推进，全部证据入库；**学习模式交付仍保持阻塞**（质量门槛未重跑，以下为解堵路径的组成部分）：
-
-- **调研与裁决落档**：三路线（换 NMT／小 LLM／加固层）＋快档补充调研见[模型解堵调研](../research-translation-model-unblock.md)（§六裁决记录、§七 quickmt 发现）；实施计划§四、[产品方向](../product.md)「已选工程路线与资源门槛」同步修订。
-- **quickmt 速度探针**（[探针报告](../../probes/results/quickmt-speed/report.md)）：`quickmt-en-zh`／`quickmt-zh-en`（CC-BY-4.0，原生 CT2）在门槛机（CT2 4.6.0 int8、greedy、2 线程、12 轮热态）短表达 p95：en→zh 66.8ms／zh→en 41.6ms；短句 79.0／82.2ms——约为预算 1/6–1/8，比 small100 同参数快 2–2.8 倍；载入 0.9s；当时机械口径风险集 32/32、留存集 180/180 可用（未含加固层）。质量烟测：small100 四个固定失败点修复三个，但短语级新暴露重复／繁体漂移／截断／语义跑偏（beam 无关，模型固有）。脚本 `scripts/validate-quickmt-speed.py`。
-- **统一后端复测（2026-11-03，[决定](../../probes/results/translation-backends/decision.md)）**：同一驱动、5 轮交错、2,400 条请求，分模型层／辅助进程层／加固层比较 small100 与 quickmt。quickmt 短表达 p95 43.4–83.6ms、短句 68.9–89.7ms，快约 1.6–3 倍；但加固后 en→zh 可用率仅 77.67%、固定风险 12 条未处置（短语级复读／截断／残片为主）；small100 为 95.15%／94.34%、固定风险 5 条。两者都未过质量门槛，**决定暂不替换、学习模式继续阻塞**；加固层另有时间区间／`am` 动词／合法三元组／URL 脚本四类误报待第二片。语义审阅见[记录](../../probes/results/translation-backends/semantic-review.md)。文档／基准改动后 fast 档复跑通过（`report-fast-20261103-094435.json`）。
-- **第二轮评测补齐（2026-11-03，[最终选择报告](../../probes/results/translation-backends-round2/final-selection.md)，只评测不接生产）**：修复第一轮评测缺口——88 条专项集纳入 `all`＋数量断言、按输入长度分桶、延迟门槛读真实结果（缺数据报 incomplete）、候选放行／语义合格／安全回退／错误放行分开统计、失败请求保留等待与超预算记录；新增每方向 50 条独立确认集（评分规则运行前冻结）；两个模型全部应译样例语义审阅完成（覆盖 360/316 放行候选）。结果：small100 放行候选合格率 70.8%（确认集 67.4%，固定风险仍 5 条错误放行）；quickmt 确认集仅 20.3%，词级失败 88.1%——**维持 small100 优先、quickmt 仍为性能对照，学习模式继续阻塞**；盲测材料已就绪未开始（`blind-comparison.md`）。评测管线回归断言 7 项接入 verify fast 档（`scripts/validate-translation-eval.py`，本轮验证通过；含同日复核勘误：§3.3 放行口径更正、Gogaku 品牌案例改为如实记录放行、新增残缺末轮完整性断言，详见报告「同日复核更正」节）。
-- **自建短文本评测集**（[translation-short-expressions.json](../../validation/translation-short-expressions.json)）：双方向各 44 例冻结；短语／时间／人名／品牌／错拼／乱码陷阱；reference 草案待用户审阅。
-- **翻译加固层第一片**（`native/GogakuCore/translate/`，附加 ABI，无 libime 依赖）：重复分类／繁→简归一（OpenCC 生成表 3616 字，`scripts/build-t2s-table.py`）／时间一致性／脚本校验／长度比率／专名保护扫描；`gogaku_core_translate_safety_test` 55 项断言；处置效果验证 [hardening-demo.json](../../probes/results/quickmt-speed/hardening-demo.json)：15 条真实失败样本中重复／时段／繁体／乱码四类被拦截或归一，**语义跑偏、多余尾部、短源截断、人名丢失、品牌改写五类未拦（需第二片：覆盖 QE／专名对齐）**，如实记录。
-- **已验证**：fast 档全过（版本 b6 拒绝路径 7/7、资源哈希、核心 ctest 5/5 含 translate_safety 55 断言、Swift Release 96 项）；报告 `docs/validation/verify/report-fast-20261102-203457.json`。
-- **未完成／待验证**：quickmt 已跑统一风险集语义审阅（2026-11-03）但质量未过，用户盲测仍未进行（不标替换）；加固层未接入翻译管线（当前为纯函数＋测试＋验证脚本）；评测集 reference 待用户审阅；host 档、GUI 人工验收、候选窗定位重构宿主回归、性能门槛未过——均不变。学习模式菜单仍置灰。
+保留 `validation/`、`probes/translation-*.json` 的通用考题、`resources/translation/` 及共享核心安全规则测试；固定数据校验改由 `scripts/validate-translation-data.py` 执行。当前翻译行为与测试覆盖见[产品方向](../product.md)和[清理与测试审查](testing-cleanup-audit.md)。
 
 ## 设置页原生落地与普通输入收尾（2026-11-03，工作区，未定版）
 
@@ -222,7 +281,7 @@ Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构
 
 ## 普通模式对齐＋自定义词语（2026-10-31 本阶段）
 
-按六轮输入习惯裁决实现普通模式：行为规格迁入共享 C++ 核心（`native/GogakuCore`，ABI v2），Mac 端（IMK 控制器／面板／设置）改为薄调用。已验证：
+按六轮输入习惯裁决实现普通模式：行为规格迁入共享 C++ 核心（`shared/GogakuCore`，ABI v2），Mac 端（IMK 控制器／面板／设置）改为薄调用。已验证：
 
 - **事件轨迹测试**：`gogaku_core_normal_test` 195 项断言全过（ctest 2/2）。覆盖：小鹤／全拼、模糊音（z/zh、n/l 等）、标点表（含引号交替、数字后半角例外）、组合中标点一次上屏（完整／部分覆盖）、数字 0／超页、每页 9 个分页（`,`／`.`／PageUp／Down）、↑↓ 跨页、分段选择与退格撤回、Home／End／Ctrl＋a/b/e/f/n/p、Shift（组合中上屏原编码不切英文／未组合单击切中英带 toast）、大写原样段（Cpj→C盘、单字母空格原样上屏）、英文候选合并排序（中文不完整时排第一、完整时排第二、前缀补全≤3）、按应用默认英文（Raycast 等九应用、Shift 覆盖、Esc 回默认）、调频与 Control＋Backspace 删词、短码短语（精确匹配置顶／前缀不出现／暂存分段不出现）、拼音词完整匹配置顶、快速添加（可加／已存在／超 60 秒交还宿主／换输入框交还宿主／排除应用）、custom-words.tsv 读写转义与损坏备份、自动读音、持久化（model.userlm／learned.txt 原子写入）与重载。
 - **ABI 合同**：`gc_abi_version()==2`，`nm -gU` 仅导出 ABI 函数；不引用 Apple 框架（纯 CMake 构建测试）。
@@ -240,27 +299,17 @@ Mac 更新引擎改为仅缓存验签通过的逐页清单，304 根据当前构
 用户已批准 macOS＋Windows 双端首阶段计划，替换原单 Mac 实施范围；门槛改为 G0–G4，见[实施总计划](../implementation-plan.md)。对验收状态的影响：
 
 - **G0 Windows 环境**：未提供，Windows 构建、TSF、安装及双端闭环全部保持未开始／未通过。不以上游 libime 的 Windows 工作流代替自验。
-- **G0 Mac 模型门槛**：Apple Translation 退出正式交付链路（原“Apple 优先、失败后 small100”顺序作废，既有 Apple 探针保留为历史证据）。唯一候选 small100 `8ab680e` 已完成 Mac 分词、转换、质量与速度验证：**技术可行性通过，模型质量门槛不通过**，双端学习交付保持阻塞，详见下方[small100 Mac 模型门槛](#g0small100-mac-模型门槛2026-10-31)与[语义审阅记录](../../probes/results/small100-gate/semantic-review.md)。
+- **G0 Mac 模型门槛**：Apple Translation 退出正式交付链路（原“Apple 优先、失败后 small100”顺序作废，既有 Apple 探针保留为历史证据）。唯一候选 small100 `8ab680e` 已完成 Mac 分词、转换、质量与速度验证：**技术可行性通过，模型质量门槛不通过**，双端学习交付保持阻塞，本段为当时状态，详报已随旧本地模型选型退役，Git 历史仍可追溯；不代表当前火山服务质量。
 - **行为规格差异待调和**：本计划确认每页 5 个候选、数字 1…5 选择；现实现按用户青简配置使用每页 9 个（见下文第 4／6 条修复）。G1 迁移时以计划为准统一，迁移前不回改已验证的 Mac 行为证据。
 - **更正（2026-10-31，追加）**：上一条“以计划为准统一为 5 个”方向写反了。用户经六轮输入习惯原型裁决后已确认**每页 9 个、数字 1–9**为准，计划文档已同步修正（见[实施总计划](../implementation-plan.md)§五与[产品方向](../product.md)普通模式行为规格）；本条及下方历史记录保留原样，不倒改。后续迁移以 9 为准，不再回改历史证据。
 - 原 A–E 阶段证据映射：A→G2 Mac 部分、B→G0、C→G3、D→G4、E→G4。以下历史记录保持原样，不倒改。
 
-## G0：small100 Mac 模型门槛（2026-10-31）
-
-执行环境：Intel Mac i9-9880H、macOS 26.7.2、CTranslate2 4.6.0 INT8、greedy、batch=1、2 线程；模型 `alirezamsh/small100@8ab680e26a596d2e3d2d2d17ae0f68df1037328c`（MIT），下载哈希与产物见 `~/Library/Caches/Gogaku/models/small100-gate/manifest.json`；转换在含 PyTorch 的隔离环境 `OMP_NUM_THREADS=1` 完成，推理在无 PyTorch 环境、`HF_HUB_OFFLINE=1` 完成。脚本：`scripts/prepare-small100-gate.py`、`scripts/validate-small100-gate.py`。
-
-**技术可行性通过**：分词与协议验证（目标语言 token 为编码器输入前缀，解码器从纯 eos 开始，非 M2M100 协议）；INT8 转换成功（model.bin 338,727,246 字节）；热态短表达 p95 125.5／111.2ms、短句 p95 218.7／198.9ms（门槛 500ms／2s）；HF 参考对照 6 句中 5 句逐字一致（分歧见下）；离线推理可用。
-
-**模型质量门槛不通过**：机械判定全过（风险集 32/32、保留集 180/180 可用，空／重复／超时均为 0，应译可用率 100%≥95%），但固定风险集存在未处置的意义破坏：en-names 丢 Bob、en-long `10:30 a.m.`→`下午10点30点`、zh-long `十点半`→`10 a.m.`、en-phrase 输出繁体；保留集扫描另有 `9 a.m.`→`下午9点` 时段翻转、品牌 `Gogaku`→`古巴`、错拼／乱码编造（含 181 个重复 Q）。逐条审阅与判定见[语义审阅记录](../../probes/results/small100-gate/semantic-review.md)，数据与哈希见 [evaluate.json](../../probes/results/small100-gate/evaluate.json)、[artifact-hashes.txt](../../probes/results/small100-gate/artifact-hashes.txt)。
-
-**处置**：按计划§4／§8 停止规则，双端学习交付保持阻塞；不改一端 Apple、不恢复 OPUS／M2M100、不扩模型名单；用户语义盲测未进行（前置质量条件不成立）。普通输入与共享核心工作继续。
-
 ## G1 前置：最小共享接口（2026-10-31）
 
-新建 `native/GogakuCore`：共享核心 C ABI 骨架（版本 1），含 `gc_abi_version`／`gc_abi_check` 版本合同与 `gc_utf8_scalar_count`（512 标量输入上限所用，明确 Unicode 标量而非 UTF-16 范围）。Windows DLL 导出宏已内置；库内分配由库释放、异常与 STL 不跨 ABI 的合同写入头文件。构建与测试：
+新建 `shared/GogakuCore`：共享核心 C ABI 骨架（版本 1），含 `gc_abi_version`／`gc_abi_check` 版本合同与 `gc_utf8_scalar_count`（512 标量输入上限所用，明确 Unicode 标量而非 UTF-16 范围）。Windows DLL 导出宏已内置；库内分配由库释放、异常与 STL 不跨 ABI 的合同写入头文件。构建与测试：
 
 ```sh
-cmake -S native/GogakuCore -B .build/core -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S shared/GogakuCore -B .build/core -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build .build/core -j 2 && ctest --test-dir .build/core
 ```
 

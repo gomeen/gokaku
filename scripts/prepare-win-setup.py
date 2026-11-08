@@ -320,7 +320,7 @@ def prepare_setup(args, lock):
         for name in ('english-words.txt', 'gloss.tsv', 'english-wordlist-sources.json', 'gloss-sources.json'):
             copy(ROOT / 'resources' / name, staging / 'data' / name)
         licenses = staging / 'licenses'
-        for source, destination in [(ROOT / 'native/licenses', 'native'),
+        for source, destination in [(ROOT / 'shared/licenses', 'native'),
                                     (ROOT / 'resources/licenses', 'resources'),
                                     (WC / 'msys-sysroot/clang64/share/licenses', 'msys2')]:
             if not source.is_dir() or not any(source.rglob('*')):
@@ -339,8 +339,8 @@ def prepare_setup(args, lock):
         for source, target in files.items():
             copy(SOURCES / source, licenses / target)
         for name in ('miniz-LICENSE.txt', 'monocypher-LICENCE.md'):
-            copy(ROOT / 'native/GogakuWindows/third_party' / name, licenses / 'windows' / name)
-        copy(ROOT / 'native/third_party/json-LICENSE.MIT', licenses / 'windows' / 'json-LICENSE.MIT')
+            copy(ROOT / 'windows/GogakuWindows/third_party' / name, licenses / 'windows' / name)
+        copy(ROOT / 'shared/third_party/json-LICENSE.MIT', licenses / 'windows' / 'json-LICENSE.MIT')
         for entry in lock['runtime_licenses']:
             candidate = Path('/usr/local/opt/mingw-w64') / {
                 'MinGW-w64-COPYING.txt': 'COPYING', 'MinGW-w64-AUTHORS.txt': 'AUTHORS'}.get(entry['file'], entry['file'])

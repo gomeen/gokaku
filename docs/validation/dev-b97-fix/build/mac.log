@@ -1,0 +1,61 @@
+PASS: 22x16pt page, ink=16839, holes=2469 (45.8%), band=5720/9728, bounds=(3,3)-(172,124)
+-- Configuring done (0.3s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/native
+ninja: no work to do.
+-- Configuring done (0.2s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/core
+ninja: no work to do.
+Building for production...
+[0/4] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.48s)
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Dev.app: replacing existing signature
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Settings Dev.app: replacing existing signature
+swift-driver version: 1.148.6 提示：工作区有未提交修改，构建身份标记 dirty=true（版本 0.1.1-dev.2）
+构建版本 0.1.1-dev.2（构建号 97，dev，提交 a3b076e0301d）
+Test project /Users/gomeen/code/gomeen/gogaku/.build/core
+      Start  1: abi_version
+ 1/10 Test  #1: abi_version ......................   Passed    0.03 sec
+      Start  2: persistence
+ 2/10 Test  #2: persistence ......................   Passed    0.04 sec
+      Start  3: persistence_normal
+ 3/10 Test  #3: persistence_normal ...............   Passed    0.36 sec
+      Start  4: normal_session
+ 4/10 Test  #4: normal_session ...................   Passed    3.89 sec
+      Start  5: learning_session
+ 5/10 Test  #5: learning_session .................   Passed    0.90 sec
+      Start  6: quality_regression
+ 6/10 Test  #6: quality_regression ...............   Passed   12.26 sec
+      Start  7: translate_safety
+ 7/10 Test  #7: translate_safety .................   Passed    0.03 sec
+      Start  8: fuzz_smoke
+ 8/10 Test  #8: fuzz_smoke .......................   Passed   24.34 sec
+      Start  9: settings_contract
+ 9/10 Test  #9: settings_contract ................   Passed    0.03 sec
+      Start 10: theme_contract
+10/10 Test #10: theme_contract ...................   Passed    0.02 sec
+
+100% tests passed out of 10
+
+Total Test time (real) =  41.95 sec
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Dev.app
+/Users/gomeen/code/gomeen/gogaku/dist/Gogaku Settings Dev.app
+构建身份：/Users/gomeen/code/gomeen/gogaku/dist/build-identity-dev.json
+/Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/apps/Gogaku Dev.app: replacing existing signature
+/Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/apps/Gogaku Settings Dev.app: replacing existing signature
+pkgbuild: Inferring bundle components from contents of /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/empty-payload
+pkgbuild: Adding top-level postinstall script
+pkgbuild: Wrote package to /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/gogaku-core-dev.pkg
+productbuild: Wrote synthesized distribution to /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/distribution.xml
+productbuild: Wrote product to /Users/gomeen/code/gomeen/gogaku/dist/Gogaku-0.1.1-dev.2-b97-dev.pkg
++ zip -q -r /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/scripts/Gogaku-apps.zip Gogaku Dev.app Gogaku Settings Dev.app
++ pkgbuild --root /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/empty-payload --scripts /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/scripts --identifier org.gogaku.inputmethod.pkg --version 0.1.1 --install-location /private/tmp/gogaku-empty /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/gogaku-core-dev.pkg
++ productbuild --synthesize --package /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/gogaku-core-dev.pkg /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/distribution.xml
++ productbuild --distribution /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/distribution.xml --resources /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev/resources --package-path /Users/gomeen/code/gomeen/gogaku/dist/pkg-work-dev --identifier org.gogaku.inputmethod /Users/gomeen/code/gomeen/gogaku/dist/Gogaku-0.1.1-dev.2-b97-dev.pkg
+   构建收据：/Users/gomeen/code/gomeen/gogaku/dist/Gogaku-0.1.1-dev.2-b97-dev.pkg.receipt.json
+✅ PKG：/Users/gomeen/code/gomeen/gogaku/dist/Gogaku-0.1.1-dev.2-b97-dev.pkg
+   大小：47.4 MB
+   SHA-256：4e96832ff600480d13964e5a7aa7b039a08b5632d5fd3112827a9e0b5e84715b
+   签名：本包未签名/未公证（开发测试）。若系统提示「无法验证开发者」，请右键打开或到系统设置允许；正式分发需 Developer ID 与公证。
+安装方式：双击 pkg → 安装器向导 → 完成后在系统设置添加输入源。

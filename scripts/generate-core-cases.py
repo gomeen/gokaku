@@ -2,7 +2,7 @@
 """从 probes 的 120 条中文测试集生成 C++ include 数组（质量回归与基准共用）。
 
 输入：probes/input-engine-cases.json（40 条）＋ probes/input-engine-holdout.json（80 条）。
-输出：native/GogakuCore/tests/quality_cases.inc
+输出：shared/GogakuCore/tests/quality_cases.inc
   kQualityCases[]  — {id, keys, targets[], syllables}，供质量回归与性能基准使用。
 
 这些用例冻结在 probes/*.json 中（created_before_measurement），本脚本只做格式
@@ -14,7 +14,7 @@ import json
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "native/GogakuCore/tests/quality_cases.inc"
+OUT = ROOT / "shared/GogakuCore/tests/quality_cases.inc"
 
 
 def esc(s: str) -> str:

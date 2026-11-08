@@ -1,0 +1,528 @@
+Test Suite 'All tests' started at 2026-11-08 11:40:33.143.
+Test Suite 'GogakuPackageTests.xctest' started at 2026-11-08 11:40:33.146.
+Test Suite 'AnchorPlausibilityTests' started at 2026-11-08 11:40:33.146.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testFirstAnchorOfCompositionAlwaysAccepted]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testFirstAnchorOfCompositionAlwaysAccepted]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testGraceStreakCarriesAcrossWindowBoundary]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testGraceStreakCarriesAcrossWindowBoundary]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testGraceWindowEscapesFasterAtCompositionStart]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testGraceWindowEscapesFasterAtCompositionStart]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testGraceWindowExpiresByAge]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testGraceWindowExpiresByAge]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testMultiLineTeleportFreezes]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testMultiLineTeleportFreezes]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testPersistentTeleportEscapes]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testPersistentTeleportEscapes]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testRecoveryAfterEscapeResetsStreak]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testRecoveryAfterEscapeResetsStreak]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testSameLineLargeLeftJumpFreezes]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testSameLineLargeLeftJumpFreezes]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testSameLineTypingAccepted]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testSameLineTypingAccepted]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testTransientMisreportWithinGraceStillFrozen]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testTransientMisreportWithinGraceStillFrozen]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testWrapToNextLineAcceptedRegardlessOfDx]' started.
+Test Case '-[GogakuKitTests.AnchorPlausibilityTests testWrapToNextLineAcceptedRegardlessOfDx]' passed (0.000 seconds).
+Test Suite 'AnchorPlausibilityTests' passed at 2026-11-08 11:40:33.158.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.009 (0.012) seconds
+Test Suite 'CandidateThemeTests' started at 2026-11-08 11:40:33.158.
+Test Case '-[GogakuKitTests.CandidateThemeTests testBuiltinCannotBeOverriddenByUserTheme]' started.
+Test Case '-[GogakuKitTests.CandidateThemeTests testBuiltinCannotBeOverriddenByUserTheme]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.CandidateThemeTests testBuiltinsResolveAppearance]' started.
+Test Case '-[GogakuKitTests.CandidateThemeTests testBuiltinsResolveAppearance]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.CandidateThemeTests testBuiltinThemesComeFromSharedContract]' started.
+Test Case '-[GogakuKitTests.CandidateThemeTests testBuiltinThemesComeFromSharedContract]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.CandidateThemeTests testCustomThemeRoundTripAndDamageIsolation]' started.
+Test Case '-[GogakuKitTests.CandidateThemeTests testCustomThemeRoundTripAndDamageIsolation]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.CandidateThemeTests testRoundTripAndInvalidColorOrName]' started.
+Test Case '-[GogakuKitTests.CandidateThemeTests testRoundTripAndInvalidColorOrName]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.CandidateThemeTests testSettingsCompatibilityAndSelectionRoundTrip]' started.
+Test Case '-[GogakuKitTests.CandidateThemeTests testSettingsCompatibilityAndSelectionRoundTrip]' passed (0.001 seconds).
+Test Suite 'CandidateThemeTests' passed at 2026-11-08 11:40:33.169.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.009 (0.011) seconds
+Test Suite 'CustomWordListModelTests' started at 2026-11-08 11:40:33.169.
+Test Case '-[GogakuKitTests.CustomWordListModelTests testAppendInsertsAfterLastSameKind]' started.
+Test Case '-[GogakuKitTests.CustomWordListModelTests testAppendInsertsAfterLastSameKind]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.CustomWordListModelTests testMoveRestrictedToSameKindAndDisabledWhileSearching]' started.
+Test Case '-[GogakuKitTests.CustomWordListModelTests testMoveRestrictedToSameKindAndDisabledWhileSearching]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.CustomWordListModelTests testRemoveAndUpdateByStorageIndex]' started.
+Test Case '-[GogakuKitTests.CustomWordListModelTests testRemoveAndUpdateByStorageIndex]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.CustomWordListModelTests testRowIDsReferenceStorageIndexStableThroughFiltering]' started.
+Test Case '-[GogakuKitTests.CustomWordListModelTests testRowIDsReferenceStorageIndexStableThroughFiltering]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.CustomWordListModelTests testRowsFilterByContentCodeAndPinyin]' started.
+Test Case '-[GogakuKitTests.CustomWordListModelTests testRowsFilterByContentCodeAndPinyin]' passed (0.001 seconds).
+Test Suite 'CustomWordListModelTests' passed at 2026-11-08 11:40:33.173.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+Test Suite 'EagerAnnotationTests' started at 2026-11-08 11:40:33.173.
+Test Case '-[GogakuKitTests.EagerAnnotationTests testAnnotationIsIdempotent]' started.
+Test Case '-[GogakuKitTests.EagerAnnotationTests testAnnotationIsIdempotent]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.EagerAnnotationTests testEmptyMemoryClearsStaleExplanations]' started.
+Test Case '-[GogakuKitTests.EagerAnnotationTests testEmptyMemoryClearsStaleExplanations]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.EagerAnnotationTests testHighlightRowAnnotatedAndOthersCleared]' started.
+Test Case '-[GogakuKitTests.EagerAnnotationTests testHighlightRowAnnotatedAndOthersCleared]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.EagerAnnotationTests testPageOffsetDrivesHighlightIndex]' started.
+Test Case '-[GogakuKitTests.EagerAnnotationTests testPageOffsetDrivesHighlightIndex]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.EagerAnnotationTests testUncachedHighlightStaysEmpty]' started.
+Test Case '-[GogakuKitTests.EagerAnnotationTests testUncachedHighlightStaysEmpty]' passed (0.001 seconds).
+Test Suite 'EagerAnnotationTests' passed at 2026-11-08 11:40:33.178.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 0.003 (0.004) seconds
+Test Suite 'EngineTests' started at 2026-11-08 11:40:33.178.
+Test Case '-[GogakuKitTests.EngineTests testCandidateAppendNeverRenumbersAndNavigationFreezes]' started.
+Test Case '-[GogakuKitTests.EngineTests testCandidateAppendNeverRenumbersAndNavigationFreezes]' passed (0.056 seconds).
+Test Case '-[GogakuKitTests.EngineTests testDraftsNeverOverwriteAndExplicitTake]' started.
+Test Case '-[GogakuKitTests.EngineTests testDraftsNeverOverwriteAndExplicitTake]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.EngineTests testEnglishUnicodeAndCompletionAreIndependent]' started.
+Test Case '-[GogakuKitTests.EngineTests testEnglishUnicodeAndCompletionAreIndependent]' passed (0.033 seconds).
+Test Case '-[GogakuKitTests.EngineTests testFactoryXiaoheCompleteAndNonFirst]' started.
+Test Case '-[GogakuKitTests.EngineTests testFactoryXiaoheCompleteAndNonFirst]' passed (0.067 seconds).
+Test Case '-[GogakuKitTests.EngineTests testFocusModeAndDirectionInvalidateCandidates]' started.
+Test Case '-[GogakuKitTests.EngineTests testFocusModeAndDirectionInvalidateCandidates]' passed (0.040 seconds).
+Test Case '-[GogakuKitTests.EngineTests testLiteralChineseSegmentsAndPartialLearningConsumption]' started.
+Test Case '-[GogakuKitTests.EngineTests testLiteralChineseSegmentsAndPartialLearningConsumption]' passed (0.055 seconds).
+Test Case '-[GogakuKitTests.EngineTests testOriginalOnlyOnceAndScalarLimit]' started.
+Test Case '-[GogakuKitTests.EngineTests testOriginalOnlyOnceAndScalarLimit]' passed (0.032 seconds).
+Test Case '-[GogakuKitTests.EngineTests testPagingEditingAndInvalidCommandsPreserveState]' started.
+Test Case '-[GogakuKitTests.EngineTests testPagingEditingAndInvalidCommandsPreserveState]' passed (0.037 seconds).
+Test Case '-[GogakuKitTests.EngineTests testPartialSelectionUsesGraphRange]' started.
+Test Case '-[GogakuKitTests.EngineTests testPartialSelectionUsesGraphRange]' passed (0.037 seconds).
+Test Case '-[GogakuKitTests.EngineTests testSessionStaleCandidateAndNoAutomaticCommit]' started.
+Test Case '-[GogakuKitTests.EngineTests testSessionStaleCandidateAndNoAutomaticCommit]' passed (0.048 seconds).
+Test Case '-[GogakuKitTests.EngineTests testSettingsThemeDefaultPreservesLegacyFiles]' started.
+Test Case '-[GogakuKitTests.EngineTests testSettingsThemeDefaultPreservesLegacyFiles]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.EngineTests testSpellingIssuesPersistAcrossEditsAndRejectStale]' started.
+Test Case '-[GogakuKitTests.EngineTests testSpellingIssuesPersistAcrossEditsAndRejectStale]' passed (0.040 seconds).
+Test Suite 'EngineTests' passed at 2026-11-08 11:40:33.628.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.446 (0.450) seconds
+Test Suite 'FocusRuleTests' started at 2026-11-08 11:40:33.628.
+Test Case '-[GogakuKitTests.FocusRuleTests testAnchorAtZeroLettersAtZero_sameField]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testAnchorAtZeroLettersAtZero_sameField]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testApplicationChanged_differentField]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testApplicationChanged_differentField]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testComposingLettersAtAnchor_sameField]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testComposingLettersAtAnchor_sameField]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testComposingWithoutLettersAtAnchor_selectionAloneInsufficient]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testComposingWithoutLettersAtAnchor_selectionAloneInsufficient]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testHostReportsEmptyMarkedAsZeroZero_noFalseMatch]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testHostReportsEmptyMarkedAsZeroZero_noFalseMatch]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testIdleSelectionMoved_startsNewComposition]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testIdleSelectionMoved_startsNewComposition]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testLettersDisabledRequiresStableAnchor]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testLettersDisabledRequiresStableAnchor]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testLettersPushSelection_sameFieldViaMarkedRange]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testLettersPushSelection_sameFieldViaMarkedRange]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testMarkedElsewhere_differentField]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testMarkedElsewhere_differentField]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testPidChanged_differentField]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testPidChanged_differentField]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testSelectionUnchanged_sameField]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testSelectionUnchanged_sameField]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.FocusRuleTests testUnavailableSelectionDoesNotLoseActiveComposition]' started.
+Test Case '-[GogakuKitTests.FocusRuleTests testUnavailableSelectionDoesNotLoseActiveComposition]' passed (0.000 seconds).
+Test Suite 'FocusRuleTests' passed at 2026-11-08 11:40:33.637.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.006 (0.010) seconds
+Test Suite 'HostTests' started at 2026-11-08 11:40:33.637.
+Test Case '-[GogakuKitTests.HostTests testCommitUsesClientSelection]' started.
+Test Case '-[GogakuKitTests.HostTests testCommitUsesClientSelection]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testConfirmedTextHandoffDoesNotCommitBeforeInsertion]' started.
+Test Case '-[GogakuKitTests.HostTests testConfirmedTextHandoffDoesNotCommitBeforeInsertion]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testIdentityRecheckSkipsGeometryIPC]' started.
+Test Case '-[GogakuKitTests.HostTests testIdentityRecheckSkipsGeometryIPC]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testInsertThrowReturnsFalseAndClearStillWorks]' started.
+Test Case '-[GogakuKitTests.HostTests testInsertThrowReturnsFalseAndClearStillWorks]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testMarkedSelectionFollowsCaretEvenWhenTextUnchanged]' started.
+Test Case '-[GogakuKitTests.HostTests testMarkedSelectionFollowsCaretEvenWhenTextUnchanged]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testMissingCaretGeometryKeepsHostIdentity]' started.
+Test Case '-[GogakuKitTests.HostTests testMissingCaretGeometryKeepsHostIdentity]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testMissingClientDoesNotReportIssuedCommit]' started.
+Test Case '-[GogakuKitTests.HostTests testMissingClientDoesNotReportIssuedCommit]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.HostTests testNativeSelectedTextIsReplaced]' started.
+Test Case '-[GogakuKitTests.HostTests testNativeSelectedTextIsReplaced]' passed (0.210 seconds).
+Test Case '-[GogakuKitTests.HostTests testPreeditByteOffsetsBecomeUTF16]' started.
+Test Case '-[GogakuKitTests.HostTests testPreeditByteOffsetsBecomeUTF16]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testUnavailableSelectionKeepsHostIdentity]' started.
+Test Case '-[GogakuKitTests.HostTests testUnavailableSelectionKeepsHostIdentity]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testUnknownSelectionDoesNotReadCaretRectangle]' started.
+Test Case '-[GogakuKitTests.HostTests testUnknownSelectionDoesNotReadCaretRectangle]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testWindowLevelExceptionFallsBackToInvalid]' started.
+Test Case '-[GogakuKitTests.HostTests testWindowLevelExceptionFallsBackToInvalid]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.HostTests testWindowLevelReadFromClient]' started.
+Test Case '-[GogakuKitTests.HostTests testWindowLevelReadFromClient]' passed (0.000 seconds).
+Test Suite 'HostTests' passed at 2026-11-08 11:40:33.858.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 0.217 (0.220) seconds
+Test Suite 'KeyComboTests' started at 2026-11-08 11:40:33.858.
+Test Case '-[GogakuKitTests.KeyComboTests testClearedBindingDoesNotMatchEvents]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testClearedBindingDoesNotMatchEvents]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testConflictBetweenConfigurableCommands]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testConflictBetweenConfigurableCommands]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testConflictWithFixedOperations]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testConflictWithFixedOperations]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testFixedOperationsCoverCancelAndCommit]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testFixedOperationsCoverCancelAndCommit]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testFunctionKeyUsesKeyCodeMap]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testFunctionKeyUsesKeyCodeMap]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testLetterMatchesAcrossShiftAndCase]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testLetterMatchesAcrossShiftAndCase]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testPunctuationWithShiftKeepsShiftedCharacter]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testPunctuationWithShiftKeepsShiftedCharacter]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testRecordingRulesRejectBarePrintableAndAcceptFunctionKeys]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testRecordingRulesRejectBarePrintableAndAcceptFunctionKeys]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testShortcutValidationRoundTrip]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testShortcutValidationRoundTrip]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.KeyComboTests testUnknownPrivateUseAndControlCharactersUnbindable]' started.
+Test Case '-[GogakuKitTests.KeyComboTests testUnknownPrivateUseAndControlCharactersUnbindable]' passed (0.000 seconds).
+Test Suite 'KeyComboTests' passed at 2026-11-08 11:40:33.866.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.005 (0.008) seconds
+Test Suite 'LearningTranslationTests' started at 2026-11-08 11:40:33.866.
+Test Case '-[GogakuKitTests.LearningTranslationTests testConnectionErrorMessagesAreShort]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testConnectionErrorMessagesAreShort]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testEmptyLegacyConfigMigratesToOff]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testEmptyLegacyConfigMigratesToOff]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testEnvironmentReportsMissingParts]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testEnvironmentReportsMissingParts]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testFailureMessagesAreSpecific]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testFailureMessagesAreSpecific]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testLegacyLocalBackendMigratesToOff]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testLegacyLocalBackendMigratesToOff]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testLegacyVolcengineConfigKeepsEnabledAndCredentials]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testLegacyVolcengineConfigKeepsEnabledAndCredentials]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testLegacyVolcengineDisabledStaysDisabled]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testLegacyVolcengineDisabledStaysDisabled]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testNewSettingsDefaultOff]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testNewSettingsDefaultOff]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testSchemaTwoRoundTrip]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testSchemaTwoRoundTrip]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testServiceConfigurationUsesHelperAndCredentials]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testServiceConfigurationUsesHelperAndCredentials]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testTranslationFailureKeepsInputAndShowsVolcengineHint]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testTranslationFailureKeepsInputAndShowsVolcengineHint]' passed (0.032 seconds).
+Test Case '-[GogakuKitTests.LearningTranslationTests testVolcengineCandidateEntersOnlyWithApproval]' started.
+Test Case '-[GogakuKitTests.LearningTranslationTests testVolcengineCandidateEntersOnlyWithApproval]' passed (0.033 seconds).
+Test Suite 'LearningTranslationTests' passed at 2026-11-08 11:40:33.954.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.085 (0.088) seconds
+Test Suite 'LegacyCandidateAppearanceTests' started at 2026-11-08 11:40:33.954.
+Test Case '-[GogakuKitTests.LegacyCandidateAppearanceTests testCustomPaletteActuallyFeedsRendering]' started.
+Test Case '-[GogakuKitTests.LegacyCandidateAppearanceTests testCustomPaletteActuallyFeedsRendering]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.LegacyCandidateAppearanceTests testOldSettingsRetainEveryRenderingColor]' started.
+Test Case '-[GogakuKitTests.LegacyCandidateAppearanceTests testOldSettingsRetainEveryRenderingColor]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.LegacyCandidateAppearanceTests testPanelRefreshesEditedThemeWithSameID]' started.
+Test Case '-[GogakuKitTests.LegacyCandidateAppearanceTests testPanelRefreshesEditedThemeWithSameID]' passed (0.005 seconds).
+Test Suite 'LegacyCandidateAppearanceTests' passed at 2026-11-08 11:40:33.967.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.012 (0.012) seconds
+Test Suite 'NormalEngineTests' started at 2026-11-08 11:40:33.967.
+Test Case '-[GogakuKitTests.NormalEngineTests testBridgeAbiVersion]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testBridgeAbiVersion]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testClearFrequencyDataRemovesPersistentFiles]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testClearFrequencyDataRemovesPersistentFiles]' passed (0.048 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testCommitConfirmedAppliesLearning]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testCommitConfirmedAppliesLearning]' passed (0.043 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testCustomWordReadErrorDistinctFromMissing]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testCustomWordReadErrorDistinctFromMissing]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testCustomWordsRoundTripAndValidation]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testCustomWordsRoundTripAndValidation]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testEnglishCandidatesHotUpdate]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testEnglishCandidatesHotUpdate]' passed (0.051 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testFactoryAutoPinyinUsesCommonReadings]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testFactoryAutoPinyinUsesCommonReadings]' passed (1.128 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testFactoryCustomPinyinInBothSchemesAndReload]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testFactoryCustomPinyinInBothSchemesAndReload]' passed (0.236 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testFocusSyncAndAppDefaults]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testFocusSyncAndAppDefaults]' passed (0.035 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testRestoreChineseDraftInDefaultAndTemporaryEnglish]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testRestoreChineseDraftInDefaultAndTemporaryEnglish]' passed (0.048 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testSettingsNormalFieldsDecodeLegacyFiles]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testSettingsNormalFieldsDecodeLegacyFiles]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testShiftClickCommitAndToggle]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testShiftClickCommitAndToggle]' passed (0.046 seconds).
+Test Case '-[GogakuKitTests.NormalEngineTests testXiaoheCommitAndEnglishCandidates]' started.
+Test Case '-[GogakuKitTests.NormalEngineTests testXiaoheCommitAndEnglishCandidates]' passed (0.044 seconds).
+Test Suite 'NormalEngineTests' passed at 2026-11-08 11:40:35.663.
+	 Executed 13 tests, with 0 failures (0 unexpected) in 1.692 (1.696) seconds
+Test Suite 'PanelLevelTests' started at 2026-11-08 11:40:35.663.
+Test Case '-[GogakuKitTests.PanelLevelTests testBaselineConstantMatchesPopUpMenuLevel]' started.
+Test Case '-[GogakuKitTests.PanelLevelTests testBaselineConstantMatchesPopUpMenuLevel]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelLevelTests testCeilingCapsAbnormalClientLevel]' started.
+Test Case '-[GogakuKitTests.PanelLevelTests testCeilingCapsAbnormalClientLevel]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelLevelTests testHigherClientLevelRaisesByOneOnly]' started.
+Test Case '-[GogakuKitTests.PanelLevelTests testHigherClientLevelRaisesByOneOnly]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.PanelLevelTests testUnknownOrNonPositiveClientLevelUsesBaseline]' started.
+Test Case '-[GogakuKitTests.PanelLevelTests testUnknownOrNonPositiveClientLevelUsesBaseline]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.PanelLevelTests testWindowLevelChangeReachesWindowServer]' started.
+Test Case '-[GogakuKitTests.PanelLevelTests testWindowLevelChangeReachesWindowServer]' passed (1.134 seconds).
+Test Suite 'PanelLevelTests' passed at 2026-11-08 11:40:36.800.
+	 Executed 5 tests, with 0 failures (0 unexpected) in 1.136 (1.137) seconds
+Test Suite 'PanelPlacementTests' started at 2026-11-08 11:40:36.800.
+Test Case '-[GogakuKitTests.PanelPlacementTests testAnchorOutsideAllScreensIsHidden]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testAnchorOutsideAllScreensIsHidden]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testClampedInsideVisibleFrameOnAllEdges]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testClampedInsideVisibleFrameOnAllEdges]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testContainmentCheckForStickyOrigin]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testContainmentCheckForStickyOrigin]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testDefaultPlacementBelowCaret]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testDefaultPlacementBelowCaret]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testFlipUpWhenInsufficientSpaceBelow]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testFlipUpWhenInsufficientSpaceBelow]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testInvalidRectanglesAreRejected]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testInvalidRectanglesAreRejected]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testNegativeCoordinatesOnSideDisplay]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testNegativeCoordinatesOnSideDisplay]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testToastClampsHorizontalAndRejectsInvalidAnchor]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testToastClampsHorizontalAndRejectsInvalidAnchor]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testToastFallsBelowWhenNoRoomAbove]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testToastFallsBelowWhenNoRoomAbove]' passed (0.000 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testToastPrefersAboveCaret]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testToastPrefersAboveCaret]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testTooTallPanelPinsToTopInsteadOfHidden]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testTooTallPanelPinsToTopInsteadOfHidden]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.PanelPlacementTests testZeroWidthCaretRectIsValid]' started.
+Test Case '-[GogakuKitTests.PanelPlacementTests testZeroWidthCaretRectIsValid]' passed (0.000 seconds).
+Test Suite 'PanelPlacementTests' passed at 2026-11-08 11:40:36.810.
+	 Executed 12 tests, with 0 failures (0 unexpected) in 0.006 (0.010) seconds
+Test Suite 'SettingsMigrationTests' started at 2026-11-08 11:40:36.810.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testAppListsAreIndependent]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testAppListsAreIndependent]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testEncodingStaysLegacyCompatibleForDefaults]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testEncodingStaysLegacyCompatibleForDefaults]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testFontAndFuzzyDefaultsOnMissingKeys]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testFontAndFuzzyDefaultsOnMissingKeys]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testFontClampOnOutOfRangeLegacyValue]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testFontClampOnOutOfRangeLegacyValue]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testGlobalModePreferenceDecodedAndValidated]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testGlobalModePreferenceDecodedAndValidated]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testLegacyShortcutDefaultsAndDisabledSurvive]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testLegacyShortcutDefaultsAndDisabledSurvive]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testLegacyStringAppDefaultEnglishBecomesEnabledEntries]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testLegacyStringAppDefaultEnglishBecomesEnabledEntries]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsMigrationTests testNewAppDefaultEnglishKeepsDisabledRows]' started.
+Test Case '-[GogakuKitTests.SettingsMigrationTests testNewAppDefaultEnglishKeepsDisabledRows]' passed (0.001 seconds).
+Test Suite 'SettingsMigrationTests' passed at 2026-11-08 11:40:36.819.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.007 (0.009) seconds
+Test Suite 'SettingsStoreTests' started at 2026-11-08 11:40:36.819.
+Test Case '-[GogakuKitTests.SettingsStoreTests testCoalescedSubmitKeepsLatestValue]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testCoalescedSubmitKeepsLatestValue]' passed (0.371 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testCustomRetryHandlerRunsOnRetry]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testCustomRetryHandlerRunsOnRetry]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testImmediateSubmitWritesAndNotifies]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testImmediateSubmitWritesAndNotifies]' passed (0.007 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testLegacyBaselineDoesNotEraseConcurrentlyCreatedTheme]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testLegacyBaselineDoesNotEraseConcurrentlyCreatedTheme]' passed (0.008 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testMergeOnlyCopiesChangedTopLevelFields]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testMergeOnlyCopiesChangedTopLevelFields]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testSecondInstanceMergesInsteadOfOverwriting]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testSecondInstanceMergesInsteadOfOverwriting]' passed (0.010 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testStaleBaselineDoesNotClobberForeignFields]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testStaleBaselineDoesNotClobberForeignFields]' passed (0.022 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testThemeSaveMergesForeignFieldsAndRejectsInvalidData]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testThemeSaveMergesForeignFieldsAndRejectsInvalidData]' passed (0.009 seconds).
+Test Case '-[GogakuKitTests.SettingsStoreTests testWriteFailureKeepsPendingAndRetrySucceeds]' started.
+Test Case '-[GogakuKitTests.SettingsStoreTests testWriteFailureKeepsPendingAndRetrySucceeds]' passed (0.008 seconds).
+Test Suite 'SettingsStoreTests' passed at 2026-11-08 11:40:37.260.
+	 Executed 9 tests, with 0 failures (0 unexpected) in 0.438 (0.441) seconds
+Test Suite 'SkinEditorSessionTests' started at 2026-11-08 11:40:37.260.
+Test Case '-[GogakuKitTests.SkinEditorSessionTests testCopyAndDraftIsolation]' started.
+Test Case '-[GogakuKitTests.SkinEditorSessionTests testCopyAndDraftIsolation]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.SkinEditorSessionTests testExistingDraftDirtyAndSingleAppearance]' started.
+Test Case '-[GogakuKitTests.SkinEditorSessionTests testExistingDraftDirtyAndSingleAppearance]' passed (0.001 seconds).
+Test Suite 'SkinEditorSessionTests' passed at 2026-11-08 11:40:37.262.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.002 (0.003) seconds
+Test Suite 'SpellingTests' started at 2026-11-08 11:40:37.262.
+Test Case '-[GogakuKitTests.SpellingTests testAsyncSpellRangesBelongToExactText]' started.
+Test Case '-[GogakuKitTests.SpellingTests testAsyncSpellRangesBelongToExactText]' passed (0.193 seconds).
+Test Case '-[GogakuKitTests.SpellingTests testFinishedWordUTF16AndExemptions]' started.
+Test Case '-[GogakuKitTests.SpellingTests testFinishedWordUTF16AndExemptions]' passed (0.003 seconds).
+Test Suite 'SpellingTests' passed at 2026-11-08 11:40:37.459.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.196 (0.197) seconds
+Test Suite 'StoreTests' started at 2026-11-08 11:40:37.459.
+Test Case '-[GogakuKitTests.StoreTests testDedupExpiryAndPauseExclusion]' started.
+Test Case '-[GogakuKitTests.StoreTests testDedupExpiryAndPauseExclusion]' passed (0.036 seconds).
+Test Case '-[GogakuKitTests.StoreTests testDeleteTombstoneRejectsLateDuplicate]' started.
+Test Case '-[GogakuKitTests.StoreTests testDeleteTombstoneRejectsLateDuplicate]' passed (0.016 seconds).
+Test Case '-[GogakuKitTests.StoreTests testStorageFailureDoesNotThrowIntoInput]' started.
+Test Case '-[GogakuKitTests.StoreTests testStorageFailureDoesNotThrowIntoInput]' passed (0.002 seconds).
+Test Suite 'StoreTests' passed at 2026-11-08 11:40:37.515.
+	 Executed 3 tests, with 0 failures (0 unexpected) in 0.055 (0.056) seconds
+Test Suite 'ThemePackageTests' started at 2026-11-08 11:40:37.515.
+Test Case '-[GogakuKitTests.ThemePackageTests testBuiltinIdentityIsPreservedButCannotOverrideSettings]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testBuiltinIdentityIsPreservedButCannotOverrideSettings]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testDescriptorSupportedAndDamagedDescriptorRejected]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testDescriptorSupportedAndDamagedDescriptorRejected]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testFakeTruncatedCorruptAndOversizedImagesAreRejected]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testFakeTruncatedCorruptAndOversizedImagesAreRejected]' passed (0.018 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testImportValidatesEachEmbeddedImageAndExportFailurePreservesDestination]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testImportValidatesEachEmbeddedImageAndExportFailurePreservesDestination]' passed (0.010 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testPackageRoundTripPreservesIdentityTypographyMetricsAndBothImages]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testPackageRoundTripPreservesIdentityTypographyMetricsAndBothImages]' passed (0.015 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testPNGAndJPEGActuallyDecodeAndNormalize]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testPNGAndJPEGActuallyDecodeAndNormalize]' passed (0.005 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsDuplicatesEncryptionUnsupportedCompressionAndExcessFileCount]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsDuplicatesEncryptionUnsupportedCompressionAndExcessFileCount]' passed (0.005 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsMismatchedLocalHeaderCRCExtraFieldsAndTruncation]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsMismatchedLocalHeaderCRCExtraFieldsAndTruncation]' passed (0.005 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsSymlinksDirectoriesAndSpecialFiles]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsSymlinksDirectoriesAndSpecialFiles]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsTraversalAbsolutePathsBackslashesAndUnsupportedFiles]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsTraversalAbsolutePathsBackslashesAndUnsupportedFiles]' passed (0.005 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsUnsupportedExtensionJSONAndVersion]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsUnsupportedExtensionJSONAndVersion]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsZipBombDeclarationsAndActualArchiveLimit]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testRejectsZipBombDeclarationsAndActualArchiveLimit]' passed (0.059 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testSingleAppearanceWithoutImagesAndVersionOneEnvelope]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testSingleAppearanceWithoutImagesAndVersionOneEnvelope]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testSystemDeflatedArchiveRoundTripAndCRCFailure]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testSystemDeflatedArchiveRoundTripAndCRCFailure]' passed (0.290 seconds).
+Test Case '-[GogakuKitTests.ThemePackageTests testWebPActuallyDecodesAndNormalizes]' started.
+Test Case '-[GogakuKitTests.ThemePackageTests testWebPActuallyDecodesAndNormalizes]' passed (0.003 seconds).
+Test Suite 'ThemePackageTests' passed at 2026-11-08 11:40:37.951.
+	 Executed 15 tests, with 0 failures (0 unexpected) in 0.431 (0.435) seconds
+Test Suite 'ThemeVisualTests' started at 2026-11-08 11:40:37.951.
+Test Case '-[GogakuKitTests.ThemeVisualTests testBackgroundAndWholePanelAlphaAreActuallyDrawn]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testBackgroundAndWholePanelAlphaAreActuallyDrawn]' passed (0.019 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testImageIsDecodedAtThemeUpdateAndReusedByLayoutAndAppearance]' started.
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unrecognized colorspace number -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unknown number of components for colorspace model -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unrecognized colorspace number -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unknown number of components for colorspace model -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unrecognized colorspace number -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unknown number of components for colorspace model -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unrecognized colorspace number -1
+2026-11-08 11:40:37.970 xctest[58871:1898418] Unknown number of components for colorspace model -1
+Test Case '-[GogakuKitTests.ThemeVisualTests testImageIsDecodedAtThemeUpdateAndReusedByLayoutAndAppearance]' passed (0.006 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testIndependentPalettesAndImageRoundTrip]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testIndependentPalettesAndImageRoundTrip]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testLegacyGlobalFontAndNoBorderRemainCompatible]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testLegacyGlobalFontAndNoBorderRemainCompatible]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testLegacyJSONAndPartialNewFieldsUseDefaults]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testLegacyJSONAndPartialNewFieldsUseDefaults]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testNewThemeUsesDemoMetricsAndIndependentAppearance]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testNewThemeUsesDemoMetricsAndIndependentAppearance]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testRealLayoutUsesEnglishFontAndRefreshesSameID]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testRealLayoutUsesEnglishFontAndRefreshesSameID]' passed (0.015 seconds).
+Test Case '-[GogakuKitTests.ThemeVisualTests testRejectsInvalidNumbersAndFontNames]' started.
+Test Case '-[GogakuKitTests.ThemeVisualTests testRejectsInvalidNumbersAndFontNames]' passed (0.002 seconds).
+Test Suite 'ThemeVisualTests' passed at 2026-11-08 11:40:37.999.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 0.046 (0.048) seconds
+Test Suite 'TranslationTests' started at 2026-11-08 11:40:37.999.
+Test Case '-[GogakuKitTests.TranslationTests testCacheHitIsMarkedAndNotCountedAsNewRequest]' started.
+Test Case '-[GogakuKitTests.TranslationTests testCacheHitIsMarkedAndNotCountedAsNewRequest]' passed (1.883 seconds).
+Test Case '-[GogakuKitTests.TranslationTests testHungHelperTimesOutThenRunsLatestAfterExit]' started.
+Test Case '-[GogakuKitTests.TranslationTests testHungHelperTimesOutThenRunsLatestAfterExit]' passed (10.222 seconds).
+Test Case '-[GogakuKitTests.TranslationTests testInputLimitPreservesOriginalRequest]' started.
+Test Case '-[GogakuKitTests.TranslationTests testInputLimitPreservesOriginalRequest]' passed (0.125 seconds).
+Test Case '-[GogakuKitTests.TranslationTests testInvalidationPreventsSuccessfulLateResponse]' started.
+Test Case '-[GogakuKitTests.TranslationTests testInvalidationPreventsSuccessfulLateResponse]' passed (1.005 seconds).
+Test Case '-[GogakuKitTests.TranslationTests testOneRunningAndOnlyLatestPendingAndNoStaleDelivery]' started.
+Test Case '-[GogakuKitTests.TranslationTests testOneRunningAndOnlyLatestPendingAndNoStaleDelivery]' passed (1.939 seconds).
+Test Case '-[GogakuKitTests.TranslationTests testWrongResourceResponseIsRejected]' started.
+Test Case '-[GogakuKitTests.TranslationTests testWrongResourceResponseIsRejected]' passed (0.729 seconds).
+Test Suite 'TranslationTests' passed at 2026-11-08 11:40:53.902.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 15.901 (15.903) seconds
+Test Suite 'UpdateTests' started at 2026-11-08 11:40:53.902.
+Test Case '-[GogakuKitTests.UpdateTests testAutoCheckThrottleDefaultsOff]' started.
+Test Case '-[GogakuKitTests.UpdateTests testAutoCheckThrottleDefaultsOff]' passed (0.005 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testChannelIsolation]' started.
+Test Case '-[GogakuKitTests.UpdateTests testChannelIsolation]' passed (0.008 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testCrossChannelPaginationAndPerPage304]' started.
+Test Case '-[GogakuKitTests.UpdateTests testCrossChannelPaginationAndPerPage304]' passed (0.031 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testDownloaderCancellationMapsToCancelled]' started.
+Test Case '-[GogakuKitTests.UpdateTests testDownloaderCancellationMapsToCancelled]' passed (0.104 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testDownloaderRejectsSizeMismatch]' started.
+Test Case '-[GogakuKitTests.UpdateTests testDownloaderRejectsSizeMismatch]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testDownloaderVerifiesSizeAndHashAndReusesCache]' started.
+Test Case '-[GogakuKitTests.UpdateTests testDownloaderVerifiesSizeAndHashAndReusesCache]' passed (0.013 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testETag304ReevaluatesAfterUpgrade]' started.
+Test Case '-[GogakuKitTests.UpdateTests testETag304ReevaluatesAfterUpgrade]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testFindsAvailableUpdate]' started.
+Test Case '-[GogakuKitTests.UpdateTests testFindsAvailableUpdate]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testInvalidFirstCheckThen304CannotReuseLegacyOutcome]' started.
+Test Case '-[GogakuKitTests.UpdateTests testInvalidFirstCheckThen304CannotReuseLegacyOutcome]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testInvalidSignatureDoesNotCommitETagBefore304]' started.
+Test Case '-[GogakuKitTests.UpdateTests testInvalidSignatureDoesNotCommitETagBefore304]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testInvalidSignatureIsNotUpToDate]' started.
+Test Case '-[GogakuKitTests.UpdateTests testInvalidSignatureIsNotUpToDate]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testManifestValidationRejectsBadFields]' started.
+Test Case '-[GogakuKitTests.UpdateTests testManifestValidationRejectsBadFields]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testNoManifestAndUnconfigured]' started.
+Test Case '-[GogakuKitTests.UpdateTests testNoManifestAndUnconfigured]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testPaginationFindsManifestOnSecondPage]' started.
+Test Case '-[GogakuKitTests.UpdateTests testPaginationFindsManifestOnSecondPage]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testPaginationNeverExceedsThreePages]' started.
+Test Case '-[GogakuKitTests.UpdateTests testPaginationNeverExceedsThreePages]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testRateLimitAndHTTPFailure]' started.
+Test Case '-[GogakuKitTests.UpdateTests testRateLimitAndHTTPFailure]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportChecksReleaseAndSmallAssetsWithoutNetwork]' started.
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportChecksReleaseAndSmallAssetsWithoutNetwork]' passed (0.014 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportEnforcesAPIAndAssetHostBoundaries]' started.
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportEnforcesAPIAndAssetHostBoundaries]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportRedirectDelegateKeepsHTTPSAllowlist]' started.
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportRedirectDelegateKeepsHTTPSAllowlist]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportRejectsUnsafeFinalResponseURL]' started.
+Test Case '-[GogakuKitTests.UpdateTests testRealTransportRejectsUnsafeFinalResponseURL]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testSameOrLowerBuildIsUpToDate]' started.
+Test Case '-[GogakuKitTests.UpdateTests testSameOrLowerBuildIsUpToDate]' passed (0.005 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testSignatureVerification]' started.
+Test Case '-[GogakuKitTests.UpdateTests testSignatureVerification]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testUnknownKeyIsRejected]' started.
+Test Case '-[GogakuKitTests.UpdateTests testUnknownKeyIsRejected]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testUnsupportedArchAndOS]' started.
+Test Case '-[GogakuKitTests.UpdateTests testUnsupportedArchAndOS]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.UpdateTests testVersionAndOSComparison]' started.
+Test Case '-[GogakuKitTests.UpdateTests testVersionAndOSComparison]' passed (0.002 seconds).
+Test Suite 'UpdateTests' passed at 2026-11-08 11:40:54.135.
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.225 (0.232) seconds
+Test Suite 'VolcengineHTTPTests' started at 2026-11-08 11:40:54.135.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testBufferedResponseSizeBoundary]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testBufferedResponseSizeBoundary]' passed (0.009 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testCredentialsAreReadAfterSaveReplaceRemoveAndRestore]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testCredentialsAreReadAfterSaveReplaceRemoveAndRestore]' passed (0.012 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testEmptyAndMalformedResponses]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testEmptyAndMalformedResponses]' passed (0.012 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testHTTPFailuresDoNotReturnTargetsOrRetry]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testHTTPFailuresDoNotReturnTargetsOrRetry]' passed (0.009 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testInvalidInputAndForeignCredentialHostFailBeforeTransport]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testInvalidInputAndForeignCredentialHostFailBeforeTransport]' passed (0.004 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testMissingStubRouteFailsClosed]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testMissingStubRouteFailsClosed]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testRedirectsNeverForwardSourceOrSignature]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testRedirectsNeverForwardSourceOrSignature]' passed (0.046 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testTimeoutAndNetworkFailures]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testTimeoutAndNetworkFailures]' passed (0.008 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testTranslateBothDirectionsAndBillingThroughHTTP]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testTranslateBothDirectionsAndBillingThroughHTTP]' passed (0.007 seconds).
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testTranslateWithoutBillingField]' started.
+Test Case '-[GogakuKitTests.VolcengineHTTPTests testTranslateWithoutBillingField]' passed (0.003 seconds).
+Test Suite 'VolcengineHTTPTests' passed at 2026-11-08 11:40:54.250.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.112 (0.115) seconds
+Test Suite 'VolcengineTests' started at 2026-11-08 11:40:54.250.
+Test Case '-[GogakuKitTests.VolcengineTests testCanonicalQuery]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testCanonicalQuery]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testCredentialsRejectsIncompleteFile]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testCredentialsRejectsIncompleteFile]' passed (0.002 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testCredentialsRoundTripAndPermissions]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testCredentialsRoundTripAndPermissions]' passed (0.003 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testEndpointRejectsForeignHost]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testEndpointRejectsForeignHost]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testErrorCodeMapping]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testErrorCodeMapping]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testLearningTranslationOnlyExposesVolcengine]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testLearningTranslationOnlyExposesVolcengine]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testPayloadMatchesPythonReference]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testPayloadMatchesPythonReference]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testPayloadRejectsOversizeAndBlank]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testPayloadRejectsOversizeAndBlank]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testSignatureMatchesPythonReference]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testSignatureMatchesPythonReference]' passed (0.001 seconds).
+Test Case '-[GogakuKitTests.VolcengineTests testStripTrailingOrphanPunctuation]' started.
+Test Case '-[GogakuKitTests.VolcengineTests testStripTrailingOrphanPunctuation]' passed (0.001 seconds).
+Test Suite 'VolcengineTests' passed at 2026-11-08 11:40:54.266.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.013 (0.016) seconds
+Test Suite 'GogakuPackageTests.xctest' passed at 2026-11-08 11:40:54.266.
+	 Executed 217 tests, with 0 failures (0 unexpected) in 21.055 (21.120) seconds
+Test Suite 'All tests' passed at 2026-11-08 11:40:54.266.
+	 Executed 217 tests, with 0 failures (0 unexpected) in 21.055 (21.123) seconds
+◇ Test run started.
+↳ Testing Library Version: 1902
+↳ Target Platform: x86_64-apple-macos14.0
+✔ Test run with 0 tests in 0 suites passed after 0.002 seconds.
+[0/1] Planning build
+Building for production...
+[0/5] Write swift-version--58304C5D6DBC2206.txt
+Build complete! (0.63s)

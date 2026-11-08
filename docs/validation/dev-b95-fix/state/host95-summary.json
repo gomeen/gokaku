@@ -1,0 +1,323 @@
+{
+  "schema": 1,
+  "buildNumber": 95,
+  "completedAt": "2026-11-08T06:02:21.746Z",
+  "scope": "已授权 Windows 11 VM 限定真实宿主回归；仅测试及 local 证据写入。顺序独占执行，首次真实输入错误后停止。",
+  "status": "stopped-on-real-input-mismatch",
+  "ok": false,
+  "plannedCount": 11,
+  "executedCount": 1,
+  "passedCount": 0,
+  "failedCount": 1,
+  "notRunCount": 10,
+  "installationEvidence": "local/windows-tsf-diagnosis/install95-result.json",
+  "preInputComparison": {
+    "baseline": "local/windows-tsf-diagnosis/state95-before/result.json",
+    "snapshot": "local/windows-tsf-diagnosis/state95-after-install/result.json",
+    "allFileHashesUnchanged": true,
+    "files": [
+      {
+        "path": "\\chinese\\learned.txt",
+        "beforeSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "afterSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\chinese\\model.userlm",
+        "beforeSha256": "ac41e7f1509c4da02c71288a7c7cf334ef3a157212f35a4dbeff9368e517c720",
+        "afterSha256": "ac41e7f1509c4da02c71288a7c7cf334ef3a157212f35a4dbeff9368e517c720",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\settings.json",
+        "beforeSha256": "f4f1ae24da1a1363ba3450adbe09f5d114258d17e387b9a0b81d43ca10e13e29",
+        "afterSha256": "f4f1ae24da1a1363ba3450adbe09f5d114258d17e387b9a0b81d43ca10e13e29",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\user\\learned.txt",
+        "beforeSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "afterSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\user\\model.userlm",
+        "beforeSha256": "096cc97ed2bf8a9c409d7cd97b92d05ec0a4750909ba7a0294559bba7b1aa6f4",
+        "afterSha256": "096cc97ed2bf8a9c409d7cd97b92d05ec0a4750909ba7a0294559bba7b1aa6f4",
+        "unchanged": true,
+        "retained": true
+      }
+    ],
+    "autostartUnchanged": true,
+    "autostartBefore": null,
+    "autostartAfter": null
+  },
+  "postInputComparison": {
+    "snapshot": "local/windows-tsf-diagnosis/state95-after-input/result.json",
+    "allFileHashesUnchanged": true,
+    "files": [
+      {
+        "path": "\\chinese\\learned.txt",
+        "beforeSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "afterSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\chinese\\model.userlm",
+        "beforeSha256": "ac41e7f1509c4da02c71288a7c7cf334ef3a157212f35a4dbeff9368e517c720",
+        "afterSha256": "ac41e7f1509c4da02c71288a7c7cf334ef3a157212f35a4dbeff9368e517c720",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\settings.json",
+        "beforeSha256": "f4f1ae24da1a1363ba3450adbe09f5d114258d17e387b9a0b81d43ca10e13e29",
+        "afterSha256": "f4f1ae24da1a1363ba3450adbe09f5d114258d17e387b9a0b81d43ca10e13e29",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\user\\learned.txt",
+        "beforeSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "afterSha256": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+        "unchanged": true,
+        "retained": true
+      },
+      {
+        "path": "\\user\\model.userlm",
+        "beforeSha256": "096cc97ed2bf8a9c409d7cd97b92d05ec0a4750909ba7a0294559bba7b1aa6f4",
+        "afterSha256": "096cc97ed2bf8a9c409d7cd97b92d05ec0a4750909ba7a0294559bba7b1aa6f4",
+        "unchanged": true,
+        "retained": true
+      }
+    ],
+    "autostartUnchanged": true,
+    "autostartBefore": null,
+    "autostartAfter": null
+  },
+  "moduleIdentity": {
+    "installedReferenceEvidence": "local/windows-tsf-diagnosis/identity95-readonly/result.json",
+    "checks": [
+      {
+        "stage": "modulesBefore",
+        "count": 1,
+        "passed": true,
+        "modules": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      {
+        "stage": "modulesAfter",
+        "count": 1,
+        "passed": true,
+        "modules": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      }
+    ],
+    "allLoadedModulesMatchFormalB95": true,
+    "x64Installed": {
+      "sha256": "eb83d812416936dec84b80a79984284278fa0a2b21ae80a130ad8a8996a5cd72",
+      "sha256Matched": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll",
+      "arch": "x64",
+      "diskPeTimestamp": 1794117231,
+      "expectedSha256": "eb83d812416936dec84b80a79984284278fa0a2b21ae80a130ad8a8996a5cd72"
+    },
+    "x86Installed": {
+      "sha256": "f88a1d651c10147c64610490f958739731050600464929052655e92fcfbc4b7b",
+      "sha256Matched": true,
+      "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x86\\GogakuTsf.dll",
+      "arch": "x86",
+      "diskPeTimestamp": 1794117194,
+      "expectedSha256": "f88a1d651c10147c64610490f958739731050600464929052655e92fcfbc4b7b"
+    },
+    "x86RuntimeTested": false,
+    "method": "实际进程 modulesBefore/modulesAfter 的路径、ReadProcessMemory PE timestamp 对照安装件 PE timestamp；安装件 SHA-256 对照 b95 身份清单。不是以 COM 登记代替加载证据。"
+  },
+  "agentIdentity": {
+    "before": [
+      {
+        "ProcessId": 11940,
+        "SessionId": 1,
+        "ExecutablePath": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe"
+      }
+    ],
+    "after": [
+      {
+        "ProcessId": 11940,
+        "SessionId": 1,
+        "ExecutablePath": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe"
+      }
+    ],
+    "readOnlyVerification": [
+      {
+        "sha256": "54ea9b97c9891d18d8c9f058229f0d5aaa8d6f8fc5f42ccafe620426dd5019a2",
+        "bytesMatchB95": false,
+        "processId": 11940,
+        "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe",
+        "sessionId": 1,
+        "b95ExpectedSha256": "7bc1a85a7f9739efdb0d7ebd77a5fe67c2534841475c0fbe3709f30e79ab7d17"
+      }
+    ],
+    "b95AgentRuntimeVerified": false,
+    "mixedRuntime": true,
+    "limitation": "输入时原 b94 代理 PID 11940 仍在运行，文件哈希与 b95 不同。未停止既有代理。此失败反映 b95 TSF 配合既有 b94 代理的实际状态，不可单独归因于纯 b95 运行时。"
+  },
+  "cases": [
+    {
+      "name": "b95-chrome-focus-1",
+      "mode": "chrome-focus",
+      "executed": true,
+      "passed": false,
+      "evidence": "local/windows-acceptance/b95-chrome-focus-1/result.json",
+      "newHostFirstGroup": true,
+      "agentColdStart": false,
+      "newHostEvidence": {
+        "pid": 10528,
+        "driver": "local/windows-acceptance/host-acceptance.cpp 与 browser-cases.h；每轮按驱动 PID 新建专属 Chrome profile/page；本轮只发送 N、I、Space",
+        "activateHr": 0,
+        "activationMilliseconds": 0
+      },
+      "resultOk": false,
+      "values": {
+        "active": "target",
+        "source": "i",
+        "target": " "
+      },
+      "firstFieldText": "i",
+      "secondFieldText": " ",
+      "firstFieldEmpty": false,
+      "secondFieldOnlySpace": true,
+      "candidateVisibleAfterFocus": false,
+      "oldChineseSubmittedToSecondField": false,
+      "oldDraftInNewFieldObserved": false,
+      "sourceResidualObserved": true,
+      "errorClassification": "真实 DOM 输入结果不符；无驱动 error 字段。首框残留 i 违反验收，不推断丢键根因。",
+      "driverError": null,
+      "syntheticWindowClosed": true,
+      "foregroundRestored": true,
+      "screenshots": [],
+      "screenshotLimitation": "本轮候选已隐藏，驱动仅截图可见候选，screenshots=[]；无失败现场截图，停止后不重新输入补拍。"
+    },
+    {
+      "name": "b95-chrome-focus-2",
+      "mode": "chrome-focus",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-chrome-basic-1",
+      "mode": "chrome-basic",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-chrome-basic-2",
+      "mode": "chrome-basic",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-chrome-basic-3",
+      "mode": "chrome-basic",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-chrome-basic-4",
+      "mode": "chrome-basic",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-chrome-password",
+      "mode": "chrome-password",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-notepad-basic-1",
+      "mode": "notepad-basic",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-notepad-basic-2",
+      "mode": "notepad-basic",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": false
+    },
+    {
+      "name": "b95-notepad-cold-1",
+      "mode": "notepad-cold",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": "not-tested"
+    },
+    {
+      "name": "b95-notepad-cold-2",
+      "mode": "notepad-cold",
+      "executed": false,
+      "status": "not-run",
+      "reason": "首轮真实输入错误后按用户要求停止",
+      "agentColdStart": "not-tested"
+    }
+  ],
+  "notTested": [
+    "第二次 Chrome 跨字段",
+    "四次 Chrome 新宿主首组普通输入",
+    "Chrome 密码框",
+    "两次记事本普通输入",
+    "两次记事本代理冷启动（未执行，不能算暖启动或冷启动通过）",
+    "纯 b95 TSF + b95 代理组合",
+    "x86 实际宿主加载",
+    "完整宿主／性能／稳定性及升级回滚卸载矩阵"
+  ],
+  "conclusions": [
+    "首轮第一框应为空、实际 i；第二框为单个空格且无候选，未出现旧中文进入第二框。目标条件整体失败。",
+    "按停止规则仅执行 1/11，不用后续成功掩盖本次失败。",
+    "没有定位首组间歇异常根因，不宣称已修复。",
+    "全部原有用户文件保留，安装前/后/输入后文件哈希及自启动均一致。"
+  ],
+  "mutations": {
+    "productionSourceChanged": false,
+    "docsChanged": false,
+    "buildNumberChanged": false,
+    "installedOrRegistrationChanged": false,
+    "agentStoppedOrRestarted": false,
+    "userWindowsClosed": false,
+    "ownSyntheticChromeWindowClosed": true,
+    "newEvidenceUnder": "local/"
+  }
+}

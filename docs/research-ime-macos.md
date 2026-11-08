@@ -4,7 +4,7 @@
 
 ## 范围与证据状态
 
-Gogaku 当前只有需求/设计文档、浏览器流程原型和隔离组件探针；没有已实现的 macOS 输入法。普通中文、小鹤、中英方向、选择即提交、按应用记忆模式和英→中自有区域标记是需求，不是交付能力。[产品方向](product.md)；既有青简/Rime及模型详报见[可行性](feasibility.md)、[青简源码核查](research-qingjian.md)、[Rime 支撑边界](research-rime.md)，本文不重复引擎细节。
+本文保留 2026-10-30 的 IMK 协议与宿主约束研究，文中的“未实现”仅指当时状态。当前需求见[产品方向](product.md)，实际实现与验收见[原生开发验收](validation/native-development.md)。旧青简／Rime／模型选型详报已退役，可从 Git 历史追溯；本文不再维护旧选型索引。
 
 证据标识：**官方契约**=Apple公开API文档/本机公开SDK声明；**源码行为**=下述固定上游版本；**工程判断**=建议或风险假设，须实测。上游版本固定为 Squirrel `46962d2efae5be70389c778d0a6c52f669072827`，fcitx5-macos `3466612499c149d5002b1aab37b92bb257da1a75`。源码行为不代表 macOS 或其他 IMK 客户端保证。
 本轮只读公开资料、源码及SDK；未注册/启用输入源、启动GUI、运行模型、性能或宿主测试。Apple JS文档已通过公开 `tutorials/data/documentation/*.json` 核对 abstract/primaryContentSections；源码阅读不构成运行验收。文末 SDK 索引列出完整本机路径。

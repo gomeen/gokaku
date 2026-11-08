@@ -187,7 +187,7 @@ def data_and_license_smoke(app):
 
 def expected_abi_version():
     """从头文件读取当前 ABI 版本，避免每次版本迁移都改脚本（v3/v4 教训）。"""
-    header = ROOT / 'native/GogakuCore/include/gogaku_core.h'
+    header = ROOT / 'shared/GogakuCore/include/gogaku_core.h'
     m = re.search(r'#define GOGAKU_CORE_ABI_VERSION (\d+)', header.read_text())
     assert m, '头文件缺少 GOGAKU_CORE_ABI_VERSION'
     return int(m.group(1))

@@ -1,0 +1,32 @@
+﻿2026-11-08 11:49:07.858   Log opened. (Time zone: UTC+08:00)
+2026-11-08 11:49:07.858   Setup version: Inno Setup version 6.7.4
+2026-11-08 11:49:07.859   Original Setup EXE: C:\Users\iixm\AppData\Local\Temp\GogakuProbe-1793953155\Gogaku-0.1.1-dev.2-b94-dev-windows-x64-setup.exe
+2026-11-08 11:49:07.859   Setup command line: /SL5="$1300B2,53274490,990720,C:\Users\iixm\AppData\Local\Temp\GogakuProbe-1793953155\Gogaku-0.1.1-dev.2-b94-dev-windows-x64-setup.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /LOG="C:\Users\iixm\AppData\Local\Temp\GogakuProbe-1793953155\same-build-b94-blocked.log" 
+2026-11-08 11:49:07.859   Windows version: 10.0.26300
+2026-11-08 11:49:07.859   Windows architecture: x64 (64-bit)
+2026-11-08 11:49:07.859   Machine types supported by system: x86 x64
+2026-11-08 11:49:07.859   User privileges: Administrative
+2026-11-08 11:49:07.868   Administrative install mode: Yes
+2026-11-08 11:49:07.868   Install mode root key: HKEY_LOCAL_MACHINE
+2026-11-08 11:49:07.868   64-bit install mode: Yes
+2026-11-08 11:49:07.868   RedirectionGuard status for current process: Enabled in enforcing mode
+2026-11-08 11:49:07.870   Created protected temporary directory: C:\Users\administrator\AppData\Local\Temp\is-W3RNSLJW1H.tmp
+2026-11-08 11:49:07.880   -- DLL function import --
+2026-11-08 11:49:07.880   Function and DLL name: CreateFileW@kernel32.dll
+2026-11-08 11:49:07.880   Importing the DLL function. Dest DLL name: kernel32.dll
+2026-11-08 11:49:07.880   Successfully imported the DLL function. Delay loaded? No
+2026-11-08 11:49:07.880   -- DLL function import --
+2026-11-08 11:49:07.880   Function and DLL name: CloseHandle@kernel32.dll
+2026-11-08 11:49:07.880   Importing the DLL function. Dest DLL name: kernel32.dll
+2026-11-08 11:49:07.880   Successfully imported the DLL function. Delay loaded? No
+2026-11-08 11:49:08.068   PrepareToInstall failed: 无法替换或删除文件（被占用或没有写权限）：
+                          C:\Program Files\GogakuDev\versions\b93\versions\0.1.1-dev.2-b94-dev\bin\x64\GogakuAgent.exe
+                          请先保存工作、切到其它输入法，在 Gogaku 托盘菜单选择“退出输入代理”，关闭设置及使用 Gogaku 的应用，再重试。若仍被 TSF 宿主占用，可自行注销后重试。安装器不会强杀应用，也不会安排下次重启替换。
+2026-11-08 11:49:08.070   Need to restart Windows? No
+2026-11-08 11:49:08.070   Defaulting to OK for suppressed message box (OK):
+                          无法替换或删除文件（被占用或没有写权限）：
+                          C:\Program Files\GogakuDev\versions\b93\versions\0.1.1-dev.2-b94-dev\bin\x64\GogakuAgent.exe
+                          请先保存工作、切到其它输入法，在 Gogaku 托盘菜单选择“退出输入代理”，关闭设置及使用 Gogaku 的应用，再重试。若仍被 TSF 宿主占用，可自行注销后重试。安装器不会强杀应用，也不会安排下次重启替换。
+2026-11-08 11:49:08.070   Got EAbort exception.
+2026-11-08 11:49:08.070   Deinitializing Setup.
+2026-11-08 11:49:08.070   Log closed.

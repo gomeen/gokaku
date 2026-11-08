@@ -25,11 +25,15 @@ ROOT = Path(__file__).resolve().parent.parent
 from _gogaku_delivery import (DeliveryError, package_receipt_path, source_fingerprint,
                               validate_compile_receipt, write_package_receipt)
 VERSION_FILE = ROOT / 'version.json'
-ISS_TEMPLATE = ROOT / 'packaging/windows/gogaku.iss.in'
+ISS_TEMPLATE = ROOT / 'windows/packaging/gogaku.iss.in'
 DATA_FILES = ['sc.dict', 'zh_CN.lm', 'english-words.txt', 'gloss.tsv']
 APP_IDS = {
     'stable': '{{0F3E6E4A-6D7B-4C1E-9B2A-5C8D7E1F3A21}',
     'dev': '{{7B2D9C4E-1A3F-4E6B-8C5D-2F7A9B1C3E42}',
+}
+TSF_CLSIDS = {
+    'stable': '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E12}',
+    'dev': '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}',
 }
 # Windows 11 自带 DLL；VC++/MinGW runtime 不在豁免中，必须随架构闭包提供。
 SYSTEM_DLLS = set(('advapi32 avrt bcrypt bcryptprimitives cabinet cfgmgr32 comctl32 '
@@ -277,7 +281,7 @@ def resource_plan(args):
         result.append((resources / name, Path('data') / name))
     result.append((resources / 'update/config.json', Path('resources/update/windows.json')))
     # 仅从指定许可目录复制；保留目录结构，避免同名 LICENSE/COPYING 互相覆盖。
-    license_dirs = [Path(value) for value in (args.license_dir or [ROOT / 'native/licenses'])]
+    license_dirs = [Path(value) for value in (args.license_dir or [ROOT / 'shared/licenses'])]
     license_dirs += [resources / 'licenses']
     for i, folder in enumerate(license_dirs):
         if not folder.is_dir() or not any(p.is_file() for p in folder.rglob('*')):
@@ -312,7 +316,7 @@ def resource_plan(args):
     windows = Path(args.windows_source_dir)
     for name in ('miniz-LICENSE.txt', 'monocypher-LICENCE.md'):
         result.append((windows / 'third_party' / name, Path('licenses/windows') / name))
-    # json.hpp 与共享核心共用一份（native/third_party），许可文本跟着走。
+    # json.hpp 与共享核心共用一份（shared/third_party），许可文本跟着走。
     result.append((Path(args.third_party_dir) / 'json-LICENSE.MIT',
                    Path('licenses/windows') / 'json-LICENSE.MIT'))
     for path, _ in result:
@@ -396,14 +400,14 @@ def stage(args, *, version_file=VERSION_FILE, git=None):
     replacements = {
         '@APP_NAME@': 'Gogaku Dev' if args.channel == 'dev' else 'Gogaku',
         '@VERSION@': version, '@BUILD@': str(build), '@CHANNEL@': args.channel,
-        '@APP_ID@': APP_IDS[args.channel],
+        '@APP_ID@': APP_IDS[args.channel], '@TSF_CLSID@': TSF_CLSIDS[args.channel],
         '@INSTALL_DIR@': 'GogakuDev' if args.channel == 'dev' else 'Gogaku',
         '@AGENT_RUN_VALUE@': 'GogakuDevAgent' if args.channel == 'dev' else 'GogakuAgent',
         '@OUTPUT_DIR@': inno_path(out_root), '@OUTPUT_BASE@': output_base,
         '@VERSION_QUAD@': version.split('-', 1)[0] + f'.{build}',
         '@APP_MUTEX@': 'GogakuDevSetupMutex' if args.channel == 'dev' else 'GogakuSetupMutex',
         '@STAGE_DIR@': inno_path(stage_dir), '@REPO@': args.repo or 'gogaku/gogaku-releases',
-        '@ICON_FILE@': inno_path(ROOT / 'assets/app-icon/Gogaku.ico'),
+        '@ICON_FILE@': inno_path(ROOT / 'windows/assets/Gogaku.ico'),
     }
     iss = ISS_TEMPLATE.read_text(encoding='utf-8')
     for token, value in replacements.items():
@@ -461,11 +465,11 @@ def make_parser():
     parser.add_argument('--data-lock', default=str(ROOT / 'scripts/windows-setup-dependencies.lock.json'),
                         help='固定的出厂数据 SHA-256 来源锁')
     parser.add_argument('--resources-dir', default=str(ROOT / 'resources'))
-    parser.add_argument('--license-dir', action='append', help='额外原生许可目录，可重复；默认 native/licenses')
+    parser.add_argument('--license-dir', action='append', help='额外原生许可目录，可重复；默认 shared/licenses')
     parser.add_argument('--deps-source-dir', default=str(ROOT / '.build/win-cross/static'),
                         help='包含 libime/、fcitx5/ 的实际原生依赖源码许可根目录')
-    parser.add_argument('--windows-source-dir', default=str(ROOT / 'native/GogakuWindows'))
-    parser.add_argument('--third-party-dir', default=str(ROOT / 'native/third_party'))
+    parser.add_argument('--windows-source-dir', default=str(ROOT / 'windows/GogakuWindows'))
+    parser.add_argument('--third-party-dir', default=str(ROOT / 'shared/third_party'))
     parser.add_argument('--out', help='默认 dist/gogaku-win')
     parser.add_argument('--iscc', help='ISCC.exe 或仅编译 Inno 的本机 wrapper')
     return parser
@@ -564,7 +568,12 @@ def self_test(iscc=None):
         args.iscc = iscc
         if iscc:
             print('仅对临时合成 PE 夹具编译 Inno；此测试安装器不用于交付，也不会执行。')
-        staged = stage(args, version_file=version_file, git=git)
+        # 合成安装器的版本来源也留在临时夹具中；不改真实 version.json。
+        from unittest.mock import patch
+        def fixture_stage():
+            with patch('_gogaku_delivery.current_meta', return_value=json.loads(version_file.read_text())):
+                return stage(args, version_file=version_file, git=git)
+        staged = fixture_stage()
         identity = json.loads((staged / 'build-identity.json').read_text())
         assert identity['dirty'] and identity['gitCommit'] == 'a' * 40
         assert identity['fullVersion'] == '0.1.1-dev.2' and identity['buildNumber'] == 88
@@ -577,10 +586,15 @@ def self_test(iscc=None):
         if hasattr(stat, 'UF_IMMUTABLE'):
             immutable = staged / 'data/sc.dict'
             os.chflags(immutable, immutable.stat().st_flags | stat.UF_IMMUTABLE)
-            assert stage(args, version_file=version_file, git=git) == staged
+            assert fixture_stage() == staged
             assert not (immutable.stat().st_flags & stat.UF_IMMUTABLE)
         text = next(staged.glob('*.iss')).read_text(encoding='utf-8-sig')
         assert 'AfterInstall: RegisterComponents' in text
+        assert 'DestDir: "{app}\\versions\\{#AppVersion}-b{#AppBuild}-{#AppChannel}\\bin\\x64"' in text
+        assert 'DestDir: "{app}\\bin\\x64"' not in text
+        assert 'GogakuAgent.exe"; Parameters: "--set-autostart on"' in text
+        assert 'Regsvr(Architecture: String; DllPath: String; Unregister: Boolean' in text
+        assert '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}' in text
         assert '\n[UninstallRun]\n' not in text and '@STAGE_DIR@' not in text
         assert 'Source: "' + inno_path(staged) + '\\*"' not in text
         def rejected(action, message):

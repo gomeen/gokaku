@@ -1,0 +1,15 @@
+Test project /var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/gogaku-verification-s_czwj87/build-core
+    Start 1: skip
+1/1 Test #1: skip .............................***Skipped   0.04 sec
+
+100% tests passed out of 1
+
+Total Test time (real) =   0.04 sec
+
+The following tests did not run:
+	  1 - skip (Skipped)
+.............
+----------------------------------------------------------------------
+Ran 13 tests in 0.682s
+
+OK

@@ -1,7 +1,7 @@
 // Windows integration probe: a delayed blur from an inactive connection must
 // preserve the active connection's composition. Uses only synthetic protocol
 // input; no host text, credentials, translation requests or frequency commits.
-#include "../native/GogakuWindows/platform.h"
+#include "../windows/GogakuWindows/platform.h"
 #include <fstream>
 #include <objbase.h>
 #include <stdexcept>

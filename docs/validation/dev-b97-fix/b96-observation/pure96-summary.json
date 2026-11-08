@@ -1,0 +1,28 @@
+{
+  "runLabel": "b96-pure2",
+  "timestamp": "2026-11-09",
+  "activeRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b96-dev",
+  "expectedTsDll": {"pathSubstring": "0.1.1-dev.2-b96-dev\\bin\\x64\\GogakuTsf.dll", "memoryPeTimestamp": 1794120424},
+  "agentPidAtStart": 8252,
+  "roundsPlanned": 11,
+  "roundsExecuted": 6,
+  "passed": 6,
+  "failed": 0,
+  "rounds": [
+    {"n": 1, "mode": "chrome-focus", "name": "b96-pure2-chrome-focus-1", "result": "pass", "hostPid": 1732, "newHostFirstGroup": true, "agentPid": 8252, "modulesBeforeAfter": "b96 ts=1794120424 both", "evidence": "ok=true values.source=\"\" values.target=\" \" candidateVisibleAfterFocus=false"},
+    {"n": 2, "mode": "chrome-focus", "name": "b96-pure2-chrome-focus-2", "result": "pass", "hostPid": 7260, "newHostFirstGroup": true, "agentPid": 8252, "modulesBeforeAfter": "b96 ts=1794120424 both", "evidence": "ok=true values.source=\"\" values.target=\" \" candidateVisibleAfterFocus=false"},
+    {"n": 3, "mode": "chrome-basic", "name": "b96-pure2-chrome-basic-1", "result": "pass", "hostPid": 3096, "newHostFirstGroup": true, "agentPid": 8252, "modulesBeforeAfter": "b96 ts=1794120424 both", "evidence": "ok=true savedText=你好 candidateVisible=true"},
+    {"n": 4, "mode": "chrome-basic", "name": "b96-pure2-chrome-basic-2", "result": "pass", "hostPid": 12188, "newHostFirstGroup": true, "agentPid": 8252, "modulesBeforeAfter": "b96 ts=1794120424 both", "evidence": "ok=true savedText=你好 candidateVisible=true"},
+    {"n": 5, "mode": "chrome-basic", "name": "b96-pure2-chrome-basic-3", "result": "pass", "hostPid": 7532, "newHostFirstGroup": true, "agentPid": 8252, "modulesBeforeAfter": "b96 ts=1794120424 both", "evidence": "ok=true savedText=你好 candidateVisible=true"},
+    {"n": 6, "mode": "chrome-basic", "name": "b96-pure2-chrome-basic-4", "result": "pass", "hostPid": 8652, "newHostFirstGroup": true, "agentPid": 8252, "modulesBeforeAfter": "b96 ts=1794120424 both", "evidence": "ok=true savedText=你好 candidateVisible=true"}
+  ],
+  "notExecuted": [
+    {"n": 7, "mode": "chrome-password", "name": "b96-pure2-chrome-password"},
+    {"n": 8, "mode": "notepad-basic", "name": "b96-pure2-notepad-basic-1"},
+    {"n": 9, "mode": "notepad-basic", "name": "b96-pure2-notepad-basic-2"},
+    {"n": 10, "mode": "notepad-cold", "name": "b96-pure2-notepad-cold-1"},
+    {"n": 11, "mode": "notepad-cold", "name": "b96-pure2-notepad-cold-2"}
+  ],
+  "stopReason": "运行轮次上限，非输入失败；无真实输入失败，无预检拦截",
+  "conclusion": "已执行 6 轮全部通过；通过不可覆盖历史失败，notepad 与密码框未测，完整验收仍未通过"
+}

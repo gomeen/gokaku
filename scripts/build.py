@@ -91,12 +91,61 @@ def check_build_number_not_regressing(new: int, baseline: int) -> None:
 if 'DEVELOPER_DIR' not in os.environ and Path('/Applications/Xcode.app/Contents/Developer').is_dir():
     os.environ['DEVELOPER_DIR'] = '/Applications/Xcode.app/Contents/Developer'
 CACHE = Path(os.environ.get('GOGAKU_DEPS', Path.home() / 'Library/Caches/Gogaku/libime-1.1.17'))
-# 构建根：默认 .build；verify.py 干净构建用 GOGAKU_BUILD_ROOT 指到全新目录。
-BUILD_ROOT = Path(os.environ.get('GOGAKU_BUILD_ROOT', ROOT / '.build'))
+def resolve_build_root(value=None, root=ROOT):
+    """与 macos/Package.swift 一致：相对仓库根解析，默认 .build。"""
+    path = Path(value or '.build')
+    return (root / path).resolve()
+
+
+# 固定为绝对路径；SwiftPM 在 macos/ 解析 manifest，不得再相对其工作目录。
+BUILD_ROOT = resolve_build_root(os.environ.get('GOGAKU_BUILD_ROOT'))
 DIST = ROOT / 'dist'
 
-def run(args):
-    subprocess.run([str(a) for a in args], cwd=ROOT, check=True)
+def run(args, *, env=None):
+    subprocess.run([str(a) for a in args], cwd=ROOT, check=True, env=env)
+
+
+def configure_cmake(source, binary):
+    """迁移后保留旧 source 构建目录，不删除缓存，也不复用其旧库。"""
+    source = (ROOT / source).resolve()
+    cache = binary / 'CMakeCache.txt'
+    if cache.is_file():
+        previous = next((line.partition('=')[2] for line in cache.read_text().splitlines()
+                         if line.startswith('CMAKE_HOME_DIRECTORY:INTERNAL=')), None)
+        if previous and Path(previous).resolve() != source:
+            index = 1
+            backup = binary.with_name(f'{binary.name}.stale-source-{index}')
+            while backup.exists():
+                index += 1
+                backup = binary.with_name(f'{binary.name}.stale-source-{index}')
+            binary.rename(backup)
+            print(f'CMake source 已迁移；保留旧构建目录：{backup}')
+    run(['cmake', '-S', source, '-B', binary, '-G', 'Ninja',
+         '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
+
+
+def test_core():
+    """构建门同 verify 共用判定，CTest 跳过／零测试不算可交付。"""
+    from _gogaku_verification import validate_ctest_result
+    result = subprocess.run(
+        ['ctest', '--test-dir', str(BUILD_ROOT / 'core'), '--output-on-failure', '--no-tests=error'],
+        cwd=ROOT, env=dict(os.environ, GOGAKU_CORE_TEST_DATA=str(CACHE / 'data')),
+        text=True, capture_output=True)
+    combined = result.stdout + result.stderr
+    print(combined, end='')
+    problems = validate_ctest_result(result.returncode, combined)
+    if problems:
+        raise RuntimeError('核心测试未完整通过：' + '；'.join(problems))
+
+
+def build_swift(configuration, validation=False):
+    args = ['swift', 'build', '-c', configuration, '-j', '2', '--package-path', 'macos',
+            '--scratch-path', str(BUILD_ROOT / 'swift')]
+    if validation:
+        args += ['-Xswiftc', '-DGOGAKU_VALIDATION']
+    # 显式传入同一绝对构建根；不依赖调用者是否导出环境变量。
+    env = dict(os.environ, GOGAKU_BUILD_ROOT=str(BUILD_ROOT))
+    run(args, env=env)
 
 def output(args):
     return subprocess.check_output([str(a) for a in args], cwd=ROOT, text=True)
@@ -173,9 +222,9 @@ def licenses(destination):
     if any('zstd' in n for n in framework_names): extra.append((Path('/usr/local/opt/zstd/LICENSE'), 'zstd-BSD-LICENSE'))
     if any('lzma' in n for n in framework_names):
         extra += [(Path('/usr/local/opt/xz/COPYING'), 'xz-COPYING'), (Path('/usr/local/opt/xz/COPYING.0BSD'), 'xz-0BSD-LICENSE')]
-    if any('boost' in n for n in framework_names): extra.append((ROOT / 'native/licenses/Boost-LICENSE.txt', 'Boost-LICENSE.txt'))
+    if any('boost' in n for n in framework_names): extra.append((ROOT / 'shared/licenses/Boost-LICENSE.txt', 'Boost-LICENSE.txt'))
     if any('intl' in n for n in framework_names):
-        extra += [(ROOT / 'native/licenses/libintl-NOTICE.txt', 'libintl-NOTICE.txt'), (Path('/usr/local/opt/xz/COPYING.LGPLv2.1'), 'libintl-LGPL-2.1.txt')]
+        extra += [(ROOT / 'shared/licenses/libintl-NOTICE.txt', 'libintl-NOTICE.txt'), (Path('/usr/local/opt/xz/COPYING.LGPLv2.1'), 'libintl-LGPL-2.1.txt')]
     for source, name in extra:
         if not source.is_file(): raise RuntimeError(f'缺少依赖许可 {source}')
         shutil.copy2(source, destination / name)
@@ -234,7 +283,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
         'LSMinimumSystemVersion': '26.0', 'NSHighResolutionCapable': True,
         'CFBundleIconFile': 'AppIcon', 'CFBundleDevelopmentRegion': 'zh-Hans',
     }
-    shutil.copy2(ROOT / 'assets/app-icon/AppIcon.icns', contents / 'Resources/AppIcon.icns')
+    shutil.copy2(ROOT / 'macos/assets/app-icon/AppIcon.icns', contents / 'Resources/AppIcon.icns')
     if input_method:
         # dist 一律中立：不携带输入源身份键（TISInputSourceID／
         # ComponentInputModeDict 等，见 _gogaku_dist.py docstring 的事故记录）。
@@ -247,7 +296,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
             'InputMethodType': 'Keyboard', 'NSPrincipalClass': 'NSApplication',
         })
         info = strip_tis_identity(info)
-        shutil.copy2(ROOT / 'assets/app-icon/gogaku-menu.pdf', contents / 'Resources/gogaku-menu.pdf')
+        shutil.copy2(ROOT / 'macos/assets/app-icon/gogaku-menu.pdf', contents / 'Resources/gogaku-menu.pdf')
         # 输入模式的显示名按模式 ID 从 InfoPlist.strings 查找；缺失时菜单里显示原始 ID。
         for folder in ('en.lproj', 'zh-Hans.lproj'):
             strings = contents / 'Resources' / folder
@@ -356,17 +405,15 @@ if __name__ == '__main__':
     if meta['git']['dirty']:
         print(f"提示：工作区有未提交修改，构建身份标记 dirty=true（版本 {meta['version']}）")
     print(f"构建版本 {meta['version']}（构建号 {meta['buildNumber']}，{stage}，提交 {meta['git']['commit'][:12]}）")
-    run(['swift', 'scripts/check-menu-icon.swift', ROOT / 'assets/app-icon/gogaku-menu.pdf'])
+    run(['swift', 'scripts/check-menu-icon.swift', ROOT / 'macos/assets/app-icon/gogaku-menu.pdf'])
     if args.prepare or not (CACHE / 'dependencies.lock.json').exists(): run(['python3', 'scripts/prepare-dependencies.py', '--jobs', '2'])
-    run(['cmake', '-S', 'native/EngineBridge', '-B', BUILD_ROOT / 'native', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
+    configure_cmake('macos/EngineBridge', BUILD_ROOT / 'native')
     run(['cmake', '--build', BUILD_ROOT / 'native', '-j', '2'])
-    # 共享普通模式核心（native/GogakuCore，ABI v2）。
-    run(['cmake', '-S', 'native/GogakuCore', '-B', BUILD_ROOT / 'core', '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
+    # 共享普通模式核心（shared/GogakuCore，ABI v2）。
+    configure_cmake('shared/GogakuCore', BUILD_ROOT / 'core')
     run(['cmake', '--build', BUILD_ROOT / 'core', '-j', '2'])
-    run(['ctest', '--test-dir', BUILD_ROOT / 'core', '--output-on-failure'])
-    swift_args = ['swift', 'build', '-c', args.configuration, '-j', '2', '--scratch-path', str(BUILD_ROOT / 'swift')]
-    if args.validation: swift_args += ['-Xswiftc', '-DGOGAKU_VALIDATION']
-    run(swift_args)
+    test_core()
+    build_swift(args.configuration, args.validation)
     DIST.mkdir(exist_ok=True)
     meta['configuration'] = args.configuration
     meta['validation'] = bool(args.validation)

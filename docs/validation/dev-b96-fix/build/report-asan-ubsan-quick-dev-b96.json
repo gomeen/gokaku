@@ -1,0 +1,168 @@
+{
+  "policyVersion": 2,
+  "runIdentityStable": true,
+  "profile": "release",
+  "channel": "dev",
+  "quick": true,
+  "sourceSha256": "e26f632f1eae310f67e3dfc12219df1ae578f7e6d73ba81006b3d4c07ea24d1f",
+  "testSha256": "2d07182c801960c661da73f65a13cbd9ee3b38e414c9d79da4737317e0dc55f6",
+  "artifacts": {
+    "macos": {
+      "name": "Gogaku-0.1.1-dev.2-b96-dev.pkg",
+      "sha256": "fb13bf18d8b08a80cb5d49bf5b43e85602b35c9c04f4cf44f3e640e668f27bde",
+      "bytes": 49653971
+    },
+    "windows": {
+      "name": "Gogaku-0.1.1-dev.2-b96-dev-windows-x64-setup.exe",
+      "sha256": "0de73e8442ed517d2cb7bf45ff767c19bf90a637c817abf0a5543a325a17a357",
+      "bytes": 54522087
+    }
+  },
+  "artifactError": null,
+  "startedAt": "2026-11-08T14:52:27+0800",
+  "finishedAt": "2026-11-08T14:53:03+0800",
+  "commit": "a3b076e0301dfddbef96099288689b9ad4944875",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 96
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "translation-data",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "verification-contracts",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "clean-build",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "bundle-check",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "quality",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "render",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "data-reliability",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "asan-ubsan",
+      "required": true,
+      "status": "passed",
+      "detail": "2000 随机序列 ASan＋UBSan 无错误（quick 冒烟，不满足十万门槛）",
+      "durationMs": 35361,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261108-145227/asan-ubsan.log"
+    },
+    {
+      "name": "install-preflight",
+      "required": false,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 13,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "version",
+      "resources",
+      "core-tests",
+      "swift-tests",
+      "translation-data",
+      "verification-contracts",
+      "clean-build",
+      "bundle-check",
+      "quality",
+      "render",
+      "data-reliability",
+      "delivery-contracts"
+    ]
+  }
+}

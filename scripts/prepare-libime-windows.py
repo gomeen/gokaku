@@ -2,7 +2,7 @@
 """Windows（MSYS2 Clang64）libime 依赖准备：与 Mac 同 pin、同源数据、同上游转换命令。
 
 产出 GOGAKU_DEPS 目录（source/ ecm-source/ fcitx5-source/ build/ prefix/ data/
-manifest.json），供 native/GogakuCore 的 CMake 直接使用（-DGOGAKU_DEPS）。
+manifest.json），供 shared/GogakuCore 的 CMake 直接使用（-DGOGAKU_DEPS）。
 
 与 probes/prepare-libime-input.py（Mac 版）的关系：
 - pin 完全同源（libime/fcitx5/ECM/kenlm 提交与数据档案 SHA256 从同一模块导入，
@@ -150,7 +150,7 @@ def main():
     print('Windows 依赖就绪：' + str(root))
     print('核心构建与测试（CI 同款）：')
     print(f'  export GOGAKU_DEPS="{root}"')
-    print('  cmake --preset clang64 -S native/GogakuCore')
+    print('  cmake --preset clang64 -S shared/GogakuCore')
     print('  cmake --build --preset clang64')
     print(f'  GOGAKU_CORE_TEST_DATA="{root / "data"}" ctest --test-dir .build/core-windows --output-on-failure')
 

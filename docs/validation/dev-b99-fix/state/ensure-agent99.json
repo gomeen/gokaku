@@ -1,0 +1,33 @@
+{
+  "ok": true,
+  "activeRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b99-dev",
+  "attempts": [
+    {
+      "pipePresent": true,
+      "launched": 4236,
+      "correct": true,
+      "agents": [
+        {
+          "pid": 4236,
+          "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b99-dev\\bin\\x64\\GogakuAgent.exe",
+          "sha256": "65de4eb8311e38877d2f2eee34c50f45c69f7fef44a27025770a18b002442280"
+        }
+      ],
+      "try": 1,
+      "stopped": 10456
+    }
+  ],
+  "stable": true,
+  "oldTsfHosts": [
+    {
+      "pid": 5468,
+      "name": "explorer.exe",
+      "dll": "C:\\gogaku-test\\GogakuTsf.dll"
+    },
+    {
+      "pid": 6172,
+      "name": "msedge.exe",
+      "dll": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b97-dev\\bin\\x64\\GogakuTsf.dll"
+    }
+  ]
+}

@@ -1,0 +1,441 @@
+﻿2026-11-08 10:46:05.359   Log opened. (Time zone: UTC+08:00)
+2026-11-08 10:46:05.359   Setup version: Inno Setup version 6.7.4
+2026-11-08 10:46:05.359   Original Setup EXE: C:\Users\iixm\AppData\Local\Temp\GogakuProbe-1793953155\Gogaku-0.1.1-dev.2-b93-dev-windows-x64-setup.exe
+2026-11-08 10:46:05.359   Setup command line: /SL5="$E60066,53284866,990720,C:\Users\iixm\AppData\Local\Temp\GogakuProbe-1793953155\Gogaku-0.1.1-dev.2-b93-dev-windows-x64-setup.exe" /VERYSILENT /SUPPRESSMSGBOXES /NORESTART /DIR="C:\Program Files\GogakuDev\versions\b93" /LOG="C:\Users\iixm\AppData\Local\Temp\GogakuProbe-1793953155\setup-b93-versioned-final.log" 
+2026-11-08 10:46:05.361   Windows version: 10.0.26300
+2026-11-08 10:46:05.361   Windows architecture: x64 (64-bit)
+2026-11-08 10:46:05.361   Machine types supported by system: x86 x64
+2026-11-08 10:46:05.361   User privileges: Administrative
+2026-11-08 10:46:05.370   Administrative install mode: Yes
+2026-11-08 10:46:05.370   Install mode root key: HKEY_LOCAL_MACHINE
+2026-11-08 10:46:05.370   64-bit install mode: Yes
+2026-11-08 10:46:05.370   RedirectionGuard status for current process: Enabled in enforcing mode
+2026-11-08 10:46:05.377   Created protected temporary directory: C:\Users\ADMINI~1\AppData\Local\Temp\is-4KZTSEI3J6.tmp
+2026-11-08 10:46:05.385   -- DLL function import --
+2026-11-08 10:46:05.385   Function and DLL name: CreateFileW@kernel32.dll
+2026-11-08 10:46:05.385   Importing the DLL function. Dest DLL name: kernel32.dll
+2026-11-08 10:46:05.385   Successfully imported the DLL function. Delay loaded? No
+2026-11-08 10:46:05.385   -- DLL function import --
+2026-11-08 10:46:05.385   Function and DLL name: CloseHandle@kernel32.dll
+2026-11-08 10:46:05.385   Importing the DLL function. Dest DLL name: kernel32.dll
+2026-11-08 10:46:05.385   Successfully imported the DLL function. Delay loaded? No
+2026-11-08 10:46:05.747   Starting the installation process.
+2026-11-08 10:46:05.749   Creating directory: C:\Program Files\GogakuDev\versions
+2026-11-08 10:46:05.751   Creating directory: C:\Program Files\GogakuDev\versions\b93
+2026-11-08 10:46:05.751   Directory for uninstall files: C:\Program Files\GogakuDev\versions\b93
+2026-11-08 10:46:05.751   Creating new uninstall log: C:\Program Files\GogakuDev\versions\b93\unins000.dat
+2026-11-08 10:46:05.767   -- File entry --
+2026-11-08 10:46:05.770   Dest filename: C:\Program Files\GogakuDev\versions\b93\unins000.exe
+2026-11-08 10:46:05.770   Non-default bitness: 32-bit
+2026-11-08 10:46:05.782   Time stamp of our file: 2026-11-08 10:46:04.356
+2026-11-08 10:46:05.782   Installing the file.
+2026-11-08 10:46:05.802   Successfully installed the file.
+2026-11-08 10:46:05.802   -- File entry --
+2026-11-08 10:46:05.802   Dest filename: C:\Program Files\GogakuDev\versions\b93\bin\x64\GogakuAgent.exe
+2026-11-08 10:46:05.804   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:05.804   Installing the file.
+2026-11-08 10:46:05.804   Creating directory: C:\Program Files\GogakuDev\versions\b93\bin
+2026-11-08 10:46:05.806   Creating directory: C:\Program Files\GogakuDev\versions\b93\bin\x64
+2026-11-08 10:46:07.288   Successfully installed the file.
+2026-11-08 10:46:07.288   -- File entry --
+2026-11-08 10:46:07.288   Dest filename: C:\Program Files\GogakuDev\versions\b93\bin\x64\GogakuSettings.exe
+2026-11-08 10:46:07.288   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:07.288   Installing the file.
+2026-11-08 10:46:09.014   Successfully installed the file.
+2026-11-08 10:46:09.014   -- File entry --
+2026-11-08 10:46:09.014   Dest filename: C:\Program Files\GogakuDev\versions\b93\bin\x64\GogakuTsf.dll
+2026-11-08 10:46:09.017   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:09.017   Installing the file.
+2026-11-08 10:46:10.516   Successfully installed the file.
+2026-11-08 10:46:10.516   -- File entry --
+2026-11-08 10:46:10.516   Dest filename: C:\Program Files\GogakuDev\versions\b93\bin\x64\libgogaku_core.dll
+2026-11-08 10:46:10.516   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:10.519   Installing the file.
+2026-11-08 10:46:12.795   Successfully installed the file.
+2026-11-08 10:46:12.799   -- File entry --
+2026-11-08 10:46:12.799   Dest filename: C:\Program Files\GogakuDev\versions\b93\bin\x86\GogakuTsf.dll
+2026-11-08 10:46:12.799   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:12.799   Installing the file.
+2026-11-08 10:46:12.799   Creating directory: C:\Program Files\GogakuDev\versions\b93\bin\x86
+2026-11-08 10:46:14.406   Successfully installed the file.
+2026-11-08 10:46:14.406   -- File entry --
+2026-11-08 10:46:14.406   Dest filename: C:\Program Files\GogakuDev\versions\b93\data\english-wordlist-sources.json
+2026-11-08 10:46:14.409   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:14.409   Installing the file.
+2026-11-08 10:46:14.409   Creating directory: C:\Program Files\GogakuDev\versions\b93\data
+2026-11-08 10:46:14.416   Successfully installed the file.
+2026-11-08 10:46:14.418   -- File entry --
+2026-11-08 10:46:14.418   Dest filename: C:\Program Files\GogakuDev\versions\b93\data\english-words.txt
+2026-11-08 10:46:14.418   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:14.418   Installing the file.
+2026-11-08 10:46:14.476   Successfully installed the file.
+2026-11-08 10:46:14.478   -- File entry --
+2026-11-08 10:46:14.478   Dest filename: C:\Program Files\GogakuDev\versions\b93\data\gloss-sources.json
+2026-11-08 10:46:14.478   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:14.478   Installing the file.
+2026-11-08 10:46:14.485   Successfully installed the file.
+2026-11-08 10:46:14.487   -- File entry --
+2026-11-08 10:46:14.487   Dest filename: C:\Program Files\GogakuDev\versions\b93\data\gloss.tsv
+2026-11-08 10:46:14.487   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:14.487   Installing the file.
+2026-11-08 10:46:15.293   Successfully installed the file.
+2026-11-08 10:46:15.293   -- File entry --
+2026-11-08 10:46:15.293   Dest filename: C:\Program Files\GogakuDev\versions\b93\data\sc.dict
+2026-11-08 10:46:15.295   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:15.295   Installing the file.
+2026-11-08 10:46:16.132   Successfully installed the file.
+2026-11-08 10:46:16.135   -- File entry --
+2026-11-08 10:46:16.135   Dest filename: C:\Program Files\GogakuDev\versions\b93\data\zh_CN.lm
+2026-11-08 10:46:16.135   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:16.135   Installing the file.
+2026-11-08 10:46:23.465   Successfully installed the file.
+2026-11-08 10:46:23.468   -- File entry --
+2026-11-08 10:46:23.468   Dest filename: C:\Program Files\GogakuDev\versions\b93\resources\update\windows.json
+2026-11-08 10:46:23.470   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.470   Installing the file.
+2026-11-08 10:46:23.470   Creating directory: C:\Program Files\GogakuDev\versions\b93\resources
+2026-11-08 10:46:23.472   Creating directory: C:\Program Files\GogakuDev\versions\b93\resources\update
+2026-11-08 10:46:23.479   Successfully installed the file.
+2026-11-08 10:46:23.479   -- File entry --
+2026-11-08 10:46:23.479   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\THIRD-PARTY.md
+2026-11-08 10:46:23.481   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.481   Installing the file.
+2026-11-08 10:46:23.481   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses
+2026-11-08 10:46:23.497   Successfully installed the file.
+2026-11-08 10:46:23.499   -- File entry --
+2026-11-08 10:46:23.499   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\GCC-COPYING.RUNTIME
+2026-11-08 10:46:23.499   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.499   Installing the file.
+2026-11-08 10:46:23.499   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses
+2026-11-08 10:46:23.509   Successfully installed the file.
+2026-11-08 10:46:23.509   -- File entry --
+2026-11-08 10:46:23.509   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\GCC-COPYING3
+2026-11-08 10:46:23.509   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.509   Installing the file.
+2026-11-08 10:46:23.519   Successfully installed the file.
+2026-11-08 10:46:23.521   -- File entry --
+2026-11-08 10:46:23.521   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\MinGW-w64-AUTHORS.txt
+2026-11-08 10:46:23.521   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.521   Installing the file.
+2026-11-08 10:46:23.530   Successfully installed the file.
+2026-11-08 10:46:23.530   -- File entry --
+2026-11-08 10:46:23.530   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\MinGW-w64-COPYING.txt
+2026-11-08 10:46:23.530   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.530   Installing the file.
+2026-11-08 10:46:23.536   Successfully installed the file.
+2026-11-08 10:46:23.536   -- File entry --
+2026-11-08 10:46:23.538   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\THIRD-PARTY.md
+2026-11-08 10:46:23.538   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.538   Installing the file.
+2026-11-08 10:46:23.546   Successfully installed the file.
+2026-11-08 10:46:23.546   -- File entry --
+2026-11-08 10:46:23.546   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\windows-runtime-sources.json
+2026-11-08 10:46:23.546   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.548   Installing the file.
+2026-11-08 10:46:23.557   Successfully installed the file.
+2026-11-08 10:46:23.557   -- File entry --
+2026-11-08 10:46:23.557   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\windows-setup-dependencies.lock.json
+2026-11-08 10:46:23.557   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.557   Installing the file.
+2026-11-08 10:46:23.566   Successfully installed the file.
+2026-11-08 10:46:23.566   -- File entry --
+2026-11-08 10:46:23.566   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\ecm\COPYING-CMAKE-SCRIPTS
+2026-11-08 10:46:23.566   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.569   Installing the file.
+2026-11-08 10:46:23.569   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\ecm
+2026-11-08 10:46:23.576   Successfully installed the file.
+2026-11-08 10:46:23.576   -- File entry --
+2026-11-08 10:46:23.578   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\fcitx5\LGPL-2.1-or-later.txt
+2026-11-08 10:46:23.578   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.578   Installing the file.
+2026-11-08 10:46:23.578   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\fcitx5
+2026-11-08 10:46:23.592   Successfully installed the file.
+2026-11-08 10:46:23.592   -- File entry --
+2026-11-08 10:46:23.592   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\fcitx5\Unicode-DFS-2016.txt
+2026-11-08 10:46:23.594   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.594   Installing the file.
+2026-11-08 10:46:23.601   Successfully installed the file.
+2026-11-08 10:46:23.601   -- File entry --
+2026-11-08 10:46:23.601   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\inno\license.txt
+2026-11-08 10:46:23.601   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.601   Installing the file.
+2026-11-08 10:46:23.603   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\inno
+2026-11-08 10:46:23.617   Successfully installed the file.
+2026-11-08 10:46:23.619   -- File entry --
+2026-11-08 10:46:23.619   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\COPYING
+2026-11-08 10:46:23.619   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.619   Installing the file.
+2026-11-08 10:46:23.619   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm
+2026-11-08 10:46:23.633   Successfully installed the file.
+2026-11-08 10:46:23.633   -- File entry --
+2026-11-08 10:46:23.633   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\COPYING.3
+2026-11-08 10:46:23.635   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.635   Installing the file.
+2026-11-08 10:46:23.642   Successfully installed the file.
+2026-11-08 10:46:23.642   -- File entry --
+2026-11-08 10:46:23.644   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\COPYING.LESSER.3
+2026-11-08 10:46:23.644   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.644   Installing the file.
+2026-11-08 10:46:23.651   Successfully installed the file.
+2026-11-08 10:46:23.651   -- File entry --
+2026-11-08 10:46:23.651   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\LICENSE
+2026-11-08 10:46:23.651   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.651   Installing the file.
+2026-11-08 10:46:23.658   Successfully installed the file.
+2026-11-08 10:46:23.658   -- File entry --
+2026-11-08 10:46:23.658   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\util\getopt.c
+2026-11-08 10:46:23.660   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.660   Installing the file.
+2026-11-08 10:46:23.660   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\util
+2026-11-08 10:46:23.668   Successfully installed the file.
+2026-11-08 10:46:23.670   -- File entry --
+2026-11-08 10:46:23.670   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\util\integer_to_string.cc
+2026-11-08 10:46:23.670   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.670   Installing the file.
+2026-11-08 10:46:23.677   Successfully installed the file.
+2026-11-08 10:46:23.677   -- File entry --
+2026-11-08 10:46:23.677   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\util\murmur_hash.cc
+2026-11-08 10:46:23.679   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.679   Installing the file.
+2026-11-08 10:46:23.686   Successfully installed the file.
+2026-11-08 10:46:23.686   -- File entry --
+2026-11-08 10:46:23.686   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\kenlm\util\string_piece.hh
+2026-11-08 10:46:23.686   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.686   Installing the file.
+2026-11-08 10:46:23.695   Successfully installed the file.
+2026-11-08 10:46:23.695   -- File entry --
+2026-11-08 10:46:23.698   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\libime\data-CMakeLists.txt
+2026-11-08 10:46:23.698   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.698   Installing the file.
+2026-11-08 10:46:23.698   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\libime
+2026-11-08 10:46:23.705   Successfully installed the file.
+2026-11-08 10:46:23.705   -- File entry --
+2026-11-08 10:46:23.707   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\libime\LGPL-2.1-or-later.txt
+2026-11-08 10:46:23.707   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.707   Installing the file.
+2026-11-08 10:46:23.714   Successfully installed the file.
+2026-11-08 10:46:23.714   -- File entry --
+2026-11-08 10:46:23.714   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\libime\REUSE.toml
+2026-11-08 10:46:23.716   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.716   Installing the file.
+2026-11-08 10:46:23.730   Successfully installed the file.
+2026-11-08 10:46:23.730   -- File entry --
+2026-11-08 10:46:23.730   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\dlfcn\LICENSE
+2026-11-08 10:46:23.732   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.732   Installing the file.
+2026-11-08 10:46:23.732   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2
+2026-11-08 10:46:23.735   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\dlfcn
+2026-11-08 10:46:23.742   Successfully installed the file.
+2026-11-08 10:46:23.742   -- File entry --
+2026-11-08 10:46:23.742   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime\COPYING
+2026-11-08 10:46:23.742   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.745   Installing the file.
+2026-11-08 10:46:23.745   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime
+2026-11-08 10:46:23.756   Successfully installed the file.
+2026-11-08 10:46:23.756   -- File entry --
+2026-11-08 10:46:23.756   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime\intl\COPYING.LIB
+2026-11-08 10:46:23.758   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.758   Installing the file.
+2026-11-08 10:46:23.758   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime\intl
+2026-11-08 10:46:23.767   Successfully installed the file.
+2026-11-08 10:46:23.767   -- File entry --
+2026-11-08 10:46:23.767   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime\libasprintf\COPYING
+2026-11-08 10:46:23.770   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.770   Installing the file.
+2026-11-08 10:46:23.770   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime\libasprintf
+2026-11-08 10:46:23.779   Successfully installed the file.
+2026-11-08 10:46:23.779   -- File entry --
+2026-11-08 10:46:23.781   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\gettext-runtime\libasprintf\COPYING.LIB
+2026-11-08 10:46:23.781   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.781   Installing the file.
+2026-11-08 10:46:23.790   Successfully installed the file.
+2026-11-08 10:46:23.790   -- File entry --
+2026-11-08 10:46:23.790   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\libiconv\COPYING
+2026-11-08 10:46:23.792   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.792   Installing the file.
+2026-11-08 10:46:23.792   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\libiconv
+2026-11-08 10:46:23.806   Successfully installed the file.
+2026-11-08 10:46:23.806   -- File entry --
+2026-11-08 10:46:23.806   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\libiconv\COPYING.LIB
+2026-11-08 10:46:23.809   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.809   Installing the file.
+2026-11-08 10:46:23.818   Successfully installed the file.
+2026-11-08 10:46:23.818   -- File entry --
+2026-11-08 10:46:23.818   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\libiconv\README
+2026-11-08 10:46:23.818   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.818   Installing the file.
+2026-11-08 10:46:23.827   Successfully installed the file.
+2026-11-08 10:46:23.827   -- File entry --
+2026-11-08 10:46:23.827   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\libiconv\libcharset\COPYING.LIB
+2026-11-08 10:46:23.827   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.827   Installing the file.
+2026-11-08 10:46:23.830   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\libiconv\libcharset
+2026-11-08 10:46:23.843   Successfully installed the file.
+2026-11-08 10:46:23.843   -- File entry --
+2026-11-08 10:46:23.843   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\zlib\LICENSE
+2026-11-08 10:46:23.843   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.843   Installing the file.
+2026-11-08 10:46:23.843   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\zlib
+2026-11-08 10:46:23.850   Successfully installed the file.
+2026-11-08 10:46:23.850   -- File entry --
+2026-11-08 10:46:23.850   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\zstd\LICENSE
+2026-11-08 10:46:23.850   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.850   Installing the file.
+2026-11-08 10:46:23.853   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\msys2\zstd
+2026-11-08 10:46:23.857   Successfully installed the file.
+2026-11-08 10:46:23.857   -- File entry --
+2026-11-08 10:46:23.857   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\native\Boost-LICENSE.txt
+2026-11-08 10:46:23.866   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.866   Installing the file.
+2026-11-08 10:46:23.866   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\native
+2026-11-08 10:46:23.875   Successfully installed the file.
+2026-11-08 10:46:23.875   -- File entry --
+2026-11-08 10:46:23.875   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\native\libintl-NOTICE.txt
+2026-11-08 10:46:23.875   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.875   Installing the file.
+2026-11-08 10:46:23.882   Successfully installed the file.
+2026-11-08 10:46:23.882   -- File entry --
+2026-11-08 10:46:23.882   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\resources\CC-BY-SA-4.0.txt
+2026-11-08 10:46:23.884   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.884   Installing the file.
+2026-11-08 10:46:23.887   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\resources
+2026-11-08 10:46:23.896   Successfully installed the file.
+2026-11-08 10:46:23.896   -- File entry --
+2026-11-08 10:46:23.896   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\resources\DATA-ATTRIBUTION.txt
+2026-11-08 10:46:23.898   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.898   Installing the file.
+2026-11-08 10:46:23.903   Successfully installed the file.
+2026-11-08 10:46:23.903   -- File entry --
+2026-11-08 10:46:23.903   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\resources\MIT-jieba.txt
+2026-11-08 10:46:23.903   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.903   Installing the file.
+2026-11-08 10:46:23.913   Successfully installed the file.
+2026-11-08 10:46:23.913   -- File entry --
+2026-11-08 10:46:23.914   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\resources\MIT-Mayoi.txt
+2026-11-08 10:46:23.914   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.914   Installing the file.
+2026-11-08 10:46:23.919   Successfully installed the file.
+2026-11-08 10:46:23.919   -- File entry --
+2026-11-08 10:46:23.919   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\resources\SCOWL-Copyright.txt
+2026-11-08 10:46:23.919   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.919   Installing the file.
+2026-11-08 10:46:23.926   Successfully installed the file.
+2026-11-08 10:46:23.929   -- File entry --
+2026-11-08 10:46:23.929   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\windows\json-LICENSE.MIT
+2026-11-08 10:46:23.929   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.929   Installing the file.
+2026-11-08 10:46:23.933   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\windows
+2026-11-08 10:46:23.940   Successfully installed the file.
+2026-11-08 10:46:23.940   -- File entry --
+2026-11-08 10:46:23.940   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\windows\miniz-LICENSE.txt
+2026-11-08 10:46:23.940   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.940   Installing the file.
+2026-11-08 10:46:23.954   Successfully installed the file.
+2026-11-08 10:46:23.954   -- File entry --
+2026-11-08 10:46:23.954   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\00-licenses\windows\monocypher-LICENCE.md
+2026-11-08 10:46:23.954   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.954   Installing the file.
+2026-11-08 10:46:23.963   Successfully installed the file.
+2026-11-08 10:46:23.963   -- File entry --
+2026-11-08 10:46:23.963   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\01-licenses\CC-BY-SA-4.0.txt
+2026-11-08 10:46:23.963   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.963   Installing the file.
+2026-11-08 10:46:23.963   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\01-licenses
+2026-11-08 10:46:23.974   Successfully installed the file.
+2026-11-08 10:46:23.974   -- File entry --
+2026-11-08 10:46:23.974   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\01-licenses\DATA-ATTRIBUTION.txt
+2026-11-08 10:46:23.974   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.974   Installing the file.
+2026-11-08 10:46:23.981   Successfully installed the file.
+2026-11-08 10:46:23.981   -- File entry --
+2026-11-08 10:46:23.984   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\01-licenses\MIT-jieba.txt
+2026-11-08 10:46:23.984   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.984   Installing the file.
+2026-11-08 10:46:23.993   Successfully installed the file.
+2026-11-08 10:46:23.993   -- File entry --
+2026-11-08 10:46:23.993   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\01-licenses\MIT-Mayoi.txt
+2026-11-08 10:46:23.993   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:23.993   Installing the file.
+2026-11-08 10:46:24.000   Successfully installed the file.
+2026-11-08 10:46:24.000   -- File entry --
+2026-11-08 10:46:24.000   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\01-licenses\SCOWL-Copyright.txt
+2026-11-08 10:46:24.000   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.000   Installing the file.
+2026-11-08 10:46:24.007   Successfully installed the file.
+2026-11-08 10:46:24.007   -- File entry --
+2026-11-08 10:46:24.007   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\fcitx5\LGPL-2.1-or-later.txt
+2026-11-08 10:46:24.007   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.007   Installing the file.
+2026-11-08 10:46:24.009   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\fcitx5
+2026-11-08 10:46:24.018   Successfully installed the file.
+2026-11-08 10:46:24.018   -- File entry --
+2026-11-08 10:46:24.018   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\fcitx5\Unicode-DFS-2016.txt
+2026-11-08 10:46:24.018   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.018   Installing the file.
+2026-11-08 10:46:24.025   Successfully installed the file.
+2026-11-08 10:46:24.025   -- File entry --
+2026-11-08 10:46:24.025   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\kenlm\COPYING
+2026-11-08 10:46:24.025   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.025   Installing the file.
+2026-11-08 10:46:24.025   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\kenlm
+2026-11-08 10:46:24.038   Successfully installed the file.
+2026-11-08 10:46:24.038   -- File entry --
+2026-11-08 10:46:24.038   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\kenlm\COPYING.3
+2026-11-08 10:46:24.041   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.041   Installing the file.
+2026-11-08 10:46:24.047   Successfully installed the file.
+2026-11-08 10:46:24.047   -- File entry --
+2026-11-08 10:46:24.047   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\kenlm\COPYING.LESSER.3
+2026-11-08 10:46:24.047   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.047   Installing the file.
+2026-11-08 10:46:24.055   Successfully installed the file.
+2026-11-08 10:46:24.055   -- File entry --
+2026-11-08 10:46:24.055   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\kenlm\LICENSE
+2026-11-08 10:46:24.057   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.057   Installing the file.
+2026-11-08 10:46:24.068   Successfully installed the file.
+2026-11-08 10:46:24.068   -- File entry --
+2026-11-08 10:46:24.068   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\libime\LGPL-2.1-or-later.txt
+2026-11-08 10:46:24.071   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.071   Installing the file.
+2026-11-08 10:46:24.071   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\libime
+2026-11-08 10:46:24.080   Successfully installed the file.
+2026-11-08 10:46:24.080   -- File entry --
+2026-11-08 10:46:24.080   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\windows\json-LICENSE.MIT
+2026-11-08 10:46:24.080   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.080   Installing the file.
+2026-11-08 10:46:24.082   Creating directory: C:\Program Files\GogakuDev\versions\b93\licenses\windows
+2026-11-08 10:46:24.091   Successfully installed the file.
+2026-11-08 10:46:24.091   -- File entry --
+2026-11-08 10:46:24.091   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\windows\miniz-LICENSE.txt
+2026-11-08 10:46:24.091   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.091   Installing the file.
+2026-11-08 10:46:24.096   Successfully installed the file.
+2026-11-08 10:46:24.096   -- File entry --
+2026-11-08 10:46:24.096   Dest filename: C:\Program Files\GogakuDev\versions\b93\licenses\windows\monocypher-LICENCE.md
+2026-11-08 10:46:24.098   Time stamp of our file: 2026-11-08 10:29:46.000
+2026-11-08 10:46:24.098   Installing the file.
+2026-11-08 10:46:24.105   Successfully installed the file.
+2026-11-08 10:46:24.105   -- File entry --
+2026-11-08 10:46:24.105   Dest filename: C:\Program Files\GogakuDev\versions\b93\build-identity.json
+2026-11-08 10:46:24.105   Time stamp of our file: 2026-11-08 10:29:48.000
+2026-11-08 10:46:24.105   Installing the file.
+2026-11-08 10:46:24.114   Successfully installed the file.
+2026-11-08 10:46:32.049   x64 regsvr32 exit=0
+2026-11-08 10:46:36.953   x86 regsvr32 exit=0
+2026-11-08 10:46:36.953   Saving uninstall information.
+2026-11-08 10:46:36.955   Deleting uninstall key left over from previous administrative 64-bit install.
+2026-11-08 10:46:36.958   Creating new uninstall key: HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Uninstall\{7B2D9C4E-1A3F-4E6B-8C5D-2F7A9B1C3E42}_is1
+2026-11-08 10:46:36.960   Writing uninstall key values.
+2026-11-08 10:46:37.037   Detected previous non administrative install? No
+2026-11-08 10:46:37.037   Detected previous administrative 32-bit install? No
+2026-11-08 10:46:37.837   Installation process succeeded.
+2026-11-08 10:46:37.840   -- Run entry --
+2026-11-08 10:46:37.842   Run as: Original user
+2026-11-08 10:46:37.842   Type: Exec
+2026-11-08 10:46:37.842   Filename: C:\Program Files\GogakuDev\versions\b93\bin\x64\GogakuAgent.exe
+2026-11-08 10:46:37.842   Parameters: --set-autostart on
+2026-11-08 10:46:50.529   Process exit code: 0
+2026-11-08 10:46:50.529   Need to restart Windows? No
+2026-11-08 10:46:50.535   Deinitializing Setup.
+2026-11-08 10:46:50.556   Log closed.

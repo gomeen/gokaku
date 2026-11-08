@@ -1,0 +1,522 @@
+; Gogaku Windows 安装向导（Inno Setup 6）。只注册，不激活/设默认输入法。
+; bin/x86 与 bin/x64 的 TSF 均通过私有管道连接 x64 代理。
+; 用户数据 %LOCALAPPDATA%\Gogaku 默认保留；不强杀宿主，不自动注销/重启。
+#define AppName "@APP_NAME@"
+#define AppVersion "@VERSION@"
+#define AppBuild "@BUILD@"
+#define AppChannel "@CHANNEL@"
+#define AppId "@APP_ID@"
+#define TsfClsid "@TSF_CLSID@"
+
+[Setup]
+AppId={#AppId}
+AppName={#AppName}
+AppVersion={#AppVersion}
+AppVerName={#AppName} {#AppVersion}（构建 {#AppBuild}）
+AppPublisher=Gogaku
+AppPublisherURL=https://github.com/@REPO@
+DefaultDirName={autopf}\@INSTALL_DIR@
+DefaultGroupName={#AppName}
+DisableProgramGroupPage=yes
+OutputDir=@OUTPUT_DIR@
+OutputBaseFilename=@OUTPUT_BASE@
+Compression=lzma2
+SolidCompression=yes
+WizardStyle=modern
+ArchitecturesAllowed=x64os
+ArchitecturesInstallIn64BitMode=x64os
+PrivilegesRequired=admin
+CloseApplications=no
+RestartApplications=no
+RestartIfNeededByRun=no
+UninstallDisplayIcon={app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuSettings.exe
+SetupIconFile=@ICON_FILE@
+AppMutex=@APP_MUTEX@
+VersionInfoVersion=@VERSION_QUAD@
+VersionInfoCompany=Gogaku
+VersionInfoDescription={#AppName} 安装向导
+VersionInfoProductName={#AppName}
+VersionInfoProductVersion=@VERSION_QUAD@
+VersionInfoProductTextVersion={#AppVersion}
+
+[Languages]
+; 官方 Inno 6 安装包未附 ChineseSimplified.isl；自定义行为提示保留中文。
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "startmenu"; Description: "创建开始菜单快捷方式"; GroupDescription: "快捷方式："; Flags: checkedonce
+Name: "autostartagent"; Description: "登录时启动 Gogaku 输入代理（可选）"; GroupDescription: "启动："; Flags: unchecked
+
+[Files]
+; 只打包明确的 payload 子目录，不递归 stage 根，避免包含 .iss 或其它构建产物。
+Source: "@STAGE_DIR@\bin\x64\*"; DestDir: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64"; Flags: ignoreversion
+Source: "@STAGE_DIR@\bin\x86\*"; DestDir: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x86"; Flags: ignoreversion
+Source: "@STAGE_DIR@\data\*"; DestDir: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "@STAGE_DIR@\resources\*"; DestDir: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\resources"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "@STAGE_DIR@\licenses\*"; DestDir: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\licenses"; Flags: ignoreversion recursesubdirs createallsubdirs
+; 在文件安装事务内注册。不能放 [Run]，后者退出码非零仍可能显示安装成功。
+Source: "@STAGE_DIR@\build-identity.json"; DestDir: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}"; Flags: ignoreversion; AfterInstall: RegisterComponents
+
+[Icons]
+Name: "{group}\{#AppName} 设置"; Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuSettings.exe"; Tasks: startmenu
+Name: "{group}\卸载 {#AppName}"; Filename: "{uninstallexe}"; Tasks: startmenu
+
+[Run]
+; 仅用户显式选择的操作，以原始用户身份运行；不写提升账户的 HKCU。
+Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuAgent.exe"; Parameters: "--set-autostart on"; Flags: runasoriginaluser runhidden waituntilterminated; Tasks: autostartagent
+Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuSettings.exe"; Description: "打开 Gogaku 设置"; Flags: postinstall unchecked runasoriginaluser nowait skipifsilent
+
+[Code]
+var
+  Old64Dll, Old86Dll: String;
+  OldActiveRoot, OldPreviousRoot: String;
+  HadActiveRoot, HadPreviousRoot: Boolean;
+  AutostartKeys, AutostartValues: TArrayOfString;
+
+function PayloadRoot(): String;
+begin
+  Result := ExpandConstant('{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}');
+end;
+
+function ChannelRegistryKey(): String;
+begin
+  Result := 'Software\Gogaku\{#AppChannel}';
+end;
+
+function TargetDll(Architecture: String): String;
+begin
+  Result := PayloadRoot() + '\bin\' + Architecture + '\GogakuTsf.dll';
+end;
+
+function LegacyRoot(DllPath: String): String;
+var
+  I: Integer;
+begin
+  Result := DllPath;
+  { ...\bin\x64\GogakuTsf.dll -> 向上三层得到 payload/app 根。 }
+  for I := 1 to 3 do Result := ExtractFileDir(Result);
+end;
+
+function QueryInproc(Architecture: String; var DllPath: String): Boolean;
+var
+  Key: String;
+  RegistryRoot: Integer;
+begin
+  if Architecture = 'x64' then RegistryRoot := HKLM64 else RegistryRoot := HKLM32;
+  Key := 'Software\Classes\CLSID\{#TsfClsid}\InprocServer32';
+  Result := RegQueryStringValue(RegistryRoot, Key, '', DllPath);
+end;
+
+procedure CapturePreviousState();
+var
+  DerivedRoot: String;
+begin
+  Old64Dll := '';
+  Old86Dll := '';
+  OldActiveRoot := '';
+  OldPreviousRoot := '';
+  HadActiveRoot := False;
+  HadPreviousRoot := False;
+  QueryInproc('x64', Old64Dll);
+  QueryInproc('x86', Old86Dll);
+  HadActiveRoot := RegQueryStringValue(HKLM64, ChannelRegistryKey(), 'ActiveRoot', OldActiveRoot);
+  HadPreviousRoot := RegQueryStringValue(HKLM64, ChannelRegistryKey(), 'PreviousRoot', OldPreviousRoot);
+  { 旧安装没有指针时，从任一架构的旧 DLL 路径恢复活动根。 }
+  if OldActiveRoot = '' then
+  begin
+    DerivedRoot := '';
+    if Old64Dll <> '' then DerivedRoot := LegacyRoot(Old64Dll)
+    else if Old86Dll <> '' then DerivedRoot := LegacyRoot(Old86Dll);
+    OldActiveRoot := DerivedRoot;
+  end;
+end;
+
+function DeleteStringValueIfPresent(RootKey: Integer; Key, Name: String): Boolean;
+var
+  Value: String;
+begin
+  if RegQueryStringValue(RootKey, Key, Name, Value) then
+    Result := RegDeleteValue(RootKey, Key, Name)
+  else
+    Result := True;
+end;
+
+function RestorePointers(var Detail: String): Boolean;
+var
+  Ok: Boolean;
+begin
+  Ok := True;
+  if HadActiveRoot then
+    Ok := RegWriteStringValue(HKLM64, ChannelRegistryKey(), 'ActiveRoot', OldActiveRoot) and Ok
+  else
+    Ok := DeleteStringValueIfPresent(HKLM64, ChannelRegistryKey(), 'ActiveRoot') and Ok;
+  if HadPreviousRoot then
+    Ok := RegWriteStringValue(HKLM64, ChannelRegistryKey(), 'PreviousRoot', OldPreviousRoot) and Ok
+  else
+    Ok := DeleteStringValueIfPresent(HKLM64, ChannelRegistryKey(), 'PreviousRoot') and Ok;
+  Result := Ok;
+  if not Result then Detail := '恢复 HKLM ' + ChannelRegistryKey() + ' 指针失败';
+end;
+
+function WriteInstallPointers(var Detail: String): Boolean;
+begin
+  Result := RegWriteStringValue(HKLM64, ChannelRegistryKey(), 'ActiveRoot', PayloadRoot());
+  if Result then
+    Result := RegWriteStringValue(HKLM64, ChannelRegistryKey(), 'PreviousRoot', OldActiveRoot);
+  if not Result then Detail := '写入 HKLM ' + ChannelRegistryKey() + ' ActiveRoot/PreviousRoot 失败';
+end;
+
+function OpenForWrite(FileName: String; Access, Share: LongWord;
+  Security: LongWord; Creation, Attributes: LongWord; Template: LongWord): THandle;
+  external 'CreateFileW@kernel32.dll stdcall';
+function CloseFileHandle(Handle: THandle): Boolean;
+  external 'CloseHandle@kernel32.dll stdcall';
+
+function CheckRootLocks(BaseRoot: String; var MessageText: String): Boolean;
+var
+  Architecture, FileName: String;
+  Item: TFindRec;
+  I: Integer;
+  Handle: THandle;
+begin
+  Result := True;
+  for I := 0 to 1 do
+  begin
+    if I = 0 then Architecture := 'x64' else Architecture := 'x86';
+    if FindFirst(BaseRoot + '\bin\' + Architecture + '\*', Item) then
+    begin
+      try
+        repeat
+          if (Item.Attributes and FILE_ATTRIBUTE_DIRECTORY) = 0 then
+          begin
+            FileName := BaseRoot + '\bin\' + Architecture + '\' + Item.Name;
+            { GENERIC_WRITE + share read/write/delete + OPEN_EXISTING。
+              已加载的 PE 映像不能以写方式打开；权限失败也必须如实中止。 }
+            Handle := OpenForWrite(FileName, $40000000, 7, 0, 3, $80, 0);
+            if Handle = THandle(-1) then
+            begin
+              MessageText := '无法替换或删除文件（被占用或没有写权限）：' + #13#10 + FileName + #13#10 +
+                '请先保存工作、切到其它输入法，在 Gogaku 托盘菜单选择“退出输入代理”，关闭设置及使用 Gogaku 的应用，再重试。' +
+                '若仍被 TSF 宿主占用，可自行注销后重试。安装器不会强杀应用，也不会安排下次重启替换。';
+              Result := False;
+              Exit;
+            end;
+            CloseFileHandle(Handle);
+          end;
+        until not FindNext(Item);
+      finally
+        FindClose(Item);
+      end;
+    end;
+  end;
+end;
+
+function LockMessage(AllRoots: Boolean): String;
+var
+  Item: TFindRec;
+  VersionRoot, MessageText: String;
+begin
+  Result := '';
+  if not AllRoots then
+  begin
+    if not CheckRootLocks(PayloadRoot(), MessageText) then Result := MessageText;
+    Exit;
+  end;
+  { 卸载要覆盖旧版 legacy/bin 与 versions 下所有 payload 的 bin。 }
+  if not CheckRootLocks(ExpandConstant('{app}'), MessageText) then
+  begin
+    Result := MessageText;
+    Exit;
+  end;
+  VersionRoot := ExpandConstant('{app}\versions');
+  if FindFirst(VersionRoot + '\*', Item) then
+  begin
+    try
+      repeat
+        if ((Item.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) and
+           (Item.Name <> '.') and (Item.Name <> '..') then
+          if not CheckRootLocks(VersionRoot + '\' + Item.Name, MessageText) then
+          begin
+            Result := MessageText;
+            Exit;
+          end;
+      until not FindNext(Item);
+    finally
+      FindClose(Item);
+    end;
+  end;
+end;
+
+function Regsvr(Architecture: String; DllPath: String; Unregister: Boolean;
+  var Detail: String): Boolean;
+var
+  ProgramPath, Parameters: String;
+  ExitCode: Integer;
+  PreviousRedirection: Boolean;
+begin
+  if Architecture = 'x64' then
+    ProgramPath := ExpandConstant('{sys}\regsvr32.exe')
+  else
+    ProgramPath := ExpandConstant('{syswow64}\regsvr32.exe');
+  Parameters := '/s ';
+  if Unregister then Parameters := Parameters + '/u ';
+  Parameters := Parameters + '"' + DllPath + '"';
+  ExitCode := -1;
+  { 显式关闭文件系统重定向，x64 使用 System32，x86 使用 SysWOW64。 }
+  PreviousRedirection := EnableFsRedirection(False);
+  try
+    Result := Exec(ProgramPath, Parameters, '', SW_HIDE, ewWaitUntilTerminated, ExitCode);
+    Result := Result and (ExitCode = 0);
+  finally
+    EnableFsRedirection(PreviousRedirection);
+  end;
+  Detail := Architecture + ' regsvr32 ' + DllPath + ' exit=' + IntToStr(ExitCode);
+  Log(Detail);
+end;
+
+function UnregisterSaved(Architecture, DllPath: String; var Detail: String): Boolean;
+begin
+  if DllPath = '' then
+  begin
+    Detail := Architecture + ' 没有已登记 DLL';
+    Result := True;
+  end
+  else
+    Result := Regsvr(Architecture, DllPath, True, Detail);
+end;
+
+function RestoreSavedRegistration(var Detail: String): Boolean;
+var
+  Ok, Current: Boolean;
+  One: String;
+begin
+  Ok := True;
+  if Old64Dll <> '' then
+  begin
+    Current := Regsvr('x64', Old64Dll, False, One);
+    if not Current then Detail := Detail + #13#10 + '恢复64位注册失败：' + One;
+    Ok := Current and Ok;
+  end;
+  if Old86Dll <> '' then
+  begin
+    Current := Regsvr('x86', Old86Dll, False, One);
+    if not Current then Detail := Detail + #13#10 + '恢复32位注册失败：' + One;
+    Ok := Current and Ok;
+  end;
+  Result := Ok;
+end;
+
+procedure MigrateLoadedUserAutostart();
+var
+  Users: TArrayOfString;
+  I, Count: Integer;
+  Key, Value, NewCommand, OldCommand, PreviousCommand: String;
+begin
+  SetArrayLength(AutostartKeys, 0);
+  SetArrayLength(AutostartValues, 0);
+  if not RegGetSubkeyNames(HKEY_USERS, '', Users) then
+    RaiseException('无法读取既有自启动项，安装已中止。');
+  NewCommand := '"' + PayloadRoot() + '\bin\x64\GogakuAgent.exe' + '"';
+  OldCommand := '"' + OldActiveRoot + '\bin\x64\GogakuAgent.exe' + '"';
+  PreviousCommand := '"' + OldPreviousRoot + '\bin\x64\GogakuAgent.exe' + '"';
+  for I := 0 to GetArrayLength(Users) - 1 do
+  begin
+    Key := Users[I] + '\Software\Microsoft\Windows\CurrentVersion\Run';
+    if RegQueryStringValue(HKEY_USERS, Key, '@AGENT_RUN_VALUE@', Value) then
+      if ((OldActiveRoot <> '') and (CompareText(Value, OldCommand) = 0)) or
+         ((OldPreviousRoot <> '') and (CompareText(Value, PreviousCommand) = 0)) then
+      begin
+        Count := GetArrayLength(AutostartKeys);
+        SetArrayLength(AutostartKeys, Count + 1);
+        SetArrayLength(AutostartValues, Count + 1);
+        AutostartKeys[Count] := Key;
+        AutostartValues[Count] := Value;
+        if not RegWriteStringValue(HKEY_USERS, Key, '@AGENT_RUN_VALUE@', NewCommand) then
+          RaiseException('迁移既有自启动项失败：HKEY_USERS\' + Key);
+      end;
+  end;
+end;
+
+procedure RestoreMigratedAutostart(var Detail: String);
+var
+  I: Integer;
+  Value, NewCommand: String;
+begin
+  NewCommand := '"' + PayloadRoot() + '\bin\x64\GogakuAgent.exe' + '"';
+  for I := 0 to GetArrayLength(AutostartKeys) - 1 do
+    if RegQueryStringValue(HKEY_USERS, AutostartKeys[I], '@AGENT_RUN_VALUE@', Value) then
+      if CompareText(Value, NewCommand) = 0 then
+        if not RegWriteStringValue(HKEY_USERS, AutostartKeys[I], '@AGENT_RUN_VALUE@', AutostartValues[I]) then
+          Detail := Detail + #13#10 + '恢复自启动项失败：HKEY_USERS\' + AutostartKeys[I];
+end;
+
+procedure RegisterComponents();
+var
+  Detail, Cleanup, Errors: String;
+  Attempted64, Attempted86: Boolean;
+begin
+  CapturePreviousState();
+  Attempted64 := False;
+  Attempted86 := False;
+  try
+    Attempted64 := True;
+    if not Regsvr('x64', TargetDll('x64'), False, Detail) then
+      RaiseException('64 位输入法注册失败：' + Detail);
+    Attempted86 := True;
+    if not Regsvr('x86', TargetDll('x86'), False, Detail) then
+      RaiseException('32 位输入法注册失败：' + Detail);
+    if not WriteInstallPointers(Detail) then
+      RaiseException(Detail);
+    MigrateLoadedUserAutostart();
+  except
+    Errors := GetExceptionMessage();
+    RestoreMigratedAutostart(Errors);
+    { 失败的 DllRegisterServer 可能已部分写入；先撤销本次，再恢复旧 DLL 与指针。 }
+    if Attempted86 or Attempted64 then
+      if not Regsvr('x86', TargetDll('x86'), True, Cleanup) then
+        Errors := Errors + #13#10 + '32 位本次注册清理失败：' + Cleanup;
+    if Attempted64 then
+      if not Regsvr('x64', TargetDll('x64'), True, Cleanup) then
+        Errors := Errors + #13#10 + '64 位本次注册清理失败：' + Cleanup;
+    if not RestoreSavedRegistration(Cleanup) then Errors := Errors + Cleanup;
+    if not RestorePointers(Cleanup) then Errors := Errors + #13#10 + Cleanup;
+    RaiseException(Errors + #13#10 + '安装未完成，将回滚本次文件安装。修复原因后请重新运行安装器。');
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+var
+  Version: TWindowsVersion;
+begin
+  GetWindowsVersionEx(Version);
+  Result := IsWin64 and (Version.Major >= 10) and
+    ((Version.Major > 10) or (Version.Build >= 22000));
+  if not Result then
+    MsgBox('Gogaku 需要 Windows 11 x64（10.0.22000 或更高）。', mbError, MB_OK);
+end;
+
+function IsOwnedAgentCommand(Value: String): Boolean;
+var
+  VersionRoot: String;
+  Item: TFindRec;
+  Expected: String;
+begin
+  Result := False;
+  Expected := '"' + ExpandConstant('{app}\bin\x64\GogakuAgent.exe') + '"';
+  if CompareText(Value, Expected) = 0 then
+  begin
+    Result := True;
+    Exit;
+  end;
+  Expected := '"' + PayloadRoot() + '\bin\x64\GogakuAgent.exe' + '"';
+  if CompareText(Value, Expected) = 0 then
+  begin
+    Result := True;
+    Exit;
+  end;
+  VersionRoot := ExpandConstant('{app}\versions');
+  if FindFirst(VersionRoot + '\*', Item) then
+  begin
+    try
+      repeat
+        if ((Item.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) and
+           (Item.Name <> '.') and (Item.Name <> '..') then
+        begin
+          Expected := '"' + VersionRoot + '\' + Item.Name + '\bin\x64\GogakuAgent.exe' + '"';
+          if CompareText(Value, Expected) = 0 then
+          begin
+            Result := True;
+            Exit;
+          end;
+        end;
+      until not FindNext(Item);
+    finally
+      FindClose(Item);
+    end;
+  end;
+end;
+
+procedure RemoveLoadedUserAutostart();
+var
+  Users: TArrayOfString;
+  I: Integer;
+  Key, Value: String;
+begin
+  { [UninstallRun] 不支持 runasoriginaluser。直接枚举已加载用户 hive，
+    只删命令指向当前安装根下 Gogaku payload 的 Run 值，不运行用户代理，不加载离线 hive。 }
+  if not RegGetSubkeyNames(HKEY_USERS, '', Users) then
+    RaiseException('无法读取已加载用户的自启动项，卸载已中止。');
+  for I := 0 to GetArrayLength(Users) - 1 do
+  begin
+    Key := Users[I] + '\Software\Microsoft\Windows\CurrentVersion\Run';
+    if RegQueryStringValue(HKEY_USERS, Key, '@AGENT_RUN_VALUE@', Value) then
+      if IsOwnedAgentCommand(Value) then
+        if not RegDeleteValue(HKEY_USERS, Key, '@AGENT_RUN_VALUE@') then
+          RaiseException('无法删除 Gogaku 自启动项：HKEY_USERS\' + Key);
+  end;
+end;
+
+function DeleteInstallPointers(var Detail: String): Boolean;
+var
+  Ok: Boolean;
+begin
+  Ok := DeleteStringValueIfPresent(HKLM64, ChannelRegistryKey(), 'ActiveRoot');
+  Ok := DeleteStringValueIfPresent(HKLM64, ChannelRegistryKey(), 'PreviousRoot') and Ok;
+  Result := Ok;
+  if not Result then Detail := '删除 HKLM ' + ChannelRegistryKey() + ' 指针失败';
+end;
+
+function InitializeUninstall(): Boolean;
+var
+  MessageText: String;
+begin
+  CapturePreviousState();
+  MessageText := LockMessage(True);
+  Result := MessageText = '';
+  if not Result then MsgBox(MessageText, mbError, MB_OK);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  { 只检查本次目标 payload；旧版本 DLL 可以继续被旧宿主持有。 }
+  CapturePreviousState();
+  Result := LockMessage(False);
+end;
+
+procedure PrepareUninstall();
+var
+  MessageText, Detail, OtherDetail: String;
+  Removed64, Removed86: Boolean;
+begin
+  { 用户确认卸载后、Inno 删除文件前才执行有副作用的清理；绝不强杀进程。 }
+  CapturePreviousState();
+  MessageText := LockMessage(True);
+  if MessageText <> '' then RaiseException(MessageText);
+  Removed64 := UnregisterSaved('x64', Old64Dll, Detail);
+  Removed86 := UnregisterSaved('x86', Old86Dll, OtherDetail);
+  if not (Removed64 and Removed86) then
+  begin
+    MessageText := '输入法注销失败，程序文件尚未删除：' + #13#10 + Detail + #13#10 + OtherDetail;
+    if not RestoreSavedRegistration(OtherDetail) then MessageText := MessageText + #13#10 + OtherDetail;
+    RaiseException(MessageText);
+  end;
+  try
+    RemoveLoadedUserAutostart();
+    if not DeleteInstallPointers(Detail) then RaiseException(Detail);
+  except
+    MessageText := GetExceptionMessage();
+    if not RestoreSavedRegistration(OtherDetail) then MessageText := MessageText + #13#10 + OtherDetail;
+    if not RestorePointers(OtherDetail) then MessageText := MessageText + #13#10 + OtherDetail;
+    RaiseException(MessageText);
+  end;
+end;
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+begin
+  if CurUninstallStep = usUninstall then PrepareUninstall();
+  if CurUninstallStep = usPostUninstall then
+    if not UninstallSilent then
+      MsgBox('程序卸载已完成，用户数据、词表、主题和凭据已保留。' + #13#10 +
+        '未登录用户的离线配置未被修改；这些用户如曾开启登录启动，可在 Windows 启动应用中移除失效的 Gogaku 项。',
+        mbInformation, MB_OK);
+end;

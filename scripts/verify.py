@@ -3,7 +3,7 @@
 
 验证节奏（开发要快，全量留给里程碑与排查）：
   python3 scripts/verify.py --profile fast       # 平时开发（约 2 分钟）：关键测试——核心
-                                                 # ctest＋Release Swift＋版本＋资源
+                                                 # ctest＋Release Swift＋版本／资源＋数据和门禁负例
   python3 scripts/verify.py --profile release --only asan-ubsan --quick
                                                  # 核心／内存敏感改动后（约 4 分钟）：
                                                  # ASan/UBSan 2000 序列冒烟（不满足
@@ -11,7 +11,7 @@
   python3 scripts/verify.py --profile release    # 发版本／交付 rc／定版／疑难排查（约
                                                  # 2.5 小时，建议后台跑）：干净构建＋包
                                                  # 检查＋质量＋渲染＋数据可靠性＋十万序
-                                                 # 列 ASan/UBSan＋安装预检
+                                                 # 列 ASan/UBSan（安装预检可选）
   python3 scripts/verify.py --profile host --yes # 真实宿主／性能／稳定性（显式要求，逐项
                                                  # 核对前台身份并恢复输入源与焦点；仅在
                                                  # 用户空闲时段执行）
@@ -37,7 +37,9 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from _gogaku_delivery import (DeliveryError, source_fingerprint, validate_package, working_tree_dirty)
+from _gogaku_delivery import (DeliveryError, sha256, source_fingerprint, test_fingerprint,
+                              validate_package, working_tree_dirty)
+from _gogaku_verification import POLICY_VERSION, PROFILE_CHECKS, validate_ctest_result
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'scripts'))
@@ -129,7 +131,7 @@ def check_resources(ctx):
                          if manifest.exists() else f'{data_name} 与清单均未生成')
             continue
         expected = json.loads(manifest.read_text())['output_sha256']
-        digest = hashlib.file_digest(data.open('rb'), 'sha256').hexdigest()
+        digest = sha256(data)
         if digest != expected:
             problems.append(f'{data_name} 哈希与清单不符（{digest[:12]}… ≠ {expected[:12]}…）')
         else:
@@ -143,7 +145,7 @@ def check_resources(ctx):
         if not source.exists():
             problems.append(f'依赖数据缺失：{name}')
             continue
-        digest = hashlib.file_digest(source.open('rb'), 'sha256').hexdigest()
+        digest = sha256(source)
         if digest != expected:
             problems.append(f'依赖数据哈希不符：{name}')
     if problems:
@@ -153,7 +155,7 @@ def check_resources(ctx):
 
 def check_core_tests(ctx):
     """共享核心：Release 构建＋ctest 全量（含 ABI、事件轨迹、质量、fuzz 冒烟）。"""
-    result = sh(['cmake', '-S', 'native/GogakuCore', '-B', ctx['core_dir'],
+    result = sh(['cmake', '-S', 'shared/GogakuCore', '-B', ctx['core_dir'],
                  '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', f'-DGOGAKU_DEPS={CACHE}'])
     if result.returncode != 0:
         return FAIL, 'cmake 配置失败：' + result.stderr[-400:], None
@@ -161,19 +163,18 @@ def check_core_tests(ctx):
     if result.returncode != 0:
         return FAIL, '核心构建失败：' + (result.stdout[-300:] + result.stderr[-300:]), None
     env = {'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data')} if (CACHE / 'data').exists() else {}
-    result = sh(['ctest', '--test-dir', ctx['core_dir'], '--output-on-failure'], env=env, timeout=1200)
+    result = sh(['ctest', '--test-dir', ctx['core_dir'], '--output-on-failure', '--no-tests=error'], env=env, timeout=1200)
     evidence = ctx.evidence('core-ctest.log', result.stdout + result.stderr)
-    if 'SKIP:' in result.stdout:
-        return BLOCK, '核心测试输出包含 SKIP（必需数据缺失按未完成计）', evidence
-    passed = re.search(r'(\d+)% tests passed', result.stdout)
-    if result.returncode != 0 or not passed or passed.group(1) != '100':
-        return FAIL, f'ctest 未全过（exit={result.returncode}）', evidence
-    return PASS, f'ctest 全过（{passed.group(0)}）', evidence
+    problems = validate_ctest_result(result.returncode, result.stdout + result.stderr)
+    if problems:
+        return FAIL, 'ctest 未完整通过：' + '；'.join(problems), evidence
+    return PASS, 'ctest 全量通过，无跳过／未运行项', evidence
 
 
 def check_swift_tests(ctx):
     """Swift 回归：Release 配置（与交付构建一致；Debug 结果不作为通过证据）。"""
-    result = sh(['swift', 'test', '-c', 'release', '-j', str(ctx['jobs'])], timeout=1800)
+    result = sh(['swift', 'test', '-c', 'release', '-j', str(ctx['jobs'])], timeout=1800,
+                cwd=ROOT / 'macos')  # Swift 包根已迁至 macos/
     evidence = ctx.evidence('swift-tests.log', result.stdout + result.stderr)
     executed = re.findall(r'Executed (\d+) tests?, with (\d+) failures?', result.stdout)
     if result.returncode != 0 or not executed:
@@ -187,25 +188,22 @@ def check_swift_tests(ctx):
     return PASS, f'{total} 项全部通过（Release）', evidence
 
 
-def check_translation_eval_regression(ctx):
-    """翻译评测管线回归：专项集加载、超预算不报通过、缺失审阅不报完成等断言。"""
-    result = sh(['python3', 'scripts/validate-translation-eval.py'], timeout=600)
-    evidence = ctx.evidence('translation-eval-regression.log', result.stdout + result.stderr)
+def check_translation_data(ctx):
+    """通用测试集冻结身份、数量、审阅分组与资源许可检查；不调用在线服务。"""
+    result = sh(['python3', 'scripts/validate-translation-data.py'], timeout=120)
+    evidence = ctx.evidence('translation-data.log', result.stdout + result.stderr)
     if result.returncode != 0:
-        return FAIL, f'评测回归失败（exit={result.returncode}）', evidence
-    m = re.search(r'(\d+) 项断言全部通过', result.stdout)
-    return PASS, '评测管线回归通过' + (f'（{m.group(1)} 项断言）' if m else ''), evidence
+        return FAIL, f'翻译数据检查失败（exit={result.returncode}）', evidence
+    return PASS, '通用翻译数据与资源正负例回归通过（不代表译文质量通过）', evidence
 
 
-def check_learning_worker_protocol(ctx):
-    """历史参考 worker 协议回归（quickmt）：回显、invalid_request、model_missing、
-    非法行存活。产品已不再使用本地模型；保留此检查防止参考实现与文档漂移。"""
-    result = sh(['python3', 'scripts/validate-learning-translation.py', 'protocol'], timeout=120)
-    evidence = ctx.evidence('learning-worker-protocol.log', result.stdout + result.stderr)
+def check_verification_contracts(ctx):
+    """验证工具自身的离线负例，防止错误身份／旧 GUI／跳过被判为通过。"""
+    result = sh(['python3', '-m', 'unittest', 'scripts.test_verification'], timeout=120)
+    evidence = ctx.evidence('verification-contracts.log', result.stdout + result.stderr)
     if result.returncode != 0:
-        return FAIL, f'worker 协议回归失败（exit={result.returncode}）', evidence
-    m = re.search(r'(\d+) 项断言', result.stdout)
-    return PASS, 'worker 协议回归通过' + (f'（{m.group(1)} 项断言）' if m else ''), evidence
+        return FAIL, f'验证合同回归失败（exit={result.returncode}）', evidence
+    return PASS, '验证工具的离线正负例通过', evidence
 
 
 def check_delivery_contracts(ctx):
@@ -214,6 +212,16 @@ def check_delivery_contracts(ctx):
     import base64
     import subprocess as sp
     problems, notes = [], []
+    result = sh(['python3', '-m', 'unittest', 'scripts.test_delivery_pipeline'], timeout=300)
+    if result.returncode != 0:
+        problems.append('交付流水线负例失败：' + (result.stdout + result.stderr)[-500:])
+    else:
+        notes.append('交付流水线身份／报告／发布负例通过')
+    result = sh(['python3', '-m', 'unittest', 'scripts.test_build_paths'], timeout=120)
+    if result.returncode != 0:
+        problems.append('隔离构建路径回归失败：' + (result.stdout + result.stderr)[-500:])
+    else:
+        notes.append('隔离构建路径回归通过')
     result = sh(['python3', 'scripts/make-update-manifest.py', '--self-test'], timeout=300)
     if result.returncode != 0:
         problems.append('更新清单 self-test 失败：' + (result.stdout + result.stderr)[-300:])
@@ -224,7 +232,7 @@ def check_delivery_contracts(ctx):
         problems.append('Windows 组装 self-test 失败：' + (result.stdout + result.stderr)[-300:])
     else:
         notes.append('Windows 安装器布局/iss 渲染通过')
-    script = ROOT / 'scripts/pkg-postinstall.sh'
+    script = ROOT / 'macos/packaging/pkg-postinstall.sh'
     if not script.exists():
         problems.append('缺少 pkg 事务 postinstall 模板')
     else:
@@ -247,7 +255,7 @@ def check_delivery_contracts(ctx):
         problems.append(f'更新源配置非法：{error}')
     forbidden = ('learningBeamSize', 'quickmt_worker', 'normalizedBackend', 'small100_worker')
     hits = []
-    for path in (ROOT / 'Sources').rglob('*.swift'):
+    for path in (ROOT / 'macos/Sources').rglob('*.swift'):
         text = path.read_text(errors='ignore')
         for token in forbidden:
             if token in text:
@@ -334,20 +342,23 @@ def check_quality(ctx):
 
 def check_render(ctx):
     """候选窗离线渲染回归（AppKit 2x 位图逐项核对）。"""
-    triple = 'x86_64-apple-macosx'
-    modules = ROOT / f'.build/{triple}/release/Modules'
-    objects_dir = ROOT / f'.build/{triple}/release/GogakuCore.build'
+    # 与 check_swift_tests 共用 macos/.build，询问 SwiftPM 而非硬编码架构路径。
+    result = sh(['swift', 'build', '-c', 'release', '--show-bin-path'], cwd=ROOT / 'macos')
+    if result.returncode != 0 or not result.stdout.strip():
+        return BLOCK, '无法确定 Swift Release 构建目录', None
+    swift_bin = Path(result.stdout.strip())
+    modules, objects_dir = swift_bin / 'Modules', swift_bin / 'GogakuKit.build'
     if not modules.exists() or not objects_dir.exists():
-        return BLOCK, '缺少 Swift Release 构建产物（先运行 swift build -c release）', None
+        return BLOCK, '缺少 macos/.build 的 Release 产物（先运行 fast 档）', None
     binary = ROOT / '.build/render-panel-verify'
     objects = sorted(str(p) for p in objects_dir.rglob('*.o'))
     if not objects:
-        return BLOCK, 'GogakuCore 目标文件缺失', None
+        return BLOCK, 'GogakuKit 目标文件缺失', None
     compile_cmd = ['swiftc', 'probes/render-candidate-panel.swift',
-                   'Sources/GogakuInput/CandidatePanel.swift',
-                   'Sources/GogakuInput/CandidatePanelTheme.swift',
+                   'macos/Sources/GogakuInput/CandidatePanel.swift',
+                   'macos/Sources/GogakuInput/CandidatePanelTheme.swift',
                    '-I', str(modules),
-                   '-I', 'Sources/CGogakuCore', '-I', 'Sources/CGogakuEngine', '-I', 'Sources/CSQLite',
+                   '-I', 'macos/Sources/CGogakuCore', '-I', 'macos/Sources/CGogakuEngine', '-I', 'macos/Sources/CSQLite',
                    '-L', str(ctx['core_dir']), '-lgogaku_core',
                    '-L', str(ROOT / '.build/native'), '-lGogakuEngine', '-lsqlite3',
                    '-Xlinker', '-rpath', '-Xlinker', str(ctx['core_dir']),
@@ -356,12 +367,22 @@ def check_render(ctx):
     result = sh(compile_cmd, timeout=600)
     if result.returncode != 0:
         return FAIL, '渲染工具编译失败：' + result.stderr[-300:], None
-    result = sh([binary], timeout=600, capture=True)
+    result = sh([binary], timeout=600, capture=True,
+                env={'GOGAKU_RENDER_OUTPUT_DIR': str(ctx._dir)})
     evidence = ctx.evidence('panel-render.log', result.stdout + result.stderr)
     if result.returncode != 0:
         return FAIL, f'渲染检查失败（exit={result.returncode}）', evidence
-    checks = re.findall(r'(\d+) 项', result.stdout)
-    return PASS, '渲染检查通过' + (f'（{checks[0]} 项）' if checks else ''), evidence
+    summaries = re.findall(r'^候选窗渲染比对：(\d+) 项检查，失败 (\d+) — (PASS|FAIL)$',
+                           result.stdout, re.MULTILINE)
+    if len(summaries) != 1:
+        return FAIL, '渲染报告缺少唯一的完整汇总', evidence
+    count, failures, verdict = summaries[0]
+    prefix = result.stdout.split('候选窗渲染比对：', 1)[0]
+    passed = re.findall(r'^\s+ok\s+.+$', prefix, re.MULTILINE)
+    if (int(count) < 53 or int(failures) != 0 or verdict != 'PASS'
+            or len(passed) != int(count) or re.search(r'^\s*FAIL\b', result.stdout, re.MULTILINE)):
+        return FAIL, '渲染逐项结果、数量或汇总未完整通过', evidence
+    return PASS, f'渲染检查通过（{count} 项）', evidence
 
 
 def check_data_reliability(ctx):
@@ -379,7 +400,7 @@ def check_data_reliability(ctx):
 def check_asan_ubsan(ctx):
     """十万随机序列 ASan＋UBSan 插桩回归；中断或未完成计数不算通过。"""
     asan_dir = ROOT / '.build/core-asan'
-    result = sh(['cmake', '-S', 'native/GogakuCore', '-B', asan_dir, '-G', 'Ninja',
+    result = sh(['cmake', '-S', 'shared/GogakuCore', '-B', asan_dir, '-G', 'Ninja',
                  '-DCMAKE_BUILD_TYPE=Debug',
                  '-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer',
                  '-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer',
@@ -460,7 +481,7 @@ def check_host_plan(ctx):
         '  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n'
         '  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n'
         '  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n'
-        '  - native-gui：设置六页 × 两种窗口尺寸 × 浅／深外观的真实点击／键盘导航验收（目前无自动化探针，需人工核对后归档证据）'
+        '  - native-gui：设置七页 × 两种窗口尺寸 × 浅／深外观的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
     )
     if not ctx['yes']:
         return BLOCK, plan, None
@@ -478,28 +499,126 @@ def _installed_identity(ctx):
     version_data = json.loads(VERSION_FILE.read_text()) if VERSION_FILE.exists() else {}
     expected_release = (version_data.get('version'), str(version_data.get('buildNumber')))
     problems, notes = [], []
-    binary = Path.home() / 'Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput'
-    apps = [Path.home() / 'Library/Input Methods/Gogaku.app',
-            Path.home() / 'Applications/Gogaku Settings.app']
+    binary = INSTALLED_INPUT_APP / 'Contents/MacOS/GogakuInput'
+    apps = [INSTALLED_INPUT_APP, INSTALLED_SETTINGS_APP]
     for app in apps:
         plist = app / 'Contents/Info.plist'
         if not plist.exists():
             problems.append(f'{app} 缺少 Info.plist')
             continue
         info = plistlib.loads(plist.read_bytes())
+        expected_id = ('org.gogaku.inputmethod' if app == INSTALLED_INPUT_APP else 'org.gogaku.settings')
+        expected_id += '.dev' if CHANNEL == 'dev' else ''
+        if info.get('CFBundleIdentifier') != expected_id:
+            problems.append(f'{app.name} bundle ID 与 {CHANNEL} 通道不符')
+        identity_path = app / 'Contents/Resources/build-identity.json'
+        try:
+            identity = json.loads(identity_path.read_text())
+            if (identity.get('sourceSha256') != source_fingerprint(ROOT)
+                    or identity.get('channel') != CHANNEL
+                    or identity.get('fullVersion') != expected_release[0]
+                    or str(identity.get('buildNumber')) != expected_release[1]):
+                problems.append(f'{app.name} 包内源码／通道／版本身份过期')
+        except (OSError, ValueError, AttributeError):
+            problems.append(f'{app.name} 缺少可读的包内构建身份')
         got = (info.get('CFBundleShortVersionString'), str(info.get('CFBundleVersion')))
         expected = (str(expected_release[0]).split('-', 1)[0], expected_release[1])
         if got != expected:
             problems.append(f'{app.name} 版本 {got} ≠ version.json {expected}')
         else:
             notes.append(f'{app.name} {got[0]} b{got[1]}')
-    sha = hashlib.file_digest(binary.open('rb'), 'sha256').hexdigest() if binary.exists() else None
+    sha = sha256(binary) if binary.exists() else None
     if sha is None:
         problems.append('输入法主二进制不存在：' + str(binary))
     return '；'.join(notes), problems, sha
 
 
-def _host_json_problems(report_path, expect_sha, min_checks=1):
+def _probe_module(name):
+    """只加载探针的纯数据／校验函数，不调用其 main 或真实桌面操作。"""
+    import importlib.util
+    probe_dir = str(ROOT / 'probes')
+    if probe_dir not in sys.path:
+        sys.path.insert(0, probe_dir)
+    spec = importlib.util.spec_from_file_location('gogaku_verify_' + name,
+                                                 ROOT / 'probes' / (name + '.py'))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _host_coverage_problems(report, hosts, iterations, evidence_path, strict):
+    """按探针同一份计划核对全部宿主、组和逐轮证据，不能只信 failures=0。"""
+    from collections import Counter
+    fkr = _probe_module('first_key_regression')
+    expected = fkr.build_plan(hosts, iterations)
+    matrix = report.get('firstKeyMatrix') if strict else report
+    if not isinstance(matrix, dict):
+        return ['缺少完整首键矩阵']
+    problems = []
+    expected_schema = 'gogaku.real-host-matrix.v2' if strict else 'gogaku.first-key-matrix.v1'
+    if report.get('schema') != expected_schema:
+        problems.append('宿主报告 schema 不符')
+    if not isinstance(report.get('panelState'), dict) or report['panelState'].get('enabled') is not True:
+        problems.append('缺少真实候选窗／逐事件状态证据')
+    plan = matrix.get('plan')
+    if not isinstance(plan, dict) or any(plan.get(key) != expected[key] for key in
+                                        ('sha256', 'hosts', 'iterations', 'confirmations', 'postKeys')):
+        problems.append('首键计划与本次必需宿主／轮次不符')
+    checks = matrix.get('checks')
+    if (type(matrix.get('failures')) is not int or matrix['failures'] != 0
+            or not isinstance(checks, list) or not checks
+            or any(not isinstance(c, dict) or c.get('ok') is not True for c in checks)):
+        problems.append('首键矩阵未逐项通过')
+    else:
+        event_groups = {c.get('group') for c in checks if c.get('phase') == 'panel'}
+        if not {g['id'] for g in expected['groups']} <= event_groups:
+            problems.append('部分组缺少逐事件／面板检查')
+    groups = matrix.get('groups')
+    expected_ids = {g['id'] for g in expected['groups']}
+    if (not isinstance(groups, list) or any(not isinstance(g, dict) for g in groups)
+            or len(groups) != len(expected_ids) or {g.get('id') for g in groups} != expected_ids):
+        return problems + ['宿主矩阵组缺失／重复／不符']
+    totals = {}
+    for group in groups:
+        warmup = group.get('warmup')
+        if (type(warmup) is not int or warmup < 0 or type(group.get('iterations')) is not int
+                or group['iterations'] != iterations):
+            problems.append('矩阵组轮次非法：' + str(group.get('id')))
+            continue
+        total = iterations + warmup
+        if (any(type(group.get(k)) is not int for k in ('ran', 'passed', 'failed'))
+                or group['ran'] != total or group['passed'] != total or group['failed'] != 0):
+            problems.append('矩阵组未完成全部轮次：' + group['id'])
+        totals[group['id']] = total
+    try:
+        records = [json.loads(line) for line in Path(evidence_path).read_text().splitlines() if line.strip()]
+        actual = Counter()
+        for row in records:
+            if (not isinstance(row, dict) or row.get('group') not in totals
+                    or type(row.get('iteration')) is not int or row.get('ok') is not True):
+                raise ValueError('逐轮证据字段非法')
+            actual[(row['group'], row['iteration'])] += 1
+        wanted = Counter({(group, index): 1 for group, total in totals.items() for index in range(total)})
+        if actual != wanted:
+            problems.append('逐轮证据缺失／重复或未完成')
+    except (OSError, ValueError):
+        problems.append('逐轮证据缺失或不可读')
+    if strict:
+        probe = _probe_module('validate-real-hosts')
+        if report.get('strictScenarios') != [s['id'] for s in probe.SCENARIOS]:
+            problems.append('严格宿主场景清单不符')
+        targets = {f'{host}/{target}' for host in hosts for target in fkr.TARGETS[host]}
+        if not isinstance(report.get('hosts'), list) or set(report['hosts']) != targets:
+            problems.append('实际宿主／字段覆盖不完整')
+        labels = {c.get('check') for c in report.get('checks', []) if isinstance(c, dict)}
+        if any(not any(label.startswith(target + ': ' + scenario['label']) for label in labels
+                       if isinstance(label, str)) for target in targets for scenario in probe.SCENARIOS):
+            problems.append('严格宿主场景逐项证据不完整')
+    return problems
+
+
+def _host_json_problems(report_path, expect_sha, min_checks=1, *, hosts=None,
+                        iterations=200, evidence_path=None, strict=False):
     """核对宿主报告：结果文件可读、完成数量达标、失败为 0、安装件身份一致。
     缺证据按 blocked 处理（返回 None 表示需 blocked）。"""
     if not Path(report_path).exists():
@@ -509,21 +628,26 @@ def _host_json_problems(report_path, expect_sha, min_checks=1):
     except json.JSONDecodeError:
         return None
     problems = []
+    if not isinstance(report, dict):
+        return ['宿主报告必须是对象']
     checks = report.get('checks')
     failures = report.get('failures')
-    if not isinstance(checks, list) or failures is None:
-        problems.append('报告缺少 checks／failures 字段')
+    if not isinstance(checks, list) or type(failures) is not int:
+        problems.append('报告缺少合法的 checks／failures 字段')
     else:
         if len(checks) < min_checks:
             problems.append(f'检查数 {len(checks)} < 门槛 {min_checks}')
-        if failures != 0:
-            problems.append(f'失败 {failures} 项')
-    sha = report.get('inputSource', {}).get('installedSHA256')
-    if expect_sha and sha != expect_sha:
+        if failures != 0 or any(not isinstance(c, dict) or c.get('ok') is not True for c in checks):
+            problems.append(f'失败 {failures} 项或逐项结果未明确通过')
+    identity = report.get('inputSource')
+    sha = identity.get('installedSHA256') if isinstance(identity, dict) else None
+    if not expect_sha or sha != expect_sha:
         problems.append(f"报告安装件身份 {str(sha)[:12]} ≠ 当前安装件 {str(expect_sha)[:12]}")
-    skipped = report.get('skipped') or []
-    if skipped:
-        problems.append(f"有 {len(skipped)} 个宿主被跳过：" + '; '.join(s.get('host', '?') for s in skipped[:4]))
+    skipped = report.get('skipped', [])
+    if not isinstance(skipped, list) or skipped:
+        problems.append('存在跳过宿主或 skipped 字段非法')
+    if hosts is not None:
+        problems.extend(_host_coverage_problems(report, hosts, iterations, evidence_path, strict))
     return problems
 
 
@@ -542,14 +666,15 @@ def check_host_matrix_round(ctx, round_no):
     report_path = ctx.evidence_path(f'real-host-matrix-round-{round_no}.json')
     evidence_path = ctx.evidence_path(f'real-host-matrix-round-{round_no}.jsonl')
     result = sh(['python3', 'probes/validate-real-hosts.py',
-                 '--hosts', HOST_MATRIX_HOSTS, '--iterations', '200',
+                 '--hosts', HOST_MATRIX_HOSTS, '--iterations', '200', '--enable-validation',
                  '--report', report_path, '--evidence', evidence_path], timeout=14400)
     log = ctx.evidence(f'host-matrix-round-{round_no}.log', result.stdout + result.stderr)
-    problems = _host_json_problems(report_path, expect_sha)
+    problems = _host_json_problems(report_path, expect_sha, hosts=HOST_MATRIX_HOSTS.split(','),
+                                    evidence_path=evidence_path, strict=True)
     if problems is None:
         return BLOCK, f'第 {round_no} 轮报告缺失或不可读（exit={result.returncode}，见日志）', log
-    if result.returncode == 5:
-        return FAIL, f'第 {round_no} 轮前台身份断言失败，整轮中止', log
+    if result.returncode != 0:
+        return FAIL, f'第 {round_no} 轮进程失败或前台身份断言中止（exit={result.returncode}）', log
     if problems:
         return FAIL, f'第 {round_no} 轮未通过：' + '；'.join(problems), log
     report = json.loads(Path(report_path).read_text())
@@ -562,16 +687,55 @@ def check_orca_shift(ctx):
         return BLOCK, 'host 档位需要 --yes', None
     expect_sha = ctx.get('installed_sha')
     report_path = ctx.evidence_path('orca-shift.json')
+    evidence_path = ctx.evidence_path('orca-shift.jsonl')
     result = sh(['python3', 'probes/first_key_regression.py', '--hosts', 'orca-pty',
-                 '--iterations', '200', '--enable-validation', '--report', report_path], timeout=14400)
+                 '--iterations', '200', '--enable-validation', '--report', report_path,
+                 '--evidence', evidence_path], timeout=14400)
     log = ctx.evidence('orca-shift.log', result.stdout + result.stderr)
-    problems = _host_json_problems(report_path, expect_sha)
+    problems = _host_json_problems(report_path, expect_sha, hosts=['orca-pty'],
+                                    evidence_path=evidence_path)
     if problems is None:
         return BLOCK, 'Orca Shift 专项报告缺失或不可读', log
+    if result.returncode != 0:
+        return FAIL, f'Orca Shift 进程未正常完成（exit={result.returncode}）', log
     if problems:
         return FAIL, 'Orca Shift 专项未通过：' + '；'.join(problems), log
     report = json.loads(Path(report_path).read_text())
     return PASS, f'Orca Shift 专项通过（{len(report["checks"])} 项检查，含逐事件核对）', log
+
+
+def _performance_problems(report, samples_path, expect_sha):
+    """读取本轮原始样本，复用探针的汇总与门槛实现重新判定。"""
+    import math
+    if not isinstance(report, dict) or report.get('schema') != 'gogaku.imk-latency.v1':
+        return ['性能报告 schema 不符']
+    try:
+        samples = json.loads(Path(samples_path).read_text())
+        declared = report.get('samplesFile')
+        if not isinstance(declared, str) or Path(declared).resolve() != Path(samples_path).resolve():
+            return ['性能报告未绑定本轮样本文件']
+    except (OSError, ValueError):
+        return ['性能原始样本缺失或不可读']
+    if (not isinstance(samples, list) or len(samples) < 10000
+            or type(report.get('sampleCount')) is not int or report['sampleCount'] != len(samples)):
+        return ['性能有效样本未达到一万或数量不符']
+    if any(not isinstance(s, dict) or type(s.get('callbackNs')) not in (int, float)
+           or not math.isfinite(s['callbackNs']) or s['callbackNs'] < 0 for s in samples):
+        return ['性能样本缺少合法回调耗时']
+    identity = report.get('inputSource')
+    artifacts = identity.get('artifacts', []) if isinstance(identity, dict) else []
+    if not expect_sha or not isinstance(artifacts, list) or not any(
+            isinstance(a, dict) and a.get('path') == 'Contents/MacOS/GogakuInput'
+            and a.get('sha256') == expect_sha for a in artifacts):
+        return ['性能报告安装件身份不符']
+    probe = _probe_module('measure-imk-latency')
+    summary = probe.summarize(samples)
+    if report.get('summary') != summary:
+        return ['性能汇总与原始样本不符']
+    acceptance = probe.evaluate_report({**report, 'summary': summary})
+    if acceptance['passed'] is not True or report.get('acceptance') != acceptance:
+        return ['性能重新判定未通过或 acceptance 不符']
+    return []
 
 
 def check_host_performance(ctx):
@@ -585,15 +749,16 @@ def check_host_performance(ctx):
     log = ctx.evidence('performance.log', result.stdout + result.stderr)
     if not Path(report_path).exists():
         return BLOCK, '性能报告缺失（exit=' + str(result.returncode) + '）', log
-    report = json.loads(Path(report_path).read_text())
-    acceptance = report.get('acceptance')
-    if not isinstance(acceptance, dict) or 'passed' not in acceptance:
-        return FAIL, '性能报告缺少 acceptance 判定', log
-    events = report.get('events') or report.get('sampleCount')
-    detail = '性能门槛判定：' + json.dumps(acceptance.get('checks', acceptance), ensure_ascii=False)[:300]
-    if result.returncode != 0 or not acceptance['passed']:
-        return FAIL, detail, log
-    return PASS, detail, log
+    try:
+        report = json.loads(Path(report_path).read_text())
+    except (OSError, ValueError):
+        return FAIL, '性能报告不可读', log
+    problems = _performance_problems(report, samples_path, ctx.get('installed_sha'))
+    if result.returncode != 0:
+        problems.append(f'性能进程未完成（exit={result.returncode}）')
+    if problems:
+        return FAIL, '性能未通过：' + '；'.join(problems), log
+    return PASS, f'性能门槛通过（{report["sampleCount"]} 条原始样本，当前安装件）', log
 
 
 def check_host_stability(ctx):
@@ -610,6 +775,8 @@ def check_host_stability(ctx):
     duration_min = (report.get('durationSeconds') or 0) / 60
     trend = report.get('memoryTrend') or []
     problems = []
+    if result.returncode != 0:
+        problems.append(f'进程未正常完成（exit={result.returncode}）')
     if report.get('badRounds'):
         problems.append('异常轮次 ' + str(report['badRounds']))
     if report.get('totalFailures'):
@@ -628,22 +795,73 @@ def check_host_stability(ctx):
                      memory.get('maxRSSKB'), memory.get('meanRSSKB'))), log
 
 
+GUI_PAGES = ('learning-translation', 'normal-input', 'custom-words', 'skin',
+             'shortcuts', 'learning-privacy', 'learning-snippets')
+GUI_SIZES = ((900, 620), (760, 520))
+GUI_APPEARANCES = ('light', 'dark')
+
+
+def gui_problems(report, evidence_dir, expected):
+    """人工验收证据的完整性／身份检查；不以截图存在代替人工实际操作。"""
+    import hashlib
+    if not isinstance(report, dict):
+        return ['GUI 报告必须是对象']
+    problems = []
+    for key, value in expected.items():
+        if report.get(key) != value:
+            problems.append(f'GUI {key} 与当前身份不符')
+    if report.get('pass') is not True:
+        problems.append('GUI 总结不是明确通过')
+    expected_cells = {(p, size, a) for p in GUI_PAGES for size in GUI_SIZES for a in GUI_APPEARANCES}
+    seen = set()
+    screens = report.get('screens')
+    if not isinstance(screens, list):
+        return problems + ['GUI 缺少逐项 screens 矩阵（七页×两尺寸×浅深）']
+    for screen in screens:
+        if not isinstance(screen, dict):
+            problems.append('GUI 矩阵项不是对象')
+            continue
+        size = screen.get('size')
+        if not isinstance(size, list) or len(size) != 2 or any(type(n) is not int for n in size):
+            problems.append('GUI 窗口尺寸非法')
+            continue
+        cell = (screen.get('page'), tuple(size), screen.get('appearance'))
+        if cell not in expected_cells or cell in seen or screen.get('passed') is not True:
+            problems.append('GUI 矩阵项未知／重复／未通过')
+        seen.add(cell)
+        name = screen.get('screenshot')
+        if not isinstance(name, str) or not name:
+            problems.append('GUI 缺少截图路径')
+            continue
+        path = (evidence_dir / name).resolve()
+        if (not path.is_relative_to(evidence_dir.resolve()) or not path.is_file()
+                or path.stat().st_size == 0):
+            problems.append('GUI 截图缺失／空文件／路径越界')
+        elif hashlib.sha256(path.read_bytes()).hexdigest() != screen.get('screenshotSha256'):
+            problems.append('GUI 截图哈希不符')
+    if seen != expected_cells or len(screens) != len(expected_cells):
+        problems.append('GUI 七页×两尺寸×浅深矩阵不完整')
+    return problems
+
+
 def check_native_gui(ctx):
-    """原生 GUI 验收：目前无自动化探针。必须有已归档的人工验收证据，缺证据记 blocked。"""
-    evidence = ROOT / 'docs/validation/verify' / 'native-gui-acceptance.json'
-    if evidence.exists():
-        try:
-            report = json.loads(evidence.read_text())
-            commit = report.get('commit')
-            pages = report.get('pages')
-            if commit and pages and report.get('pass'):
-                return PASS, f"GUI 验收已归档（六页×两尺寸×浅深，提交 {str(commit)[:12]}）", str(evidence)
-        except json.JSONDecodeError:
-            pass
-        return FAIL, 'GUI 验收证据存在但字段不完整（需 commit／pages／pass）', str(evidence)
-    return BLOCK, ('原生 GUI 验收未归档：需六页 × 900×620／760×520 × 浅／深的真实点击、'
-                   '键盘导航、录制与应用选择验收，读落盘配置并截图；证据写入 '
-                   + str(evidence) + '（含 commit、pages、pass 字段）', None)
+    evidence = ROOT / 'docs/validation/verify' / f'native-gui-acceptance-{CHANNEL}.json'
+    if not evidence.is_file():
+        return BLOCK, ('原生 GUI 未归档：七页×900×620／760×520×浅深，真实点击、键盘、'
+                       '录制与应用选择并读回配置；逐项格式见 docs/release.md：' + str(evidence)), None
+    expected = {'commit': sh(['git', 'rev-parse', 'HEAD']).stdout.strip(),
+                'sourceSha256': source_fingerprint(ROOT), 'testSha256': test_fingerprint(ROOT),
+                'version': json.loads(VERSION_FILE.read_text()), 'channel': CHANNEL,
+                'installedSHA256': ctx.get('installed_sha')}
+    if not expected['installedSHA256']:
+        return BLOCK, '缺少当前安装件的已核验身份；先运行 host-identity', None
+    try:
+        problems = gui_problems(json.loads(evidence.read_text()), evidence.parent, expected)
+    except (OSError, ValueError, TypeError):
+        return FAIL, 'GUI 证据不可读或类型非法', str(evidence)
+    if problems:
+        return FAIL, '；'.join(problems), str(evidence)
+    return PASS, 'GUI 人工验收证据完整（七页×两尺寸×浅深，身份／截图已核对）', str(evidence)
 
 
 # ── 档位定义 ──────────────────────────────────────────────────────────────
@@ -667,42 +885,25 @@ def set_channel(name):
     INSTALLED_SETTINGS_APP = Path.home() / 'Applications' / f'Gogaku Settings{suffix}.app'
 
 
-PROFILES = {
-    'fast': [
-        ('version', True, check_version),
-        ('resources', True, check_resources),
-        ('core-tests', True, check_core_tests),
-        ('swift-tests', True, check_swift_tests),
-        ('translation-eval-regression', True, check_translation_eval_regression),
-        ('learning-worker-protocol', True, check_learning_worker_protocol),
-        ('delivery-contracts', True, check_delivery_contracts),
-    ],
-    'release': [
-        ('version', True, check_version),
-        ('resources', True, check_resources),
-        ('core-tests', True, check_core_tests),
-        ('swift-tests', True, check_swift_tests),
-        ('translation-eval-regression', True, check_translation_eval_regression),
-        ('clean-build', True, check_clean_build),
-        ('bundle-check', True, check_bundle),
-        ('quality', True, check_quality),
-        ('render', True, check_render),
-        ('data-reliability', True, check_data_reliability),
-        ('delivery-contracts', True, check_delivery_contracts),
-        ('asan-ubsan', True, check_asan_ubsan),
-        ('install-preflight', False, check_install_preflight),
-    ],
-    'host': [
-        ('host-plan', True, check_host_plan),
-        ('host-identity', True, check_host_identity),
-        ('host-matrix-round-1', True, lambda ctx: check_host_matrix_round(ctx, 1)),
-        ('host-matrix-round-2', True, lambda ctx: check_host_matrix_round(ctx, 2)),
-        ('orca-shift', True, check_orca_shift),
-        ('performance', True, check_host_performance),
-        ('stability', True, check_host_stability),
-        ('native-gui', True, check_native_gui),
-    ],
+RUNNERS = {
+    'version': check_version, 'resources': check_resources,
+    'core-tests': check_core_tests, 'swift-tests': check_swift_tests,
+    'translation-data': check_translation_data,
+    'verification-contracts': check_verification_contracts,
+    'delivery-contracts': check_delivery_contracts,
+    'clean-build': check_clean_build, 'bundle-check': check_bundle,
+    'quality': check_quality, 'render': check_render,
+    'data-reliability': check_data_reliability, 'asan-ubsan': check_asan_ubsan,
+    'install-preflight': check_install_preflight,
+    'host-plan': check_host_plan, 'host-identity': check_host_identity,
+    'host-matrix-round-1': lambda ctx: check_host_matrix_round(ctx, 1),
+    'host-matrix-round-2': lambda ctx: check_host_matrix_round(ctx, 2),
+    'orca-shift': check_orca_shift, 'performance': check_host_performance,
+    'stability': check_host_stability, 'native-gui': check_native_gui,
 }
+# 执行器与发布消费者共用一份策略；报告不能自己削减必需项。
+PROFILES = {profile: [(name, required, RUNNERS[name]) for name, required in checks]
+            for profile, checks in PROFILE_CHECKS.items()}
 
 
 class Ctx:
@@ -750,7 +951,11 @@ def main():
 
     ctx = Ctx(args)
     only = {name.strip() for name in args.only.split(',') if name.strip()}
+    unknown = only - {name for name, _, _ in PROFILES[args.profile]}
+    if unknown:
+        parser.error('--only 中存在未知检查：' + ', '.join(sorted(unknown)))
     started = time.strftime('%Y-%m-%dT%H:%M:%S%z')
+    start_source, start_tests = source_fingerprint(ROOT), test_fingerprint(ROOT)
     results = []
     for name, required, runner in PROFILES[args.profile]:
         if only and name not in only:
@@ -759,7 +964,16 @@ def main():
             continue
         t0 = time.monotonic()
         try:
-            status, detail, evidence = runner(ctx)
+            # 当前宿主探针固定 stable；不允许 dev 报告实际测到 stable。
+            if args.profile == 'host' and CHANNEL != 'stable':
+                status, detail, evidence = BLOCK, '宿主探针尚未支持 dev 通道；未注入按键，不接受 stable 安装件代测', None
+            elif (args.profile == 'host' and name not in ('host-plan', 'host-identity')
+                  and not ctx.get('host_identity_passed')):
+                status, detail, evidence = BLOCK, '当前安装件身份未通过；未启动宿主探针', None
+            else:
+                status, detail, evidence = runner(ctx)
+            if name == 'host-identity':
+                ctx['host_identity_passed'] = status == PASS
         except Exception as e:  # 检查自身崩溃按失败计，不静默
             status, detail, evidence = FAIL, f'检查异常：{type(e).__name__}: {e}', None
         duration = int((time.monotonic() - t0) * 1000)
@@ -769,7 +983,8 @@ def main():
 
     summary = {s: sum(1 for r in results if r['status'] == s) for s in (PASS, FAIL, SKIP, BLOCK)}
     required_bad = [r for r in results if r['required'] and r['status'] != PASS]
-    gate = not required_bad
+    identity_stable = (source_fingerprint(ROOT), test_fingerprint(ROOT)) == (start_source, start_tests)
+    gate = not required_bad and identity_stable
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip() or 'no-git'
     dirty = working_tree_dirty(ROOT)
     artifacts = {}
@@ -787,20 +1002,27 @@ def main():
         except DeliveryError as error:
             artifact_error = str(error)
     report = {
+        'policyVersion': POLICY_VERSION, 'runIdentityStable': identity_stable,
         'profile': args.profile, 'channel': CHANNEL, 'quick': args.quick,
-        'sourceSha256': source_fingerprint(ROOT), 'artifacts': artifacts,
+        'sourceSha256': start_source, 'testSha256': start_tests, 'artifacts': artifacts,
         'artifactError': artifact_error, 'startedAt': started,
         'finishedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
         'commit': head, 'dirty': dirty, 'arch': platform.machine(),
         'version': json.loads(VERSION_FILE.read_text()) if VERSION_FILE.exists() else None,
         'checks': results, 'summary': summary,
-        'gate': {'passed': gate, 'notPassed': [r['name'] for r in required_bad]},
+        'gate': {'passed': gate, 'notPassed': [r['name'] for r in required_bad]
+                 + ([] if identity_stable else ['运行期间源码／测试身份改变'])},
     }
     out = Path(args.report) if args.report else EVIDENCE_DIR / f'report-{args.profile}-{time.strftime("%Y%m%d-%H%M%S")}.json'
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(f"\n摘要：passed={summary[PASS]} failed={summary[FAIL]} skipped={summary[SKIP]} "
-          f"blocked={summary[BLOCK]}；发布门槛：{'通过' if gate else '未通过（' + '、'.join(report['gate']['notPassed']) + '）'}")
+          f"blocked={summary[BLOCK]}；本档位检查：{'通过' if gate else '未通过（' + '、'.join(report['gate']['notPassed']) + '）'}")
+    print('发布就绪须由 publish-release.py 另行核对全部必需档位、当前双端包及收据；本档位通过不等于可发布。')
+    if artifact_error:
+        print('安装包身份未绑定：' + artifact_error)
+    elif set(artifacts) != {'macos', 'windows'}:
+        print('未绑定当前双端安装包，本报告仅为开发检查结果，不能用于发布。')
     print(f"报告：{out}")
     return 0 if gate else 1
 

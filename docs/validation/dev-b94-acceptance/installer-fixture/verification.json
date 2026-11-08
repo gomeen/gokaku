@@ -1,0 +1,35 @@
+{
+  "staticVerificationPassed": true,
+  "runtimeExecuted": false,
+  "templateSha256": "10f6afdad1bcee5f13b5f91780065a43e3f347ccff5be36e3c4ab5abebb357d8",
+  "packages": {
+    "A": {
+      "sha256": "7b58eb74016d092db38243e230198d726dedc2afdfaf87ca68a215340cd9d802",
+      "bytes": 2308480,
+      "payloadFiles": 8,
+      "codeTransactionUnchanged": true,
+      "expectedFailureMarker": null
+    },
+    "B-success": {
+      "sha256": "e5a2b30fbd52b8af961a1c835dec9dc11e3750efba528d4c57aefd52d15349c4",
+      "bytes": 2308491,
+      "payloadFiles": 8,
+      "codeTransactionUnchanged": true,
+      "expectedFailureMarker": null
+    },
+    "B-fail-x64": {
+      "sha256": "f8d33db9f2c921aaa04eac614eb9d8e72dbb43419bc0b12b6fef06c395622021",
+      "bytes": 2308637,
+      "payloadFiles": 9,
+      "codeTransactionUnchanged": true,
+      "expectedFailureMarker": "data/fail-register-x64.flag"
+    },
+    "B-fail-x86": {
+      "sha256": "17967129d753dcc78dbde2675aebbe37c3a41715fdc7d83c0cf0183443f65d1b",
+      "bytes": 2308639,
+      "payloadFiles": 9,
+      "codeTransactionUnchanged": true,
+      "expectedFailureMarker": "data/fail-register-x86.flag"
+    }
+  }
+}

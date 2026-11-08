@@ -11,13 +11,13 @@ import os
 from pathlib import Path
 import select
 import time
+import uuid
 import shlex
 import subprocess
 import tempfile
 import plistlib
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = 'org.gogaku.inputmethod.Hans'
 ABC = 'com.apple.keylayout.ABC'
 ENV = dict(os.environ)
 if Path('/Applications/Xcode.app/Contents/Developer').is_dir():
@@ -38,10 +38,22 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--orca', action='store_true')
     parser.add_argument('--restore-terminal')
-    parser.add_argument('--report', type=Path, default=ROOT / 'docs/validation/imk-host-smoke.json')
+    parser.add_argument('--channel', choices=('stable', 'dev'), default='stable',
+                        help='选择已安装的输入源通道（默认：stable）')
+    parser.add_argument('--report', type=Path,
+                        help='报告路径（默认：docs/validation/imk-host-smoke[-dev].json）')
     args = parser.parse_args()
-    report = {'checkedAt': datetime.now(timezone.utc).isoformat(), 'checks': []}
-    binary = Path.home() / 'Library/Input Methods/Gogaku.app/Contents/MacOS/GogakuInput'
+    suffix = '-dev' if args.channel == 'dev' else ''
+    if args.report is None:
+        args.report = ROOT / f'docs/validation/imk-host-smoke{suffix}.json'
+    source = 'org.gogaku.inputmethod' + ('.dev' if args.channel == 'dev' else '') + '.Hans'
+    app_name = 'Gogaku Dev.app' if args.channel == 'dev' else 'Gogaku.app'
+    contents_path = Path.home() / 'Library/Input Methods' / app_name / 'Contents'
+    binary = contents_path / 'MacOS/GogakuInput'
+    report = {'checkedAt': datetime.now(timezone.utc).isoformat(),
+              'channel': args.channel, 'checks': []}
+    report['installedBuildIdentity'] = json.loads(
+        (contents_path / 'Resources/build-identity.json').read_text(encoding='utf-8'))
     report['installedInputSHA256'] = hashlib.sha256(binary.read_bytes()).hexdigest()
     with tempfile.TemporaryDirectory(prefix='gogaku-imk-') as temp:
         contents = Path(temp) / 'Gogaku IMK Probe.app/Contents'
@@ -61,10 +73,16 @@ def main():
                 line = process.stdout.readline()
                 assert line, 'IMK host exited'
                 return json.loads(line)
+            target_guard = {}
             def command(op, **kwargs):
+                if op in ('key', 'burst', 'shortcut'):
+                    assert target_guard, '缺少专属测试窗口守卫'
+                    kwargs['guard'] = target_guard
                 process.stdin.write(json.dumps({'op': op, **kwargs}) + '\n')
                 process.stdin.flush()
-                return receive()
+                value = receive()
+                assert not value.get('guardBlocked') and value.get('guardOk', True), value
+                return value
             def keys(codes):
                 for code in codes:
                     command('key', code=code, delay=0.1)
@@ -77,16 +95,20 @@ def main():
                 value = command('select', id=identifier)
                 assert value['status'] == 0 and value['source'] == identifier, value
             def toggle_pairs(scope):
-                choose(ABC); choose(SOURCE)
+                choose(ABC); choose(source)
                 transitions = []
                 for _ in range(3):
                     a = command('shortcut')['source']
                     b = command('shortcut')['source']
                     transitions.append([a, b])
                 check(scope + '_control_space_both_directions',
-                      all(pair == [ABC, SOURCE] for pair in transitions), transitions)
+                      all(pair == [ABC, source] for pair in transitions), transitions)
 
             ready = receive()
+            marker = 'gogaku-smoke-' + uuid.uuid4().hex
+            target_guard = {'bundle': 'org.gogaku.validation.host',
+                            'pid': ready['pid'], 'marker': marker}
+            command('setMarker', marker=marker)
             terminal = None
             try:
                 toggle_pairs('native')
@@ -198,6 +220,7 @@ def main():
                     orca('terminal', 'switch', '--terminal', terminal)
                     value = command('frontApp', id='com.stablyai.orca')
                     assert value['front'] == 'com.stablyai.orca', value
+                    target_guard = {'bundle': 'com.stablyai.orca', 'pid': value['frontPid']}
                     toggle_pairs('orca_terminal')
                     assert received.exists(), 'PTY fixture did not become ready'
                     def payload():
@@ -221,7 +244,7 @@ def main():
                     # 注入重复投递会插入散落 \r；不变量＝去除 \r 后恰为 你好m你好。
                     clean = data.replace(b'\r', b'')
                     check('orca_source_change_cancels_old_composition',
-                          [a, b] == [ABC, SOURCE] and clean == '你好m你好'.encode(), data.hex())
+                          [a, b] == [ABC, source] and clean == '你好m你好'.encode(), data.hex())
             finally:
                 if terminal:
                     orca('terminal', 'close', '--terminal', terminal)

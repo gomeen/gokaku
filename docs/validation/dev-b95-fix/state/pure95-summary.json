@@ -1,0 +1,226 @@
+{
+  "scope": "限定 VM 串行测试；未编译、安装、注册、换代理或运行 notepad-cold。未关闭其他文档。",
+  "agentCimBefore": {
+    "ProcessId": 9116,
+    "ExecutablePath": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuAgent.exe",
+    "CommandLine": "\"C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin/x64/GogakuAgent.exe\""
+  },
+  "expectedDll": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll",
+  "expectedMemoryPeTimestamp": 1794117231,
+  "requestedRounds": 8,
+  "executedRounds": 7,
+  "passedRounds": 6,
+  "failedRounds": 1,
+  "inputRounds": 6,
+  "stoppedOnFirstFailure": true,
+  "stopReason": "第7轮记事本预检发现 b94 DLL，未发送按键；无 modulesAfter 或正文证据。",
+  "notRun": [
+    "b95-pure-notepad-basic-2"
+  ],
+  "chromeNewHostFirstGroups": 4,
+  "notepadFirstGroupsSent": 0,
+  "historicalContext": "用户报告 pure chrome-focus-1 此前通过，不计本轮；此前 b95 DLL + b94 代理首次残留 i 的失败保留，不计本轮。",
+  "results": [
+    {
+      "name": "b95-pure-chrome-focus-2",
+      "evidence": "local/windows-acceptance/b95-pure-chrome-focus-2/result.json",
+      "mode": "chrome-focus",
+      "hostPid": 11696,
+      "firstGroup": false,
+      "keysSent": 3,
+      "ok": true,
+      "actualBody": {
+        "active": "target",
+        "source": "",
+        "target": " "
+      },
+      "bodyMatchesExpected": true,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      "formalB95BeforeAndAfter": true,
+      "error": null
+    },
+    {
+      "name": "b95-pure-chrome-basic-1",
+      "evidence": "local/windows-acceptance/b95-pure-chrome-basic-1/result.json",
+      "mode": "chrome-basic",
+      "hostPid": 736,
+      "firstGroup": true,
+      "keysSent": 5,
+      "ok": true,
+      "actualBody": "你好",
+      "bodyMatchesExpected": true,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      "formalB95BeforeAndAfter": true,
+      "error": null
+    },
+    {
+      "name": "b95-pure-chrome-basic-2",
+      "evidence": "local/windows-acceptance/b95-pure-chrome-basic-2/result.json",
+      "mode": "chrome-basic",
+      "hostPid": 5088,
+      "firstGroup": true,
+      "keysSent": 5,
+      "ok": true,
+      "actualBody": "你好",
+      "bodyMatchesExpected": true,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      "formalB95BeforeAndAfter": true,
+      "error": null
+    },
+    {
+      "name": "b95-pure-chrome-basic-3",
+      "evidence": "local/windows-acceptance/b95-pure-chrome-basic-3/result.json",
+      "mode": "chrome-basic",
+      "hostPid": 436,
+      "firstGroup": true,
+      "keysSent": 5,
+      "ok": true,
+      "actualBody": "你好",
+      "bodyMatchesExpected": true,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      "formalB95BeforeAndAfter": true,
+      "error": null
+    },
+    {
+      "name": "b95-pure-chrome-basic-4",
+      "evidence": "local/windows-acceptance/b95-pure-chrome-basic-4/result.json",
+      "mode": "chrome-basic",
+      "hostPid": 8640,
+      "firstGroup": true,
+      "keysSent": 5,
+      "ok": true,
+      "actualBody": "你好",
+      "bodyMatchesExpected": true,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      "formalB95BeforeAndAfter": true,
+      "error": null
+    },
+    {
+      "name": "b95-pure-chrome-password",
+      "evidence": "local/windows-acceptance/b95-pure-chrome-password/result.json",
+      "mode": "chrome-password",
+      "hostPid": 11316,
+      "firstGroup": false,
+      "keysSent": 5,
+      "ok": true,
+      "actualBody": "nihc ",
+      "bodyMatchesExpected": true,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": [
+          {
+            "memoryPeTimestamp": 1794117231,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ]
+      },
+      "formalB95BeforeAndAfter": true,
+      "error": null
+    },
+    {
+      "name": "b95-pure-notepad-basic-1",
+      "evidence": "local/windows-acceptance/b95-pure-notepad-basic-1/result.json",
+      "mode": "notepad-basic",
+      "hostPid": 11496,
+      "firstGroup": false,
+      "keysSent": 0,
+      "ok": false,
+      "actualBody": null,
+      "bodyMatchesExpected": false,
+      "modules": {
+        "modulesBefore": [
+          {
+            "memoryPeTimestamp": 1794109130,
+            "memoryRead": true,
+            "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuTsf.dll"
+          }
+        ],
+        "modulesAfter": null
+      },
+      "formalB95BeforeAndAfter": false,
+      "error": "Notepad did not load installed b94 TSF; no keys sent"
+    }
+  ]
+}

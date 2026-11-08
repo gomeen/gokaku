@@ -1,0 +1,8 @@
+{
+  "result": {
+    "checks": [],
+    "error": "terminated composition retained agent commit eligibility",
+    "ok": false
+  },
+  "exitCode": 1
+}

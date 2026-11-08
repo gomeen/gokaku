@@ -1,0 +1,283 @@
+{
+  "schema": 1,
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 98
+  },
+  "channel": "dev",
+  "recordedAt": "2026-11-08T08:02:54.271748+00:00",
+  "sourceSha256": "038c07b48a30453a1994ea1ebc87352a934e8318da1fc2fb11c718535cb57db0",
+  "testSha256": "2d07182c801960c661da73f65a13cbd9ee3b38e414c9d79da4737317e0dc55f6",
+  "status": "three-fixes-verified-in-limited-matrix-full-acceptance-still-open",
+  "fullAcceptancePassed": false,
+  "fixes": [
+    {
+      "id": "cross-field-commit-revocation",
+      "build": "b95",
+      "summary": "OnCompositionTerminated 撤销代理旧组合资格、更新字段身份；临时文本存储仅在候选窗显示编码",
+      "verified": "b95-b98 各轮矩阵持续通过"
+    },
+    {
+      "id": "inputscope-settle-reread",
+      "build": "b97",
+      "summary": "首次解析为「允许」时 40ms 复核；读取瞬时失败沿用上一键结论。修复宿主复用上下文切换字段后 scope 滞后导致首键被误认领吞字",
+      "evidence": "b96 密码轮失败 ihc → b98 密码 3/3 通过 nihc "
+    },
+    {
+      "id": "flush-off-request-path",
+      "build": "b98",
+      "summary": "代理 30 秒调频落盘曾持全局锁，打字中响应超 200ms 致已处理按键放行宿主重复出字；改为空闲 3 秒才落盘，单键截止 200→400ms",
+      "evidence": "b97 chrome-basic 失败 hc你好 → b98 basic 4/4 通过"
+    }
+  ],
+  "packages": [
+    {
+      "platform": "macos",
+      "artifact": {
+        "name": "Gogaku-0.1.1-dev.2-b98-dev.pkg",
+        "sha256": "4d2297b75d047aa38900195609bb266e9e58263151d85bb67f7f58731e70cee7",
+        "bytes": 49654070
+      }
+    },
+    {
+      "platform": "windows",
+      "artifact": {
+        "name": "Gogaku-0.1.1-dev.2-b98-dev-windows-x64-setup.exe",
+        "sha256": "368021b37e7b7c013507129d014a2476b53f6741d0c223e63e0c40d2ee0547ab",
+        "bytes": 54522262
+      }
+    }
+  ],
+  "installation": {
+    "evidence": "dev-b98-fix/install.json",
+    "defaultUpgradePassed": true,
+    "fileCount": 71,
+    "previousRoot": "0.1.1-dev.2-b97-dev"
+  },
+  "fast": {
+    "passed": true,
+    "evidence": "dev-b98-fix/build/report-fast-dev-b98.json"
+  },
+  "asanUbsanQuick": {
+    "passed": true,
+    "sequenceCount": 2000,
+    "fullReleaseGatePassed": false,
+    "evidence": "dev-b98-fix/build/report-asan-ubsan-quick-dev-b98.json"
+  },
+  "compositionLifecycle": {
+    "evidence": [
+      "dev-b98-fix/composition/b98-x64.json",
+      "dev-b98-fix/composition/b98-x86.json"
+    ],
+    "passed": true
+  },
+  "matrix": {
+    "planned": 13,
+    "executed": 13,
+    "passed": 13,
+    "failed": 0,
+    "summary": "dev-b98-fix/matrix-summary.json",
+    "cases": [
+      {
+        "id": "b98-matrix-chrome-focus-1",
+        "mode": "chrome-focus",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-focus-1.json",
+        "hostPid": 2036,
+        "values": {
+          "active": "target",
+          "source": "",
+          "target": " "
+        },
+        "text": null,
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-focus-2",
+        "mode": "chrome-focus",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-focus-2.json",
+        "hostPid": 1696,
+        "values": {
+          "active": "target",
+          "source": "",
+          "target": " "
+        },
+        "text": null,
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-basic-1",
+        "mode": "chrome-basic",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-basic-1.json",
+        "hostPid": 10368,
+        "values": null,
+        "text": "你好",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-basic-2",
+        "mode": "chrome-basic",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-basic-2.json",
+        "hostPid": 2356,
+        "values": null,
+        "text": "你好",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-basic-3",
+        "mode": "chrome-basic",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-basic-3.json",
+        "hostPid": 12088,
+        "values": null,
+        "text": "你好",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-basic-4",
+        "mode": "chrome-basic",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-basic-4.json",
+        "hostPid": 11432,
+        "values": null,
+        "text": "你好",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-password-1",
+        "mode": "chrome-password",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-password-1.json",
+        "hostPid": 8732,
+        "values": null,
+        "text": "nihc ",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-password-2",
+        "mode": "chrome-password",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-password-2.json",
+        "hostPid": 5508,
+        "values": null,
+        "text": "nihc ",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-chrome-password-3",
+        "mode": "chrome-password",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-chrome-password-3.json",
+        "hostPid": 10616,
+        "values": null,
+        "text": "nihc ",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-notepad-basic-1",
+        "mode": "notepad-basic",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-notepad-basic-1.json",
+        "hostPid": 4864,
+        "values": null,
+        "text": "你好",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-notepad-basic-2",
+        "mode": "notepad-basic",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-notepad-basic-2.json",
+        "hostPid": 11168,
+        "values": null,
+        "text": "你好",
+        "cold": false,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-notepad-cold-1",
+        "mode": "notepad-cold",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-notepad-cold-1.json",
+        "hostPid": 4404,
+        "values": null,
+        "text": "你好",
+        "cold": true,
+        "moduleIdentityConfirmed": true
+      },
+      {
+        "id": "b98-matrix-notepad-cold-2",
+        "mode": "notepad-cold",
+        "passed": true,
+        "evidence": "dev-b98-fix/cases/b98-matrix-notepad-cold-2.json",
+        "hostPid": 11976,
+        "values": null,
+        "text": "你好",
+        "cold": true,
+        "moduleIdentityConfirmed": true
+      }
+    ],
+    "agentChain": {
+      "baseline": "b98 PID 7324",
+      "cold1": "PID 4816（路径由夹具记录，行为一致）",
+      "cold2": "PID 10456 已独立核验哈希与 b98 清单一致"
+    },
+    "b97Observation": {
+      "failure": "b97-matrix-chrome-basic-1 hc你好（响应迟到重复出字）",
+      "evidence": "dev-b98-fix/b97-observation/chrome-basic-1-failure.json"
+    },
+    "b96Observation": {
+      "failure": "b96-pure2-chrome-password ihc（scope 滞后吞首键）",
+      "evidence": "dev-b98-fix/b96-observation/chrome-password-failure.json"
+    },
+    "environment": {
+      "oldTsfHosts": [
+        "explorer.exe 持 C:\\gogaku-test\\GogakuTsf.dll（b91 时代诊断副本）",
+        "msedge.exe 持 b97 DLL，可复活 b97 僵尸代理（被互斥量拒绝，秒退）"
+      ],
+      "note": "b98 代理持锁期间僵尸无法夺取管道；冷启动停止窗口存在竞态，夹具已放宽为停止全部 GogakuDev 自有代理并复查复活"
+    }
+  },
+  "retainedFailures": [
+    {
+      "build": "b95",
+      "detail": "b95 DLL＋长期运行 b94 代理首轮切框原框残留 i；其后诊断对照通过，未逐例归因",
+      "evidence": "dev-b95-fix/cases/b95-chrome-focus-1"
+    }
+  ],
+  "finalState": {
+    "evidence": "dev-b98-fix/state/cleanup98.json",
+    "settingsUnchanged": true,
+    "allUserFilesRetained": true,
+    "autostartUnchanged": true,
+    "modelFrequencyChangedBySyntheticCommits": true,
+    "formalComRestored": true,
+    "temporaryTasksRemoved": true,
+    "securityKeptEnabled": true,
+    "agent": {
+      "pid": 10456,
+      "path": "b98\\bin\\x64\\GogakuAgent.exe"
+    }
+  },
+  "notCompleted": [
+    "Windows Terminal / Electron / 真实 32 位应用矩阵",
+    "完整安装故障恢复／卸载矩阵",
+    "万次级延迟／长时稳定性",
+    "真实翻译／在线更新",
+    "Mac b98 安装与运行验证",
+    "历史间歇异常的逐例归因（两个机制已修复并复测，未宣称覆盖全部历史个案）"
+  ]
+}

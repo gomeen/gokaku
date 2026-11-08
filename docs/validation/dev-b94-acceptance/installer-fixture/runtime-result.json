@@ -1,0 +1,191 @@
+{
+    "schema":  1,
+    "ok":  false,
+    "status":  "failed",
+    "runId":  "20261108T045637287Z-a370f1679d344597a1b12dfae9932dfb",
+    "startedAtUtc":  "2026-11-08T04:56:38.1060513Z",
+    "finishedAtUtc":  "2026-11-08T04:56:40.5767905Z",
+    "inputActivityFinishedAcknowledged":  true,
+    "baselineTiming":  "Caller must finish all input tasks before invocation; this script never generates input or stops production processes.",
+    "transferDirectory":  "C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture",
+    "manifestSha256":  "6e32f4bd74a8ea11debcf313edaa527d5e2f600858dd79f9fc1b45c9bc57845b",
+    "mutationStarted":  false,
+    "runtimeExecuted":  false,
+    "cleanupCompleted":  false,
+    "error":  {
+                  "message":  "无法读取文件“C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture\\packages\\A.exe”: 无法成功完成操作，因为文件包含病毒或潜在的垃圾软件。\r\n",
+                  "exception":  "Microsoft.PowerShell.Commands.WriteErrorException: 无法读取文件“C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture\\packages\\A.exe”: 无法成功完成操作，因为文件包含病毒或潜在的垃圾软件。\r\n",
+                  "position":  "所在位置 C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture\\runtime.ps1:127 字符: 13\r\n+     return (Get-FileHash -LiteralPath $Path -Algorithm SHA256).Hash.T ...\r\n+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~",
+                  "scriptStackTrace":  "在 Get-FileHash\u003cProcess\u003e、C:\\WINDOWS\\system32\\WindowsPowerShell\\v1.0\\Modules\\Microsoft.PowerShell.Utility\\Microsoft.PowerShell.Utility.psm1 中: 第 129 行\r\n在 File-Sha、C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture\\runtime.ps1 中: 第 127 行\r\n在 Check-Package、C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture\\runtime.ps1 中: 第 414 行\r\n在 \u003cScriptBlock\u003e、C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\installer-fixture\\runtime.ps1 中: 第 611 行"
+              },
+    "steps":  [
+                  {
+                      "name":  "preflight",
+                      "status":  "failed",
+                      "startedAtUtc":  "2026-11-08T04:56:38.1174188Z",
+                      "finishedAtUtc":  "2026-11-08T04:56:40.4261523Z",
+                      "exitCode":  null,
+                      "processId":  null,
+                      "assertions":  [
+                                         {
+                                             "name":  "caller.inputFinished",
+                                             "passed":  true,
+                                             "expected":  "-InputActivityFinished after all production input tasks ended",
+                                             "actual":  true
+                                         },
+                                         {
+                                             "name":  "previousResult.absent",
+                                             "passed":  true,
+                                             "expected":  "no prior result.json; preserve previous run evidence",
+                                             "actual":  false
+                                         },
+                                         {
+                                             "name":  "OS.Windows64Process",
+                                             "passed":  true,
+                                             "expected":  "64-bit PowerShell on Windows x64",
+                                             "actual":  "Microsoft Windows NT 10.0.26300.0"
+                                         },
+                                         {
+                                             "name":  "OS.Windows11",
+                                             "passed":  true,
+                                             "expected":  "Windows 11 build \u003e=22000",
+                                             "actual":  "10.0.26300.0"
+                                         },
+                                         {
+                                             "name":  "operator.alreadyElevated",
+                                             "passed":  true,
+                                             "expected":  "already elevated; never prompt UAC or runas",
+                                             "actual":  "NT AUTHORITY\\SYSTEM"
+                                         },
+                                         {
+                                             "name":  "fixture.Run.targetUserUnique",
+                                             "passed":  true,
+                                             "expected":  "C:\\Users\\iixm",
+                                             "actual":  [
+                                                            "S-1-5-21-2161532568-202614849-456035553-1001"
+                                                        ]
+                                         },
+                                         {
+                                             "name":  "fixture.Run.targetUserLoaded",
+                                             "passed":  true,
+                                             "expected":  "target hive already loaded; never load offline hives",
+                                             "actual":  "S-1-5-21-2161532568-202614849-456035553-1001"
+                                         },
+                                         {
+                                             "name":  "manifest.schemaAndFixture",
+                                             "passed":  true,
+                                             "expected":  "schema 1, fixtureOnly true",
+                                             "actual":  1
+                                         },
+                                         {
+                                             "name":  "manifest.identity.appId",
+                                             "passed":  true,
+                                             "expected":  "{B74D13D2-0952-4B54-B124-671170C7A294}",
+                                             "actual":  "{B74D13D2-0952-4B54-B124-671170C7A294}"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.channel",
+                                             "passed":  true,
+                                             "expected":  "acceptance-b94",
+                                             "actual":  "acceptance-b94"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.tsfClsid",
+                                             "passed":  true,
+                                             "expected":  "{B74D13D2-0952-4B54-B124-671170C7A295}",
+                                             "actual":  "{B74D13D2-0952-4B54-B124-671170C7A295}"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.runValue",
+                                             "passed":  true,
+                                             "expected":  "GogakuAcceptanceB94Agent",
+                                             "actual":  "GogakuAcceptanceB94Agent"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.mutex",
+                                             "passed":  true,
+                                             "expected":  "GogakuAcceptanceB94Settings",
+                                             "actual":  "GogakuAcceptanceB94Settings"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.defaultDirName",
+                                             "passed":  true,
+                                             "expected":  "{autopf}\\GogakuAcceptanceB94",
+                                             "actual":  "{autopf}\\GogakuAcceptanceB94"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.channelKey64",
+                                             "passed":  true,
+                                             "expected":  "HKLM\\Software\\Gogaku\\acceptance-b94",
+                                             "actual":  "HKLM\\Software\\Gogaku\\acceptance-b94"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.clsidKeyBothViews",
+                                             "passed":  true,
+                                             "expected":  "HKLM\\Software\\Classes\\CLSID\\{B74D13D2-0952-4B54-B124-671170C7A295}",
+                                             "actual":  "HKLM\\Software\\Classes\\CLSID\\{B74D13D2-0952-4B54-B124-671170C7A295}"
+                                         },
+                                         {
+                                             "name":  "manifest.identity.uninstallKey64",
+                                             "passed":  true,
+                                             "expected":  "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{B74D13D2-0952-4B54-B124-671170C7A294}_is1",
+                                             "actual":  "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{B74D13D2-0952-4B54-B124-671170C7A294}_is1"
+                                         },
+                                         {
+                                             "name":  "ProgramW6432.available",
+                                             "passed":  true,
+                                             "expected":  "ProgramW6432",
+                                             "actual":  "C:\\Program Files"
+                                         },
+                                         {
+                                             "name":  "manifest.packageSet",
+                                             "passed":  true,
+                                             "expected":  [
+                                                              "A",
+                                                              "B-fail-x64",
+                                                              "B-fail-x86",
+                                                              "B-success"
+                                                          ],
+                                             "actual":  [
+                                                            "A",
+                                                            "B-fail-x64",
+                                                            "B-fail-x86",
+                                                            "B-success"
+                                                        ]
+                                         },
+                                         {
+                                             "name":  "A.versionAndRoot",
+                                             "passed":  true,
+                                             "expected":  "C:\\Program Files\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94",
+                                             "actual":  "C:\\Program Files\\GogakuAcceptanceB94\\versions\\1.0.0-b1-acceptance-b94"
+                                         },
+                                         {
+                                             "name":  "A.relativePath",
+                                             "passed":  true,
+                                             "expected":  "packages/A.exe",
+                                             "actual":  "packages/A.exe"
+                                         }
+                                     ],
+                      "logs":  [
+                                   "results/20261108T045637287Z-a370f1679d344597a1b12dfae9932dfb/failure-fixture.json"
+                               ]
+                  }
+              ],
+    "logs":  [
+                 "results/20261108T045637287Z-a370f1679d344597a1b12dfae9932dfb/failure-fixture.json"
+             ],
+    "limitations":  [
+                        "Controlled registration DLL only; no CTF/TSF keyboard or default input changes.",
+                        "Failure variants exercise registration failure before pointer/Run migration, not partial migration or unregister failure.",
+                        "External sentinel and all reports are retained; failure paths deliberately retain fixture state."
+                    ],
+    "operator":  {
+                     "name":  "NT AUTHORITY\\SYSTEM",
+                     "sid":  "S-1-5-18"
+                 },
+    "fixtureRunUser":  {
+                           "profile":  "C:\\Users\\iixm",
+                           "sid":  "S-1-5-21-2161532568-202614849-456035553-1001"
+                       },
+    "fixtureRoot":  "C:\\Program Files\\GogakuAcceptanceB94"
+}

@@ -126,7 +126,7 @@ def delete_not_resurrected() -> None:
     code_path = user_dir / "probe.cpp"
     code_path.write_text(DELETE_PROBE.replace("__USER_DIR__", str(user_dir)))
     binary = user_dir / "probe"
-    build = run(["c++", "-std=gnu++20", f"-I{ROOT}/native/GogakuCore/include",
+    build = run(["c++", "-std=gnu++20", f"-I{ROOT}/shared/GogakuCore/include",
                  str(code_path), "-L", str(ROOT / ".build/core"), "-lgogaku_core",
                  "-Wl,-rpath", str(ROOT / ".build/core"), "-o", str(binary)])
     if build.returncode != 0:

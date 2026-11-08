@@ -7,18 +7,14 @@
 // - 注释琥珀色 #7D5800（浅色）／#E3A82E（深色）
 // - 页码「1/2」多于一页才显示、右对齐
 // - 长注释截断省略号且面板宽不超 440；单行短内容时面板 ≥180
-// - 预编辑插入点存在；深色主题背景 #2D1E1F
-// 产物：docs/validation/panel-render-{light,dark}-2x.png。
-//
-// 用法：先 swift build（提供 GogakuCore 模块），然后
-//   swiftc probes/render-candidate-panel.swift Sources/GogakuInput/CandidatePanel.swift \
-//         Sources/GogakuInput/CandidatePanelTheme.swift -I .build/debug/Modules \
-//         -L .build/debug -L .build/core -lGogakuCore -lgogaku_core \
-//         -Xlinker -rpath -Xlinker "$PWD/.build/core" -o .build/render-panel
-//   .build/render-panel
+// - 预编辑光标字形随文本排版；深色主题背景 #2D1E1F
+// 产物：GOGAKU_RENDER_OUTPUT_DIR 下的 panel-render-{light,dark}-2x.png，
+// 手动运行未指定时沿用 docs/validation；verify 使用本轮独立证据目录。
+// 用法：先运行 fast，再 python3 scripts/verify.py --profile release --only render。
+// 入口从 macos/ 的 SwiftPM Release 输出获取 GogakuKit 模块与对象，不链接旧模块。
 import AppKit
 import Foundation
-import GogakuCore
+import GogakuKit
 
 var failures = 0
 var checks = 0
@@ -92,7 +88,7 @@ func scanForColor(_ rep: NSBitmapImageRep, hex: UInt32, rect: NSRect, tol: CGFlo
     minColorDistance(rep, hex: hex, rect: rect) <= tol
 }
 
-let outDir = "docs/validation"
+let outDir = ProcessInfo.processInfo.environment["GOGAKU_RENDER_OUTPUT_DIR"] ?? "docs/validation"
 
 func runChecks() {
 // ── 字号与行高规格 ─────────────────────────────────────────────
@@ -120,12 +116,7 @@ content.update(view)
     check(content.debugRowFrames.count == 9, "渲染 9 行（实际 \(content.debugRowFrames.count)）")
     check(content.debugPageString == "1/2", "两页时绘制页码 1/2（实际 \(content.debugPageString)）")
     check(!content.debugPageRect.isEmpty, "两页时页码有绘制位置")
-    if let caret = content.debugPreeditCaretX {
-        let width = ("ni'hao" as NSString).size(withAttributes: [.font: theme.annotationFont]).width
-        check(approx(caret, 8 + width, tol: 0.5), "展开拼音光标在末尾（x=\(caret)）")
-    } else {
-        check(false, "预编辑插入点存在")
-    }
+    check(content.debugPreedit?.string == "ni'hao|", "展开拼音光标字形在末尾")
     // 分段选择场景：预编辑开头为已暂存中文，插入点画在其后。
     var staged = CompositionView(stamp: InputStamp(mode: .normal))
     staged.raw = "nihc"
@@ -136,13 +127,7 @@ content.update(view)
     staged.selected = 0
     let stagedContent = PanelContent(frame: NSRect(x: 0, y: 0, width: 400, height: 400))
     stagedContent.update(staged)
-    if let caret = stagedContent.debugPreeditCaretX {
-        let stagedWidth = ("你好c" as NSString).size(withAttributes: [.font: theme.annotationFont]).width
-        check(approx(caret, 8 + stagedWidth, tol: 0.5),
-              "分段选择后光标在剩余编码末尾（x=\(caret)，期望≈\(8 + stagedWidth)）")
-    } else {
-        check(false, "分段选择时预编辑插入点存在")
-    }
+    check(stagedContent.debugPreedit?.string == "你好c|", "分段选择后光标字形在剩余编码末尾")
     let lightRep = render(content, dark: false, path: "\(outDir)/panel-render-light-2x.png")
     check(lightRep.pixelsWide >= Int(content.layoutSize.width * 2), "2x 位图宽度（\(lightRep.pixelsWide)px / \(content.layoutSize.width)pt）")
 
@@ -202,10 +187,23 @@ longContent.update(longView)
             caretView.preeditCaretUTF16 = offset
             let caretContent = PanelContent(frame: .zero)
             caretContent.update(caretView)
-            let expected = 8 + ((text as NSString).substring(to: offset) as NSString).size(withAttributes: [.font: theme.annotationFont]).width
-            check(approx(caretContent.debugPreeditCaretX ?? -1, expected, tol: 0.5), "\(text) 光标 UTF16=\(offset) 横坐标")
+            let expected = NSMutableString(string: text)
+            expected.insert("|", at: offset)
+            check(caretContent.debugPreedit?.string == expected as String,
+                  "\(text) 光标字形在 UTF16=\(offset)，原文完整保留")
             _ = render(caretContent, dark: false, path: "\(outDir)/panel-caret-last-2x.png")
         }
+    }
+
+    for direction in [Direction.enToZh, .zhToEn] {
+        var learning = CompositionView(stamp: InputStamp(mode: .learning, direction: direction))
+        learning.preedit = "hello"
+        learning.preeditCaretUTF16 = 1
+        let learningContent = PanelContent(frame: .zero)
+        learningContent.update(learning)
+        check(learningContent.debugPreedit?.string == (direction == .enToZh ? "hello|" : "hello"),
+              "学习方向 \(direction)：英→中末尾光标，中→英不插入光标")
+        _ = render(learningContent, dark: false, path: "\(outDir)/panel-learning-\(direction)-2x.png")
     }
 
 print("候选窗渲染比对：\(checks) 项检查，失败 \(failures) — \(failures == 0 ? "PASS" : "FAIL")")

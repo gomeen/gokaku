@@ -1,0 +1,61 @@
+{
+  "canStop": false,
+  "visibleWindows": [
+    {
+      "handle": 2163822,
+      "visible": true,
+      "class": "Notepad",
+      "title": "GogakuAcceptanceB94-11560.txt - Notepad"
+    }
+  ],
+  "windows": [
+    {
+      "handle": 2425742,
+      "visible": false,
+      "class": "GogakuCandidateWindowV2",
+      "title": "Gogaku 候选"
+    },
+    {
+      "handle": 2163822,
+      "visible": true,
+      "class": "Notepad",
+      "title": "GogakuAcceptanceB94-11560.txt - Notepad"
+    },
+    {
+      "handle": 1836036,
+      "visible": false,
+      "class": "GDI+ Hook Window Class",
+      "title": "GDI+ Window (Notepad.exe)"
+    },
+    {
+      "handle": 3474388,
+      "visible": false,
+      "class": "MSCTFIME UI",
+      "title": "MSCTFIME UI"
+    },
+    {
+      "handle": 2687926,
+      "visible": false,
+      "class": "IME",
+      "title": "Default IME"
+    },
+    {
+      "handle": 2360652,
+      "visible": false,
+      "class": "MSCTFIME UI",
+      "title": "MSCTFIME UI"
+    },
+    {
+      "handle": 2032650,
+      "visible": false,
+      "class": "IME",
+      "title": "Default IME"
+    },
+    {
+      "handle": 3277492,
+      "visible": false,
+      "class": "IME",
+      "title": "Default IME"
+    }
+  ]
+}

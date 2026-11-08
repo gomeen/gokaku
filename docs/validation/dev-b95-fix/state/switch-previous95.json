@@ -1,0 +1,9 @@
+{
+  "agentImage": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev\\bin\\x64\\GogakuAgent.exe",
+  "ok": true,
+  "sha256": "54ea9b97c9891d18d8c9f058229f0d5aaa8d6f8fc5f42ccafe620426dd5019a2",
+  "agentPid": 11024,
+  "stoppedPids": [
+    6820
+  ]
+}

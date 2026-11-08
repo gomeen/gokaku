@@ -1,0 +1,19 @@
+编译 x86: windows/GogakuWindows/platform.cpp
+编译 x86: windows/GogakuWindows/appearance.cpp
+编译 x86: windows/GogakuWindows/themes.cpp
+编译 x86: shared/GogakuCore/settings_contract.cpp
+编译 x86: shared/GogakuCore/theme_contract.cpp
+编译 x86: windows/GogakuTsf/src/dllmain.cpp
+编译 x86: windows/GogakuTsf/src/text_service.cpp
+编译 x86: windows/GogakuTsf/src/candidate_window.cpp
+编译 x86: windows/GogakuTsf/src/core_bridge.cpp
+链接 x86 TSF
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllCanUnloadNow by linking to _DllCanUnloadNow@0
+Use --enable-stdcall-fixup to disable these warnings
+Use --disable-stdcall-fixup to disable these fixups
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllGetClassObject by linking to _DllGetClassObject@12
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllRegisterServer by linking to _DllRegisterServer@0
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllUnregisterServer by linking to _DllUnregisterServer@0
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _GogakuActivateProfile by linking to _GogakuActivateProfile@16
+产物：/Users/gomeen/code/gomeen/gogaku/.build/win-app/dev/bin/x86/GogakuTsf.dll (15,203,632 bytes)
+编译完成并写入各架构收据；未运行 Windows 程序。

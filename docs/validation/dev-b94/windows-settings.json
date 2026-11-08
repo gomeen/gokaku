@@ -1,0 +1,54 @@
+{
+  "installedRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b94-dev",
+  "largeIcon": 9241551,
+  "ok": true,
+  "pages": [
+    {
+      "heading": "学习翻译",
+      "index": 0
+    },
+    {
+      "heading": "普通输入",
+      "index": 1
+    },
+    {
+      "heading": "自定义词语",
+      "index": 2
+    },
+    {
+      "heading": "皮肤",
+      "index": 3
+    },
+    {
+      "heading": "快捷键",
+      "index": 4
+    },
+    {
+      "heading": "学习与隐私",
+      "index": 5
+    },
+    {
+      "heading": "学习片段",
+      "index": 6
+    }
+  ],
+  "screenshots": [
+    "windows-settings-translation.png",
+    "windows-settings-skin-minimum.png"
+  ],
+  "session": 1,
+  "settings": {
+    "class": "GogakuNativeSettings",
+    "dpi": 192,
+    "handle": 2622722,
+    "pid": 10292,
+    "rect": [
+      40,
+      40,
+      2000,
+      1400
+    ],
+    "visible": true
+  },
+  "smallIcon": 6816219
+}

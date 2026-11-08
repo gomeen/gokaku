@@ -1,0 +1,11 @@
+{
+  "error": "unexpected broker image, no stop attempted",
+  "foregroundRestored": true,
+  "keyTrace": [],
+  "mode": "notepad-cold",
+  "ok": false,
+  "screenshots": [],
+  "stoppedAgentPids": [
+    9116
+  ]
+}

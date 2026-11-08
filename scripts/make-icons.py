@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""从 assets/app-icon/*.svg 生成打包所需的图标资产。
+"""从 shared/branding/*.svg 生成打包所需的图标资产。
 
-产物（全部写回 assets/app-icon/，随仓库提交）：
-- AppIcon.icns           两个 .app 的 Contents/Resources/AppIcon.icns
-- gogaku-menu.pdf        16pt 矢量 PDF，输入源菜单与菜单栏图标
-- gogaku-menu.png        32x32 预览图；不用于输入源菜单
+产物随仓库提交：
+- macos/assets/app-icon/AppIcon.icns    两个 .app 的 Contents/Resources/AppIcon.icns
+- macos/assets/app-icon/gogaku-menu.pdf 16pt 矢量 PDF，输入源菜单与菜单栏图标
+- macos/assets/app-icon/gogaku-menu.png 32x32 预览图；不用于输入源菜单
+
+（Windows 侧 windows/assets/Gogaku.ico 由 app.rc 引用，单独维护。）
 
 应用图标经 NSImage（系统 CoreSVG）光栅化，保留 SVG 的透明四角；
 qlmanage 生成的是白底缩略图，会把透明边距压成不透明白色，故不再使用。
@@ -19,7 +21,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-ASSETS = ROOT / 'assets/app-icon'
+BRAND = ROOT / 'shared/branding'
+ASSETS = ROOT / 'macos/assets/app-icon'
 
 ICONSET_SIZES = [16, 32, 64, 128, 256, 512, 1024]
 ICON_CANVAS = 1024
@@ -38,7 +41,7 @@ def render_png(svg: Path, size: int, destination: Path) -> None:
 
 
 def make_app_icon(scratch: Path) -> None:
-    master = ASSETS / 'icon.svg'
+    master = BRAND / 'icon.svg'
     svg = master.read_text()
     if f'rx="{ICON_CORNER_RADIUS}"' not in svg:
         sys.exit(f'icon.svg 主矩形圆角必须 rx="{ICON_CORNER_RADIUS}"'
@@ -59,10 +62,10 @@ def make_app_icon(scratch: Path) -> None:
 def make_menu_icon(scratch: Path) -> None:
     """生成实际含笔画的 16pt 矢量页面及 PNG 预览。"""
     png = ASSETS / 'gogaku-menu.png'
-    render_png(ASSETS / 'menu.svg', 32, png)
+    render_png(BRAND / 'menu.svg', 32, png)
     run('sips', '-s', 'dpiWidth', '144', '-s', 'dpiHeight', '144', str(png))
     pdf = ASSETS / 'gogaku-menu.pdf'
-    run('swift', str(ROOT / 'scripts/menu-pdf.swift'), str(pdf), str(ASSETS / 'menu.svg'))
+    run('swift', str(ROOT / 'scripts/menu-pdf.swift'), str(pdf), str(BRAND / 'menu.svg'))
     run('swift', str(ROOT / 'scripts/check-menu-icon.swift'), str(pdf))
     print(f"已生成 {pdf.relative_to(ROOT)}")
 

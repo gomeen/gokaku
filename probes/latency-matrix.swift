@@ -10,15 +10,15 @@
 //
 // 编译（与 probes/render-candidate-panel.swift 相同方式）：
 //   xcrun swiftc -o .build/latency-matrix probes/latency-matrix.swift \
-//     Sources/GogakuInput/CandidatePanel.swift Sources/GogakuInput/CandidatePanelTheme.swift \
-//     .build/debug/GogakuCore.build/*.o -I .build/debug/Modules -I Sources/CGogakuCore \
-//     -I Sources/CGogakuEngine -I Sources/CSQLite -L .build/core -L .build/native \
+//     macos/Sources/GogakuInput/CandidatePanel.swift macos/Sources/GogakuInput/CandidatePanelTheme.swift \
+//     macos/.build/debug/GogakuKit.build/*.o -I macos/.build/debug/Modules -I macos/Sources/CGogakuCore \
+//     -I macos/Sources/CGogakuEngine -I macos/Sources/CSQLite -L .build/core -L .build/native \
 //     -lgogaku_core -lGogakuEngine -Xlinker -rpath -Xlinker "$PWD/.build/core" \
 //     -Xlinker -rpath -Xlinker "$PWD/.build/native"
 // 运行：GOGAKU_CORE_TEST_DATA=… .build/latency-matrix [--events 12000]
 import AppKit
 import Foundation
-import GogakuCore
+import GogakuKit
 
 struct Sample {
     var hostNs: Int64 = 0

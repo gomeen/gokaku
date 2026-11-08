@@ -1,0 +1,23 @@
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/setup-core-io
+ninja: no work to do.
+编译 x64: windows/GogakuWindows/platform.cpp
+编译 x64: windows/GogakuWindows/appearance.cpp
+编译 x64: windows/GogakuWindows/themes.cpp
+编译 x64: shared/GogakuCore/settings_contract.cpp
+编译 x64: shared/GogakuCore/theme_contract.cpp
+编译 x64: windows/GogakuTsf/src/dllmain.cpp
+编译 x64: windows/GogakuTsf/src/text_service.cpp
+编译 x64: windows/GogakuTsf/src/candidate_window.cpp
+编译 x64: windows/GogakuTsf/src/core_bridge.cpp
+编译 x64: windows/GogakuWindows/agent.cpp
+编译 x64: windows/GogakuWindows/services.cpp
+编译 x64: windows/GogakuWindows/update.cpp
+编译 x64: windows/GogakuWindows/settings.cpp
+链接 x64 TSF
+产物：/Users/gomeen/code/gomeen/gogaku/.build/win-app/dev/bin/x64/GogakuAgent.exe (17,336,946 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/win-app/dev/bin/x64/GogakuSettings.exe (19,261,406 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/win-app/dev/bin/x64/GogakuTsf.dll (16,991,020 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/win-app/dev/bin/x64/libgogaku_core.dll (25,461,314 bytes)
+编译完成并写入各架构收据；未运行 Windows 程序。

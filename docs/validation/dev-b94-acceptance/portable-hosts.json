@@ -1,0 +1,59 @@
+{
+  "scope": "portable tool preparation only; no executable launch or host acceptance",
+  "started_at_utc": "2026-11-08T04:27:17.575681+00:00",
+  "remote_directory": "C:/Users/iixm/AppData/Local/Temp/GogakuAcceptanceB94/tools",
+  "status": "complete",
+  "artifacts": [
+    {
+      "requested_url": "https://storage.googleapis.com/chrome-for-testing-public/157.0.8103.38/win64/chrome-win64.zip",
+      "resolved_url": "https://storage.googleapis.com/chrome-for-testing-public/157.0.8103.38/win64/chrome-win64.zip",
+      "filename": "chrome-win64.zip",
+      "bytes": 210600182,
+      "sha256": "ae0deef27d449e1d7529df7705d609bab102de48464da13567ed3dd2ee1a0586",
+      "product": "Google Chrome for Testing",
+      "version": "157.0.8103.38",
+      "revision": "1717349",
+      "expected_executable": "C:/Users/iixm/AppData/Local/Temp/GogakuAcceptanceB94/tools/chrome/chrome-win64/chrome.exe",
+      "zip_crc_verified": true
+    },
+    {
+      "requested_url": "https://update.code.visualstudio.com/latest/win32-x64-archive/stable",
+      "resolved_url": "https://vscode.download.prss.microsoft.com/dbazure/download/stable/c4453f8ea430795f941c1b2ff6c9321135a74a02/VSCode-win32-x64-1.145.2.zip",
+      "filename": "vscode-win32-x64.zip",
+      "bytes": 369543882,
+      "sha256": "33cf166a751090fe7d244bf0e594e3c69c832d5ae2af1769140ad82a35ea1e0b",
+      "product": "Microsoft Visual Studio Code",
+      "version": "1.145.2",
+      "commit": "c4453f8ea430795f941c1b2ff6c9321135a74a02",
+      "quality": "stable",
+      "expected_executable": "C:/Users/iixm/AppData/Local/Temp/GogakuAcceptanceB94/tools/vscode/Code.exe",
+      "zip_crc_verified": true
+    }
+  ],
+  "chrome_source_metadata": {
+    "requested_url": "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json",
+    "resolved_url": "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json",
+    "filename": "chrome-last-known-good.json",
+    "bytes": 10450,
+    "sha256": "c20d062e95bf6ab7a9d2ceb33510a03d14cc46c55f6a68006f0e6742c725ae38"
+  },
+  "remote_verification": [
+    {
+      "filename": "chrome-win64.zip",
+      "sha256": "ae0deef27d449e1d7529df7705d609bab102de48464da13567ed3dd2ee1a0586",
+      "executable": "C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\tools\\chrome\\chrome-win64\\chrome.exe",
+      "file_version": "157.0.8103.38",
+      "product_version": "157.0.8103.38",
+      "executable_sha256": "b299662ff2155d34b7aa8475d287940aa9461fc538defecff6fdd566054541b1"
+    },
+    {
+      "filename": "vscode-win32-x64.zip",
+      "sha256": "33cf166a751090fe7d244bf0e594e3c69c832d5ae2af1769140ad82a35ea1e0b",
+      "executable": "C:\\Users\\iixm\\AppData\\Local\\Temp\\GogakuAcceptanceB94\\tools\\vscode\\Code.exe",
+      "file_version": "1.145.2",
+      "product_version": "1.145.2",
+      "executable_sha256": "51dfee70fd38d8cc3e204f9a304f6fb6700dfa5147223c59d8c37e8176fb9b64"
+    }
+  ],
+  "completed_at_utc": "2026-11-08T04:29:04.077431+00:00"
+}

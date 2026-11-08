@@ -1,0 +1,66 @@
+{
+  "ok": true,
+  "activeRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev",
+  "attempts": [
+    {
+      "pipePresent": true,
+      "launched": 11528,
+      "correct": false,
+      "agents": [
+        {
+          "pid": 4712,
+          "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuAgent.exe",
+          "sha256": "7bc1a85a7f9739efdb0d7ebd77a5fe67c2534841475c0fbe3709f30e79ab7d17"
+        }
+      ],
+      "try": 1,
+      "stopped": 3508
+    },
+    {
+      "pipePresent": false,
+      "launched": 10052,
+      "correct": true,
+      "agents": [
+        {
+          "pid": 10052,
+          "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev\\bin\\x64\\GogakuAgent.exe",
+          "sha256": "ab75d6204efff866fd42fe00665cddc37f9cbb0b75ed1a3a7749440a07c3f8bf"
+        }
+      ],
+      "try": 2,
+      "stopped": 4712
+    },
+    {
+      "pipePresent": true,
+      "launched": 6404,
+      "correct": true,
+      "agents": [
+        {
+          "pid": 6404,
+          "path": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev\\bin\\x64\\GogakuAgent.exe",
+          "sha256": "ab75d6204efff866fd42fe00665cddc37f9cbb0b75ed1a3a7749440a07c3f8bf"
+        }
+      ],
+      "try": 3,
+      "stopped": 10052
+    }
+  ],
+  "stable": true,
+  "oldTsfHosts": [
+    {
+      "pid": 5468,
+      "name": "explorer.exe",
+      "dll": "C:\\gogaku-test\\GogakuTsf.dll"
+    },
+    {
+      "pid": 4020,
+      "name": "Notepad.exe",
+      "dll": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b95-dev\\bin\\x64\\GogakuTsf.dll"
+    },
+    {
+      "pid": 6172,
+      "name": "msedge.exe",
+      "dll": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b97-dev\\bin\\x64\\GogakuTsf.dll"
+    }
+  ]
+}

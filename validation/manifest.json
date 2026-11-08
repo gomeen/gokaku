@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "purpose": "提供商无关测试数据冻结哈希；不代表任何当前提供商质量已验收。改卷时显式审阅并更新本清单。",
+  "files": {
+    "probes/translation-cases.json": "39b1dde0ecce1feda88765ddc8574bcd5a89be002967b0fda18552f51a1b5e6a",
+    "probes/translation-comparison-cases.json": "77373fd2d7deca39a3bd99d2ae63dfbc4fa600b72d4e0624e1bac0b5347d4e3f",
+    "probes/translation-language-probes.json": "c86b85201aafc16f0da54f392aaf4636f572b89974fce2d4bc43f6a0332140ee",
+    "probes/translation-risk-checks.json": "e8a645eecafef044db64111e071505affb53fde8348461e1bdf447188d773e12",
+    "validation/translation-holdout.json": "ccaaf86909dd30980202bf4e3abfd6f36b6b9834c049d7d46913ebec23cffdac",
+    "validation/translation-holdout.tsv": "89f01016c179729b6f0495188604942db1ef0d34cea2e69dbcf7e151a9c61aac",
+    "validation/translation-confirm-set.json": "a6f905495750f038d0466eb88f680062dc8cf5efb2d9d507a98c3ca0ef700dd0",
+    "validation/translation-final-set.json": "217f81db6f87e43bd41e12b9abd6eabb5663b9e2fb52bd0df34a55594dc2f2c8",
+    "validation/translation-short-expressions.json": "b27ea43608028c60ab68fa84ef50164b6c17a927599359a9cb8b379a4eba53b9"
+  }
+}

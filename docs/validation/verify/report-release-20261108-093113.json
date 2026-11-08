@@ -1,0 +1,158 @@
+{
+  "policyVersion": 2,
+  "runIdentityStable": true,
+  "profile": "release",
+  "channel": "dev",
+  "quick": false,
+  "sourceSha256": "830eba32e81abece56e5e2cc9dfc5a6e92fdc5f800fcf1432a666a7946644084",
+  "testSha256": "b149de00e90706fe46e17d346907e91688e5830d4c071d164ddfce38c528ba9b",
+  "artifacts": {},
+  "artifactError": "源码／资源已变化或缺少源码身份；请重新构建",
+  "startedAt": "2026-11-08T09:31:09+0800",
+  "finishedAt": "2026-11-08T09:31:13+0800",
+  "commit": "a3b076e0301dfddbef96099288689b9ad4944875",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 92
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "translation-data",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "verification-contracts",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "clean-build",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "bundle-check",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "quality",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "render",
+      "required": true,
+      "status": "failed",
+      "detail": "渲染工具编译失败：probes/render-candidate-panel.swift:21:8: error: no such module 'GogakuCore'\n 19 | import AppKit\n 20 | import Foundation\n 21 | import GogakuCore\n    |        `- error: no such module 'GogakuCore'\n 22 | \n 23 | var failures = 0\n",
+      "durationMs": 4213,
+      "evidence": null
+    },
+    {
+      "name": "data-reliability",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "asan-ubsan",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "install-preflight",
+      "required": false,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 13,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "version",
+      "resources",
+      "core-tests",
+      "swift-tests",
+      "translation-data",
+      "verification-contracts",
+      "clean-build",
+      "bundle-check",
+      "quality",
+      "render",
+      "data-reliability",
+      "delivery-contracts",
+      "asan-ubsan"
+    ]
+  }
+}

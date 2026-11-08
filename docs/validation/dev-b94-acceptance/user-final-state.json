@@ -1,0 +1,12 @@
+{
+  "screenshots": [],
+  "ok": true,
+  "user": "GOMEEN\\iixm",
+  "fileHashesAfterInput": {
+    "\\user\\model.userlm": "096cc97ed2bf8a9c409d7cd97b92d05ec0a4750909ba7a0294559bba7b1aa6f4",
+    "\\user\\learned.txt": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+    "\\chinese\\model.userlm": "98474af4aec40b9bd414247941d40c5a04a0bc34f3c5a2842c07c9d03f7c1a81",
+    "\\settings.json": "f4f1ae24da1a1363ba3450adbe09f5d114258d17e387b9a0b81d43ca10e13e29",
+    "\\chinese\\learned.txt": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e"
+  }
+}

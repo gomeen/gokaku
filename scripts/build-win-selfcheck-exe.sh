@@ -130,11 +130,11 @@ rm -rf core-src core-src.tmp
 mkdir -p core-src core-src.tmp
 # 从 git HEAD 提取核心源码：排除工作区里其他并行会话的未提交 WIP，
 # 保证自检包构建自已验证的提交状态（与版本规则一致）。
-git -C $ROOT archive HEAD native/GogakuCore native/third_party | tar -x -C core-src.tmp
-mv core-src.tmp/native/GogakuCore/* core-src/
+git -C $ROOT archive HEAD shared/GogakuCore shared/third_party | tar -x -C core-src.tmp
+mv core-src.tmp/shared/GogakuCore/* core-src/
 # 共享第三方（json.hpp）必须与 core-src 平级，CMake 从 core-src/../third_party 找。
 rm -rf $SC/third_party
-mv core-src.tmp/native/third_party $SC/third_party
+mv core-src.tmp/shared/third_party $SC/third_party
 rm -rf core-src.tmp
 python3 - "$SC/core-src" <<'PYEOF'
 import sys

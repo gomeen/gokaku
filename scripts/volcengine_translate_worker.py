@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """火山翻译（Volcengine TranslateText）云端 NMT 后端 worker——仅学习模式使用。
 
-协议与 scripts/quickmt_worker.py 完全一致（TranslationRequest／TranslationResult v1，
-JSON 行、stdio），运行时差异：
+协议为 TranslationRequest／TranslationResult v1（JSON 行、stdio）：
   - 普通 NMT 云端调用：无 beam／线程／精度概念；V4 HMAC-SHA256 签名（stdlib 实现）。
   - HTTPS 连接跨请求复用（http.client keep-alive），失败重连一次。
   - 凭据从 --credentials 指向的 JSON 文件读取（0600，不进命令行避免 ps 泄露）：
@@ -11,7 +10,7 @@ JSON 行、stdio），运行时差异：
        "requestOverrides": {...}(可选，合并进请求体——垂类引擎/术语库等未来参数口子)}
   - 联网仅限学习模式：本 worker 只被学习翻译服务拉起，普通模式不经此路径。
 
-错误码与 quickmt worker 同口径，另加 credentials_missing。
+错误码保持既有学习请求协议，凭据缺失为 credentials_missing。
 无端口、无文本日志；进程常驻、单请求串行。
 """
 import argparse
@@ -25,8 +24,6 @@ import time
 from datetime import datetime, timezone
 from http.client import HTTPSConnection
 from pathlib import Path
-
-os.environ.setdefault("HF_HUB_OFFLINE", "1")  # 与本地 worker 保持同样的断网默认值（本 worker 仅访问火山 API 域）
 
 DIRECTIONS = {"zhToEn": ("zh", "en"), "enToZh": ("en", "zh")}
 MAX_SOURCE_SCALARS = 512

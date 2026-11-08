@@ -1,0 +1,19 @@
+{
+  "hashes": {
+    "\\user\\model.userlm": "096cc97ed2bf8a9c409d7cd97b92d05ec0a4750909ba7a0294559bba7b1aa6f4",
+    "\\user\\learned.txt": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e",
+    "\\chinese\\model.userlm": "c7fa314fcf74cf16a14004adc03f49525ebafde56a22a2eba025ba4fcab7f29d",
+    "\\settings.json": "f4f1ae24da1a1363ba3450adbe09f5d114258d17e387b9a0b81d43ca10e13e29",
+    "\\chinese\\learned.txt": "fa8a1f50c04964f5caec801ccc8d18c96fb73d30a07d9591758a8e3a926b516e"
+  },
+  "ok": true,
+  "activeRoot": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev",
+  "autostart": null,
+  "agents": [
+    {
+      "ProcessId": 10456,
+      "SessionId": 1,
+      "ExecutablePath": "C:\\Program Files\\GogakuDev\\versions\\b93\\versions\\0.1.1-dev.2-b98-dev\\bin\\x64\\GogakuAgent.exe"
+    }
+  ]
+}

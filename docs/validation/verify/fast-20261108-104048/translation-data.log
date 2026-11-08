@@ -1,0 +1,13 @@
+test_current_data (__main__.TranslationDataTests.test_current_data) ... ok
+test_direction_alias_preserved (__main__.TranslationDataTests.test_direction_alias_preserved) ... ok
+test_duplicate_ids_rejected (__main__.TranslationDataTests.test_duplicate_ids_rejected) ... ok
+test_empty_source_rejected (__main__.TranslationDataTests.test_empty_source_rejected) ... ok
+test_expression_duplicates_rejected (__main__.TranslationDataTests.test_expression_duplicates_rejected) ... ok
+test_expression_license_and_fields_required (__main__.TranslationDataTests.test_expression_license_and_fields_required) ... ok
+test_hash_mismatch_missing_and_escape_rejected (__main__.TranslationDataTests.test_hash_mismatch_missing_and_escape_rejected) ... ok
+test_truncated_or_imbalanced_data_rejected (__main__.TranslationDataTests.test_truncated_or_imbalanced_data_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.020s
+
+OK

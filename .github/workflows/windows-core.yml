@@ -17,8 +17,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'native/GogakuCore/**'
+      - 'shared/GogakuCore/**'
+      - 'shared/third_party/**'
       - 'scripts/prepare-libime-windows.py'
+      - 'scripts/_gogaku_verification.py'
+      - 'probes/prepare-libime-input.py'
       - '.github/workflows/windows-core.yml'
 
 jobs:
@@ -51,24 +54,41 @@ jobs:
         run: python scripts/prepare-libime-windows.py --jobs 4 --root "$GOGAKU_DEPS"
 
       - name: 配置与构建共享核心
+        working-directory: shared/GogakuCore
         run: |
-          cmake --preset clang64 -S native/GogakuCore
+          cmake --preset clang64
           cmake --build --preset clang64 -j 4
 
       - name: 核心测试向量（Windows 全量 ctest）
+        working-directory: shared/GogakuCore
         run: |
+          DEPS=$(cygpath -u "$GOGAKU_DEPS")
+          export PATH="$DEPS/build/bin:$DEPS/prefix/bin:$PATH"
           export GOGAKU_CORE_TEST_DATA="$GOGAKU_DEPS/data"
-          ctest --preset clang64
+          python - <<'PY'
+          import subprocess, sys
+          sys.path.insert(0, '../../scripts')
+          from _gogaku_verification import validate_ctest_result
+          result = subprocess.run(['ctest', '--preset', 'clang64', '--no-tests=error'],
+                                  text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+          print(result.stdout)
+          problems = validate_ctest_result(result.returncode, result.stdout)
+          if problems:
+              sys.exit('; '.join(problems))
+          PY
 
       - name: ABI 版本与 DLL 导出清单
         run: |
-          DLL=$(ls .build/core-windows/*.dll | head -1)
+          DEPS=$(cygpath -u "$GOGAKU_DEPS")
+          export PATH="$DEPS/build/bin:$DEPS/prefix/bin:$PATH"
+          DLL=.build/core-windows/bin/libgogaku_core.dll
+          test -f "$DLL"
           echo "== $DLL =="
           objdump -p "$DLL" | grep "DLL Name"
           echo "== 导出符号（gc_*）=="
-          objdump -p "$DLL" | awk '/Export Address Table/,/Ordinal.*Name Table/' | grep -oE '\bgc_[a-z_0-9]+' | sort -u | tee dll-exports.txt
+          objdump -p "$DLL" | grep -oE '\bgc_[a-z_0-9]+' | sort -u | tee dll-exports.txt
           echo "== ABI 版本实跑 =="
-          ./.build/core-windows/gogaku_core_abi_test.exe
+          ./.build/core-windows/bin/gogaku_core_abi_test.exe
 
       - name: 产物哈希清单
         run: |
@@ -76,7 +96,7 @@ jobs:
             echo "== Windows 侧工厂数据（同源数据生成）=="
             sha256sum "$GOGAKU_DEPS/data/sc.dict" "$GOGAKU_DEPS/data/zh_CN.lm"
             echo "== 核心 DLL =="
-            sha256sum .build/core-windows/*.dll
+            sha256sum .build/core-windows/bin/libgogaku_core.dll
           } | tee artifacts-hash.txt
           cp "$GOGAKU_DEPS/manifest.json" libime-manifest.json
 
@@ -89,4 +109,8 @@ jobs:
             artifacts-hash.txt
             libime-manifest.json
             deps-libime/manifest.json
+            .build/core-windows/bin/libgogaku_core.dll
+            .build/core-windows/bin/gogaku_core_abi_test.exe
+            .build/core-windows/Testing/Temporary/LastTest.log
+          include-hidden-files: true
           if-no-files-found: error

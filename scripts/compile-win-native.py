@@ -40,13 +40,13 @@ def compile_arch(args, arch):
              f'-DGOGAKU_CHANNEL="{args.channel}"']
     if args.channel == 'dev':
         flags.append('-DGOGAKU_DEV')
-    windows = ROOT / 'native/GogakuWindows'
-    tsf = ROOT / 'native/GogakuTsf'
+    windows = ROOT / 'windows/GogakuWindows'
+    tsf = ROOT / 'windows/GogakuTsf'
     common = ['platform', 'appearance', 'themes']
     service = ['dllmain', 'text_service', 'candidate_window', 'core_bridge']
     sources = [(windows / f'{name}.cpp', obj / f'{name}.o') for name in common]
-    sources += [(ROOT / 'native/GogakuCore/settings_contract.cpp', obj / 'settings_contract.o')]
-    sources += [(ROOT / 'native/GogakuCore/theme_contract.cpp', obj / 'theme_contract.o')]
+    sources += [(ROOT / 'shared/GogakuCore/settings_contract.cpp', obj / 'settings_contract.o')]
+    sources += [(ROOT / 'shared/GogakuCore/theme_contract.cpp', obj / 'theme_contract.o')]
     sources += [(tsf / 'src' / f'{name}.cpp', obj / f'{name}.o') for name in service]
     if arch == 'x64':
         sources += [(windows / f'{name}.cpp', obj / f'{name}.o')
@@ -126,7 +126,7 @@ def main():
             p.error('缺少静态 libime 依赖或 MinGW toolchain；先准备 Windows 交叉依赖')
         link = '-static ' + ' '.join('-L' + str(path) for path in
             (args.sysroot / 'lib', args.deps / 'build/bin', args.deps / 'prefix/lib'))
-        run(['cmake', '-S', ROOT / 'native/GogakuCore', '-B', args.core_build, '-G', 'Ninja',
+        run(['cmake', '-S', ROOT / 'shared/GogakuCore', '-B', args.core_build, '-G', 'Ninja',
              f'-DCMAKE_TOOLCHAIN_FILE={args.toolchain}', f'-DGOGAKU_DEPS={args.deps}',
              '-DCMAKE_BUILD_TYPE=Release', f'-DCMAKE_SHARED_LINKER_FLAGS={link}'])
         run(['cmake', '--build', args.core_build, '--target', 'GogakuCore', '-j', args.jobs])

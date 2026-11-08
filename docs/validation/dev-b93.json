@@ -1,0 +1,471 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-08T02:53:51.129681+00:00",
+  "version": "0.1.1-dev.2",
+  "buildNumber": 93,
+  "channel": "dev",
+  "sourceSha256": "19a4602e1e7786fd2d81cd7b0f6f96cbf9cb436a70dd4cd2886412cd0f0cc3e6",
+  "testSha256": "7c6586a1f4bab2b74739a417493fe105b7a705b0fdddb0f34d7fbcd1b521eb43",
+  "git": {
+    "commit": "a3b076e0301dfddbef96099288689b9ad4944875",
+    "dirty": true
+  },
+  "artifacts": {
+    "macos": {
+      "name": "Gogaku-0.1.1-dev.2-b93-dev.pkg",
+      "sha256": "e3cc99b1f5a5c8ab2e4cbecde4fdae894d0dc502530463f0d4e7b4d34b22d30e",
+      "bytes": 49654050
+    },
+    "windows": {
+      "name": "Gogaku-0.1.1-dev.2-b93-dev-windows-x64-setup.exe",
+      "sha256": "6b018b0a516ef1b801022cb482d03387b936b2c312e0c61f3e1469a86a0dd14b",
+      "bytes": 54534100
+    }
+  },
+  "fastReport": "verify/report-fast-dev-b93.json",
+  "fastPassed": true,
+  "macOS": {
+    "installer": "installer -pkg dist/Gogaku-0.1.1-dev.2-b93-dev.pkg -target CurrentUserHomeDirectory",
+    "installerSucceeded": true,
+    "installedBuildNumber": 93,
+    "inputSHA256": "0182453e33de52ea69efd5f36f7daac9c4333a44c1a0e2fb5897911a1fcb4aac",
+    "bundleCheck": "dev-b93/mac-installed-bundle-check.json",
+    "imkSmoke": "dev-b93/mac-imk-smoke.json",
+    "passedChecks": 14,
+    "restoredInputSource": "org.gogaku.inputmethod.Hans",
+    "runtimePidObserved": 29392,
+    "runtimePathObserved": "/Users/gomeen/Library/Input Methods/Gogaku Dev.app/Contents/MacOS/GogakuInput",
+    "runtimeLibraries": "lsof showed package Frameworks including libgogaku_core.dylib",
+    "completeHostAcceptance": false
+  },
+  "windows": {
+    "installRoot": "C:\\Program Files\\GogakuDev\\versions\\b93",
+    "installerExitCode": 0,
+    "defaultDirectoryUpgrade": {
+      "passed": false,
+      "exitCode": 7,
+      "reason": "Old agent/TSF loaded by existing processes; replacement correctly blocked.",
+      "evidence": "dev-b93/windows-default-upgrade-blocked.log"
+    },
+    "versionedDirectoryInstall": {
+      "passed": true,
+      "evidence": "dev-b93/windows-versioned-install.log",
+      "previousProgramFilesMoved": false,
+      "oldUserHostsForceClosed": false,
+      "oldAgentStop": "Old b91 agent had no tray window; stopped only own agent once, then it relaunched from existing hosts.",
+      "ordinaryUpgradeAccepted": false
+    },
+    "installedBuildNumber": 93,
+    "verifiedFiles": [
+      {
+        "path": "bin/x64/GogakuAgent.exe",
+        "sha256": "6b680d6994ed0fe563843fddddb7f0bc519642b76d9c1b96c9f6feee9e7d67a9",
+        "passed": true
+      },
+      {
+        "path": "bin/x64/GogakuSettings.exe",
+        "sha256": "d78fe269d7e2680e255fcac1cfa6d6ec95a2dbf277305ff11ec3114dc084c727",
+        "passed": true
+      },
+      {
+        "path": "bin/x64/GogakuTsf.dll",
+        "sha256": "e24d39d58696624bb8cd3e62e67d622fc75a2e293f4d556b438fb3e4a79c8fcf",
+        "passed": true
+      },
+      {
+        "path": "bin/x64/libgogaku_core.dll",
+        "sha256": "46f57d6339e8a1d09200dfba40ef8eeab1f3ad78c1296d1e1ad3251aa24ecfb8",
+        "passed": true
+      },
+      {
+        "path": "bin/x86/GogakuTsf.dll",
+        "sha256": "4f1a74693061ae44fb1db22e42fbe0d9abae743353c7408206ccb11a09e2e4f7",
+        "passed": true
+      },
+      {
+        "path": "data/english-wordlist-sources.json",
+        "sha256": "5233dd91f1ccfd103df9b406e2f97b8fb2f52da47ba82befda1c36e5ffe909f8",
+        "passed": true
+      },
+      {
+        "path": "data/english-words.txt",
+        "sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+        "passed": true
+      },
+      {
+        "path": "data/gloss-sources.json",
+        "sha256": "e9b88618b5e82719ff5ec9e5c08c404157da171c7c7bccf7b528fa5fe7d2aee3",
+        "passed": true
+      },
+      {
+        "path": "data/gloss.tsv",
+        "sha256": "7f3e32be397f9aa2c87457fc207b26fcf10fe911ce9ac6ee4f48a79096cadc5d",
+        "passed": true
+      },
+      {
+        "path": "data/sc.dict",
+        "sha256": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+        "passed": true
+      },
+      {
+        "path": "data/zh_CN.lm",
+        "sha256": "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/GCC-COPYING.RUNTIME",
+        "sha256": "9d6b43ce4d8de0c878bf16b54d8e7a10d9bd42b75178153e3af6a815bdc90f74",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/GCC-COPYING3",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/MinGW-w64-AUTHORS.txt",
+        "sha256": "8f308316e7a94b8410f871868bd3948f126526dc1775aeee97a0e365f9a0fd9f",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/MinGW-w64-COPYING.txt",
+        "sha256": "99a69660981156c21336fdb5661f89341b013c94e4bf9e1c7467b4745718397f",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/THIRD-PARTY.md",
+        "sha256": "ec0eb28475e26510f5a45db4bed9f339ca6a9063e2891ce0427ced8a8e34066e",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/ecm/COPYING-CMAKE-SCRIPTS",
+        "sha256": "46cde7dc11e64c78d650b4851b88f6704b4665ff60f22a1caf68ceb15e217e5b",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/fcitx5/LGPL-2.1-or-later.txt",
+        "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/fcitx5/Unicode-DFS-2016.txt",
+        "sha256": "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/inno/license.txt",
+        "sha256": "2e5346868c2a18434489824e11d65c3031620f792fefc415d05f19cd441abf5c",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/COPYING",
+        "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/COPYING.3",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/COPYING.LESSER.3",
+        "sha256": "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/LICENSE",
+        "sha256": "6d9f8894586896ee3b383c962e141f527edeb54f561a6bd189d0eb08380c4cc2",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/util/getopt.c",
+        "sha256": "0a523a06b49384ace3cff98b60b45063299d3ca642de46e0e47ccc51d8cb08f4",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/util/integer_to_string.cc",
+        "sha256": "368848d6b70e5537d7bd8a4942a9fd2ba8ad0f78dec67bc7b2436129dc8dfae0",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/util/murmur_hash.cc",
+        "sha256": "77c4cd0fb91f67d9f1149964180cf1cf5c80793ab810f8bbce55ede1b980412b",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/kenlm/util/string_piece.hh",
+        "sha256": "cc4de0949793b958fa6da1eecd4335b58fdf779dc6652ac323502ba9e0a58d8b",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/libime/LGPL-2.1-or-later.txt",
+        "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/libime/REUSE.toml",
+        "sha256": "d314176a91e08c0affc0017c9994d9440a4ac1c18ddf8eab1842117c0d6c806e",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/libime/data-CMakeLists.txt",
+        "sha256": "c73cbe828525a0c3f9da52d483d2a7edc3cad6211afdc5ce61b4878624cd7c73",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/dlfcn/LICENSE",
+        "sha256": "4cc7ac997b9293db5919baf630100cc09b3508efdfe6a6611c95511fb863b3c7",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/gettext-runtime/COPYING",
+        "sha256": "7ef2cdfe58e0c0460657b6598b49af29d4e03c1e41cbaf0e1da1eb8ad74b95d0",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/gettext-runtime/intl/COPYING.LIB",
+        "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/gettext-runtime/libasprintf/COPYING",
+        "sha256": "03133addae5b99a6148c538300e6d97074453089be1423b741bd081f18e2b298",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/gettext-runtime/libasprintf/COPYING.LIB",
+        "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/libiconv/COPYING",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/libiconv/COPYING.LIB",
+        "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/libiconv/README",
+        "sha256": "ff0400ffb0c3dace1a64012f4125f292a3fef58c5b8486c7f9ba0c01a0637f3c",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/libiconv/libcharset/COPYING.LIB",
+        "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/zlib/LICENSE",
+        "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/msys2/zstd/LICENSE",
+        "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/native/Boost-LICENSE.txt",
+        "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/native/libintl-NOTICE.txt",
+        "sha256": "0be40e3c9d326bee38ccdd96a82bb39caddd923c27d67e6beeee91e08abbe0b0",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/resources/CC-BY-SA-4.0.txt",
+        "sha256": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/resources/DATA-ATTRIBUTION.txt",
+        "sha256": "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/resources/MIT-Mayoi.txt",
+        "sha256": "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/resources/MIT-jieba.txt",
+        "sha256": "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/resources/SCOWL-Copyright.txt",
+        "sha256": "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/windows/json-LICENSE.MIT",
+        "sha256": "59a5abff0cf2deaf76ea12790c7c42256331aa5fbd6478f95b303edf76e67e6b",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/windows/miniz-LICENSE.txt",
+        "sha256": "8a77c33cd389c8ed4e81b11e4cb2aeac5c5b816a3648d35ebcc6bccfe2a02d8a",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/windows/monocypher-LICENCE.md",
+        "sha256": "093f8980c0ac0e6e4709dd3a6baf85a24dbec14b3c8130fc1fb97630e8681dce",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/windows-runtime-sources.json",
+        "sha256": "6b2e3f4ae60eb98a7de9614626851f0fd23b922227b0aa405baddc14189797fd",
+        "passed": true
+      },
+      {
+        "path": "licenses/00-licenses/windows-setup-dependencies.lock.json",
+        "sha256": "db02a3fe312a3e96521b7a4e1b460f90f43f0e092ef9638f63641689b3e4c26a",
+        "passed": true
+      },
+      {
+        "path": "licenses/01-licenses/CC-BY-SA-4.0.txt",
+        "sha256": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+        "passed": true
+      },
+      {
+        "path": "licenses/01-licenses/DATA-ATTRIBUTION.txt",
+        "sha256": "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+        "passed": true
+      },
+      {
+        "path": "licenses/01-licenses/MIT-Mayoi.txt",
+        "sha256": "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+        "passed": true
+      },
+      {
+        "path": "licenses/01-licenses/MIT-jieba.txt",
+        "sha256": "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+        "passed": true
+      },
+      {
+        "path": "licenses/01-licenses/SCOWL-Copyright.txt",
+        "sha256": "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+        "passed": true
+      },
+      {
+        "path": "licenses/THIRD-PARTY.md",
+        "sha256": "0e94a75f64bdd5e9b2d9b55ba3fe2ed7c4b8eaede4f990612e922df4388d09eb",
+        "passed": true
+      },
+      {
+        "path": "licenses/fcitx5/LGPL-2.1-or-later.txt",
+        "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+        "passed": true
+      },
+      {
+        "path": "licenses/fcitx5/Unicode-DFS-2016.txt",
+        "sha256": "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+        "passed": true
+      },
+      {
+        "path": "licenses/kenlm/COPYING",
+        "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+        "passed": true
+      },
+      {
+        "path": "licenses/kenlm/COPYING.3",
+        "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+        "passed": true
+      },
+      {
+        "path": "licenses/kenlm/COPYING.LESSER.3",
+        "sha256": "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+        "passed": true
+      },
+      {
+        "path": "licenses/kenlm/LICENSE",
+        "sha256": "6d9f8894586896ee3b383c962e141f527edeb54f561a6bd189d0eb08380c4cc2",
+        "passed": true
+      },
+      {
+        "path": "licenses/libime/LGPL-2.1-or-later.txt",
+        "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+        "passed": true
+      },
+      {
+        "path": "licenses/windows/json-LICENSE.MIT",
+        "sha256": "59a5abff0cf2deaf76ea12790c7c42256331aa5fbd6478f95b303edf76e67e6b",
+        "passed": true
+      },
+      {
+        "path": "licenses/windows/miniz-LICENSE.txt",
+        "sha256": "8a77c33cd389c8ed4e81b11e4cb2aeac5c5b816a3648d35ebcc6bccfe2a02d8a",
+        "passed": true
+      },
+      {
+        "path": "licenses/windows/monocypher-LICENCE.md",
+        "sha256": "093f8980c0ac0e6e4709dd3a6baf85a24dbec14b3c8130fc1fb97630e8681dce",
+        "passed": true
+      },
+      {
+        "path": "resources/update/windows.json",
+        "sha256": "612de6941e48e781e595f80621f3afb08657f3287cf4c7febd2ff81c51f6af79",
+        "passed": true
+      }
+    ],
+    "com64": "C:\\Program Files\\GogakuDev\\versions\\b93\\bin\\x64\\GogakuTsf.dll",
+    "com32": "C:\\Program Files\\GogakuDev\\versions\\b93\\bin\\x86\\GogakuTsf.dll",
+    "agentProcesses": [
+      {
+        "ProcessId": 11720,
+        "SessionId": 1,
+        "ExecutablePath": "C:\\Program Files\\GogakuDev\\versions\\b93\\bin\\x64\\GogakuAgent.exe"
+      }
+    ],
+    "coldFirst": {
+      "passed": false,
+      "evidence": "dev-b93/windows-cold-first.json",
+      "expectedText": "你好",
+      "actualText": "nihc ",
+      "readinessRetry": false
+    },
+    "warmX64": {
+      "passed": true,
+      "evidence": "dev-b93/windows-warm-x64.json"
+    },
+    "warmX86": {
+      "passed": true,
+      "evidence": "dev-b93/windows-warm-x86.json"
+    },
+    "settings": {
+      "passed": true,
+      "evidence": "dev-b93/windows-settings.json",
+      "coverage": "Seven page switches, both icon handles, 200% DPI and one minimum skin preview; not full GUI matrix"
+    },
+    "userData": {
+      "existingFilesRemain": true,
+      "settingsBytesUnchanged": true,
+      "changedPaths": [
+        "\\chinese\\model.userlm"
+      ],
+      "explanation": "Chinese frequency model changed after confirmed synthetic commits; no user data cleanup performed."
+    },
+    "diagnosticHelperSourceSHA256": "8deb9b14ee63d0e2385fc24a54a2737eade1058f685013da20070cf3dfd783cc",
+    "diagnosticHelperBinarySHA256": {
+      "x64": "d41e37c80d74e7eb2f97d907939e3862907885fbc9c5dc1f6c7e75489cac1482",
+      "x86": "cd31e463d8e967e904309edadd5df5136156a8d123fd546ca030514a5105ebb9"
+    },
+    "originalDiagnosticRunner": ".build/windows-diagnosis/run-native.py (local diagnostic, not a release gate)",
+    "completeHostAcceptance": false
+  },
+  "notRun": [
+    "complete release profile / 100000-sequence instrumentation",
+    "complete host profile / performance / 2-hour stability",
+    "real cloud translation with authorized credentials",
+    "real GitHub update",
+    "installation failure recovery and Windows uninstall matrix",
+    "new b93 Notepad/Chrome/Electron/Terminal full runtime matrix"
+  ],
+  "overallProductAccepted": false,
+  "published": false
+}

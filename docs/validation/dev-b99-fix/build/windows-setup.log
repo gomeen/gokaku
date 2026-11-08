@@ -1,0 +1,153 @@
+Inno Setup 6 Command-Line Compiler
+Copyright (C) 1997-2026 Jordan Russell. All rights reserved.
+Portions Copyright (C) 2000-2026 Martijn Laan. All rights reserved.
+Portions Copyright (C) 2001-2004 Alex Yackimoff. All rights reserved.
+https://www.innosetup.com
+
+Compiler engine version: Inno Setup 6.7.4
+Non-commercial use only
+
+Preprocessing
+   Reading file: Z:\Users\gomeen\code\gomeen\gogaku\.build\win-tools\inno\ISPPBuiltins.iss
+Parsing [Setup] section, line 12
+Parsing [Setup] section, line 13
+Parsing [Setup] section, line 14
+Parsing [Setup] section, line 15
+Parsing [Setup] section, line 16
+Parsing [Setup] section, line 17
+Parsing [Setup] section, line 18
+Parsing [Setup] section, line 19
+Parsing [Setup] section, line 20
+Parsing [Setup] section, line 21
+Parsing [Setup] section, line 22
+Parsing [Setup] section, line 23
+Parsing [Setup] section, line 24
+Parsing [Setup] section, line 25
+Parsing [Setup] section, line 26
+Parsing [Setup] section, line 27
+Parsing [Setup] section, line 28
+Parsing [Setup] section, line 29
+Parsing [Setup] section, line 30
+Parsing [Setup] section, line 31
+Parsing [Setup] section, line 32
+Parsing [Setup] section, line 33
+Parsing [Setup] section, line 34
+Parsing [Setup] section, line 35
+Parsing [Setup] section, line 36
+Parsing [Setup] section, line 37
+Parsing [Setup] section, line 38
+Parsing [Setup] section, line 39
+Parsing [Setup] section, line 40
+Reading file (WizardImageFile)
+Reading file (WizardSmallImageFile)
+Preparing Setup program executable
+   Verification successful
+   Updating icons (Setup.e32)
+   Updating version info (Setup.e32)
+Determining language code pages
+Parsing [Languages] section, line 44
+   Reading file: Z:\Users\gomeen\code\gomeen\gogaku\.build\win-tools\inno\Default.isl
+   Messages in script file
+Reading default messages from Default.isl
+Parsing [Languages] section, line 44
+   Reading file: Z:\Users\gomeen\code\gomeen\gogaku\.build\win-tools\inno\Default.isl
+Parsing [LangOptions], [Messages], and [CustomMessages] sections
+   Messages in script file
+Reading [Code] section
+Parsing [Tasks] section, line 47
+Parsing [Tasks] section, line 48
+Parsing [Icons] section, line 61
+Parsing [Icons] section, line 62
+Parsing [Run] section, line 66
+Parsing [Run] section, line 67
+Parsing [Files] section, line 52
+Parsing [Files] section, line 53
+Parsing [Files] section, line 54
+Parsing [Files] section, line 55
+Parsing [Files] section, line 56
+Parsing [Files] section, line 58
+Compiling [Code] section
+Creating setup files
+   Verification successful
+   Updating icons (Setup.exe)
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\bin\x64\GogakuAgent.exe
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\bin\x64\GogakuSettings.exe
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\bin\x64\GogakuTsf.dll
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\bin\x64\libgogaku_core.dll
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\bin\x86\GogakuTsf.dll
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\data\english-wordlist-sources.json
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\data\english-words.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\data\gloss-sources.json
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\data\gloss.tsv
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\data\sc.dict
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\data\zh_CN.lm
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\resources\update\windows.json
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\THIRD-PARTY.md
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\GCC-COPYING.RUNTIME
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\GCC-COPYING3
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\MinGW-w64-AUTHORS.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\MinGW-w64-COPYING.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\THIRD-PARTY.md
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\windows-runtime-sources.json
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\windows-setup-dependencies.lock.json
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\ecm\COPYING-CMAKE-SCRIPTS
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\fcitx5\LGPL-2.1-or-later.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\fcitx5\Unicode-DFS-2016.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\inno\license.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\COPYING
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\COPYING.3
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\COPYING.LESSER.3
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\LICENSE
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\util\getopt.c
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\util\integer_to_string.cc
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\util\murmur_hash.cc
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\kenlm\util\string_piece.hh
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\libime\data-CMakeLists.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\libime\LGPL-2.1-or-later.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\libime\REUSE.toml
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\dlfcn\LICENSE
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\gettext-runtime\COPYING
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\gettext-runtime\intl\COPYING.LIB
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\gettext-runtime\libasprintf\COPYING
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\gettext-runtime\libasprintf\COPYING.LIB
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\libiconv\COPYING
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\libiconv\COPYING.LIB
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\libiconv\README
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\libiconv\libcharset\COPYING.LIB
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\zlib\LICENSE
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\msys2\zstd\LICENSE
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\native\Boost-LICENSE.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\native\libintl-NOTICE.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\resources\CC-BY-SA-4.0.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\resources\DATA-ATTRIBUTION.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\resources\MIT-jieba.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\resources\MIT-Mayoi.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\resources\SCOWL-Copyright.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\windows\json-LICENSE.MIT
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\windows\miniz-LICENSE.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\00-licenses\windows\monocypher-LICENCE.md
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\01-licenses\CC-BY-SA-4.0.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\01-licenses\DATA-ATTRIBUTION.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\01-licenses\MIT-jieba.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\01-licenses\MIT-Mayoi.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\01-licenses\SCOWL-Copyright.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\fcitx5\LGPL-2.1-or-later.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\fcitx5\Unicode-DFS-2016.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\kenlm\COPYING
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\kenlm\COPYING.3
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\kenlm\COPYING.LESSER.3
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\kenlm\LICENSE
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\libime\LGPL-2.1-or-later.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\windows\json-LICENSE.MIT
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\windows\miniz-LICENSE.txt
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\licenses\windows\monocypher-LICENCE.md
+   Compressing: Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\0.1.1-dev.2-b99-dev\build-identity.json
+   Compressing Setup program executable
+   Updating version info (Setup.exe)
+   Updating manifest (Setup.exe)
+
+
+Successful compile (25.491 sec). Resulting Setup program filename is:
+Z:\Users\gomeen\code\gomeen\gogaku\dist\gogaku-win\Gogaku-0.1.1-dev.2-b99-dev-windows-x64-setup.exe
+Windows Setup：/Users/gomeen/code/gomeen/gogaku/dist/gogaku-win/Gogaku-0.1.1-dev.2-b99-dev-windows-x64-setup.exe
+SHA-256：5e92c3f1ce09068aea2271533163c9aa7647433696db47f1b25f7ab66036592a

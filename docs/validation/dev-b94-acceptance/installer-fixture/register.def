@@ -1,0 +1,4 @@
+LIBRARY GogakuTsf
+EXPORTS
+    DllRegisterServer
+    DllUnregisterServer
