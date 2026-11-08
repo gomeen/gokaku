@@ -32,7 +32,7 @@
 
 现行证据见 [工程化检查](docs/validation/engineering-readiness.md)、[皮肤验收](docs/validation/skin-native-status.md) 和 [清理与测试审查](docs/validation/testing-cleanup-audit.md)。旧引擎／本地模型选型工具、结果和研究已移出当前树，可从 Git 历史追溯；只保留 [采用理由](docs/input-selection-decision.md)、通用考题和当前产品测试。
 
-已授权当前用户安装 Mac 开发版，由用户手动启用输入源；安装、恢复与卸载见[开发版使用说明](docs/native-development.md)。Mac 输入源采用双通道（stable／dev），用户数据共用。
+Mac 开发版按用户要求当前处于卸载状态（2026-11-08）：重装 `python3 scripts/manage-install.py --channel dev install` 并 `register` 后在系统设置中启用输入源即可；安装、恢复与卸载见[开发版使用说明](docs/native-development.md)。Mac 输入源采用双通道（stable／dev），用户数据共用；本机 stable 通道为旧构建 86。
 
 保留的三份浏览器定稿原型使用预设样例，只用于核对输入习惯、设置布局与皮肤；核心回归和真实宿主验收分别留证。[输入习惯原型](docs/prototype-input-habits.md)经六轮迭代定稿，其按键裁决已并入[产品方向](docs/product.md)；原型可能保留旧提示，实现与验证状态以产品文档及原生验收为准。
 

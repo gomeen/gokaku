@@ -22,7 +22,7 @@
 
 - [fast 7/7](build/report-fast-dev-b99.json)；[ASan／UBSan quick](build/report-asan-ubsan-quick-dev-b99.json) 2,000 序列通过。
 - Windows EXE SHA-256：以[收据](build/windows-setup.json)为准。
-- **本机已更新**：`manage-install.py --channel dev install` 装入 b99（52＋44 个文件哈希核对）；重装后输入源注册需 `register` 刷新；[14 项 IMK 冒烟](../../validation/imk-host-smoke-dev.json)一次通过。
+- **本机已更新**：`manage-install.py --channel dev install` 装入 b99（52＋44 个文件哈希核对）；重装后输入源注册需 `register` 刷新；[14 项 IMK 冒烟](../../validation/imk-host-smoke-dev.json)一次通过。另发现替换 bundle 后运行中的输入法进程不会自动重启，kill 旧进程后冒烟 14/14 在新进程通过。**后续（b100 发布同日）：本机已按用户要求卸载 dev 通道**（应用与 285MB dev 备份移除；stable 86 与共用用户数据保留），测试时用 `manage-install.py --channel dev install` 重装。
 - **发布进展**：更新源已配置为 `gomeen/gokaku`；b100（对外发布前递增）双端重建并通过 fast，[离线门禁与真实发布](../release-b100.json)完成——Draft `v0.1.1-dev.2-b100-dev`（ID 438177886）已含双端安装包与签名清单，待人工审阅发布（[发布记录](../release-b100.json)）。
 - [安装记录](install.json)：默认升级返回 0，71 个文件与双架构 COM 匹配，上一根指向 b98。
 - 无回归验证 3 轮：Chrome 切框、密码 `nihc `、记事本「你好」，模块身份均为 b99（PE 1794128481），见 [cases/](cases/)。

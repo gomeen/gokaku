@@ -1,5 +1,5 @@
 {
-  "checkedAt": "2026-11-08T10:32:29.316986+00:00",
+  "checkedAt": "2026-11-08T11:00:03.512476+00:00",
   "channel": "dev",
   "checks": [
     {
@@ -86,7 +86,7 @@
     {
       "name": "native_period_pages_down_before_digit",
       "passed": true,
-      "evidence": "倪"
+      "evidence": "溺"
     },
     {
       "name": "native_comma_pages_back_to_first",

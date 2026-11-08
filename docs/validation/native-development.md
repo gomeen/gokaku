@@ -6,6 +6,7 @@
 
 VS Code／Electron 类宿主矩阵记为受限项：激活后立即输入按预期以临时英文直通，恢复 Shift 点击可整对落在 TIP 激活完成前（TSF 固有窗口，输入法收不到即无法补发）；GetForeground 轮询不可作就绪探针；3 秒稳定等待后按键进入窗口但编辑器缓冲为空（首启 UI 抢占焦点，夹具目标状态问题）。Windows Terminal 未安装（wt.exe 不存在）。此两项未通过，需专用 VS Code 诊断另立轮次；b98 及之前的矩阵结论不受影响。
 
+- **Mac 通道后续**：b100 发布后本机 Mac 更新至 b100（进程重启后冒烟 14/14），随后按用户要求**卸载 dev 通道**——移除 Gogaku Dev／设置应用与全部 dev 备份（285MB），保留 stable 构建 86、共用用户数据与签名密钥；重装方式见 README。
 - **正式安装与本机更新**：b99 默认升级返回 0，71 个文件与双架构 COM 匹配，上一根指向 b98；用户授权下 `manage-install.py --channel dev install` 更新本 Mac，重装后按文档 `register` 刷新输入源注册，[14 项 IMK 冒烟](imk-host-smoke-dev.json)全部通过。
 - **检查与清理**：[fast 7/7](verify/report-fast-dev-b99.json)；[ASan／UBSan quick](verify/report-asan-ubsan-quick-dev-b99.json) 2,000 序列通过，整体 release gate 未过。发布门禁在「随包更新源未配置」处按设计拒绝（收据／许可／报告校验已过），真实 Draft 待仓库决策与 Token／私钥。本地测试目录 `local/` 已按用户要求移除，源码／测试指纹不变，档案证据均在 docs/validation。
 
