@@ -1,0 +1,92 @@
+{
+  "policyVersion": 2,
+  "runIdentityStable": true,
+  "profile": "fast",
+  "channel": "stable",
+  "quick": false,
+  "sourceSha256": "c2c1a5f9609bcf708d12242363281f5302a7c7c5135a33b9f764fa9181b0aac5",
+  "testSha256": "c494b1de7a62da2bdab9b634d0feac43dea415f89d64618898dc3351dd40447c",
+  "artifacts": {},
+  "artifactError": null,
+  "startedAt": "2026-11-09T10:52:12+0800",
+  "finishedAt": "2026-11-09T10:53:54+0800",
+  "commit": "afe92e8cc7f292fb2f85a051fe0a01663d8f15f9",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.1-dev.2",
+    "buildNumber": 100
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.1-dev.2 构建100；拒绝路径 7/7；installed=Gogaku.app 0.1.1 b86;Gogaku Settings.app 0.1.1 b86",
+      "durationMs": 9,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "blocked",
+      "detail": "缺少依赖锁 /Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/dependencies.lock.json；先运行 scripts/prepare-dependencies.py",
+      "durationMs": 17,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "failed",
+      "detail": "核心构建失败：Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/normal_session.cpp:27:10: fatal error: 'libime/core/userlanguagemodel.h' file not found\n   27 | #include <libime/core/userlanguagemodel.h>\n      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n1 error generated.\nninja: build stopped: subcommand failed.\n",
+      "durationMs": 5377,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "failed",
+      "detail": "swift test 未完成（exit=1）",
+      "durationMs": 75233,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261109-105212/swift-tests.log"
+    },
+    {
+      "name": "translation-data",
+      "required": true,
+      "status": "passed",
+      "detail": "通用翻译数据与资源正负例回归通过（不代表译文质量通过）",
+      "durationMs": 166,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261109-105212/translation-data.log"
+    },
+    {
+      "name": "verification-contracts",
+      "required": true,
+      "status": "passed",
+      "detail": "验证工具的离线正负例通过",
+      "durationMs": 946,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261109-105212/verification-contracts.log"
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "passed",
+      "detail": "交付流水线身份／报告／发布负例通过；隔离构建路径回归通过；更新清单签名/篡改拒绝通过；Windows 安装器布局/iss 渲染通过；pkg postinstall 语法通过；更新源配置 1 个可信公钥（已配置仓库）；产品源码无本地模型引用",
+      "durationMs": 20557,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261109-105212/delivery-contracts.log"
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 2,
+    "skipped": 0,
+    "blocked": 1
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "resources",
+      "core-tests",
+      "swift-tests"
+    ]
+  }
+}

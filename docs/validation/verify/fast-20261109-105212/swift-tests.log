@@ -1,0 +1,165 @@
+未能载入软件包“GogakuPackageTests.xctest”。 请尝试重新安装软件包。
+(dlopen(/Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests, 0x0109): Library not loaded: @rpath/libIMEPinyin.0.dylib
+  Referenced from: <A2560C60-5944-3DE2-AA6B-B110AE3F4021> /Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib
+  Reason: tried: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/Goga<…>)
+swiftpm_testing_helper/Entrypoint.swift:34: Fatal error: Failed to open test bundle at path /Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests: dlopen(/Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests, 0x0101): Library not loaded: @rpath/libIMEPinyin.0.dylib
+  Referenced from: <A2560C60-5944-3DE2-AA6B-B110AE3F4021> /Users/gomeen/code/gomeen/gogaku/.build/core/libgogaku_core.dylib
+  Reason: tried: '/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/build/bin/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/Library/Caches/Gogaku/libime-1.1.17/prefix/lib/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/../../../libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/../../../libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/native/libIMEPinyin.0.dylib' (no such file), '/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/System/Volumes/Preboot/Cryptexes/OS/Users/gomeen/code/gomeen/gogaku/.build/core/libIMEPinyin.0.dylib' (no such file), '/usr/lib/swift/libIMEPinyin.0.dylib' (no such file, not in dyld cache), '/System/Volumes/Preboot/Cryptexes/OS/usr/lib/swift/libIMEPinyin.0.dylib' (no such file), '/usr/lib/swift/libIMEPinyin.0.dylib' (no such file, not in dyld cache), '/System/Volumes/Preboot/Cryptexes/OS/usr/lib/swift/libIMEPinyin.0.dylib' (no such file)
+[0/1] Planning build
+Building for production...
+[0/12] Write sources
+[3/12] Write swift-version--58304C5D6DBC2206.txt
+[5/13] Compiling GogakuKit AnchorFallback.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/CustomWordListModel.swift:2:8: warning: file 'CustomWordListModel.swift' is part of module 'GogakuKit'; ignoring import
+ 1 | import Foundation
+ 2 | import GogakuKit
+   |        `- warning: file 'CustomWordListModel.swift' is part of module 'GogakuKit'; ignoring import
+ 3 | 
+ 4 | /// 自定义词语页的行模型（可单元测试）：搜索筛选与排序分离。
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/Composition.swift:129:16: warning: value 'text' was defined but never used; consider replacing with boolean test [#no-usage]
+127 |             for i in issueItems.indices { issueItems[i].freeStrings() }
+128 |         }
+129 |         if let text { ev.text = textCopy }
+    |                `- warning: value 'text' was defined but never used; consider replacing with boolean test [#no-usage]
+130 |         if let stamp {
+131 |             ev.stamp_focus = stamp.focus
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/Composition.swift:137:16: warning: value 'sourceID' was defined but never used; consider replacing with boolean test [#no-usage]
+135 |             ev.stamp_direction = stamp.direction == .enToZh ? Int32(GC_LEARN_DIR_EN_TO_ZH) : Int32(GC_LEARN_DIR_ZH_TO_EN)
+136 |         }
+137 |         if let sourceID { ev.source_id = sourceIDCopy }
+    |                `- warning: value 'sourceID' was defined but never used; consider replacing with boolean test [#no-usage]
+138 |         if let source { ev.source = sourceCopy }
+139 |         if let target { ev.target = targetCopy }
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/Composition.swift:138:16: warning: value 'source' was defined but never used; consider replacing with boolean test [#no-usage]
+136 |         }
+137 |         if let sourceID { ev.source_id = sourceIDCopy }
+138 |         if let source { ev.source = sourceCopy }
+    |                `- warning: value 'source' was defined but never used; consider replacing with boolean test [#no-usage]
+139 |         if let target { ev.target = targetCopy }
+140 |         if let resource { ev.resource = resourceCopy }
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/Composition.swift:139:16: warning: value 'target' was defined but never used; consider replacing with boolean test [#no-usage]
+137 |         if let sourceID { ev.source_id = sourceIDCopy }
+138 |         if let source { ev.source = sourceCopy }
+139 |         if let target { ev.target = targetCopy }
+    |                `- warning: value 'target' was defined but never used; consider replacing with boolean test [#no-usage]
+140 |         if let resource { ev.resource = resourceCopy }
+141 |         ev.approved = approved ? 1 : 0
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/Composition.swift:140:16: warning: value 'resource' was defined but never used; consider replacing with boolean test [#no-usage]
+138 |         if let source { ev.source = sourceCopy }
+139 |         if let target { ev.target = targetCopy }
+140 |         if let resource { ev.resource = resourceCopy }
+    |                `- warning: value 'resource' was defined but never used; consider replacing with boolean test [#no-usage]
+141 |         ev.approved = approved ? 1 : 0
+142 |         if let message { ev.message = messageCopy }
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuKit/Composition.swift:142:16: warning: value 'message' was defined but never used; consider replacing with boolean test [#no-usage]
+140 |         if let resource { ev.resource = resourceCopy }
+141 |         ev.approved = approved ? 1 : 0
+142 |         if let message { ev.message = messageCopy }
+    |                `- warning: value 'message' was defined but never used; consider replacing with boolean test [#no-usage]
+143 |         if let issues {
+144 |             issueItems = issues.map {
+[6/15] Compiling GogakuTranslator GogakuTranslatorApp.swift
+[7/16] Compiling GogakuInput CandidatePanel.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/CandidatePanel.swift:183:13: warning: variable 'caretX' was never mutated; consider changing to 'let' constant
+181 |         let preeditText = view.preedit.isEmpty ? view.raw : view.preedit
+182 |         var preeditString: NSAttributedString?
+183 |         var caretX: CGFloat?
+    |             `- warning: variable 'caretX' was never mutated; consider changing to 'let' constant
+184 |         var caretUTF16: Int?
+185 |         var preeditWidth: CGFloat = 0
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/CandidatePanel.swift:184:13: warning: variable 'caretUTF16' was never mutated; consider changing to 'let' constant
+182 |         var preeditString: NSAttributedString?
+183 |         var caretX: CGFloat?
+184 |         var caretUTF16: Int?
+    |             `- warning: variable 'caretUTF16' was never mutated; consider changing to 'let' constant
+185 |         var preeditWidth: CGFloat = 0
+186 |         var preeditLineCount = 1
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/CandidatePanel.swift:314:13: warning: variable 'placedButtons' was never mutated; consider changing to 'let' constant
+312 |             pageRect = .zero
+313 |         }
+314 |         var placedButtons: [Button] = []
+    |             `- warning: variable 'placedButtons' was never mutated; consider changing to 'let' constant
+315 |         // 原文上屏／切换来源按钮行已移除（2026-11 用户裁决：学习面板底部与
+316 |         // 中→英界面保持一致）；原文上屏保留 ⌘↩ 隐藏快捷键。
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/InputController.swift:1274:23: warning: 'where' only applies to the second pattern match in this 'case'
+1272 |         case 116 where composing: edit { try $0.page(-1) }; return true
+1273 |         case 121 where composing: edit { try $0.page(1) }; return true
+1274 |         case 125, 124 where composing: edit { $0.navigate(1) }; return true
+     |              |    |   `- warning: 'where' only applies to the second pattern match in this 'case'
+     |              |    `- note: disambiguate by adding a line break between them if this is desired
+     |              `- note: duplicate the 'where' on both patterns to check both patterns
+1275 |         case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+1276 |         case 36 where composing: chooseCurrent(); return true
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/InputController.swift:1275:23: warning: 'where' only applies to the second pattern match in this 'case'
+1273 |         case 121 where composing: edit { try $0.page(1) }; return true
+1274 |         case 125, 124 where composing: edit { $0.navigate(1) }; return true
+1275 |         case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+     |              |    |   `- warning: 'where' only applies to the second pattern match in this 'case'
+     |              |    `- note: disambiguate by adding a line break between them if this is desired
+     |              `- note: duplicate the 'where' on both patterns to check both patterns
+1276 |         case 36 where composing: chooseCurrent(); return true
+1277 |         default: break
+[7/16] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[9/16] Linking GogakuTranslator
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[10/16] Linking GogakuInput
+[12/16] Compiling GogakuSettings AppCatalog.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuSettings/CustomWordsPage.swift:210:21: warning: variable 'page' was never mutated; consider changing to 'let' constant
+208 |                 // 结构体 View 拷贝：State/Binding 存储由 SwiftUI 引用承载，
+209 |                 // 拷贝上的 save() 读取当前词表并把结果写回同一存储。
+210 |                 var page = self
+    |                     `- warning: variable 'page' was never mutated; consider changing to 'let' constant
+211 |                 page.status = status
+212 |                 page.model = model
+[12/16] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[13/16] Linking GogakuSettings
+[15/17] Compiling GogakuKitTests AnchorFallbackTests.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/KeyComboTests.swift:71:13: warning: variable 'settings' was never mutated; consider changing to 'let' constant
+ 69 | 
+ 70 |     func testConflictBetweenConfigurableCommands() {
+ 71 |         var settings = Settings()
+    |             `- warning: variable 'settings' was never mutated; consider changing to 'let' constant
+ 72 |         let mode = ConfigurableCommand.modeSwitch
+ 73 |         XCTAssertEqual(KeyCombo.conflict(target: .directionSwitch, keyID: "k",
+
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/KeyComboTests.swift:72:13: warning: initialization of immutable value 'mode' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+ 70 |     func testConflictBetweenConfigurableCommands() {
+ 71 |         var settings = Settings()
+ 72 |         let mode = ConfigurableCommand.modeSwitch
+    |             `- warning: initialization of immutable value 'mode' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+ 73 |         XCTAssertEqual(KeyCombo.conflict(target: .directionSwitch, keyID: "k",
+ 74 |                                          modifiers: ctrlShift.rawValue, settings: settings),
+
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/UpdateTests.swift:223:28: warning: immutable value 'signature' was never used; consider replacing with '_' or removing it [#no-usage]
+221 |     func testInvalidSignatureIsNotUpToDate() async throws {
+222 |         let manifest = manifest()
+223 |         let (manifestData, signature) = try signedRelease(manifest)
+    |                            `- warning: immutable value 'signature' was never used; consider replacing with '_' or removing it [#no-usage]
+224 |         let releases = try releaseJSON(manifestData: manifestData, signatureData: Data("bad".utf8))
+225 |         let transport = FakeTransport()
+[16/18] Compiling GogakuPackageTests runner.swift
+[16/18] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[17/18] Linking GogakuPackageTests
+Build complete! (58.67s)
+error: Process '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/libexec/swift/pm/swiftpm-testing-helper --test-bundle-path /Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests -c release -j 2 /Users/gomeen/code/gomeen/gogaku/macos/.build/x86_64-apple-macosx/release/GogakuPackageTests.xctest/Contents/MacOS/GogakuPackageTests --testing-library swift-testing' exited with unexpected signal code 4

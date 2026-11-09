@@ -32,6 +32,11 @@ private struct ShiftClickTracker {
     private var otherKeySeen = false
 
     mutating func press(_ event: NSEvent) {
+        // 按下沿缺释放沿的宿主（2026-11 企业微信兼容）会让 pressing 卡死：
+        // !pressing 恒假 → 新按下沿永不注册，事件通路单击此后全部判死。超过
+        // 单击窗（600ms）的残留按下沿先自愈再注册；同边沿 2ms 内的重复投递
+        // （Orca 双投递）时长≈0，仍走幂等路径不受影响。
+        if pressTime > 0, event.timestamp - pressTime >= 0.6 { pressTime = 0 }
         pressTime = event.timestamp
         side = (event.keyCode == 60) ? 1 : 0   // 60 右 Shift，56 左 Shift
         otherKeySeen = false
@@ -44,20 +49,31 @@ private struct ShiftClickTracker {
     }
 
     mutating func markOtherKey() { otherKeySeen = true }
+
+    /// 轮询兜底代发后调用：失效残留按下沿，宿主把释放沿延迟到确认窗之后
+    /// 才投递时，事件通路的迟到单击不再二次触发（切两次＝没切）。
+    mutating func expirePress() { pressTime = 0; otherKeySeen = true }
+
     var pressing: Bool { pressTime > 0 }
 }
 
 /// 修饰键事件依赖宿主投递；Orca（Chromium 系）会投递但每个过渡双投递
-/// （2026-11-02 侧车实测，已由事件通路幂等化修复）。若某宿主完全不投递，
-/// 事件通路永远沉默——轮询 CGEventSource 会话级修饰键快照作纯兜底
-/// （共享内存读取，无需任何权限）：仅当整个按住窗口＋120ms 宽限内没有任何
-/// flagsChanged 事件时才代发，保证与事件通路互斥、永不双发。
+/// （2026-11-02 侧车实测，已由事件通路幂等化修复）；企业微信（2026-11
+/// 用户报告）投递按下沿但释放沿无产出，旧「全程无事件才代发」互斥守卫被
+/// 按下沿事件满足，兜底与事件通路一起静默。现改为物理单击先立案，确认期
+/// 按「释放沿证据」（noteReleaseHandled）判定归属：证据在按下后出现＝事件
+/// 通路已负责，取消；缺失＝事件通路吞了释放沿，代发。正常宿主与 Orca 双
+/// 投递的释放沿证据恒在，不双发。
 private final class ShiftTapPoller {
     private var timer: Timer?
     private var shiftDown = false          // 上次采样的 Shift 状态
     private var pressTime: TimeInterval = 0
     private var otherKeySeen = false       // 按住期间出现过按键（含其他修饰键）
-    private var lastFlagsEventAt: TimeInterval = -10
+    /// 事件通路最近一次处理「释放沿形态」flagsChanged（raw 无 Shift 位）的
+    /// 时刻。只有释放沿算证据：企业微信（2026-11 用户报告）投递按下沿但
+    /// 单击链无产出——旧守卫「press 以来无任何 flagsChanged 才代发」被按下沿
+    /// 事件满足，兜底与事件通路一起静默，Shift 单击彻底无提示。
+    private var releaseEvidenceAt: TimeInterval = -10
     private var pendingFire: (press: TimeInterval, side: Int64)?
     private var pendingTimer: Timer?
 
@@ -81,8 +97,9 @@ private final class ShiftTapPoller {
         shiftDown = false; pressTime = 0
     }
 
-    /// 事件通路每收到一条 flagsChanged 都告知（按下／释放／其他修饰键均算）。
-    func noteFlagsEvent() { lastFlagsEventAt = ProcessInfo.processInfo.systemUptime }
+    /// 事件通路处理「释放沿形态」flagsChanged（raw 无 Shift 位）时告知：
+    /// 这是释放沿已由事件通路负责的证据，确认期据此取消代发。
+    func noteReleaseHandled() { releaseEvidenceAt = ProcessInfo.processInfo.systemUptime }
 
     /// 按住期间出现按键（keyDown／其他修饰键事件）→ 取消单击资格。
     func markOtherKey() { if pressTime > 0 { otherKeySeen = true } }
@@ -101,12 +118,15 @@ private final class ShiftTapPoller {
             shiftDown = false
             let press = pressTime
             pressTime = 0
-            let sawFlagsEvents = lastFlagsEventAt >= press
-            // 与事件通路同一规格：<600ms、按住期间无其他按键／修饰键；
-            // 延迟 120ms 确认期内事件通路仍无任何 flagsChanged 才代发。
-            if !sawFlagsEvents, press > 0, !otherKeySeen, now - press < 0.6 {
+            // 与事件通路同一规格立案：<600ms、按住期间无其他按键／修饰键。
+            // 是否代发改在确认期按「释放沿证据」判定（2026-11 企业微信兼容）：
+            // 确认窗（200ms）内事件通路处理过释放沿形态事件（含迟到补投）→
+            // 本轮归事件通路，取消；否则事件通路吞了释放沿（或以杂修饰形态
+            // 判死单击）→ 代发。正常宿主与双投递宿主（Orca）的释放沿都在
+            // 释放采样前处理完毕，证据时间不早于按下采样时间，恒取消不双发。
+            if press > 0, !otherKeySeen, now - press < 0.6 {
                 pendingFire = (press, 0)
-                let t = Timer(timeInterval: 0.12, repeats: false) { [weak self] _ in self?.confirmPendingFire() }
+                let t = Timer(timeInterval: 0.2, repeats: false) { [weak self] _ in self?.confirmPendingFire() }
                 RunLoop.main.add(t, forMode: .common)
                 pendingTimer = t
             }
@@ -119,8 +139,8 @@ private final class ShiftTapPoller {
         pendingTimer = nil
         guard let (press, side) = pendingFire else { return }
         pendingFire = nil
-        // 宽限期内事件通路收到了任何 flagsChanged → 本轮由事件通路负责，不代发。
-        guard lastFlagsEventAt < press else { return }
+        // 按下观测之后事件通路处理过释放沿 → 本轮由事件通路负责，不代发。
+        guard releaseEvidenceAt < press else { return }
         onShiftClick(side)
     }
 }
@@ -150,7 +170,8 @@ final class GogakuInputController: IMKInputController {
     private var sourceIndex = 0
     private var requestedSpellStamp: InputStamp?
     private var shiftTracker = ShiftClickTracker()
-    /// Orca 等 Chromium 系宿主不转发 flagsChanged 的轮询兜底（验后保留，仅日志可移除）。
+    /// Shift 单击轮询兜底：覆盖不投递／只投按下沿／释放沿被吞的宿主
+    /// （2026-11 企业微信兼容；判定细节见 ShiftTapPoller 注释）。
     /// 学习模式下的 Shift 单击：切中→英／英→中方向（2026-11 用户裁决），
     /// 不进普通模式的临时英文路径。
     private func handleShiftClickInLearning() {
@@ -159,6 +180,9 @@ final class GogakuInputController: IMKInputController {
     }
     private lazy var shiftPoller = ShiftTapPoller { [weak self] side in
         guard let self, self.active, self.engineAvailable else { return }
+        // 代发即失效事件通路的残留按下沿：宿主把释放沿延迟到确认窗之后才
+        // 投递时，事件通路的迟到单击不再二次触发（切两次＝没切）。
+        self.shiftTracker.expirePress()
         if self.mode == .learning { self.handleShiftClickInLearning(); return }
         if let current = self.currentTarget() {
             _ = self.handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: self.target == nil)
@@ -168,6 +192,12 @@ final class GogakuInputController: IMKInputController {
     /// 当前有效显示位置（宿主光标矩形）；nil＝面板隐藏但组合保留。
     /// 与目标身份锚点分离：位置变化不改变目标身份。
     private var displayRect: NSRect?
+    /// 上一组合的显示锚点（跨词保留）：无锚点回退（AnchorFallback，2026-11
+    /// 企业微信兼容）的第一优先来源。换字段／失焦／配置复位时清零。
+    private var carriedAnchorRect: NSRect?
+    /// 字段证据丢失（hidePanelKeepComposition）标记：丢失期间无锚点不回退
+    /// （旧锚点可能属于别的输入框）；复查恢复字段一致后清除。
+    private var hiddenByFieldLoss = false
     /// 锚点瞬移过滤器（AnchorPlausibility）的连续可疑计数；组合开始/结束、
     /// 换目标、隐藏面板时随 displayRect 一并清零。
     private var anchorSuspectStreak = 0
@@ -560,7 +590,8 @@ final class GogakuInputController: IMKInputController {
 
     private func configure() {
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
-        displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
+        displayRect = nil; carriedAnchorRect = nil; hiddenByFieldLoss = false
+        anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
         markedShown = ""; markedCaret = -1
         panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
@@ -604,7 +635,8 @@ final class GogakuInputController: IMKInputController {
         eagerPumpRetryCount = 0
         cancelEnToZhHide()
         // 先隐藏并使迟到渲染失效；宿主字母仅在仍有原字段证据时清除。
-        stopPositionRefresh(); displayRect = nil; anchorSuspectStreak = 0; anchorAgeReads = 0
+        stopPositionRefresh(); displayRect = nil; carriedAnchorRect = nil; hiddenByFieldLoss = false
+        anchorSuspectStreak = 0; anchorAgeReads = 0
         panel.dismiss(); toast.hide()
         if clearMarked, !markedShown.isEmpty, let old = target, let facts = hostFacts(),
            facts.application == old.application, facts.pid == old.pid,
@@ -738,7 +770,6 @@ final class GogakuInputController: IMKInputController {
         // keyUp 不是新输入：一律透传（单字符原文提交竞态的历史修复）。
         if event.type == .keyUp { return false }
         if event.type == .flagsChanged {
-            shiftPoller.noteFlagsEvent()   // 轮询兜底互斥：本轮窗口内有事件就不代发
             // Shift 单击判定；其他修饰键变化不挂起组合（规格）。
             // Hyper（fn／globe 修饰）不算 Shift 单击：fn 按住时 flags 含 .function，
             // 与 Command／Control／Option 一样取消单击资格；长按（≥600ms）与
@@ -752,6 +783,7 @@ final class GogakuInputController: IMKInputController {
                 event.modifierFlags.intersection([.command, .control, .option, .function]).rawValue == 0
             if !hasShift {
                 // 释放沿（Shift 已松开；raw 里可能仍带其他修饰键）。
+                shiftPoller.noteReleaseHandled()
                 if shiftTracker.pressing {
                     if let side = shiftTracker.release(event) {
                         if mode == .learning {
@@ -784,6 +816,10 @@ final class GogakuInputController: IMKInputController {
         if match(settings.directionShortcut, event: event) { toggleDirection(nil); return true }
         guard let current = currentTarget(readRectangle: displayed == nil && markedShown.isEmpty) else { suspend(); return false }
         let fieldChanged = target == nil || target?.application != current.application || target?.pid != current.pid
+        if fieldChanged {
+            // 跨字段不沿用旧字段的回退锚点（位置属于上一个输入框）。
+            carriedAnchorRect = nil; hiddenByFieldLoss = false
+        }
         target = current; application = current.application
         // 学习模式中→英与普通模式同一条核心路径（同候选、同上屏规则），
         // 仅提交时换译译文；英→中保留独立英语缓冲路径。
@@ -941,12 +977,20 @@ final class GogakuInputController: IMKInputController {
                 }
             }
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
-            // 否则等待 marked 更新后的合并刷新。无有效坐标时隐藏面板但保留组合
-            //（不丢弃文字；恢复有效且字段一致后重新显示）。
-            if displayRect == nil, target.rect != .zero {
-                displayRect = target.rect
-                // 首键 pre-read 是锚点确立点：宽限窗从这里起算。
-                anchorAgeReads = 0
+            // 否则按 AnchorFallback 回退（2026-11 企业微信兼容：该类宿主组合中
+            // 不再返回有效矩形，无锚点＝整词无候选窗）。字段证据丢失时不回退。
+            if displayRect == nil {
+                if target.rect != .zero {
+                    displayRect = target.rect
+                    // 首键 pre-read 是锚点确立点：宽限窗从这里起算。
+                    anchorAgeReads = 0
+                } else if !hiddenByFieldLoss,
+                          let fallback = AnchorFallback.resolve(preRead: target.rect,
+                                                                carried: carriedAnchorRect,
+                                                                mouseCaret: carriedAnchorRect == nil ? Self.mouseCaretRect() : nil) {
+                    displayRect = fallback
+                    anchorAgeReads = 0
+                }
             }
             startPositionRefresh()
             #if GOGAKU_VALIDATION
@@ -979,7 +1023,10 @@ final class GogakuInputController: IMKInputController {
             scheduleEagerPump()
         } else {
             displayed = nil
+            // 本词锚点留给下一词回退（2026-11 企业微信兼容）；字段证据状态复位。
+            carriedAnchorRect = displayRect ?? carriedAnchorRect
             displayRect = nil
+            hiddenByFieldLoss = false
             anchorSuspectStreak = 0
             anchorAgeReads = 0
             stopPositionRefresh()
@@ -1011,8 +1058,10 @@ final class GogakuInputController: IMKInputController {
     }
 
     /// 隐藏面板但保留组合与字母；坐标恢复有效且字段一致后由复查重新显示。
+    /// 字段证据丢失期间无锚点不回退（旧锚点可能属于别的输入框）。
     private func hidePanelKeepComposition() {
         displayRect = nil
+        hiddenByFieldLoss = true
         anchorSuspectStreak = 0
         anchorAgeReads = 0
         panel.dismiss()
@@ -1026,6 +1075,8 @@ final class GogakuInputController: IMKInputController {
             hidePanelKeepComposition()
             return
         }
+        // 字段证据恢复（同应用同进程）：后续无锚点可安全回退。
+        hiddenByFieldLoss = false
         if current.rect == .zero {
             // Orca 1.4.246 实测（2026-11-02 诊断）：组合（marked range）覆盖插入点
             // 期间，宿主对插入点与组合起点的 attributes 查询都返回零矩形，组合结束
@@ -1502,6 +1553,12 @@ final class GogakuInputController: IMKInputController {
             return current.rect
         }
         if let rect = target?.rect, rect != .zero { return rect }
+        return Self.mouseCaretRect()
+    }
+
+    /// 鼠标位置光标矩形：无任何可信插入点时的最终兜底（与切换提示同语义：
+    /// 必须出现在操作者注意力附近；候选窗回退仅在本会话无历史锚点时使用）。
+    private static func mouseCaretRect() -> NSRect {
         let mouse = NSEvent.mouseLocation
         return NSRect(x: mouse.x, y: mouse.y - 8, width: 0, height: 18)
     }
