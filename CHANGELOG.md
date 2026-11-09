@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-09：修复双通道 IMK 连接名冲突，构建 102 dev）
+
+- b101 真机发现：IMKServer 连接名硬编码 `Gogaku_Connection`，stable 与 dev 两通道同名。stable 进程存活时 dev 端点注册被 imklaunchagent 拒绝（`Refusing connection name for bundle: unrecognized 'InputMethodConnectionName' value`），表现为 dev 输入源选中即回弹、进程拉不起、输入菜单无可用入口；此前 dev 能用只是因为 stable 输入源未启用、无进程占名。
+- 连接名改为按 bundle ID 派生（`org.gogaku.inputmethod[.dev]_connection`），两通道可长期并存。本机 dev 选中验证：选中后保持不回弹，无拒绝日志。
+- 企业微信兼容内容与 b101 相同（候选窗无锚点回退＋Shift 释放沿兑底）；详见[原生验收](docs/validation/native-development.md) 2026-11-09 节。
+
 ### 变更（2026-11-09：企业微信兼容——候选窗无锚点回退与 Shift 释放沿兑底，构建 101 dev）
 
 - 企业微信里打长段落：前几个词有候选窗，后面消失但空格上屏一直正常，Shift 切换也无提示。两个根因都在显示层：词首定位是全组合唯一锚点机会，该宿主对插入点矩形查询随段落增长返回无效且组合中不恢复（同 Orca 零矩形形态），一次失败整词隐藏；Shift flagsChanged 只投按下沿，旧轮询兑底「全程无事件才代发」守卫被按下沿满足，与事件通路一起静默。

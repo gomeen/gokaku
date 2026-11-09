@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.1.1-dev.2-b102-dev",
+  "channel": "dev",
+  "buildNumber": 102,
+  "releaseId": 438733764,
+  "state": "published",
+  "createdAt": "2026-11-09",
+  "assets": {
+    "macos": "Gogaku-0.1.1-dev.2-b102-dev.pkg",
+    "windows": "Gogaku-0.1.1-dev.2-b102-dev-windows-x64-setup.exe",
+    "manifest": "update-manifest.json",
+    "signature": "update-manifest.json.sig"
+  },
+  "manifestKey": "gogaku-dev-2026-11",
+  "fastReport": "verify/report-fast-20261109-120932.json",
+  "stateFile": "dist/release-b102/release-state.json（本机留存；dist 不入库）",
+  "notes": "b101 已发布版本含双通道连接名冲突缺陷（dev 端点被 imklaunchagent 拒绝），b102 修复并直接发布（同一用户已批准发布的企业微信兼容修复系列）。tag 与 main HEAD 同点，无 tag 修正。",
+  "publishedAt": "2026-11-09",
+  "pushedCommit": "5414e0c (main HEAD；tag 由 GitHub 创建时 main 已先行推送，tag 同点)"
+}
