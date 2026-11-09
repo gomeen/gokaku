@@ -84,6 +84,7 @@ static GcSnapshot *send(GcNormalSession *s, int kind, const char *text = nullptr
     GcKeyEvent ev{}; ev.kind = kind; ev.text = text; ev.app = "rel.app"; ev.field = "f";
     GcSnapshot *snap = nullptr; gc_normal_handle(s, &ev, &snap); return snap;
 }
+static GcSnapshot *confirm(GcNormalSession *s) { return send(s, GC_EV_COMMIT_CONFIRMED); }
 static void type(GcNormalSession *s, const char *keys) {
     for (const char *p = keys; *p; ++p) { GcSnapshot *x = send(s, GC_EV_TEXT, std::string(1, *p).c_str()); gc_snapshot_free(x); }
 }
@@ -97,6 +98,7 @@ int main() {
     if (gc_normal_session_create(&cfg, &s, err, sizeof err)) { printf("CREATE-FAIL %s\n", err); return 2; }
     type(s, "nihc");
     { GcSnapshot *x = send(s, GC_EV_SPACE); gc_snapshot_free(x); }   // 学习 你好
+    gc_snapshot_free(confirm(s));   // ABI v4：确认提交后才写入调频与学习词
     if (gc_normal_flush(s)) { printf("FLUSH-FAIL\n"); return 2; }
     type(s, "nih");
     { GcSnapshot *x = send(s, GC_EV_TEXT, "c");
