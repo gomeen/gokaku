@@ -18,5 +18,5 @@
   "stateFile": "dist/release-b101/release-state.json（本机留存；dist 不入库）",
   "notes": "Draft 已含双端安装包与签名清单；人工审阅后以 --publish-existing 438705074 发布。发布所用 Token 审阅完成后应撤销。",
   "publishedAt": "2026-11-09",
-  "pushedCommit": "173d85f (main; tag 由 GitHub 在发布时创建)"
+  "pushedCommit": "tag 指 9974cb9（b101 构建提交）；创建 Draft 时远端 main 落后致 tag 误指 afe92e8，发布后已推送 main 并强移 tag 修正（dev tag 创建后无依赖方，构建身份与 tag 对齐）"
 }
