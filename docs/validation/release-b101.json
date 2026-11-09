@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.1.1-dev.2-b101-dev",
+  "channel": "dev",
+  "buildNumber": 101,
+  "releaseId": 438705074,
+  "state": "draft",
+  "createdAt": "2026-11-09",
+  "assets": {
+    "macos": "Gogaku-0.1.1-dev.2-b101-dev.pkg",
+    "windows": "Gogaku-0.1.1-dev.2-b101-dev-windows-x64-setup.exe",
+    "manifest": "update-manifest.json",
+    "signature": "update-manifest.json.sig"
+  },
+  "manifestKey": "gogaku-dev-2026-11",
+  "fastReport": "verify/report-fast-20261109-111202.json",
+  "stateFile": "dist/release-b101/release-state.json（本机留存；dist 不入库）",
+  "notes": "Draft 已含双端安装包与签名清单；人工审阅后以 --publish-existing 438705074 发布。发布所用 Token 审阅完成后应撤销。",
+  "pushedCommit": "9974cb9 (main; tag 由 GitHub 在发布时创建)"
+}
