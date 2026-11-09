@@ -13,7 +13,7 @@ import InputMethodKit
         // 安装共用硬编码名时，后启动的通道会被 imklaunchagent 以
         // “Refusing connection name for bundle: unrecognized
         // 'InputMethodConnectionName' value”拒绝——dev 选中即回弹、进程拉不起。
-        let bundleID = Bundle.main.bundleIdentifier
+        let bundleID = Bundle.main.bundleIdentifier ?? "org.gogaku.inputmethod"
         server = IMKServer(name: bundleID + "_connection", bundleIdentifier: bundleID)
         DispatchQueue.main.async {
             CandidatePanel.shared.prime()
