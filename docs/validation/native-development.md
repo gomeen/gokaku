@@ -1,12 +1,12 @@
 # 原生工程实施验收记录
 
-## 企业微信兼容：候选窗无锚点回退与 Shift 释放沿兑底（2026-11-09，工作区，未定版）
+## 企业微信兼容：候选窗无锚点回退与 Shift 释放沿兑底（2026-11-09，dev b101 已发布）
 
 用户报告：企业微信里打一段话，前几个词有候选窗，后面没有，但空格上屏中文一直正常；Shift 切换也无提示。中文上屏正常说明组合／提交链路健康，问题锁定显示层：①候选窗锚点获取失败——词首 pre-read 是全组合唯一锚点机会，该类宿主对插入点的矩形查询随段落增长／中文提交后返回无效值且组合中不恢复（同 Orca 零矩形行为），一次失败即整词隐藏（round-build6「缺可信定位就隐藏」裁决的边缘后果）；②Shift 单击链断裂——企业微信投递按下沿但释放沿无产出，旧兑底「全程无 flagsChanged 才代发」守卫被按下沿事件满足，兑底与事件通路一起静默。用户裁决：普通模式必须始终有候选窗，进行兼容。
 
 - **无锚点回退（`GogakuKit.AnchorFallback` 纯函数＋单测）**：词首 pre-read 无效时依次回退同字段上一组合锚点（`carriedAnchorRect`，连续输入偏差最小）＞鼠标位置光标矩形（与切换提示同语义）；全部不可得维持隐藏。字段证据丢失（`hidePanelKeepComposition`，新增 `hiddenByFieldLoss` 标记）期间不回退——旧锚点可能属于别的输入框；复查恢复字段一致即清除标记。组合中读到真实矩形后由既有位置复查＋瞬移过滤器纠正。换字段／失焦／配置复位时清 `carriedAnchorRect`。覆写 round-build6 的「隐藏保留组合」裁决范围：仅对「字段证据在但矩形不可得」的宿主生效，Orca（词首可读到锚点）行为不变。
 - **Shift 释放沿兑底重写（`ShiftTapPoller`）**：物理单击先按同一规格立案，是否代发改在 200ms 确认期按「释放沿证据」（`noteReleaseHandled`，仅释放沿形态 flagsChanged 算）判定：证据在按下后出现＝事件通路已负责，取消；缺失＝释放沿被吞／以杂修饰形态判死，代发。正常宿主与 Orca 双投递的释放沿证据恒在，不双发；代发后 `shiftTracker.expirePress()` 失效残留按下沿，防迟到释放沿二次触发。`ShiftClickTracker.press` 增加超 600ms 残留按下沿自愈（按下沿缺释放沿宿主原先会卡死单击注册）。
-- **验证边界**：`AnchorFallback` 纯函数 7/7 断言通过（swiftc 直编独立验证）；`GogakuInput`／`GogakuKit` Release 构建通过。**企业微信真机验收未执行**（需用户空闲时段：真实段落输入候选窗持续可见、Shift 提示回归、Orca/Bob/记事本回归不回退）。本轮 fast 档因环境阻塞未全绿：Xcode 已按用户要求卸载（afe92e8），CLT 无 XCTest 框架致 `swift test` 无法运行；libime 1.1.17 依赖锁缺失致 core-tests 构建失败（`scripts/prepare-dependencies.py` 待重跑）。两项均为环境问题（b96–b99 同命令全绿），报告 `report-fast-20261109-105354.json`。
+- **验证边界**：`AnchorFallback` 纯函数 7/7 断言通过（fast 档 AnchorFallbackTests 套件实跑通过）；fast 7/7 全绿（核心 ctest 10/10、Swift Release 221 项），报告绑定双端包哈希（`report-fast-20261109-111202.json`，环境阻塞已解除：Xcode 在位经 DEVELOPER_DIR 选用、libime 锁由 prepare-dependencies.py 重建）。**企业微信真机验收未执行**（需用户空闲时段：真实段落输入候选窗持续可见、Shift 提示回归、Orca/Bob/记事本回归不回退）。b101 双端包已发布 dev 通道（Draft→published，Release 438705074，tag `v0.1.1-dev.2-b101-dev`；公开清单签名用随包公钥远端验证通过，[发布记录](release-b101.json)）；本机 dev 通道已装 b101（构建号、commit、签名核对通过，输入源已注册），stable 通道仍为 b86。前一轮环境阻塞记录保留在 `report-fast-20261109-105354.json`。
 
 ## Windows 挂起 Shift 补发与宿主受限项（2026-11-08，dev b99）
 
