@@ -979,6 +979,9 @@ final class GogakuInputController: IMKInputController {
             // 显示位置用当前有效插入点：组合刚开始且本次读取到有效矩形时采用；
             // 否则按 AnchorFallback 回退（2026-11 企业微信兼容：该类宿主组合中
             // 不再返回有效矩形，无锚点＝整词无候选窗）。字段证据丢失时不回退。
+            #if GOGAKU_VALIDATION
+            GogakuInput.diag("applyNormal preRead=\(NSStringFromRect(target.rect)) hidden=\(hiddenByFieldLoss) carried=\(carriedAnchorRect == nil ? "nil" : NSStringFromRect(carriedAnchorRect!)) composing=\(snap.composing)")
+            #endif
             if displayRect == nil {
                 if target.rect != .zero {
                     displayRect = target.rect
@@ -990,6 +993,9 @@ final class GogakuInputController: IMKInputController {
                                                                 mouseCaret: carriedAnchorRect == nil ? Self.mouseCaretRect() : nil) {
                     displayRect = fallback
                     anchorAgeReads = 0
+                    #if GOGAKU_VALIDATION
+                    GogakuInput.diag("fallback-engaged rect=\(NSStringFromRect(fallback))")
+                    #endif
                 }
             }
             startPositionRefresh()
@@ -1060,6 +1066,11 @@ final class GogakuInputController: IMKInputController {
     /// 隐藏面板但保留组合与字母；坐标恢复有效且字段一致后由复查重新显示。
     /// 字段证据丢失期间无锚点不回退（旧锚点可能属于别的输入框）。
     private func hidePanelKeepComposition() {
+        #if GOGAKU_VALIDATION
+        if let a = target {
+            GogakuInput.diag("hidePanelKeepComposition app=\(a.application) pid=\(a.pid) anchor=\(NSStringFromRange(a.anchor)) sel=\(NSStringFromRange(a.selection)) marked=\(NSStringFromRange(a.markedRange))")
+        }
+        #endif
         displayRect = nil
         hiddenByFieldLoss = true
         anchorSuspectStreak = 0
@@ -1076,6 +1087,9 @@ final class GogakuInputController: IMKInputController {
             return
         }
         // 字段证据恢复（同应用同进程）：后续无锚点可安全回退。
+        #if GOGAKU_VALIDATION
+        GogakuInput.diag("refresh rect=\(NSStringFromRect(current.rect)) anchorAge=\(anchorAgeReads) streak=\(anchorSuspectStreak) hiddenFlag→0")
+        #endif
         hiddenByFieldLoss = false
         if current.rect == .zero {
             // Orca 1.4.246 实测（2026-11-02 诊断）：组合（marked range）覆盖插入点
