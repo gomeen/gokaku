@@ -172,7 +172,7 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 
 `host`／`host-full` 读取 `docs/validation/verify/native-gui-acceptance-stable.json`（dev 探针尚未支持）。顶层必须包含 `channel`、输入法主二进制的 `installedSHA256`、`macosSourceSha256`、`macosTestSha256`（取 fast 报告 `platformFingerprints.macos` 的两个值）、`pass: true` 及 `screens`。不再绑定 commit 与全量指纹，纯文档提交或只改 Windows 不使人工证据失效；安装件哈希仍随构建号变化，每个新构建都要重新确认。在真实点击／键盘导航、快捷键录制、应用选择、配置读回及 VoiceOver 检查后人工确认。
 
-`screens` 覆盖七页 `learning-translation`、`normal-input`、`custom-words`、`skin`、`shortcuts`、`learning-privacy`、`learning-snippets` × `light`／`dark`：host 短档只要求 `[900,620]`（14 项），host-full 还要 `[760,520]`（共 28 项）。host 短档每项可不附截图，改为写非空 `note` 记录实际核对内容（2026-11-10 裁决）；host-full 每项必须附截图及哈希。每项包含 `page`、`size`、`appearance`、`passed: true`、报告同目录内的截图相对路径 `screenshot` 及实际 `screenshotSha256`。校验器核对矩阵完整性、身份和截图哈希；操作结果仍依赖人工验收，截图不能代替行为验证。
+`screens` 覆盖七页 `learning-translation`、`normal-input`、`custom-words`、`skin`、`shortcuts`、`learning-privacy`、`learning-snippets` × `light`／`dark`：host 短档只要求 `[1000,620]`（14 项），host-full 还要 `[1000,520]`（共 28 项）；窗口最小宽 1000，见[皮肤说明](skin-themes.md)。host 短档每项可不附截图，改为写非空 `note` 记录实际核对内容（2026-11-10 裁决）；host-full 每项必须附截图及哈希。每项包含 `page`、`size`、`appearance`、`passed: true`、报告同目录内的截图相对路径 `screenshot` 及实际 `screenshotSha256`。校验器核对矩阵完整性、身份和截图哈希；操作结果仍依赖人工验收，截图不能代替行为验证。
 
 ## 6. CI 与当前缺口
 

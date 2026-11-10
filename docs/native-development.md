@@ -27,7 +27,7 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -
 | 平时开发(每轮改动) | `python3 scripts/verify.py --profile fast` | 约 2 分钟 | 关键测试：核心 ctest＋Release Swift＋版本／资源＋通用翻译数据＋验证／交付门禁负例 |
 | 核心/内存敏感改动后(可选) | `python3 scripts/verify.py --profile release --only asan-ubsan --quick` | 约 4 分钟 | ASan／UBSan 2000 序列冒烟（单项报告，不满足十万门槛） |
 | 定版／疑难排查 | `python3 scripts/verify.py --profile release` | 预计约 15 分钟（11-10 未分片时实测 40 分钟，其中 ASan 36 分钟） | 全量：fast 内容＋干净构建＋包检查＋质量＋渲染＋数据可靠性＋十万序列插桩（默认按核数分片并行，`--asan-shards N` 可调）；安装预检可选；**后台运行，不阻塞迭代** |
-| 真实宿主（每次定版） | `python3 scripts/verify.py --profile host --yes` | 数小时 | 一轮宿主矩阵、万次性能、GUI 抽查（七页×900×620×浅深）；仅用户空闲时段执行 |
+| 真实宿主（每次定版） | `python3 scripts/verify.py --profile host --yes` | 数小时 | 一轮宿主矩阵、万次性能、GUI 抽查（七页×1000×620×浅深）；仅用户空闲时段执行 |
 | 完整宿主（核心／IMK 改动、里程碑） | `python3 scripts/verify.py --profile host-full --yes` | 半天以上 | 两轮宿主矩阵、Orca Shift 专项、万次性能、两小时浸泡、GUI 全矩阵 |
 
 约定:全量档只在「要对外提供安装包」或「出现难以定位的问题需要全面排查」时运行;开发阶段不允许为等待全量结果阻塞迭代(后台跑完再归档证据)。历史报告不自动代表当前源码通过。报告策略版本、必需检查清单、产品源码指纹和测试指纹都必须匹配；release／host 只绑定 Mac 平台指纹，只改 Windows 或同版本只递增构建号时可沿用，规则见[版本管理](versioning.md)「验证报告的绑定与沿用」。运行期间 `verify.py` 用 caffeinate 阻止空闲睡眠；合盖且无外接显示器仍会睡眠，报告每项的 `wallMs` 明显大于 `durationMs` 时即为睡眠。`--only` 的缺项与 quick 插桩会使完整档位不通过，单项成功不能用作完整发布报告。host 探针目前仅支持 stable，dev 明确 blocked；GUI 人工证据须绑定当前安装件和 Mac 平台指纹，host 覆盖七页×默认尺寸×浅深（14 项），host-full 覆盖七页×两尺寸×浅深（28 项）；键盘与 VoiceOver 等交互仍需人工核对。宿主报告须覆盖完整计划及逐轮记录；性能须一万条原始样本重算达标。
@@ -66,7 +66,7 @@ python3 probes/validate-imk-host.py --channel dev --report local/imk-host-smoke-
 
 ## 设置页面
 
-设置窗口采用 200pt 左侧分类导航、右侧内容滚动区与固定底部状态栏布局，七页分别为“学习翻译”“普通输入”“自定义词语”“皮肤”“快捷键”“学习与隐私”“学习片段”，默认 900×620、最小 760×520，青绿强调色跟随系统明暗外观（视觉规格见[产品方向](product.md)「设置页面规格」）。版本信息旁「检查更新」打开独立更新窗口；自动检查默认关闭。
+设置窗口采用 200pt 左侧分类导航、右侧内容滚动区与固定底部状态栏布局，七页分别为“学习翻译”“普通输入”“自定义词语”“皮肤”“快捷键”“学习与隐私”“学习片段”，默认 1100×800、最小 1000×520，青绿强调色跟随系统明暗外观（视觉规格见[产品方向](product.md)「设置页面规格」）。版本信息旁「检查更新」打开独立更新窗口；自动检查默认关闭。
 
 所有改动**立即保存**：普通选项、应用列表、有效快捷键改动即时提交；连续文本输入（如忽略词）合并 300 毫秒后提交，失焦或关闭窗口时提交剩余改动。底部状态栏显示保存中／已保存／失败，失败时改动保留并可点「重试」。添加应用通过可搜索弹层（索引 `/Applications`、`/System/Applications`、`~/Applications`），也可点「选择其他位置的 .app…」；未安装的应用保留在列表中并显示通用图标。
 

@@ -62,6 +62,6 @@ macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发�
 | fast | 当前 `version.json`、全量源码与测试指纹、双端安装包哈希 | 每个对外构建 |
 | release、host、host-full | 同一版本字符串、构建号不高于当前、Mac 平台源码与测试指纹 | Mac 平台指纹变化时 |
 
-Mac 平台指纹＝`shared/`、`macos/`、`resources/`、共享脚本与探针、`docs/third-party.md`，不含 `windows/`、Windows 专属脚本与探针、`version.json`（归属规则见 `scripts/_gogaku_delivery.py` 的 `path_platform`）。因此：只改 Windows、或同版本只递增构建号时，release／host 报告沿用，只需重打双端包并重跑 fast；改共享核心、Mac 代码、共享脚本或探针时，release／host 都要重跑。Windows 没有机器宿主门禁，VM 验收记录应注明对应的 Windows 平台指纹（fast 报告的 `platformFingerprints.windows`）。
+发布期工具（`verify.py`、`publish-release.py`、清单签名与交付测试脚本）只计入测试指纹，改它们不必重新打包。Mac 平台指纹＝`shared/`、`macos/`、`resources/`、共享脚本与探针、`docs/third-party.md`，不含 `windows/`、Windows 专属脚本与探针、`version.json`（归属规则见 `scripts/_gogaku_delivery.py` 的 `path_platform`）。因此：只改 Windows、或同版本只递增构建号时，release／host 报告沿用，只需重打双端包并重跑 fast；改共享核心、Mac 代码、共享脚本或探针时，release／host 都要重跑。Windows 没有机器宿主门禁，VM 验收记录应注明对应的 Windows 平台指纹（fast 报告的 `platformFingerprints.windows`）。
 
 更新清单的拒绝路径：未知 schema、未知 keyId、签名失败、stable 清单含预发布段、通道不符、构建号不递增、平台／架构不支持、`minOS` 高于当前系统、重复 platform/arch、`sha256` 非 64 位十六进制、资产大小／哈希与下载不符——均拒绝，不显示为「已是最新」。

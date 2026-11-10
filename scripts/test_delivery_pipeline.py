@@ -292,6 +292,18 @@ class DeliveryPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(delivery.DeliveryError, '版本不同'):
             delivery.validate_reports([fast, paths[1], paths[2]], self.receipts(), 'dev', root=self.root)
 
+    def test_release_tooling_changes_tests_not_packages(self):
+        source, tests = delivery.source_fingerprint(self.root), delivery.test_fingerprint(self.root)
+        mac = delivery.platform_fingerprints(self.root)['macos']
+        self.put('scripts/verify.py', 'changed gate')
+        self.assertEqual(source, delivery.source_fingerprint(self.root))
+        self.assertNotEqual(tests, delivery.test_fingerprint(self.root))
+        now = delivery.platform_fingerprints(self.root)['macos']
+        self.assertEqual(mac['sourceSha256'], now['sourceSha256'])
+        self.assertNotEqual(mac['testSha256'], now['testSha256'])
+        self.put('scripts/build.py', 'changed build')
+        self.assertNotEqual(source, delivery.source_fingerprint(self.root))
+
     def test_platform_fingerprints_split_by_owner(self):
         before = delivery.platform_fingerprints(self.root)
         self.put('windows/a.cpp')

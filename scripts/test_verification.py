@@ -93,7 +93,7 @@ class VerificationTests(unittest.TestCase):
         report, expected = self.gui_fixture()
         short = verify.gui_required_cells('host')
         self.assertEqual(len(short), 14)
-        report['screens'] = [s for s in report['screens'] if s['size'] == [900, 620]]
+        report['screens'] = [s for s in report['screens'] if s['size'] == [1000, 620]]
         self.assertEqual(verify.gui_problems(report, self.root, expected, short), [])
         # 短档证据不满足完整档；完整档证据满足短档。
         self.assertTrue(verify.gui_problems(report, self.root, expected,
@@ -108,7 +108,7 @@ class VerificationTests(unittest.TestCase):
         short = verify.gui_required_cells('host')
         report['screens'] = [{'page': s['page'], 'size': s['size'], 'appearance': s['appearance'],
                               'passed': True, 'note': '页面打开、控件可读、改值后读回一致'}
-                             for s in report['screens'] if s['size'] == [900, 620]]
+                             for s in report['screens'] if s['size'] == [1000, 620]]
         self.assertEqual(verify.gui_problems(report, self.root, expected, short, screenshots=False), [])
         self.assertTrue(verify.gui_problems(report, self.root, expected, short))
         report['screens'][0]['note'] = ' '

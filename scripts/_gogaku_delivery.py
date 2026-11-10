@@ -32,6 +32,11 @@ MACOS_ONLY_PATHS = ('scripts/package-macos-pkg.py', 'scripts/manage-install.py',
                     'scripts/check-bundle.py', 'scripts/check-menu-icon.swift',
                     'scripts/tis-select.swift', 'scripts/menu-pdf.swift')
 PLATFORMS = ('macos', 'windows')
+# 发布期工具不进安装包：只计入测试指纹，改它们不必重新打包（仍会使对应验证报告失效）。
+RELEASE_TOOLING = frozenset({
+    'scripts/verify.py', 'scripts/publish-release.py', 'scripts/make-update-manifest.py',
+    'scripts/update-signing.swift', 'scripts/test_delivery_pipeline.py',
+    'scripts/test_verification.py', 'scripts/test_build_paths.py'})
 
 
 class DeliveryError(ValueError):
@@ -89,7 +94,7 @@ def _fingerprint(root, relatives, excluded_dirs=GENERATED_DIRS, excluded_paths=(
 
 
 def source_fingerprint(root=ROOT):
-    return _fingerprint(root, SOURCE_PATHS)
+    return _fingerprint(root, SOURCE_PATHS, exclude=lambda relative: relative in RELEASE_TOOLING)
 
 
 def test_fingerprint(root=ROOT):
@@ -116,7 +121,7 @@ def platform_fingerprints(root=ROOT):
             owner = path_platform(relative)
             return relative == 'version.json' or (owner is not None and owner != platform)
         result[platform] = {
-            'sourceSha256': _fingerprint(root, SOURCE_PATHS, exclude=exclude),
+            'sourceSha256': _fingerprint(root, SOURCE_PATHS, exclude=lambda r: exclude(r) or r in RELEASE_TOOLING),
             'testSha256': _fingerprint(root, TEST_PATHS, excluded_paths={'probes/results'}, exclude=exclude),
         }
     return result

@@ -521,7 +521,7 @@ def check_host_plan(ctx):
         + ('  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n' if full else '')
         + '  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n'
         + ('  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n' if full else '')
-        + '  - native-gui：设置七页 × ' + ('两种窗口尺寸' if full else '默认 900×620') + ' × 浅／深外观的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
+        + '  - native-gui：设置七页 × ' + ('1000×620／1000×520' if full else '1000×620') + ' × 浅／深外观的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
     )
     if not ctx['yes']:
         return BLOCK, plan, None
@@ -837,7 +837,8 @@ def check_host_stability(ctx):
 
 GUI_PAGES = ('learning-translation', 'normal-input', 'custom-words', 'skin',
              'shortcuts', 'learning-privacy', 'learning-snippets')
-GUI_SIZES = ((900, 620), (760, 520))
+# 设置窗口最小宽 1000（皮肤页定稿，见 docs/skin-themes.md）；首项为短档抽查尺寸。
+GUI_SIZES = ((1000, 620), (1000, 520))
 GUI_APPEARANCES = ('light', 'dark')
 
 
@@ -902,7 +903,7 @@ def gui_problems(report, evidence_dir, expected, required=None, screenshots=True
 def check_native_gui(ctx):
     evidence = ROOT / 'docs/validation/verify' / f'native-gui-acceptance-{CHANNEL}.json'
     if not evidence.is_file():
-        return BLOCK, ('原生 GUI 未归档：七页×900×620／760×520×浅深，真实点击、键盘、'
+        return BLOCK, ('原生 GUI 未归档：七页×1000×620／1000×520×浅深，真实点击、键盘、'
                        '录制与应用选择并读回配置；逐项格式见 docs/release.md：' + str(evidence)), None
     # 绑定安装件哈希与 Mac 平台指纹；纯文档提交或只改 Windows 不使人工证据失效。
     mac = platform_fingerprints(ROOT)['macos']
