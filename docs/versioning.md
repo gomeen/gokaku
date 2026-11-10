@@ -1,6 +1,6 @@
 # 版本与构建管理
 
-Gogaku 的版本管理覆盖**双端开发测试版**：本地 Git 提交与标签；检查更新使用公开 GitHub Releases 与签名清单（见[检查更新](update.md)）。项目公开许可、Developer ID／公证和 Authenticode 仍未决定；源码仓库是否公开不由发布仓库决定（见[产品方向](product.md)「交付与验收边界」）。
+Gogaku 的版本管理覆盖**双端开发测试版**：本地 Git 提交与标签；检查更新使用公开 GitHub Releases 与签名清单（见[检查更新](update.md)）。Developer ID／公证和 Authenticode 仍未决定；源码仓库是否公开不由发布仓库决定（见[产品方向](product.md)「交付与验收边界」）。
 
 ## 单一版本来源
 

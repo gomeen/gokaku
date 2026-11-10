@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-10：项目自身许可定为 MIT 并致谢青简／Rime，工作区）
+
+- 新增仓库根 `LICENSE`（MIT，Copyright (c) 2026 gomeen）；README 许可节改写并新增致谢段：青简输入法＝候选窗样式与学习交互的设计对照参考，Rime＝开源输入法社区的先行实践，均未复制其代码、词库或数据。
+- 同步清除「许可尚未决定」表述：`AGENTS.md`、`docs/third-party.md`（公开分发前待办清单去掉「自身许可决定」，其余义务不变）、`docs/product.md`、`docs/versioning.md`、`docs/input-selection-decision.md`、`docs/validation/engineering-readiness.md`。
+- MIT 不改变第三方义务：libime／Fcitx5Utils／KenLM 等 LGPL-2.1-or-later 组件的源码提供与重链接材料、CC BY-SA 4.0 数据的署名与相同方式共享照旧；已构建安装包内的 THIRD-PARTY.md 副本为历史快照不追溯修改，下次构包自动更新。
+
 ### 0.1.3（构建 110，stable 定版，2026-11-10）
 
 - 首次 stable 定版，含普通应用临时英文 Esc 修复、Orca 终端候选窗定位修复、双通道 IMK 连接名修复。

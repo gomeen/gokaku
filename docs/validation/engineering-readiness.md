@@ -75,7 +75,7 @@
 
 **本轮整改**：释义数据生成规则收紧后重新生成来源清单与哈希（[审阅记录](gloss-simplification-review.md)）；`third-party.md` 的哈希入口指向自动更新的 `gloss-sources.json`，保持有效。
 
-**后续改进**（不阻塞 0.1.0 本机开发版）：项目公开许可决定前的分发评估；CC BY-SA 4.0 的 ShareAlike 边界说明已在 `third-party.md`，公开分发前复核。
+**后续改进**（不阻塞 0.1.0 本机开发版）：CC BY-SA 4.0 的 ShareAlike 边界说明已在 `third-party.md`，公开分发前复核。
 
 ## 7. 汇总：发布阻塞 vs 后续改进
 

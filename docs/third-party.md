@@ -1,6 +1,6 @@
 # 第三方组件与本机开发版许可边界
 
-Gogaku 项目许可尚未决定；当前包仅用于本机开发，不代表可公开分发。没有复制青简前端、词库或个人数据。
+Gogaku 自身代码以 MIT 许可发布（仓库根 `LICENSE`）；MIT 不改变随包第三方组件与数据的许可，各项义务以下表与后文为准。当前包仅用于本机开发验证，公开分发前仍须完成下文列出的源码提供与重链接义务。没有复制青简前端、词库或个人数据。
 
 | 组件 | 固定版本/来源 | 许可与处理 |
 | --- | --- | --- |
@@ -23,7 +23,7 @@ Gogaku 项目许可尚未决定；当前包仅用于本机开发，不代表可�
 | Wiktionary 缺失词补义项（gloss.tsv） | CC-CEDICT 当前 dump（`www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz`，2026-11-03 拉取；哈希见 `resources/gloss-sources.json`）；覆盖 Wiktionary 缺失的单字与词组（拼音词库高频词组覆盖 92%→95%，总词条 164k→201k） | CC BY-SA 4.0；署名 CC-CEDICT（MDBG）贡献者、声明修改；ShareAlike 约束同上，全文随包附 `Licenses/CC-BY-SA-4.0.txt` |
 | 翻译表达资源（`resources/translation/expressions.tsv`，尚未随包分发） | CC-CEDICT 当前 dump（`~/Library/Caches/Gogaku/kaikki/cedict_ts.u8.gz`，2026-11-02 版本 125,356 条；哈希见 `resources/translation/manifest.json`）；选词用 jieba 词频（MIT）与既有英文词频表 | CC BY-SA 4.0 衍生数据：署名 CC-CEDICT 贡献者、声明修改（按义项组数与唯一性规则筛选、逐条人工复核）、按 CC BY-SA 4.0 分发；只含词／短语级表达，不含句对；当前翻译走火山 API，本文件不进入安装包，保留为历史研究材料 |
 
-构建将实际许可证据、哈希与上游声明复制到每个 app 的 `Contents/Licenses/`。`scripts/prepare-dependencies.py` 从固定提交构建，`macos/EngineBridge/` 是完整桥接源码；动态库可替换并重新进行本机签名。固定源码与数据留在 `~/Library/Caches/Gogaku/libime-1.1.17/`。后续公开分发前仍需完成适用源码提供、重链接/替换说明、全部间接依赖署名和 Gogaku 自身许可决定，不把本机 ad-hoc 签名称为 Developer ID 签名或公证。
+构建将实际许可证据、哈希与上游声明复制到每个 app 的 `Contents/Licenses/`。`scripts/prepare-dependencies.py` 从固定提交构建，`macos/EngineBridge/` 是完整桥接源码；动态库可替换并重新进行本机签名。固定源码与数据留在 `~/Library/Caches/Gogaku/libime-1.1.17/`。后续公开分发前仍需完成适用源码提供、重链接/替换说明和全部间接依赖署名，不把本机 ad-hoc 签名称为 Developer ID 签名或公证。
 
 `shared/licenses/Boost-LICENSE.txt` 对照Boost官方 `https://www.boost.org/LICENSE_1_0.txt`；libintl声明对照本机gettext 1.0的 `libintl.h`，LGPL-2.1全文取本机XZ随附的同一标准许可文本。实际包内共享库、可执行文件及资源的最终哈希在 `dist/bundle-manifest.json`，运行依赖闭包实测见[包检查结果](validation/bundle-smoke.json)。没有复制Homebrew命令行工具；构建时可使用Homebrew，运行时只引用系统或包内库。
 
