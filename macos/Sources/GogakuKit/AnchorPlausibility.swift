@@ -47,12 +47,17 @@ public enum AnchorPlausibility {
     }
 
     /// - Parameters:
+    ///   - previousProvisional: 上次锚点只是组合前的临时锚点（首键 pre-read 或无锚点
+    ///     回退），还没有任何组合内读数印证 → 组合内首个有效读数直接采纳。
+    ///     2026-11-10 Orca 终端实测：pre-read 可能是 pi 启动前 shell 行的陈旧
+    ///     矩形（屏幕顶部），组合内索引 0 才是真实输入行；若把陈旧 pre-read
+    ///     当上次有效锚点保护，真实位置会被当瞬移冻结。
     ///   - anchorAge: 锚点确立以来的有效读数序号（0 起，含本次）；宽限窗按它
     ///     判定。与 suspectStreak 独立：冻结拍也推进窗龄，逃生门跨窗界沿用
     ///     已累积的 streak，达到当时生效的阈值即接受。
     public static func classify(previous: NSRect?, next: NSRect, suspectStreak: Int,
-                                anchorAge: Int = 0) -> Decision {
-        guard let previous else { return .accept }
+                                anchorAge: Int = 0, previousProvisional: Bool = false) -> Decision {
+        guard let previous, !previousProvisional else { return .accept }
         let escapeThreshold = anchorAge < graceReads ? graceEscapeAfter : escapeAfter
         let line = max(previous.height, next.height, 12)
         let dy = next.midY - previous.midY

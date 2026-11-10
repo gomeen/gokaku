@@ -627,6 +627,9 @@ final class CandidatePanel: NSPanel {
         }
         prime()
         if let target = targetWindowLevel { applyClientWindowLevel(targetLevel: target) }
+        #if GOGAKU_VALIDATION
+        GogakuInput.diag("render t=\(DispatchTime.now().uptimeNanoseconds / 1_000_000) anchor=\(NSStringFromRect(anchor)) frame=\(NSStringFromRect(nextFrame))")
+        #endif
         if nextFrame != frame { setFrame(nextFrame, display: false) }
         placementAnchor = anchor
         placementOrigin = nextFrame.origin

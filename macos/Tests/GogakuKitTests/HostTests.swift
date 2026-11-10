@@ -30,6 +30,53 @@ final class HostTests: XCTestCase {
         @objc func bundleIdentifier() -> String { "org.gogaku.validation.host" }
     }
 
+    /// 宿主矩形按索引区分：模拟 Orca 终端组合期间索引≥1 全零、索引 0（组合起点）有效。
+    private final class IndexedRectClient: NSObject {
+        var selection = NSRange(location: 7, length: 0)
+        var marked = NSRange(location: 5, length: 2)
+        var rects: [Int: NSRect] = [:]
+        var indices: [Int] = []
+        @objc var windowLevel: Int { 0 }
+        @objc func supportsUnicode() -> Bool { true }
+        @objc func selectedRange() -> NSRange { selection }
+        @objc func markedRange() -> NSRange { marked }
+        @objc func bundleIdentifier() -> String { "org.gogaku.validation.host" }
+        @objc func attributes(forCharacterIndex index: Int, lineHeightRectangle rect: UnsafeMutablePointer<NSRect>) -> NSDictionary {
+            indices.append(index)
+            rect.pointee = rects[index] ?? .zero
+            return [:]
+        }
+    }
+
+    func testCompositionFallsBackToIndexZeroWhenCaretRectInvalid() {
+        let client = IndexedRectClient()
+        let compositionStart = NSRect(x: 326, y: 145, width: 1, height: 19)
+        client.rects[0] = compositionStart
+        let snapshot = gg_read_host(client)
+        XCTAssertEqual(client.indices, [7, 0], "先按插入点读，无效再按 SDK 契约读索引 0（组合起点）")
+        XCTAssertEqual(snapshot?.rectangleValid, true)
+        XCTAssertEqual(snapshot?.rectangle, compositionStart)
+    }
+
+    func testValidCaretRectDuringCompositionIsKept() {
+        let client = IndexedRectClient()
+        let caret = NSRect(x: 400, y: 145, width: 1, height: 19)
+        client.rects[7] = caret
+        client.rects[0] = NSRect(x: 326, y: 145, width: 1, height: 19)
+        let snapshot = gg_read_host(client)
+        XCTAssertEqual(client.indices, [7], "插入点矩形有效时不额外读组合起点（原生宿主行为不变）")
+        XCTAssertEqual(snapshot?.rectangle, caret)
+    }
+
+    func testNoCompositionNeverReadsIndexZeroFallback() {
+        let client = IndexedRectClient()
+        client.marked = NSRange(location: NSNotFound, length: 0)
+        client.rects[0] = NSRect(x: 326, y: 145, width: 1, height: 19)
+        let snapshot = gg_read_host(client)
+        XCTAssertEqual(client.indices, [7], "无组合时索引 0 读数不可靠（Orca 实测在相邻字符格间循环），不回退")
+        XCTAssertEqual(snapshot?.rectangleValid, false)
+    }
+
     func testWindowLevelReadFromClient() {
         let client = MetadataClient()
         client.windowLevelValue = 2000

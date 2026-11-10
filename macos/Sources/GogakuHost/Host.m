@@ -5,6 +5,12 @@
 GGHostSnapshot *gg_read_host(id value) {
     return gg_read_host_state(value, YES);
 }
+/** 宿主矩形可用：有限值、非负宽、正高，且不是零矩形（宿主「无数据」的回报）。 */
+static BOOL gg_rectangle_usable(NSRect r) {
+    return isfinite(r.origin.x) && isfinite(r.origin.y)
+        && isfinite(r.size.width) && isfinite(r.size.height)
+        && r.size.width >= 0 && r.size.height > 0;
+}
 GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
     @try {
         id<IMKTextInput> client = value;
@@ -34,14 +40,24 @@ GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
                 @catch (NSException *nested) { rectangle = NSZeroRect; }
             }
             // 零宽光标矩形可以有效（caret 无宽度）；非有限值或负尺寸才是无效。
-            // 组合中矩形无效（Orca 1.4.246 对组合覆盖的插入点返回零矩形）由控
-            // 制器冻结组合内最后有效锚点（refreshDisplayPosition）；此处不做
-            // 组合起点索引回退——网页/Electron 输入框对组合起点返回控件原点
-            // 附近的矩形，会被误当合法锚点把面板钉到屏幕左上角（2026-11-02
-            // 用户报告后撤销该回退）。
-            rectangleValid = isfinite(rectangle.origin.x) && isfinite(rectangle.origin.y)
-                && isfinite(rectangle.size.width) && isfinite(rectangle.size.height)
-                && rectangle.size.width >= 0 && rectangle.size.height > 0;
+            rectangleValid = gg_rectangle_usable(rectangle);
+            // 组合中按插入点读不到有效矩形时，按 SDK 契约读索引 0（索引相对
+            // inline session，0＝组合起点）。2026-11-10 Orca 终端诊断实测：
+            // 组合期间索引≥1（组合内相对位置、组合末尾、文档绝对位置）全为零，
+            // 只有索引 0 返回非零且落在真实输入行；而首键前按绝对位置读到的
+            // 是 pi 启动前 shell 行的陈旧矩形（面板钉在顶部）。只在组合中使用：
+            // 无组合时索引 0 在 Orca 读数会在相邻字符格间循环，不可靠。
+            // 2026-11-02 撤销的「组合起点回退」传的是 markedRange.location
+            // （文档绝对位置），网页输入框据此返回控件原点；与索引 0 不同。
+            if (!rectangleValid && marked.location != NSNotFound && marked.length > 0) {
+                NSRect composition = NSZeroRect;
+                @try { [client attributesForCharacterIndex:0 lineHeightRectangle:&composition]; }
+                @catch (NSException *nested) { composition = NSZeroRect; }
+                if (gg_rectangle_usable(composition)) {
+                    rectangle = composition;
+                    rectangleValid = YES;
+                }
+            }
         }
         GGHostSnapshot *result = [GGHostSnapshot new];
         result.clientID = @""; result.application = application;

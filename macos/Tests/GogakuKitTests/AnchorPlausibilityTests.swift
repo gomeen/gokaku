@@ -110,4 +110,16 @@ final class AnchorPlausibilityTests: XCTestCase {
         XCTAssertEqual(AnchorPlausibility.classify(previous: bufferStart, next: bufferStart, suspectStreak: 0),
                        .accept)
     }
+
+    func testProvisionalPreReadReplacedByFirstCompositionReading() {
+        // 2026-11-10 Orca 终端：首键 pre-read 是 pi 启动前 shell 行的陈旧矩形
+        // （屏幕顶部），组合内索引 0 才是底部输入行。临时锚点不受瞬移保护。
+        let staleShellLine = caret(x: 359, y: 1318), realEditorLine = caret(x: 326, y: 145)
+        XCTAssertEqual(AnchorPlausibility.classify(previous: staleShellLine, next: realEditorLine,
+                                                   suspectStreak: 0, previousProvisional: true),
+                       .accept, "临时锚点被组合内首个有效读数直接取代")
+        XCTAssertEqual(AnchorPlausibility.classify(previous: staleShellLine, next: realEditorLine,
+                                                   suspectStreak: 0),
+                       .freeze, "已被组合内读数印证的锚点仍受瞬移保护")
+    }
 }

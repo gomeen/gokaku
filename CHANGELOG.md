@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-10：Orca 终端打开 pi 后候选窗钉在顶部，构建 105 dev，真机待验证）
+
+- 诊断构建 104 实测（Orca 终端，`/tmp/gogaku-diag-b104.log`）：首键前按文档绝对位置读到的是 pi 启动前 shell 行的陈旧矩形（屏幕顶部）；组合期间索引 ≥1 全为零，只有索引 0（IMKTextInput 契约：相对 inline session，0＝组合起点）落在真实输入行；面板因此全程冻结在顶部。无组合时索引 0 读数在相邻字符格间循环，不可靠。
+- 修复：`Host.m` 组合中按插入点读不到有效矩形时回退读索引 0；首键 pre-read 与无锚点回退标为临时锚点，组合内首个有效读数直接取代，不经瞬移过滤。插入点矩形有效的宿主（原生文本框）行为不变。
+- HostTests／AnchorPlausibilityTests 32 项通过；Orca 终端／聊天框、Chrome、企业微信、备忘录真机待用户验证。
+
 ### 变更（2026-11-10：普通应用临时英文不再被 Esc 切回中文，工作区）
 
 - 用户报告：Shift 切临时英文直输后按 Esc，输入法立刻弹「中」切回中文且吞键。根因在共享核心 `GC_EV_ESC`：无组合时只要当前中英态偏离应用默认就无条件复位，把普通应用的手动临时英文（Temp）也切回中文——超出 product.md 编辑键行的授予范围（「Esc 回默认」只属于按应用默认英文的应用）。该分支自基线提交就存在，核心测试只覆盖了 Raycast 场景故未暴露。

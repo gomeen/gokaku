@@ -205,6 +205,10 @@ final class GogakuInputController: IMKInputController {
     /// （AnchorPlausibility.graceReads）推进首入错位更快自愈；与 streak 同点
     /// 清零。零矩形冻结不推进（无有效读数）。
     private var anchorAgeReads = 0
+    /// displayRect 只是组合前的临时锚点（首键 pre-read 或 AnchorFallback），尚无组合内
+    /// 读数印证：组合内首个有效读数直接采纳，不过瞬移过滤（2026-11-10 Orca
+    /// 终端：pre-read 可能是 shell 行的陈旧矩形）。仅在 displayRect 非空时有意义。
+    private var displayRectProvisional = false
     /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
     private var positionTimer: Timer?
     // 学习功能门禁（2026-11-06 双端统一计划）：默认关闭；用户保存火山凭据并
@@ -561,9 +565,46 @@ final class GogakuInputController: IMKInputController {
         ValidationMonitor.shared.selectionRead(snapshot.selection)
         #endif
         let state: RectState = !snapshot.rectangleRead ? .notRead : (snapshot.rectangleValid ? .valid : .invalid)
+        #if GOGAKU_VALIDATION
+        if readRectangle { diagIndexProbe(c, snapshot: snapshot) }
+        #endif
         return (snapshot.application, pid, snapshot.selection, snapshot.markedRange, snapshot.rectangle, state,
                 Int(snapshot.windowLevel), snapshot.windowLevelValid)
     }
+
+    #if GOGAKU_VALIDATION
+    /// 候选窗定位诊断（2026-11-10）：同一时刻用不同字符索引各读一次插入点矩形，
+    /// 核对 IMKTextInput 索引语义（SDK：索引相对 inline session，无组合时传 0
+    /// 取当前选区；生产路径传的是文档绝对位置 selection.location）。只记录
+    /// 范围与坐标，不读正文。额外 IPC 只在验收构建发生。
+    private func diagIndexProbe(_ c: IMKTextInput & NSObjectProtocol, snapshot: GGHostSnapshot) {
+        func rect(_ index: Int) -> String {
+            var r = NSRect.zero
+            _ = c.attributes(forCharacterIndex: index, lineHeightRectangle: &r)
+            return NSStringFromRect(r)
+        }
+        let sel = snapshot.selection, marked = snapshot.markedRange
+        var fields = ["probe t=\(DispatchTime.now().uptimeNanoseconds / 1_000_000) app=\(snapshot.application)",
+                      "composing=\(displayed != nil || !markedShown.isEmpty)",
+                      "markedLen=\(markedShown.utf16.count) caret=\(markedCaret)",
+                      "sel=\(NSStringFromRange(sel)) marked=\(NSStringFromRange(marked))",
+                      "prod=\(NSStringFromRect(snapshot.rectangle)) valid=\(snapshot.rectangleValid)",
+                      "idx0=\(rect(0))"]
+        if marked.location != NSNotFound, marked.length > 0 {
+            // 组合内光标的相对位置（选区相对组合起点）与组合末尾。
+            if sel.location != NSNotFound, sel.location >= marked.location {
+                let rel = sel.location - marked.location
+                fields.append("idxRel\(rel)=\(rect(rel))")
+            }
+            fields.append("idxEnd\(marked.length)=\(rect(marked.length))")
+        }
+        if sel.location != NSNotFound, sel.location > 0 {
+            fields.append("idxAbs\(sel.location)=\(rect(sel.location))")
+        }
+        fields.append("mouse=\(NSStringFromPoint(NSEvent.mouseLocation))")
+        GogakuInput.diag(fields.joined(separator: " "))
+    }
+    #endif
 
     private func currentTarget(readRectangle: Bool = false, strictComposition: Bool = true) -> FocusTarget? {
         guard let facts = hostFacts(readRectangle: readRectangle) else { return nil }
@@ -987,12 +1028,14 @@ final class GogakuInputController: IMKInputController {
                     displayRect = target.rect
                     // 首键 pre-read 是锚点确立点：宽限窗从这里起算。
                     anchorAgeReads = 0
+                    displayRectProvisional = true
                 } else if !hiddenByFieldLoss,
                           let fallback = AnchorFallback.resolve(preRead: target.rect,
                                                                 carried: carriedAnchorRect,
                                                                 mouseCaret: carriedAnchorRect == nil ? Self.mouseCaretRect() : nil) {
                     displayRect = fallback
                     anchorAgeReads = 0
+                    displayRectProvisional = true
                     #if GOGAKU_VALIDATION
                     GogakuInput.diag("fallback-engaged rect=\(NSStringFromRect(fallback))")
                     #endif
@@ -1108,7 +1151,11 @@ final class GogakuInputController: IMKInputController {
         let decision = AnchorPlausibility.classify(previous: displayRect,
                                                    next: current.rect,
                                                    suspectStreak: anchorSuspectStreak,
-                                                   anchorAge: anchorAgeReads)
+                                                   anchorAge: anchorAgeReads,
+                                                   previousProvisional: displayRectProvisional)
+        #if GOGAKU_VALIDATION
+        GogakuInput.diag("decision=\(decision) provisional=\(displayRectProvisional) prev=\(displayRect.map(NSStringFromRect) ?? "nil") next=\(NSStringFromRect(current.rect))")
+        #endif
         // 有效读数推进宽限窗龄（零矩形冻结已在上方提前返回，不消耗窗龄）。
         anchorAgeReads += 1
         switch decision {
@@ -1120,6 +1167,7 @@ final class GogakuInputController: IMKInputController {
         }
         let changed = displayRect != current.rect
         displayRect = current.rect
+        displayRectProvisional = false
         if changed, let view = displayed {
             // 宽限隐藏已执行时保持收起（停下且确实无译文）；其余情况面板跟随
             // 位置刷新（含首键即显的原文无候选阶段——首键矩形不可用时由这里
