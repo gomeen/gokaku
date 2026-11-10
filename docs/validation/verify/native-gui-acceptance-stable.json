@@ -1,0 +1,151 @@
+{
+  "channel": "stable",
+  "installedSHA256": "54bcf388880f8bdf99d2a18aff13dd87296b6ff40ade91c9c4e124b0f9ad766b",
+  "macosSourceSha256": "3c7f6198caf7ddadde4967275c77d21af8c328abde3d22e1bf2df3fcaaf44499",
+  "macosTestSha256": "a4219b1e1c66694652938f480d66c6593dc7546642035b2a48464bdb2388e39f",
+  "pass": true,
+  "checkedAt": "2026-11-10",
+  "method": "orca computer 读取辅助功能树，窗口实测 1000×620（最小宽 1000），浅深外观各一遍，七页各自显示「0.1.3 构建109」；按用户要求只检查不截图",
+  "screens": [
+    {
+      "page": "normal-input",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；输入方案单选、九项模糊音、候选字号滑块(14)、英文释义／输入区字母／英文候选／调频开关及应用列表可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "normal-input",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；输入方案单选、九项模糊音、候选字号滑块(14)、英文释义／输入区字母／英文候选／调频开关及应用列表可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "learning-translation",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；学习翻译开关、凭据状态「已启用（凭据已配置）」、火山凭据区可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "learning-translation",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；学习翻译开关、凭据状态「已启用（凭据已配置）」、火山凭据区可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "custom-words",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；短码短语／拼音词分段可读，空列表提示正常；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "custom-words",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；短码短语／拼音词分段可读，空列表提示正常；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "skin",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；主题列表与九条预览（ni'hao 你好）可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "skin",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；主题列表与九条预览（ni'hao 你好）可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "shortcuts",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；普通／学习、学习方向两条可配置命令及固定操作行可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "shortcuts",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；普通／学习、学习方向两条可配置命令及固定操作行可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "learning-privacy",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；记录学习片段开关、排除列表、忽略词输入区可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "learning-privacy",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；记录学习片段开关、排除列表、忽略词输入区可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "learning-snippets",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "light",
+      "passed": true,
+      "note": "页面打开；空状态「暂无学习片段」可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    },
+    {
+      "page": "learning-snippets",
+      "size": [
+        1000,
+        620
+      ],
+      "appearance": "dark",
+      "passed": true,
+      "note": "页面打开；空状态「暂无学习片段」可读；保存状态「无待保存改动」；读取辅助功能树核对，未改设置值，未截图"
+    }
+  ]
+}

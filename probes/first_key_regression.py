@@ -137,6 +137,16 @@ TARGETS = {
 }
 
 
+def close_quietly(session):
+    """跳过的宿主也要关掉：否则它留在前台，后续宿主的前台身份断言必然失败。"""
+    if session is None:
+        return
+    try:
+        session.close()
+    except Exception:
+        pass
+
+
 class GuardError(RuntimeError):
     """前台身份或专属目标身份断言失败：禁止继续投递按键。"""
 
@@ -1109,25 +1119,29 @@ class BrowserSession(BaseSession):
             raise HostError(f'页面标题载荷不可解析：{payload[:120]!r}')
         return json.loads(payload[start:end + 1])
 
+    # 会话目标名 → 测试页元素 id（页面标题 focus 字段报告的是元素 id）。
+    FIELD_IDS = {'textarea': 'area', 'contenteditable': 'rich'}
+
     def focus_target(self, target=None):
         # 焦点落到页面里的目标字段：用页面标题里的 focus 字段确认，
-        # 不依赖不稳定的网页 AX 树。target 缺省时其他会话的无参调用不会
-        # TypeError（独立运行 --hosts chrome 等场景按 HostError 跳过而非崩溃）。
-        if target is None:
-            raise HostError('浏览器会话需要目标字段（textarea／contenteditable）')
+        # 不依赖不稳定的网页 AX 树。缺省用会话自身的 target（首键矩阵无参调用）。
+        target = target or getattr(self, 'target', None)
+        if target not in self.FIELD_IDS:
+            raise HostError(f'浏览器会话目标字段非法：{target!r}')
+        field = self.FIELD_IDS[target]
         for _ in range(12):
             try:
                 state = self.page_state()
             except HostError:
                 state = {}
-            if state.get('focus') == target:
+            if state.get('focus') == field:
                 return True
             self.send([[{'key': 'tab'}]])
             time.sleep(0.15)
         state = self.page_state()
-        if state.get('focus') == target:
+        if state.get('focus') == field:
             return True
-        raise HostError(f'无法把焦点放到目标字段 {target}（当前 {state.get("focus")!r}）')
+        raise HostError(f'无法把焦点放到目标字段 {target}／#{field}（当前 {state.get("focus")!r}）')
 
     def reset_field(self):
         self.send([[{'key': 'esc'}]])
@@ -1954,6 +1968,7 @@ def main():
         for host in hosts:
             for target in TARGETS.get(host, ['default']):
                 key = (host, target)
+                session = None  # 防止 make_session 失败时误关上一个已就绪会话
                 try:
                     session = make_session(driver, host, target, run_id)
                     session.open()
@@ -1982,6 +1997,7 @@ def main():
                 except HostError as error:
                     skipped.append({'host': host, 'target': target, 'reason': str(error)})
                     print(f'跳过宿主 {host}/{target}：{error}')
+                    close_quietly(session)
         runner = Runner(driver, panel, args.iterations, warmup=args.warmup,
                         evidence=evidence, stop_on_failure=args.stop_on_failure,
                         panel_observation=args.panel_observation)

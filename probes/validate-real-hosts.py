@@ -224,6 +224,7 @@ def main():
         for host in hosts:
             for target in fkr.TARGETS.get(host, ['default']):
                 key = (host, target)
+                session = None
                 try:
                     session = fkr.make_session(driver, host, target, run_id)
                     session.open()
@@ -240,6 +241,7 @@ def main():
                 except fkr.HostError as error:
                     skipped.append({'host': host, 'target': target, 'reason': str(error)})
                     print(f'跳过宿主 {host}/{target}：{error}')
+                    fkr.close_quietly(session)
         # 严格场景集。
         letters_enabled = fkr.input_letters_enabled()
         for (host, target), session in sessions.items():
