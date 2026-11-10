@@ -22,8 +22,9 @@
   "signature": "update-manifest.json.sig"
  },
  "manifestKey": "gogaku-dev-2026-11",
- "fastReport": "verify/report-fast-dev-b99.json",
+ "fastReport": "verify/report-fast-20261110-165952.json",
  "releaseReport": "verify/report-release-20261110-172115.json",
  "hostWaiver": "用户 2026-11-10 决定直接发布：浏览器宿主探针尚未跑通且 host 档需占用桌面",
+ "evidenceNote": "fast/release 报告当前为工作区未跟踪产物；在将报告及其依赖日志纳入版本库前，不把它们作为干净 checkout 可复核的正式证据。",
  "notes": "首次 stable 定版。b106–b109 均为本地构建、未对外：b106 报告因探针修复失效；b107–b110 为验证规则调整后的重建。首次创建 Draft 440154397 上传 Windows 包失败，已删除后重建。公开清单签名用随包公钥验证通过。"
 }

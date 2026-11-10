@@ -1,12 +1,12 @@
 # 英文释义词性数据调研
 
-更新：2026-10-31。回答一个问题：普通模式候选窗的「词性＋译文」注释（如「会议 n. meeting · n. conference」）用什么数据源，能否随 macOS／Windows 安装包公开分发。结论由两轮独立调研（含本机实际下载与统计）得出；**标注「实测」的数字来自调研中真实下载的文件，其余引自官方页面原文**。
+更新：2026-11-10。本文记录数据源、许可义务和生成路线；当前 `resources/gloss.tsv` 已实际生成并随验证包使用，当前条目数与哈希以[释义审阅记录](validation/gloss-simplification-review.md)和 `resources/gloss-sources.json` 为准。
 
 ## 结论速览
 
 | 来源 | 可随包分发？ | 词性覆盖 | 规模（实测） | 角色 |
 | --- | --- | --- | --- | --- |
-| Wiktionary／enwiktionary（经 wiktextract，kaikki.org 提取） | **可以**；派生数据文件本身须按 CC BY-SA 4.0 发布，应用代码许可不受影响 | 最好：n/v/adj/adv/pron/intj/conj/classifier/name/character 等 12 类 | zh 词条＋英文释义 177,531 行／163,236 词头；紧凑 TSV 9.79 MB（gzip 4.13 MB） | **主源（建议）** |
+| Wiktionary／enwiktionary（经 wiktextract，kaikki.org 提取） | **可以**；派生数据文件本身须按 CC BY-SA 4.0 发布，应用代码许可不受影响 | 最好：n/v/adj/adv/pron/intj/conj/classifier/name/character 等 12 类 | 首轮实测 177,531 行／163,236 词头；当前生成表 200,858 条记录（含 jieba／CC-CEDICT 补缺） | **主源，已落地** |
 | CC-CEDICT | 可以（CC BY-SA 4.0） | **无词性**（官方明文禁止） | 125,330 条；txt.gz 3.98 MB | 中英对照补全（覆盖更全） |
 | Chinese Open Wordnet (COW 1.1) | 可以（自定义宽松许可，须保留声明） | WordNet 粒度 n/a/v/r/x，中文虚词／量词无独立词性 | 82,660 词条；tar.xz 2.9 MB；97% 可连 Princeton WordNet 得英文释义 | 词义关系补充，暂不作主源 |
 | Unihan `kDefinition` | 可以（Unicode License V3） | 无词性、仅单字 | 23,310 个码位有英文释义 | 单字补字 |
@@ -19,7 +19,7 @@
 - **正确数据集**：英文维基词典中的中文语言条目（中文词头＋英文释义＋词性），不是中文维基词典版（`kaikki.org/zhwiktionary/` 的释义是中文，实测 353,456 条中仅 27,224 条带英文翻译）。
 - **获取**：kaikki.org 的后处理文件 `kaikki.org/dictionary/Chinese/kaikki.org-dictionary-Chinese.jsonl`（实测 1,214,688,531 B，328,919 行）**已标记 DEPRECATED**（wiktextract issue #1178，将移除）；官方推荐路径是英文版原始转储 `kaikki.org/dictionary/raw-wiktextract-data.jsonl.gz`（实测 3,082,185,963 B ≈ 2.87 GiB）按 `lang_code == "zh"` 过滤（实测 332,735 行）。
 - **实测统计**：CJK 词头＋英文释义 177,531 行／163,236 词头；词性分布 noun 85,229、verb 33,888、name 18,109、character 13,941、adj 11,074、phrase 9,275、adv 3,196、pron 594、intj 501、conj 373、classifier 151；9,042 个词头多词性（多义项用 `·` 分隔与规格一致）。以 CC-CEDICT 简体多字词为参照，覆盖率 60.2%（简→繁映射来自 `forms` 的 Simplified-Chinese 标签与 soft-redirect，实测 125,054 条）。
-- **质量抽查**：调研中抽看「會議 n. meeting; conference」等条目结构与字段完整；正式打包前仍须按计划执行随机 50 条质量样例审阅，未经审阅不打包。
+- **质量抽查**：首轮调研中抽看「會議 n. meeting; conference」等条目结构；后续已完成固定种子 50 条审阅，并按 v8.2 规则生成当前产物。当前哈希和条目数见[释义审阅记录](validation/gloss-simplification-review.md)。
 
 ## 许可义务（打包前逐项登记到[第三方许可](third-party.md)）
 
@@ -41,11 +41,11 @@ Wiktionary 文本为 CC BY-SA 4.0 ＋ GFDL 双许可（kaikki.org 原文："This
 
 COW：自定义宽松许可，许可声明与免责声明须出现在所有副本（含内部修改版）；英文释义经 `omw-en:2.0` 连接 Princeton WordNet 3.0（Princeton WordNet License：保留声明、不得以 Princeton 名义背书）。Unihan：Unicode License V3。
 
-## 落地路径（未执行项）
+## 当前落地状态
 
-1. `scripts/build-gloss-data.py`（已就位）：从 kaikki 原始转储过滤 `lang_code=="zh"`，输出 `词\t词性. 释义 · 释义`，文件头内嵌来源与许可声明；产物进 `resources/gloss.tsv`。
-2. `scripts/build-english-wordlist.py`（已就位）：SCOWL size≤60 ∩ wordfreq 词频排序，输出 `english-words.txt` 与来源哈希清单。
-3. 打包前：执行质量样例审阅（随机 50 条）、在[第三方许可](third-party.md)登记文件／版本／哈希／义务、构建 `Contents/Licenses/` 附 SCOWL README_en.txt 与 CC BY-SA 4.0 全文、随包回归确认注释降级路径正常。
-4. 在完成上述登记之前，`gloss.tsv` 与 `english-words.txt` **不进入** EngineData；输入法以无注释、无英文候选状态运行（规格允许的降级形态）。
+1. `scripts/build-gloss-data.py` 已从来源数据生成 `resources/gloss.tsv`，规则版本和来源哈希写入 `resources/gloss-sources.json`；当前清单记录 200,858 条。
+2. 释义生成已完成固定种子审阅、键与长度不变量核查、缺包降级和哈希不一致拒包验证；详见[释义审阅记录](validation/gloss-simplification-review.md)。
+3. `resources/gloss.tsv` 已进入普通输入资源链路；缺少该文件时核心继续运行但不显示注释，构建校验失败时拒绝打包。
+4. CC BY-SA 4.0、Wiktionary、jieba 与 CC-CEDICT 的署名和许可入口已登记在[第三方许可](third-party.md)。
 
-主要不确定性：把派生数据装入自有数据库时「实质改编 vs 单纯聚合」的边界因辖区而异（已用纯文本文件规避）；Wiktionary:Copyrights 页面较旧且 GFDL 版本表述与 Wikipedia 实际口径有差异（已用「只取 CC BY-SA 4.0 一支」规避）。
+英文候选词表仍按 SCOWL／wordfreq 路线单独管理，不能把释义数据已落地解释为英文候选、翻译模型或真实宿主能力已验收。

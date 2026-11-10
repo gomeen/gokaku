@@ -10,7 +10,7 @@
 | --- | --- | --- | --- | --- |
 | 开机构建 | `0.1.x-dev.N`（构建号递增） | 自己 | `verify.py --profile fast`（约 2 分钟） | Mac 两 App＋Windows 组装输入（若产物齐全） |
 | 功能交付包 | dev 版 | 自己＋朋友（测试与试用） | fast＋构建身份＋安装冒烟 | Mac pkg；Windows Setup.exe |
-| 定版 | `0.1.x`＋标签 `v0.1.x` | stable 用户 | **工作区干净**＋fast＋release＋host（短档）；核心／IMK 改动或里程碑用 host-full | 双端安装包＋身份记录＋验证报告 |
+| 定版 | `0.1.x`＋标签 `v0.1.x` | stable 用户 | **工作区干净**＋fast＋release＋host（短档）；用户书面豁免 host 时，必须记录理由、在发布说明中写明未运行 host，并写入 `release-state.json`；核心／IMK 改动或里程碑用 host-full | 双端安装包＋身份记录＋验证报告 |
 
 不再有候选版 rc（2026-11-10 裁决）。定版号决定后固定，验证失败的修复只递增构建号；版本已正式发布后才换新版本号，见[版本管理](versioning.md)。每次**对外提供安装包前递增 `version.json` 构建号**；定版构建由脚本强制要求干净工作区。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
 
@@ -64,7 +64,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 - 若当前输入源正选着 Gogaku 或旧进程仍在运行，只提示切换输入源／注销，不强杀宿主。
 - 工程坑：productbuild 手写 distribution 的 `choices-root` 结构会静默产出无组件的 2KB 空壳——必须 `--synthesize` 生成基线再补丁；脚本内置体积断言（<10MB 拒绝放行）。
 
-**当前状态**：已用真实 `installer -pkg ... -target CurrentUserHomeDirectory` 复验构建 87 dev（双 App 构建号、身份、签名、事务成功、安装后 helper 均核对）；ad-hoc 包 `spctl` 仍拒绝，Developer ID／公证未跑（无证书）。
+**当前状态**：b110 stable 已完成双端构包并发布；发布记录中的公开清单签名已验证。b110 未运行真实 host，用户已明确豁免该门槛；此前 b87 dev 的真实 `installer -pkg` 安装与事务验证仍是独立历史证据。ad-hoc 包 `spctl` 仍拒绝，Developer ID／公证未跑（无证书）。
 
 ### 2.3 签名与公证（正式分发）
 
@@ -95,7 +95,7 @@ python3 scripts/package-macos-pkg.py --channel stable \
 
 ## 3. Windows 构建（Setup.exe）
 
-构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。用户后续授权连接其已安装的 Windows VM 排查输入、候选窗、设置与图标；限定运行结果见[验收记录](validation/native-development.md)。当前 dev b94 双端包与 fast 报告见 [b94 记录](validation/dev-b94.json)；Windows 已在旧 DLL 保持加载时默认升级，并通过双架构冷／暖启动与七页设置回归，构包结果见 [windows-setup-build.json](validation/windows-setup-build.json)。Mac b94 本轮未安装；Mac b93 和 Windows b91 的宿主结果保留为历史，完整宿主、升级故障恢复／卸载及在线更新仍未验收，功能缺口见[对照表](feature-parity.md)。
+构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。当前 stable b110 安装包名称见[发布记录](validation/release-b110.json)；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为 b110 通过。
 
 | 部件 | 构建线 | 工具链 | 状态 |
 | --- | --- | --- | --- |
@@ -138,20 +138,20 @@ python3 scripts/build-win-app.py --channel dev \
 - 不设置默认输入法，不强杀宿主，不自动注销／重启，不安排锁定文件下次重启替换。
 - 未做 Authenticode 签名；不关闭系统安全机制。
 
-Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、静态包检查分别记录。完整宿主、升级／卸载、真实翻译与在线更新仍未验收；用户使用与反馈步骤见[Windows 使用说明](windows-testing.md)。
+历史 b94–b99 Windows VM 的安装、限定文本宿主、设置和图标结果与编译、静态包检查分别记录；b110 只保留构包、自动化验证和发布侧签名证据。完整宿主、升级／卸载、真实翻译与在线更新仍未验收；用户使用与反馈步骤见[Windows 使用说明](windows-testing.md)。
 
 ## 4. 检查更新与 Draft Release
 
 完整合同见[检查更新](update.md)。发布顺序：
 
 1. 递增 `version.json` 构建号，构建双端安装包及两份 `*.receipt.json`；定版要求工作区干净。
-2. 使用与发布通道相同的验证报告：dev 至少 fast；定版要求 fast＋release＋host（或 host-full）。fast 绑定当前构建号、全量指纹和两个安装包哈希；release／host 绑定同一版本字符串与 Mac 平台指纹，同版本只递增构建号或只改 Windows 时可沿用（规则见[版本管理](versioning.md)「验证报告的绑定与沿用」）。测试期间身份改变、缺项、跳过或 blocked 均不能冒充完整通过。host 仅在用户空闲并授权时执行，目前探针只支持 stable，dev 的 host 明确阻塞。
+2. 使用与发布通道相同的验证报告：dev 至少 fast；定版要求 fast＋release＋host（或 host-full），或按版本规则记录用户书面 host 豁免。fast 绑定当前构建号、全量指纹和两个安装包哈希；release／host 绑定同一版本字符串与 Mac 平台指纹，同版本只递增构建号或只改 Windows 时可沿用（规则见[版本管理](versioning.md)「验证报告的绑定与沿用」）。测试期间身份改变、缺项、跳过或 blocked 均不能冒充完整通过。host 仅在用户空闲并授权时执行，目前探针只支持 stable，dev 的 host 明确阻塞。
 3. `python3 scripts/publish-release.py --dry-run ... --verification-report <fast报告> ...` 离线核对收据、许可、报告、文件名与哈希；定版同时传 `--verification-report <release报告> --verification-report <host 或 host-full 报告>`。
 4. `GITHUB_TOKEN=... python3 scripts/publish-release.py ...`：创建 Draft → 上传 pkg／setup → 取得 asset id → 生成并签名清单 → 上传清单与签名，生成 `release-state.json`。**不自动发布。**
 5. 人工审阅 Draft 后，用原参数与原 `--out` 目录，加 `--publish-existing <Draft ID>`。脚本重新验证本地收据、报告、清单签名和远端 Draft 的四份资产，再只对指定 ID 执行 PATCH；若审阅期间资产变化，拒绝发布。也可在 GitHub 手动发布，但不会经过这一门槛。
 6. 用两个构建验证旧版发现新版、下载、校验、安装、重开显示新版本、保留数据；记录报告。
 
-发布脚本对缺失配置、私钥、许可材料或验证证据明确失败。`resources/update/config.json` 的 owner／repo 留空＝未配置更新源；客户端不得显示「已是最新」。生产发布前把 `trustedKeys` 换成生产公钥；脚本会拒绝配置中不存在的 `keyId`。私钥只存发布环境，绝不入库。
+发布脚本对缺失配置、私钥、许可材料或验证证据明确失败。`resources/update/config.json` 当前配置为 `gomeen/gokaku`；客户端若未配置更新源不得显示「已是最新」。生产发布前把 `trustedKeys` 换成生产公钥；脚本会拒绝配置中不存在的 `keyId`。私钥只存发布环境，绝不入库。
 
 ## 5. 发布 checklist
 
@@ -178,7 +178,7 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 
 - `windows-core.yml`：远端 `gomeen/gokaku` 已于 11-08 首跑，因 action 名写错（`msys2/setup-action`）在准备阶段失败；已改为 `msys2/setup-msys2@v2`，修正后尚未重跑。后续可能还要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
 - Mac 侧 CI：无。候选 `mac-core.yml` 可后置。
-- 🚧 Windows b94 默认升级与限定双架构冷／暖启动已验证；完整宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
+- 🚧 Windows 当前 b110 仅有构包和发布侧证据；真实宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
 - 🚧 Mac 双构建 pkg 升级／恢复复验（单次真实安装已有证据）。
-- 🚧 真实 GitHub Releases 更新链路（P5）。
+- 🚧 GitHub Releases 发布侧链路已通过；客户端从旧版发现、下载、安装并重开验证仍待完成。
 - ⬜ 朋友真机完整试用（走 dev 通道）。

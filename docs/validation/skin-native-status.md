@@ -1,6 +1,6 @@
 # 原生候选窗主题验收
 
-更新：2026-11-05。实现及验证在 `/Users/gomeen/orca/workspaces/gogaku/skin-native` 完成，开发分支 `gomeen/skin-native`，基于 `27428de0`；未制作安装包、未替换当前输入法。功能与格式见[皮肤说明](../skin-themes.md)。
+更新：2026-11-10。本文保留 `gomeen/skin-native` worktree 的主题设置窗口与离屏验证证据；主题数据和共享契约已进入当前源码。该 worktree 证据没有替代 b110 的真实输入源、热更新、性能或 Windows 宿主验收。功能与格式见[皮肤说明](../skin-themes.md)。
 
 ## 已实现
 

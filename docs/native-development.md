@@ -1,8 +1,8 @@
 # 本机原生开发版
 
-Windows 开发测试安装包已打通本机构包链，用户双击 EXE 安装即可；安装与启用见[Windows 使用说明](windows-testing.md)，编译／组件哈希见[构包报告](validation/windows-setup-build.json)。用户后续授权在已安装的 Windows VM 中排查普通输入、候选窗、设置与图标，限定结果见[原生验收记录](validation/native-development.md)；构包流程仍不要求 VM，以下本机安装与宿主操作指 macOS。
+Windows stable b110 安装包已打通本机构包链；当前发布、安装与启用见[Windows 使用说明](windows-testing.md)，b110 资产与签名见[发布记录](validation/release-b110.json)。[构包报告](validation/windows-setup-build.json)是 b91 的历史交叉编译／组件哈希证据。b110 的 fast／release 自动化验证和发布清单签名已完成，真实 Windows 宿主、客户端在线更新、完整升级恢复／卸载仍未验收；历史 b94–b99 VM 结果见[原生验收记录](validation/native-development.md)。构包流程仍不要求 VM，以下本机安装与宿主操作指 macOS。
 
-当前 dev b94 已重建双端包并通过 fast；Windows 在旧 DLL 保持加载时完成默认升级，双架构冷／暖启动和七页设置回归通过，详见 [b94 记录](validation/dev-b94.json)。Mac b94 本轮未安装；Mac PKG 实装、安装后检查与 14 项 IMK 冒烟仍属于 [b93 历史记录](validation/dev-b93.json)。完整宿主与升级失败恢复／卸载矩阵尚未验收。
+历史 dev b94 的双端包、Windows 默认升级、双架构冷／暖启动和七页设置回归仍作为对应构建证据保留，详见 [b94 记录](validation/dev-b94.json)。Mac b94 本轮未安装；Mac PKG 实装、安装后检查与 14 项 IMK 冒烟属于 [b93 历史记录](validation/dev-b93.json)。这些历史结果不代表 b110，完整宿主与升级失败恢复／卸载矩阵尚未验收。
 
 这是首阶段实施中的本机开发版，完整产品尚未通过。已验证能力与待验收矩阵见[验收记录](validation/native-development.md)，产品行为以[产品方向](product.md)为准。
 

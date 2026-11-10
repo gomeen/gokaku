@@ -1,6 +1,6 @@
 # 双端功能统一、安装包与检查更新计划
 
-状态：**已批准并实施中。** Windows 初始范围为只交付最终 Setup.exe、运行交用户；用户完成安装后追加授权在同一 VM 排查输入、候选窗、设置与图标。限定运行证据单独记录，Windows 桌面仍不是本机构包前置。原计划的功能目标和未完成项继续记录，不能把构包或限定宿主通过等同双端功能验收。 本计划取代原单 Mac 阶段计划，覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载与检查更新。产品行为以[产品方向](product.md)为准，功能状态见[双端功能对照](feature-parity.md)，更新合同见[检查更新](update.md)，历史证据见[原生开发验收](validation/native-development.md)。
+状态：**已批准并实施中，当前发布基线为 `0.1.3 / b110 stable`。** Windows 初始范围为只交付最终 Setup.exe，后来保留历史 VM 限定运行记录；b110 已完成双端构包、fast／release 自动化验证和发布清单签名，真实 host 未运行且已记录用户豁免。构包或历史限定宿主通过不等同双端功能验收。本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载与检查更新；产品行为以[产品方向](product.md)为准，功能状态见[双端功能对照](feature-parity.md)，更新合同见[检查更新](update.md)，历史证据见[原生开发验收](validation/native-development.md)。
 
 ## 一、目标与范围
 
@@ -197,9 +197,9 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 | P0 文档与合同 | 完成 | 本文件、[功能对照](feature-parity.md)、[更新合同](update.md) |
 | P1 火山收敛 | Mac 完成主体；共享提交协调未完成 | `Volcengine.swift`＋`LearningTranslation`＋设置页；等待缓冲仍在 `InputController` |
 | P1 设置迁移 | 完成 | schema 2；本地模型旧配置迁移为关闭；已启用火山保留 |
-| P2 Windows TSF／代理 | x86／x64 TSF、x64 代理／核心已编译 | 私有管道、焦点／字段、提交确认、原子持久化已接通；当前 Windows 运行验证交用户 |
+| P2 Windows TSF／代理 | x86／x64 TSF、x64 代理／核心已编译 | 私有管道、焦点／字段、提交确认、原子持久化已接通；b110 真实 Windows 运行验证未做，b94–b99 运行记录仅属历史 dev 包 |
 | P3 Windows 设置／主题／拼写 | 已编译，存在功能缺口 | Win32 七页、Direct2D／DirectWrite／WIC、主题 ZIP、自定义词、系统拼写；缺口见[对照表](feature-parity.md) |
-| P4 Mac PKG | 打包阶段注入身份＋签名；真实 `installer -pkg` 单次安装通过；假 HOME 成功／失败／中断通过；Developer ID／公证未执行（无证书） | `scripts/package-macos-pkg.py`、`pkg-postinstall.sh`、`docs/validation/native-development.md` |
-| P4 Windows Setup | b94 默认升级与保留数据通过；完整恢复／卸载未验收 | [b94 证据](validation/dev-b94.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐 |
-| P5 检查更新 | 两端客户端已实现；Windows 已编译；真实 GitHub 未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本 |
-| P6 最终验收 | 核心关键回归通过；完整产品未验收 | Windows VM 限定安装／宿主／UI 结果另列；真机与完整矩阵未验收 |
+| P4 Mac PKG | b110 stable 已发布；历史真实 `installer -pkg` 单次安装与假 HOME 事务证据保留；Developer ID／公证未执行（无证书） | `scripts/package-macos-pkg.py`、`pkg-postinstall.sh`、`docs/validation/native-development.md`、[b110 发布记录](validation/release-b110.json) |
+| P4 Windows Setup | b110 stable 双端安装包已发布；真实宿主、完整恢复／卸载未验收 | [b110 发布记录](validation/release-b110.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐；b94 默认升级证据保留为历史 |
+| P5 检查更新 | 两端客户端已实现；b110 stable 发布侧已完成；客户端真实旧版更新闭环未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本、[b110 发布记录](validation/release-b110.json) |
+| P6 最终验收 | b110 核心／fast／release 自动化检查通过；完整产品未验收，host 以用户豁免发布 | b110 发布记录；真实宿主、在线更新 E2E、完整升级恢复／卸载及真机矩阵未验收 |

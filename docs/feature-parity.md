@@ -1,8 +1,8 @@
 # 双端功能对照（macOS／Windows）
 
-更新：2026-11-08。当前 `0.1.1-dev.2`／99 双端包已重建；[b98 修复与限定证据](validation/dev-b98-fix.json)、[b99 挂起 Shift 补发](validation/dev-b99-fix.json)覆盖 Windows 默认升级、双架构组合生命周期及 13 轮正式安装件 Chrome／记事本回归（含 3 次密码采样）。已修复并复测：Chrome 组合终止撤销旧提交资格（b95）、InputScope 滞后吞首键（b97）、调频落盘阻塞请求致重复出字（b98）。b95/b96/b97 失败证据保留；完整双端验收未通过。Mac b98 本轮未安装，14 项 IMK 冒烟属于 [b93 历史证据](validation/dev-b93.json)。产品行为以[产品方向](product.md)为准，更新合同见[检查更新](update.md)。
+更新：2026-11-10。当前发布基线为 `0.1.3 / b110 stable`；双端安装包已发布，b110 fast／release 自动化验证通过，公开清单签名已核验。真实 host 未运行且有记录的用户豁免；Mac 真实输入源、Windows b110 宿主、客户端在线更新 E2E、完整升级恢复／卸载仍未验收。历史 b94–b99 记录保留为对应构建的回归材料。产品行为以[产品方向](product.md)为准，更新合同见[检查更新](update.md)。
 
-用户后续授权连接已安装的 Windows 11 VM，排查普通输入、候选窗和设置展示。当前已有七页设置、200% DPI、窗口图标及固定九条预览的限定运行证据；普通输入重复回归与新安装包证据见[原生验收记录](validation/native-development.md)。下表的“已编译”仍只表示已进入构建，未经相应运行验证的能力不据此改为通过。
+b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windows VM 限定运行结果属于 b94–b99，不能自动延伸到 b110。下表的“已编译”仍只表示已进入构建，未经相应运行验证的能力不据此改为通过。
 
 平台可在系统控件、字体栅格化、应用身份和系统拼写词典上有所不同；输入规则、设置效果、数据格式与失败行为仍按统一目标实施。
 
@@ -55,25 +55,25 @@
 | 设置与调频目录 | `~/Library/Application Support/Gogaku/` | `%LOCALAPPDATA%\Gogaku\` | 凭据另存 `translation/`；用户数据不进安装包 |
 | 旧本地模型配置 | schema 2 迁移为关闭（共享契约） | 读侧规范化与迁移已接入共享契约，同一实现；b93 启动／设置有证据，迁移专项待测 | 旧 Windows `settings.txt` 完整迁移仍缺 |
 | stable／dev | 独立身份，共用数据 | 独立 CLSID／语言档案／安装目录／管道 | 每通道代理独立；共享调频并发需继续完善 |
-| 对外安装件 | 仅 `.pkg` | 实际 Inno Setup EXE | 见[Windows 构包报告](validation/windows-setup-build.json) |
+| 对外安装件 | 仅 `.pkg` | 实际 Inno Setup EXE | b110 资产见[发布记录](validation/release-b110.json)；b91 组件静态报告见[历史构包报告](validation/windows-setup-build.json) |
 | 安装与注册 | pkg 单次实装、隔离事务有证据 | UAC、双架构注册、失败中止、开始菜单、可选用户自启已编译 | 不设置默认输入法，不修改系统语言 |
 | 升级与恢复 | 备份／替换／恢复已实现 | 版本目录、当前／上一根指针、注册失败恢复已实现；b94 默认升级、既有自启动迁移与数据保留通过 | 完整故障恢复／卸载矩阵和旧版本自动清理未完成；不强杀宿主或安排重启替换 |
 | 卸载与数据 | 默认保留数据 | 双架构撤销注册、删除程序、保留用户数据已编译 | 运行验收未完成；隔离夹具在预检被 Defender 阻止 |
-| 检查更新 | 客户端及协议回归通过 | Ed25519、GitHub 分页、通道／构建号、大小／SHA-256、取消／重试与安装交接已编译 | 更新源 `gomeen/gokaku` 已配置并发布 b100–b102 dev 预发布；客户端端到端点击更新未验证（Windows 客户端未运行过） |
+| 检查更新 | 客户端及协议回归通过 | Ed25519、GitHub 分页、通道／构建号、大小／SHA-256、取消／重试与安装交接已编译 | 更新源 `gomeen/gokaku` 已发布 b110 stable；客户端端到端点击更新未验证（Windows 客户端未运行过） |
 | 系统签名 | ad-hoc；无 Developer ID／公证 | 无 Authenticode | 更新签名独立于系统信任 |
 
 ## 当前证据
 
-- [b98 修复及限定回归](validation/dev-b98-fix.json)：13 轮矩阵通过（切框×2、首组×4、密码×3、记事本暖×2冷×2）；b96 密码 `ihc ` 与 b97 `hc你好` 失败证据及修复机制归档。
-- [b99 挂起 Shift 补发](validation/dev-b99-fix.json)：切框／密码／记事本无回归验证通过；VS Code／Electron 类宿主与 Windows Terminal 记为受限项（未通过）。完整验收未通过。
-- [b95 修复及限定回归](validation/dev-b95-fix.json)：旧回调负例失败，修后 x64／x86 组合回归通过；11 次同版本用例通过。首轮混合旧代理的 `i` 残留保留。
+- [b110 发布记录](validation/release-b110.json)：`0.1.3 / build 110` stable 双端资产、公开清单签名和 host 豁免记录；发布侧已完成，真实宿主与客户端更新闭环未完成。
+- [历史 b99 挂起 Shift 补发](validation/dev-b99-fix.json)：切框／密码／记事本无回归验证通过；VS Code／Electron 类宿主与 Windows Terminal 记为受限项（未通过）。完整验收未通过。
+- [历史 b98 修复及限定回归](validation/dev-b98-fix.json)：13 轮矩阵通过（切框×2、首组×4、密码×3、记事本暖×2冷×2）；b96 密码 `ihc ` 与 b97 `hc你好` 失败证据及修复机制归档。
 - [b94 扩大宿主验收失败](validation/dev-b94-acceptance.json)：Chrome 跨字段提交两次，首组输入间歇异常；后续矩阵暂停。记事本四次限定复测和 Chrome 合成密码字段通过。安装回滚／卸载夹具被安全软件阻止，未执行。
-- 当前 fast：[构建 99 的 7 项检查通过](validation/verify/report-fast-dev-b99.json)，核心 CTest 10 项、Swift Release 217 项、版本／资源、通用翻译数据及验证／交付门禁；绑定同一源码／测试指纹与双端安装包哈希。
+- [b110 自动化验证]：当前 fast／release 报告路径记录在[发布记录](validation/release-b110.json)；host 豁免已明确写入发布记录，不代表真实宿主通过。
 - [构建 94 实装证据](validation/dev-b94.json)：Windows 在旧 DLL 加载时默认升级成功，71 个文件、双架构注册、既有自启动迁移与数据保留通过；双架构各两次冷启动、各一次暖启动及七页设置通过。冷启动激活 656–750ms，属于启动准备时间，不代表逐键性能达标；5 秒握手超时路径仍不能保证首键接管。
 - [构建 93 历史证据](validation/dev-b93.json)：Mac PKG 实装与 14 项 AppKit 冒烟通过；Windows 当时独立目录安装、暖启动通过，冷启动失败且默认升级受阻。Mac b94 本轮只重建，未复用 b93 实装结果。
 - [b95 ASan／UBSan quick](validation/verify/report-asan-ubsan-quick-dev-b95.json)：新缓存重跑 2,000 序列无错误；首次因旧目录 CMake 缓存配置失败已归档。报告整体 release gate 仍未通过，不代表十万序列或完整发布检查。
 - [b99 ASan／UBSan quick](validation/verify/report-asan-ubsan-quick-dev-b99.json)：2,000 序列无错误；报告整体 release gate 仍未通过，不代表十万序列或完整发布检查。
-- [Windows 构包报告](validation/windows-setup-build.json)：本次 PE 架构、DLL 依赖闭包、payload 与安装件哈希、Inno 编译及包文件检查。
+- [历史 Windows 构包报告](validation/windows-setup-build.json)：b91 的 PE 架构、DLL 依赖闭包、payload 与安装件哈希、Inno 编译及包文件检查；b110 资产身份见[发布记录](validation/release-b110.json)。
 - [构建 91 运行证据](validation/windows-desktop-b91.json)：七页设置、图标、记事本候选／“你好”提交、32／64 位合成 Edit 及兜底函数检查通过；代理完全退出后的第一组输入仍有失败，不能称为稳定版。安装前曾人工迁走占用文件，不是无干预升级验收。真实火山、在线更新、完整宿主、升级恢复／卸载及性能矩阵仍未验收。
 
 尚未达到双端功能完全一致。多候选预译、共享学习协调、WebP 随包解码、旧文本设置迁移、历史片段管理与跨通道调频仍是实现缺口；Windows 完整故障恢复／卸载和旧版本清理仍待补齐，不因成功生成 EXE 改写为已完成。

@@ -1,6 +1,6 @@
 # 版本与构建管理
 
-Gogaku 的版本管理覆盖**双端开发测试版**：本地 Git 提交与标签；检查更新使用公开 GitHub Releases 与签名清单（见[检查更新](update.md)）。Developer ID／公证和 Authenticode 仍未决定；源码仓库是否公开不由发布仓库决定（见[产品方向](product.md)「交付与验收边界」）。
+Gogaku 的版本管理覆盖**双端开发测试版与 stable 定版**：本地 Git 提交与标签；检查更新使用公开 GitHub Releases 与签名清单（见[检查更新](update.md)）。Developer ID／公证和 Authenticode 仍未决定；源码仓库是否公开不由发布仓库决定（见[产品方向](product.md)「交付与验收边界」）。
 
 ## 单一版本来源
 
@@ -20,7 +20,7 @@ macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发�
 | 阶段 | 版本 | 约束 |
 | --- | --- | --- |
 | 开发构建 | `0.1.0-dev.1` 起递增 | 允许带未提交修改，构建身份标记 `dirty=true`；朋友试用也走 dev 通道 |
-| 定版 | `0.1.0`，附注标签 `v0.1.0` | 源码已提交且工作区干净；fast＋release＋host（或 host-full）通过后发布 |
+| 定版 | `0.1.0`，附注标签 `v0.1.0` | 源码已提交且工作区干净；fast＋release＋host（或 host-full）通过后发布。若用户明确书面决定豁免 host，必须记录豁免理由、在发布说明中写明未运行 host，并把豁免写入 `release-state.json`；该发布不代表完整宿主验收通过。 |
 | 兼容性修复 | `0.1.1` 等补丁版本 | 标签一经创建不移动；已发布版本的修复用新版本 |
 | 功能里程碑 | 后续次版本 | 能力范围另行规划 |
 

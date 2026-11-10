@@ -1,6 +1,6 @@
 # 候选窗皮肤
 
-原生界面按最后定稿的 [皮肤原型](../prototypes/skin-settings-demo.html) 实现。本轮通过独立 `gomeen/skin-native` worktree 开发；自动化与窗口证据见[验收记录](validation/skin-native-status.md)。
+原生界面按最后定稿的 [皮肤原型](../prototypes/skin-settings-demo.html) 实现；主题数据和共享契约已进入当前源码。原生设置、持久化与离屏渲染的历史验证证据见[验收记录](validation/skin-native-status.md)；真实输入源外观／热更新、性能及完整宿主验收仍未完成。
 
 ## 选择与编辑
 

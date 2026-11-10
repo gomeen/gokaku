@@ -1,6 +1,6 @@
 # 检查更新与发布清单
 
-状态：**Mac 客户端协议实现并有离屏测试；Windows 原生客户端已交叉编译并随安装包提供；真实 GitHub Releases 链路未验证。** 本文是更新合同、默认值和发布流程的唯一说明；功能状态见[双端功能对照](feature-parity.md)，安装流程见[发布与构建](release.md)。
+状态：**Mac 客户端协议实现并有离屏测试；Windows 原生客户端已交叉编译并随安装包提供。发布侧已完成 `gomeen/gokaku` 的 GitHub Release、双端资产和清单签名验证；客户端从旧版点击检查、下载、安装并重开验证仍未完成。** 本文是更新合同、默认值和发布流程的唯一说明；功能状态见[双端功能对照](feature-parity.md)，安装流程见[发布与构建](release.md)。
 
 ## 一、范围与默认值
 
@@ -87,8 +87,8 @@
 ```json
 {
   "schema": 1,
-  "owner": "your-org",
-  "repo": "gogaku-releases",
+  "owner": "gomeen",
+  "repo": "gokaku",
   "trustedKeys": [
     { "keyId": "gogaku-prod-2026", "publicKey": "base64 原始 32 字节" }
   ]
@@ -96,6 +96,7 @@
 ```
 
 - `owner`／`repo` 留空＝本机构建未配置更新源；客户端明确显示未配置。
+- 当前仓库配置为 `gomeen/gokaku`；b110 stable 已完成发布侧资产和清单签名验证，但客户端安装闭环仍待验证。
 - 公钥可轮换：保留旧 keyId 直到所有受支持版本升级完成；私钥只存发布环境，绝不入库。
 - 开发公钥 `gogaku-dev-2026-11` 仅用于协议回归；生产发布前替换为生产公钥。
   发布脚本会拒绝 `trustedKeys` 中不存在的 `keyId`，避免客户端无法验证的清单上线。
@@ -113,7 +114,7 @@ python3 scripts/verify.py --profile host --channel stable --yes
 
 # 2. 本地检查（不联网；实际报告文件名以 verify.py 输出为准）
 python3 scripts/publish-release.py --dry-run \
-  --repo owner/gogaku-releases --channel stable \
+  --repo gomeen/gokaku --channel stable \
   --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
   --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
   --verification-report docs/validation/verify/report-fast-YYYYMMDD-HHMMSS.json \
@@ -123,7 +124,7 @@ python3 scripts/publish-release.py --dry-run \
 
 # 3. 创建 Draft、上传 pkg／setup、生成并上传清单与签名
 GITHUB_TOKEN=... python3 scripts/publish-release.py \
-  --repo owner/gogaku-releases --channel stable \
+  --repo gomeen/gokaku --channel stable \
   --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
   --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
   --verification-report docs/validation/verify/report-fast-YYYYMMDD-HHMMSS.json \
@@ -164,7 +165,7 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 安装交接 | 已实现（`open` pkg） | 未在真实安装器上点过 |
 | 设置页更新窗口／自动检查 | 已实现 | `UpdateWindow.swift`；未做真实点击验收 |
 | Windows 客户端 | 已编译，尚未运行 | `windows/GogakuWindows/update.cpp`；Monocypher Ed25519、WinHTTP、窗口与自动检查；真实链路由用户验证 |
-| 真实 GitHub Releases E2E | 部分 | 发布侧已通过：`gomeen/gokaku` 上 b100–b102 三个 dev 预发布，公开清单签名已远端验证；客户端「旧版点更新→新版」端到端未做 |
+| 真实 GitHub Releases E2E | 部分 | 发布侧已通过：`gomeen/gokaku` 上 b110 stable 及此前 dev 发布的资产和公开清单签名已验证；客户端「旧版点更新→新版」端到端未做 |
 
 已做的协议回归不访问真实网络：使用注入传输模拟 GitHub API 与资产下载；签名用临时 Ed25519 密钥。**未完成真实链路前不得把在线更新标为已验收。**
 
