@@ -82,7 +82,7 @@ class DeliveryPipelineTests(unittest.TestCase):
                                   publish_existing=None, repo='acme/releases',
                                   macos_pkg=str(self.packages[0][1]), windows_setup=str(self.packages[1][1]),
                                   verification_report=[str(self.report)], key='unused', key_id='test',
-                                  notes_file=None, tag=None, require_names=True, dry_run=True,
+                                  notes_file=None, waive_host=None, tag=None, require_names=True, dry_run=True,
                                   out=str(self.root / 'out'), release_state=None)
 
     def test_fingerprints_prune_generated_cache_subtrees(self):
@@ -265,6 +265,18 @@ class DeliveryPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(delivery.DeliveryError, '重复'):
             delivery.validate_reports(both, self.receipts(), 'dev', root=self.root)
 
+    def test_host_waiver_only_skips_host_with_written_reason(self):
+        self.make_final()
+        paths = self.write_reports(('fast', 'release'))
+        with self.assertRaisesRegex(delivery.DeliveryError, 'host'):
+            delivery.validate_reports(paths, self.receipts(), 'dev', root=self.root)
+        for reason in (None, '', '  '):
+            with self.assertRaises(delivery.DeliveryError):
+                delivery.validate_reports(paths, self.receipts(), 'dev', root=self.root, waive_host=reason)
+        delivery.validate_reports(paths, self.receipts(), 'dev', root=self.root, waive_host='用户决定')
+        with self.assertRaisesRegex(delivery.DeliveryError, 'release'):
+            delivery.validate_reports(paths[:1], self.receipts(), 'dev', root=self.root, waive_host='用户决定')
+
     def test_heavy_reports_carry_over_windows_only_change_and_build_bump(self):
         self.make_final(build=12)
         paths = self.write_reports(('fast', 'release', 'host'))
@@ -384,8 +396,8 @@ class DeliveryPipelineTests(unittest.TestCase):
     def test_publisher_dry_run_rejects_renamed_old_and_fake_bytes(self):
         args = self.args()
         with mock.patch.object(publish, 'ROOT', self.root):
-            with mock.patch.object(publish, 'validate_reports', side_effect=lambda p, r, c, root:
-                                   delivery.validate_reports(p, r, c, root=root)):
+            with mock.patch.object(publish, 'validate_reports', side_effect=lambda p, r, c, root, waive_host=None:
+                                   delivery.validate_reports(p, r, c, root=root, waive_host=waive_host)):
                 publish.validate(args)
                 self.packages[0][1].write_bytes(b'not a pkg')
                 with self.assertRaisesRegex(delivery.DeliveryError, '收据不符'):

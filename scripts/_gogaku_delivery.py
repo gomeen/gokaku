@@ -325,8 +325,12 @@ def _report_problem(report, path, meta, channel, profile, current, expected, fin
     return None
 
 
-def validate_reports(paths, packages, channel, *, root=ROOT):
-    """dev 只需 fast；定版需 fast＋release＋host 或 host-full（二选一）。"""
+HOST_WAIVER_NOTE = '未运行 host'
+
+
+def validate_reports(paths, packages, channel, *, root=ROOT, waive_host=None):
+    """dev 只需 fast；定版需 fast＋release＋host 或 host-full（二选一）。
+    waive_host：用户明确决定不跑真实宿主时的书面理由；只豁免 host，不豁免 fast／release。"""
     meta = current_meta(root)
     final = '-dev.' not in meta['version']
     if (not isinstance(packages, (list, tuple)) or len(packages) != 2
@@ -352,7 +356,7 @@ def validate_reports(paths, packages, channel, *, root=ROOT):
     missing = {'fast'} - profiles
     if final:
         missing |= {'release'} - profiles
-        if not profiles & set(HOST_PROFILES):
+        if not profiles & set(HOST_PROFILES) and not (isinstance(waive_host, str) and waive_host.strip()):
             missing.add('host 或 host-full')
     if missing:
         raise DeliveryError(f'缺少必需验证报告：{sorted(missing)}')

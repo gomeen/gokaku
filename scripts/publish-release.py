@@ -28,7 +28,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from _gogaku_delivery import (DeliveryError, current_meta, read_json, sha256,
+from _gogaku_delivery import (HOST_WAIVER_NOTE, DeliveryError, current_meta, read_json, sha256,
                               validate_package, validate_reports, write_json)
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -86,7 +86,14 @@ def validate(args) -> dict:
         fail('双端安装包必须来自相同源码／版本／Git 身份')
     if not args.verification_report:
         fail('至少需要一个 --verification-report')
-    validate_reports(args.verification_report, packages, args.channel, root=ROOT)
+    if args.waive_host is not None:
+        if '-dev.' in version['version'] or not args.waive_host.strip():
+            fail('--waive-host 只用于定版，且必须写明理由')
+        if not args.notes_file or HOST_WAIVER_NOTE not in Path(args.notes_file).read_text(encoding='utf-8'):
+            fail(f'豁免 host 时发布说明必须写明「{HOST_WAIVER_NOTE}」，让用户知道未经真实宿主验证')
+        print(f'警告：本次定版豁免 host 真实宿主验证，理由：{args.waive_host}')
+    validate_reports(args.verification_report, packages, args.channel, root=ROOT,
+                     waive_host=args.waive_host)
     config = read_json(ROOT / 'resources/update/config.json')
     if f'{config.get("owner", "")}/{config.get("repo", "")}' != args.repo:
         fail('--repo 与随包更新源配置不符或更新源尚未配置')
@@ -226,7 +233,8 @@ def binding(args, meta, release_id):
     return {'schema': 1, 'repo': args.repo, 'releaseId': release_id,
             'version': meta['version'], 'buildNumber': meta['build'], 'channel': args.channel,
             'sourceSha256': meta['sourceSha256'], 'git': meta['git'],
-            'tag': meta['tag'], 'keyId': args.key_id}
+            'tag': meta['tag'], 'keyId': args.key_id,
+            **({'hostWaiver': args.waive_host} if getattr(args, 'waive_host', None) else {})}
 
 
 def verify_manifest(args, meta, records):
@@ -371,6 +379,8 @@ def main() -> None:
     parser.add_argument('--windows-setup', required=True)
     parser.add_argument('--verification-report', action='append', required=True)
     parser.add_argument('--notes-file')
+    parser.add_argument('--waive-host', metavar='REASON',
+                        help='定版时用户明确决定不跑 host 档的理由；记入 release-state，发布说明须写明「未运行 host」')
     parser.add_argument('--key', default=os.environ.get('GOGAKU_UPDATE_KEY', ''))
     parser.add_argument('--key-id', default=os.environ.get('GOGAKU_UPDATE_KEY_ID', 'gogaku-prod-2026'))
     parser.add_argument('--out')
