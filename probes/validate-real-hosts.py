@@ -227,7 +227,14 @@ def main():
                 try:
                     session = fkr.make_session(driver, host, target, run_id)
                     session.open()
-                    session.focus_target()
+                    # BrowserSession.focus_target 需要目标字段（textarea／
+                    # contenteditable 分组各自聚焦），其余会话签名无参。此前
+                    # 一律无参调用，进入浏览器宿主即 TypeError 崩溃（2026-11-10
+                    # host 档实测暴露；基线以来浏览器路径从未跑通）。
+                    if isinstance(session, fkr.BrowserSession):
+                        session.focus_target(target)
+                    else:
+                        session.focus_target()
                     sessions[key] = session
                     print(f'宿主就绪：{host}/{target}')
                 except fkr.HostError as error:

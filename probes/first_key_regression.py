@@ -1109,9 +1109,12 @@ class BrowserSession(BaseSession):
             raise HostError(f'页面标题载荷不可解析：{payload[:120]!r}')
         return json.loads(payload[start:end + 1])
 
-    def focus_target(self, target):
+    def focus_target(self, target=None):
         # 焦点落到页面里的目标字段：用页面标题里的 focus 字段确认，
-        # 不依赖不稳定的网页 AX 树。
+        # 不依赖不稳定的网页 AX 树。target 缺省时其他会话的无参调用不会
+        # TypeError（独立运行 --hosts chrome 等场景按 HostError 跳过而非崩溃）。
+        if target is None:
+            raise HostError('浏览器会话需要目标字段（textarea／contenteditable）')
         for _ in range(12):
             try:
                 state = self.page_state()
