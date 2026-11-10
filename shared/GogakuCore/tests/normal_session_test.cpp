@@ -1214,6 +1214,21 @@ void test_esc_and_misc(const Env &env) {
     check(esc.p != nullptr && esc.p->composing == 0, "Esc 取消组合");
     DelSnap esc2{send(s, GC_EV_ESC)};
     check(esc2.p != nullptr && esc2.p->consumed == 0, "无组合 Esc 交还宿主");
+    { // 普通应用手动临时英文：Esc 不复位状态，交还宿主（规格只授予按应用
+        // 默认英文应用「无组合 Esc 回默认」；此前临时英文被 Esc 误切回中文）。
+        auto *s = make_session(env);
+        DelSnap shift{send(s, GC_EV_SHIFT_CLICK)};
+        check(shift.p != nullptr && shift.p->english == 1 && shift.p->toast == 2, "普通应用 Shift 切临时英文");
+        DelSnap esc{send(s, GC_EV_ESC)};
+        check(esc.p != nullptr && esc.p->consumed == 0, "临时英文 Esc 交还宿主");
+        check(esc.p != nullptr && esc.p->english == 1, "临时英文 Esc 不切回中文");
+        check(esc.p != nullptr && esc.p->toast == 0, "临时英文 Esc 无提示");
+        DelSnap letter{send(s, GC_EV_TEXT, "x")};
+        check(letter.p != nullptr && letter.p->consumed == 0 && letter.p->english == 1, "Esc 后仍在英文直输");
+        DelSnap back{send(s, GC_EV_SHIFT_CLICK)};
+        check(back.p != nullptr && back.p->english == 0 && back.p->toast == 1, "Shift 仍是回中文出口");
+        gc_normal_session_destroy(s);
+    }
     // 空组合退格交还宿主
     DelSnap bs{send(s, GC_EV_BACKSPACE)};
     check(bs.p != nullptr && bs.p->consumed == 0, "空组合退格交还宿主");

@@ -1230,9 +1230,14 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 s->literalUsed = false;
                 s->selected = 0;
                 discard_pending_learn(*s);   // 取消组合＝放弃未确认的提交意图
-            } else if (s->engMode != base_default(*s, app)) {
-                s->engMode = base_default(*s, app);
-                toast = s->engMode == EngMode::Off ? 1 : 2;
+            } else if (base_default(*s, app) == EngMode::AppDefault &&
+                       s->engMode != EngMode::AppDefault) {
+                // 规格只授予按应用默认英文的应用「无组合 Esc 回默认」；普通
+                // 应用手动临时英文不受 Esc 影响，按键透传宿主（退出临时英文
+                // 只有 Shift 单击一条路）。此前无条件复位把普通应用的临时
+                // 英文也切回中文，超出 product.md 编辑键行的授予范围。
+                s->engMode = EngMode::AppDefault;
+                toast = 2;
             } else {
                 consumed = false;
             }

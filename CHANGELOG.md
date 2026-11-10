@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-10：普通应用临时英文不再被 Esc 切回中文，工作区）
+
+- 用户报告：Shift 切临时英文直输后按 Esc，输入法立刻弹「中」切回中文且吞键。根因在共享核心 `GC_EV_ESC`：无组合时只要当前中英态偏离应用默认就无条件复位，把普通应用的手动临时英文（Temp）也切回中文——超出 product.md 编辑键行的授予范围（「Esc 回默认」只属于按应用默认英文的应用）。该分支自基线提交就存在，核心测试只覆盖了 Raycast 场景故未暴露。
+- 修复：核心复位条件收窄为「按应用默认英文应用且未在默认态」，普通应用临时英文下 Esc 透传宿主、状态不变（退出临时英文仍只有 Shift 单击一条路）；两端共用同一实现，Windows TSF 经 shouldClaim 吃键后按 core `consumed=false` 放行，无需平台侧改动。
+- 核心回归：普通应用「Shift→Temp→Esc 状态不变且透传→Shift 回中文」入 `esc_misc` 轨迹；应用默认英文场景断言不变。核心 ctest 10/10、fast 档位 7/7（含 Swift Release 221 项）通过；真机体验待用户验证。
+
 ### 变更（2026-11-09：修复双通道 IMK 连接名冲突，构建 102 dev）
 
 - b101 真机发现：IMKServer 连接名硬编码 `Gogaku_Connection`，stable 与 dev 两通道同名。stable 进程存活时 dev 端点注册被 imklaunchagent 拒绝（`Refusing connection name for bundle: unrecognized 'InputMethodConnectionName' value`），表现为 dev 输入源选中即回弹、进程拉不起、输入菜单无可用入口；此前 dev 能用只是因为 stable 输入源未启用、无进程占名。
