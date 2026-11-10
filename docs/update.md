@@ -10,7 +10,7 @@
 | 自动检查 | **默认关闭**；开启后仅在设置应用启动及运行期间按 24 小时最多尝试一次 |
 | 自动下载／安装 | 不自动；下载与安装都由用户点击触发 |
 | 输入法进程 | 不检查更新、不在按键路径联网或读更新缓存 |
-| 通道 | 跟随安装通道：stable 只接受正式版本；dev 可接受 dev／rc／正式 |
+| 通道 | 跟随安装通道：stable 只接受正式版本；dev 可接受 dev／正式（客户端兼容解析历史 rc，发布侧不再产生） |
 | 降级 | 不自动降级；以构建号判定，同版本更高构建号可更新 |
 | 请求内容 | 只请求 GitHub 公开 Releases；不携带输入内容、火山凭据、学习记录或设备唯一标识 |
 | 系统信任 | 更新签名只证明来自发布者，**不替代** macOS 公证或 Windows Authenticode；未签名包的系统提示照实说明 |
@@ -104,10 +104,11 @@
 ## 五、发布流程
 
 ```sh
-# 1. rc／定版：两端包和收据就绪后，运行相同通道的 fast、release、host
+# 1. 定版：两端包和收据就绪后，运行相同通道的 fast、release、host
+#    （release／host 可沿用同版本、Mac 平台指纹未变的旧构建报告；fast 每个构建重跑）
 python3 scripts/verify.py --profile fast --channel stable
 python3 scripts/verify.py --profile release --channel stable
-# 仅在用户空闲并授权后运行；当前 host 探针只支持 stable
+# 仅在用户空闲并授权后运行；当前 host 探针只支持 stable；核心／IMK 改动用 host-full
 python3 scripts/verify.py --profile host --channel stable --yes
 
 # 2. 本地检查（不联网；实际报告文件名以 verify.py 输出为准）
@@ -140,9 +141,9 @@ GITHUB_TOKEN=... python3 scripts/publish-release.py \
 
 - 先上传安装包，取得 GitHub `asset id`；`scripts/make-update-manifest.py` 用真实 ID 生成清单，避免清单指向不存在的资产。
 - 上传顺序：pkg／setup → 本地 `asset-ids.json` → `update-manifest.json` → `.sig`。全部成功后仅写 `release-state.json`，必须另行人工审阅并指定同一 Draft ID 发布。
-- 发布脚本对缺失配置、私钥、许可材料、编译／打包收据或验证证据明确失败，不制作看似可更新的假发布。dev 至少 fast；rc／定版需 fast＋release＋host。报告必须匹配当前策略、必需检查清单、源码／测试指纹和双端安装包哈希，旧报告、缺项、跳过、单项或 quick ASan 报告不能放行。
+- 发布脚本对缺失配置、私钥、许可材料、编译／打包收据或验证证据明确失败，不制作看似可更新的假发布。dev 至少 fast；定版需 fast＋release＋host（或 host-full）。fast 必须匹配当前策略、必需检查清单、源码／测试指纹和双端安装包哈希；release／host 匹配同一版本字符串与 Mac 平台指纹。缺项、跳过、单项或 quick ASan 报告不能放行。
 - 清单与签名生成后可用 `scripts/update-signing.swift verify` 独立复核。
-- 发布前递增 `version.json` 构建号；rc／定版要求工作区干净。
+- 发布前递增 `version.json` 构建号；定版要求工作区干净。
 
 签名工具：
 
@@ -163,7 +164,7 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 安装交接 | 已实现（`open` pkg） | 未在真实安装器上点过 |
 | 设置页更新窗口／自动检查 | 已实现 | `UpdateWindow.swift`；未做真实点击验收 |
 | Windows 客户端 | 已编译，尚未运行 | `windows/GogakuWindows/update.cpp`；Monocypher Ed25519、WinHTTP、窗口与自动检查；真实链路由用户验证 |
-| 真实 GitHub Releases E2E | 未验证 | 需要发布仓库、token、正式或开发公钥；本地无远端 |
+| 真实 GitHub Releases E2E | 部分 | 发布侧已通过：`gomeen/gokaku` 上 b100–b102 三个 dev 预发布，公开清单签名已远端验证；客户端「旧版点更新→新版」端到端未做 |
 
 已做的协议回归不访问真实网络：使用注入传输模拟 GitHub API 与资产下载；签名用临时 Ed25519 密钥。**未完成真实链路前不得把在线更新标为已验收。**
 

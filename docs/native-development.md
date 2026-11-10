@@ -26,10 +26,11 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer swift test -c release -
 | --- | --- | --- | --- |
 | 平时开发(每轮改动) | `python3 scripts/verify.py --profile fast` | 约 2 分钟 | 关键测试：核心 ctest＋Release Swift＋版本／资源＋通用翻译数据＋验证／交付门禁负例 |
 | 核心/内存敏感改动后(可选) | `python3 scripts/verify.py --profile release --only asan-ubsan --quick` | 约 4 分钟 | ASan／UBSan 2000 序列冒烟（单项报告，不满足十万门槛） |
-| 发版本/交付 rc/定版/疑难排查 | `python3 scripts/verify.py --profile release` | 约 2.5 小时 | 全量：fast 内容＋干净构建＋包检查＋质量＋渲染＋数据可靠性＋十万序列插桩；安装预检可选;**后台运行,不阻塞迭代** |
-| 真实宿主／性能／稳定性 | `python3 scripts/verify.py --profile host --yes` | 数小时 | 两轮宿主矩阵、Orca Shift 专项、万次性能、两小时稳定性；仅用户空闲时段执行 |
+| 定版／疑难排查 | `python3 scripts/verify.py --profile release` | 预计约 15 分钟（11-10 未分片时实测 40 分钟，其中 ASan 36 分钟） | 全量：fast 内容＋干净构建＋包检查＋质量＋渲染＋数据可靠性＋十万序列插桩（默认按核数分片并行，`--asan-shards N` 可调）；安装预检可选；**后台运行，不阻塞迭代** |
+| 真实宿主（每次定版） | `python3 scripts/verify.py --profile host --yes` | 数小时 | 一轮宿主矩阵、万次性能、GUI 抽查（七页×900×620×浅深）；仅用户空闲时段执行 |
+| 完整宿主（核心／IMK 改动、里程碑） | `python3 scripts/verify.py --profile host-full --yes` | 半天以上 | 两轮宿主矩阵、Orca Shift 专项、万次性能、两小时浸泡、GUI 全矩阵 |
 
-约定:全量档只在「要对外提供安装包」或「出现难以定位的问题需要全面排查」时运行;开发阶段不允许为等待全量结果阻塞迭代(后台跑完再归档证据)。历史报告不自动代表当前源码通过。报告策略版本、必需检查清单、产品源码指纹和测试指纹都必须匹配；源码改变后按受影响范围补跑。`--only` 的缺项与 quick 插桩会使完整档位不通过，单项成功不能用作完整发布报告。host 探针目前仅支持 stable，dev 明确 blocked；GUI 人工证据须绑定当前源码和包，并覆盖七页×两尺寸×浅深截图矩阵；键盘与 VoiceOver 等交互仍需人工核对。宿主报告须覆盖完整计划及逐轮记录；性能须一万条原始样本重算达标。
+约定:全量档只在「要对外提供安装包」或「出现难以定位的问题需要全面排查」时运行;开发阶段不允许为等待全量结果阻塞迭代(后台跑完再归档证据)。历史报告不自动代表当前源码通过。报告策略版本、必需检查清单、产品源码指纹和测试指纹都必须匹配；release／host 只绑定 Mac 平台指纹，只改 Windows 或同版本只递增构建号时可沿用，规则见[版本管理](versioning.md)「验证报告的绑定与沿用」。运行期间 `verify.py` 用 caffeinate 阻止空闲睡眠；合盖且无外接显示器仍会睡眠，报告每项的 `wallMs` 明显大于 `durationMs` 时即为睡眠。`--only` 的缺项与 quick 插桩会使完整档位不通过，单项成功不能用作完整发布报告。host 探针目前仅支持 stable，dev 明确 blocked；GUI 人工证据须绑定当前安装件和 Mac 平台指纹，host 覆盖七页×默认尺寸×浅深（14 项），host-full 覆盖七页×两尺寸×浅深（28 项）；键盘与 VoiceOver 等交互仍需人工核对。宿主报告须覆盖完整计划及逐轮记录；性能须一万条原始样本重算达标。
 
 产物为 `dist/Gogaku.app` 与 `dist/Gogaku Settings.app`。输入源包含固定libime数据及重定位共享库，运行不需Homebrew或源码目录。依赖锁与许可在包内；ad-hoc签名只用于本机，不代表已公证或可公开分发。正式公开前仍须处理GPL／LGPL源码及重新链接义务。
 

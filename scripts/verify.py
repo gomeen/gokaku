@@ -8,13 +8,17 @@
                                                  # 核心／内存敏感改动后（约 4 分钟）：
                                                  # ASan/UBSan 2000 序列冒烟（不满足
                                                  # 十万序列门槛，证据须注明）
-  python3 scripts/verify.py --profile release    # 发版本／交付 rc／定版／疑难排查（约
-                                                 # 2.5 小时，建议后台跑）：干净构建＋包
-                                                 # 检查＋质量＋渲染＋数据可靠性＋十万序
-                                                 # 列 ASan/UBSan（安装预检可选）
-  python3 scripts/verify.py --profile host --yes # 真实宿主／性能／稳定性（显式要求，逐项
-                                                 # 核对前台身份并恢复输入源与焦点；仅在
-                                                 # 用户空闲时段执行）
+  python3 scripts/verify.py --profile release    # 定版／疑难排查（约 15 分钟，ASan 默认
+                                                 # 按核数分片并行）：干净构建＋包检查＋
+                                                 # 质量＋渲染＋数据可靠性＋十万序列
+                                                 # ASan/UBSan（安装预检可选）
+  python3 scripts/verify.py --profile host --yes # 短档真实宿主（每次 stable 定版）：一轮
+                                                 # 矩阵＋万次性能＋GUI 抽查（七页×默认
+                                                 # 尺寸×浅深）；仅在用户空闲时段执行
+  python3 scripts/verify.py --profile host-full --yes
+                                                 # 完整宿主：两轮矩阵＋Orca Shift＋性能＋
+                                                 # 两小时浸泡＋GUI 全矩阵；核心／IMK
+                                                 # 改动或里程碑时执行
 
 规则：
 - 每项检查输出 passed／failed／skipped／blocked；必需项只有全部 passed 才算
@@ -23,7 +27,11 @@
 - 报告写入 docs/validation/verify/report-<profile>-<时间戳>.json，含每项状态、
   耗时与证据路径；历史报告不自动继承为当前版本通过（每次重跑重建身份绑定）。
 - --quick 的 ASan 冒烟允许开发期快速回归，但其报告会注明「不满足十万序列
-  门槛」；对外交付（rc／定版）必须以完整十万序列报告为准。
+  门槛」；定版必须以完整十万序列报告为准。
+- macOS 上运行期间自动用 caffeinate 阻止空闲睡眠（GOGAKU_NO_CAFFEINATE=1 关闭）；
+  合盖且无外接显示器时系统仍会睡眠，报告的 wallMs 与 durationMs 差值会标出。
+- release／host 报告绑定 Mac 平台指纹（见 _gogaku_delivery.platform_fingerprints），
+  同版本只递增构建号、Mac 侧未改动时可沿用；fast 每个构建都要重跑。
 - release 档位不做真实输入注入、不接管桌面；host 档位必须显式 --yes。
 """
 import argparse
@@ -37,9 +45,9 @@ import sys
 import tempfile
 import time
 from pathlib import Path
-from _gogaku_delivery import (DeliveryError, sha256, source_fingerprint, test_fingerprint,
-                              validate_package, working_tree_dirty)
-from _gogaku_verification import POLICY_VERSION, PROFILE_CHECKS, validate_ctest_result
+from _gogaku_delivery import (DeliveryError, platform_fingerprints, sha256, source_fingerprint,
+                              test_fingerprint, validate_package, working_tree_dirty)
+from _gogaku_verification import HOST_PROFILES, POLICY_VERSION, PROFILE_CHECKS, validate_ctest_result
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'scripts'))
@@ -81,6 +89,7 @@ def check_version(ctx):
                 rejected += 1
         rejects('{"version": "01.2.3", "buildNumber": 2}', '非法版本 01.2.3')
         rejects('{"version": "0.1.0-beta.1", "buildNumber": 2}', '非法预发布段 beta.1')
+        rejects('{"version": "0.1.0-rc.1", "buildNumber": 2}', '已取消的 rc 预发布段')
         rejects('{"version": "0.1", "buildNumber": 2}', '两段版本')
         rejects('{"version": "0.1.0", "buildNumber": -1}', '负构建号')
         rejects('{"version": "0.1.0", "buildNumber": "3"}', '字符串构建号')
@@ -92,8 +101,8 @@ def check_version(ctx):
     except SystemExit:
         pass
     try:
-        build.require_clean_allowed('rc', True)
-        problems.append('未拒绝：dirty 候选构建')
+        build.require_clean_allowed('final', True)
+        problems.append('未拒绝：dirty 定版构建')
     except SystemExit:
         pass
     # 两套已安装应用版本一致性（存在时）。
@@ -112,7 +121,7 @@ def check_version(ctx):
             problems.append(f'两套应用版本不一致：{found}')
         else:
             consistency.append('installed=' + ';'.join(f'{n} {v} b{b}' for n, v, b in found))
-    detail = f"version.json={meta['version']} 构建{meta['buildNumber']}；拒绝路径 {rejected}/7；" + '；'.join(consistency)
+    detail = f"version.json={meta['version']} 构建{meta['buildNumber']}；拒绝路径 {rejected}/8；" + '；'.join(consistency)
     if problems:
         return FAIL, detail + '；' + '；'.join(problems), None
     return PASS, detail, None
@@ -413,21 +422,51 @@ def check_asan_ubsan(ctx):
     if result.returncode != 0:
         return FAIL, 'ASan 构建失败', None
     binary = asan_dir / 'gogaku_core_fuzz'
-    env = {'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data'),
-           # macOS 的 ASan 不支持 detect_leaks；强行开启会 SIGABRT。
-           'ASAN_OPTIONS': 'detect_leaks=0',
-           'UBSAN_OPTIONS': 'print_stacktrace=1:halt_on_error=1'}
-    sequences = 2000 if ctx['quick'] else 100000
-    result = sh([binary, '20261031', str(sequences)], env=env,
-                timeout=600 if ctx['quick'] else 14400)
-    # fuzz 全部输出走 stderr（fprintf）；完成判定必须看合并输出。
-    combined = (result.stdout or '') + (result.stderr or '')
-    evidence = ctx.evidence('asan-ubsan.log', combined[-8000:])
-    if result.returncode != 0:
-        return FAIL, f'插桩运行失败（exit={result.returncode}；中断或报错均不算通过）', evidence
-    if f'{sequences} 序列' not in combined or '— PASS' not in combined:
-        return FAIL, '无完成计数输出；不视为通过', evidence
-    return PASS, f'{sequences} 随机序列 ASan＋UBSan 无错误' + \
+    env = dict(os.environ)
+    env.update({'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data'),
+                # macOS 的 ASan 不支持 detect_leaks；强行开启会 SIGABRT。
+                'ASAN_OPTIONS': 'detect_leaks=0',
+                'UBSAN_OPTIONS': 'print_stacktrace=1:halt_on_error=1'})
+    total = 2000 if ctx['quick'] else 100000
+    # 分片：第 k 片用种子 20261031+k，各自独立临时目录；总序列数不变。
+    shards = max(1, min(ctx.get('asan_shards') or 1, total))
+    base_seed = 20261031
+    counts = [total // shards + (1 if k < total % shards else 0) for k in range(shards)]
+    deadline = time.monotonic() + (600 if ctx['quick'] else 14400)
+    procs = []
+    for k, count in enumerate(counts):
+        log = ctx.evidence_path(f'asan-ubsan-shard-{k}.log')
+        stream = open(log, 'w')
+        procs.append((k, count, log, stream, subprocess.Popen(
+            [str(binary), str(base_seed + k), str(count)], cwd=ROOT, env=env,
+            stdout=stream, stderr=subprocess.STDOUT)))
+    failures, done = [], 0
+    for k, count, log, stream, proc in procs:
+        try:
+            code = proc.wait(timeout=max(1, deadline - time.monotonic()))
+        except subprocess.TimeoutExpired:
+            for *_, other in procs:
+                other.kill()
+            code = 'timeout'
+        stream.close()
+        text = Path(log).read_text(errors='replace')
+        # fuzz 全部输出走 stderr（fprintf）；完成判定看每片计数与 PASS。
+        if code != 0:
+            failures.append(f'分片 {k}（种子 {base_seed + k}）exit={code}')
+        elif f'{count} 序列' not in text or '— PASS' not in text:
+            failures.append(f'分片 {k} 无完成计数输出')
+        else:
+            done += count
+    summary = [f'ASan＋UBSan {shards} 片并行，种子 {base_seed}–{base_seed + shards - 1}，'
+               f'完成 {done}/{total} 序列']
+    for k, _, log, _, _ in procs:
+        summary.append(f'--- 分片 {k} ---\n' + Path(log).read_text(errors='replace')[-2000:])
+    evidence = ctx.evidence('asan-ubsan.log', '\n'.join(summary))
+    if failures:
+        return FAIL, '插桩运行失败（中断或报错均不算通过）：' + '；'.join(failures), evidence
+    if done != total:
+        return FAIL, f'完成序列 {done} ≠ {total}；不视为通过', evidence
+    return PASS, f'{total} 随机序列 ASan＋UBSan 无错误（{shards} 片并行）' + \
         ('（quick 冒烟，不满足十万门槛）' if ctx['quick'] else ''), evidence
 
 
@@ -474,14 +513,15 @@ def check_host_plan(ctx):
         if not settings_app:
             missing.append('~/Applications/Gogaku Settings.app')
         return BLOCK, '输入法未安装（缺 ' + '、'.join(missing) + '）；先构建并安装', None
+    full = ctx.get('profile') == 'host-full'
     plan = (
-        'host 档位需要 --yes 显式确认（将向系统注入真实按键并占用桌面）。确认后逐项执行：\n'
+        f"{ctx.get('profile') or 'host'} 档位需要 --yes 显式确认（将向系统注入真实按键并占用桌面）。确认后逐项执行：\n"
         '  - host-identity：安装件身份与 version.json 一致性核对\n'
-        f'  - host-matrix-round-1／round-2：probes/validate-real-hosts.py --hosts {HOST_MATRIX_HOSTS} --iterations 200（连续两轮）\n'
-        '  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n'
-        '  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n'
-        '  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n'
-        '  - native-gui：设置七页 × 两种窗口尺寸 × 浅／深外观的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
+        f'  - host-matrix-round-1{"／round-2" if full else ""}：probes/validate-real-hosts.py --hosts {HOST_MATRIX_HOSTS} --iterations 200\n'
+        + ('  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n' if full else '')
+        + '  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n'
+        + ('  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n' if full else '')
+        + '  - native-gui：设置七页 × ' + ('两种窗口尺寸' if full else '默认 900×620') + ' × 浅／深外观的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
     )
     if not ctx['yes']:
         return BLOCK, plan, None
@@ -801,7 +841,13 @@ GUI_SIZES = ((900, 620), (760, 520))
 GUI_APPEARANCES = ('light', 'dark')
 
 
-def gui_problems(report, evidence_dir, expected):
+def gui_required_cells(profile):
+    """host 短档抽查默认尺寸（14 项）；host-full 为七页×两尺寸×浅深全矩阵（28 项）。"""
+    sizes = GUI_SIZES if profile != 'host' else GUI_SIZES[:1]
+    return {(p, size, a) for p in GUI_PAGES for size in sizes for a in GUI_APPEARANCES}
+
+
+def gui_problems(report, evidence_dir, expected, required=None):
     """人工验收证据的完整性／身份检查；不以截图存在代替人工实际操作。"""
     import hashlib
     if not isinstance(report, dict):
@@ -812,7 +858,8 @@ def gui_problems(report, evidence_dir, expected):
             problems.append(f'GUI {key} 与当前身份不符')
     if report.get('pass') is not True:
         problems.append('GUI 总结不是明确通过')
-    expected_cells = {(p, size, a) for p in GUI_PAGES for size in GUI_SIZES for a in GUI_APPEARANCES}
+    all_cells = gui_required_cells('host-full')
+    expected_cells = required or all_cells
     seen = set()
     screens = report.get('screens')
     if not isinstance(screens, list):
@@ -826,7 +873,7 @@ def gui_problems(report, evidence_dir, expected):
             problems.append('GUI 窗口尺寸非法')
             continue
         cell = (screen.get('page'), tuple(size), screen.get('appearance'))
-        if cell not in expected_cells or cell in seen or screen.get('passed') is not True:
+        if cell not in all_cells or cell in seen or screen.get('passed') is not True:
             problems.append('GUI 矩阵项未知／重复／未通过')
         seen.add(cell)
         name = screen.get('screenshot')
@@ -839,8 +886,9 @@ def gui_problems(report, evidence_dir, expected):
             problems.append('GUI 截图缺失／空文件／路径越界')
         elif hashlib.sha256(path.read_bytes()).hexdigest() != screen.get('screenshotSha256'):
             problems.append('GUI 截图哈希不符')
-    if seen != expected_cells or len(screens) != len(expected_cells):
-        problems.append('GUI 七页×两尺寸×浅深矩阵不完整')
+    if not expected_cells <= seen or len(screens) != len(seen):
+        problems.append('GUI 必需矩阵不完整（%d 项中缺 %d 项）'
+                        % (len(expected_cells), len(expected_cells - seen)))
     return problems
 
 
@@ -849,19 +897,22 @@ def check_native_gui(ctx):
     if not evidence.is_file():
         return BLOCK, ('原生 GUI 未归档：七页×900×620／760×520×浅深，真实点击、键盘、'
                        '录制与应用选择并读回配置；逐项格式见 docs/release.md：' + str(evidence)), None
-    expected = {'commit': sh(['git', 'rev-parse', 'HEAD']).stdout.strip(),
-                'sourceSha256': source_fingerprint(ROOT), 'testSha256': test_fingerprint(ROOT),
-                'version': json.loads(VERSION_FILE.read_text()), 'channel': CHANNEL,
-                'installedSHA256': ctx.get('installed_sha')}
+    # 绑定安装件哈希与 Mac 平台指纹；纯文档提交或只改 Windows 不使人工证据失效。
+    mac = platform_fingerprints(ROOT)['macos']
+    expected = {'channel': CHANNEL, 'installedSHA256': ctx.get('installed_sha'),
+                'macosSourceSha256': mac['sourceSha256'], 'macosTestSha256': mac['testSha256']}
     if not expected['installedSHA256']:
         return BLOCK, '缺少当前安装件的已核验身份；先运行 host-identity', None
     try:
-        problems = gui_problems(json.loads(evidence.read_text()), evidence.parent, expected)
+        profile = ctx.get('profile') or 'host-full'
+        problems = gui_problems(json.loads(evidence.read_text()), evidence.parent, expected,
+                                gui_required_cells(profile))
     except (OSError, ValueError, TypeError):
         return FAIL, 'GUI 证据不可读或类型非法', str(evidence)
     if problems:
         return FAIL, '；'.join(problems), str(evidence)
-    return PASS, 'GUI 人工验收证据完整（七页×两尺寸×浅深，身份／截图已核对）', str(evidence)
+    return PASS, ('GUI 人工验收证据完整（%d 项，身份／截图已核对）'
+                  % len(gui_required_cells(ctx.get('profile') or 'host-full'))), str(evidence)
 
 
 # ── 档位定义 ──────────────────────────────────────────────────────────────
@@ -897,7 +948,7 @@ RUNNERS = {
     'install-preflight': check_install_preflight,
     'host-plan': check_host_plan, 'host-identity': check_host_identity,
     'host-matrix-round-1': lambda ctx: check_host_matrix_round(ctx, 1),
-    'host-matrix-round-2': lambda ctx: check_host_matrix_round(ctx, 2),
+    'host-matrix-round-2': lambda ctx: check_host_matrix_round(ctx, 2),  # 仅 host-full
     'orca-shift': check_orca_shift, 'performance': check_host_performance,
     'stability': check_host_stability, 'native-gui': check_native_gui,
 }
@@ -910,6 +961,8 @@ class Ctx:
     def __init__(self, args):
         self['core_dir'] = ROOT / '.build/core'
         self['jobs'] = args.jobs
+        self['asan_shards'] = args.asan_shards
+        self['profile'] = args.profile
         self['quick'] = args.quick
         self['yes'] = args.yes
         self._dir = EVIDENCE_DIR / f'{args.profile}-{time.strftime("%Y%m%d-%H%M%S")}'
@@ -933,6 +986,26 @@ class Ctx:
         return str(path)
 
 
+def keep_awake():
+    """macOS：本进程存活期间阻止空闲／显示器睡眠；合盖且无外接显示器时仍会睡眠。"""
+    if sys.platform != 'darwin' or os.environ.get('GOGAKU_NO_CAFFEINATE') or not shutil.which('caffeinate'):
+        return None
+    return subprocess.Popen(['caffeinate', '-dims', '-w', str(os.getpid())],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def identity_snapshot():
+    return {'source': source_fingerprint(ROOT), 'tests': test_fingerprint(ROOT),
+            'platforms': platform_fingerprints(ROOT)}
+
+
+def identity_unchanged(profile, before, after):
+    """fast 绑定全量指纹；release／host 只绑定 Mac 平台指纹（只改 Windows 不影响）。"""
+    if profile == 'fast':
+        return before == after
+    return before['platforms']['macos'] == after['platforms']['macos']
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -940,6 +1013,8 @@ def main():
     parser.add_argument('--channel', choices=['stable', 'dev'], default='stable',
                         help='检查哪个安装通道的包（dev=Gogaku Dev，bundle ID 带 .dev）')
     parser.add_argument('--jobs', type=int, default=2)
+    parser.add_argument('--asan-shards', type=int, default=max(1, min(8, (os.cpu_count() or 2) // 2)),
+                        help='十万序列 ASan 分几片并行（默认核数一半、最多 8；quick 同样分片）')
     parser.add_argument('--quick', action='store_true',
                         help='ASan/UBSan 用 2000 序列冒烟（不满足十万序列门槛，仅开发用）')
     parser.add_argument('--yes', action='store_true',
@@ -949,25 +1024,27 @@ def main():
     args = parser.parse_args()
     set_channel(args.channel)
 
+    awake = keep_awake()
     ctx = Ctx(args)
     only = {name.strip() for name in args.only.split(',') if name.strip()}
     unknown = only - {name for name, _, _ in PROFILES[args.profile]}
     if unknown:
         parser.error('--only 中存在未知检查：' + ', '.join(sorted(unknown)))
     started = time.strftime('%Y-%m-%dT%H:%M:%S%z')
-    start_source, start_tests = source_fingerprint(ROOT), test_fingerprint(ROOT)
+    start_identity = identity_snapshot()
+    start_source, start_tests = start_identity['source'], start_identity['tests']
     results = []
     for name, required, runner in PROFILES[args.profile]:
         if only and name not in only:
             results.append({'name': name, 'required': required, 'status': SKIP,
                             'detail': '未选中（--only）', 'durationMs': 0, 'evidence': None})
             continue
-        t0 = time.monotonic()
+        t0, w0 = time.monotonic(), time.time()
         try:
             # 当前宿主探针固定 stable；不允许 dev 报告实际测到 stable。
-            if args.profile == 'host' and CHANNEL != 'stable':
+            if args.profile in HOST_PROFILES and CHANNEL != 'stable':
                 status, detail, evidence = BLOCK, '宿主探针尚未支持 dev 通道；未注入按键，不接受 stable 安装件代测', None
-            elif (args.profile == 'host' and name not in ('host-plan', 'host-identity')
+            elif (args.profile in HOST_PROFILES and name not in ('host-plan', 'host-identity')
                   and not ctx.get('host_identity_passed')):
                 status, detail, evidence = BLOCK, '当前安装件身份未通过；未启动宿主探针', None
             else:
@@ -977,13 +1054,17 @@ def main():
         except Exception as e:  # 检查自身崩溃按失败计，不静默
             status, detail, evidence = FAIL, f'检查异常：{type(e).__name__}: {e}', None
         duration = int((time.monotonic() - t0) * 1000)
+        wall = max(0, int((time.time() - w0) * 1000))
+        if wall - duration > 60000:
+            # macOS 单调时钟睡眠期间不走；差值大说明期间系统睡眠，结果本身不受影响。
+            detail = f'{detail}（墙钟比运行时长多 {(wall - duration) // 60000} 分钟，期间疑似系统睡眠）'
         results.append({'name': name, 'required': required, 'status': status,
-                        'detail': detail, 'durationMs': duration, 'evidence': evidence})
+                        'detail': detail, 'durationMs': duration, 'wallMs': wall, 'evidence': evidence})
         print(f"[{status.upper():7s}] {name}（{duration}ms）：{detail}")
 
     summary = {s: sum(1 for r in results if r['status'] == s) for s in (PASS, FAIL, SKIP, BLOCK)}
     required_bad = [r for r in results if r['required'] and r['status'] != PASS]
-    identity_stable = (source_fingerprint(ROOT), test_fingerprint(ROOT)) == (start_source, start_tests)
+    identity_stable = identity_unchanged(args.profile, start_identity, identity_snapshot())
     gate = not required_bad and identity_stable
     head = sh(['git', 'rev-parse', 'HEAD']).stdout.strip() or 'no-git'
     dirty = working_tree_dirty(ROOT)
@@ -1004,7 +1085,8 @@ def main():
     report = {
         'policyVersion': POLICY_VERSION, 'runIdentityStable': identity_stable,
         'profile': args.profile, 'channel': CHANNEL, 'quick': args.quick,
-        'sourceSha256': start_source, 'testSha256': start_tests, 'artifacts': artifacts,
+        'sourceSha256': start_source, 'testSha256': start_tests,
+        'platformFingerprints': start_identity['platforms'], 'artifacts': artifacts,
         'artifactError': artifact_error, 'startedAt': started,
         'finishedAt': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
         'commit': head, 'dirty': dirty, 'arch': platform.machine(),
@@ -1012,6 +1094,7 @@ def main():
         'checks': results, 'summary': summary,
         'gate': {'passed': gate, 'notPassed': [r['name'] for r in required_bad]
                  + ([] if identity_stable else ['运行期间源码／测试身份改变'])},
+        'keptAwake': awake is not None,
     }
     out = Path(args.report) if args.report else EVIDENCE_DIR / f'report-{args.profile}-{time.strftime("%Y%m%d-%H%M%S")}.json'
     out.parent.mkdir(parents=True, exist_ok=True)

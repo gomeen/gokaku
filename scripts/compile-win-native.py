@@ -110,7 +110,7 @@ def main():
     git = git_identity(ROOT)
     dirty = git['dirty']
     if stage != 'dev' and dirty:
-        p.error('rc／定版构建要求工作区干净；开发测试请在 version.json 使用 dev 版本')
+        p.error('定版构建要求工作区干净；开发测试请在 version.json 使用 dev 版本')
     if args.channel == 'stable' and '-' in meta['version']:
         p.error('stable 通道要求 version.json 中为正式版本')
     source = source_fingerprint(ROOT)

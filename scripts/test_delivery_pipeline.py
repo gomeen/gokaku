@@ -60,6 +60,7 @@ class DeliveryPipelineTests(unittest.TestCase):
         return {'version': delivery.current_meta(self.root), 'channel': 'dev',
                 'sourceSha256': delivery.source_fingerprint(self.root),
                 'testSha256': delivery.test_fingerprint(self.root),
+                'platformFingerprints': delivery.platform_fingerprints(self.root),
                 'policyVersion': verification.POLICY_VERSION, 'runIdentityStable': True,
                 'commit': self.git['commit'], 'dirty': self.git['dirty'], 'quick': False,
                 'profile': profile, 'gate': verification.validate_checks(profile, checks),
@@ -219,21 +220,33 @@ class DeliveryPipelineTests(unittest.TestCase):
         with self.assertRaises(delivery.DeliveryError):
             delivery.validate_reports(paths, self.receipts(), 'dev', root=self.root)
 
-    def test_rc_and_final_require_all_three_profiles_clean_and_full(self):
-        for version in ('0.1.0-rc.1', '0.1.0'):
-            with self.subTest(version=version):
-                self.put('version.json', json.dumps({'version': version, 'buildNumber': 12}))
-                self.git['dirty'] = False
-                for platform, package in self.packages:
-                    receipt = delivery.read_json(delivery.package_receipt_path(package))
-                    receipt.update(fullVersion=version, sourceSha256=delivery.source_fingerprint(self.root),
-                                   git=dict(self.git))
-                    delivery.write_json(delivery.package_receipt_path(package), receipt)
-                paths = []
-                for profile in ('fast', 'release', 'host'):
-                    path = self.root / f'{profile}.json'
-                    delivery.write_json(path, self.make_report(profile))
-                    paths.append(path)
+    def make_final(self, version='0.1.0', build=12):
+        self.put('version.json', json.dumps({'version': version, 'buildNumber': build}))
+        self.git['dirty'] = False
+        for platform, package in self.packages:
+            receipt = delivery.read_json(delivery.package_receipt_path(package))
+            receipt.update(fullVersion=version, buildNumber=build,
+                           sourceSha256=delivery.source_fingerprint(self.root), git=dict(self.git))
+            delivery.write_json(delivery.package_receipt_path(package), receipt)
+
+    def write_reports(self, profiles):
+        paths = []
+        for profile in profiles:
+            path = self.root / f'{profile}.json'
+            delivery.write_json(path, self.make_report(profile))
+            paths.append(path)
+        return paths
+
+    def test_rc_version_is_no_longer_accepted(self):
+        self.put('version.json', json.dumps({'version': '0.1.0-rc.1', 'buildNumber': 12}))
+        with self.assertRaisesRegex(delivery.DeliveryError, 'rc'):
+            delivery.current_meta(self.root)
+
+    def test_final_requires_fast_release_and_one_host_tier_clean_and_full(self):
+        self.make_final()
+        for host in verification.HOST_PROFILES:
+            with self.subTest(host=host):
+                paths = self.write_reports(('fast', 'release', host))
                 receipts = self.receipts()
                 delivery.validate_reports(paths, receipts, 'dev', root=self.root)
                 for missing in range(3):
@@ -248,6 +261,52 @@ class DeliveryPipelineTests(unittest.TestCase):
                         with self.assertRaises(delivery.DeliveryError):
                             delivery.validate_reports(paths, receipts, 'dev', root=self.root)
                         delivery.write_json(path, original)
+        both = self.write_reports(('fast', 'release', 'host', 'host-full'))
+        with self.assertRaisesRegex(delivery.DeliveryError, '重复'):
+            delivery.validate_reports(both, self.receipts(), 'dev', root=self.root)
+
+    def test_heavy_reports_carry_over_windows_only_change_and_build_bump(self):
+        self.make_final(build=12)
+        paths = self.write_reports(('fast', 'release', 'host'))
+        # 只改 Windows＋只递增构建号：release／host 沿用，fast 必须重跑。
+        self.put('windows/GogakuWindows/tsf.cpp', 'fix')
+        self.put('probes/windows-field-safety.cpp', 'fix')
+        self.put('scripts/compile-win-native.py', 'fix')
+        self.make_final(build=13)
+        with self.assertRaisesRegex(delivery.DeliveryError, '身份'):
+            delivery.validate_reports(paths, self.receipts(), 'dev', root=self.root)
+        fast = self.write_reports(('fast',))[0]
+        delivery.validate_reports([fast, paths[1], paths[2]], self.receipts(), 'dev', root=self.root)
+        # Mac 侧或共享核心改动：沿用失效。
+        for relative in ('macos/Sources/Input.swift', 'shared/GogakuCore/src/core.cpp',
+                         'probes/validate-real-hosts.py', 'scripts/verify.py'):
+            with self.subTest(relative=relative):
+                path = self.put(relative, 'mac change')
+                fast = self.write_reports(('fast',))[0]
+                with self.assertRaisesRegex(delivery.DeliveryError, 'Mac'):
+                    delivery.validate_reports([fast, paths[1], paths[2]], self.receipts(), 'dev', root=self.root)
+                path.unlink()
+        # 版本字符串改变或报告构建号高于当前：拒绝沿用。
+        self.make_final(version='0.1.1', build=14)
+        fast = self.write_reports(('fast',))[0]
+        with self.assertRaisesRegex(delivery.DeliveryError, '版本不同'):
+            delivery.validate_reports([fast, paths[1], paths[2]], self.receipts(), 'dev', root=self.root)
+
+    def test_platform_fingerprints_split_by_owner(self):
+        before = delivery.platform_fingerprints(self.root)
+        self.put('windows/a.cpp')
+        after = delivery.platform_fingerprints(self.root)
+        self.assertEqual(before['macos'], after['macos'])
+        self.assertNotEqual(before['windows'], after['windows'])
+        self.put('macos/Sources/a.swift')
+        later = delivery.platform_fingerprints(self.root)
+        self.assertEqual(after['windows'], later['windows'])
+        self.assertNotEqual(after['macos'], later['macos'])
+        self.put('shared/GogakuCore/a.cpp')
+        shared = delivery.platform_fingerprints(self.root)
+        self.assertTrue(all(shared[p] != later[p] for p in delivery.PLATFORMS))
+        self.put('version.json', '{"version":"0.1.0-dev.1","buildNumber":99}')
+        self.assertEqual(shared, delivery.platform_fingerprints(self.root))
 
     def test_duplicate_profiles_and_missing_installer_rejected(self):
         with self.assertRaises(delivery.DeliveryError):
@@ -382,7 +441,7 @@ class DeliveryPipelineTests(unittest.TestCase):
 
 class VerificationPolicyTests(unittest.TestCase):
     def test_policy_names_and_requirements(self):
-        self.assertEqual(verification.POLICY_VERSION, 2)
+        self.assertEqual(verification.POLICY_VERSION, 3)
         self.assertEqual(verification.PROFILE_CHECKS['fast'], tuple((name, True) for name in (
             'version', 'resources', 'core-tests', 'swift-tests', 'translation-data',
             'verification-contracts', 'delivery-contracts')))
@@ -391,6 +450,8 @@ class VerificationPolicyTests(unittest.TestCase):
             'verification-contracts', 'clean-build', 'bundle-check', 'quality', 'render',
             'data-reliability', 'delivery-contracts', 'asan-ubsan', 'install-preflight')))
         self.assertEqual(verification.PROFILE_CHECKS['host'], tuple((name, True) for name in (
+            'host-plan', 'host-identity', 'host-matrix-round-1', 'performance', 'native-gui')))
+        self.assertEqual(verification.PROFILE_CHECKS['host-full'], tuple((name, True) for name in (
             'host-plan', 'host-identity', 'host-matrix-round-1', 'host-matrix-round-2',
             'orca-shift', 'performance', 'stability', 'native-gui')))
 

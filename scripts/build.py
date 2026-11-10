@@ -2,10 +2,10 @@
 """构建并组装仅依赖系统库/包内库的本机开发版；不注册/切换输入源。
 
 版本来源：仓库根目录 version.json（唯一来源，见 docs/versioning.md）。
-- version：完整 SemVer（可带 -dev.N / -rc.N 预发布段）。
+- version：完整 SemVer（开发版带 -dev.N；定版无预发布段；不再使用 rc）。
 - buildNumber：单调递增整数，写入两套应用的 CFBundleVersion。
 - CFBundleShortVersionString 只写三段数字；完整版本另存包内 build-identity.json。
-- dev 构建允许带未提交修改（dirty=true 记入身份）；rc／定版构建要求工作区干净。
+- dev 构建允许带未提交修改（dirty=true 记入身份）；定版构建要求工作区干净。
 - `--channel dev`：构建 Gogaku Dev 双 App（bundle ID 带 .dev 后缀），与 stable
   通道并存为两个独立输入源；用户数据仍共用 ~/Library/Application Support/Gogaku。
 """
@@ -28,7 +28,7 @@ from _gogaku_delivery import file_manifest, source_fingerprint, working_tree_dir
 VERSION_FILE = ROOT / 'version.json'
 
 _SEMVER = re.compile(r'^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)'
-                     r'(-(0|[1-9]\d*|dev|rc)\.(0|[1-9]\d*))?$')
+                     r'(-dev\.(0|[1-9]\d*))?$')
 
 
 def load_version(path: Path = VERSION_FILE) -> dict:
@@ -47,7 +47,7 @@ def load_version(path: Path = VERSION_FILE) -> dict:
     version = data.get('version')
     if not isinstance(version, str) or not _SEMVER.match(version):
         raise SystemExit(f'非法版本号：{version!r}（需要 SemVer 三段数字，'
-                         f'预发布段只允许 dev.N／rc.N，如 0.1.0-dev.1）')
+                         f'预发布段只允许 dev.N，如 0.1.0-dev.1；不再使用 rc）')
     build = data.get('buildNumber')
     if not isinstance(build, int) or isinstance(build, bool) or build < 1:
         raise SystemExit(f'非法构建号：{build!r}（需要正整数）')
@@ -60,11 +60,8 @@ def version_release(version: str) -> str:
 
 
 def version_stage(version: str) -> str:
-    """dev（默认）／rc／final（无预发布段）。rc／final 构建要求工作区干净。"""
-    if '-' not in version:
-        return 'final'
-    pre = version.split('-', 1)[1]
-    return 'rc' if pre.startswith('rc.') else 'dev'
+    """dev（带 -dev.N）／final（无预发布段）。final 构建要求工作区干净。"""
+    return 'final' if '-' not in version else 'dev'
 
 
 def git_identity() -> dict:
@@ -79,7 +76,7 @@ def git_identity() -> dict:
 
 
 def require_clean_allowed(stage: str, dirty: bool) -> None:
-    if stage in ('rc', 'final') and dirty:
+    if stage == 'final' and dirty:
         raise SystemExit(f'{stage} 构建要求源码已提交且工作区干净；'
                          '请先提交或改用 dev 版本号。')
 

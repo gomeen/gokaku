@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import re
 
-POLICY_VERSION = 2
+# 3：host 分为短档 host 与完整档 host-full；release／host 证据按 Mac 平台指纹绑定。
+POLICY_VERSION = 3
 PASS, FAIL, SKIP, BLOCK = 'passed', 'failed', 'skipped', 'blocked'
 STATUSES = (PASS, FAIL, SKIP, BLOCK)
+# 定版发布接受其一：host（短档，每次 stable 发布）或 host-full（核心／IMK 改动与里程碑）。
+HOST_PROFILES = ('host', 'host-full')
 PROFILE_CHECKS = {
     'fast': (
         ('version', True), ('resources', True), ('core-tests', True),
@@ -21,6 +24,10 @@ PROFILE_CHECKS = {
         ('asan-ubsan', True), ('install-preflight', False),
     ),
     'host': (
+        ('host-plan', True), ('host-identity', True),
+        ('host-matrix-round-1', True), ('performance', True), ('native-gui', True),
+    ),
+    'host-full': (
         ('host-plan', True), ('host-identity', True),
         ('host-matrix-round-1', True), ('host-matrix-round-2', True),
         ('orca-shift', True), ('performance', True), ('stability', True),
@@ -54,8 +61,9 @@ def validate_checks(profile, checks):
             raise VerificationError('检查项 status 非法')
         if 'detail' in check and not isinstance(check['detail'], str):
             raise VerificationError('检查项 detail 必须是文本')
-        if 'durationMs' in check and (type(check['durationMs']) is not int or check['durationMs'] < 0):
-            raise VerificationError('检查项 durationMs 必须是非负整数')
+        for key in ('durationMs', 'wallMs'):
+            if key in check and (type(check[key]) is not int or check[key] < 0):
+                raise VerificationError(f'检查项 {key} 必须是非负整数')
         if 'evidence' in check and check['evidence'] is not None and not isinstance(check['evidence'], str):
             raise VerificationError('检查项 evidence 必须是路径或 null')
     if seen != policy.keys():

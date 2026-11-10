@@ -9,11 +9,10 @@
 | 等级 | 版本形态 | 给谁 | 门槛 | 产物 |
 | --- | --- | --- | --- | --- |
 | 开机构建 | `0.1.x-dev.N`（构建号递增） | 自己 | `verify.py --profile fast`（约 2 分钟） | Mac 两 App＋Windows 组装输入（若产物齐全） |
-| 功能交付包 | dev 版 | 自己＋朋友（测试用途） | fast＋构建身份＋安装冒烟 | Mac pkg；Windows Setup.exe（产物齐全时） |
-| 候选版 rc | `0.1.x-rc.N` | 朋友正式试用 | **工作区干净**＋fast／release／host 三档通过＋双端安装／功能证据 | 双端安装包＋身份记录＋验证报告 |
-| 定版 | `0.1.x`＋标签 `v0.1.x` | 归档 | rc 全过＋用户试用确认 | 标签一经创建不移动 |
+| 功能交付包 | dev 版 | 自己＋朋友（测试与试用） | fast＋构建身份＋安装冒烟 | Mac pkg；Windows Setup.exe |
+| 定版 | `0.1.x`＋标签 `v0.1.x` | stable 用户 | **工作区干净**＋fast＋release＋host（短档）；核心／IMK 改动或里程碑用 host-full | 双端安装包＋身份记录＋验证报告 |
 
-每次**对外提供安装包前递增 `version.json` 构建号**；rc／定版构建由脚本强制要求干净工作区。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
+不再有候选版 rc（2026-11-10 裁决）。定版号决定后固定，验证失败的修复只递增构建号；版本已正式发布后才换新版本号，见[版本管理](versioning.md)。每次**对外提供安装包前递增 `version.json` 构建号**；定版构建由脚本强制要求干净工作区。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
 
 ## 1. 双通道安装（stable＋dev）
 
@@ -32,7 +31,7 @@
 - 验证：`python3 scripts/verify.py --profile fast --channel dev`。
 - 通道检测由 bundle ID 后缀派生；Darwin 通知两通道共用（数据共用下跨通道热更新是预期行为）。
 - **卸载任一通道的 `--purge-data` 会删掉共用数据，影响另一通道**（脚本有显式确认）。
-- stable 只接受 stable 更新清单；dev 可接受 dev／rc。通道切换不自动。
+- stable 只接受 stable 更新清单；dev 可接受 dev 与正式版。通道切换不自动。
 
 ## 2. Mac 构建（仅 PKG）✅
 
@@ -145,9 +144,9 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 
 完整合同见[检查更新](update.md)。发布顺序：
 
-1. 递增 `version.json` 构建号，构建双端安装包及两份 `*.receipt.json`；rc／定版要求工作区干净。
-2. 使用与发布通道相同的验证报告：dev 至少 fast；rc／定版要求 fast＋release＋host。报告绑定当前策略、必需检查清单、产品源码／测试指纹和两个安装包哈希；测试期间身份改变、缺项、跳过或 blocked 均不能冒充完整通过。host 仅在用户空闲并授权时执行，目前探针只支持 stable，dev 的 host 明确阻塞。
-3. `python3 scripts/publish-release.py --dry-run ... --verification-report <fast报告> ...` 离线核对收据、许可、报告、文件名与哈希；rc／定版同时传 `--verification-report <release报告> --verification-report <host报告>`。
+1. 递增 `version.json` 构建号，构建双端安装包及两份 `*.receipt.json`；定版要求工作区干净。
+2. 使用与发布通道相同的验证报告：dev 至少 fast；定版要求 fast＋release＋host（或 host-full）。fast 绑定当前构建号、全量指纹和两个安装包哈希；release／host 绑定同一版本字符串与 Mac 平台指纹，同版本只递增构建号或只改 Windows 时可沿用（规则见[版本管理](versioning.md)「验证报告的绑定与沿用」）。测试期间身份改变、缺项、跳过或 blocked 均不能冒充完整通过。host 仅在用户空闲并授权时执行，目前探针只支持 stable，dev 的 host 明确阻塞。
+3. `python3 scripts/publish-release.py --dry-run ... --verification-report <fast报告> ...` 离线核对收据、许可、报告、文件名与哈希；定版同时传 `--verification-report <release报告> --verification-report <host 或 host-full 报告>`。
 4. `GITHUB_TOKEN=... python3 scripts/publish-release.py ...`：创建 Draft → 上传 pkg／setup → 取得 asset id → 生成并签名清单 → 上传清单与签名，生成 `release-state.json`。**不自动发布。**
 5. 人工审阅 Draft 后，用原参数与原 `--out` 目录，加 `--publish-existing <Draft ID>`。脚本重新验证本地收据、报告、清单签名和远端 Draft 的四份资产，再只对指定 ID 执行 PATCH；若审阅期间资产变化，拒绝发布。也可在 GitHub 手动发布，但不会经过这一门槛。
 6. 用两个构建验证旧版发现新版、下载、校验、安装、重开显示新版本、保留数据；记录报告。
@@ -162,24 +161,24 @@ Windows VM 中的安装、限定文本宿主、设置和图标结果与编译、
 4. **Mac**：`build.py` → `package-macos-pkg.py` → 真实 `installer -pkg` 安装→打字→升级→恢复冒烟。
 5. **Windows**：`build-win-app.py` → VM 安装→打字→检查更新→卸载冒烟。
 6. **归档证据**：验证报告、`docs/validation/native-development.md` 对应小节、CHANGELOG 入库；构建身份与安装包收据随包归档（`dist` 生成物不强制入库）。`docs/validation/verify` 的保留策略：保留被文档／验收记录引用的运行记录、host 档全部运行，以及每个档位最新一份；其余历史运行在收敛时删除（git 历史仍可考）。
-7. **rc 级**：确认工作区干净；fast＋完整 release＋host 三档均通过。全量 release 后台跑（约 2.5 小时，不阻塞日常），host 另在用户空闲并授权后执行；`--only` 与 quick 冒烟不满足完整档位。
+7. **定版**：确认工作区干净；fast＋完整 release＋host（短档）通过。release 后台跑（ASan 分片后预计约 15 分钟，未实测），host 另在用户空闲并授权后执行；`--only` 与 quick 冒烟不满足完整档位。长任务期间不要合盖：`verify.py` 会用 caffeinate 阻止空闲睡眠，但合盖且无外接显示器时系统仍会睡眠。
+   - 何时用 host-full：改了 `shared/GogakuCore`、Mac 输入控制器／IMK 层、候选窗或宿主探针，或到达里程碑。host-full 多跑第二轮矩阵、Orca Shift 专项、两小时浸泡和 GUI 全矩阵。
 8. **分发**：把安装包＋构建身份（或哈希清单）发给测试者；记录发放对象与版本。
-9. **定版**：全部验收＋用户试用确认后打 `v0.1.x` 标签（不移动）。
+9. **标签**：定版发布后打 `v0.1.x` 标签（不移动）；之后该版本的修复换新版本号。
 
 `build.py` 和打包脚本仍可生成开发安装包；它们不会自动执行全部发布测试。`publish-release.py` 消费已有报告，不重新跑测试。Windows 原生运行、双端升级恢复／卸载、真实云翻译和在线更新尚未全部接入机器门禁，需逐项留证；手工发送安装包或在 GitHub 手动发布也会绕过发布脚本。
 
 ### 人工 GUI 证据格式
 
-`host` 读取 `docs/validation/verify/native-gui-acceptance-stable.json`（dev 探针尚未支持）。顶层必须包含当前 `commit`、`sourceSha256`、`testSha256`、`version`（version.json 的完整对象）、`channel`、输入法主二进制的 `installedSHA256`、`pass: true` 及 `screens`。身份字段取本轮 host 报告；在真实点击／键盘导航、快捷键录制、应用选择、配置读回及 VoiceOver 检查后人工确认。
+`host`／`host-full` 读取 `docs/validation/verify/native-gui-acceptance-stable.json`（dev 探针尚未支持）。顶层必须包含 `channel`、输入法主二进制的 `installedSHA256`、`macosSourceSha256`、`macosTestSha256`（取 fast 报告 `platformFingerprints.macos` 的两个值）、`pass: true` 及 `screens`。不再绑定 commit 与全量指纹，纯文档提交或只改 Windows 不使人工证据失效；安装件哈希仍随构建号变化，每个新构建都要重新确认。在真实点击／键盘导航、快捷键录制、应用选择、配置读回及 VoiceOver 检查后人工确认。
 
-`screens` 必须覆盖七页 `learning-translation`、`normal-input`、`custom-words`、`skin`、`shortcuts`、`learning-privacy`、`learning-snippets`，各含 `[900,620]`／`[760,520]` 和 `light`／`dark`，共 28 项。每项包含 `page`、`size`、`appearance`、`passed: true`、报告同目录内的截图相对路径 `screenshot` 及实际 `screenshotSha256`。校验器核对矩阵完整性、身份和截图哈希；操作结果仍依赖人工验收，截图不能代替行为验证。
+`screens` 覆盖七页 `learning-translation`、`normal-input`、`custom-words`、`skin`、`shortcuts`、`learning-privacy`、`learning-snippets` × `light`／`dark`：host 短档只要求 `[900,620]`（14 项），host-full 还要 `[760,520]`（共 28 项）。每项包含 `page`、`size`、`appearance`、`passed: true`、报告同目录内的截图相对路径 `screenshot` 及实际 `screenshotSha256`。校验器核对矩阵完整性、身份和截图哈希；操作结果仍依赖人工验收，截图不能代替行为验证。
 
 ## 6. CI 与当前缺口
 
-- `windows-core.yml`：脚手架，**从未真实运行**（仓库无远端）。建远端后首跑预期要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
+- `windows-core.yml`：远端 `gomeen/gokaku` 已于 11-08 首跑，因 action 名写错（`msys2/setup-action`）在准备阶段失败；已改为 `msys2/setup-msys2@v2`，修正后尚未重跑。后续可能还要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
 - Mac 侧 CI：无。候选 `mac-core.yml` 可后置。
-- ⬜ 远端仓库（阻塞：CI、Releases 更新、多人协作）。
 - 🚧 Windows b94 默认升级与限定双架构冷／暖启动已验证；完整宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
 - 🚧 Mac 双构建 pkg 升级／恢复复验（单次真实安装已有证据）。
 - 🚧 真实 GitHub Releases 更新链路（P5）。
-- ⬜ rc 级真机矩阵（朋友完整试用）。
+- ⬜ 朋友真机完整试用（走 dev 通道）。

@@ -9,8 +9,8 @@ import plistlib
 import re
 import subprocess
 
-from _gogaku_verification import (POLICY_VERSION, VerificationError, summarize_checks,
-                                  validate_checks)
+from _gogaku_verification import (HOST_PROFILES, POLICY_VERSION, VerificationError,
+                                  summarize_checks, validate_checks)
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE_PATHS = ('macos', 'shared', 'windows', 'resources', 'scripts',
@@ -22,6 +22,16 @@ GENERATED_DIRS = frozenset({'.build', '.swiftpm', '__pycache__', '.cache',
                             '.pytest_cache', '.mypy_cache', '.ruff_cache',
                             '.git', '.venv', 'venv', '.tox', '.nox',
                             'node_modules', 'build', 'dist', 'CMakeFiles'})
+# 平台指纹：只改一端时，另一端的 release／host 证据不作废。未归类的文件两端都算
+# （宁可多重跑，不漏重跑）。version.json 不入平台指纹：同版本只递增构建号时，产品代码
+# 未变，由 fast 报告绑定当前构建号与双端安装包。
+WINDOWS_SCRIPT_PREFIXES = ('scripts/build-win', 'scripts/compile-win', 'scripts/package-win',
+                           'scripts/prepare-win', 'scripts/prepare-libime-windows',
+                           'scripts/windows-setup-')
+MACOS_ONLY_PATHS = ('scripts/package-macos-pkg.py', 'scripts/manage-install.py',
+                    'scripts/check-bundle.py', 'scripts/check-menu-icon.swift',
+                    'scripts/tis-select.swift', 'scripts/menu-pdf.swift')
+PLATFORMS = ('macos', 'windows')
 
 
 class DeliveryError(ValueError):
@@ -58,7 +68,7 @@ def file_manifest(folder):
             and '__pycache__' not in p.parts and p.name != '.DS_Store'}
 
 
-def _fingerprint(root, relatives, excluded_dirs=GENERATED_DIRS, excluded_paths=()):
+def _fingerprint(root, relatives, excluded_dirs=GENERATED_DIRS, excluded_paths=(), exclude=None):
     root = Path(root)
     entries = {}
     for relative in relatives:
@@ -69,9 +79,11 @@ def _fingerprint(root, relatives, excluded_dirs=GENERATED_DIRS, excluded_paths=(
                                  and (Path(folder) / name).relative_to(root).as_posix() not in excluded_paths)
                 for name in sorted(files):
                     item = Path(folder) / name
-                    if name != '.DS_Store' and not name.endswith(('.pyc', '.pyo')) and item.is_file():
-                        entries[item.relative_to(root).as_posix()] = sha256(item)
-        elif path.is_file():
+                    key = item.relative_to(root).as_posix()
+                    if (name != '.DS_Store' and not name.endswith(('.pyc', '.pyo')) and item.is_file()
+                            and not (exclude and exclude(key))):
+                        entries[key] = sha256(item)
+        elif path.is_file() and not (exclude and exclude(path.relative_to(root).as_posix())):
             entries[path.relative_to(root).as_posix()] = sha256(path)
     return hashlib.sha256(json.dumps(entries, sort_keys=True).encode()).hexdigest()
 
@@ -85,13 +97,38 @@ def test_fingerprint(root=ROOT):
     return _fingerprint(root, TEST_PATHS, excluded_paths={'probes/results'})
 
 
+def path_platform(relative):
+    """仓库相对路径归属哪一端；返回 None 表示两端共用。"""
+    name = relative.rsplit('/', 1)[-1].lower()
+    if (relative.startswith(('windows/', '.github/workflows/windows')) or relative.startswith(WINDOWS_SCRIPT_PREFIXES)
+            or (relative.startswith('probes/') and name.startswith('windows'))):
+        return 'windows'
+    if relative.startswith('macos/') or relative in MACOS_ONLY_PATHS:
+        return 'macos'
+    return None
+
+
+def platform_fingerprints(root=ROOT):
+    """每端的产品源码与测试指纹：含共享部分与本端专属部分，不含另一端与 version.json。"""
+    result = {}
+    for platform in PLATFORMS:
+        def exclude(relative, platform=platform):
+            owner = path_platform(relative)
+            return relative == 'version.json' or (owner is not None and owner != platform)
+        result[platform] = {
+            'sourceSha256': _fingerprint(root, SOURCE_PATHS, exclude=exclude),
+            'testSha256': _fingerprint(root, TEST_PATHS, excluded_paths={'probes/results'}, exclude=exclude),
+        }
+    return result
+
+
 def current_meta(root=ROOT):
     value = read_json(Path(root) / 'version.json')
     if (not isinstance(value, dict) or set(value) != {'version', 'buildNumber'}
             or not isinstance(value['version'], str)
-            or not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-(?:dev|rc)\.(?:0|[1-9][0-9]*))?', value['version'])
+            or not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-dev\.(?:0|[1-9][0-9]*))?', value['version'])
             or type(value['buildNumber']) is not int or not 1 <= value['buildNumber'] <= 65535):
-        raise DeliveryError('非法 version.json；版本须为 dev.N／rc.N／定版，构建号为 1–65535')
+        raise DeliveryError('非法 version.json；版本须为 dev.N 或定版（不再使用 rc），构建号为 1–65535')
     return value
 
 
@@ -128,7 +165,7 @@ def check_identity(value, channel, *, root=ROOT, meta=None, source=None):
     if not isinstance(git, dict) or not git.get('commit') or type(git.get('dirty')) is not bool:
         raise DeliveryError('缺少 Git 构建身份')
     if '-dev.' not in meta['version'] and git['dirty']:
-        raise DeliveryError('rc／定版不接受 dirty 构建')
+        raise DeliveryError('定版不接受 dirty 构建')
     if channel == 'stable' and '-' in meta['version']:
         raise DeliveryError('stable 通道只接受正式版本')
     return value
@@ -227,62 +264,90 @@ def _valid_artifact(value):
             and type(value['bytes']) is int and value['bytes'] > 0)
 
 
+def _report_problem(report, path, meta, channel, profile, current, expected, final):
+    """fast 精确绑定当前版本、全量指纹与双端安装包；release／host 只绑定同一版本字符串
+    与 Mac 平台指纹，可沿用到同版本、更高构建号、Mac 未改动的构建。"""
+    version = report.get('version')
+    declared_gate = report.get('gate')
+    try:
+        gate = validate_checks(profile, report.get('checks'))
+    except VerificationError as error:
+        raise DeliveryError(f'验证报告策略不符：{path}：{error}') from error
+    common_bad = (
+        not isinstance(version, dict) or set(version) != set(meta)
+        or type(version.get('buildNumber')) is not int
+        or report.get('channel') != channel
+        or type(report.get('policyVersion')) is not int or report['policyVersion'] != POLICY_VERSION
+        or report.get('runIdentityStable') is not True
+        or type(report.get('quick')) is not bool or type(report.get('dirty')) is not bool
+        or not isinstance(report.get('commit'), str)
+        or not re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', report['commit'])
+        or not isinstance(declared_gate, dict) or set(declared_gate) != {'passed', 'notPassed'}
+        or type(declared_gate.get('passed')) is not bool
+        or not isinstance(declared_gate.get('notPassed'), list)
+        or declared_gate != gate or not gate['passed']
+        or (final and report['quick']))
+    if common_bad:
+        return '验证报告缺失、未通过或指向其他源码／版本／测试身份'
+    if profile == 'fast':
+        if (version != meta or report.get('sourceSha256') != current['source']
+                or report.get('testSha256') != current['tests']):
+            return '验证报告缺失、未通过或指向其他源码／版本／测试身份'
+    else:
+        fingerprints = report.get('platformFingerprints')
+        mac = fingerprints.get('macos') if isinstance(fingerprints, dict) else None
+        if version.get('version') != meta['version'] or not 1 <= version['buildNumber'] <= meta['buildNumber']:
+            return f'{profile} 报告版本不同或构建号高于当前（只能沿用到同版本更高构建号）'
+        if mac != current['platforms']['macos']:
+            return f'{profile} 报告的 Mac 源码／测试指纹与当前不符；Mac 侧有改动须重跑'
+    if 'summary' in report:
+        summary = report['summary']
+        if (not isinstance(summary, dict) or any(type(n) is not int for n in summary.values())
+                or summary != summarize_checks(report['checks'])):
+            return '验证报告 summary 不符'
+    for key in ('startedAt', 'finishedAt', 'arch'):
+        if key in report and not isinstance(report[key], str):
+            return f'验证报告 {key} 类型非法'
+    if report.get('artifactError') is not None:
+        return '验证报告产物核验失败'
+    artifacts = report.get('artifacts')
+    if not isinstance(artifacts, dict) or any(not _valid_artifact(value) for value in artifacts.values()):
+        return '验证报告 artifacts 非法'
+    if profile == 'fast' and (set(artifacts) != set(expected) or artifacts != expected):
+        return '验证报告未绑定本轮双端安装包哈希'
+    if final and report['dirty']:
+        return '定版验证报告必须来自干净工作区'
+    return None
+
+
 def validate_reports(paths, packages, channel, *, root=ROOT):
+    """dev 只需 fast；定版需 fast＋release＋host 或 host-full（二选一）。"""
     meta = current_meta(root)
-    required_profiles = {'fast'} if '-dev.' in meta['version'] else {'fast', 'release', 'host'}
+    final = '-dev.' not in meta['version']
     if (not isinstance(packages, (list, tuple)) or len(packages) != 2
             or any(not isinstance(p, dict) for p in packages)
-            or {p.get('platform') for p in packages if isinstance(p.get('platform'), str)} != {'macos', 'windows'}
+            or {p.get('platform') for p in packages if isinstance(p.get('platform'), str)} != set(PLATFORMS)
             or any(not _valid_artifact(p.get('artifact')) for p in packages)):
         raise DeliveryError('验证报告必须绑定本轮双端安装包哈希')
     expected = {p['platform']: p['artifact'] for p in packages}
-    source, tests = source_fingerprint(root), test_fingerprint(root)
+    current = {'source': source_fingerprint(root), 'tests': test_fingerprint(root),
+               'platforms': platform_fingerprints(root)}
     profiles = set()
     for path in paths:
         report = read_json(path)
         if not isinstance(report, dict):
             raise DeliveryError(f'验证报告必须是对象：{path}')
-        try:
-            gate = validate_checks(report.get('profile'), report.get('checks'))
-        except VerificationError as error:
-            raise DeliveryError(f'验证报告策略不符：{path}：{error}') from error
-        version = report.get('version')
-        declared_gate = report.get('gate')
-        if (not isinstance(version, dict) or set(version) != set(meta)
-                or type(version.get('buildNumber')) is not int or version != meta
-                or report.get('channel') != channel
-                or type(report.get('policyVersion')) is not int or report['policyVersion'] != POLICY_VERSION
-                or report.get('sourceSha256') != source or report.get('testSha256') != tests
-                or report.get('runIdentityStable') is not True
-                or type(report.get('quick')) is not bool or type(report.get('dirty')) is not bool
-                or not isinstance(report.get('commit'), str)
-                or not re.fullmatch(r'[0-9a-f]{40}|[0-9a-f]{64}', report['commit'])
-                or not isinstance(declared_gate, dict) or set(declared_gate) != {'passed', 'notPassed'}
-                or type(declared_gate.get('passed')) is not bool
-                or not isinstance(declared_gate.get('notPassed'), list)
-                or declared_gate != gate or not gate['passed']
-                or (required_profiles != {'fast'} and report['quick'])):
-            raise DeliveryError(f'验证报告缺失、未通过或指向其他源码／版本／测试身份：{path}')
-        if 'summary' in report:
-            summary = report['summary']
-            if (not isinstance(summary, dict) or any(type(n) is not int for n in summary.values())
-                    or summary != summarize_checks(report['checks'])):
-                raise DeliveryError(f'验证报告 summary 不符：{path}')
-        for key in ('startedAt', 'finishedAt', 'arch'):
-            if key in report and not isinstance(report[key], str):
-                raise DeliveryError(f'验证报告 {key} 类型非法：{path}')
-        if report.get('artifactError') is not None:
-            raise DeliveryError(f'验证报告产物核验失败：{path}')
-        artifacts = report.get('artifacts')
-        if (not isinstance(artifacts, dict) or set(artifacts) != set(expected)
-                or any(not _valid_artifact(value) for value in artifacts.values())
-                or artifacts != expected):
-            raise DeliveryError(f'验证报告未绑定本轮双端安装包哈希：{path}')
-        if required_profiles != {'fast'} and report['dirty']:
-            raise DeliveryError('rc／定版验证报告必须来自干净工作区')
-        profile = report['profile']
-        if profile in profiles:
+        profile = report.get('profile')
+        problem = _report_problem(report, path, meta, channel, profile, current, expected, final)
+        if problem:
+            raise DeliveryError(f'{problem}：{path}')
+        if profile in profiles or (profile in HOST_PROFILES and profiles & set(HOST_PROFILES)):
             raise DeliveryError(f'重复验证 profile：{profile}')
         profiles.add(profile)
-    if not required_profiles <= profiles:
-        raise DeliveryError(f'缺少必需验证报告：{sorted(required_profiles - profiles)}')
+    missing = {'fast'} - profiles
+    if final:
+        missing |= {'release'} - profiles
+        if not profiles & set(HOST_PROFILES):
+            missing.add('host 或 host-full')
+    if missing:
+        raise DeliveryError(f'缺少必需验证报告：{sorted(missing)}')

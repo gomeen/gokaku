@@ -47,9 +47,8 @@ class VerificationTests(unittest.TestCase):
     def gui_fixture(self):
         image = self.root / 'screen.png'
         image.write_bytes(b'test screenshot fixture; not real GUI evidence')
-        expected = {'commit': 'a' * 40, 'sourceSha256': 'b' * 64,
-                    'testSha256': 'c' * 64, 'version': self.meta,
-                    'channel': 'stable', 'installedSHA256': 'd' * 64}
+        expected = {'channel': 'stable', 'installedSHA256': 'd' * 64,
+                    'macosSourceSha256': 'b' * 64, 'macosTestSha256': 'c' * 64}
         report = {**expected, 'pass': True, 'screens': [
             {'page': page, 'size': list(size), 'appearance': appearance, 'passed': True,
              'screenshot': image.name, 'screenshotSha256': hashlib.sha256(image.read_bytes()).hexdigest()}
@@ -61,6 +60,48 @@ class VerificationTests(unittest.TestCase):
         report, expected = self.gui_fixture()
         self.assertEqual(len(report['screens']), 28)
         self.assertEqual(verify.gui_problems(report, self.root, expected), [])
+
+    def fake_fuzz(self, fail_seed=None):
+        binary = self.root / '.build/core-asan/gogaku_core_fuzz'
+        binary.parent.mkdir(parents=True, exist_ok=True)
+        binary.write_text('#!/bin/sh\n'
+                          + (f'[ "$1" = "{fail_seed}" ] && echo "ERROR: AddressSanitizer" >&2 && exit 1\n' if fail_seed else '')
+                          + 'echo "fuzz: $2 序列 / 9 事件，失败 0 — PASS" >&2\n')
+        binary.chmod(0o755)
+
+    def run_asan(self, shards, quick=True):
+        self.ctx['asan_shards'] = shards
+        self.ctx['quick'] = quick
+        with mock.patch.object(verify, 'ROOT', self.root), \
+                mock.patch.object(verify, 'sh', return_value=subprocess.CompletedProcess([], 0, '', '')):
+            return verify.check_asan_ubsan(self.ctx)
+
+    def test_asan_shards_cover_total_sequences_and_fail_any_shard(self):
+        self.fake_fuzz()
+        status, detail, evidence = self.run_asan(3)
+        self.assertEqual(status, verify.PASS, detail)
+        self.assertIn('3 片并行', detail)
+        self.assertIn('完成 2000/2000', Path(evidence).read_text())
+        status, detail, _ = self.run_asan(1)
+        self.assertEqual(status, verify.PASS, detail)
+        self.fake_fuzz(fail_seed=20261032)
+        status, detail, _ = self.run_asan(3)
+        self.assertEqual(status, verify.FAIL)
+        self.assertIn('分片 1', detail)
+
+    def test_gui_short_profile_needs_default_size_only(self):
+        report, expected = self.gui_fixture()
+        short = verify.gui_required_cells('host')
+        self.assertEqual(len(short), 14)
+        report['screens'] = [s for s in report['screens'] if s['size'] == [900, 620]]
+        self.assertEqual(verify.gui_problems(report, self.root, expected, short), [])
+        # 短档证据不满足完整档；完整档证据满足短档。
+        self.assertTrue(verify.gui_problems(report, self.root, expected,
+                                            verify.gui_required_cells('host-full')))
+        full, _ = self.gui_fixture()
+        self.assertEqual(verify.gui_problems(full, self.root, expected, short), [])
+        report['screens'].pop()
+        self.assertTrue(verify.gui_problems(report, self.root, expected, short))
 
     def test_gui_rejects_old_identity_incomplete_duplicate_and_missing_image(self):
         report, expected = self.gui_fixture()
@@ -110,7 +151,7 @@ class VerificationTests(unittest.TestCase):
             (apps[1] / 'Contents/Resources/build-identity.json').write_text('{}')
             self.assertTrue(verify._installed_identity(self.ctx)[1])
 
-    def run_main(self, profile, channel, runners, *, source=None):
+    def run_main(self, profile, channel, runners, *, source=None, platforms=None):
         output = io.StringIO()
         report = self.root / 'report.json'
         with mock.patch.object(sys, 'argv', ['verify.py', '--profile', profile, '--channel', channel,
@@ -121,6 +162,9 @@ class VerificationTests(unittest.TestCase):
                 mock.patch.object(verify, 'PROFILES', {profile: runners}), \
                 mock.patch.object(verify, 'source_fingerprint', side_effect=source or ['s', 's']), \
                 mock.patch.object(verify, 'test_fingerprint', return_value='t'), \
+                mock.patch.object(verify, 'platform_fingerprints', side_effect=platforms or
+                                  (lambda root: {'macos': {'sourceSha256': 'm'}, 'windows': {'sourceSha256': 'w'}})), \
+                mock.patch.object(verify, 'keep_awake', return_value=None), \
                 mock.patch.object(verify, 'working_tree_dirty', return_value=True), \
                 mock.patch.object(verify, 'sh', return_value=subprocess.CompletedProcess([], 0, 'a' * 40, '')), \
                 contextlib.redirect_stdout(output):
@@ -128,13 +172,30 @@ class VerificationTests(unittest.TestCase):
         return code, json.loads(report.read_text()), output.getvalue()
 
     def test_dev_host_never_starts_stable_probes(self):
-        runners = [(name, required, mock.Mock(return_value=(verify.PASS, 'fixture', None)))
-                   for name, required in verify.PROFILE_CHECKS['host']]
-        code, report, _ = self.run_main('host', 'dev', runners)
+        for profile in ('host', 'host-full'):
+            runners = [(name, required, mock.Mock(return_value=(verify.PASS, 'fixture', None)))
+                       for name, required in verify.PROFILE_CHECKS[profile]]
+            code, report, _ = self.run_main(profile, 'dev', runners)
+            self.assertEqual(code, 1)
+            self.assertTrue(all(row['status'] == verify.BLOCK for row in report['checks']))
+            for _, _, runner in runners:
+                runner.assert_not_called()
+
+    def test_release_identity_ignores_windows_only_drift(self):
+        runners = [('version', True, lambda ctx: (verify.PASS, 'fixture', None))]
+        snapshots = iter([{'macos': {'sourceSha256': 'm'}, 'windows': {'sourceSha256': 'w1'}},
+                          {'macos': {'sourceSha256': 'm'}, 'windows': {'sourceSha256': 'w2'}}])
+        code, report, _ = self.run_main('release', 'stable', runners, source=['s1', 's2'],
+                                        platforms=lambda root: next(snapshots))
+        self.assertIs(report['runIdentityStable'], True)
+        self.assertEqual(report['platformFingerprints']['macos'], {'sourceSha256': 'm'})
+        self.assertIn('wallMs', report['checks'][0])
+        snapshots = iter([{'macos': {'sourceSha256': 'm1'}, 'windows': {}},
+                          {'macos': {'sourceSha256': 'm2'}, 'windows': {}}])
+        code, report, _ = self.run_main('release', 'stable', runners,
+                                        platforms=lambda root: next(snapshots))
+        self.assertIs(report['runIdentityStable'], False)
         self.assertEqual(code, 1)
-        self.assertTrue(all(row['status'] == verify.BLOCK for row in report['checks']))
-        for _, _, runner in runners:
-            runner.assert_not_called()
 
     def test_stale_installation_blocks_host_injection(self):
         runners = [(name, required, mock.Mock(return_value=(verify.PASS, 'fixture', None)))

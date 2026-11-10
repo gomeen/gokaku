@@ -73,10 +73,10 @@ def load_meta(version=None, build=None, channel='stable', *, version_file=VERSIO
     try:
         meta = json.loads(version_file.read_text(encoding='utf-8'))
         full, number = meta['version'], meta['buildNumber']
-        pattern = r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-(dev|rc)\.(0|[1-9][0-9]*))?'
+        pattern = r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(?:-(dev)\.(0|[1-9][0-9]*))?'
         match = re.fullmatch(pattern, full) if isinstance(full, str) else None
         if not match or type(number) is not int or not 1 <= number <= 65535:
-            raise ValueError('版本须为 SemVer dev.N/rc.N/定版，构建号须为 1–65535 整数')
+            raise ValueError('版本须为 SemVer dev.N 或定版（不再使用 rc），构建号须为 1–65535 整数')
         if any(int(match[i]) > 65535 for i in (1, 2, 3)):
             raise ValueError('Windows 版本数字段不能超过 65535')
     except (OSError, ValueError, KeyError, TypeError) as error:
@@ -606,7 +606,7 @@ def self_test(iscc=None):
                 raise AssertionError(f'应拒绝：{message}')
         rejected(lambda: load_meta('9.9.9', channel='dev', version_file=version_file, git=git), '不得覆盖')
         rejected(lambda: load_meta(build=89, channel='dev', version_file=version_file, git=git), '不得覆盖')
-        for version in ('0.1.1-rc.1', '0.1.1'):
+        for version in ('0.1.1',):
             version_file.write_text(json.dumps({'version': version, 'buildNumber': 88}))
             rejected(lambda: load_meta(channel='dev', version_file=version_file, git=git), '干净')
         runtime = root / 'bin/x64/libwinpthread-1.dll'
