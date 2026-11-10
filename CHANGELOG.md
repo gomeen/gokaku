@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 0.1.3（构建 110，stable 定版，2026-11-10）
+
+- 首次 stable 定版，含普通应用临时英文 Esc 修复、Orca 终端候选窗定位修复、双通道 IMK 连接名修复。
+- 发布流程：取消 rc，定版号固定、失败只递增构建号；host 分短档／完整档；release／host 报告按 Mac 平台指纹沿用；ASan 分片并行；验证期间防睡眠；定版可经书面理由豁免 host（本版即如此，发布说明已写明）。
+- 未运行 host 真实宿主验证，边界见 [验收记录](docs/validation/native-development.md)。
+
 ### 变更（2026-11-10：Orca 终端打开 pi 后候选窗钉在顶部，构建 105 dev，真机待验证）
 
 - 诊断构建 104 实测（Orca 终端，`/tmp/gogaku-diag-b104.log`）：首键前按文档绝对位置读到的是 pi 启动前 shell 行的陈旧矩形（屏幕顶部）；组合期间索引 ≥1 全为零，只有索引 0（IMKTextInput 契约：相对 inline session，0＝组合起点）落在真实输入行；面板因此全程冻结在顶部。无组合时索引 0 读数在相邻字符格间循环，不可靠。

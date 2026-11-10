@@ -1,0 +1,29 @@
+{
+ "schema": 1,
+ "repo": "gomeen/gokaku",
+ "tag": "v0.1.3",
+ "channel": "stable",
+ "version": "0.1.3",
+ "buildNumber": 110,
+ "releaseId": 440156339,
+ "state": "published",
+ "publishedAt": "2026-11-10",
+ "commit": "9d12deac30d6b8da608ebc6583bd2724c6d62fd4",
+ "assets": {
+  "macos": {
+   "name": "Gogaku-0.1.3-b110.pkg",
+   "sha256": "74112c15e52a5c7e8387ea96709f3c8744ac1c690da7cd672db017327dc3bd9b"
+  },
+  "windows": {
+   "name": "Gogaku-0.1.3-b110-windows-x64-setup.exe",
+   "sha256": "23cdbf6b39a9def13619ee6116d8d139f6a03f470652781d46f2ab1e4069edbf"
+  },
+  "manifest": "update-manifest.json",
+  "signature": "update-manifest.json.sig"
+ },
+ "manifestKey": "gogaku-dev-2026-11",
+ "fastReport": "verify/report-fast-dev-b99.json",
+ "releaseReport": "verify/report-release-20261110-172115.json",
+ "hostWaiver": "用户 2026-11-10 决定直接发布：浏览器宿主探针尚未跑通且 host 档需占用桌面",
+ "notes": "首次 stable 定版。b106–b109 均为本地构建、未对外：b106 报告因探针修复失效；b107–b110 为验证规则调整后的重建。首次创建 Draft 440154397 上传 Windows 包失败，已删除后重建。公开清单签名用随包公钥验证通过。"
+}
