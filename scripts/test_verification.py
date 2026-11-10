@@ -103,6 +103,17 @@ class VerificationTests(unittest.TestCase):
         report['screens'].pop()
         self.assertTrue(verify.gui_problems(report, self.root, expected, short))
 
+    def test_gui_short_profile_accepts_notes_instead_of_screenshots(self):
+        report, expected = self.gui_fixture()
+        short = verify.gui_required_cells('host')
+        report['screens'] = [{'page': s['page'], 'size': s['size'], 'appearance': s['appearance'],
+                              'passed': True, 'note': '页面打开、控件可读、改值后读回一致'}
+                             for s in report['screens'] if s['size'] == [900, 620]]
+        self.assertEqual(verify.gui_problems(report, self.root, expected, short, screenshots=False), [])
+        self.assertTrue(verify.gui_problems(report, self.root, expected, short))
+        report['screens'][0]['note'] = ' '
+        self.assertTrue(verify.gui_problems(report, self.root, expected, short, screenshots=False))
+
     def test_gui_rejects_old_identity_incomplete_duplicate_and_missing_image(self):
         report, expected = self.gui_fixture()
         for field in expected:

@@ -847,8 +847,10 @@ def gui_required_cells(profile):
     return {(p, size, a) for p in GUI_PAGES for size in sizes for a in GUI_APPEARANCES}
 
 
-def gui_problems(report, evidence_dir, expected, required=None):
-    """人工验收证据的完整性／身份检查；不以截图存在代替人工实际操作。"""
+def gui_problems(report, evidence_dir, expected, required=None, screenshots=True):
+    """人工验收证据的完整性／身份检查；不以截图存在代替人工实际操作。
+    screenshots=False（host 短档）：截图可省，每项须有非空 note 记录实际核对内容；
+    给了截图仍校验路径与哈希。"""
     import hashlib
     if not isinstance(report, dict):
         return ['GUI 报告必须是对象']
@@ -877,6 +879,11 @@ def gui_problems(report, evidence_dir, expected, required=None):
             problems.append('GUI 矩阵项未知／重复／未通过')
         seen.add(cell)
         name = screen.get('screenshot')
+        if not screenshots and name is None:
+            note = screen.get('note')
+            if not isinstance(note, str) or not note.strip():
+                problems.append('GUI 短档无截图时须有 note 记录实际核对内容')
+            continue
         if not isinstance(name, str) or not name:
             problems.append('GUI 缺少截图路径')
             continue
@@ -906,7 +913,7 @@ def check_native_gui(ctx):
     try:
         profile = ctx.get('profile') or 'host-full'
         problems = gui_problems(json.loads(evidence.read_text()), evidence.parent, expected,
-                                gui_required_cells(profile))
+                                gui_required_cells(profile), screenshots=profile != 'host')
     except (OSError, ValueError, TypeError):
         return FAIL, 'GUI 证据不可读或类型非法', str(evidence)
     if problems:
