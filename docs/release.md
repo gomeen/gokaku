@@ -64,7 +64,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 - 若当前输入源正选着 Gogaku 或旧进程仍在运行，只提示切换输入源／注销，不强杀宿主。
 - 工程坑：productbuild 手写 distribution 的 `choices-root` 结构会静默产出无组件的 2KB 空壳——必须 `--synthesize` 生成基线再补丁；脚本内置体积断言（<10MB 拒绝放行）。
 
-**当前状态**：b110 stable 已完成双端构包并发布；发布记录中的公开清单签名已验证。b110 未运行真实 host，用户已明确豁免该门槛；此前 b87 dev 的真实 `installer -pkg` 安装与事务验证仍是独立历史证据。ad-hoc 包 `spctl` 仍拒绝，Developer ID／公证未跑（无证书）。
+**当前状态**：b112 stable（0.1.4）已完成双端构包并发布；发布记录中的公开清单签名已验证。本机用 `installer -pkg … -target CurrentUserHomeDirectory` 真实安装并通过事务（`phase=success`）；b110／b112 均未运行真实 host，用户已书面豁免该门槛。ad-hoc 包 `spctl` 仍拒绝，Developer ID／公证未跑（无证书）。
 
 ### 2.3 签名与公证（正式分发）
 
@@ -95,7 +95,7 @@ python3 scripts/package-macos-pkg.py --channel stable \
 
 ## 3. Windows 构建（Setup.exe）
 
-构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。当前 stable b110 安装包名称见[发布记录](validation/release-b110.json)；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为 b110 通过。
+构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。当前 stable b112 安装包名称见[发布记录](validation/release-b112.json)；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为 b112 通过。
 
 | 部件 | 构建线 | 工具链 | 状态 |
 | --- | --- | --- | --- |
@@ -138,7 +138,7 @@ python3 scripts/build-win-app.py --channel dev \
 - 不设置默认输入法，不强杀宿主，不自动注销／重启，不安排锁定文件下次重启替换。
 - 未做 Authenticode 签名；不关闭系统安全机制。
 
-历史 b94–b99 Windows VM 的安装、限定文本宿主、设置和图标结果与编译、静态包检查分别记录；b110 只保留构包、自动化验证和发布侧签名证据。完整宿主、升级／卸载、真实翻译与在线更新仍未验收；用户使用与反馈步骤见[Windows 使用说明](windows-testing.md)。
+历史 b94–b99 Windows VM 的安装、限定文本宿主、设置和图标结果与编译、静态包检查分别记录；b110／b112 只保留构包、自动化验证和发布侧签名证据。完整宿主、升级／卸载、真实翻译与在线更新仍未验收；用户使用与反馈步骤见[Windows 使用说明](windows-testing.md)。
 
 ## 4. 检查更新与 Draft Release
 
@@ -178,7 +178,7 @@ python3 scripts/build-win-app.py --channel dev \
 
 - `windows-core.yml`：远端 `gomeen/gokaku` 已于 11-08 首跑，因 action 名写错（`msys2/setup-action`）在准备阶段失败；已改为 `msys2/setup-msys2@v2`，修正后尚未重跑。后续可能还要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
 - Mac 侧 CI：无。候选 `mac-core.yml` 可后置。
-- 🚧 Windows 当前 b110 仅有构包和发布侧证据；真实宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
+- 🚧 Windows 当前 b112 仅有构包和发布侧证据；真实宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
 - 🚧 Mac 双构建 pkg 升级／恢复复验（单次真实安装已有证据）。
 - 🚧 GitHub Releases 发布侧链路已通过；客户端从旧版发现、下载、安装并重开验证仍待完成。
 - ⬜ 朋友真机完整试用（走 dev 通道）。

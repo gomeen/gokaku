@@ -2,11 +2,11 @@
 
 Gogaku 让用户在日常输入中学习另一种语言。本文是已确认需求的依据；实施路线、阶段状态和证据见[首阶段实施总计划](implementation-plan.md)及[原生开发验收](validation/native-development.md)。
 
-**当前已进入双端（macOS＋Windows）原生工程实施。当前发布基线为 `0.1.3 / b110 stable`：双端安装包已构建并发布，fast／release 自动化验证通过，发布清单签名已核验；真实 host 未运行且有明确豁免。** Mac 真实输入源、Windows b110 宿主、客户端在线更新 E2E、完整升级恢复／卸载和翻译凭据实测仍未完成。学习翻译保持火山 NMT、默认关闭、需用户保存凭据并显式启用；Windows 已交叉编译 x86／x64 TSF、x64 每用户代理、七页设置与更新客户端。b110 资产和发布身份见[发布记录](validation/release-b110.json)，b91 构包细节见[历史报告](validation/windows-setup-build.json)。构包不依赖 VM，历史 VM 证据只归属于对应构建。既有[浏览器原型](prototype-input-flow.md)仍只用预设样例，不能作为真实翻译能力。功能状态及未补齐项见[双端功能对照](feature-parity.md)。
+**当前已进入双端（macOS＋Windows）原生工程实施。当前发布基线为 `0.1.4 / b112 stable`：双端安装包已构建并发布，fast／release 自动化验证通过，发布清单签名已核验；真实 host 未运行且有明确豁免。** Mac 真实输入源、Windows b112 宿主、客户端在线更新 E2E、完整升级恢复／卸载和翻译凭据实测仍未完成。学习翻译保持火山 NMT、默认关闭、需用户保存凭据并显式启用；Windows 已交叉编译 x86／x64 TSF、x64 每用户代理、七页设置与更新客户端。b112 资产和发布身份见[发布记录](validation/release-b112.json)，b91 构包细节见[历史报告](validation/windows-setup-build.json)。构包不依赖 VM，历史 VM 证据只归属于对应构建。既有[浏览器原型](prototype-input-flow.md)仍只用预设样例，不能作为真实翻译能力。功能状态及未补齐项见[双端功能对照](feature-parity.md)。
 
-**历史 b94 验收记录**：Chrome 字段切换时旧组合提交至新字段，扩大宿主验收不通过；安装／回滚／卸载未执行。这些记录用于说明历史缺陷和边界，不能作为 b110 当前状态。见[本轮验收](validation/dev-b94-acceptance/README.md)及[机器汇总](validation/dev-b94-acceptance.json)。
+**历史 b94 验收记录**：Chrome 字段切换时旧组合提交至新字段，扩大宿主验收不通过；安装／回滚／卸载未执行。这些记录用于说明历史缺陷和边界，不能作为 b112 当前状态。见[本轮验收](validation/dev-b94-acceptance/README.md)及[机器汇总](validation/dev-b94-acceptance.json)。
 
-此前 dev b94 的 fast、默认升级和限定宿主记录保留在验证目录，作为历史回归材料；它们不代表当前 b110。
+此前 dev b94 的 fast、默认升级和限定宿主记录保留在验证目录，作为历史回归材料；它们不代表当前 b112。
 
 ## 目标与范围
 

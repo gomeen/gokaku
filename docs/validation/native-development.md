@@ -1,5 +1,14 @@
 # 原生工程实施验收记录
 
+## 0.1.4 b112 stable 定版发布（2026-11-11，含用户真机确认）
+
+- **已发布**：Release 441395987，tag `v0.1.4`（构建提交 38b1704），[发布记录](release-b112.json)。Mac pkg SHA-256 `5dee41b4…403a7d7e`，Windows Setup `70afd3cb…b877b1e99`；公开清单用随包公钥验签通过（`signature ok`）。仍为 ad-hoc 签名，无公证／Authenticode。
+- **已通过**：fast 7/7（报告绑定本轮双端安装包哈希：[fast](verify/report-fast-20261111-152217.json)）、release 14/14（含十万序列 ASan／UBSan 1027s、干净重建 126s、包检查、渲染、数据可靠性：[release](verify/report-release-20261111-160140.json)）。
+- **未运行 host（用户书面豁免，2026-11-11）**：理由与 b110 同（host 档需占用桌面，浏览器宿主探针仍未跑通），已写入 `release-state.json` 与发布说明。替代证据：两处修复均在 dev 构建 0.1.4-dev.1（b111）上由用户真机确认——Orca 终端里首次与连续切换提示回到光标上方，设置应用关窗后不再残留 Dock 图标。
+- **真实安装冒烟**：`installer -pkg dist/Gogaku-0.1.4-b112.pkg -target CurrentUserHomeDirectory` 安装成功（两包 0.1.4 b112、`install/transaction.txt` `phase=success`、旧 b110 已备份），安装后设置应用关窗即退出，输入法进程重启后继续正常打字。
+- **发布流程记录**：Draft 创建时 tag `v0.1.4` 被 GitHub 建在远端旧 HEAD `7e9972d`（本地修复未推）；推送 main 后把标签强移到构建提交 38b1704，与 b101 同事故类别，按同一方式修正。
+- **发现的工具缺陷（未修，另立）**：`verify.py` 的 `clean-build` 在 `build.py` 因脏工作区拒绝时用 `result.stdout.strip().splitlines()[-1]` 取末行，stdout 为空时抛 `IndexError`，报告显示「检查异常」而不是给出真实原因（本轮验证期间改文档撞上一次）。
+
 ## 切换提示浮层锚点：无组合读数不可当首选（2026-11-11，工作区）
 
 用户反馈：候选窗定位好后，Orca 终端里「中／英」、「学习·中→英」、「普通」等提示浮层仍会跑到屏幕左上角或其他位置，与之前候选窗的毛病同类。
@@ -7,7 +16,7 @@
 - **真因**：提示总在**无组合**时触发（Shift 单击切中英、⌃⇧M／⌃⇧J 切模式、译文失败）。旧 `freshToastAnchor` 的第二优先级是实时宿主读数，而 Orca 终端无组合时按选区读到的矩形是 pi 启动前 shell 行的陈旧值（屏幕顶部）；组合期唯一的正确读数（索引 0）在无组合时不可靠——Host.m 按契约只在 `marked.length > 0` 时做索引 0 回退，且无组合时索引 0 在相邻字符格间循环。
 - **修复**：新增纯函数 `GogakuKit.ToastAnchor.resolve(preRead:carried:mouseCaret:screens:)`，与候选窗首键（`applyNormal` 的 `displayRect == nil` 分支）逐条对齐：①组合中的 `displayRect`（已过 `AnchorPlausibility`）优先；②无组合时的宿主读数与首键 pre-read 同源，且适用同一条有效性规则——必须落在某块屏幕可视区内（候选窗遇到屏幕外锚点由 `PanelPlacement` 返回 nil、干脆不显示；提示必须显示，于是把这类读数当作「没有读数」，否则几何层只会把它钳到左上角）；③回退顺序与 `AnchorFallback` 同序：本次读数 ＞ 同一输入框上一组合锚点（`carriedAnchorRect`，换字段／失焦即清，不在屏幕内的旧锚点同样作废）＞ 鼠标位置；④本次读数与上一锚点相差跨多行时按 `AnchorPlausibility` 判为陈旧并保留上一锚点——提示只活 1 秒，等不到面板那套 3–8 拍逃生门。`InputController.toastAnchor()` 在组合中直接返回 `displayRect`（不再多读一次宿主，避免额外 hostReadNs），并在 GOGAKU_VALIDATION 构建里写 `toastAnchor carried=… preRead=… anchor=…` 诊断行。
 - **测试**：`ToastAnchorTests` 7 项全过（陈旧跳变被拒、同行前进采纳、屏幕外读数回退鼠标、零读数回退、屏幕外旧锚点被忽略、全不可得不显示）；组合期行为不变（既有 `AnchorFallback`／`AnchorPlausibility` 测试不受影响）。
-- **未验证**：Orca 终端真机（需用户空闭时段：终端里首次切中英提示应在输入行上方）；如果真机仍偏上，用 `--validation` 构建的 `toastAnchor` 诊断行可以确认该宿主无组合时到底回了什么矩形（是屏幕外垃圾还是屏幕内陈旧行）。
+- **未验证**：Orca 终端真机（需用户空闭时段：终端里首次切中英提示应在输入行上方）；如果真机仍偏上，用 `--validation` 构建的 `toastAnchor` 诊断行可以确认该宿主无组合时到底回了什么矩形（是屏幕外垃圾还是屏幕内陈旧行）。**后续（同日）**：用户已在 dev b111 与 stable b112 真机确认 Orca 首次与连续切换均在光标上方。
 
 ## 设置应用关窗不退出（Dock 常驻）（2026-11-11，源码 release 构建，工作区）
 
