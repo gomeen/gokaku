@@ -68,7 +68,8 @@ public enum PanelPlacement {
 
     /// 模式／方向切换提示浮层：优先锚点上方（下方常被候选窗占用），
     /// 上方放不下时移到下方，水平随锚点左缘并钳制在屏幕可视区内；
-    /// 锚点无效或不在任何屏幕内时返回 nil（调用方回退固定位置）。
+    /// 锚点无效或不在任何屏幕内时返回 nil（锚点如何取见 `ToastAnchor`，
+    /// 调用方不在固定角落回退）。
     public static func toastOrigin(anchor: NSRect, panelSize: NSSize, screens: [ScreenFrame]) -> NSPoint? {
         guard isFinite(anchor), anchor.size.width >= 0, anchor.size.height >= 0,
               panelSize.width > 0, panelSize.height > 0, anchor != .zero,

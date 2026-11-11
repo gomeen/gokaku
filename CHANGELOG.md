@@ -2,6 +2,20 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-11：切换提示浮层锚点参照候选窗方案重做，Orca 终端不再跑偏，工作区）
+
+- 用户报告：候选窗定位修好后，Orca 终端里的「中／英」「学习·中→英」提示浮层仍会跑到屏幕左上角或其他位置。原因同上一轮候选窗那次：该宿主**无组合**时按选区读到的矩形是陈旧值（pi 启动前 shell 行，屏幕顶部），而组合期才可用的索引 0 读数在无组合时不可靠（Host.m 按契约只在组合中使用它），提示又恰好在无组合时触发。
+- 修复：新增纯函数 `ToastAnchor`，与候选窗首键**逐条对齐**：屏幕外／非有限的宿主读数一律当作「没有读数」（候选窗遇到这种锚点由 `PanelPlacement` 返回 nil 直接不显示，提示必须显示，于是退回下一个来源）；回退顺序与 `AnchorFallback` 同序：本次读数 ＞ 同一输入框上一组合锚点（换字段／失焦即清）＞ 鼠标位置；本次读数与上一锚点相差跨多行时按 `AnchorPlausibility` 判为陈旧并保留上一锚点。`InputController` 的四处提示改走 `toastAnchor()`，组合中不再多读一次宿主；屏幕几何统一走 `GogakuInputController.screenFrames()`。
+- 边界：本输入框尚无已验证锚点（换字段后第一件事就是切换）时仍只能信任宿主读数（与候选窗首键同待遇）：屏幕外的垃圾坐标已拦住，屏幕内但陈旧的读数仍会偏；同一应用内换输入框后未打字就切换，提示可能停在上一个输入框。
+- 测试：`ToastAnchorTests` 7 项（陈旧跳变被拒、同行前进采纳、屏幕外读数回退、零读数回退、屏幕外参照被忽略、全不可得不显示）；fast 档 swift-tests 233 项通过。
+
+### 变更（2026-11-11：设置应用关窗即退出，不再常驻 Dock，工作区）
+
+- 用户报告：设置页长时间挂在 Dock 栏。实测本机设置进程从前一晚起一直在跑、无任何窗口——从输入菜单打开设置后关窗只关 NSWindow，SwiftUI `Window` 应用默认不因最后窗口关闭而退出，进程与 Dock 图标一直留着。
+- 修复：`SettingsAppDelegate` 关闭最后一个窗口即终止应用（`applicationShouldTerminateAfterLastWindowClosed`）。退出前用 `.terminateLater` 等一次落盘，把 300ms 合并中的文本改动写完再退出（新增 `SettingsStore.flushForTermination`，无待保存改动也回调），2 秒兜底保证不会卡在退出中；皮肤草稿的离开门禁不变。
+- 行为变化：自动检查更新只在设置窗口打开期间按 24 小时节流尝试（关窗即进程结束）；关窗后再从输入菜单打开设置会重新启动设置应用。
+- 验证：源码 release 构建实测关窗 3 秒内进程消失、退出请求正常结束、无残留进程；新增 `SettingsStoreTests.testFlushForTerminationWritesPendingThenCallsBack`，fast 档 swift-tests 226 项通过。装成 `.app` 后从输入菜单再次打开未复测（下次构建安装后核对）。
+
 ### 变更（2026-11-10：项目自身许可定为 MIT 并致谢青简／Rime，工作区）
 
 - 新增仓库根 `LICENSE`（MIT，Copyright (c) 2026 gomeen）；README 许可节改写并新增致谢段：青简输入法＝候选窗样式与学习交互的设计对照参考，Rime＝开源输入法社区的先行实践，均未复制其代码、词库或数据。

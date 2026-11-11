@@ -451,7 +451,7 @@ final class GogakuInputController: IMKInputController {
         if translated {
             storeTranslationMemory(pending.source, result.target!)
         } else {
-            toast.show("译文失败，已上屏原文", anchor: freshToastAnchor())
+            toast.show("译文失败，已上屏原文", anchor: toastAnchor())
         }
         insertLearningCommit(text, at: pending.anchor)
         // 重放缓冲按键（重放前已清 pending，避免再次入队）。
@@ -964,9 +964,9 @@ final class GogakuInputController: IMKInputController {
             return
         }
         if snap.beep { NSSound.beep() }
-        if snap.toast != 0 { toast.show(snap.toast == 1 ? "中" : "英", anchor: freshToastAnchor()) }
+        if snap.toast != 0 { toast.show(snap.toast == 1 ? "中" : "英", anchor: toastAnchor()) }
         // 无组合的瞬态说明（如删词结果）用提示浮层；组合中状态走面板状态行。
-        if !snap.composing && !snap.status.isEmpty { toast.show(snap.status, anchor: freshToastAnchor()) }
+        if !snap.composing && !snap.status.isEmpty { toast.show(snap.status, anchor: toastAnchor()) }
         if snap.candidates.contains(where: { $0.kind == GC_CAND_LEARNED }) {
             scheduleFlush()
         }
@@ -1604,18 +1604,28 @@ final class GogakuInputController: IMKInputController {
         return snap.candidates.indices.contains(inPage) ? snap.candidates[inPage].text : nil
     }
 
-    /// 切换提示的输入位置锚点：显示矩形／目标矩形，否则实时读宿主光标矩形（组合外也可用）。
-    /// 全部不可得（密码字段／宿主不支持矩形读取／无选区）时退回鼠标位置：切换
-    /// 本身成功就必须有提示，不能因宿主读不出光标而静默吞掉（2026-11 用户报告
-    /// 「有时切换无提示」；此前的「无锚点不显示」裁决只反对固定角落，鼠标位置
-    /// 仍在操作者注意力附近）。
-    private func freshToastAnchor() -> NSRect? {
+    /// 切换提示的输入位置锚点：与候选窗首键同一套规则（`ToastAnchor`）：
+    /// 组合中的显示锚点 ＞ 本次宿主读数（与上一组合锚点相容时用本次，更精确）
+    /// ＞ 同一输入框上一组合锚点 ＞ 鼠标位置；屏幕外读数不算数。无组合时宿主
+    /// 读数可能陈旧（Orca 终端按选区读 shell 行），故不当首选项（2026-11-11
+    /// 用户报告）。全部不可得（密码字段／宿主不支持矩形读取／无选区）时退回
+    /// 鼠标位置：切换本身成功就必须有提示，不能因宿主读不出光标而静默吞掉。
+    private func toastAnchor() -> NSRect? {
+        // 组合中已有经过验证的锚点，不再多读一次宿主（性能：额外读取计入 hostReadNs）。
         if let rect = displayRect, rect != .zero { return rect }
-        if let current = currentTarget(readRectangle: true, strictComposition: false), current.rect != .zero {
-            return current.rect
-        }
-        if let rect = target?.rect, rect != .zero { return rect }
-        return Self.mouseCaretRect()
+        let preRead = currentTarget(readRectangle: true, strictComposition: false)?.rect ?? .zero
+        let anchor = ToastAnchor.resolve(preRead: preRead, carried: carriedAnchorRect,
+                                         mouseCaret: Self.mouseCaretRect(),
+                                         screens: Self.screenFrames())
+        #if GOGAKU_VALIDATION
+        GogakuInput.diag("toastAnchor carried=\(carriedAnchorRect.map(NSStringFromRect) ?? "nil") preRead=\(NSStringFromRect(preRead)) anchor=\(anchor.map(NSStringFromRect) ?? "nil")")
+        #endif
+        return anchor
+    }
+
+    /// 屏幕几何（与候选窗／提示浮层共用一份转换，避免两处各写一遍）。
+    static func screenFrames() -> [ScreenFrame] {
+        NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }
     }
 
     /// 鼠标位置光标矩形：无任何可信插入点时的最终兜底（与切换提示同语义：
@@ -1628,7 +1638,7 @@ final class GogakuInputController: IMKInputController {
     @objc private func toggleMode(_ sender: Any?) {
         // 学习开关打开时才可切换；关闭保持门禁态（蜂鸣）。
         guard learningEnabled else { NSSound.beep(); return }
-        let anchor = freshToastAnchor()   // 在 suspend 清理前读当前插入点
+        let anchor = toastAnchor()   // 在 suspend 清理（会清空 displayRect／carried）前读
         suppressSettingsReloadUntil = Date().addingTimeInterval(0.5)
         suspend()
         mode = mode == .normal ? .learning : .normal
@@ -1643,7 +1653,7 @@ final class GogakuInputController: IMKInputController {
 
     @objc private func toggleDirection(_ sender: Any?) {
         guard learningEnabled else { NSSound.beep(); return }
-        let anchor = freshToastAnchor()
+        let anchor = toastAnchor()
         suppressSettingsReloadUntil = Date().addingTimeInterval(0.5)
         suspend()
         direction = direction == .zhToEn ? .enToZh : .zhToEn
@@ -1746,8 +1756,7 @@ final class ToastWindow: NSPanel {
         // 锚到鼠标位置，保证切换成功必有提示（2026-11 用户报告「有时无提示」）。
         guard let caret = anchor, caret != .zero,
               let origin = PanelPlacement.toastOrigin(
-                  anchor: caret, panelSize: size,
-                  screens: NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }) else { return }
+                  anchor: caret, panelSize: size, screens: GogakuInputController.screenFrames()) else { return }
         label.stringValue = text
         label.frame = NSRect(x: 0, y: 0, width: size.width, height: size.height)
         setContentSize(size)

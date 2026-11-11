@@ -57,6 +57,24 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(try readDisk().candidateFontSize, 16)
     }
 
+    /// 退出前落盘：合并计时器中的改动在退出前写盘，无待保存改动也回调
+    /// （退出流程靠这次回调结束 `.terminateLater`，漏回调会让应用卡住）。
+    func testFlushForTerminationWritesPendingThenCallsBack() throws {
+        let store = SettingsStore(directory: directory)
+        var settings = Settings()
+        settings.candidateFontSize = 15
+        store.submit(settings, coalesce: true)
+        let flushed = expectation(description: "flush for termination")
+        store.flushForTermination { flushed.fulfill() }
+        wait(for: [flushed], timeout: 3)
+        XCTAssertEqual(try readDisk().candidateFontSize, 15)
+
+        // 第二次（无待保存改动）仍必须回调，否则退出会一直等下去。
+        let empty = expectation(description: "callback without pending work")
+        store.flushForTermination { empty.fulfill() }
+        wait(for: [empty], timeout: 2)
+    }
+
     /// 自定义词保存失败注册的重试闭包必须由底栏「重试」真正执行（2026-11 整改 #12）。
     func testCustomRetryHandlerRunsOnRetry() throws {
         let store = SettingsStore(directory: directory)

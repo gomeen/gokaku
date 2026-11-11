@@ -100,6 +100,17 @@ public final class SettingsStore {
         }
     }
 
+    /// 退出前的最后一次落盘：取消合并计时器、立即写入待保存改动，完成后回调。
+    /// 与 `flushPending` 的区别是无待保存改动也回调——退出流程用
+    /// `.terminateLater` 等这次落盘结束再终止，回调缺失会让应用卡在退出中。
+    public func flushForTermination(completion: @escaping @MainActor () -> Void) {
+        queue.async { [weak self] in
+            self?.pendingWork?.cancel()
+            self?.flush()
+            DispatchQueue.main.async { MainActor.assumeIsolated { completion() } }
+        }
+    }
+
     /// 草稿保存失败时撤销对应的待重试快照，避免放弃草稿后被其他操作复活。
     public func discardPending(_ value: Settings) {
         queue.async { [weak self] in

@@ -1,5 +1,22 @@
 # 原生工程实施验收记录
 
+## 切换提示浮层锚点：无组合读数不可当首选（2026-11-11，工作区）
+
+用户反馈：候选窗定位好后，Orca 终端里「中／英」、「学习·中→英」、「普通」等提示浮层仍会跑到屏幕左上角或其他位置，与之前候选窗的毛病同类。
+
+- **真因**：提示总在**无组合**时触发（Shift 单击切中英、⌃⇧M／⌃⇧J 切模式、译文失败）。旧 `freshToastAnchor` 的第二优先级是实时宿主读数，而 Orca 终端无组合时按选区读到的矩形是 pi 启动前 shell 行的陈旧值（屏幕顶部）；组合期唯一的正确读数（索引 0）在无组合时不可靠——Host.m 按契约只在 `marked.length > 0` 时做索引 0 回退，且无组合时索引 0 在相邻字符格间循环。
+- **修复**：新增纯函数 `GogakuKit.ToastAnchor.resolve(preRead:carried:mouseCaret:screens:)`，与候选窗首键（`applyNormal` 的 `displayRect == nil` 分支）逐条对齐：①组合中的 `displayRect`（已过 `AnchorPlausibility`）优先；②无组合时的宿主读数与首键 pre-read 同源，且适用同一条有效性规则——必须落在某块屏幕可视区内（候选窗遇到屏幕外锚点由 `PanelPlacement` 返回 nil、干脆不显示；提示必须显示，于是把这类读数当作「没有读数」，否则几何层只会把它钳到左上角）；③回退顺序与 `AnchorFallback` 同序：本次读数 ＞ 同一输入框上一组合锚点（`carriedAnchorRect`，换字段／失焦即清，不在屏幕内的旧锚点同样作废）＞ 鼠标位置；④本次读数与上一锚点相差跨多行时按 `AnchorPlausibility` 判为陈旧并保留上一锚点——提示只活 1 秒，等不到面板那套 3–8 拍逃生门。`InputController.toastAnchor()` 在组合中直接返回 `displayRect`（不再多读一次宿主，避免额外 hostReadNs），并在 GOGAKU_VALIDATION 构建里写 `toastAnchor carried=… preRead=… anchor=…` 诊断行。
+- **测试**：`ToastAnchorTests` 7 项全过（陈旧跳变被拒、同行前进采纳、屏幕外读数回退鼠标、零读数回退、屏幕外旧锚点被忽略、全不可得不显示）；组合期行为不变（既有 `AnchorFallback`／`AnchorPlausibility` 测试不受影响）。
+- **未验证**：Orca 终端真机（需用户空闭时段：终端里首次切中英提示应在输入行上方）；如果真机仍偏上，用 `--validation` 构建的 `toastAnchor` 诊断行可以确认该宿主无组合时到底回了什么矩形（是屏幕外垃圾还是屏幕内陈旧行）。
+
+## 设置应用关窗不退出（Dock 常驻）（2026-11-11，源码 release 构建，工作区）
+
+- **现象与真因**：用户报告设置页一直在 Dock。查进程：本机设置应用从前一晚 17:31 起一直在跑、辅助功能树读不到任何窗口。从输入菜单 `NSWorkspace.open` 打开设置后关窗只关窗口；SwiftUI `Window` 应用默认 `applicationShouldTerminateAfterLastWindowClosed = false`，进程与 Dock 图标便一直留着（旧实现里打开过后永不消失）。
+- **修复**：`SettingsAppDelegate` 实现 `applicationShouldTerminateAfterLastWindowClosed → true`；退出前 `applicationShouldTerminate` 返回 `.terminateLater`，由新增的 `SettingsStore.flushForTermination` 把合并中的文本改动落盘后再 `reply(toApplicationShouldTerminate:true)`，2 秒兜底防卡死、`replySent` 保证只回复一次；皮肤草稿的离开确认不变。
+- **验证（源码 release 构建，`swift build -c release --product GogakuSettings`）**：启动后经辅助功能读窗名 `Gogaku 设置` → 点关闭按钮 → 3 秒内进程消失且无残留；重启后经 `NSRunningApplication.terminate()` 走标准退出流程 → 3 秒内退出，未卡在 `terminateLater`。同日已结束本机那个从前一晚起驻留的旧进程。
+- **测试**：`SettingsStoreTests.testFlushForTerminationWritesPendingThenCallsBack`（合并中的改动先写盘＋无待保存也回调）；fast 档 swift-tests 226 项通过（`report-fast-20261111-130759.json`）。
+- **未验证**：装成 `~/Applications/Gogaku Settings.app` 后从输入菜单关窗再打开（下次构建安装后核对）；自动检查更新现在只在窗口打开期间计时，未与新节奏对表。
+
 ## 0.1.3 b110 stable 定版发布（2026-11-10，未运行 host）
 
 - **已发布**：Release 440156339，tag `v0.1.3`（提交 9d12dea），[发布记录](release-b110.json)。Mac pkg SHA-256 `74112c15…dc3bd9b`，Windows Setup `23cdbf6b…e4069edbf`；公开清单签名用随包公钥验证通过。仍用 dev 签名密钥，ad-hoc，无公证／Authenticode。
