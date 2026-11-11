@@ -6,6 +6,7 @@
 - **已通过**：fast 7/7（报告绑定本轮双端安装包哈希：[fast](verify/report-fast-20261111-152217.json)）、release 14/14（含十万序列 ASan／UBSan 1027s、干净重建 126s、包检查、渲染、数据可靠性：[release](verify/report-release-20261111-160140.json)）。
 - **未运行 host（用户书面豁免，2026-11-11）**：理由与 b110 同（host 档需占用桌面，浏览器宿主探针仍未跑通），已写入 `release-state.json` 与发布说明。替代证据：两处修复均在 dev 构建 0.1.4-dev.1（b111）上由用户真机确认——Orca 终端里首次与连续切换提示回到光标上方，设置应用关窗后不再残留 Dock 图标。
 - **真实安装冒烟**：`installer -pkg dist/Gogaku-0.1.4-b112.pkg -target CurrentUserHomeDirectory` 安装成功（两包 0.1.4 b112、`install/transaction.txt` `phase=success`、旧 b110 已备份），安装后设置应用关窗即退出，输入法进程重启后继续正常打字。
+- **客户端更新链路（发布后实测）**：安装件就是本发布包；设置应用→检查更新→「检查更新」按钮实测拉到 GitHub 上的 `update-manifest.json`，用随包公钥验签通过并显示「已是最新（0.1.4 构建 112）」（辅助功能树读取确认）。**未测**：从 b110 旧版发现新版→下载→安装→重开显示新版本的全链（需要先装回 b110 并驱动系统安装器）。
 - **发布流程记录**：Draft 创建时 tag `v0.1.4` 被 GitHub 建在远端旧 HEAD `7e9972d`（本地修复未推）；推送 main 后把标签强移到构建提交 38b1704，与 b101 同事故类别，按同一方式修正。
 - **发现的工具缺陷（未修，另立）**：`verify.py` 的 `clean-build` 在 `build.py` 因脏工作区拒绝时用 `result.stdout.strip().splitlines()[-1]` 取末行，stdout 为空时抛 `IndexError`，报告显示「检查异常」而不是给出真实原因（本轮验证期间改文档撞上一次）。
 
