@@ -1,0 +1,30 @@
+{
+ "schema": 1,
+ "repo": "gomeen/gokaku",
+ "tag": "v0.1.5",
+ "channel": "stable",
+ "version": "0.1.5",
+ "buildNumber": 113,
+ "releaseId": 442660261,
+ "state": "published",
+ "publishedAt": "2026-11-12",
+ "commit": "e2ee18555ee16efb2bae019c88a94f84c9acbabb",
+ "assets": {
+  "macos": {
+   "name": "Gogaku-0.1.5-b113.pkg",
+   "sha256": "c5923b4ac6ae07a95f770b6a45d591df8f7e893d54f32ab18883b20a659129d4"
+  },
+  "windows": {
+   "name": "Gogaku-0.1.5-b113-windows-x64-setup.exe",
+   "sha256": "b8cea8dbcbe0c582aa6878548c56bcec554415e27ca46fb6742166f124f17f40"
+  },
+  "manifest": "update-manifest.json",
+  "signature": "update-manifest.json.sig"
+ },
+ "manifestKey": "gogaku-dev-2026-11",
+ "fastReport": "verify/report-fast-20261112-155328.json",
+ "releaseReport": "verify/report-release-20261112-161219.json",
+ "hostWaiver": "用户 2026-11-12 在发布会话中书面决定本次定版不运行 host 档（真实宿主按键注入会占用桌面）；本次改动为皮肤编辑，fast／release 与双端构包已通过，真实宿主外观与 Windows 运行时仍未验收。",
+ "evidenceNote": "fast／release 报告本轮入库，可在干净 checkout 复核；host 档位未运行，豁免理由见 hostWaiver 与发布说明。",
+ "notes": "本次发布为皮肤编辑体验更新：新增「编辑当前主题」，内置主题可原地修改（相对出厂数据的 JSON Merge Patch 存于 settings.json 顶层 builtinThemeOverrides，可一键恢复默认），编辑正在使用的主题时保存即生效；合并与求差只在共享核心实现（附加导出、未升 ABI）。v0.1.4 已发布，故按版本规则换新版本号 0.1.5。验证：fast 7/7（报告绑定本轮双端安装包哈希）、release 14/14（含十万序列 ASan／UBSan 720s、干净重建、包检查、渲染、数据可靠性）；共享核心改动另跑过 ASan／UBSan quick 冒烟。Windows 只做官方流水线交叉编译（x64 设置／代理／核心 DLL，x64／x86 TSF）与静态包检查，设置页与 resolvedTheme 夹具未在 VM 运行；Mac 设置页内手动检查（保存并应用、恢复默认、rime-macos-like→Gogaku、复制已修改内置主题）未执行。公开清单用随包公钥验签通过（signature ok）。仍为 ad-hoc 签名，无公证／Authenticode。发布流程记录：Draft 创建时 tag v0.1.5 被 GitHub 建在远端旧 HEAD d056b62，推送 main 后把标签强移到构建提交 e2ee185（与 b101／b112 同事故类别，按同一方式修正）。本机未对新 pkg 做真实安装冒烟。"
+}

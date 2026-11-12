@@ -1,5 +1,14 @@
 # 原生工程实施验收记录
 
+## 0.1.5 b113 stable 定版发布（2026-11-12，未运行 host）
+
+- **已发布**：Release 442660261，tag `v0.1.5`（构建提交 e2ee185），[发布记录](release-b113.json)。Mac pkg SHA-256 `c5923b4a…a659129d4`，Windows Setup `b8cea8db…24f17f40`；公开清单用随包公钥验签通过（`signature ok`）。仍为 ad-hoc 签名，无公证／Authenticode。
+- **内容**：皮肤支持「编辑当前主题」与内置主题原地修改（覆盖补丁存 `settings.json` 的 `builtinThemeOverrides`，合并／求差只在共享核心 `gc_themes_effective`／`gc_theme_override_make`），编辑正在使用的主题时保存即生效。实现与边界见 CHANGELOG 0.1.5 与[皮肤说明](../skin-themes.md)。
+- **已通过**：fast 7/7（报告绑定本轮双端安装包哈希：[fast](verify/report-fast-20261112-155328.json)）、release 14/14（十万序列 ASan／UBSan 720s、干净重建、包检查、渲染 53 项、数据可靠性 40 轮：[release](verify/report-release-20261112-161219.json)）。共享核心改动另跑 ASan／UBSan quick 冒烟通过。
+- **未运行 host（用户书面豁免，2026-11-12）**：用户在发布会话中决定本次定版不跑 host 档（真实宿主按键注入会占用桌面），理由已写入 `release-state.json` 与发布说明。因此本发布不含真实输入源外观／热更新的宿主验收。
+- **未验证**：Mac 设置页内手动检查（改色后「保存并应用」、恢复默认、从 `rime-macos-like` 保存 Gogaku 后切换渲染、复制已修改的内置主题）；新 pkg 的真实 `installer` 安装冒烟；Windows 设置页与 `resolvedTheme` 夹具的 VM 运行（`probes/build-windows-theme-fixture.py` 只完成交叉构建）；客户端从 b112 发现新版→下载→安装→重开的全链。
+- **发布流程记录**：Draft 创建时 tag `v0.1.5` 被 GitHub 建在远端旧 HEAD `d056b62`（构建提交未推）；推送 main 后把标签强移到构建提交 e2ee185，与 b101／b112 同事故类别，按同一方式修正。
+
 ## 0.1.4 b112 stable 定版发布（2026-11-11，含用户真机确认）
 
 - **已发布**：Release 441395987，tag `v0.1.4`（构建提交 38b1704），[发布记录](release-b112.json)。Mac pkg SHA-256 `5dee41b4…403a7d7e`，Windows Setup `70afd3cb…b877b1e99`；公开清单用随包公钥验签通过（`signature ok`）。仍为 ad-hoc 签名，无公证／Authenticode。

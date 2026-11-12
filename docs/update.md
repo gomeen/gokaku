@@ -96,7 +96,7 @@
 ```
 
 - `owner`／`repo` 留空＝本机构建未配置更新源；客户端明确显示未配置。
-- 当前仓库配置为 `gomeen/gokaku`；b112 stable（0.1.4）已完成发布侧资产和清单签名验证，但客户端安装闭环仍待验证。
+- 当前仓库配置为 `gomeen/gokaku`；b113 stable（0.1.5）已完成发布侧资产和清单签名验证，但客户端安装闭环仍待验证。
 - 公钥可轮换：保留旧 keyId 直到所有受支持版本升级完成；私钥只存发布环境，绝不入库。
 - 开发公钥 `gogaku-dev-2026-11` 仅用于协议回归；生产发布前替换为生产公钥。
   发布脚本会拒绝 `trustedKeys` 中不存在的 `keyId`，避免客户端无法验证的清单上线。
@@ -165,7 +165,7 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 安装交接 | 已实现（`open` pkg） | 未在真实安装器上点过 |
 | 设置页更新窗口／自动检查 | 已实现 | `UpdateWindow.swift`；未做真实点击验收 |
 | Windows 客户端 | 已编译，尚未运行 | `windows/GogakuWindows/update.cpp`；Monocypher Ed25519、WinHTTP、窗口与自动检查；真实链路由用户验证 |
-| 真实 GitHub Releases E2E | 部分 | 发布侧已通过：`gomeen/gokaku` 上 b112 stable 及此前 b110／dev 发布的资产和公开清单签名已验证；客户端「旧版点更新→新版」端到端未做 |
+| 真实 GitHub Releases E2E | 部分 | 发布侧已通过：`gomeen/gokaku` 上 b113 stable 及此前 b112／b110／dev 发布的资产和公开清单签名已验证；客户端「旧版点更新→新版」端到端未做 |
 
 已做的协议回归不访问真实网络：使用注入传输模拟 GitHub API 与资产下载；签名用临时 Ed25519 密钥。**未完成真实链路前不得把在线更新标为已验收。**
 
