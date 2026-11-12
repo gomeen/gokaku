@@ -57,6 +57,8 @@ void showUpdateWindow(HWND owner, HINSTANCE instance);
 
 // 主题包纯数据；主题编辑与应用分别持久化。
 Json builtinThemes();
+// 套用 settings.builtinThemeOverrides 后的内置主题（共享核心合并，单条失败回退出厂）。
+Json effectiveBuiltinThemes(const Json &settings);
 Json resolvedTheme(const Json &settings);
 void validateTheme(const Json &theme);
 Json importTheme(const fs::path &path);

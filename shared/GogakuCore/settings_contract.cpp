@@ -19,7 +19,8 @@ const std::unordered_set<std::string> &knownKeys() {
     static const std::unordered_set<std::string> keys = {
         "schemaVersion", "recording", "excludedApplications", "ignoredWords",
         "applications", "modeShortcut", "directionShortcut", "candidateTheme",
-        "userCandidateThemes", "inputScheme", "fuzzyPinyin", "candidateFontSize",
+        "userCandidateThemes", "builtinThemeOverrides", "inputScheme", "fuzzyPinyin",
+        "candidateFontSize",
         "glossEnabled", "inputLettersEnabled", "fullPinyinPreedit", "frequencyEnabled",
         "englishCandidatesEnabled", "appDefaultEnglish", "learningTranslationEnabled",
         "preferredMode", "preferredDirection", "volcengineUsageMonth",
@@ -41,6 +42,7 @@ Json defaults() {
         {"directionShortcut", Json{{"key", "j"}, {"modifiers", 393216}}},
         {"candidateTheme", "rime-macos-like"},
         {"userCandidateThemes", Json::array()},
+        {"builtinThemeOverrides", Json::object()},
         {"inputScheme", "xiaohe"},
         {"fuzzyPinyin", Json::array()},
         {"candidateFontSize", 14},
@@ -177,6 +179,29 @@ Json themeObjects(const Json &value) {
     return out;
 }
 
+// 内置主题 ID 是共享数据的一部分：覆盖补丁只认这四个键。
+const std::unordered_set<std::string> &builtinThemeIds() {
+    static const std::unordered_set<std::string> ids = {"gogaku", "claude", "grok", "witch"};
+    return ids;
+}
+
+// 覆盖补丁是「相对出厂主题的 Merge Patch」。读侧只做结构清理：非对象整体
+// 丢弃、非内置 ID 丢弃、剥除 id（不得改主题身份）、空补丁丢弃。补丁内部的
+// 键是否合法由两端套用后的解码／校验判定。
+Json builtinOverrides(const Json &value) {
+    Json out = Json::object();
+    if (!value.is_object()) return out;
+    for (auto entry = value.begin(); entry != value.end(); ++entry) {
+        if (builtinThemeIds().count(entry.key()) == 0) continue;
+        if (!entry.value().is_object()) continue;
+        Json patch = entry.value();
+        patch.erase("id");
+        if (patch.empty()) continue;
+        out[entry.key()] = patch;
+    }
+    return out;
+}
+
 }  // namespace
 
 namespace {
@@ -239,6 +264,9 @@ int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
     }
     if (const Json *value = member(input, "userCandidateThemes")) {
         canonical["userCandidateThemes"] = themeObjects(*value);
+    }
+    if (const Json *value = member(input, "builtinThemeOverrides")) {
+        canonical["builtinThemeOverrides"] = builtinOverrides(*value);
     }
     if (const Json *value = member(input, "inputScheme"); value && value->is_string()) {
         canonical["inputScheme"] = oneOf(*value, {"xiaohe", "fullPinyin"}, "xiaohe");

@@ -224,6 +224,27 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(try Data(contentsOf: directory.appendingPathComponent("settings.json")), before)
     }
 
+    func testBuiltinOverrideSurvivesReadModifyWrite() throws {
+        // 覆盖补丁是顶层字段：另一页只改别的字段时不得把它合并掉。
+        var original = Settings()
+        original.builtinThemeOverrides = ["claude": .object(["light": .object(["highlight": .number(1218922)])])]
+        original.candidateTheme = .claude
+        try original.save(at: directory)
+
+        let store = SettingsStore(directory: directory)
+        var modified = Settings.load(at: directory)
+        XCTAssertTrue(modified.overrideIsActive(.claude), "读盘后覆盖字段不能丢")
+        modified.recording = false
+        let done = expectation(description: "override merged")
+        store.submit(modified) { _ in done.fulfill() }
+        wait(for: [done], timeout: 3)
+
+        let disk = try readDisk()
+        XCTAssertFalse(disk.recording)
+        XCTAssertEqual(disk.builtinThemeOverrides, original.builtinThemeOverrides)
+        XCTAssertEqual(disk.resolvedCandidateTheme.light.highlight.rgb, 1218922)
+    }
+
     func testMergeOnlyCopiesChangedTopLevelFields() throws {
         let pending = ["a": 1, "b": "same", "c": [1, 2, 3]] as [String: Any]
         let baseline = ["a": 0, "b": "same", "c": [1, 2, 3]] as [String: Any]

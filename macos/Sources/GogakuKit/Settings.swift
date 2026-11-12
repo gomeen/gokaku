@@ -209,11 +209,26 @@ public struct Settings: Codable {
     /// A stable ID leaves the rendering layer open for user-selectable themes.
     public var candidateTheme: CandidateThemeID = .rimeMacOSLike
     public var userCandidateThemes: [CandidateTheme] = []
+    /// 内置主题的覆盖补丁（键为内置 ID，值为相对出厂主题的 JSON Merge Patch）。
+    /// 合并与求差只在共享核心实现；这里只负责原样存取。`null` 值表示删除该
+    /// 键（例如 `"dark": null` 把双色主题改为单色）。
+    public var builtinThemeOverrides: [String: JSONValue] = [:]
+
+    /// 套用覆盖补丁后的内置主题。
+    public var effectiveBuiltinThemes: [CandidateTheme] {
+        BuiltinCandidateThemes.effective(overrides: builtinThemeOverrides)
+    }
+
+    /// 这个内置主题是否有覆盖（列表里显示「已修改」、启用「恢复默认」）。
+    public func overrideIsActive(_ id: CandidateThemeID) -> Bool {
+        builtinThemeOverrides[id.rawValue] != nil
+    }
 
     /// 内置 ID 始终优先；已删除或无效的主题回退到旧默认外观。
     public var resolvedCandidateTheme: CandidateTheme {
+        // 旧默认 ID 固定用出厂配色与历史渲染，不受覆盖影响。
         if candidateTheme == .rimeMacOSLike { return BuiltinCandidateThemes.theme(.rimeMacOSLike) }
-        if let builtin = BuiltinCandidateThemes.all.first(where: { $0.id == candidateTheme }) { return builtin }
+        if let builtin = effectiveBuiltinThemes.first(where: { $0.id == candidateTheme }) { return builtin }
         return userCandidateThemes.first(where: { $0.id == candidateTheme && $0.isValid })
             ?? BuiltinCandidateThemes.theme(.rimeMacOSLike)
     }
@@ -246,6 +261,7 @@ public struct Settings: Codable {
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
         case modeShortcut, directionShortcut, candidateTheme, userCandidateThemes
+        case builtinThemeOverrides
         case inputScheme, fuzzyPinyin, candidateFontSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish
@@ -271,6 +287,8 @@ public struct Settings: Codable {
         let raw = try? container.decode(String.self, forKey: .candidateTheme)
         let requested = raw.flatMap(CandidateThemeID.init(rawValue:)) ?? .rimeMacOSLike
         candidateTheme = (BuiltinCandidateThemes.all.contains { $0.id == requested } || userCandidateThemes.contains { $0.id == requested }) ? requested : .rimeMacOSLike
+        // 补丁结构已经过共享核心规范化；这里只做解码，结构不对的条目单独丢弃。
+        builtinThemeOverrides = (try? container.decodeIfPresent([String: JSONValue].self, forKey: .builtinThemeOverrides)) ?? [:]
         inputScheme = try container.decodeIfPresent(InputScheme.self, forKey: .inputScheme) ?? .xiaohe
         fuzzyPinyin = try container.decodeIfPresent(Set<String>.self, forKey: .fuzzyPinyin) ?? []
         candidateFontSize = min(16, max(12, try container.decodeIfPresent(Int.self, forKey: .candidateFontSize) ?? 14))

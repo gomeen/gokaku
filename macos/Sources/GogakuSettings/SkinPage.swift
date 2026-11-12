@@ -11,11 +11,19 @@ struct SkinPage: View {
     @State private var dark = false
     @State private var busy = false
     @State private var failure: String?
+    /// 有效内置主题（已套用覆盖补丁）缓存：列表与预览每帧都要用，避免每次
+    /// 渲染都走一遍 JSON 解码（含背景图）。覆盖变化时刷新。
+    @State private var builtinThemes: [CandidateTheme] = BuiltinCandidateThemes.all
     @Environment(\.colorScheme) private var colorScheme
 
-    private var themes: [CandidateTheme] { BuiltinCandidateThemes.all + settings.userCandidateThemes }
+    private var themes: [CandidateTheme] { builtinThemes + settings.userCandidateThemes }
     private var theme: CandidateTheme { themes.first(where: { $0.id == selected }) ?? BuiltinCandidateThemes.theme(.gogaku) }
-    private var builtin: Bool { BuiltinCandidateThemes.all.contains { $0.id == selected } }
+    private var builtin: Bool { BuiltinCandidateThemes.isBuiltin(selected) }
+    /// 当前生效的主题 ID；旧默认 `rime-macos-like` 按 Gogaku 处理。
+    private var activeThemeID: CandidateThemeID {
+        let id = settings.resolvedCandidateTheme.id
+        return id == .rimeMacOSLike ? .gogaku : id
+    }
 
     var body: some View {
         Group {
@@ -24,11 +32,18 @@ struct SkinPage: View {
         .font(.system(size: 14))
         .buttonStyle(SkinButtonStyle())
         .onAppear {
-            let id = settings.resolvedCandidateTheme.id
-            selected = id == .rimeMacOSLike ? .gogaku : id
+            refreshBuiltins()
+            let id = activeThemeID
+            selected = builtinThemes.contains(where: { $0.id == id }) ? id : .gogaku
             dark = colorScheme == .dark
         }
+        .onChange(of: settings.builtinThemeOverrides) { _, _ in refreshBuiltins() }
         .onChange(of: editor.draft?.id) { _, _ in failure = nil }
+    }
+
+    private func refreshBuiltins() {
+        let next = BuiltinCandidateThemes.effective(overrides: settings.builtinThemeOverrides)
+        if next != builtinThemes { builtinThemes = next }
     }
 
     private var catalog: some View {
@@ -36,6 +51,7 @@ struct SkinPage: View {
             HStack(spacing: 12) {
                 pageTitle("皮肤")
                 Spacer()
+                Button("编辑当前主题", action: editCurrentTheme)
                 Button("导入主题…", action: importTheme)
                 Button("＋ 新建主题") { editor.begin(theme, copy: true, new: true); dark = false }
                     .buttonStyle(SkinButtonStyle(prominent: true))
@@ -50,8 +66,14 @@ struct SkinPage: View {
                     }.scrollIndicators(.never).frame(height: min(465, CGFloat(themes.count) * 61 - 7))
                     HStack(spacing: 8) {
                         Button("应用主题", action: apply).buttonStyle(SkinButtonStyle(prominent: true))
-                        Button(builtin ? "复制并编辑" : "编辑") { editor.begin(theme, copy: builtin); dark = false }
-                        Button("删除", action: deleteTheme).disabled(builtin)
+                        Button("编辑") { editor.begin(theme, copy: false); dark = false }
+                        Button("复制并编辑") { editor.begin(theme, copy: true); dark = false }
+                        if builtin {
+                            Button("恢复默认", action: restoreDefault)
+                                .disabled(!settings.overrideIsActive(selected))
+                        } else {
+                            Button("删除", action: deleteTheme)
+                        }
                     }
                     Spacer(minLength: 0)
                 }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -60,6 +82,13 @@ struct SkinPage: View {
             }.frame(maxHeight: .infinity, alignment: .top)
             errorMessage
         }.disabled(busy || editor.saving)
+    }
+
+    private func themeSubtitle(_ item: CandidateTheme) -> String {
+        let origin = BuiltinCandidateThemes.isBuiltin(item.id)
+            ? (settings.overrideIsActive(item.id) ? "内置 · 已修改" : "内置")
+            : "自定义"
+        return origin + " · " + (item.dark == nil ? "单色" : "浅深双色")
     }
 
     private func themeRow(_ item: CandidateTheme) -> some View {
@@ -71,7 +100,7 @@ struct SkinPage: View {
                     .frame(width: 36, height: 36)
                 VStack(alignment: .leading, spacing: 3) {
                     Text(item.name).fontWeight(.semibold).lineLimit(1)
-                    Text((BuiltinCandidateThemes.all.contains { $0.id == item.id } ? "内置" : "自定义") + " · " + (item.dark == nil ? "单色" : "浅深双色")).font(.caption).foregroundStyle(.secondary)
+                    Text(themeSubtitle(item)).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer(minLength: 0)
                 if settings.candidateTheme == item.id { Text("当前使用").font(.caption).foregroundStyle(SettingsPalette.accent) }
@@ -91,7 +120,8 @@ struct SkinPage: View {
                 pageTitle("编辑主题")
                 Spacer()
                 Button("导出主题…") { if let draft = editor.draft { exportTheme(draft) } }
-                Button("保存主题", action: saveDraft).disabled(!(editor.draft?.isValid ?? false))
+                Button(activeThemeID == editor.draft?.id ? "保存并应用" : "保存主题", action: saveDraft)
+                    .disabled(!(editor.draft?.isValid ?? false))
                     .buttonStyle(SkinButtonStyle(prominent: true))
                     .keyboardShortcut("s", modifiers: .command)
             }
@@ -293,11 +323,41 @@ struct SkinPage: View {
     private func saveDraft() {
         guard var draft = editor.draft, draft.isValid else { return }
         draft.name = draft.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let applying = activeThemeID == draft.id
         var next = settings
-        if let i = next.userCandidateThemes.firstIndex(where: { $0.id == draft.id }) { next.userCandidateThemes[i] = draft }
-        else { next.userCandidateThemes.append(draft) }
+        if BuiltinCandidateThemes.isBuiltin(draft.id) {
+            // 内置主题原地修改：存「相对出厂数据的最小补丁」，与出厂一致即恢复默认。
+            guard let patch = BuiltinCandidateThemes.override(for: draft) else { failure = "无法计算内置主题的修改内容。"; return }
+            if patch.isEmpty { next.builtinThemeOverrides.removeValue(forKey: draft.id.rawValue) }
+            else { next.builtinThemeOverrides[draft.id.rawValue] = .object(patch) }
+        } else if let i = next.userCandidateThemes.firstIndex(where: { $0.id == draft.id }) {
+            next.userCandidateThemes[i] = draft
+        } else {
+            next.userCandidateThemes.append(draft)
+        }
+        // 编辑的是正在使用的主题时保存即生效，同一次写入完成。
+        if applying { next.candidateTheme = draft.id }
         persist(next) { selected = draft.id; editor.discard() }
     }
+
+    private func editCurrentTheme() {
+        let id = activeThemeID
+        guard let item = themes.first(where: { $0.id == id }) else { return }
+        selected = id
+        editor.begin(item, copy: false)
+        dark = false
+    }
+
+    /// 恢复默认只移除覆盖，不动主题身份：正在使用则仍保持应用。
+    private func restoreDefault() {
+        guard builtin, settings.overrideIsActive(selected),
+              confirm("恢复“\(theme.name)”的出厂外观？", detail: "丢弃对此内置主题的修改；它正在使用时立即生效。", action: "恢复默认")
+        else { return }
+        var next = settings
+        next.builtinThemeOverrides.removeValue(forKey: selected.rawValue)
+        persist(next) {}
+    }
+
     private func deleteTheme() {
         guard !builtin, confirm("删除“\(theme.name)”？", action: "删除") else { return }
         var next = settings

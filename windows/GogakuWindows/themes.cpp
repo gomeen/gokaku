@@ -339,9 +339,52 @@ Json builtinThemes() {
     }();
     return themes;
 }
+Json effectiveBuiltinThemes(const Json &settings) {
+    // 覆盖补丁的套用只有共享核心一份实现（gc_themes_effective）。套用后超出
+    // 本端范围（例如字号）的单条回退出厂版本，不影响其他主题与设置。
+    static thread_local std::string cacheKey;
+    static thread_local Json cacheValue;
+    Json overrides = Json::object();
+    if (settings.is_object()) {
+        const auto found = settings.find("builtinThemeOverrides");
+        if (found != settings.end() && found->is_object()) overrides = *found;
+    }
+    const Json factory = builtinThemes();
+    if (overrides.empty()) return factory;
+    const std::string key = overrides.dump();
+    // 输入法每次重绘都会取 resolvedTheme：同一份补丁不重复合并／解析。
+    if (cacheKey == key) return cacheValue;
+    Json result = factory;
+    char *buffer = nullptr;
+    size_t length = 0;
+    if (gc_themes_effective(key.data(), key.size(), &buffer, &length) == 0 && buffer) {
+        std::unique_ptr<char, void (*)(void *)> holder(buffer, gc_contract_free);
+        try {
+            const Json parsed = Json::parse(buffer, buffer + length);
+            if (parsed.is_array() && parsed.size() == result.size()) {
+                for (size_t i = 0; i < result.size(); ++i) {
+                    try {
+                        validate(parsed[i], false);
+                        result[i] = parsed[i];
+                    } catch (...) {
+                        // 单条回退出厂版本
+                    }
+                    result[i]["id"] = factory[i]["id"];
+                }
+            }
+        } catch (...) {
+            // 解析失败整体回退出厂版本
+            result = factory;
+        }
+    }
+    cacheKey = key;
+    cacheValue = result;
+    return result;
+}
 Json resolvedTheme(const Json &settings) {
-    auto all=builtinThemes(); const auto id=settings.value("candidateTheme",std::string("rime-macos-like"));
-    if (id=="rime-macos-like") { auto t=all[0]; t["id"]=id; return t; }
+    // 旧默认 ID 固定用出厂配色与历史渲染，不受覆盖影响。
+    auto all=effectiveBuiltinThemes(settings); const auto id=settings.value("candidateTheme",std::string("rime-macos-like"));
+    if (id=="rime-macos-like") { auto t=builtinThemes()[0]; t["id"]=id; return t; }
     for (const auto &t:all) if (t["id"]==id) return t;
     if (settings.contains("userCandidateThemes") && settings["userCandidateThemes"].is_array()) for (const auto &t:settings["userCandidateThemes"]) {
         try { if (t.value("id",std::string())==id) { validate(t,false); return t; } } catch (...) {}

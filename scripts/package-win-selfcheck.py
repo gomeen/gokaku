@@ -28,6 +28,8 @@ STAGE = OUT_DIR / 'gogaku-core-selfcheck'
 
 TEST_EXES = [
     'gogaku_core_abi_test.exe',
+    'gogaku_core_settings_contract_test.exe',
+    'gogaku_core_theme_contract_test.exe',
     'gogaku_core_translate_safety_test.exe',
     'gogaku_core_normal_test.exe',
     'gogaku_core_learning_test.exe',
@@ -61,7 +63,7 @@ set "LOG=%~dp0selfcheck-report.txt"
 set "JSON=%~dp0selfcheck-report.json"
 > "%LOG%" echo Gogaku core self-check
 >> "%LOG%" echo host=%COMPUTERNAME% user=%USERNAME% date=%DATE% %TIME%
-for %%T in (gogaku_core_abi_test gogaku_core_translate_safety_test gogaku_core_normal_test gogaku_core_learning_test gogaku_core_quality_test gogaku_core_fuzz) do (
+for %%T in (gogaku_core_abi_test gogaku_core_settings_contract_test gogaku_core_theme_contract_test gogaku_core_translate_safety_test gogaku_core_normal_test gogaku_core_learning_test gogaku_core_quality_test gogaku_core_fuzz) do (
   >> "%LOG%" echo === %%T ===
   %%T.exe >> "%LOG%" 2>&1
   >> "%LOG%" echo exitcode=!errorlevel!
@@ -108,8 +110,8 @@ README = '''Gogaku 共享核心 Windows 自检包
 内容清单
 --------
 - libgogaku_core.dll 等核心与依赖库
-- 6 个测试程序（ABI 合同、翻译加固、普通模式轨迹、学习模式轨迹、
-  质量回归、随机序列冒烟）
+- 8 个测试程序（ABI 合同、设置契约、主题契约与覆盖补丁、翻译加固、
+  普通模式轨迹、学习模式轨迹、质量回归、随机序列冒烟）
 - data/ 出厂数据（用于测试的词典与语言模型，来自固定数据源）
 '''
 

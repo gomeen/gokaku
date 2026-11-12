@@ -31,4 +31,25 @@ final class SkinEditorSessionTests: XCTestCase {
         session.draft?.name = "更改"
         XCTAssertTrue(session.dirty)
     }
+
+    /// 内置主题原地编辑：入口拿到的是已套用覆盖的版本，ID 不变，dirty 只看草稿。
+    func testInPlaceBuiltinEditingTracksDirtyAndIdentity() throws {
+        var overridden = BuiltinCandidateThemes.theme(.claude)
+        overridden.light.highlight = try XCTUnwrap(ThemeColor(rgb: 0x123456))
+        var settings = Settings()
+        settings.candidateTheme = .claude
+        settings.builtinThemeOverrides = ["claude": .object(try XCTUnwrap(BuiltinCandidateThemes.override(for: overridden)))]
+
+        let session = SkinEditorSession()
+        session.begin(settings.resolvedCandidateTheme, copy: false)
+        XCTAssertEqual(session.draft?.id, .claude)
+        XCTAssertEqual(session.draft?.light.highlight.rgb, 0x123456)
+        XCTAssertFalse(session.dirty)
+        session.draft?.typography.fontSize = 18
+        XCTAssertTrue(session.dirty)
+        let patch = try XCTUnwrap(BuiltinCandidateThemes.override(for: try XCTUnwrap(session.draft)))
+        XCTAssertEqual(Set(patch.keys), ["light", "typography"], "求差只包含改动过的字段")
+        session.discard()
+        XCTAssertNil(session.draft)
+    }
 }

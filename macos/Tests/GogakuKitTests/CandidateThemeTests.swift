@@ -106,4 +106,113 @@ final class CandidateThemeTests: XCTestCase {
         XCTAssertEqual(BuiltinCandidateThemes.theme(.rimeMacOSLike).id, .rimeMacOSLike)
         XCTAssertEqual(BuiltinCandidateThemes.theme(.rimeMacOSLike).light, gogaku.light)
     }
+
+    // MARK: - 内置主题覆盖补丁（原地修改）
+
+    func testBuiltinOverrideAppliesToResolvedTheme() throws {
+        var settings = Settings()
+        settings.candidateTheme = .claude
+        settings.builtinThemeOverrides = ["claude": .object([
+            "light": .object(["highlight": .number(1218922)]),
+        ])]
+        let resolved = settings.resolvedCandidateTheme
+        XCTAssertEqual(resolved.id, .claude)
+        XCTAssertEqual(resolved.light.highlight.rgb, 1218922)
+        // 补丁里没写的字段继续跟随出厂数据。
+        XCTAssertEqual(resolved.light.background, BuiltinCandidateThemes.theme(.claude).light.background)
+        XCTAssertEqual(resolved.dark, BuiltinCandidateThemes.theme(.claude).dark)
+        XCTAssertTrue(settings.overrideIsActive(.claude))
+        XCTAssertFalse(settings.overrideIsActive(.gogaku))
+    }
+
+    func testBuiltinOverrideCanAddOrRemoveDarkAppearance() throws {
+        var settings = Settings()
+        let witch = BuiltinCandidateThemes.theme(.witch)
+        settings.builtinThemeOverrides = ["witch": .object(["dark": .object([
+            "background": .number(0x101010), "border": .number(0x202020),
+            "text": .number(0xffffff), "comment": .number(0xcccccc),
+            "index": .number(0x999999), "highlight": .number(0x3366cc),
+            "highlightText": .number(0xffffff), "highlightComment": .number(0xffffff),
+            "cursor": .number(0x3366cc), "page": .number(0x999999),
+        ])])]
+        settings.candidateTheme = .witch
+        XCTAssertEqual(settings.resolvedCandidateTheme.id, .witch)
+        XCTAssertNil(witch.dark)
+        XCTAssertEqual(settings.resolvedCandidateTheme.dark?.background.rgb, 0x101010)
+        // 未应用时列表与编辑器也按覆盖解析，看到同一份。
+        XCTAssertEqual(settings.effectiveBuiltinThemes[3].dark?.background.rgb, 0x101010)
+
+        settings.candidateTheme = .claude
+        settings.builtinThemeOverrides = ["claude": .object(["dark": .null])]
+        XCTAssertEqual(settings.resolvedCandidateTheme.id, .claude)
+        XCTAssertNil(settings.resolvedCandidateTheme.dark)
+        XCTAssertNotNil(BuiltinCandidateThemes.theme(.claude).dark)
+    }
+
+    func testInvalidBuiltinOverrideFallsBackToFactory() throws {
+        var settings = Settings()
+        settings.candidateTheme = .gogaku
+        // 字号超出本端范围：该条回退出厂版本，不影响其他主题或设置。
+        settings.builtinThemeOverrides = [
+            "gogaku": .object(["typography": .object(["fontSize": .number(99)])]),
+            "grok": .object(["light": .object(["highlight": .number(0x123456)])]),
+        ]
+        XCTAssertEqual(settings.resolvedCandidateTheme, BuiltinCandidateThemes.theme(.gogaku))
+        XCTAssertEqual(settings.effectiveBuiltinThemes[2].light.highlight.rgb, 0x123456)
+        XCTAssertEqual(settings.recording, true)
+    }
+
+    func testRimeAliasIgnoresBuiltinOverride() throws {
+        var settings = Settings()
+        settings.candidateTheme = .rimeMacOSLike
+        settings.builtinThemeOverrides = ["gogaku": .object(["light": .object(["highlight": .number(0x123456)])])]
+        let resolved = settings.resolvedCandidateTheme
+        XCTAssertEqual(resolved.id, .rimeMacOSLike)
+        XCTAssertEqual(resolved.light, BuiltinCandidateThemes.theme(.gogaku).light)
+        XCTAssertNotEqual(resolved.light.highlight.rgb, 0x123456)
+    }
+
+    func testOverridePatchIsMinimalAndRoundTrips() throws {
+        let claude = BuiltinCandidateThemes.theme(.claude)
+        XCTAssertEqual(BuiltinCandidateThemes.override(for: claude)?.isEmpty, true, "出厂数据应求差为空补丁")
+
+        var edited = claude
+        edited.name = "夜行 Claude"
+        edited.light.highlight = try XCTUnwrap(ThemeColor(rgb: 0x123456))
+        edited.typography.fontSize = 16
+        let patch = try XCTUnwrap(BuiltinCandidateThemes.override(for: edited))
+        XCTAssertEqual(patch.count, 3)
+        XCTAssertEqual(patch["name"], .string("夜行 Claude"))
+        XCTAssertEqual(patch["light"], .object(["highlight": .number(0x123456)]))
+        XCTAssertEqual(patch["typography"], .object(["fontSize": .number(16)]))
+
+        var settings = Settings()
+        settings.builtinThemeOverrides = ["claude": .object(patch)]
+        XCTAssertEqual(settings.effectiveBuiltinThemes[1], edited)
+
+        var single = claude
+        single.dark = nil
+        XCTAssertEqual(BuiltinCandidateThemes.override(for: single)?["dark"], .null)
+
+        // 用户主题不能求成内置补丁。
+        var custom = claude
+        custom = CandidateTheme(id: CandidateThemeID(rawValue: UUID().uuidString)!, name: custom.name,
+                                light: custom.light, dark: custom.dark)
+        XCTAssertNil(BuiltinCandidateThemes.override(for: custom))
+    }
+
+    func testOverrideFieldRoundTripsThroughSettingsCoding() throws {
+        var settings = Settings()
+        settings.builtinThemeOverrides = ["claude": .object(["dark": .null, "light": .object(["highlight": .number(1218922)])])]
+        let data = try JSONEncoder().encode(settings)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let overrides = try XCTUnwrap(object["builtinThemeOverrides"] as? [String: Any])
+        XCTAssertNotNil(overrides["claude"])
+        // 整数值按整数写回，不改写为浮点写法。
+        XCTAssertTrue(String(data: data, encoding: .utf8)!.contains("1218922"))
+        let decoded = try JSONDecoder().decode(Settings.self, from: data)
+        XCTAssertEqual(decoded.builtinThemeOverrides, settings.builtinThemeOverrides)
+        XCTAssertEqual(Settings().builtinThemeOverrides, [:], "缺省应为空")
+        XCTAssertEqual(try JSONDecoder().decode(Settings.self, from: Data("{}".utf8)).builtinThemeOverrides, [:])
+    }
 }

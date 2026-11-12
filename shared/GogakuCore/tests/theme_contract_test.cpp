@@ -109,11 +109,207 @@ int main() {
     check(colorOf(1, "light", "highlight") == 0xdf9e87, "claude-accent", "Claude 浅色强调不符");
     check(colorOf(2, "dark", "highlight") == 0x28609b, "grok-accent-dark", "Grok 深色强调不符");
 
+    // ── 覆盖补丁：套用与求差都只有共享核心一份实现 ─────────────────
+    struct Out {
+        int32_t code = -1;
+        std::string text;
+        Json value;
+    };
+    const auto effective = [](const std::string &overrides) {
+        Out result;
+        char *buffer = nullptr;
+        size_t length = 0;
+        result.code = gc_themes_effective(overrides.data(), overrides.size(), &buffer, &length);
+        if (result.code == 0 && buffer) {
+            result.text.assign(buffer, length);
+            result.value = Json::parse(buffer, buffer + length, nullptr, false);
+        }
+        gc_contract_free(buffer);
+        return result;
+    };
+    const auto makeRaw = [](const std::string &id, const std::string &text) {
+        Out result;
+        char *buffer = nullptr;
+        size_t length = 0;
+        result.code = gc_theme_override_make(id.c_str(), text.data(), text.size(), &buffer, &length);
+        if (result.code == 0 && buffer) {
+            result.text.assign(buffer, length);
+            result.value = Json::parse(buffer, buffer + length, nullptr, false);
+        }
+        gc_contract_free(buffer);
+        return result;
+    };
+    const auto make = [&makeRaw](const std::string &id, const Json &edited) {
+        return makeRaw(id, edited.dump());
+    };
+
+    // 空补丁：与 gc_themes_builtin 逐字节相同。
+    for (const char *empty : {"", "{}"}) {
+        Out result = effective(empty);
+        check(result.code == 0, "effective-empty", std::string("返回码 ") + std::to_string(result.code));
+        check(result.text == themes.dump(), "effective-empty",
+              std::string("空补丁 ") + (empty[0] ? "{}" : "空串") + " 输出应与出厂数据一致");
+    }
+
+    {
+        Out result = effective(R"({"gogaku":{"name":"我的 Gogaku"}})");
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-name", "返回码或形状不符");
+        if (result.code == 0 && result.value.is_array() && result.value.size() == 4) {
+            check(result.value[0]["name"] == "我的 Gogaku", "effective-name", "改名未生效");
+            check(result.value[0]["light"] == themes[0]["light"], "effective-name", "未改的配色被改动");
+            check(result.value[1] == themes[1], "effective-name", "其他主题不应受影响");
+        }
+    }
+    {
+        Out result = effective(R"({"claude":{"light":{"highlight":1218922}}})");
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-color", "返回码或形状不符");
+        if (result.code == 0 && result.value.is_array() && result.value.size() == 4) {
+            check(result.value[1]["light"]["highlight"] == 1218922, "effective-color", "颜色补丁未生效");
+            check(result.value[1]["light"]["background"] == themes[1]["light"]["background"],
+                  "effective-color", "同一配色里未改的颜色应跟随出厂");
+            check(result.value[1]["dark"] == themes[1]["dark"], "effective-color", "深色配色不应受影响");
+        }
+    }
+    {
+        Out result = effective(R"({"grok":{"light":{"visual":{"radius":12}}}})");
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-visual", "返回码或形状不符");
+        if (result.code == 0 && result.value.is_array() && result.value.size() == 4) {
+            const auto &visual = result.value[2]["light"]["visual"];
+            check(visual.value("radius", 0.0) == 12.0, "effective-visual", "圆角补丁未生效");
+            check(visual.value("padding", 0.0) == 8.0 && visual.value("rowHeight", 0.0) == 100.0,
+                  "effective-visual", "同一 visual 里未改的字段应跟随出厂");
+        }
+    }
+    {
+        Out result = effective(R"({"claude":{"dark":null}})");
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-drop-dark", "返回码或形状不符");
+        if (result.code == 0 && result.value.is_array() && result.value.size() == 4) {
+            check(result.value[1].find("dark") == result.value[1].end(), "effective-drop-dark",
+                  "dark:null 应把双色主题改为单色");
+        }
+    }
+    {
+        const Json patch = Json{{"witch", Json{{"dark", themes[3]["light"]}}}};
+        Out result = effective(patch.dump());
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-add-dark", "返回码或形状不符");
+        if (result.code == 0 && result.value.is_array() && result.value.size() == 4) {
+            check(result.value[3].contains("dark") && result.value[3]["dark"] == themes[3]["light"],
+                  "effective-add-dark", "为单色主题添加深色配色未生效");
+        }
+    }
+    {
+        Out result = effective(R"({"gogaku":{"id":"evil"}})");
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-id-ignored", "返回码或形状不符");
+        if (result.code == 0 && result.value.is_array() && result.value.size() == 4) {
+            check(result.value[0]["id"] == "gogaku", "effective-id-ignored", "补丁不得改主题身份");
+            check(result.text == themes.dump(), "effective-id-ignored", "仅含 id 的补丁应等价于空补丁");
+        }
+    }
+    {
+        Out result = effective(R"({"unknown-theme":{"name":"x"}})");
+        check(result.code == 0 && result.value.is_array() && result.value.size() == 4,
+              "effective-unknown-id", "返回码或形状不符");
+        if (result.code == 0) check(result.text == themes.dump(), "effective-unknown-id", "未知 ID 应忽略");
+    }
+    for (const char *bad : {"not json", "[1,2,3]", "{\"a\":}"}) {
+        Out result = effective(bad);
+        check(result.code == 2, "effective-malformed",
+              std::string("输入 ") + bad + " 应返回 2，实际 " + std::to_string(result.code));
+    }
+    {
+        char *buffer = nullptr;
+        size_t length = 0;
+        check(gc_themes_effective(nullptr, 5, &buffer, &length) == 1, "effective-bad-args",
+              "overrides 为 NULL 但长度非 0 应返回 1");
+        check(gc_themes_effective("{}", 2, nullptr, &length) == 1, "effective-bad-args",
+              "out 为 NULL 应返回 1");
+        check(gc_themes_effective("{}", 2, &buffer, nullptr) == 1, "effective-bad-args",
+              "out_len 为 NULL 应返回 1");
+    }
+
+    // 求差：出厂数据直接回灌应该得到空补丁（含数值 14 与 14.0 等值）。
+    for (size_t i = 0; i < themes.size() && i < 4; ++i) {
+        const std::string id = themes[i]["id"];
+        Out patch = make(id, themes[i]);
+        check(patch.code == 0 && patch.text == "{}", "make-identity",
+              id + " 的出厂数据应求差为 {}，实际 " + patch.text);
+    }
+    {
+        Json edited = themes[1];
+        edited["typography"]["fontSize"] = 14.0;
+        Out patch = make("claude", edited);
+        check(patch.code == 0 && patch.text == "{}", "make-number-equal",
+              "14 与 14.0 应视为相同，实际 " + patch.text);
+    }
+    {
+        Json edited = themes[1];
+        edited["id"] = "user-copy";
+        Out patch = make("claude", edited);
+        check(patch.code == 0 && patch.text == "{}", "make-id-ignored",
+              "id 不参与求差，实际 " + patch.text);
+    }
+    {
+        Json edited = themes[0];
+        edited["name"] = "夜行";
+        edited["light"]["highlight"] = 0x123456;
+        edited["typography"]["fontSize"] = 16;
+        Out patch = make("gogaku", edited);
+        const Json expected{{"name", "夜行"},
+                            {"light", Json{{"highlight", 0x123456}}},
+                            {"typography", Json{{"fontSize", 16}}}};
+        check(patch.code == 0 && patch.value == expected, "make-minimal",
+              "补丁应只含改动字段，实际 " + patch.text);
+        Out applied = effective(Json{{"gogaku", patch.value}}.dump());
+        check(applied.code == 0 && applied.value.is_array() && applied.value.size() == 4 &&
+                  applied.value[0] == edited,
+              "make-roundtrip", "套用补丁后应等于草稿");
+    }
+    {
+        Json edited = themes[1];
+        edited.erase("dark");
+        Out patch = make("claude", edited);
+        check(patch.code == 0 && patch.value == Json{{"dark", nullptr}}, "make-drop-dark",
+              "删掉深色配色的补丁应为 {dark:null}，实际 " + patch.text);
+    }
+    {
+        Json edited = themes[3];
+        edited["dark"] = themes[3]["light"];
+        edited["dark"]["background"] = 0x101010;
+        Out patch = make("witch", edited);
+        check(patch.code == 0 && patch.value.is_object() && patch.value.contains("dark") &&
+                  patch.value["dark"].is_object(),
+              "make-add-dark", "为单色主题添加深色配色应写入完整 dark 对象，实际 " + patch.text);
+        Out applied = effective(Json{{"witch", patch.value}}.dump());
+        check(applied.code == 0 && applied.value.is_array() && applied.value.size() == 4 &&
+                  applied.value[3] == edited,
+              "make-add-dark-roundtrip", "套用补丁后应等于草稿");
+    }
+    {
+        Out patch = make("rime-macos-like", themes[0]);
+        check(patch.code == 1, "make-unknown-id", "别名不是内置 ID，应返回 1");
+        patch = makeRaw("claude", "not json");
+        check(patch.code == 2, "make-malformed", "编辑内容不是 JSON 应返回 2");
+        char *buffer = nullptr;
+        size_t length = 0;
+        check(gc_theme_override_make(nullptr, "{}", 2, &buffer, &length) == 1, "make-bad-args",
+              "builtin_id 为 NULL 应返回 1");
+        check(gc_theme_override_make("claude", nullptr, 0, &buffer, &length) == 1, "make-bad-args",
+              "edited 为 NULL 应返回 1");
+        check(gc_theme_override_make("claude", "{}", 2, nullptr, &length) == 1, "make-bad-args",
+              "out 为 NULL 应返回 1");
+    }
+
     // 参数错误路径。
     check(gc_themes_builtin(nullptr, &length) == 1, "bad-args", "out 为 NULL 应返回 1");
 
     if (failures == 0) {
-        std::printf("theme contract: 4 builtin themes passed\n");
+        std::printf("theme contract: 4 builtin themes and override patches passed\n");
         return 0;
     }
     std::fprintf(stderr, "theme contract: %d 项失败\n", failures);

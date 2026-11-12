@@ -213,4 +213,93 @@ public enum BuiltinCandidateThemes {
         }
         return all.first(where: { $0.id == id }) ?? theme(.rimeMacOSLike)
     }
+
+    /// 内置 ID（不含旧默认别名 `rime-macos-like`）。
+    public static func isBuiltin(_ id: CandidateThemeID) -> Bool {
+        all.contains { $0.id == id }
+    }
+
+    /// 套用设置里的覆盖补丁后的内置主题。合并只有共享核心一份实现
+    /// （`gc_themes_effective`）；单条补丁套用后超出本端范围（例如字号）时，
+    /// 该条回退到出厂版本，不影响其他主题与设置。
+    public static func effective(overrides: [String: JSONValue]) -> [CandidateTheme] {
+        guard !overrides.isEmpty else { return all }
+        let key = JSONValue.object(overrides).jsonText
+        return effectiveCache.value(for: key) { computeEffective(overrides) }
+    }
+
+    private static func computeEffective(_ overrides: [String: JSONValue]) -> [CandidateTheme] {
+        let text = JSONValue.object(overrides).jsonText
+        var buffer: UnsafeMutablePointer<CChar>?
+        var length = 0
+        let code = text.withCString { gc_themes_effective($0, text.utf8.count, &buffer, &length) }
+        guard code == 0, let output = buffer else { return all }
+        defer { gc_contract_free(output) }
+        let data = Data(bytes: output, count: length)
+        guard let decoded = try? JSONDecoder().decode(EffectiveBuiltinThemes.self, from: data),
+              decoded.values.count == all.count else { return all }
+        return decoded.values
+    }
+
+    /// 单条解码失败不影响其他主题：按位置回退到同一位置的出厂数据。
+    private struct EffectiveBuiltinThemes: Decodable {
+        let values: [CandidateTheme]
+        init(from decoder: Decoder) throws {
+            var container = try decoder.unkeyedContainer()
+            var result: [CandidateTheme] = []
+            var index = 0
+            while !container.isAtEnd {
+                let item = try container.superDecoder()
+                if let theme = try? CandidateTheme(from: item) {
+                    result.append(theme)
+                } else if index < BuiltinCandidateThemes.all.count {
+                    result.append(BuiltinCandidateThemes.all[index])
+                }
+                index += 1
+            }
+            values = result
+        }
+    }
+
+    /// 编辑后的完整主题 → 相对出厂数据的最小覆盖补丁；与出厂一致时返回空
+    /// 字典（调用方据此删除覆盖，等于恢复默认）。求差只有共享核心一份实现。
+    public static func override(for theme: CandidateTheme) -> [String: JSONValue]? {
+        guard isBuiltin(theme.id), let data = try? JSONEncoder().encode(theme) else { return nil }
+        var buffer: UnsafeMutablePointer<CChar>?
+        var length = 0
+        let code = data.withUnsafeBytes { raw -> Int32 in
+            guard let base = raw.baseAddress?.assumingMemoryBound(to: CChar.self) else { return 1 }
+            return gc_theme_override_make(theme.id.rawValue, base, data.count, &buffer, &length)
+        }
+        guard code == 0, let output = buffer else { return nil }
+        defer { gc_contract_free(output) }
+        let json = Data(bytes: output, count: length)
+        guard let value = try? JSONDecoder().decode(JSONValue.self, from: json) else { return nil }
+        return value.objectValue
+    }
+
+    /// 单条缓存：输入法每次重绘都会取 resolvedCandidateTheme，重复解码主题
+    /// （含背景图）成本不可接受。键是排序后的补丁 JSON，内容变了自然失效。
+    private final class EffectiveCache: @unchecked Sendable {
+        private let lock = NSLock()
+        private var key: String?
+        private var values: [CandidateTheme] = BuiltinCandidateThemes.all
+
+        func value(for key: String, compute: () -> [CandidateTheme]) -> [CandidateTheme] {
+            lock.lock()
+            if self.key == key {
+                let cached = values
+                lock.unlock()
+                return cached
+            }
+            lock.unlock()
+            let fresh = compute()
+            lock.lock()
+            self.key = key
+            values = fresh
+            lock.unlock()
+            return fresh
+        }
+    }
+    private static let effectiveCache = EffectiveCache()
 }

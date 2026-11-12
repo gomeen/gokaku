@@ -38,6 +38,20 @@ const char *ColorKeys[] = {"background","border","text","comment","index","highl
 const wchar_t *ColorLabels[] = {L"背景",L"边框",L"候选文字",L"翻译文字",L"序号",L"高亮背景",L"高亮文字",L"选中翻译",L"输入与光标",L"页码"};
 const char *VisualKeys[] = {"radius","padding","rowHeight","opacity","bgOpacity","imageOpacity"};
 const wchar_t *VisualLabels[] = {L"圆角 (0–20)",L"内边距 (0–20)",L"行高 % (80–140)",L"整体不透明度 %",L"背景色不透明度 %",L"背景图不透明度 %"};
+bool isBuiltinThemeId(const std::string &id){return id=="gogaku"||id=="claude"||id=="grok"||id=="witch";}
+// settings.builtinThemeOverrides[id]；没有覆盖时返回 nullptr。
+const Json *overrideFor(const Json &settings,const std::string &id){
+    if(!settings.is_object())return nullptr;
+    auto found=settings.find("builtinThemeOverrides");
+    if(found==settings.end()||!found->is_object())return nullptr;
+    auto entry=found->find(id);
+    return entry==found->end()?nullptr:&*entry;
+}
+// 当前生效的主题 ID；旧默认 rime-macos-like（含失效主题回退）按 Gogaku 处理。
+std::string currentThemeId(const Json &settings){
+    const auto resolved=gw::resolvedTheme(settings).value("id",std::string());
+    return resolved=="rime-macos-like"?"gogaku":resolved;
+}
 std::wstring content(HWND h) { int n=GetWindowTextLengthW(h); std::wstring s(size_t(n)+1,L'\0'); GetWindowTextW(h,s.data(),n+1); s.resize(n); return s; }
 std::wstring lower(std::wstring s) { std::transform(s.begin(),s.end(),s.begin(),::towlower); return s; }
 std::wstring trim(std::wstring s) { while(!s.empty() && iswspace(s.front()))s.erase(s.begin()); while(!s.empty() && iswspace(s.back()))s.pop_back(); return s; }
@@ -246,6 +260,8 @@ struct App {
     HBRUSH sideBrush=CreateSolidBrush(SideColor);
     std::vector<Placement> placements;std::map<HWND,std::vector<int>> listColumns;
     Json settings=Json::object(),themeDraft=Json::object(),themeOriginal=Json::object(),themeList=Json::array(),records=Json::array();
+    /// 打开编辑时的覆盖补丁基线（内置主题冲突检测用；空对象表示无覆盖）。
+    Json themeOverrideBaseline=Json::object();
     std::vector<HWND> controls;std::map<int,std::function<void(int)>> actions;
     std::vector<std::thread> jobs; std::atomic_bool cancel{false};
     std::function<void()> retryAction;
@@ -305,7 +321,7 @@ struct App {
     void debounce(){SetTimer(window,2,300,nullptr);}
     void flushText();
     void buildPage();void layout();void reflowControls();void setDpi(UINT next);void setScroll(int position);void drawNavigation(const DRAWITEMSTRUCT &item);void learningPage();void normalPage();void wordPage();void skinPage();void shortcutPage();void privacyPage();void recordsPage();
-    void fillApps();void addApp(bool browse);void removeApp();void toggleApp(size_t index);void fillWords();void editWord(bool fresh);void saveWords(std::vector<Word> value);void fillThemes();void openTheme(Json theme,bool fresh);void readThemeControls();void refreshPreview();bool leaveTheme();void saveTheme();void fillShortcuts();void recordKey(WPARAM key);void applyShortcut(int target,const Json &binding);void loadRecords();
+    void fillApps();void addApp(bool browse);void removeApp();void toggleApp(size_t index);void fillWords();void editWord(bool fresh);void saveWords(std::vector<Word> value);void fillThemes();void refreshThemeSelectionControls();void openTheme(Json theme,bool fresh);void readThemeControls();void refreshPreview();bool leaveTheme();void saveTheme();void fillShortcuts();void recordKey(WPARAM key);void applyShortcut(int target,const Json &binding);void loadRecords();
     LRESULT command(int id,int notification);LRESULT result(Result &r);LRESULT notifyControl(NMHDR *header);
     static LRESULT CALLBACK proc(HWND,UINT,WPARAM,LPARAM);static LRESULT CALLBACK pageProc(HWND,UINT,WPARAM,LPARAM);static LRESULT CALLBACK previewProc(HWND,UINT,WPARAM,LPARAM);
     static LRESULT CALLBACK captureProc(HWND h,UINT m,WPARAM w,LPARAM l,UINT_PTR,DWORD_PTR p){auto self=reinterpret_cast<App *>(p);if((m==WM_KEYDOWN||m==WM_SYSKEYDOWN)&&self->recording>=0){self->recordKey(w);return 0;}if(m==WM_GETDLGCODE)return DLGC_WANTALLKEYS;if(m==WM_KILLFOCUS)self->recording=-1;return DefSubclassProc(h,m,w,l);}
@@ -414,8 +430,18 @@ void App::saveWords(std::vector<Word> value){
     }catch(const std::exception &e){fail(e);}
 }
 
-void App::fillThemes(){themeList=gw::builtinThemes();std::set<std::string> ids={"rime-macos-like","gogaku","claude","grok","witch"};
+void App::fillThemes(){themeList=gw::effectiveBuiltinThemes(settings);std::set<std::string> ids={"rime-macos-like","gogaku","claude","grok","witch"};
     for(const auto &t:settings.value("userCandidateThemes",Json::array()))try{auto id=t.value("id",std::string());if(!ids.insert(id).second)continue;gw::validateTheme(t);themeList.push_back(t);}catch(...){}
+}
+// 选中项决定底部最后一个按钮：用户主题是「删除…」，内置主题是「恢复默认」
+// （无覆盖时禁用），编辑与复制对两者都可用。
+void App::refreshThemeSelectionControls(){
+    if(!get(405))return;
+    if(themeIndex<0||themeIndex>=int(themeList.size()))return;
+    const auto id=themeList[size_t(themeIndex)].value("id",std::string());
+    const bool builtin=isBuiltinThemeId(id);
+    SetWindowTextW(get(405),builtin?L"恢复默认":L"删除…");
+    EnableWindow(get(405),!builtin||overrideFor(settings,id)!=nullptr);
 }
 void App::skinPage(){
     fillThemes();label(L"皮肤",18,24,20,430);
@@ -423,21 +449,36 @@ void App::skinPage(){
         auto h=add(L"LISTBOX",L"",WS_TABSTOP|WS_BORDER|LBS_NOTIFY|WS_VSCROLL,20,58,420,252,400);
         for(const auto &t:themeList){std::wstring s=gw::wide(t.value("name",std::string()));if(t.value("id",std::string())==settings.value("candidateTheme",std::string()))s+=L"  · 已应用";SendMessageW(h,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(s.c_str()));}
         themeIndex=std::clamp(themeIndex,0,int(themeList.size())-1);SendMessageW(h,LB_SETCURSEL,themeIndex,0);
-        button(L"应用主题",401,20,330,130);button(L"新建",402,164,330,110);button(L"复制并编辑",403,288,330,152);
-        button(L"编辑",404,20,374,130);button(L"删除…",405,164,374,110);button(L"导入主题…",406,288,374,152);
+        button(L"应用主题",401,20,330,120);button(L"编辑",404,150,330,120);button(L"复制并编辑",403,280,330,152);
+        button(L"删除…",405,20,374,120);button(L"编辑当前主题",408,150,374,140);button(L"导入主题…",406,300,374,132);
         button(L"导出主题…",407,20,418,150);
         label(L"选择只更新预览；保存与应用分别操作。",466,44,20,420);
-        actions[400]=[this](int n){if(n==LBN_SELCHANGE){themeIndex=int(SendMessageW(get(400),LB_GETCURSEL,0,0));refreshPreview();}};
+        refreshThemeSelectionControls();
+        actions[400]=[this](int n){if(n==LBN_SELCHANGE){themeIndex=int(SendMessageW(get(400),LB_GETCURSEL,0,0));refreshThemeSelectionControls();refreshPreview();}};
         actions[401]=[this](int n){if(n==BN_CLICKED && themeIndex>=0)patch({{"candidateTheme",themeList[size_t(themeIndex)]["id"]}});};
         actions[402]=[this](int n){if(n!=BN_CLICKED)return;auto t=gw::builtinThemes()[0];t.erase("dark");t["name"]="新主题";openTheme(t,true);};
         actions[403]=[this](int n){if(n!=BN_CLICKED)return;auto t=themeList[size_t(themeIndex)];t["name"]=t.value("name",std::string())+" 副本";openTheme(t,true);};
-        actions[404]=[this](int n){if(n!=BN_CLICKED)return;if(themeIndex<4){status(L"内置主题不可修改，请使用“复制并编辑”。");return;}openTheme(themeList[size_t(themeIndex)],false);};
-        actions[405]=[this](int n){if(n!=BN_CLICKED)return;if(themeIndex<4)throw std::runtime_error("内置主题不能删除");if(MessageBoxW(window,L"删除此用户主题？若正在应用，将回到旧默认外观。",L"删除主题",MB_YESNO|MB_ICONWARNING)!=IDYES)return;auto id=themeList[size_t(themeIndex)].value("id",std::string());
+        // 内置主题原地编辑：保存后存为覆盖补丁（草稿与出厂一致即删除覆盖）。
+        actions[404]=[this](int n){if(n!=BN_CLICKED)return;openTheme(themeList[size_t(themeIndex)],false);};
+        actions[405]=[this](int n){if(n!=BN_CLICKED)return;auto id=themeList[size_t(themeIndex)].value("id",std::string());
+            if(isBuiltinThemeId(id)){
+                if(!overrideFor(settings,id)){status(L"此内置主题没有修改，已是出厂外观。");return;}
+                if(MessageBoxW(window,L"恢复此内置主题的出厂外观？丢弃对此主题的修改；它正在使用时立即生效。",L"恢复默认",MB_YESNO|MB_ICONWARNING)!=IDYES)return;
+                if(mutate([id](Json &latest){auto &overrides=latest["builtinThemeOverrides"];if(overrides.is_object())overrides.erase(id);})){refreshThemeSelectionControls();buildPage();}
+                return;
+            }
+            if(MessageBoxW(window,L"删除此用户主题？若正在应用，将回到旧默认外观。",L"删除主题",MB_YESNO|MB_ICONWARNING)!=IDYES)return;
             if(mutate([id](Json &latest){auto &themes=latest["userCandidateThemes"];themes.erase(std::remove_if(themes.begin(),themes.end(),[&](const Json &t){return t.value("id",std::string())==id;}),themes.end());if(latest.value("candidateTheme",std::string())==id)latest["candidateTheme"]="rime-macos-like";})){themeIndex=0;buildPage();}};
+        // 编辑当前生效的主题（旧默认 rime-macos-like 按 Gogaku 处理）。
+        actions[408]=[this](int n){if(n!=BN_CLICKED)return;const auto id=currentThemeId(settings);
+            for(const auto &t:themeList)if(t.value("id",std::string())==id){openTheme(t,false);return;}
+            status(L"当前主题不在列表中，请先重新选择。");};
         actions[406]=[this](int n){if(n!=BN_CLICKED||themeBusy)return;auto path=pickFile(window,false,L"Gogaku 主题 (*.gogakutheme)\0*.gogakutheme\0\0",L"gogakutheme");if(!path)return;themeBusy=true;status(L"正在后台校验并导入主题…");job("import",[path](){return gw::importTheme(*path);});};
         actions[407]=[this](int n){if(n!=BN_CLICKED||themeBusy)return;auto path=pickFile(window,true,L"Gogaku 主题 (*.gogakutheme)\0*.gogakutheme\0\0",L"gogakutheme");if(!path)return;auto t=themeList[size_t(themeIndex)];themeBusy=true;status(L"正在后台校验并导出主题…");job("export",[path,t](){gw::exportTheme(*path,t);return Json::object();});};
     }else{
-        label(L"主题编辑（草稿）",54,24,20,420);button(L"返回",410,20,88,90);button(L"保存",411,124,88,90);button(L"导出草稿…",412,228,88,140);
+        // 编辑的是正在使用的主题时保存即生效。
+        const bool applying=themeDraft.value("id",std::string())==currentThemeId(settings);
+        label(L"主题编辑（草稿）",54,24,20,420);button(L"返回",410,20,88,90);button(applying?L"保存并应用":L"保存",411,124,88,90);button(L"导出草稿…",412,228,88,140);
         combo(413,{L"浅色／单色",L"深色"},previewDark?1:0,20,134,180);button(themeDraft.contains("dark")?L"改为单色":L"增加深色",414,220,134,140);
         label(L"主题与字体",190,24,20,420);
         label(L"名称",226,24,20,135);edit(gw::wide(themeDraft.value("name",std::string())),450,160,222,280);
@@ -469,7 +510,11 @@ void App::skinPage(){
     }
     ShowWindow(preview,SW_SHOW);refreshPreview();
 }
-void App::openTheme(Json theme,bool fresh){if(themeBusy)return;if(fresh)theme["id"]=uuid();themeDraft=theme;themeOriginal=fresh?Json::object():theme;themeEditing=true;themeTouched=fresh;previewDark=false;themeError.clear();buildPage();}
+void App::openTheme(Json theme,bool fresh){if(themeBusy)return;if(fresh)theme["id"]=uuid();themeDraft=theme;themeOriginal=fresh?Json::object():theme;
+    // 内置主题的冲突基线是打开时的覆盖补丁（无覆盖为空对象）。
+    const Json *existing=fresh?nullptr:overrideFor(settings,theme.value("id",std::string()));
+    themeOverrideBaseline=existing?*existing:Json::object();
+    themeEditing=true;themeTouched=fresh;previewDark=false;themeError.clear();buildPage();}
 void App::readThemeControls(){if(!themeEditing||!get(450))return;
     try{auto next=themeDraft;next["name"]=gw::utf8(content(get(450)));auto &t=next["typography"];t["fontCN"]=gw::utf8(content(get(451)));t["fontEN"]=gw::utf8(content(get(452)));
         auto numeric=[&](int id){auto s=trim(content(get(id)));size_t read=0;double value=std::stod(s,&read);if(read!=s.size()||!std::isfinite(value))throw std::runtime_error("数值输入无效");return value;};
@@ -492,8 +537,30 @@ bool App::leaveTheme(){if(themeBusy){status(L"文件操作尚未完成，请稍�
     if(answer==IDCANCEL)return false;if(answer==IDNO){themeTouched=false;return true;}saveTheme();return !themeEditing;
 }
 void App::saveTheme(){if(themeBusy)return;readThemeControls();if(!themeError.empty())throw std::runtime_error(gw::utf8(themeError));auto value=themeDraft,original=themeOriginal;
-    gw::validateTheme(value);if(mutate([value,original](Json &latest){auto &all=latest["userCandidateThemes"];if(!all.is_array())all=Json::array();for(auto &t:all)if(t.value("id",std::string())==value.value("id",std::string())){if(!original.empty()&&t!=original)throw std::runtime_error("此主题已被其他设置窗口修改；未覆盖磁盘内容。");t=value;return;}if(!original.empty())throw std::runtime_error("此主题已被删除；请复制为新主题后保存。");all.push_back(value);})){
-        themeOriginal=value;themeTouched=false;themeEditing=false;fillThemes();for(size_t i=0;i<themeList.size();++i)if(themeList[i]["id"]==value["id"])themeIndex=int(i);buildPage();status(L"主题已保存（未自动应用）");}
+    gw::validateTheme(value);const auto id=value.value("id",std::string());const bool applying=id==currentThemeId(settings);
+    if(isBuiltinThemeId(id)){
+        // 内置主题原地修改：求差只有共享核心一份实现（gc_theme_override_make）。
+        const std::string text=value.dump();char *buffer=nullptr;size_t length=0;
+        if(gc_theme_override_make(id.c_str(),text.data(),text.size(),&buffer,&length)!=0||!buffer)throw std::runtime_error("无法计算内置主题的修改内容");
+        std::unique_ptr<char,void(*)(void*)> holder(buffer,gc_contract_free);Json patch;
+        try{patch=Json::parse(buffer,buffer+length);}catch(...){throw std::runtime_error("无法计算内置主题的修改内容");}
+        const Json baseline=themeOverrideBaseline;
+        if(mutate([id,patch,baseline,applying](Json &latest){
+            Json &overrides=latest["builtinThemeOverrides"];if(!overrides.is_object())overrides=Json::object();
+            const auto found=overrides.find(id);const Json current=found==overrides.end()?Json::object():*found;
+            if(current!=baseline)throw std::runtime_error("此主题已被其他设置窗口修改；未覆盖磁盘内容。");
+            // 与出厂数据完全一致即删除覆盖，等于恢复默认。
+            if(patch.is_object()&&patch.empty())overrides.erase(id);else overrides[id]=patch;
+            if(applying)latest["candidateTheme"]=id;
+        })){
+            themeOriginal=value;themeTouched=false;themeEditing=false;fillThemes();
+            for(size_t i=0;i<themeList.size();++i)if(themeList[i]["id"]==id)themeIndex=int(i);
+            buildPage();status(applying?L"主题已保存并应用":L"主题已保存（未自动应用）");
+        }
+        return;
+    }
+    if(mutate([value,original,applying](Json &latest){auto &all=latest["userCandidateThemes"];if(!all.is_array())all=Json::array();for(auto &t:all)if(t.value("id",std::string())==value.value("id",std::string())){if(!original.empty()&&t!=original)throw std::runtime_error("此主题已被其他设置窗口修改；未覆盖磁盘内容。");t=value;if(applying)latest["candidateTheme"]=value["id"];return;}if(!original.empty())throw std::runtime_error("此主题已被删除；请复制为新主题后保存。");all.push_back(value);if(applying)latest["candidateTheme"]=value["id"];})){
+        themeOriginal=value;themeTouched=false;themeEditing=false;fillThemes();for(size_t i=0;i<themeList.size();++i)if(themeList[i]["id"]==value["id"])themeIndex=int(i);buildPage();status(applying?L"主题已保存并应用":L"主题已保存（未自动应用）");}
 }
 
 std::wstring shortcutText(const Json &binding){if(binding.value("disabled",false))return L"已禁用";auto key=gw::wide(binding.value("key",std::string()));if(key.empty())return L"未设置";auto modifiers=binding.value("modifiers",0u);std::wstring value;
