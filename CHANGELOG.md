@@ -2,6 +2,16 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 0.1.5（构建 113，stable 定版，2026-11-12）
+
+- **行为变化：皮肤支持编辑当前主题与内置主题原地修改**。新增「编辑当前主题」，直接打开正在使用的主题（当前为旧默认 `rime-macos-like` 或已应用主题失效回退到它时，打开 Gogaku），与列表选中项无关。内置主题不再只能「复制并编辑」：修改以相对出厂数据的 JSON Merge Patch（RFC 7386）存入 `settings.json` 顶层字段 `builtinThemeOverrides`，补丁之外的字段继续跟随出厂数据，可一键「恢复默认」；列表副标题对有覆盖的内置主题显示「内置 · 已修改」。
+- 编辑正在使用的主题时保存按钮显示「保存并应用」，同一次写入设置 `candidateTheme`，保存后立即生效（从 `rime-macos-like` 保存 Gogaku 后切换到新主题渲染）；编辑其他主题仍只保存、不自动应用。草稿与出厂数据完全一致的保存等于恢复默认。「复制并编辑」复制列表中看到（已套用补丁）的版本。
+- **实现位置**：合并与求差只在共享核心（`gc_themes_effective`／`gc_theme_override_make`，`shared/GogakuCore/theme_contract.cpp`，附加导出、未升 ABI），读侧规范化在 `settings_contract.cpp`（非对象整体丢弃、非内置 ID 丢弃、剥除 `id`、空补丁丢弃）；两端只做 JSON 搬运与本端校验。套用后超出本端范围的单条内置主题回退出厂版本，旧默认 `rime-macos-like` 始终用出厂配色与历史渲染。Mac 输入法渲染取缓存的 `Settings.resolvedCandidateTheme`，Windows 取缓存的 `effectiveBuiltinThemes`。
+- **测试**：共享核心 `theme_contract_test` 新增空补丁逐字节相同、改名／改色／改 visual、`dark:null`、为单色主题添加 `dark`、`id` 与未知 ID 忽略、非法 JSON 与参数错误，以及求差往返、最小补丁、数值 14 与 14.0 等值；`settings_contract_test` 新增覆盖字段规范化向量。Mac `CandidateThemeTests`／`SettingsStoreTests`／`SkinEditorSessionTests` 覆盖套用、非法回退、别名不受影响、读改写字段保留与原地编辑 dirty。Windows 交叉编译通过（x64 设置程序、x64／x86 TSF 链接）；新增 `probes/build-windows-theme-fixture.py` 构建 `resolvedTheme` 夹具，自检包新增 `settings_contract`／`theme_contract` 两项。
+- **文档**：`docs/skin-themes.md`、`docs/product.md`、`docs/feature-parity.md` 同步；定稿原型未改。
+- **验证**：fast 档 7/7（ctest 全量＋swift 测试）、完整 release 档与双端安装包见发布记录；共享核心改动后补 ASan／UBSan 冒烟（2000 序列 ×8 片）通过。
+- **验证边界**：host 档按用户 2026-11-12 决定豁免，未运行真实宿主注入；Windows 夹具与设置页未在 VM 运行，Mac 设置页内手动检查（改色后「保存并应用」、恢复默认、从 `rime-macos-like` 切换到 Gogaku、复制已修改的内置主题）尚未执行。豁免理由与未运行 host 的事实同时写入发布说明与 `release-state.json`。
+
 ### 0.1.4（构建 112，stable 定版，2026-11-11）
 
 - **修复：设置应用关窗即退出，不再常驻 Dock**。从输入菜单打开设置后关窗只关窗口，SwiftUI `Window` 应用默认不因最后窗口关闭而退出，进程与 Dock 图标一直留着（本次实测到跨夜驻留的旧进程）。现在关掉最后一个窗口即终止；退出前置 `.terminateLater`，等 `SettingsStore.flushForTermination` 把 300ms 合并中的文本改动落盘再退，2 秒兜底保证不退卡住。
