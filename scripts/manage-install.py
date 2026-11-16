@@ -30,6 +30,14 @@ CHANNELS = {
         'input_name': 'Gogaku Dev.app', 'settings_name': 'Gogaku Settings Dev.app',
         'input_id': 'org.gogaku.inputmethod.dev', 'settings_id': 'org.gogaku.settings.dev',
     },
+    'lite-dev': {
+        'input_name': 'Gogaku Lite Dev.app',
+        'settings_name': 'Gogaku Lite Settings Dev.app',
+        'input_id': 'org.gogaku.lite.inputmethod.dev',
+        'settings_id': 'org.gogaku.lite.settings.dev',
+        # 构建形态：决定 bundle-manifest 文件名与产校验，不能与 full 混用。
+        'flavor': 'lite',
+    },
 }
 CHANNEL = 'stable'
 INPUT = Path.home() / 'Library/Input Methods' / CHANNELS[CHANNEL]['input_name']
@@ -162,8 +170,10 @@ def install():
         (ROOT / 'dist' / CHANNELS[CHANNEL]['settings_name'], SETTINGS,
          CHANNELS[CHANNEL]['settings_id'], False),
     ]
-    manifest_path = ROOT / 'dist' / ('bundle-manifest.json' if CHANNEL == 'stable'
-                                     else 'bundle-manifest-dev.json')
+    flavor = CHANNELS[CHANNEL].get('flavor', 'full')
+    manifest_path = ROOT / 'dist' / ('bundle-manifest'
+                                     + ('-lite' if flavor == 'lite' else '')
+                                     + ('' if CHANNEL == 'stable' else '-dev') + '.json')
     if not manifest_path.exists():
         raise SystemExit(f'缺少 {manifest_path.relative_to(ROOT)}；请用 scripts/build.py（同通道）构建后再安装。')
     installed = []  # [(target, backup_path)]
@@ -344,7 +354,7 @@ if __name__ == '__main__':
     parser.add_argument('action', choices=['install', 'register', 'uninstall', 'recover', 'diagnose'])
     parser.add_argument('--purge-data', action='store_true')
     parser.add_argument('--channel', choices=sorted(CHANNELS), default='stable',
-                        help='安装通道：stable（默认）／dev；dev 装为 Gogaku Dev，独立输入源，数据共用')
+                        help='安装通道：stable／dev／lite-dev（Lite 独立 bundle ID，与 full 并存）')
     args = parser.parse_args()
     set_channel(args.channel)
     {'install': install, 'register': register, 'uninstall': lambda: uninstall(args.purge_data), 'recover': recover, 'diagnose': diagnose}[args.action]()

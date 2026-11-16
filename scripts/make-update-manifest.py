@@ -59,11 +59,16 @@ def load_version():
         fail(f'无法读取 version.json：{error}')
 
 
-def expected_name(platform: str, version: str, build: int, channel: str) -> str:
+def expected_name(platform: str, version: str, build: int, channel: str, product: str = 'full') -> str:
     suffix = '-dev' if channel == 'dev' else ''
+    prefix = 'GogakuLite' if product == 'lite' else 'Gogaku'
     if platform == 'macos':
-        return f'Gogaku-{version}-b{build}{suffix}.pkg'
-    return f'Gogaku-{version}-b{build}{suffix}-windows-x64-setup.exe'
+        return f'{prefix}-{version}-b{build}{suffix}.pkg'
+    return f'{prefix}-{version}-b{build}{suffix}-windows-x64-setup.exe'
+
+
+def manifest_basename(product: str) -> str:
+    return 'update-manifest-lite.json' if product == 'lite' else 'update-manifest.json'
 
 
 def load_asset_ids(path: Path | None) -> dict:
@@ -79,7 +84,10 @@ def load_asset_ids(path: Path | None) -> dict:
 
 
 def asset_id_for(ids: dict, platform: str, filename: str, allow_placeholder: bool) -> int:
-    value = ids.get(platform, ids.get(filename))
+    # 文件名优先：双产品（full + lite）共用一份 asset-ids 时，platform 键只能
+    # 指向其中一个产品，按文件名取才不会把 Lite 清单绑到完整版资产上
+    # （2026-11-16 实测：lite 清单的 macos assetId 指向了 full 的 pkg）。
+    value = ids.get(filename, ids.get(platform))
     if isinstance(value, dict):
         value = value.get('id') or value.get('assetId')
     if value is None and allow_placeholder:
@@ -136,7 +144,8 @@ def build_manifest(args) -> tuple[dict, Path, Path | None]:
         path = Path(path)
         if not path.is_file():
             fail(f'{platform} 安装包不存在：{path}')
-        expected = expected_name(platform, version, build, args.channel)
+        product = getattr(args, 'product', 'full')
+        expected = expected_name(platform, version, build, args.channel, product)
         if args.require_names and path.name != expected:
             fail(f'{platform} 文件名应为 {expected}，实际 {path.name}')
         default = PLATFORM_DEFAULTS[platform]
@@ -160,11 +169,13 @@ def build_manifest(args) -> tuple[dict, Path, Path | None]:
     }
     out_dir = Path(args.out or (ROOT / 'dist/update'))
     out_dir.mkdir(parents=True, exist_ok=True)
-    manifest_path = out_dir / 'update-manifest.json'
+    product = getattr(args, 'product', 'full')
+    base = manifest_basename(product)
+    manifest_path = out_dir / base
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     signature_path = None
     if not args.no_sign:
-        signature_path = out_dir / 'update-manifest.json.sig'
+        signature_path = out_dir / (base + '.sig')
         sign(Path(args.key), args.key_id, manifest_path, signature_path)
     return manifest, manifest_path, signature_path
 
@@ -258,6 +269,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--self-test', action='store_true')
+    parser.add_argument('--product', choices=['full', 'lite'], default='full',
+                        help='完整版 update-manifest.json；Lite 用 update-manifest-lite.json')
     parser.add_argument('--channel', choices=['stable', 'dev'], default='stable')
     parser.add_argument('--version')
     parser.add_argument('--build', type=int)

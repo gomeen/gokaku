@@ -40,8 +40,11 @@ class BuildPathTests(unittest.TestCase):
                 mock.patch.object(build.subprocess, 'run') as run:
             build.build_swift('debug', validation=True)
         args, kwargs = run.call_args
+        # 验收构建独占 scratch 目录：SwiftPM 不跟踪 -Xswiftc -D… 变化，
+        # 共用目录会把诊断代码复用进普通包（2026-11-13 实测）。
         self.assertEqual(args[0], ['swift', 'build', '-c', 'debug', '-j', '2',
-                                  '--package-path', 'macos', '--scratch-path', str(target / 'swift'),
+                                  '--package-path', 'macos',
+                                  '--scratch-path', str(target / 'swift-validation'),
                                   '-Xswiftc', '-DGOGAKU_VALIDATION'])
         self.assertEqual(kwargs['env']['GOGAKU_BUILD_ROOT'], str(target))
         self.assertEqual(kwargs['env']['GOGAKU_PATH_TEST'], 'keep')

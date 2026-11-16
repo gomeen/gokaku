@@ -33,12 +33,23 @@ DIST = ROOT / 'dist'
 LSREGISTER = ('/System/Library/Frameworks/CoreServices.framework/Frameworks/'
               'LaunchServices.framework/Support/lsregister')
 
+# 键为 (channel, flavor)：Lite 是独立产品（独立 bundle ID／安装名／资产名），
+# 不能与完整版共用一套通道配置。
 CHANNELS = {
-    'stable': {'input': 'Gogaku.app', 'settings': 'Gogaku Settings.app', 'suffix': '', 'label': 'Gogaku',
-               'input_id': 'org.gogaku.inputmethod', 'settings_id': 'org.gogaku.settings'},
-    'dev': {'input': 'Gogaku Dev.app', 'settings': 'Gogaku Settings Dev.app', 'suffix': '-dev',
-            'label': 'Gogaku Dev', 'input_id': 'org.gogaku.inputmethod.dev',
-            'settings_id': 'org.gogaku.settings.dev'},
+    ('stable', 'full'): {'input': 'Gogaku.app', 'settings': 'Gogaku Settings.app', 'suffix': '',
+                         'label': 'Gogaku', 'input_id': 'org.gogaku.inputmethod',
+                         'settings_id': 'org.gogaku.settings'},
+    ('dev', 'full'): {'input': 'Gogaku Dev.app', 'settings': 'Gogaku Settings Dev.app', 'suffix': '-dev',
+                      'label': 'Gogaku Dev', 'input_id': 'org.gogaku.inputmethod.dev',
+                      'settings_id': 'org.gogaku.settings.dev'},
+    ('stable', 'lite'): {'input': 'Gogaku Lite.app', 'settings': 'Gogaku Lite Settings.app',
+                         'suffix': '', 'label': 'Gogaku Lite',
+                         'input_id': 'org.gogaku.lite.inputmethod',
+                         'settings_id': 'org.gogaku.lite.settings'},
+    ('dev', 'lite'): {'input': 'Gogaku Lite Dev.app', 'settings': 'Gogaku Lite Settings Dev.app',
+                      'suffix': '-dev', 'label': 'Gogaku Lite Dev',
+                      'input_id': 'org.gogaku.lite.inputmethod.dev',
+                      'settings_id': 'org.gogaku.lite.settings.dev'},
 }
 
 POSTINSTALL_TEMPLATE = ROOT / 'macos/packaging/pkg-postinstall.sh'
@@ -156,7 +167,9 @@ def run(cmd, **kw):
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--channel', choices=sorted(CHANNELS), default='stable')
+    parser.add_argument('--channel', choices=['dev', 'stable'], default='stable')
+    parser.add_argument('--flavor', choices=['full', 'lite'], default='full',
+                        help='full=完整版；lite=Gogaku Lite（独立 bundle ID／清单／资产名）')
     parser.add_argument('--app-sign-identity', default=os.environ.get('GOGAKU_APP_SIGN_IDENTITY', '-'),
                         help='Developer ID Application 身份；省略＝ad-hoc（开发测试）')
     parser.add_argument('--installer-sign-identity', default=os.environ.get('GOGAKU_INSTALLER_SIGN_IDENTITY', ''),
@@ -166,7 +179,7 @@ def main() -> None:
     parser.add_argument('--notary-profile', default=os.environ.get('GOGAKU_NOTARY_PROFILE', ''),
                         help='notarytool keychain profile 名')
     args = parser.parse_args()
-    channel = CHANNELS[args.channel]
+    channel = CHANNELS[(args.channel, args.flavor)]
     if args.app_sign_identity != '-':
         require_identity(args.app_sign_identity, 'Developer ID Application')
     if args.installer_sign_identity:
@@ -185,8 +198,12 @@ def main() -> None:
                           '请右键打开或到系统设置允许；正式分发需 Developer ID 与公证。')
 
     meta = json.loads((ROOT / 'version.json').read_text())
-    build_identity = validate_macos_apps(DIST, args.channel, root=ROOT)
-    identity_path = DIST / ('build-identity-dev.json' if args.channel == 'dev' else 'build-identity.json')
+    build_identity = validate_macos_apps(DIST, args.channel, root=ROOT, flavor=args.flavor)
+    # 与 build.py 同一命名规则（形态 + 通道）；Lite 与完整版 dev 不能共用清单。
+    flavor = getattr(args, 'flavor', 'full')
+    identity_path = DIST / ('build-identity'
+                            + ('-lite' if flavor == 'lite' else '')
+                            + ('' if args.channel == 'stable' else '-dev') + '.json')
     version_release = meta['version'].split('-', 1)[0]
     input_app = DIST / channel['input']
     settings_app = DIST / channel['settings']
@@ -267,7 +284,10 @@ def main() -> None:
         'enable_localSystem="false"/>\n    <options', 1)
     synth.write_text(xml)
 
-    pkg_name = f"Gogaku-{meta['version']}-b{meta['buildNumber']}{channel['suffix']}.pkg"
+    # 资产名前缀按产品：Lite 用 GogakuLite-，否则与完整版同名会互相覆盖
+    # （publish-release.py 的 expected_names 也按这个规则校验）。
+    product_prefix = 'GogakuLite' if args.flavor == 'lite' else 'Gogaku'
+    pkg_name = f"{product_prefix}-{meta['version']}-b{meta['buildNumber']}{channel['suffix']}.pkg"
     pkg_path = DIST / pkg_name
     if pkg_path.exists():
         pkg_path.unlink()
@@ -301,7 +321,7 @@ def main() -> None:
         subprocess.run([LSREGISTER, '-u', str(app)], capture_output=True)
 
     # 拒绝组装过程中源码或 dist 输入变化；收据只为本轮验证过的包生成。
-    if validate_macos_apps(DIST, args.channel, root=ROOT) != build_identity:
+    if validate_macos_apps(DIST, args.channel, root=ROOT, flavor=args.flavor) != build_identity:
         raise DeliveryError('打包期间双 App 身份变化；请重新构建')
     license_files = [f'{name}/{relative}' for name, entry in build_identity['apps'].items()
                      for relative in entry['files'] if relative.startswith('Contents/Licenses/')]

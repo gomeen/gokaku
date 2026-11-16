@@ -19,10 +19,12 @@
 
 ## 二、清单合同（v1）
 
-每个 Release 必须附两个资产：
+每个 Release 按产品附资产（schema 仍为 1；完整版旧客户端不受影响）：
 
-- `update-manifest.json`：UTF-8 JSON；
-- `update-manifest.json.sig`：对**清单原始 UTF-8 字节**的 Ed25519 分离签名。客户端接受原始 64 字节或 base64 文本（含换行）。
+- **完整版**：`update-manifest.json` + `update-manifest.json.sig`
+- **Gogaku Lite**：`update-manifest-lite.json` + `update-manifest-lite.json.sig`（仅 Lite 客户端拉取；完整版客户端忽略）
+
+签名均为对**清单原始 UTF-8 字节**的 Ed25519 分离签名。客户端接受原始 64 字节或 base64 文本（含换行）。清单里的 `version`／`buildNumber` 两端产品共用 `version.json` 同一序列；各清单只列本产品的 macOS／Windows 安装包。
 
 ```json
 {

@@ -1,0 +1,1 @@
+验收状态 socket 不存在：/Users/gomeen/Library/Logs/Gogaku/validation.sock（需要 scripts/build.py --validation 构建、/Users/gomeen/Library/Logs/Gogaku/validation-enabled 私有开关并重启输入法进程）

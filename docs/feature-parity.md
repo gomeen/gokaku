@@ -76,4 +76,28 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 - [历史 Windows 构包报告](validation/windows-setup-build.json)：b91 的 PE 架构、DLL 依赖闭包、payload 与安装件哈希、Inno 编译及包文件检查；b110 资产身份见[发布记录](validation/release-b110.json)。
 - [构建 91 运行证据](validation/windows-desktop-b91.json)：七页设置、图标、记事本候选／“你好”提交、32／64 位合成 Edit 及兜底函数检查通过；代理完全退出后的第一组输入仍有失败，不能称为稳定版。安装前曾人工迁走占用文件，不是无干预升级验收。真实火山、在线更新、完整宿主、升级恢复／卸载及性能矩阵仍未验收。
 
+## 横排候选窗（2026-11-13 起）
+
+| 功能 | macOS | Windows | 说明 |
+| --- | --- | --- | --- |
+| 竖排／横排设置 | 普通输入页 | 普通输入页组合控件 | 共享 `candidateLayout`／`horizontalPageSize` |
+| 分页核心 | `gc_normal_set_layout` | 代理 `applySettings` | 竖排 9；横排 4–9 |
+| 横排渲染 | `CandidatePanel.horizontalNormal` | `CandidateRenderer` 横排分支 | 宽 [320,860]；完整版释义行 |
+| 离屏回归 | 待 `verify` 扩展 | 待 selfcheck | 核心向量已加 `paging_horizontal` |
+
+## Gogaku Lite（实施中）
+
+| 项 | 状态 |
+| --- | --- |
+| 构建 | `scripts/build.py --flavor lite`（`GOGAKU_LITE`、核心学习桩、独立 bundle ID） |
+| 设置四页 | macOS 侧栏四页＋快捷键裁学习项；Windows 按 `PageNames`/build-identity 裁四页 |
+| 更新清单 | `update-manifest-lite.json`（`make-update-manifest.py --product lite`；发布可 `--lite-macos-pkg` 同 Draft） |
+| Mac 打包 | 不随包 `GogakuTranslator`／`gloss.tsv`；`check-bundle.py --lite` |
+| Win 打包 | `compile-win-native.py --flavor lite` → `build-win-app.py --flavor lite`：**已验证可交叉编译并暂存**（隔离 AppId／`GogakuLiteDev` 目录／`GogakuLite-` 前缀，出厂数据不含 gloss）；agent 无学习会话，设置裁到四页 |
+| 形态隔离 | Mac 按 flavor＋validation 分 scratch 目录；CMake 显式 `-DGOGAKU_LITE=ON/OFF`；Windows 编译收据写入并校验 `flavor`（跨形态打包被拒） |
+| 清单隔离 | Mac 的 `bundle-manifest` 文件名带形态（`-lite`）：Lite 与完整版 dev 同为 dev 通道，共用文件名会互相覆盖、装第二个时清单校验必然失败（2026-11-16 修） |
+| 本地命令 | Mac：`python3 scripts/build.py --flavor lite --prepare`。Win：`python3 scripts/compile-win-native.py --flavor lite` → `python3 scripts/build-win-app.py --flavor lite` |
+| 数据目录 | 与完整版共用；并发写为已知受限项 |
+| 真实宿主双产品验收 | 欠账与完整版同门槛，未豁免 |
+
 尚未达到双端功能完全一致。多候选预译、共享学习协调、WebP 随包解码、旧文本设置迁移、历史片段管理与跨通道调频仍是实现缺口；Windows 完整故障恢复／卸载和旧版本清理仍待补齐，不因成功生成 EXE 改写为已完成。

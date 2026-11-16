@@ -1,0 +1,169 @@
+{
+  "policyVersion": 3,
+  "runIdentityStable": true,
+  "profile": "release",
+  "channel": "stable",
+  "quick": true,
+  "sourceSha256": "936a5f1ed2326d794cc6f95e95a7d823aa2c719e379438325adafaf83b6b05b6",
+  "testSha256": "7d423e02bff71b7f3d725793569fef6bfb08f9c3cfd021d7eb57055c2329a57d",
+  "platformFingerprints": {
+    "macos": {
+      "sourceSha256": "583031f9b9676b6aa633fffe27de01ec41d03b6a628c4fe75070f2c9d86362a9",
+      "testSha256": "54e628a739fcb1a9f4e16830e26d6a18a1f851eb8325f0179c02e14a41ec44cf"
+    },
+    "windows": {
+      "sourceSha256": "1c97e843bb34f406d0b1a1961a885c331c66a554fc94e597bf8a525fdffb77ff",
+      "testSha256": "407c9dee8fd5446139589cd631e5cc124deee5889bcb381cd133a713069e1c9c"
+    }
+  },
+  "artifacts": {},
+  "artifactError": "源码／资源已变化或缺少源码身份；请重新构建",
+  "startedAt": "2026-11-12T15:31:09+0800",
+  "finishedAt": "2026-11-12T15:31:28+0800",
+  "commit": "d056b6215a697628075cb8f34a8c7d96ffad0157",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.4",
+    "buildNumber": 112
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "translation-data",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "verification-contracts",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "clean-build",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "bundle-check",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "quality",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "render",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "data-reliability",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "asan-ubsan",
+      "required": true,
+      "status": "passed",
+      "detail": "2000 随机序列 ASan＋UBSan 无错误（8 片并行）（quick 冒烟，不满足十万门槛）",
+      "durationMs": 18393,
+      "wallMs": 18395,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261112-153109/asan-ubsan.log"
+    },
+    {
+      "name": "install-preflight",
+      "required": false,
+      "status": "skipped",
+      "detail": "未选中（--only）",
+      "durationMs": 0,
+      "evidence": null
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 0,
+    "skipped": 13,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "version",
+      "resources",
+      "core-tests",
+      "swift-tests",
+      "translation-data",
+      "verification-contracts",
+      "clean-build",
+      "bundle-check",
+      "quality",
+      "render",
+      "data-reliability",
+      "delivery-contracts"
+    ]
+  },
+  "keptAwake": true
+}

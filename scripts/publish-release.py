@@ -36,8 +36,9 @@ API = 'https://api.github.com'
 UPLOADS = 'https://uploads.github.com'
 DOWNLOAD_HOSTS = {'api.github.com', 'github.com', 'objects.githubusercontent.com',
                   'release-assets.githubusercontent.com', 'github-releases.githubusercontent.com'}
-MANIFEST = 'update-manifest.json'
-SIGNATURE = MANIFEST + '.sig'
+def manifest_names(product: str) -> tuple[str, str]:
+    manifest = 'update-manifest-lite.json' if product == 'lite' else 'update-manifest.json'
+    return manifest, manifest + '.sig'
 
 
 def fail(message):
@@ -45,16 +46,21 @@ def fail(message):
     raise SystemExit(1)
 
 
-def expected_names(version: str, build: int, channel: str) -> dict:
+def expected_names(version: str, build: int, channel: str, product: str = 'full') -> dict:
     suffix = '-dev' if channel == 'dev' else ''
+    prefix = 'GogakuLite' if product == 'lite' else 'Gogaku'
     return {
-        'macos': f'Gogaku-{version}-b{build}{suffix}.pkg',
-        'windows': f'Gogaku-{version}-b{build}{suffix}-windows-x64-setup.exe',
+        'macos': f'{prefix}-{version}-b{build}{suffix}.pkg',
+        'windows': f'{prefix}-{version}-b{build}{suffix}-windows-x64-setup.exe',
     }
 
 
 def output_dir(args):
     return Path(args.out or ROOT / 'dist/update')
+
+
+def release_products(meta):
+    return meta.get('products', ['full'])
 
 
 def state_path(args):
@@ -74,14 +80,25 @@ def validate(args) -> dict:
         fail('--publish-existing 必须为正整数')
     if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', args.repo or ''):
         fail('需要合法的 --repo owner/repo')
-    names = expected_names(version['version'], version['buildNumber'], args.channel)
-    assets = [('macos', Path(args.macos_pkg)), ('windows', Path(args.windows_setup))]
+    full_names = expected_names(version['version'], version['buildNumber'], args.channel, 'full')
+    assets = [('macos', Path(args.macos_pkg), 'full'), ('windows', Path(args.windows_setup), 'full')]
+    lite_mac = getattr(args, 'lite_macos_pkg', None)
+    lite_win = getattr(args, 'lite_windows_setup', None)
+    if lite_mac and lite_win:
+        assets += [('macos', Path(lite_mac), 'lite'), ('windows', Path(lite_win), 'lite')]
+    elif lite_mac or lite_win:
+        fail('Lite 双端必须同时提供 --lite-macos-pkg 与 --lite-windows-setup')
     packages = []
-    for platform, path in assets:
+    for platform, path, product in assets:
+        names = expected_names(version['version'], version['buildNumber'], args.channel, product)
         if args.require_names and path.name != names[platform]:
-            fail(f'{platform} 文件名应为 {names[platform]}')
-        packages.append(validate_package(path, platform, args.channel, root=ROOT))
-    if any(packages[0][key] != packages[1][key]
+            fail(f'{product} {platform} 文件名应为 {names[platform]}')
+        record = validate_package(path, platform, args.channel, root=ROOT)
+        record['product'] = product
+        packages.append(record)
+    # 四个包（full + lite）必须同源同版本；逐个与第一个比。
+    if any(p[key] != packages[0][key]
+           for p in packages[1:]
            for key in ('fullVersion', 'buildNumber', 'sourceSha256', 'git')):
         fail('双端安装包必须来自相同源码／版本／Git 身份')
     if not args.verification_report:
@@ -111,8 +128,9 @@ def validate(args) -> dict:
         fail('创建 Draft 需要 Ed25519 私钥：--key 或 GOGAKU_UPDATE_KEY')
     tag = args.tag or (f'v{version["version"]}-b{version["buildNumber"]}-dev'
                        if args.channel == 'dev' else f'v{version["version"]}')
+    products = ['full'] + (['lite'] if len(assets) > 2 else [])
     return {'version': version['version'], 'build': version['buildNumber'],
-            'channel': args.channel, 'assets': assets, 'packages': packages,
+            'channel': args.channel, 'assets': assets, 'products': products, 'packages': packages,
             'sourceSha256': packages[0]['sourceSha256'], 'git': packages[0]['git'],
             'tag': tag, 'name': f'Gogaku {version["version"]}（构建 {version["buildNumber"]}）',
             'publicKey': keys[0]['publicKey']}
@@ -206,11 +224,13 @@ def upload_asset(repo: str, release_id: int, token: str, path: Path) -> int:
     return asset_id
 
 
-def run_manifest(args, asset_ids: Path) -> tuple[Path, Path]:
+def run_manifest(args, asset_ids: Path, product: str, macos_pkg: Path,
+                 windows_setup: Path) -> tuple[Path, Path]:
     command = [sys.executable, str(ROOT / 'scripts/make-update-manifest.py'),
-               '--channel', args.channel, '--macos-pkg', str(args.macos_pkg),
-               '--windows-setup', str(args.windows_setup), '--asset-ids', str(asset_ids),
-               '--key', str(args.key), '--key-id', args.key_id, '--out', str(output_dir(args))]
+               '--channel', args.channel, '--product', product,
+               '--macos-pkg', str(macos_pkg), '--windows-setup', str(windows_setup),
+               '--asset-ids', str(asset_ids), '--key', str(args.key), '--key-id', args.key_id,
+               '--out', str(output_dir(args))]
     if args.notes_file:
         command += ['--notes-file', str(args.notes_file)]
     if not args.require_names:
@@ -218,7 +238,8 @@ def run_manifest(args, asset_ids: Path) -> tuple[Path, Path]:
     result = subprocess.run(command, text=True, capture_output=True)
     if result.returncode != 0:
         fail('生成／签名清单失败（子进程输出已隐藏）')
-    return output_dir(args) / MANIFEST, output_dir(args) / SIGNATURE
+    manifest, signature = manifest_names(product)
+    return output_dir(args) / manifest, output_dir(args) / signature
 
 
 def file_record(path, asset_id):
@@ -226,7 +247,11 @@ def file_record(path, asset_id):
 
 
 def local_files(args, meta):
-    return [path for _, path in meta['assets']] + [output_dir(args) / MANIFEST, output_dir(args) / SIGNATURE]
+    files = [path for _, path, _ in meta['assets']]
+    for product in release_products(meta):
+        manifest, signature = manifest_names(product)
+        files += [output_dir(args) / manifest, output_dir(args) / signature]
+    return files
 
 
 def binding(args, meta, release_id):
@@ -237,8 +262,10 @@ def binding(args, meta, release_id):
             **({'hostWaiver': args.waive_host} if getattr(args, 'waive_host', None) else {})}
 
 
-def verify_manifest(args, meta, records):
-    manifest, signature = output_dir(args) / MANIFEST, output_dir(args) / SIGNATURE
+def verify_manifest(args, meta, records, product: str, macos_pkg: Path, windows_setup: Path):
+    manifest, signature = manifest_names(product)
+    manifest = output_dir(args) / manifest
+    signature = output_dir(args) / signature
     if manifest.stat().st_size > 262144 or not 0 < signature.stat().st_size <= 8192:
         fail('清单或签名大小非法')
     value = read_json(manifest)
@@ -247,7 +274,9 @@ def verify_manifest(args, meta, records):
             'buildNumber': meta['build'], 'channel': args.channel}.items()):
         fail('签名清单与本轮版本／构建／通道不符')
     expected_assets = []
-    for platform, path in meta['assets']:
+    for platform, path, _product in meta['assets']:
+        if path not in (macos_pkg, windows_setup):
+            continue
         record = records[path.name]
         expected_assets.append({'platform': platform, 'arch': 'x86_64',
                                 'minOS': '26.0' if platform == 'macos' else '10.0.22000',
@@ -271,8 +300,11 @@ def validate_state(args, meta):
         fail('release-state 与 repo／Release ID／源码／Git／版本／通道不符')
     records = state.get('assets', {})
     files = local_files(args, meta)
-    if not isinstance(records, dict) or set(records) != {path.name for path in files} or len(records) != 4:
-        fail('release-state 必须绑定且只绑定四个发布资产')
+    expected_names = {path.name for path in files}
+    products = release_products(meta)
+    asset_count = 4 * len(products)
+    if not isinstance(records, dict) or set(records) != expected_names or len(records) != asset_count:
+        fail(f'release-state 必须绑定且只绑定 {asset_count} 个发布资产')
     ids = []
     for path in files:
         record = records[path.name]
@@ -281,9 +313,15 @@ def validate_state(args, meta):
         if record != file_record(path, record['id']):
             fail('本地资产与 release-state 的大小／SHA-256 不符')
         ids.append(record['id'])
-    if len(set(ids)) != 4:
+    if len(set(ids)) != asset_count:
         fail('release-state asset IDs 重复')
-    verify_manifest(args, meta, records)
+    full_mac = next(path for plat, path, prod in meta['assets'] if plat == 'macos' and prod == 'full')
+    full_win = next(path for plat, path, prod in meta['assets'] if plat == 'windows' and prod == 'full')
+    verify_manifest(args, meta, records, 'full', full_mac, full_win)
+    if 'lite' in products:
+        lite_mac = next(path for plat, path, prod in meta['assets'] if plat == 'macos' and prod == 'lite')
+        lite_win = next(path for plat, path, prod in meta['assets'] if plat == 'windows' and prod == 'lite')
+        verify_manifest(args, meta, records, 'lite', lite_mac, lite_win)
     return state
 
 
@@ -298,8 +336,9 @@ def validate_remote(args, meta, state, token):
         fail('远端不是指定仓库中已审阅的同版本／构建／通道 Draft')
     # 显式取资产列表，不能相信 release 响应中可能截断的 assets。
     assets = api_request('GET', url + '/assets?per_page=100', token)
-    if not isinstance(assets, list) or len(assets) != 4:
-        fail('远端资产列表变化：必须恰好四项')
+    expected_count = 4 * len(release_products(meta))
+    if not isinstance(assets, list) or len(assets) != expected_count:
+        fail(f'远端资产列表变化：必须恰好 {expected_count} 项')
     expected = state['assets']
     if {asset.get('name') for asset in assets} != set(expected):
         fail('远端资产名称／列表变化')
@@ -352,16 +391,24 @@ def publish(args) -> None:
     out = output_dir(args)
     out.mkdir(parents=True, exist_ok=True)
     ids, records = {}, {}
-    for platform, path in meta['assets']:
+    for platform, path, _ in meta['assets']:
         asset_id = upload_asset(args.repo, release_id, token, path)
         ids[platform] = ids[path.name] = asset_id
         records[path.name] = file_record(path, asset_id)
-    asset_ids_path = out / 'asset-ids.json'
-    write_json(asset_ids_path, ids)
-    run_manifest(args, asset_ids_path)
-    verify_manifest(args, meta, records)
-    for path in (out / MANIFEST, out / SIGNATURE):
-        records[path.name] = file_record(path, upload_asset(args.repo, release_id, token, path))
+    write_json(out / 'asset-ids.json', ids)
+    full_mac = next(path for plat, path, prod in meta['assets'] if plat == 'macos' and prod == 'full')
+    full_win = next(path for plat, path, prod in meta['assets'] if plat == 'windows' and prod == 'full')
+    for product in release_products(meta):
+        if product == 'full':
+            mac, win = full_mac, full_win
+        else:
+            mac = next(path for plat, path, prod in meta['assets'] if plat == 'macos' and prod == 'lite')
+            win = next(path for plat, path, prod in meta['assets'] if plat == 'windows' and prod == 'lite')
+        run_manifest(args, out / 'asset-ids.json', product, mac, win)
+    for product in release_products(meta):
+        manifest, signature = manifest_names(product)
+        for path in (out / manifest, out / signature):
+            records[path.name] = file_record(path, upload_asset(args.repo, release_id, token, path))
     state = binding(args, meta, release_id)
     state['assets'] = records
     write_json(state_path(args), state)
@@ -377,6 +424,8 @@ def main() -> None:
     parser.add_argument('--tag')
     parser.add_argument('--macos-pkg', required=True)
     parser.add_argument('--windows-setup', required=True)
+    parser.add_argument('--lite-macos-pkg', type=Path, help='可选：同一 Draft 同时发布 Gogaku Lite')
+    parser.add_argument('--lite-windows-setup', type=Path, help='可选：同一 Draft 同时发布 Gogaku Lite')
     parser.add_argument('--verification-report', action='append', required=True)
     parser.add_argument('--notes-file')
     parser.add_argument('--waive-host', metavar='REASON',

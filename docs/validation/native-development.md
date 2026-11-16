@@ -1,5 +1,76 @@
 # 原生工程实施验收记录
 
+## 无组合时宿主矩形贴顶垃圾读数与提示浮层落点（2026-11-16，真机日志实证）
+
+用户报告：从别的应用切回 Orca 后，候选窗／切换提示位置不对；Shift 单击切「中／英」时提示跑到窗口右上角。
+
+- **诊断（`--validation` 构建 + `GogakuInput.diag`）**：抓 2476 行日志，Orca 段里同一宿主在**无组合**时按选区读到的矩形在真值与垃圾间跳：`sel={0,0}` → `{{326,145},{1,19}}`（真实输入行）；`sel={1,0}` → `{{0,1410},{1,12}}`（屏幕最上方菜单栏区域）。而同一时刻 `idx0` 恒为 `{{335,145},{1,19}}`。候选窗有 `isPlausibleCaret` 拦住贴顶读数并在一帧内纠正；但**切换提示**在刚切回应用时 `carried=nil`（无历史锚点）、`preRead` 又是零／垃圾，于是落到 `mouseCaretRect()` 兜底——日志里两次 `toastAnchor ... anchor={{1262,342}}`／`{{1604,347}}` 正是鼠标坐标。
+- **修复（`macos/Sources/GogakuHost/Host.m`）**：无组合且矩形**可疑**（贴在屏幕最上方 60pt 内＝菜单栏区域）时，多读一次索引 0 交叉核对；两者纵向相差超过两行则以索引 0 为准（打字光标不会离组合起点多行），同行则保留真实插入点（不把光标拽回行首）。只在可疑时读，正常宿主零额外 IPC。
+- **另修（`InputController.toastAnchor`）**：无组合时优先用上一组合锚点 `carriedAnchorRect`（已过 `isPlausibleCaret`），有它就不再读宿主——省一次 IPC，也避开无组合读数不可靠。`ToastAnchor.resolve` 的回退顺序保持「本次读数 ＞ 上一锚点 ＞ 鼠标」。
+- **测试**：`HostTests` 18 项（新增「贴顶垃圾被索引 0 纠正」「同行保留插入点」「无组合且光标无效不拿索引 0 冒充」），`ToastAnchor*` 11 项全过。
+- **真机确认**：用户 2026-11-16 复测「修复好了」。候选窗与「中／英」提示均贴光标，不再落到鼠标处。
+
+## Mac 宿主验收两轮（2026-11-14 07:27 / 08:51 重启后，均未通过）
+
+重启后（干净登录会话、只保留 `org.gogaku.inputmethod` 一个第三方输入源、验收 socket 已建立）重跑，结果与首轮一致：
+
+| 检查 | 结果 |
+| --- | --- |
+| host-plan | 通过 |
+| host-identity | 通过（0.1.5 b114，SHA-256 `985cd2977539…`） |
+| host-matrix-round-1 | **BLOCKED**（exit=5；本轮耗时 978s 后仍未产出报告） |
+| performance | **FAILED**（393s，exit=1） |
+| native-gui | **FAILED**（归档 GUI 证据的 `installedSHA256`／`macosSourceSHA256`／`macosTestSha256` 与当前身份不符） |
+
+**缩小复现（`--hosts textedit --iterations 5`）定位到具体失败点**：探针把宿主拉起、报「宿主就绪：textedit/default」后，`tell application "TextEdit" to get text of front document` 反复 15 秒超时；同一调用在探针之外手工执行约 0.26 秒。失败时 TextEdit 文档里留下的是**字面文本 `Nihc`**（原始按键），说明探针注入的按键没有被输入法消费。
+
+**产品侧对照（同机同时段手工验证）**：TextEdit 前台时注入 `n i h c` 得到标亮 `ni'hao`，空格上屏「你好」，候选窗位置正确——输入法与面板链路正常。因此这批失败**不能归因于产品行为**。
+
+**最可能的原因**：探针的宿主 App（`org.gogaku.validation.host`）每次运行都用 ad-hoc 签名重新构建，签名身份随之改变，TCC 把它当成新应用——辅助功能／自动化授权在重启或重建后不再有效，于是部分按键被系统直接送进宿主、AppleScript 控制也被拦下（表现为 15s 超时）。这类「ad-hoc 重建导致 TCC 授权失效」此前未记录，建议作为工具缺陷单独跟进（用稳定签名身份或复用固定二进制）。
+
+**结论**：Mac 宿主档**两轮均未通过**，且失败点已定位在探针环境；`native-gui` 属人工证据（七页×尺寸×浅深、真实点击读回），脚本无法自动生成，本轮失败仅表示归档证据不是当前构建的。**在产品侧未取得宿主通过证据之前，不得声称宿主验收通过。** 两轮结束后都已把机器恢复为 release 构建（`validationBuild=false`、无诊断字符串）、删除验收私有开关、清理探针遗留文档并还原输入源启停表。
+
+## Mac 宿主验收一轮（2026-11-14 07:27，未通过）
+
+`scripts/verify.py --profile host --yes` 在 b114 验收构建（`validationBuild=true`、私有 socket 已建立）上执行：
+
+| 检查 | 结果 | 证据 |
+| --- | --- | --- |
+| host-plan | 通过 | 安装件存在 |
+| host-identity | 通过 | 安装件 0.1.5 b114，输入法 SHA-256 `985cd2977539…` |
+| host-matrix-round-1 | **BLOCKED**（exit=5） | 探针起宿主后立即 `error messaging the mach port for IMKCFRunLoopWakeUpReliable`，无报告产出 |
+| performance | **FAILED**（431s，exit=1） | `imk-latency.json` 生成但重新判定不通过；同样伴随 mach port 错误 |
+| native-gui | **FAILED** | 归档的 GUI 证据属于旧构建：`installedSHA256`／`macosSourceSha256`／`macosTestSha256` 均与当前身份不符 |
+
+- **观察到的具体阻塞**：`probes/validate-real-hosts.py` 在与 TextEdit 交互时，`tell application "TextEdit" to get text of front document`（15s 超时）反复超时；同一调用在本机手工执行仅 0.3s。TextEdit 被前几轮中断留下 3 个 `GOGAKU-PROBE-*` 未保存文档，且系统当时有残留的探针/IME 进程。单独跑 5 次迭代的缩小复现也失败。
+- **背景因素**（同一天的破坏性操作，见上一节）：输入法进程当日被重启 12 次、多次改动 `com.apple.inputsources` 与 `TISSelect`，会话级 TIS／imklaunchagent 状态不干净；本机还有鼠须管与 Gogaku Dev 两套可用中文输入源，选中态一度漂移。这些都会让依赖 IMK 端点的探针失败。
+- **native-gui 属人工证据**：要求七页×两种尺寸×浅深、真实点击与读回，脚本只能校验归档文件的哈希与结构，无法自动生成——本轮失败仅表示「归档证据不是当前构建的」。
+- **结论**：本轮 host 档**未通过**，且失败集中在探针运行环境而非产品行为本身；但**不能据此声称宿主验收通过**。建议在下一次干净登录会话（注销重登清 TIS 会话状态）里、仅保留一个 Gogaku 输入源时重跑。执行后已把机器恢复到 release 构建（`validationBuild=false`、无诊断字符串）并删除验收私有开关与探针遗留文档。
+
+## Windows Lite 交叉构建与打包（2026-11-13，仅构建与暂存，未在 Windows 运行）
+
+首次真正跑通 Windows 的 Lite 形态（此前只有代码路径）：
+
+- **交叉编译**：`compile-win-native.py --arch all --channel dev --flavor lite` 通过。x64 产物 `GogakuTsf.dll`／`GogakuAgent.exe`／`GogakuSettings.exe`／`libgogaku_core.dll`，x86 仅 TSF；两个架构的收据都写入 `flavor=lite`。核心以 `-DGOGAKU_LITE=ON` 配置，学习会话为桩。
+- **裁剪证据**：`GogakuAgent.exe` 含「Lite 不支持学习模式」字面量、无「切换普通／学习」「切换学习方向」菜单项；`GogakuSettings.exe` 无「火山翻译凭据」「记录学习片段」等学习页专属文案。
+- **打包暂存**：`build-win-app.py --channel dev --flavor lite --data-dir …` 通过，输出 `GogakuLite-0.1.5-dev.1-b114-dev-windows-x64-setup.iss`。与完整版隔离：`AppId={{C6F4D9B2-…}}`、`DefaultDirName={autopf}\GogakuLiteDev`、`AppName="Gogaku Lite Dev"`、输出名前缀 `GogakuLite-`。出厂数据只含 `sc.dict`／`zh_CN.lm`／`english-words.txt` 及词表来源清单，**不含 `gloss.tsv` 与 `gloss-sources.json`**（后者是本次一并修掉的：清单指向不存在的数据文件）。
+- **新增形态守卫**：编译收据写入并校验 `flavor`。此前 full 与 lite 产物能通过同一份源码／通道校验，改个 `--flavor` 就能把 lite 二进制当 full 打包（静默交付错产品）。`validate_compile_receipt(…, flavor=)` 比对，缺字段按 full 处理；`test_delivery_pipeline` 增加跨形态负例（同形态放行、跨形态拒绝、老收据不能冒充 lite）。反向验证：用 `--flavor full` 打包 lite 产物被拒并给出「构建形态不符」。
+- **未验证**：未生成 `.exe`（本机无 Wine／Inno），未在 Windows 上安装或运行；Tsf／TSF 注入、设置七页→四页真机外观、Task Scheduler 自启、卸载清理均未执行。Windows Lite 仍属「可构建、未运行」。
+
+## 微信／企业微信：整屏锚点钉左上角、组合中按键漏给宿主（2026-11-13，dev 构建真机复现＋AX 实测）
+
+用户报告两件事：候选窗**一直在屏幕左上角**；**有弹框时按删除会删掉之前已提交的字**（并且这些现象出现在日常使用的正式输入法里）。
+
+- **左上角真因（已实证）**：`log` 抓 IME 面板 AX 坐标序列，同一次会话里先是正确位置 `(335,937)`，随后变成 `(8,38)`。把**整个屏幕矩形 (0,0,2560,1410)** 代入 `PanelPlacement.origin` 得到的正是 `(8, 1071)` → AX `(8,38)`，与日志逐字相符：微信类宿主会把整屏矩形当成插入点矩形回报，它有限、正高、落在屏内，旧的合理性规则全部通过；`PanelPlacement` 判「下方放不下 → 上翻 → 顶到菜单栏下方」，位置复查又每拍读到同一矩形，瞬移过滤的逃生门一过就采纳，位置再也回不来。**修复**：新增 `AnchorPlausibility.isPlausibleCaret(rect:screens:)`（高度 ≥ 可视区一半、或面积 ≥ 可视区四分之一即判非光标；整行宽单行矩形仍合法），首键 pre-read、位置复查、切换提示锚点三处都过这道校验，不可信读数一律当「无读数」走 `carried → 鼠标` 回退。回归向量 `CaretPlausibilityTests`（6 项，含「整屏锚点 → (8,1071)」）。
+- **删除删掉正文的真因（两条，均已修）**：① 宿主瞬时读不到应用身份时 `currentTarget` 返回 nil，旧代码 `suspend(); return false` 把按键**原样漏给宿主**——组合与候选窗都还在，用户以为在删拼音，实际宿主删掉了已提交正文；② 前向删除（keyCode 117）从未映射，走「未映射键在组合中先上屏原编码再交还宿主」分支，宿主随即把刚上屏的字删掉。**修复**：新增 `CompositionKeyPolicy`（唯一实现）声明「组合存在时破坏性键由输入法拥有」，并在 `handleEvent` 的读数判定**之前**执行硬不变量——组合中退格／前向删除绝不交还宿主，读数不可用时直接吞掉；组合事实改用独立字段 `composingRaw`（只由引擎快照维护，渲染缓存清空不影响）。回归 `CompositionKeyOwnershipTests`（4 项）。
+- **弹框消失的真因（第三条）**：`refreshDisplayPosition` 在「组合中矩形读到零」时直接 `return`，但注释声称会走 `AnchorFallback` 补显——代码没实现。于是**首次 pre-read 无效的宿上面板会永久不出现**。**修复**：无有效锚点时按同一回退链补显；字段证据丢失加 2 拍去抖（单次读数失败不再立即隐藏）。
+- **顺带修掉的构建缺陷**：`build.py` 的 `--flavor` 只在 lite 时传 `-DGOGAKU_LITE=ON`，full 构建不传 OFF，CMake 缓存会沿用 ON——**full 构建静默链上学习桩**（实测 `EngineTests` 报 `invalidCommand`、stable 包缺学习会话）。改为显式写 ON／OFF。修复后 Swift 253 项全绿。
+- **验证**：`CaretPlausibilityTests` 6/6、`CompositionKeyOwnershipTests` 4/4、Swift release 253/253、核心 ctest 全量通过、`delivery-contracts` 通过。**端到端 AX 实测（TextEdit，真实按键注入）**：组合中面板固定 `(314,225)`、空闲 2.5 秒仍可见；上屏「你好」后再组合、退格一次、前向删除，已提交正文**均未变化**。
+- **未验证**：微信／企业微信真机（需用户在自己会话重现）；截图与 AX 采样均为 TextEdit 验证。Lite 构建同源修复，但未在 Lite 包上复测这三条。
+- **后续（同日）工具缺陷两处**：① `build.py` 的 `--flavor` 只在 lite 时传 `-DGOGAKU_LITE=ON`，full 不传 OFF，CMake 缓存沿用 ON → full 静默链学习桩（`EngineTests` `invalidCommand`）。已改为显式 ON／OFF。② SwiftPM 增量编译**不跟踪 `-Xswiftc -D…` 变化**：先构建 `--validation` 再构建普通包会复用旧对象，诊断代码混进对外产物（`check-bundle` 的「构建产物含旧输入日志代码」断言拦下，Lite 包实测命中 `/tmp/gogaku-`）。已按「flavor＋validation」分 scratch 目录（`swift`／`swift-lite`／`swift-validation`／`swift-lite-validation`）。
+- **当天真机事故复盘（非产品缺陷）**：排查期间对这台的破坏性操作包括——直接改用户真实 `settings.json`（把 `inputLettersEnabled` 由 true 翻成 false，导致宿主收不到标亮字母、锚点读数退化为整屏／零矩形，用户看到「弹框消失＋钉左上角」）、反复 kill 输入法进程与重装（当日同 ID 进程重启 12 次，Electron 宿主 Orca 缓存的 IMK 连接失效，表现为「Orca 里打不出字、TextEdit／微信正常」）、多次 `TISSelect` 与改 `com.apple.inputsources` 导致选中态漂移（一度实际选中鼠须管却以为在用 Gogaku）。**结论：这两个用户可见问题不是代码缺陷**；教训是设置类实验只能用临时目录（`SettingsStore(directory:)`），宿主问题优先重启宿主而不是反复重装输入法。
+
+
 ## 0.1.5 b113 stable 定版发布（2026-11-12，未运行 host）
 
 - **已发布**：Release 442660261，tag `v0.1.5`（构建提交 e2ee185），[发布记录](release-b113.json)。Mac pkg SHA-256 `c5923b4a…a659129d4`，Windows Setup `b8cea8db…24f17f40`；公开清单用随包公钥验签通过（`signature ok`）。仍为 ad-hoc 签名，无公证／Authenticode。

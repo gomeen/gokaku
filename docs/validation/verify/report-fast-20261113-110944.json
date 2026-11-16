@@ -1,0 +1,109 @@
+{
+  "policyVersion": 3,
+  "runIdentityStable": true,
+  "profile": "fast",
+  "channel": "stable",
+  "quick": false,
+  "sourceSha256": "a5f3a95c559470df85cbecaaf38ea51e86ccef6c66f7e01c7d70b3f3115cf4eb",
+  "testSha256": "95fc73676916971ee182433d161a1c6132314029c17853c3a13b52ca6e2c557f",
+  "platformFingerprints": {
+    "macos": {
+      "sourceSha256": "d1a3882b746072d2f017d7ffaf6b14ac16a4346d61ffccef04e744433b53fa14",
+      "testSha256": "7911898f8d82a3d43b2c53067f0461bf1a6eb7b87f5d65c2a43bb4652e9afc9a"
+    },
+    "windows": {
+      "sourceSha256": "0db7ed15db210a7a652ca0b63f566d24a12c40cc12b0205e06029bccfde480aa",
+      "testSha256": "991beec1f10abefe74960fd6061f191c6f2ba5c7c68493601ae36ab82552a631"
+    }
+  },
+  "artifacts": {},
+  "artifactError": "源码／资源已变化或缺少源码身份；请重新构建",
+  "startedAt": "2026-11-13T11:08:19+0800",
+  "finishedAt": "2026-11-13T11:09:44+0800",
+  "commit": "6ef7ae2540890fa01d753cbed71e9f35697d58f6",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.5",
+    "buildNumber": 113
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.5 构建113；拒绝路径 8/8；installed=Gogaku.app 0.1.5 b113;Gogaku Settings.app 0.1.5 b113",
+      "durationMs": 16,
+      "wallMs": 16,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 113,
+      "wallMs": 113,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全量通过，无跳过／未运行项",
+      "durationMs": 25584,
+      "wallMs": 25584,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261113-110819/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "failed",
+      "detail": "swift test 未完成（exit=1）",
+      "durationMs": 41094,
+      "wallMs": 41094,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261113-110819/swift-tests.log"
+    },
+    {
+      "name": "translation-data",
+      "required": true,
+      "status": "passed",
+      "detail": "通用翻译数据与资源正负例回归通过（不代表译文质量通过）",
+      "durationMs": 146,
+      "wallMs": 146,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261113-110819/translation-data.log"
+    },
+    {
+      "name": "verification-contracts",
+      "required": true,
+      "status": "passed",
+      "detail": "验证工具的离线正负例通过",
+      "durationMs": 1666,
+      "wallMs": 1666,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261113-110819/verification-contracts.log"
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "failed",
+      "detail": "交付流水线负例失败：e.py\", line 431, in test_remote_draft_id_and_assets_must_match\n    publish.validate_remote(args, meta, state, 'fake')\n    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/gomeen/code/gomeen/gogaku/scripts/publish-release.py\", line 329, in validate_remote\n    expected_count = 4 * len(meta['products'])\n                             ~~~~^^^^^^^^^^^^\nKeyError: 'products'\n\n----------------------------------------------------------------------\nRan 24 tests in 0.970s\n\nFAILED (errors=2)\n；隔离构建路径回归失败：\n\n  ['swift',\n   'build',\n   '-c',\n   'debug',\n   '-j',\n   '2',\n   '--package-path',\n   'macos',\n   '--scratch-path',\n   '/private/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/gogaku-build-paths-conp61ra/isolated '\n   'build/swift',\n-  '--target',\n-  'GogakuInput',\n-  '--target',\n-  'GogakuSettings',\n-  '--target',\n-  'GogakuTranslator',\n   '-Xswiftc',\n   '-DGOGAKU_VALIDATION']\n\n----------------------------------------------------------------------\nRan 5 tests in 11.614s\n\nFAILED (failures=1)\n；Windows 组装 self-test 失败：/gomeen/gogaku/scripts/build-win-app.py\", line 680, in main\n    self_test(args.iscc)\n    ~~~~~~~~~^^^^^^^^^^^\n  File \"/Users/gomeen/code/gomeen/gogaku/scripts/build-win-app.py\", line 546, in self_test\n    for name in DATA_FILES:\n                ^^^^^^^^^^\nNameError: name 'DATA_FILES' is not defined\n",
+      "durationMs": 15734,
+      "wallMs": 15734,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261113-110819/delivery-contracts.log"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 2,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "swift-tests",
+      "delivery-contracts"
+    ]
+  },
+  "keptAwake": true
+}

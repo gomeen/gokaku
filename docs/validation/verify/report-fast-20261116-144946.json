@@ -1,0 +1,108 @@
+{
+  "policyVersion": 3,
+  "runIdentityStable": true,
+  "profile": "fast",
+  "channel": "stable",
+  "quick": false,
+  "sourceSha256": "b768e49dffce8274ada32a0b21605cdeb51c5889908a788d91ed68922667a65e",
+  "testSha256": "e82b16f52a4bc6b1f2bee1e7c9b59664ad6b9a903af75691f19649b1ea03f1f8",
+  "platformFingerprints": {
+    "macos": {
+      "sourceSha256": "7aa78117280137f1c626461562caa934ee6ba1ffb23ed6c1213cee5036243ffa",
+      "testSha256": "e0bb021e9cf2fdfffeaabf63468efd169a165e8153fb02e816f849f3a4603507"
+    },
+    "windows": {
+      "sourceSha256": "c1ea3f7bd7e68e41e01bde1891d391f95049711b421d7e3d67659461d11a4a53",
+      "testSha256": "66356469b0a48bc473421ae61271b3beb4bebfb79bbd287e25ab5af10f3e2559"
+    }
+  },
+  "artifacts": {},
+  "artifactError": null,
+  "startedAt": "2026-11-16T14:47:24+0800",
+  "finishedAt": "2026-11-16T14:49:46+0800",
+  "commit": "6ef7ae2540890fa01d753cbed71e9f35697d58f6",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.5-dev.1",
+    "buildNumber": 114
+  },
+  "checks": [
+    {
+      "name": "version",
+      "required": true,
+      "status": "passed",
+      "detail": "version.json=0.1.5-dev.1 构建114；拒绝路径 8/8；installed=Gogaku.app 0.1.5 b114;Gogaku Settings.app 0.1.5 b114",
+      "durationMs": 21,
+      "wallMs": 21,
+      "evidence": null
+    },
+    {
+      "name": "resources",
+      "required": true,
+      "status": "passed",
+      "detail": "resources/gloss.tsv 哈希一致；resources/english-words.txt 哈希一致；依赖锁 2 项一致",
+      "durationMs": 145,
+      "wallMs": 145,
+      "evidence": null
+    },
+    {
+      "name": "core-tests",
+      "required": true,
+      "status": "passed",
+      "detail": "ctest 全量通过，无跳过／未运行项",
+      "durationMs": 33539,
+      "wallMs": 33539,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261116-144724/core-ctest.log"
+    },
+    {
+      "name": "swift-tests",
+      "required": true,
+      "status": "failed",
+      "detail": "swift test 未完成（exit=1）",
+      "durationMs": 81537,
+      "wallMs": 81538,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261116-144724/swift-tests.log"
+    },
+    {
+      "name": "translation-data",
+      "required": true,
+      "status": "passed",
+      "detail": "通用翻译数据与资源正负例回归通过（不代表译文质量通过）",
+      "durationMs": 250,
+      "wallMs": 250,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261116-144724/translation-data.log"
+    },
+    {
+      "name": "verification-contracts",
+      "required": true,
+      "status": "passed",
+      "detail": "验证工具的离线正负例通过",
+      "durationMs": 2142,
+      "wallMs": 2142,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261116-144724/verification-contracts.log"
+    },
+    {
+      "name": "delivery-contracts",
+      "required": true,
+      "status": "passed",
+      "detail": "交付流水线身份／报告／发布负例通过；隔离构建路径回归通过；更新清单签名/篡改拒绝通过；Windows 安装器布局/iss 渲染通过；pkg postinstall 语法通过；更新源配置 1 个可信公钥（已配置仓库）；产品源码无本地模型引用",
+      "durationMs": 23627,
+      "wallMs": 23628,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/fast-20261116-144724/delivery-contracts.log"
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 1,
+    "skipped": 0,
+    "blocked": 0
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "swift-tests"
+    ]
+  },
+  "keptAwake": true
+}

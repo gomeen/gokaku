@@ -383,6 +383,31 @@ class DeliveryPipelineTests(unittest.TestCase):
         with self.assertRaisesRegex(delivery.DeliveryError, '通道不符'):
             delivery.validate_compile_receipt(path, folder, 'dev', 'x86', root=self.root)
 
+    def test_compile_receipt_rejects_cross_flavor_artifacts(self):
+        """full 与 lite 的产物能过同一份源码／通道校验：不比对 flavor 就会把
+        lite 二进制当 full 打包（或反之），静默交付错产品。"""
+        folder = self.root / 'bin-lite/x86'
+        folder.mkdir(parents=True)
+        binary = folder / 'GogakuTsf.dll'
+        binary.write_bytes(b'lite binary')
+        receipt = dict(schema=1, fullVersion='0.1.0-dev.1', buildNumber=12, channel='dev',
+                       flavor='lite', sourceSha256=self.source, git=self.git, arch='x86',
+                       configuration='release',
+                       artifacts={'GogakuTsf.dll': {'sha256': delivery.sha256(binary),
+                                                     'bytes': binary.stat().st_size}})
+        path = folder / 'build-receipt.json'
+        delivery.write_json(path, receipt)
+        # 同形态放行
+        delivery.validate_compile_receipt(path, folder, 'dev', 'x86', root=self.root, flavor='lite')
+        # 跨形态拒绝
+        with self.assertRaisesRegex(delivery.DeliveryError, '构建形态不符'):
+            delivery.validate_compile_receipt(path, folder, 'dev', 'x86', root=self.root, flavor='full')
+        # 缺 flavor 字段一律按 full 处理：老收据不能冒充 lite
+        receipt.pop('flavor')
+        delivery.write_json(path, receipt)
+        with self.assertRaisesRegex(delivery.DeliveryError, '构建形态不符'):
+            delivery.validate_compile_receipt(path, folder, 'dev', 'x86', root=self.root, flavor='lite')
+
     def test_report_must_bind_both_installers(self):
         receipts = [delivery.validate_package(p, platform, 'dev', root=self.root)
                     for platform, p in self.packages]

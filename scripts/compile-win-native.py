@@ -35,11 +35,12 @@ def compile_arch(args, arch):
     obj.mkdir(parents=True, exist_ok=True)
     flags = ['-std=c++20', '-O2', '-DNDEBUG', '-DNOMINMAX', '-D_WIN32_WINNT=0x0A00',
              '-DUNICODE', '-D_UNICODE', '-fmax-errors=3', '-fdiagnostics-plain-output',
-             # 设置契约实现直接编进各 Windows 二进制（x86 TSF 无法加载 x64 核心 DLL）。
              '-DGOGAKU_SETTINGS_CONTRACT_STATIC',
              f'-DGOGAKU_CHANNEL="{args.channel}"']
     if args.channel == 'dev':
         flags.append('-DGOGAKU_DEV')
+    if getattr(args, 'flavor', 'full') == 'lite':
+        flags.append('-DGOGAKU_LITE')
     windows = ROOT / 'windows/GogakuWindows'
     tsf = ROOT / 'windows/GogakuTsf'
     common = ['platform', 'appearance', 'themes']
@@ -94,6 +95,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--arch', choices=['x64', 'x86', 'all'], default='all')
     p.add_argument('--channel', choices=['dev', 'stable'], default='dev')
+    p.add_argument('--flavor', choices=['full', 'lite'], default='full')
     p.add_argument('--jobs', type=int, default=3)
     p.add_argument('--out', type=Path)
     p.add_argument('--core-build', type=Path, default=ROOT / '.build/win-cross/static/setup-core-io')
@@ -126,9 +128,12 @@ def main():
             p.error('缺少静态 libime 依赖或 MinGW toolchain；先准备 Windows 交叉依赖')
         link = '-static ' + ' '.join('-L' + str(path) for path in
             (args.sysroot / 'lib', args.deps / 'build/bin', args.deps / 'prefix/lib'))
-        run(['cmake', '-S', ROOT / 'shared/GogakuCore', '-B', args.core_build, '-G', 'Ninja',
-             f'-DCMAKE_TOOLCHAIN_FILE={args.toolchain}', f'-DGOGAKU_DEPS={args.deps}',
-             '-DCMAKE_BUILD_TYPE=Release', f'-DCMAKE_SHARED_LINKER_FLAGS={link}'])
+        core_flags = ['cmake', '-S', ROOT / 'shared/GogakuCore', '-B', args.core_build, '-G', 'Ninja',
+                      f'-DCMAKE_TOOLCHAIN_FILE={args.toolchain}', f'-DGOGAKU_DEPS={args.deps}',
+                      '-DCMAKE_BUILD_TYPE=Release', f'-DCMAKE_SHARED_LINKER_FLAGS={link}']
+        if args.flavor == 'lite':
+            core_flags.append('-DGOGAKU_LITE=ON')
+        run(core_flags)
         run(['cmake', '--build', args.core_build, '--target', 'GogakuCore', '-j', args.jobs])
         core_out = args.out / 'bin/x64'
         core_out.mkdir(parents=True, exist_ok=True)
@@ -151,7 +156,8 @@ def main():
         if arch == 'x64':
             names += ['GogakuAgent.exe', 'GogakuSettings.exe', 'libgogaku_core.dll']
         receipt = dict(schema=1, fullVersion=meta['version'], buildNumber=meta['buildNumber'],
-                       channel=args.channel, arch=arch, configuration='release', git=git,
+                       channel=args.channel, flavor=args.flavor,
+                       arch=arch, configuration='release', git=git,
                        sourceSha256=source, dependencies=dependencies if arch == 'x64' else {},
                        artifacts={name: {'sha256': sha256(folder / name),
                                          'bytes': (folder / name).stat().st_size} for name in names})

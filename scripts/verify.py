@@ -164,8 +164,12 @@ def check_resources(ctx):
 
 def check_core_tests(ctx):
     """共享核心：Release 构建＋ctest 全量（含 ABI、事件轨迹、质量、fuzz 冒烟）。"""
+    # 必须显式写 -DGOGAKU_LITE=OFF：CMake 把该开关缓存在构建目录里，
+    # 之前若跑过 Lite 构建，这里不传就会沿用 ON，核心变成学习桩——Swift 侧
+    # EngineTests 全报 invalidCommand（2026-11-16 实测，同 build.py 的坑）。
     result = sh(['cmake', '-S', 'shared/GogakuCore', '-B', ctx['core_dir'],
-                 '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', f'-DGOGAKU_DEPS={CACHE}'])
+                 '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', f'-DGOGAKU_DEPS={CACHE}',
+                 '-DGOGAKU_LITE=OFF'])
     if result.returncode != 0:
         return FAIL, 'cmake 配置失败：' + result.stderr[-400:], None
     result = sh(['cmake', '--build', ctx['core_dir'], '-j', str(ctx['jobs'])])

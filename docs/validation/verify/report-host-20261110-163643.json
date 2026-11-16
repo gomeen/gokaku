@@ -1,0 +1,102 @@
+{
+  "policyVersion": 3,
+  "runIdentityStable": true,
+  "profile": "host",
+  "channel": "stable",
+  "quick": false,
+  "sourceSha256": "2c86d5db2cf6db9e11d3f3478ed00552d25442bdda41a39327efbbeb8a39d9c9",
+  "testSha256": "5db10571288e8fafbe5e2f6ee34d5dd03beed1f27c9933cd7d845803f41e19a4",
+  "platformFingerprints": {
+    "macos": {
+      "sourceSha256": "3c7f6198caf7ddadde4967275c77d21af8c328abde3d22e1bf2df3fcaaf44499",
+      "testSha256": "a4219b1e1c66694652938f480d66c6593dc7546642035b2a48464bdb2388e39f"
+    },
+    "windows": {
+      "sourceSha256": "28b534d157037079e52a7debd458609f212551d28e6873d9987700e6b3f9ccce",
+      "testSha256": "902a370aeb508dee8c974dff91c0ad284de6f74930bb2983d9062aa9618d6a59"
+    }
+  },
+  "artifacts": {
+    "macos": {
+      "name": "Gogaku-0.1.3-b109.pkg",
+      "sha256": "dfc9d7fa26e653629b3d99e1f52960b52d7637a363b7e1056725446d094571f6",
+      "bytes": 49656480
+    },
+    "windows": {
+      "name": "Gogaku-0.1.3-b109-windows-x64-setup.exe",
+      "sha256": "fbc84538f9db8e089e06fec44758b9619b932313c5404692822e3dc846c1b9ef",
+      "bytes": 54525374
+    }
+  },
+  "artifactError": null,
+  "startedAt": "2026-11-10T16:23:45+0800",
+  "finishedAt": "2026-11-10T16:36:43+0800",
+  "commit": "2549527a6166107387cf1d2b5a6992c09ec02989",
+  "dirty": false,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.3",
+    "buildNumber": 109
+  },
+  "checks": [
+    {
+      "name": "host-plan",
+      "required": true,
+      "status": "passed",
+      "detail": "host 档位预检通过（安装件存在）",
+      "durationMs": 0,
+      "wallMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "host-identity",
+      "required": true,
+      "status": "passed",
+      "detail": "安装件身份与 version.json 一致（Gogaku.app 0.1.3 b109；Gogaku Settings.app 0.1.3 b109；输入法 SHA-256 54bcf388880f…）",
+      "durationMs": 149,
+      "wallMs": 149,
+      "evidence": null
+    },
+    {
+      "name": "host-matrix-round-1",
+      "required": true,
+      "status": "blocked",
+      "detail": "第 1 轮报告缺失或不可读（exit=5，见日志）",
+      "durationMs": 775720,
+      "wallMs": 775699,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/host-20261110-162345/host-matrix-round-1.log"
+    },
+    {
+      "name": "performance",
+      "required": true,
+      "status": "blocked",
+      "detail": "性能报告缺失（exit=2）",
+      "durationMs": 481,
+      "wallMs": 481,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/host-20261110-162345/performance.log"
+    },
+    {
+      "name": "native-gui",
+      "required": true,
+      "status": "passed",
+      "detail": "GUI 人工验收证据完整（14 项，身份／截图已核对）",
+      "durationMs": 175,
+      "wallMs": 175,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/native-gui-acceptance-stable.json"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "blocked": 2
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "host-matrix-round-1",
+      "performance"
+    ]
+  },
+  "keptAwake": true
+}

@@ -102,7 +102,7 @@ def run(args, *, env=None):
     subprocess.run([str(a) for a in args], cwd=ROOT, check=True, env=env)
 
 
-def configure_cmake(source, binary):
+def configure_cmake(source, binary, extra: list[str] | None = None):
     """迁移后保留旧 source 构建目录，不删除缓存，也不复用其旧库。"""
     source = (ROOT / source).resolve()
     cache = binary / 'CMakeCache.txt'
@@ -117,8 +117,11 @@ def configure_cmake(source, binary):
                 backup = binary.with_name(f'{binary.name}.stale-source-{index}')
             binary.rename(backup)
             print(f'CMake source 已迁移；保留旧构建目录：{backup}')
-    run(['cmake', '-S', source, '-B', binary, '-G', 'Ninja',
-         '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)])
+    cmd = ['cmake', '-S', source, '-B', binary, '-G', 'Ninja',
+           '-DCMAKE_BUILD_TYPE=Release', '-DGOGAKU_DEPS=' + str(CACHE)]
+    if extra:
+        cmd.extend(extra)
+    run(cmd)
 
 
 def test_core():
@@ -135,14 +138,33 @@ def test_core():
         raise RuntimeError('核心测试未完整通过：' + '；'.join(problems))
 
 
-def build_swift(configuration, validation=False):
+def swift_scratch(validation: bool, flavor: str) -> Path:
+    """编译开关各占一个 scratch 目录。
+
+    SwiftPM 的增量编译不跟踪 `-Xswiftc -D…` 的变化（实测）：先构建
+    --validation 再构建普通包，对象文件会被复用，**诊断代码混进对外产物**
+    （check-bundle 的「构建产物含旧输入日志代码」断言就是拦这个）；lite 与
+    full 的 -DGOGAKU_LITE 同理。按开关分目录，杜绝跨形态污染。
+    """
+    suffix = ('-lite' if flavor == 'lite' else '') + ('-validation' if validation else '')
+    return BUILD_ROOT / ('swift' + suffix)
+
+
+def build_swift(configuration, validation=False, flavor='full'):
     args = ['swift', 'build', '-c', configuration, '-j', '2', '--package-path', 'macos',
-            '--scratch-path', str(BUILD_ROOT / 'swift')]
+            '--scratch-path', str(swift_scratch(validation, flavor))]
     if validation:
         args += ['-Xswiftc', '-DGOGAKU_VALIDATION']
-    # 显式传入同一绝对构建根；不依赖调用者是否导出环境变量。
     env = dict(os.environ, GOGAKU_BUILD_ROOT=str(BUILD_ROOT))
-    run(args, env=env)
+    if flavor == 'lite':
+        # 按 product 构建：--target 只编译不链接（产物缺失时 assemble 会拷到旧
+        # 二进制，GOGAKU_LITE 分支静默失效）。`--product` 是单值参数，必须每个
+        # product 各跑一次——同时传两个只有最后一个生效（实测 GogakuInput 缺失）。
+        args += ['-Xswiftc', '-DGOGAKU_LITE']
+        for name in ('GogakuInput', 'GogakuSettings'):
+            run(args + ['--product', name], env=env)
+    else:
+        run(args, env=env)
 
 def output(args):
     return subprocess.check_output([str(a) for a in args], cwd=ROOT, text=True)
@@ -247,6 +269,7 @@ def write_build_identity(contents: Path, meta: dict) -> None:
         'arch': platform.machine(),
         'configuration': meta['configuration'],
         'validationBuild': meta['validation'],
+        'flavor': meta.get('flavor', 'full'),
         'abiVersion': 2,
     }
     lock = CACHE / 'dependencies.lock.json'
@@ -260,13 +283,16 @@ def write_build_identity(contents: Path, meta: dict) -> None:
         json.dumps(identity, ensure_ascii=False, indent=2) + '\n')
 
 
-def assemble(name, executable, identifier, input_method=False, configuration='release', meta=None):
+def assemble(name, executable, identifier, input_method=False, configuration='release', meta=None, flavor='full'):
     app = DIST / (name + '.app')
     if app.exists(): shutil.rmtree(app)
     contents = app / 'Contents'
     for folder in ['MacOS', 'Resources', 'Frameworks', 'Helpers']:
         (contents / folder).mkdir(parents=True, exist_ok=True)
-    source = BUILD_ROOT / 'swift' / configuration / executable
+    # 必须与 build_swift 用同一个 scratch：否则验收构建会把普通二进制装进包，
+    # 而身份记录写着 validationBuild=true（身份与产物不符，2026-11-13 实测）。
+    scratch = swift_scratch(bool(meta.get('validation')), meta.get('flavor', 'full'))
+    source = scratch / configuration / executable
     binary = contents / 'MacOS' / executable
     shutil.copy2(source, binary)
     bundle_libraries(binary, contents / 'Frameworks')
@@ -311,8 +337,7 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
             (data / filename).chmod(0o644)
         # 英文候选／释义数据：只在生成物与来源清单都在且哈希一致时打包；
         # 任一缺失则按规格降级（无注释、无英文候选），不阻塞构建。
-        for filename, manifest_name in [('english-words.txt', 'english-wordlist-sources.json'),
-                                        ('gloss.tsv', 'gloss-sources.json')]:
+        for filename, manifest_name in [('english-words.txt', 'english-wordlist-sources.json')]:
             source = ROOT / 'resources' / filename
             manifest = ROOT / 'resources' / manifest_name
             if not source.exists() or not manifest.exists():
@@ -321,10 +346,20 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
             expected = json.loads(manifest.read_text())['output_sha256']
             if digest(source) != expected: raise RuntimeError(f'数据校验失败 {filename}')
             shutil.copy2(source, data / filename)
+        if flavor != 'lite':
+            source = ROOT / 'resources/gloss.tsv'
+            manifest = ROOT / 'resources/gloss-sources.json'
+            if source.exists() and manifest.exists():
+                expected = json.loads(manifest.read_text())['output_sha256']
+                if digest(source) != expected: raise RuntimeError('数据校验失败 gloss.tsv')
+                shutil.copy2(source, data / 'gloss.tsv')
+            else:
+                print('提示：resources/gloss.tsv 未生成，按降级形态打包（无该数据）')
         shutil.copy2(CACHE / 'dependencies.lock.json', contents / 'Resources/dependencies.lock.json')
-        helper = contents / 'Helpers/GogakuTranslator'
-        shutil.copy2(BUILD_ROOT / 'swift' / configuration / 'GogakuTranslator', helper)
-        bundle_libraries(helper, contents / 'Frameworks')
+        if flavor != 'lite':
+            helper = contents / 'Helpers/GogakuTranslator'
+            shutil.copy2(scratch / configuration / 'GogakuTranslator', helper)
+            bundle_libraries(helper, contents / 'Frameworks')
     elif executable == 'GogakuSettings':
         # 自动读音只需出厂词典；设置应用必须能独立运行，不依赖开发缓存。
         data = contents / 'Resources/EngineData'
@@ -355,7 +390,8 @@ def write_dist_identity(apps: list, meta: dict, configuration: str, validation: 
         fullVersion=meta['version'], buildNumber=meta['buildNumber'],
         stage=version_stage(meta['version']), commit=meta['git']['commit'],
         dirty=meta['git']['dirty'], arch=platform.machine(),
-        git=meta['git'], channel=meta['channel'], sourceSha256=meta['sourceSha256'],
+        git=meta['git'], channel=meta['channel'], flavor=meta.get('flavor', 'full'),
+        sourceSha256=meta['sourceSha256'],
         configuration=configuration, validationBuild=validation,
         toolchain={'swift': output(['swift', '--version']).splitlines()[0].strip(),
                    'cmake': output(['cmake', '--version']).splitlines()[0].strip()},
@@ -372,7 +408,11 @@ def write_dist_identity(apps: list, meta: dict, configuration: str, validation: 
         report['apps'][app.name] = {'bundleSha256': bundle_sha, 'files': entries,
                                     'identity': json.loads(
                                         (contents / 'Resources/build-identity.json').read_text())}
-    out = DIST / ('build-identity' + suffix + '.json')
+    # 文件名必须带形态：Lite 与完整版 dev 同为 dev 通道，共用
+    # build-identity-dev.json 会互相覆盖，打包脚本随即读到另一形态的清单并
+    # 报「双 App 身份清单／通道不符」（2026-11-16 实测）。
+    identity_suffix = ('-lite' if meta.get('flavor') == 'lite' else '') + suffix
+    out = DIST / ('build-identity' + identity_suffix + '.json')
     out.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     return out
 
@@ -380,6 +420,8 @@ def write_dist_identity(apps: list, meta: dict, configuration: str, validation: 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--prepare', action='store_true')
+    parser.add_argument('--flavor', choices=['full', 'lite'], default='full',
+                        help='full=完整版；lite=Gogaku Lite（编译期裁剪学习链路与释义）')
     parser.add_argument('--channel', choices=['stable', 'dev'], default='stable',
                         help='安装通道：stable=Gogaku（日常），dev=Gogaku Dev（测试；'
                              'bundle ID 加 .dev 后缀，独立输入源与安装路径，'
@@ -407,26 +449,43 @@ if __name__ == '__main__':
     configure_cmake('macos/EngineBridge', BUILD_ROOT / 'native')
     run(['cmake', '--build', BUILD_ROOT / 'native', '-j', '2'])
     # 共享普通模式核心（shared/GogakuCore，ABI v2）。
-    configure_cmake('shared/GogakuCore', BUILD_ROOT / 'core')
+    # 必须显式写 OFF：CMake 把 GOGAKU_LITE 缓存在构建目录里，lite 构建后
+    # 再跑 full 若不传就会沿用 ON，全量构建静默链上学习桩（实测导致
+    # EngineTests 的 invalidCommand 与 stable 包缺学习会话）。
+    core_extra = ['-DGOGAKU_LITE=ON' if args.flavor == 'lite' else '-DGOGAKU_LITE=OFF']
+    configure_cmake('shared/GogakuCore', BUILD_ROOT / 'core', core_extra)
     run(['cmake', '--build', BUILD_ROOT / 'core', '-j', '2'])
     test_core()
-    build_swift(args.configuration, args.validation)
+    build_swift(args.configuration, args.validation, args.flavor)
     DIST.mkdir(exist_ok=True)
     meta['configuration'] = args.configuration
     meta['validation'] = bool(args.validation)
+    meta['flavor'] = args.flavor
     suffix = '.dev' if args.channel == 'dev' else ''
     name_suffix = ' Dev' if args.channel == 'dev' else ''
-    apps = [assemble('Gogaku' + name_suffix, 'GogakuInput', 'org.gogaku.inputmethod' + suffix,
-                     True, args.configuration, meta),
-            assemble('Gogaku Settings' + name_suffix, 'GogakuSettings', 'org.gogaku.settings' + suffix,
-                     configuration=args.configuration, meta=meta)]
+    if args.flavor == 'lite':
+        im_name = 'Gogaku Lite' + name_suffix
+        im_id = 'org.gogaku.lite.inputmethod' + suffix
+        settings_name = 'Gogaku Lite Settings' + name_suffix
+        settings_id = 'org.gogaku.lite.settings' + suffix
+    else:
+        im_name = 'Gogaku' + name_suffix
+        im_id = 'org.gogaku.inputmethod' + suffix
+        settings_name = 'Gogaku Settings' + name_suffix
+        settings_id = 'org.gogaku.settings' + suffix
+    apps = [assemble(im_name, 'GogakuInput', im_id, True, args.configuration, meta, args.flavor),
+            assemble(settings_name, 'GogakuSettings', settings_id, configuration=args.configuration, meta=meta, flavor=args.flavor)]
     if source_fingerprint(ROOT) != meta['sourceSha256']:
         raise SystemExit('构建期间源码／资源变化，未生成有效收据；请重试构建')
     report = []
     for app in apps:
         for path in app.rglob('*'):
             if path.is_file(): report.append({'path': str(path.relative_to(DIST)), 'bytes': path.stat().st_size, 'sha256': digest(path)})
-    manifest_name = 'bundle-manifest.json' if args.channel == 'stable' else 'bundle-manifest-dev.json'
+    # 清单名必须带形态：Lite 与完整版 dev 通道同为 dev 通道，共用
+    # bundle-manifest-dev.json 会互相覆盖，装第二个时清单校验必然失败。
+    manifest_name = ('bundle-manifest'
+                     + ('-lite' if args.flavor == 'lite' else '')
+                     + ('' if args.channel == 'stable' else '-dev') + '.json')
     (DIST / manifest_name).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     identity_path = write_dist_identity(apps, meta, args.configuration, bool(args.validation),
                                         suffix='' if args.channel == 'stable' else '-dev')

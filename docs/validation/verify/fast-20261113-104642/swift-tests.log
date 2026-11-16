@@ -1,0 +1,100 @@
+[0/1] Planning build
+Building for production...
+[0/7] Write sources
+[1/7] Write swift-version--58304C5D6DBC2206.txt
+[3/12] Compiling GogakuInput CandidatePanel.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/CandidatePanel.swift:219:13: warning: variable 'caretX' was never mutated; consider changing to 'let' constant
+217 |         let preeditText = view.preedit.isEmpty ? view.raw : view.preedit
+218 |         var preeditString: NSAttributedString?
+219 |         var caretX: CGFloat?
+    |             `- warning: variable 'caretX' was never mutated; consider changing to 'let' constant
+220 |         var caretUTF16: Int?
+221 |         var preeditWidth: CGFloat = 0
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/CandidatePanel.swift:220:13: warning: variable 'caretUTF16' was never mutated; consider changing to 'let' constant
+218 |         var preeditString: NSAttributedString?
+219 |         var caretX: CGFloat?
+220 |         var caretUTF16: Int?
+    |             `- warning: variable 'caretUTF16' was never mutated; consider changing to 'let' constant
+221 |         var preeditWidth: CGFloat = 0
+222 |         var preeditLineCount = 1
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/CandidatePanel.swift:351:13: warning: variable 'placedButtons' was never mutated; consider changing to 'let' constant
+349 |             pageRect = .zero
+350 |         }
+351 |         var placedButtons: [Button] = []
+    |             `- warning: variable 'placedButtons' was never mutated; consider changing to 'let' constant
+352 |         // 原文上屏／切换来源按钮行已移除（2026-11 用户裁决：学习面板底部与
+353 |         // 中→英界面保持一致）；原文上屏保留 ⌘↩ 隐藏快捷键。
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/InputController.swift:1357:23: warning: 'where' only applies to the second pattern match in this 'case'
+1355 |         case 116 where composing: edit { try $0.page(-1) }; return true
+1356 |         case 121 where composing: edit { try $0.page(1) }; return true
+1357 |         case 125, 124 where composing: edit { $0.navigate(1) }; return true
+     |              |    |   `- warning: 'where' only applies to the second pattern match in this 'case'
+     |              |    `- note: disambiguate by adding a line break between them if this is desired
+     |              `- note: duplicate the 'where' on both patterns to check both patterns
+1358 |         case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+1359 |         case 36 where composing: chooseCurrent(); return true
+
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuInput/InputController.swift:1358:23: warning: 'where' only applies to the second pattern match in this 'case'
+1356 |         case 121 where composing: edit { try $0.page(1) }; return true
+1357 |         case 125, 124 where composing: edit { $0.navigate(1) }; return true
+1358 |         case 126, 123 where composing: edit { $0.navigate(-1) }; return true
+     |              |    |   `- warning: 'where' only applies to the second pattern match in this 'case'
+     |              |    `- note: disambiguate by adding a line break between them if this is desired
+     |              `- note: duplicate the 'where' on both patterns to check both patterns
+1359 |         case 36 where composing: chooseCurrent(); return true
+1360 |         default: break
+[3/12] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[5/12] Linking GogakuTranslator
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[6/12] Linking GogakuInput
+[8/12] Compiling GogakuSettings AppCatalog.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Sources/GogakuSettings/CustomWordsPage.swift:210:21: warning: variable 'page' was never mutated; consider changing to 'let' constant
+208 |                 // 结构体 View 拷贝：State/Binding 存储由 SwiftUI 引用承载，
+209 |                 // 拷贝上的 save() 读取当前词表并把结果写回同一存储。
+210 |                 var page = self
+    |                     `- warning: variable 'page' was never mutated; consider changing to 'let' constant
+211 |                 page.status = status
+212 |                 page.model = model
+[8/12] Write Objects.LinkFileList
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/native' ignored
+ld: warning: duplicate -rpath '/Users/gomeen/code/gomeen/gogaku/.build/core' ignored
+[9/12] Linking GogakuSettings
+[11/13] Compiling GogakuKitTests AnchorFallbackTests.swift
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/HorizontalCandidatePanelTests.swift:21:22: error: cannot find 'PanelLayout' in scope
+19 |         }
+20 |         let theme = CandidatePanelTheme.resolve(.rimeMacOSLike, fontSize: 14)
+21 |         let layout = PanelLayout.horizontalNormal(view: view, theme: theme)
+   |                      `- error: cannot find 'PanelLayout' in scope
+22 |         XCTAssertGreaterThanOrEqual(layout.panelWidth, 320)
+23 |         XCTAssertLessThanOrEqual(layout.panelWidth, 860)
+
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/KeyComboTests.swift:71:13: warning: variable 'settings' was never mutated; consider changing to 'let' constant
+ 69 | 
+ 70 |     func testConflictBetweenConfigurableCommands() {
+ 71 |         var settings = Settings()
+    |             `- warning: variable 'settings' was never mutated; consider changing to 'let' constant
+ 72 |         let mode = ConfigurableCommand.modeSwitch
+ 73 |         XCTAssertEqual(KeyCombo.conflict(target: .directionSwitch, keyID: "k",
+
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/KeyComboTests.swift:72:13: warning: initialization of immutable value 'mode' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+ 70 |     func testConflictBetweenConfigurableCommands() {
+ 71 |         var settings = Settings()
+ 72 |         let mode = ConfigurableCommand.modeSwitch
+    |             `- warning: initialization of immutable value 'mode' was never used; consider replacing with assignment to '_' or removing it [#no-usage]
+ 73 |         XCTAssertEqual(KeyCombo.conflict(target: .directionSwitch, keyID: "k",
+ 74 |                                          modifiers: ctrlShift.rawValue, settings: settings),
+
+/Users/gomeen/code/gomeen/gogaku/macos/Tests/GogakuKitTests/UpdateTests.swift:223:28: warning: immutable value 'signature' was never used; consider replacing with '_' or removing it [#no-usage]
+221 |     func testInvalidSignatureIsNotUpToDate() async throws {
+222 |         let manifest = manifest()
+223 |         let (manifestData, signature) = try signedRelease(manifest)
+    |                            `- warning: immutable value 'signature' was never used; consider replacing with '_' or removing it [#no-usage]
+224 |         let releases = try releaseJSON(manifestData: manifestData, signatureData: Data("bad".utf8))
+225 |         let transport = FakeTransport()
+error: fatalError

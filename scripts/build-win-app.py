@@ -26,14 +26,19 @@ from _gogaku_delivery import (DeliveryError, package_receipt_path, source_finger
                               validate_compile_receipt, write_package_receipt)
 VERSION_FILE = ROOT / 'version.json'
 ISS_TEMPLATE = ROOT / 'windows/packaging/gogaku.iss.in'
-DATA_FILES = ['sc.dict', 'zh_CN.lm', 'english-words.txt', 'gloss.tsv']
+FULL_DATA_FILES = ['sc.dict', 'zh_CN.lm', 'english-words.txt', 'gloss.tsv']
+LITE_DATA_FILES = ['sc.dict', 'zh_CN.lm', 'english-words.txt']
 APP_IDS = {
-    'stable': '{{0F3E6E4A-6D7B-4C1E-9B2A-5C8D7E1F3A21}',
-    'dev': '{{7B2D9C4E-1A3F-4E6B-8C5D-2F7A9B1C3E42}',
+    ('full', 'stable'): '{{0F3E6E4A-6D7B-4C1E-9B2A-5C8D7E1F3A21}',
+    ('full', 'dev'): '{{7B2D9C4E-1A3F-4E6B-8C5D-2F7A9B1C3E42}',
+    ('lite', 'stable'): '{{B4E2C8A1-3F6D-4A91-9C0E-7D5A1B2E4F60}',
+    ('lite', 'dev'): '{{C6F4D9B2-5A7E-4C13-BD1F-8E6C2A3F5B71}',
 }
 TSF_CLSIDS = {
-    'stable': '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E12}',
-    'dev': '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}',
+    ('full', 'stable'): '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E12}',
+    ('full', 'dev'): '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}',
+    ('lite', 'stable'): '{C8E4A2B0-5D6F-4E8A-9B1C-3D7F5A9C1E24}',
+    ('lite', 'dev'): '{D9F5B3C1-6E7A-5F9B-AC2D-4E8A6B0D2F35}',
 }
 # Windows 11 自带 DLL；VC++/MinGW runtime 不在豁免中，必须随架构闭包提供。
 SYSTEM_DLLS = set(('advapi32 avrt bcrypt bcryptprimitives cabinet cfgmgr32 comctl32 '
@@ -275,9 +280,15 @@ def binary_plan(args):
 
 def resource_plan(args):
     data = Path(args.data_dir)
-    result = [(data / name, Path('data') / name) for name in DATA_FILES]
+    data_files = LITE_DATA_FILES if getattr(args, 'flavor', 'full') == 'lite' else FULL_DATA_FILES
+    result = [(data / name, Path('data') / name) for name in data_files]
     resources = Path(args.resources_dir)
-    for name in ('english-wordlist-sources.json', 'gloss-sources.json'):
+    # Lite 不带释义数据，就不该把它对应的来源清单也塞进包（清单指向不存在的
+    # gloss.tsv 会让随包数据自述与实物不一致）。
+    manifest_files = ['english-wordlist-sources.json']
+    if getattr(args, 'flavor', 'full') != 'lite':
+        manifest_files.append('gloss-sources.json')
+    for name in manifest_files:
         result.append((resources / name, Path('data') / name))
     result.append((resources / 'update/config.json', Path('resources/update/windows.json')))
     # 仅从指定许可目录复制；保留目录结构，避免同名 LICENSE/COPYING 互相覆盖。
@@ -293,12 +304,17 @@ def resource_plan(args):
     if set(lock['data']) != {'sc.dict', 'zh_CN.lm'}:
         raise InputError('出厂数据锁必须覆盖 sc.dict 与 zh_CN.lm')
     for name, expected in lock['data'].items():
-        if name not in DATA_FILES or sha256(data / name) != expected:
+        if name not in data_files or sha256(data / name) != expected:
             raise InputError(f'出厂数据哈希不符：{name}')
-    for name, manifest in [('english-words.txt', 'english-wordlist-sources.json'),
-                           ('gloss.tsv', 'gloss-sources.json')]:
+    optional = [('english-words.txt', 'english-wordlist-sources.json')]
+    if getattr(args, 'flavor', 'full') != 'lite':
+        optional.append(('gloss.tsv', 'gloss-sources.json'))
+    for name, manifest in optional:
+        path = data / name
+        if name not in data_files:
+            continue
         expected = json.loads((resources / manifest).read_text(encoding='utf-8'))['output_sha256']
-        if sha256(data / name) != expected:
+        if sha256(path) != expected:
             raise InputError(f'来源清单与数据不符：{name}')
     # 对外声明由当前仓库维护，不能沿用暂存目录中的陈旧版本。
     result.append((ROOT / 'docs/third-party.md', Path('licenses/THIRD-PARTY.md')))
@@ -352,7 +368,8 @@ def stage(args, *, version_file=VERSION_FILE, git=None):
     receipts = {arch: validate_compile_receipt(
         Path(args.bin_dir or ROOT / f'.build/win-app/{args.channel}/bin') / arch / 'build-receipt.json',
         Path(args.bin_dir or ROOT / f'.build/win-app/{args.channel}/bin') / arch,
-        args.channel, arch, meta={'version': version, 'buildNumber': build}, source=source)
+        args.channel, arch, meta={'version': version, 'buildNumber': build}, source=source,
+        flavor=getattr(args, 'flavor', 'full'))
         for arch in ('x64', 'x86')}
     if receipts['x64']['git'] != receipts['x86']['git'] or receipts['x64']['git'] != git:
         raise InputError('两架构 Git 编译身份与当前工作区不一致')
@@ -363,9 +380,11 @@ def stage(args, *, version_file=VERSION_FILE, git=None):
         for name in names:
             if evidence[arch][name]['sha256'] != receipts[arch]['artifacts'][name]['sha256']:
                 raise InputError(f'{arch}/{name} 未来自本轮编译收据；禁止覆盖构建身份')
+    flavor = getattr(args, 'flavor', 'full')
     resources = resource_plan(args)
     suffix = '-dev' if args.channel == 'dev' else ''
-    output_base = f'Gogaku-{version}-b{build}{suffix}-windows-x64-setup'
+    product = 'GogakuLite' if flavor == 'lite' else 'Gogaku'
+    output_base = f'{product}-{version}-b{build}{suffix}-windows-x64-setup'
     out_root = Path(args.out or ROOT / 'dist/gogaku-win').resolve()
     stage_dir = out_root / f'{version}-b{build}{suffix}'
     # 校验完成才替换旧暂存目录；不能删除恰好被指定为输入的目录。
@@ -389,7 +408,7 @@ def stage(args, *, version_file=VERSION_FILE, git=None):
             raise InputError(f'组装期间资源输入变化：{path}')
     identity = {
         'fullVersion': version, 'buildNumber': build, 'phase': phase, 'channel': args.channel,
-        'platform': 'windows', 'arch': 'x86_64', 'builtOn': platform.platform(),
+        'flavor': flavor, 'platform': 'windows', 'arch': 'x86_64', 'builtOn': platform.platform(),
         'git': git, 'gitCommit': git['commit'], 'dirty': git['dirty'],
         'sourceSha256': source, 'compileReceipts': receipts,
         'versionSourceSha256': sha256(version_file), 'peDependencies': evidence,
@@ -397,12 +416,19 @@ def stage(args, *, version_file=VERSION_FILE, git=None):
                       for p in sorted(stage_dir.rglob('*')) if p.is_file()},
     }
     (stage_dir / 'build-identity.json').write_text(json.dumps(identity, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    lite = flavor == 'lite'
+    app_name = ('Gogaku Lite Dev' if args.channel == 'dev' else 'Gogaku Lite') if lite else (
+        'Gogaku Dev' if args.channel == 'dev' else 'Gogaku')
+    install_dir = ('GogakuLiteDev' if args.channel == 'dev' else 'GogakuLite') if lite else (
+        'GogakuDev' if args.channel == 'dev' else 'Gogaku')
+    agent_run = (('GogakuLiteDevAgent' if args.channel == 'dev' else 'GogakuLiteAgent') if lite else
+                 ('GogakuDevAgent' if args.channel == 'dev' else 'GogakuAgent'))
     replacements = {
-        '@APP_NAME@': 'Gogaku Dev' if args.channel == 'dev' else 'Gogaku',
+        '@APP_NAME@': app_name,
         '@VERSION@': version, '@BUILD@': str(build), '@CHANNEL@': args.channel,
-        '@APP_ID@': APP_IDS[args.channel], '@TSF_CLSID@': TSF_CLSIDS[args.channel],
-        '@INSTALL_DIR@': 'GogakuDev' if args.channel == 'dev' else 'Gogaku',
-        '@AGENT_RUN_VALUE@': 'GogakuDevAgent' if args.channel == 'dev' else 'GogakuAgent',
+        '@APP_ID@': APP_IDS[(flavor, args.channel)], '@TSF_CLSID@': TSF_CLSIDS[(flavor, args.channel)],
+        '@INSTALL_DIR@': install_dir,
+        '@AGENT_RUN_VALUE@': agent_run,
         '@OUTPUT_DIR@': inno_path(out_root), '@OUTPUT_BASE@': output_base,
         '@VERSION_QUAD@': version.split('-', 1)[0] + f'.{build}',
         '@APP_MUTEX@': 'GogakuDevSetupMutex' if args.channel == 'dev' else 'GogakuSetupMutex',
@@ -455,6 +481,8 @@ def make_parser():
     parser.add_argument('--self-test', action='store_true')
     parser.add_argument('--check', action='store_true')
     parser.add_argument('--channel', choices=['stable', 'dev'], default='stable')
+    parser.add_argument('--flavor', choices=['full', 'lite'], default='full',
+                        help='full=完整版；lite=Gogaku Lite（独立安装目录与出厂数据）')
     parser.add_argument('--version', help='兼容参数：必须等于根 version.json')
     parser.add_argument('--build', type=int, help='兼容参数：必须等于根 version.json')
     parser.add_argument('--repo', default=os.environ.get('GOGAKU_UPDATE_REPO', ''))
@@ -521,7 +549,7 @@ def self_test(iscc=None):
         fake_pe(root / 'bin/x64/GogakuSettings.exe', 'x64', ['libgogaku_core.dll'])
         fake_pe(root / 'bin/x64/libgogaku_core.dll', 'x64', ['libwinpthread-1.dll'])
         fake_pe(root / 'bin/x64/libwinpthread-1.dll', 'x64', delay=['api-ms-win-core-synch-l1-2-0.dll'])
-        for name in DATA_FILES:
+        for name in FULL_DATA_FILES:
             path = root / 'data' / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(b'fixture data')

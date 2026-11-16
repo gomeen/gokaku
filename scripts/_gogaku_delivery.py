@@ -176,11 +176,17 @@ def check_identity(value, channel, *, root=ROOT, meta=None, source=None):
     return value
 
 
-def validate_compile_receipt(path, folder, channel, arch, *, root=ROOT, meta=None, source=None):
+def validate_compile_receipt(path, folder, channel, arch, *, root=ROOT, meta=None, source=None,
+                             flavor='full'):
     receipt = read_json(path)
     check_identity(receipt, channel, root=root, meta=meta, source=source)
     if receipt.get('schema') != 1 or receipt.get('arch') != arch or receipt.get('configuration') != 'release':
         raise DeliveryError(f'{path} 编译配置／架构不符')
+    # 构建形态必须与收据一致：full 与 lite 的产物能过同一份源码／通道校验，
+    # 不比对 flavor 就会把 lite 二进制当 full 打包（或反之），静默交付错产品。
+    if receipt.get('flavor', 'full') != flavor:
+        raise DeliveryError(f'{path} 构建形态不符：收据为 {receipt.get("flavor", "full")}，'
+                            f'本轮要求 {flavor}；请用相同 --flavor 重新编译')
     artifacts = receipt.get('artifacts', {})
     required = {'GogakuTsf.dll'}
     if arch == 'x64':
@@ -194,15 +200,26 @@ def validate_compile_receipt(path, folder, channel, arch, *, root=ROOT, meta=Non
     return receipt
 
 
-def validate_macos_apps(dist, channel, *, root=ROOT):
+# 产品形态 → (双 App 基名, bundle ID 基名)。Lite 是独立产品，不能与完整版共用。
+MACOS_PRODUCTS = {
+    'full': (('Gogaku', 'Gogaku Settings'), ('org.gogaku.inputmethod', 'org.gogaku.settings')),
+    'lite': (('Gogaku Lite', 'Gogaku Lite Settings'),
+             ('org.gogaku.lite.inputmethod', 'org.gogaku.lite.settings')),
+}
+
+
+def validate_macos_apps(dist, channel, *, root=ROOT, flavor='full'):
     dist = Path(dist)
     suffix = '-dev' if channel == 'dev' else ''
-    identity = read_json(dist / f'build-identity{suffix}.json')
+    # 清单名带形态：Lite 与完整版 dev 共用 build-identity-dev.json 会互相覆盖。
+    identity = read_json(dist / ('build-identity' + ('-lite' if flavor == 'lite' else '') + suffix + '.json'))
     check_identity(identity, channel, root=root)
     if identity.get('configuration') != 'release' or identity.get('validationBuild') is not False:
         raise DeliveryError('对外 pkg 必须使用 Release、非 validation 的双 App')
-    names = ['Gogaku Dev.app', 'Gogaku Settings Dev.app'] if channel == 'dev' else ['Gogaku.app', 'Gogaku Settings.app']
-    identifiers = ['org.gogaku.inputmethod', 'org.gogaku.settings']
+    if identity.get('flavor', 'full') != flavor:
+        raise DeliveryError(f'双 App 构建形态不符：收据为 {identity.get("flavor", "full")}，本轮要求 {flavor}')
+    base_names, identifiers = MACOS_PRODUCTS[flavor]
+    names = [name + (' Dev.app' if channel == 'dev' else '.app') for name in base_names]
     if set(identity.get('apps', {})) != set(names):
         raise DeliveryError('双 App 身份清单／通道不符')
     for name, identifier in zip(names, identifiers):
@@ -333,12 +350,22 @@ def validate_reports(paths, packages, channel, *, root=ROOT, waive_host=None):
     waive_host：用户明确决定不跑真实宿主时的书面理由；只豁免 host，不豁免 fast／release。"""
     meta = current_meta(root)
     final = '-dev.' not in meta['version']
-    if (not isinstance(packages, (list, tuple)) or len(packages) != 2
+    # 每个产品都必须凑齐双端（full 必需，lite 可选）：2 个（仅完整版）或 4 个。
+    if (not isinstance(packages, (list, tuple)) or len(packages) not in (2, 4)
             or any(not isinstance(p, dict) for p in packages)
-            or {p.get('platform') for p in packages if isinstance(p.get('platform'), str)} != set(PLATFORMS)
             or any(not _valid_artifact(p.get('artifact')) for p in packages)):
         raise DeliveryError('验证报告必须绑定本轮双端安装包哈希')
-    expected = {p['platform']: p['artifact'] for p in packages}
+    by_product = {}
+    for item in packages:
+        by_product.setdefault(item.get('product', 'full'), set()).add(item.get('platform'))
+    if 'full' not in by_product or any(platforms != set(PLATFORMS)
+                                       for platforms in by_product.values()):
+        raise DeliveryError('验证报告必须绑定本轮双端安装包哈希')
+    # 验证报告只绑定**完整版**双端安装包：Lite 是同一源码下的附加产品，
+    # fast 档的产物核验只认 dist 里那对 Gogaku-* 文件（verify.py 的实现）。
+    # 把 Lite 也算进 expected 会让「报告没绑 Lite」被判为不合格。
+    expected = {p['platform']: p['artifact'] for p in packages
+                if p.get('product', 'full') == 'full'}
     current = {'source': source_fingerprint(root), 'tests': test_fingerprint(root),
                'platforms': platform_fingerprints(root)}
     profiles = set()

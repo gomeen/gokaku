@@ -246,15 +246,26 @@ if __name__ == '__main__':
     parser.add_argument('--input-app', type=Path, default=ROOT / 'dist/Gogaku.app')
     parser.add_argument('--settings-app', type=Path, default=ROOT / 'dist/Gogaku Settings.app')
     parser.add_argument('--report', type=Path, default=ROOT / 'docs/validation/bundle-smoke.json')
+    parser.add_argument('--lite', action='store_true', help='Gogaku Lite：无释义／翻译 helper 检查')
     args = parser.parse_args()
+    lite = args.lite or 'Lite' in args.input_app.name
     report = {'checkedAt': datetime.now(timezone.utc).isoformat(), 'apps': [inspect(args.input_app), inspect(args.settings_app)],
               'menuIcon': menu_icon(args.input_app), 'engine': engine_smoke(args.input_app), 'normalCore': normal_core_smoke(args.input_app),
               'dataAndLicenses': data_and_license_smoke(args.input_app),
               'settingsAutoPinyin': auto_pinyin_smoke(args.settings_app),
               'updateConfig': update_config_smoke(args.settings_app),
-              'volcengineHelper': volcengine_helper_smoke(args.input_app),
-              **spelling_smoke(args.input_app),
-              'hostAcceptance': 'not_tested', 'qualityAcceptance': 'not_tested', 'performanceAcceptance': 'not_tested'}
+              'flavor': 'lite' if lite else 'full'}
+    if not lite:
+        report['volcengineHelper'] = volcengine_helper_smoke(args.input_app)
+        report.update(spelling_smoke(args.input_app))
+    else:
+        helper = args.input_app / 'Contents/Helpers/GogakuTranslator'
+        assert not helper.exists(), 'Lite 包不应包含 GogakuTranslator'
+        gloss = args.input_app / 'Contents/Resources/EngineData/gloss.tsv'
+        assert not gloss.exists(), 'Lite 包不应包含 gloss.tsv'
+        report['volcengineHelper'] = 'absent_lite'
+        report['spelling'] = 'absent_lite'
+    report |= {'hostAcceptance': 'not_tested', 'qualityAcceptance': 'not_tested', 'performanceAcceptance': 'not_tested'}
     args.report.parent.mkdir(parents=True, exist_ok=True)
     args.report.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(report, ensure_ascii=False, indent=2))

@@ -1,0 +1,187 @@
+已创建验收开关：/Users/gomeen/Library/Logs/Gogaku/validation-enabled（已重启输入法进程）
+探针宿主已启动（pid 6628）
+候选窗状态 socket 不存在：/Users/gomeen/Library/Logs/Gogaku/validation.sock（本轮不做面板状态判定）
+宿主就绪：textedit/default
+跳过宿主 chrome/textarea：无法把焦点放到目标字段 textarea（当前 'secret'）
+跳过宿主 chrome/contenteditable：无法把焦点放到目标字段 contenteditable（当前 ''）
+前台身份断言失败，整轮中止（未投递的按键不再补发）：前台应用不是预期宿主：'com.google.Chrome' ≠ 'com.apple.Safari'
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:84:38: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 82 | for (title, action, key) in [("Undo", Selector(("undo:")), "z"),
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+    |                                      `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:85:39: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 83 |                              ("Redo", Selector(("redo:")), "Z"),
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+    |                                       `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:86:40: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 84 |                              ("Cut", Selector(("cut:")), "x"),
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+    |                                        `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+
+/Users/gomeen/code/gomeen/gogaku/probes/imk-regression-host.swift:87:45: warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 85 |                              ("Copy", Selector(("copy:")), "c"),
+ 86 |                              ("Paste", Selector(("paste:")), "v"),
+ 87 |                              ("Select All", Selector(("selectAll:")), "a")] {
+    |                                             `- warning: use '#selector' instead of explicitly constructing a 'Selector'
+ 88 |     editMenu.addItem(NSMenuItem(title: title, action: action, keyEquivalent: key))
+ 89 | }
+Trying to load the allocator multiple times. This is *not* supported.
+2026-11-10 16:24:23.724 Google Chrome[6747:427059] TSM AdjustCapsLockLEDForKeyTransitionHandling - _ISSetPhysicalKeyboardCapsLockLED Inhibit
+Created TensorFlow Lite XNNPACK delegate for CPU.
+Trying to load the allocator multiple times. This is *not* supported.
+[6926:428890:1110/162434.705273:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[6926:428890:1110/162434.705791:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7637, parent pid: 6747
+[6926:428890:1110/162434.710381:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596671668224B (555.694GiB) / 1000240963584B (931.547GiB)
+[6926:428890:1110/162434.710481:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596671668224B (555.694GiB) / 1000240963584B (931.547GiB)
+[6926:428890:1110/162434.710674:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[6928:428894:1110/162434.731911:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[6928:428894:1110/162434.732396:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7637, parent pid: 1
+[6928:428894:1110/162434.737877:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596671668224B (555.694GiB) / 1000240963584B (931.547GiB)
+[6928:428894:1110/162434.737962:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596671668224B (555.694GiB) / 1000240963584B (931.547GiB)
+[6928:428894:1110/162434.738180:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[6926:428890:1110/162434.739273:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[6926:428890:1110/162434.741313:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[6926:428890:1110/162434.741630:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[6926:428890:1110/162434.742025:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[6926:428890:1110/162434.742105:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/Measurement/Crashpad/settings.dat: No such file or directory (2)
+[6926:428890:1110/162434.742562:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[6926:428903:1110/162434.743748:VERBOSE1:chrome/updater/app/app_wakeall.cc:58] Launching `/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake`
+[6930:428909:1110/162434.764264:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[6930:428909:1110/162434.764784:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7637, parent pid: 6926
+[6930:428909:1110/162434.769848:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596671655936B (555.694GiB) / 1000240963584B (931.547GiB)
+[6930:428909:1110/162434.769914:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596671655936B (555.694GiB) / 1000240963584B (931.547GiB)
+[6930:428909:1110/162434.770088:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[6932:428913:1110/162434.790455:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[6932:428913:1110/162434.790951:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7637, parent pid: 1
+[6932:428913:1110/162434.796271:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596671651840B (555.694GiB) / 1000240963584B (931.547GiB)
+[6932:428913:1110/162434.796336:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596671651840B (555.694GiB) / 1000240963584B (931.547GiB)
+[6932:428913:1110/162434.796558:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[6930:428909:1110/162434.797462:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[6930:428909:1110/162434.799155:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[6930:428909:1110/162434.799440:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[6930:428909:1110/162434.799667:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[6930:428909:1110/162434.799722:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/Measurement/Crashpad/settings.dat: No such file or directory (2)
+[6930:428909:1110/162434.800148:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[6930:428909:1110/162434.800803:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run
+Created TensorFlow Lite XNNPACK delegate for CPU.
+[6930:428909:1110/162449.970026:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[6930:428909:1110/162449.970869:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[6930:428909:1110/162449.970909:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.
+[6926:428903:1110/162450.172036:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0
+[6926:428890:1110/162450.172192:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[6926:428890:1110/162450.173104:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[6926:428890:1110/162450.173140:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.
+[7052:430320:1110/162451.202386:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[7052:430320:1110/162451.202979:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7654, parent pid: 6898
+[7052:430320:1110/162451.208960:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596609695744B (555.636GiB) / 1000240963584B (931.547GiB)
+[7052:430320:1110/162451.209040:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596609695744B (555.636GiB) / 1000240963584B (931.547GiB)
+[7052:430320:1110/162451.209233:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[7054:430324:1110/162451.232248:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[7054:430324:1110/162451.232844:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7654, parent pid: 1
+[7054:430324:1110/162451.238730:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596609691648B (555.636GiB) / 1000240963584B (931.547GiB)
+[7054:430324:1110/162451.238818:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596609691648B (555.636GiB) / 1000240963584B (931.547GiB)
+[7054:430324:1110/162451.239039:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[7052:430320:1110/162451.240322:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[7052:430320:1110/162451.242776:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[7052:430320:1110/162451.243113:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[7052:430320:1110/162451.243372:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[7052:430320:1110/162451.243428:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/Measurement/Crashpad/settings.dat: No such file or directory (2)
+[7052:430320:1110/162451.243934:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[7052:430332:1110/162451.244894:VERBOSE1:chrome/updater/app/app_wakeall.cc:58] Launching `/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake`
+[7055:430338:1110/162451.267473:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[7055:430338:1110/162451.268108:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7654, parent pid: 7052
+[7055:430338:1110/162451.273914:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596607574016B (555.634GiB) / 1000240963584B (931.547GiB)
+[7055:430338:1110/162451.274045:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596607574016B (555.634GiB) / 1000240963584B (931.547GiB)
+[7055:430338:1110/162451.274283:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[7057:430342:1110/162451.298296:VERBOSE1:chrome/updater/updater.cc:375] Version: 157.0.8089.0, opt, x86_64, command line: /Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --crash-handler --database=/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/Crashpad --url=https://clients2.google.com/cr/report --annotation=prod=Update4 --annotation=ver=157.0.8089.0 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[7057:430342:1110/162451.298799:VERBOSE1:chrome/updater/updater.cc:378] OS version: 26.7.3, arch: x86_64, System uptime (seconds): 7654, parent pid: 1
+[7057:430342:1110/162451.303862:VERBOSE1:chrome/updater/updater.cc:383] Available disk space in install directory (/Users/gomeen/Library/Application Support/Google/GoogleUpdater): 596609671168B (555.636GiB) / 1000240963584B (931.547GiB)
+[7057:430342:1110/162451.303936:VERBOSE1:chrome/updater/updater.cc:387] Available disk space in temporary directory (/var/folders/2f/7ckygs2n439f4d6jbzxwt3kr0000gn/T/): 596609671168B (555.636GiB) / 1000240963584B (931.547GiB)
+[7057:430342:1110/162451.304150:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[7055:430338:1110/162451.305304:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[7055:430338:1110/162451.307390:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[7055:430338:1110/162451.307658:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[7055:430338:1110/162451.307949:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/RLZ/Crashpad/settings.dat: No such file or directory (2)
+[7055:430338:1110/162451.308006:ERROR:third_party/crashpad/crashpad/util/file/file_io_posix.cc:145] open /Users/gomeen/Library/Application Support/Google/Measurement/Crashpad/settings.dat: No such file or directory (2)
+[7055:430338:1110/162451.308550:VERBOSE1:chrome/updater/updater.cc:107] Crash reporting initialized.
+[7055:430338:1110/162451.309079:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run
+[7055:430338:1110/162455.626367:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[7055:430338:1110/162455.627280:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[7055:430338:1110/162455.627318:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake) returned 0.
+[7057:430342:1110/162455.629771:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[7057:430342:1110/162455.629860:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+[7052:430332:1110/162455.790954:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/gomeen/Library/Application Support/Google/GoogleUpdater/157.0.8089.0/GoogleUpdater.app/Contents/MacOS/GoogleUpdater --wake` exited 0
+[7052:430320:1110/162455.791124:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[7052:430320:1110/162455.792168:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[7052:430320:1110/162455.792207:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--wake-all) returned 0.
+[7054:430324:1110/162455.794461:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[7054:430324:1110/162455.794532:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+[6932:428913:1110/162505.637515:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[6932:428913:1110/162505.637573:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+[6928:428894:1110/162505.639734:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[6928:428894:1110/162505.639830:VERBOSE1:chrome/updater/updater.cc:420] UpdaterMain (--crash-handler) returned 0.
+Trying to load the allocator multiple times. This is *not* supported.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794299235.674714  435094 environment.cc:526] Selected adapter: AMD Radeon Pro 5500M, arch=rdna-1, vendor=amd, backend=Metal, adapterType=Discrete GPU
+I0000 00:00:1794299235.681229  435111 environment.cc:526] Selected adapter: AMD Radeon Pro 5500M, arch=rdna-1, vendor=amd, backend=Metal, adapterType=Discrete GPU
+Trying to load the allocator multiple times. This is *not* supported.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794299252.336195  435617 environment.cc:526] Selected adapter: AMD Radeon Pro 5500M, arch=rdna-1, vendor=amd, backend=Metal, adapterType=Discrete GPU
+I0000 00:00:1794299252.340604  435629 environment.cc:526] Selected adapter: AMD Radeon Pro 5500M, arch=rdna-1, vendor=amd, backend=Metal, adapterType=Discrete GPU
+[6898:428535:1110/163151.116608:ERROR:chrome/browser/ui/views/user_education/impl/browser_user_education_interface_impl.cc:186] Attempting to show IPH IPH_ExtensionsZeroStatePromo before browser initialization complete; IPH will not be shown.
+[6898:428535:1110/163153.340599:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[6898:428535:1110/163153.344792:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[6902:428582:1110/163153.597781:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.598168:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.598176:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.598180:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.598187:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.598190:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.600969:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.600986:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.600991:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.600995:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.600999:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.601003:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.601673:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.601690:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.601695:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.601699:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6902:428582:1110/163153.601704:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6902:428582:1110/163153.601708:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6747:427059:1110/163634.073267:ERROR:chrome/browser/ui/views/user_education/impl/browser_user_education_interface_impl.cc:186] Attempting to show IPH IPH_ExtensionsZeroStatePromo before browser initialization complete; IPH will not be shown.
+[6747:427059:1110/163636.211713:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[6747:427059:1110/163636.213442:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[6752:427111:1110/163636.272725:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.273328:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.273339:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.273343:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.273347:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.273351:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.275680:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.275702:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.275709:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.275714:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.275717:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.275721:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.276665:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.276681:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.276687:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.276691:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.276695:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.276698:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6752:427111:1110/163636.276702:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:376] SharedImageManager::ProduceOverlay: Trying to Produce a Overlay representation from a non-existent mailbox.
+[6752:427111:1110/163636.276705:ERROR:components/viz/service/display_embedder/skia_output_device_buffer_queue.cc:258] Invalid mailbox.
+[6747:427059:1110/163640.101753:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.
+[6747:427059:1110/163640.102368:ERROR:chrome/browser/ui/webui/ntp/new_tab_ui.cc:54] Requested load of chrome://newtab/ for incorrect profile type.

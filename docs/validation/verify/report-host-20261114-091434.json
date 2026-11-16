@@ -1,0 +1,92 @@
+{
+  "policyVersion": 3,
+  "runIdentityStable": true,
+  "profile": "host",
+  "channel": "stable",
+  "quick": false,
+  "sourceSha256": "fe8ea970aa6d6d8bf89c291ac106916771151d6f35f56dd245b25639c050de15",
+  "testSha256": "c071fb4422a35f6aede2638c27075d1402cd4adae3a9b643c385a476254e573c",
+  "platformFingerprints": {
+    "macos": {
+      "sourceSha256": "05a51347a12076217f81600fbe75d3c8eda36360e01de211969f7a7b6bc5056d",
+      "testSha256": "53783849a123ee66d16d5fbfadaa11d2170e1d6848387fc9e99ce6380d2dfa5d"
+    },
+    "windows": {
+      "sourceSha256": "367b4a05cd20df74b57736115b44713c82681ffa63f642dc5a913119cfd1b31d",
+      "testSha256": "c93973a856b75db2e9b224a3360dd91608fdebcc45952885265ce5a646da90ec"
+    }
+  },
+  "artifacts": {},
+  "artifactError": null,
+  "startedAt": "2026-11-14T08:51:41+0800",
+  "finishedAt": "2026-11-14T09:14:34+0800",
+  "commit": "6ef7ae2540890fa01d753cbed71e9f35697d58f6",
+  "dirty": true,
+  "arch": "x86_64",
+  "version": {
+    "version": "0.1.5-dev.1",
+    "buildNumber": 114
+  },
+  "checks": [
+    {
+      "name": "host-plan",
+      "required": true,
+      "status": "passed",
+      "detail": "host 档位预检通过（安装件存在）",
+      "durationMs": 0,
+      "wallMs": 0,
+      "evidence": null
+    },
+    {
+      "name": "host-identity",
+      "required": true,
+      "status": "passed",
+      "detail": "安装件身份与 version.json 一致（Gogaku.app 0.1.5 b114；Gogaku Settings.app 0.1.5 b114；输入法 SHA-256 985cd2977539…）",
+      "durationMs": 136,
+      "wallMs": 136,
+      "evidence": null
+    },
+    {
+      "name": "host-matrix-round-1",
+      "required": true,
+      "status": "blocked",
+      "detail": "第 1 轮报告缺失或不可读（exit=5，见日志）",
+      "durationMs": 978907,
+      "wallMs": 978974,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/host-20261114-085141/host-matrix-round-1.log"
+    },
+    {
+      "name": "performance",
+      "required": true,
+      "status": "failed",
+      "detail": "性能未通过：性能重新判定未通过或 acceptance 不符；性能进程未完成（exit=1）",
+      "durationMs": 393616,
+      "wallMs": 393651,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/host-20261114-085141/performance.log"
+    },
+    {
+      "name": "native-gui",
+      "required": true,
+      "status": "failed",
+      "detail": "GUI installedSHA256 与当前身份不符；GUI macosSourceSha256 与当前身份不符；GUI macosTestSha256 与当前身份不符",
+      "durationMs": 147,
+      "wallMs": 147,
+      "evidence": "/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/native-gui-acceptance-stable.json"
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 2,
+    "skipped": 0,
+    "blocked": 1
+  },
+  "gate": {
+    "passed": false,
+    "notPassed": [
+      "host-matrix-round-1",
+      "performance",
+      "native-gui"
+    ]
+  },
+  "keptAwake": true
+}
