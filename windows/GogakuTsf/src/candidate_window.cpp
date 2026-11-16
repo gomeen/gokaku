@@ -44,7 +44,7 @@ void CandidateWindow::showView(const gw::Json &view,const RECT &caret,const gw::
 }
 void CandidateWindow::showCandidates(const GcSnapshot &snapshot,const RECT &caret) {
     gw::Json candidates=gw::Json::array();
-    for (size_t i=0;i<snapshot.count && i<9;++i) candidates.push_back({
+    for (size_t i=0;i<snapshot.count;++i) candidates.push_back({
         {"text",snapshot.candidates[i].text?snapshot.candidates[i].text:""},
         {"gloss",snapshot.candidates[i].gloss?snapshot.candidates[i].gloss:""}});
     showView({{"composing",snapshot.count || (snapshot.preedit && *snapshot.preedit)},
@@ -63,7 +63,7 @@ void CandidateWindow::redraw() {
     if (!m_renderer || !m_haveCaret) return;
     try {
         UINT dpi=GetDpiForWindow(m_hwnd); if (!dpi) dpi=96;
-        m_renderer->render(m_view,gw::resolvedTheme(m_settings),gw::darkAppearance(),m_settings.value("candidateFontSize",14),dpi);
+        m_renderer->render(m_view,gw::resolvedTheme(m_settings),gw::darkAppearance(),m_settings.value("candidateFontSize",14),dpi,m_settings);
         auto size=m_renderer->size();
         MONITORINFO info{}; info.cbSize=sizeof(info);
         if (!GetMonitorInfoW(MonitorFromRect(&m_caret,MONITOR_DEFAULTTONEAREST),&info)) return;

@@ -198,6 +198,17 @@ final class GogakuInputController: IMKInputController {
     /// 字段证据丢失（hidePanelKeepComposition）标记：丢失期间无锚点不回退
     /// （旧锚点可能属于别的输入框）；复查恢复字段一致后清除。
     private var hiddenByFieldLoss = false
+    /// 连续字段证据丢失次数：宿主在布局更新时会瞬时读不到字段（微信实测），
+    /// 单次失败不能隐藏面板，否则候选窗一闪即失。
+    private var fieldLossStreak = 0
+
+    /// 引擎侧「当前确有组合」的独立事实（组合中的原编码）。
+    ///
+    /// 与 `displayed` 分开：`displayed` 是渲染缓存，目标读数失败、面板隐藏时
+    /// 会被清空；而**组合本身还在**。破坏性按键的归属判定必须看这份事实，
+    /// 否则宿主一次瞬时读不到身份，退格就漏给宿主、删掉用户已提交的正文
+    /// （2026-11-13 用户事故）。
+    private var composingRaw = ""
     /// 锚点瞬移过滤器（AnchorPlausibility）的连续可疑计数；组合开始/结束、
     /// 换目标、隐藏面板时随 displayRect 一并清零。
     private var anchorSuspectStreak = 0
@@ -214,7 +225,13 @@ final class GogakuInputController: IMKInputController {
     // 学习功能门禁（2026-11-06 双端统一计划）：默认关闭；用户保存火山凭据并
     // 显式启用后才进入学习模式。关闭即回门禁态，与 EngineHub.learningSession
     // 同源（同一设置字段）。
-    private var learningEnabled: Bool { settings.learningTranslationEnabled }
+    private var learningEnabled: Bool {
+        #if GOGAKU_LITE
+        return false
+        #else
+        return settings.learningTranslationEnabled
+        #endif
+    }
 
     private lazy var spelling: TranslationService = {
         // 与翻译共用同一个随包 helper 及其解析规则（bundle 内 → 已安装通道）。
@@ -506,6 +523,8 @@ final class GogakuInputController: IMKInputController {
                           freqEnabled: settings.frequencyEnabled,
                           englishEnabled: settings.englishCandidatesEnabled)
             normal.setAppDefaults(settings.enabledDefaultEnglishApps)
+            let hps: Int32 = settings.candidateLayout == .horizontal ? Int32(settings.horizontalPageSize) : 0
+            normal.setLayout(horizontalPageSize: hps)
             normal.reloadCustomWords()
         }
     }
@@ -521,6 +540,7 @@ final class GogakuInputController: IMKInputController {
         // 不按应用记忆；学习开关关闭时学习状态不可用，普通模式始终可用。
         mode = learningEnabled ? settings.preferredMode : .normal
         direction = settings.preferredDirection
+        applyEngineSettings()
         configure()
     }
 
@@ -633,6 +653,7 @@ final class GogakuInputController: IMKInputController {
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
         displayRect = nil; carriedAnchorRect = nil; hiddenByFieldLoss = false
         anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
+        composingRaw = ""
         markedShown = ""; markedCaret = -1
         panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
@@ -855,7 +876,26 @@ final class GogakuInputController: IMKInputController {
         shiftPoller.markOtherKey()
         if match(settings.modeShortcut, event: event) { toggleMode(nil); return true }
         if match(settings.directionShortcut, event: event) { toggleDirection(nil); return true }
-        guard let current = currentTarget(readRectangle: displayed == nil && markedShown.isEmpty) else { suspend(); return false }
+        // 硬不变量（2026-11-13 用户事故）：组合存在时破坏性按键由输入法拥有。
+        // 宿主读数失败、字段判定失败、渲染缓存已清都不能让它漏给宿主——
+        // 漏一次就删掉用户已提交的正文。这里先于任何读数判定。
+        if CompositionKeyPolicy.keepsKeyOwned(keyCode: event.keyCode, composing: !composingRaw.isEmpty) {
+            if let cached = target, let current = currentTarget(readRectangle: false) {
+                return handleNormalSync(event, at: current, fieldChanged: false)
+            }
+            return true   // 读数不可用：吞掉，绝不交给宿主
+        }
+        guard let current = currentTarget(readRectangle: displayed == nil && markedShown.isEmpty) else {
+            // 宿主瞬时读不到身份（字段切换、微信类宿主布局重建）时旧代码直接
+            // `return false` 把按键漏给宿主。组合中这是灾难：退格会删掉**已提交
+            // 的正文**（2026-11-13 用户报告「有弹框时删除会删除之前的字」），
+            // 因为候选窗还在、组合还在，用户以为在删拼音。
+            // 组合中一律把按键路由给引擎（用上次目标），不交给宿主。
+            if displayed != nil, let cached = target {
+                return handleNormalSync(event, at: cached, fieldChanged: false)
+            }
+            suspend(); return false
+        }
         let fieldChanged = target == nil || target?.application != current.application || target?.pid != current.pid
         if fieldChanged {
             // 跨字段不沿用旧字段的回退锚点（位置属于上一个输入框）。
@@ -897,6 +937,11 @@ final class GogakuInputController: IMKInputController {
                 return false
             }
             // 未映射按键（Tab、F1…）：组合中先上屏原编码再交还宿主。
+            // 破坏性按键例外：退格（51）与前向删除（117）在组合中绝不能
+            // 「先上屏再交还宿主」——宿主会把刚上屏的字立即删掉。直接吞掉。
+            if CompositionKeyPolicy.keepsKeyOwned(keyCode: event.keyCode, composing: displayed != nil) {
+                return true
+            }
             if displayed != nil {
                 _ = handleNormalSync(.enter, at: target, fieldChanged: false)
                 refreshAfterEngine(at: target)
@@ -989,6 +1034,13 @@ final class GogakuInputController: IMKInputController {
         view.totalCandidates = snap.total
         view.page = snap.page
         view.selected = snap.selected
+        view.normalPageSize = settings.effectiveNormalPageSize
+        view.candidateLayoutHorizontal = settings.candidateLayout == .horizontal
+        #if GOGAKU_LITE
+        view.horizontalGlossRowEnabled = false
+        #else
+        view.horizontalGlossRowEnabled = settings.glossEnabled
+        #endif
         view.candidates = snap.candidates.map { item in
             let isHighlighted = item.text == highlightedCandidateText(snap)
             return Candidate(stamp: view.stamp,
@@ -1004,13 +1056,16 @@ final class GogakuInputController: IMKInputController {
                       resource: "gogaku-core")
         }
         view.status = snap.status
+        // 引擎侧组合事实：组合中记原编码，组合结束即清（与渲染缓存无关）。
+        composingRaw = snap.composing ? snap.rawInput : ""
         if snap.composing {
             // 学习中→英：只预译高亮候选（2026-11 用户裁决：仅第一个显示英文）。
             // 不再发送固定文本预热请求（2026-11-06）：云端按请求计费，固定
             // “你好/hi” 预热会污染本月字符统计且无必要；TLS 复用由 URLSession
             // 在首次真实请求后保持。
             if learningSwap {
-                let inPage = snap.selected - snap.page * CandidatePage.size
+                let psz = settings.effectiveNormalPageSize
+                let inPage = snap.selected - snap.page * psz
                 if snap.candidates.indices.contains(inPage) {
                     let highlight = snap.candidates[inPage].text
                     eagerBacklog = translationMemory[highlight] == nil ? [highlight] : []
@@ -1024,13 +1079,21 @@ final class GogakuInputController: IMKInputController {
             GogakuInput.diag("applyNormal preRead=\(NSStringFromRect(target.rect)) hidden=\(hiddenByFieldLoss) carried=\(carriedAnchorRect == nil ? "nil" : NSStringFromRect(carriedAnchorRect!)) composing=\(snap.composing)")
             #endif
             if displayRect == nil {
-                if target.rect != .zero {
+                // 微信实测会回报整屏矩形；不可信读数一律当「无读数」走回退，
+                // 否则 PanelPlacement 会把它算成屏幕上翻，面板钉死左上角。
+                let usable = AnchorPlausibility.isPlausibleCaret(target.rect, screens: Self.screenFrames())
+                #if GOGAKU_VALIDATION
+                if target.rect != .zero && !usable {
+                    GogakuInput.diag("implausible-preRead rect=\(NSStringFromRect(target.rect))")
+                }
+                #endif
+                if usable {
                     displayRect = target.rect
                     // 首键 pre-read 是锚点确立点：宽限窗从这里起算。
                     anchorAgeReads = 0
                     displayRectProvisional = true
                 } else if !hiddenByFieldLoss,
-                          let fallback = AnchorFallback.resolve(preRead: target.rect,
+                          let fallback = AnchorFallback.resolve(preRead: .zero,
                                                                 carried: carriedAnchorRect,
                                                                 mouseCaret: carriedAnchorRect == nil ? Self.mouseCaretRect() : nil) {
                     displayRect = fallback
@@ -1118,6 +1181,7 @@ final class GogakuInputController: IMKInputController {
         hiddenByFieldLoss = true
         anchorSuspectStreak = 0
         anchorAgeReads = 0
+        fieldLossStreak = 0
         panel.dismiss()
     }
 
@@ -1126,20 +1190,51 @@ final class GogakuInputController: IMKInputController {
         guard active, displayed != nil, target != nil else { stopPositionRefresh(); return }
         guard let current = currentTarget(readRectangle: true), let anchor = target,
               current.application == anchor.application, current.pid == anchor.pid else {
-            hidePanelKeepComposition()
+            // 单次读数失败不足以判字段证据丢失（微信等宿主会瞬时读不到
+            // 应用身份）；连续两次才隐藏，避免候选窗闪失。
+            fieldLossStreak += 1
+            if fieldLossStreak >= 2 { hidePanelKeepComposition() }
             return
         }
+        fieldLossStreak = 0
         // 字段证据恢复（同应用同进程）：后续无锚点可安全回退。
         #if GOGAKU_VALIDATION
         GogakuInput.diag("refresh rect=\(NSStringFromRect(current.rect)) anchorAge=\(anchorAgeReads) streak=\(anchorSuspectStreak) hiddenFlag→0")
         #endif
         hiddenByFieldLoss = false
-        if current.rect == .zero {
-            // Orca 1.4.246 实测（2026-11-02 诊断）：组合（marked range）覆盖插入点
-            // 期间，宿主对插入点与组合起点的 attributes 查询都返回零矩形，组合结束
-            // 才恢复有效。已有有效锚点时冻结在组合内最后测得的位置（不追逐、不
-            // 隐藏，矩形恢复后重新跟随）；从未获得过锚点（含陈旧锚点被拒）才走
-            // hidePanelKeepComposition 的隐藏保留组合路径。
+        // 微信实测会回报整屏矩形（2026-11-13）：先当不可信读数丢弃，再走
+        // 零矩形冻结与瞬移过滤，否则面板会被钉到左上角。
+        let rectUsable = AnchorPlausibility.isPlausibleCaret(current.rect, screens: Self.screenFrames())
+        #if GOGAKU_VALIDATION
+        if current.rect != .zero && !rectUsable {
+            GogakuInput.diag("implausible-refresh rect=\(NSStringFromRect(current.rect))")
+        }
+        #endif
+        if current.rect == .zero || !rectUsable {
+            // 已有有效锚点时冻结在组合内最后测得的位置（不追逐、不隐藏，
+            // 矩形恢复后重新跟随）。
+            if displayRect != nil { return }
+            // 从未获得过锚点（含陈旧／不可信锚点被拒、字段证据刚恢复）：
+            // 这里必须走回退补显。旧代码只 return，首个 pre-read 无效的
+            // 宿主（微信组合中恒返零矩形）面板就永久不出现——用户表现为
+            // 「输入一个字母弹框立即消失」。回退链与首键同一套：
+            // carried（同字段上一组合）＞鼠标位置。
+            if hiddenByFieldLoss { return }
+            guard let fallback = AnchorFallback.resolve(
+                    preRead: .zero, carried: carriedAnchorRect,
+                    mouseCaret: carriedAnchorRect == nil ? Self.mouseCaretRect() : nil) else { return }
+            displayRect = fallback
+            anchorAgeReads = 0
+            displayRectProvisional = true
+            anchorSuspectStreak = 0
+            #if GOGAKU_VALIDATION
+            GogakuInput.diag("refresh-fallback rect=\(NSStringFromRect(fallback))")
+            #endif
+            if enToZhGraceHidden { return }
+            if let view = displayed {
+                panel.enqueue(view, at: fallback, targetWindowLevel:
+                              GGPanelTargetLevel(current.windowLevel, current.windowLevelValid))
+            }
             return
         }
         // 瞬移过滤器（2026-11-03 用户报告 Orca 打字中面板无规律跳到无关位置）：
@@ -1285,12 +1380,13 @@ final class GogakuInputController: IMKInputController {
             panelChooseLearning(row: row)
             return
         }
-        let index = snapDisplayed.selected - (snapDisplayed.selected % CandidatePage.size) + row
+        let psz = settings.effectiveNormalPageSize
+        let index = snapDisplayed.selected - (snapDisplayed.selected % psz) + row
         guard index < snapDisplayed.totalCandidates else { return }
         // 核心按「当前页内序号」选择：数字键路径与点击共用页内序号。
-        let pageStart = snapDisplayed.page * CandidatePage.size
+        let pageStart = snapDisplayed.page * psz
         let inPage = index - pageStart
-        guard inPage >= 0, inPage < CandidatePage.size, let target = target else { return }
+        guard inPage >= 0, inPage < psz, let target = target else { return }
         _ = handleNormalSync(.text(String(inPage + 1)), at: target, fieldChanged: false)
     }
 
@@ -1600,7 +1696,8 @@ final class GogakuInputController: IMKInputController {
 
     /// 当前高亮候选文本（页内索引换算；越界返回 nil）。
     private func highlightedCandidateText(_ snap: NormalSnapshot) -> String? {
-        let inPage = snap.selected - snap.page * CandidatePage.size
+        let psz = settings.effectiveNormalPageSize
+        let inPage = snap.selected - snap.page * psz
         return snap.candidates.indices.contains(inPage) ? snap.candidates[inPage].text : nil
     }
 
@@ -1613,8 +1710,20 @@ final class GogakuInputController: IMKInputController {
     private func toastAnchor() -> NSRect? {
         // 组合中已有经过验证的锚点，不再多读一次宿主（性能：额外读取计入 hostReadNs）。
         if let rect = displayRect, rect != .zero { return rect }
-        let preRead = currentTarget(readRectangle: true, strictComposition: false)?.rect ?? .zero
-        let anchor = ToastAnchor.resolve(preRead: preRead, carried: carriedAnchorRect,
+        // 无组合时（Shift 单击切中／英、⌃⇧M／⌃⇧J 切模式、译文失败提示）宿主读数
+        // 不可靠：IMKTextInput 契约里索引相对 inline session，无组合时按选区读到的
+        // 是陈旧值或在相邻字符格间循环（2026-11-10 Orca 实测、2026-11-13 微信整屏
+        // 矩形）。上一组合锚点才是同一输入框里最近的真实光标位置，优先用它，
+        // 不再读宿主（省一次 IPC）——否则提示会落到鼠标位置，表现为「中／英提示
+        // 跑到窗口右上角」（用户 2026-11-16 报）。
+        let carried = carriedAnchorRect.flatMap {
+            AnchorPlausibility.isPlausibleCaret($0, screens: Self.screenFrames()) ? $0 : nil
+        }
+        let raw = carried != nil ? .zero
+            : (currentTarget(readRectangle: true, strictComposition: false)?.rect ?? .zero)
+        // 整屏等不可信读数当无读数（同候选窗，2026-11-13 微信实测）。
+        let preRead = AnchorPlausibility.isPlausibleCaret(raw, screens: Self.screenFrames()) ? raw : .zero
+        let anchor = ToastAnchor.resolve(preRead: preRead, carried: carried,
                                          mouseCaret: Self.mouseCaretRect(),
                                          screens: Self.screenFrames())
         #if GOGAKU_VALIDATION
@@ -1664,7 +1773,14 @@ final class GogakuInputController: IMKInputController {
 
     @objc private func openSettings(_ sender: Any?) {
         suspend()
-        NSWorkspace.shared.open(FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications/Gogaku Settings.app"))
+        // 按当前包打开配套设置：Lite 输入法 → Gogaku Lite Settings（dev 通道带 Dev 后缀）。
+        let apps = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Applications")
+        #if GOGAKU_LITE
+        let liteName = (Bundle.main.bundleIdentifier ?? "").hasSuffix(".dev") ? "Gogaku Lite Settings Dev.app" : "Gogaku Lite Settings.app"
+        NSWorkspace.shared.open(apps.appendingPathComponent(liteName))
+        #else
+        NSWorkspace.shared.open(apps.appendingPathComponent("Gogaku Settings.app"))
+        #endif
     }
 
     @objc private func restoreDraft(_ sender: NSMenuItem) {

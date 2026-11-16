@@ -38,7 +38,7 @@
 
 namespace {
 
-constexpr size_t kPageSize = 9;
+constexpr size_t kVerticalPageSize = 9;
 constexpr size_t kMaxInputScalars = 512;
 constexpr size_t kMaxChineseCandidates = 200;
 constexpr size_t kMaxEnglishPrefixHits = 3;
@@ -349,7 +349,17 @@ struct GcNormalSession {
     std::vector<libime::HistoryBigram::WordWithCode> pendingSentence;
     std::string pendingJoined, pendingPinyin;
     bool pendingLearnValid = false;
+    /// 0 = 竖排（每页 9）；4–9 = 横排每页数量（由 gc_normal_set_layout 设置）。
+    int32_t layoutHorizontal = 0;
 };
+
+inline size_t page_size(const GcNormalSession &s) {
+    if (s.layoutHorizontal == 0) return 9;
+    int32_t n = s.layoutHorizontal;
+    if (n < 4) n = 4;
+    if (n > 9) n = 9;
+    return static_cast<size_t>(n);
+}
 
 namespace {
 
@@ -564,7 +574,7 @@ MergedSet build_merged_set(GcNormalSession &s) {
     ms.staged = c.selectedSentence();
     const size_t stagedLen = c.selectedLength();
     const size_t limit = std::min(chinese.size(), kMaxChineseCandidates);
-    ms.cache.reserve(kPageSize * 2);
+    ms.cache.reserve(page_size(s) * 2);
 
     // 中文候选身份：覆盖判定只读候选句尾下标，不生成文本。
     std::vector<char> completes(limit, 0);
@@ -717,11 +727,12 @@ void warm_visible_pages(GcNormalSession &s) {
     const size_t total = ms.entries.size();
     if (total == 0) return;
     const size_t sel = std::min(s.selected, total - 1);
-    const size_t page = sel / kPageSize;
+    const size_t psz = page_size(s);
+    const size_t page = sel / psz;
     for (size_t p = page; p <= page + 1; ++p) {
-        const size_t start = p * kPageSize;
+        const size_t start = p * psz;
         if (start >= total) break;
-        const size_t count = std::min(kPageSize, total - start);
+        const size_t count = std::min(psz, total - start);
         for (size_t i = 0; i < count; ++i) materialize_candidate(s, ms, start + i);
     }
 }
@@ -773,11 +784,12 @@ GcSnapshot *build_snapshot(GcNormalSession &s, const std::string &commit,
     // 候选列表只在组合仍在进行时附带；提交／清空后的快照不得携带候选页。
     if (composing && merged != nullptr && !merged->entries.empty()) {
         const size_t total = merged->entries.size();
-        const size_t pageCount = (total + kPageSize - 1) / kPageSize;
+        const size_t psz = page_size(s);
+        const size_t pageCount = (total + psz - 1) / psz;
         const size_t sel = std::min(s.selected, total - 1);
-        const size_t page = sel / kPageSize;
-        const size_t start = page * kPageSize;
-        const size_t count = std::min(kPageSize, total - start);
+        const size_t page = sel / psz;
+        const size_t start = page * psz;
+        const size_t count = std::min(psz, total - start);
         snap->candidates = static_cast<GcCandidate *>(std::calloc(count, sizeof(GcCandidate)));
         if (snap->candidates == nullptr) throw std::bad_alloc();
         for (size_t n = 0; n < count; ++n) {
@@ -1151,6 +1163,18 @@ extern "C" size_t gc_normal_copy_raw(GcNormalSession *s, char *buffer, size_t ca
     return required;
 }
 
+extern "C" int gc_normal_set_layout(GcNormalSession *session, int32_t horizontal_page_size) {
+    if (session == nullptr) return 1;
+    if (horizontal_page_size == 0) {
+        session->layoutHorizontal = 0;
+        return 0;
+    }
+    if (horizontal_page_size < 4) horizontal_page_size = 4;
+    if (horizontal_page_size > 9) horizontal_page_size = 9;
+    session->layoutHorizontal = horizontal_page_size;
+    return 0;
+}
+
 extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcSnapshot **out) {
     if (s == nullptr || event == nullptr || out == nullptr) return 1;
     *out = nullptr;
@@ -1307,11 +1331,12 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 // 有候选时 `,`/`.` 作为翻页键；否则进入标点路径。
                 if ((ch == ',' || ch == '.') && has_candidates()) {
                     const size_t total = candidate_count();
-                    const size_t last = (total - 1) / kPageSize;
-                    const size_t page = std::min(s->selected / kPageSize, last);
+                    const size_t psz = page_size(*s);
+                    const size_t last = (total - 1) / psz;
+                    const size_t page = std::min(s->selected / psz, last);
                     const size_t nextPage = ch == ',' ? (page > 0 ? page - 1 : page) : (page < last ? page + 1 : page);
                     if (nextPage != page) {
-                        s->selected = std::min(nextPage * kPageSize, total - 1);
+                        s->selected = std::min(nextPage * psz, total - 1);
                         *out = build_snapshot(*s, "", status, 0, beep, consumed, &ensure_view());
                         return 0;
                     }
@@ -1322,9 +1347,10 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     const long n = ch - '0';
                     // 1–9 选当前页：页内序号 + 页首全局下标。
                     const size_t total = candidate_count();
-                    const size_t pageStart = total > 0 ? (std::min(s->selected, total - 1) / kPageSize) * kPageSize : 0;
+                    const size_t psz = page_size(*s);
+                    const size_t pageStart = total > 0 ? (std::min(s->selected, total - 1) / psz) * psz : 0;
                     const size_t idx = n == 0 ? SIZE_MAX : pageStart + static_cast<size_t>(n - 1);
-                    if (n >= 1 && n <= 9 && idx < total) {
+                    if (n >= 1 && n <= static_cast<long>(psz) && idx < total) {
                         CommitResult r = select_merged(*s, ensure_view(), idx);
                         if (r.text.empty()) {
                             s->selected = 0;
@@ -1558,8 +1584,9 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
         }
         case GC_EV_PAGE_UP: {
             if (composing && has_candidates()) {
-                const size_t page = s->selected / kPageSize;
-                if (page > 0) s->selected = (page - 1) * kPageSize;
+                const size_t psz = page_size(*s);
+                const size_t page = s->selected / psz;
+                if (page > 0) s->selected = (page - 1) * psz;
             } else if (composing) {
                 beep = true;
             } else {
@@ -1570,9 +1597,10 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
         case GC_EV_PAGE_DOWN: {
             if (composing && has_candidates()) {
                 const size_t total = candidate_count();
-                const size_t last = (total - 1) / kPageSize;
-                const size_t page = s->selected / kPageSize;
-                if (page < last) s->selected = std::min((page + 1) * kPageSize, total - 1);
+                const size_t psz = page_size(*s);
+                const size_t last = (total - 1) / psz;
+                const size_t page = s->selected / psz;
+                if (page < last) s->selected = std::min((page + 1) * psz, total - 1);
             } else if (composing) {
                 beep = true;
             } else {

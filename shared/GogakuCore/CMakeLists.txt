@@ -39,15 +39,24 @@ if(WIN32)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
 endif()
 
-add_library(GogakuCore SHARED core.cpp normal_session.cpp custom_words.cpp
-    learning_session.cpp translate/translate_safety.cpp settings_contract.cpp
-    theme_contract.cpp)
+option(GOGAKU_LITE "Build shared core without learning session" OFF)
+set(GOGAKU_CORE_SOURCES core.cpp normal_session.cpp custom_words.cpp
+    settings_contract.cpp theme_contract.cpp)
+if(GOGAKU_LITE)
+    list(APPEND GOGAKU_CORE_SOURCES learning_session_stub.cpp)
+else()
+    list(APPEND GOGAKU_CORE_SOURCES learning_session.cpp translate/translate_safety.cpp)
+endif()
+add_library(GogakuCore SHARED ${GOGAKU_CORE_SOURCES})
 target_include_directories(GogakuCore
     PRIVATE "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}" "${CMAKE_CURRENT_SOURCE_DIR}/../third_party"
     PUBLIC include)
 target_link_directories(GogakuCore PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
 target_link_libraries(GogakuCore PRIVATE IMEPinyin IMECore Fcitx5Utils)
 target_compile_definitions(GogakuCore PRIVATE GOGAKU_CORE_BUILDING)
+if(GOGAKU_LITE)
+    target_compile_definitions(GogakuCore PUBLIC GOGAKU_LITE=1)
+endif()
 set_target_properties(GogakuCore PROPERTIES
     OUTPUT_NAME gogaku_core
     CXX_VISIBILITY_PRESET hidden
@@ -112,12 +121,14 @@ gogaku_enable_sanitizers(gogaku_core_normal_profile)
 
 # 学习模式事件轨迹测试（ABI v3）：学习组合状态机＋翻译调度合同＋三状态语义。
 # 词典/模型路径同普通模式测试（GOGAKU_CORE_TEST_DATA）；测试词典临时生成。
-add_executable(gogaku_core_learning_test tests/learning_session_test.cpp)
-target_include_directories(gogaku_core_learning_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
-target_link_directories(gogaku_core_learning_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
-target_link_libraries(gogaku_core_learning_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
-gogaku_enable_sanitizers(gogaku_core_learning_test)
-add_test(NAME learning_session COMMAND gogaku_core_learning_test)
+if(NOT GOGAKU_LITE)
+    add_executable(gogaku_core_learning_test tests/learning_session_test.cpp)
+    target_include_directories(gogaku_core_learning_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+    target_link_directories(gogaku_core_learning_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+    target_link_libraries(gogaku_core_learning_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+    gogaku_enable_sanitizers(gogaku_core_learning_test)
+    add_test(NAME learning_session COMMAND gogaku_core_learning_test)
+endif()
 
 # 中文质量回归：120 条冻结用例的首选／前十门槛与调频／自定义词不干扰检查。
 add_executable(gogaku_core_quality_test tests/normal_session_quality.cpp)
@@ -127,12 +138,14 @@ gogaku_enable_sanitizers(gogaku_core_quality_test)
 add_test(NAME quality_regression COMMAND gogaku_core_quality_test)
 set_tests_properties(quality_regression PROPERTIES SKIP_RETURN_CODE 3)
 
-# 翻译加固层回归：纯文本规则，无词典依赖（2026-11-02 模型路线裁决的处置手段）。
-add_executable(gogaku_core_translate_safety_test tests/translate_safety_test.cpp)
-target_include_directories(gogaku_core_translate_safety_test PRIVATE include)
-target_link_libraries(gogaku_core_translate_safety_test PRIVATE GogakuCore)
-gogaku_enable_sanitizers(gogaku_core_translate_safety_test)
-add_test(NAME translate_safety COMMAND gogaku_core_translate_safety_test)
+# 翻译加固层回归：纯文本规则，无词典依赖（Lite 无 translate 单元）。
+if(NOT GOGAKU_LITE)
+    add_executable(gogaku_core_translate_safety_test tests/translate_safety_test.cpp)
+    target_include_directories(gogaku_core_translate_safety_test PRIVATE include)
+    target_link_libraries(gogaku_core_translate_safety_test PRIVATE GogakuCore)
+    gogaku_enable_sanitizers(gogaku_core_translate_safety_test)
+    add_test(NAME translate_safety COMMAND gogaku_core_translate_safety_test)
+endif()
 
 # 随机按键序列模糊测试（手动运行；默认种子与序列数即可覆盖 ≥10 万序列）。
 add_executable(gogaku_core_fuzz tests/normal_session_fuzz.cpp)

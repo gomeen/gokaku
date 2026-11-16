@@ -119,6 +119,14 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
     case modeSwitch = "gogaku.mode"
     case directionSwitch = "gogaku.direction"
 
+    public static var uiCases: [ConfigurableCommand] {
+        #if GOGAKU_LITE
+        return []
+        #else
+        return Array(allCases)
+        #endif
+    }
+
     public var displayName: String {
         switch self {
         case .modeSwitch: return "普通／学习"
@@ -199,6 +207,11 @@ public let defaultEnglishApps = [
 
 /// 旧 `settings.json` 的本地模型后端字段已在共享核心的迁移里消耗，Swift 侧不再读它。
 
+public enum CandidateArrangement: String, Codable, Sendable {
+    case vertical
+    case horizontal
+}
+
 public struct Settings: Codable {
     public var recording = true
     public var excludedApplications: Set<String> = []
@@ -236,6 +249,8 @@ public struct Settings: Codable {
     public var inputScheme: InputScheme = .xiaohe
     public var fuzzyPinyin: Set<String> = []                       // 默认全关
     public var candidateFontSize: Int = 14                         // 12–16
+    public var candidateLayout: CandidateArrangement = .vertical
+    public var horizontalPageSize: Int = 7                           // 4–9，仅横排
     public var glossEnabled = true                                 // 英文释义注释
     public var inputLettersEnabled = true                          // 输入区字母（marked text）
     public var fullPinyinPreedit = true                            // ni'hao / nihc
@@ -262,7 +277,7 @@ public struct Settings: Codable {
         case recording, excludedApplications, ignoredWords, applications
         case modeShortcut, directionShortcut, candidateTheme, userCandidateThemes
         case builtinThemeOverrides
-        case inputScheme, fuzzyPinyin, candidateFontSize, glossEnabled
+        case inputScheme, fuzzyPinyin, candidateFontSize, candidateLayout, horizontalPageSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish
         case learningTranslationEnabled, schemaVersion
@@ -292,6 +307,8 @@ public struct Settings: Codable {
         inputScheme = try container.decodeIfPresent(InputScheme.self, forKey: .inputScheme) ?? .xiaohe
         fuzzyPinyin = try container.decodeIfPresent(Set<String>.self, forKey: .fuzzyPinyin) ?? []
         candidateFontSize = min(16, max(12, try container.decodeIfPresent(Int.self, forKey: .candidateFontSize) ?? 14))
+        candidateLayout = CandidateArrangement(rawValue: try container.decodeIfPresent(String.self, forKey: .candidateLayout) ?? "") ?? .vertical
+        horizontalPageSize = min(9, max(4, try container.decodeIfPresent(Int.self, forKey: .horizontalPageSize) ?? 7))
         glossEnabled = try container.decodeIfPresent(Bool.self, forKey: .glossEnabled) ?? true
         inputLettersEnabled = try container.decodeIfPresent(Bool.self, forKey: .inputLettersEnabled) ?? true
         fullPinyinPreedit = try container.decodeIfPresent(Bool.self, forKey: .fullPinyinPreedit) ?? true
@@ -319,6 +336,11 @@ public struct Settings: Codable {
         appDefaultEnglish.filter(\.enabled).map(\.id)
     }
 
+
+    /// 普通模式分页大小（竖排 9；横排由 horizontalPageSize 决定）。
+    public var effectiveNormalPageSize: Int {
+        candidateLayout == .horizontal ? horizontalPageSize : 9
+    }
 
     /// 模糊音位标志（与共享核心 GC_FUZZY_* 一致）。
     public var fuzzyMask: UInt32 {

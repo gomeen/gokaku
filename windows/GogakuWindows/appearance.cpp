@@ -130,7 +130,7 @@ struct CandidateRenderer::Impl {
         if (!bitmap) throw std::runtime_error("无法创建候选像素缓冲。");
         previous=static_cast<HBITMAP>(SelectObject(memory,bitmap)); extent={w,h};
     }
-    void render(const Json &view, const Json &theme, bool dark, int legacy, UINT dpi) {
+    void render(const Json &view, const Json &theme, bool dark, int legacy, UINT dpi, const Json &settings) {
         factories(); fonts(theme, legacy); targets.clear();
         const auto &palette = dark && theme.contains("dark") && theme["dark"].is_object() ? theme["dark"] : theme.at("light");
         auto visual=palette.value("visual",Json::object());
@@ -147,12 +147,19 @@ struct CandidateRenderer::Impl {
         if (!toast.empty() && !toastOnly) status=toast;
         bool learning=view.value("learning",false), draft=view.value("draftAvailable",false);
         size_t pages=view.value("pageCount",size_t(0)), page=view.value("page",size_t(0));
-        size_t selected=view.value("selected",size_t(0)); size_t local=selected>=page*9?selected-page*9:9;
-        float width=180;
-        for (size_t i=0;i<count;++i) width=std::max(width,2*pad+32+measure(text(candidates[i],"text"),cn.p)+12+measure(text(candidates[i],"gloss"),en.p));
+        size_t selected=view.value("selected",size_t(0));
+        const bool horizontal=!learning && settings.value("candidateLayout",std::string())=="horizontal";
+        const size_t psz=horizontal?size_t(std::clamp(settings.value("horizontalPageSize",7),4,9)):size_t(9);
+        size_t local=selected>=page*psz?selected-page*psz:0;
+        if (count && local>=count) local=count-1;
+        const bool glossOn=settings.value("glossEnabled",true);
+        float width=horizontal?320.0f:180.0f;
+        if (!horizontal) {
+            for (size_t i=0;i<count;++i) width=std::max(width,2*pad+32+measure(text(candidates[i],"text"),cn.p)+12+(glossOn?measure(text(candidates[i],"gloss"),en.p):0));
+            width=std::clamp(width,180.0f,440.0f);
+        }
         if (!preedit.empty()) width=std::max(width,measure(preedit,small.p)+2*pad);
         if (!status.empty()) width=std::max(width,measure(status,index.p)+2*pad);
-        width=std::clamp(width,180.0f,440.0f);
         float sourceHeight=0;
         Com<IDWriteTextLayout> source;
         if (!preedit.empty()) {
@@ -161,6 +168,26 @@ struct CandidateRenderer::Impl {
         }
         float footer=(!status.empty() || pages>1)?24.0f:0, actions=(learning && (!preedit.empty() || count)) || draft ? 30.0f : 0;
         float height=2*pad+sourceHeight+row*count+footer+actions;
+        if (horizontal && !toastOnly && count) {
+            const float minW=320.0f, maxW=860.0f;
+            float chipX=pad+4, chipH=std::max(28.0f,row*0.65f), rowY=pad+sourceHeight+(sourceHeight?4.0f:0);
+            std::wstring glossLine;
+            for (size_t i=0;i<count;++i) {
+                bool chosen=i==local;
+                auto word=text(candidates[i],"text");
+                float iw=measure(std::to_wstring(i+1),index.p), ww=measure(word,cn.p);
+                float chipW=iw+6+ww+16;
+                if (chosen && glossOn) {
+                    auto gloss=text(candidates[i],"gloss");
+                    if (!gloss.empty()) glossLine=gloss;
+                }
+                width=std::max(width,chipX+chipW+pad);
+                chipX+=chipW+4;
+            }
+            float glossH=(!glossLine.empty())?20.0f:0;
+            width=std::clamp(width,minW,maxW);
+            height=pad+sourceHeight+(sourceHeight>0?4.0f:0)+chipH+glossH+footer+pad;
+        }
         if (toastOnly) { width=std::clamp(measure(toast,cn.p)+32,64.0f,440.0f); height=56; }
         height=std::max(height,32.0f);
         int w=int(std::ceil(width*scale)),h=int(std::ceil(height*scale)); surface(w,h);
@@ -224,11 +251,30 @@ struct CandidateRenderer::Impl {
                 }
                 target->PopAxisAlignedClip(); y+=sourceHeight;
             }
-            for (size_t i=0;i<count;++i) {
+            if (horizontal) {
+                float chipY=y, chipH=std::max(28.0f,row*0.65f), x=pad+4;
+                std::wstring glossLine;
+                for (size_t i=0;i<count;++i) {
+                    bool chosen=i==local;
+                    auto word=text(candidates[i],"text");
+                    float iw=measure(std::to_wstring(i+1),index.p), ww=measure(word,cn.p);
+                    float chipW=iw+6+ww+16;
+                    auto rect=D2D1::RectF(x,chipY,x+chipW,chipY+chipH);
+                    if (chosen) target->FillRoundedRectangle(D2D1::RoundedRect(rect,4,4),ink("highlight"));
+                    draw(std::to_wstring(i+1),index.p,D2D1::RectF(x+4,chipY,x+4+iw,chipY+chipH),chosen?"highlightText":"index");
+                    draw(word,cn.p,D2D1::RectF(x+4+iw+6,chipY,x+chipW-4,chipY+chipH),chosen?"highlightText":"text");
+                    Hit hit; hit.action=Action::Choose; hit.index=i;
+                    targets.push_back({pixels(rect,scale),hit});
+                    if (chosen && glossOn) { auto g=text(candidates[i],"gloss"); if (!g.empty()) glossLine=g; }
+                    x+=chipW+4;
+                }
+                y=chipY+chipH;
+                if (!glossLine.empty()) { draw(glossLine,en.p,D2D1::RectF(pad+4,y,width-pad-8,y+20),"comment"); y+=22; }
+            } else for (size_t i=0;i<count;++i) {
                 bool chosen=i==local; auto rect=D2D1::RectF(pad,y,width-pad+std::min(4.0f,pad),y+row);
                 if (chosen) target->FillRoundedRectangle(D2D1::RoundedRect(rect,4,4),ink("highlight"));
                 draw(std::to_wstring(i+1),index.p,D2D1::RectF(pad+4,y,pad+25,y+row),chosen?"highlightText":"index");
-                auto word=text(candidates[i],"text"),gloss=text(candidates[i],"gloss");
+                auto word=text(candidates[i],"text"),gloss=glossOn?text(candidates[i],"gloss"):L"";
                 float wordWidth=gloss.empty()?width-2*pad-32:std::min(measure(word,cn.p)+4,(width-2*pad-32)*.62f);
                 draw(word,cn.p,D2D1::RectF(pad+28,y,pad+28+wordWidth,y+row),chosen?"highlightText":"text");
                 draw(gloss,en.p,D2D1::RectF(pad+28+wordWidth+8,y,width-pad-3,y+row),chosen?"highlightComment":"comment");
@@ -259,7 +305,7 @@ struct CandidateRenderer::Impl {
 };
 CandidateRenderer::CandidateRenderer():impl_(new Impl) {}
 CandidateRenderer::~CandidateRenderer()=default;
-void CandidateRenderer::render(const Json &view,const Json &theme,bool dark,int font,UINT dpi) { impl_->render(view,theme,dark,font,dpi); }
+void CandidateRenderer::render(const Json &view,const Json &theme,bool dark,int font,UINT dpi,const Json &settings) { impl_->render(view,theme,dark,font,dpi,settings); }
 HDC CandidateRenderer::dc() const { return impl_->memory; }
 SIZE CandidateRenderer::size() const { return impl_->extent; }
 BYTE CandidateRenderer::opacity() const { return impl_->alpha; }

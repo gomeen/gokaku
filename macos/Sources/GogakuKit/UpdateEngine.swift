@@ -33,8 +33,13 @@ public final class UpdateEngine {
         }
     }
 
+    #if GOGAKU_LITE
+    public static let manifestName = "update-manifest-lite.json"
+    public static let signatureName = "update-manifest-lite.json.sig"
+    #else
     public static let manifestName = "update-manifest.json"
     public static let signatureName = "update-manifest.json.sig"
+    #endif
     public static let manifestLimit = 256 * 1024
     public static let signatureLimit = 8 * 1024
     public static let releasesPerPage = 30

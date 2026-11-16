@@ -24,7 +24,7 @@ const std::unordered_set<std::string> &knownKeys() {
         "glossEnabled", "inputLettersEnabled", "fullPinyinPreedit", "frequencyEnabled",
         "englishCandidatesEnabled", "appDefaultEnglish", "learningTranslationEnabled",
         "preferredMode", "preferredDirection", "volcengineUsageMonth",
-        "volcengineUsageCharacters",
+        "volcengineUsageCharacters", "candidateLayout", "horizontalPageSize",
     };
     return keys;
 }
@@ -56,6 +56,8 @@ Json defaults() {
         {"preferredDirection", "zhToEn"},
         {"volcengineUsageMonth", ""},
         {"volcengineUsageCharacters", 0},
+        {"candidateLayout", "vertical"},
+        {"horizontalPageSize", 7},
     };
 }
 
@@ -276,6 +278,12 @@ int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
     }
     if (const Json *value = member(input, "candidateFontSize")) {
         canonical["candidateFontSize"] = clampInt(*value, 14, 12, 16);
+    }
+    if (const Json *value = member(input, "candidateLayout"); value && value->is_string()) {
+        canonical["candidateLayout"] = oneOf(*value, {"vertical", "horizontal"}, "vertical");
+    }
+    if (const Json *value = member(input, "horizontalPageSize")) {
+        canonical["horizontalPageSize"] = clampInt(*value, 7, 4, 9);
     }
     if (const Json *value = member(input, "appDefaultEnglish")) {
         // 缺这个键与「用户把列表清空」不是同一件事：缺键时下面不写这个键，

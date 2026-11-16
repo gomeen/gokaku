@@ -48,3 +48,6 @@ volcengine-credentials.json
 
 # docs/validation/ 与 probes/results/ 是按保留策略归档的证据，不整体忽略。
 # .vscode/ 可保存共享任务与调试配置，不整体忽略。
+
+# pi 工具的本地状态（不属于产品源码）
+.pi/

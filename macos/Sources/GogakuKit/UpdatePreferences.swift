@@ -53,7 +53,15 @@ public final class UpdatePreferencesStore {
     private let url: URL
     private let fileManager: FileManager
 
-    public init(url: URL = Paths.support.appendingPathComponent("update-preferences.json"),
+    public static let fileName: String = {
+        #if GOGAKU_LITE
+        return "update-preferences-lite.json"
+        #else
+        return "update-preferences.json"
+        #endif
+    }()
+
+    public init(url: URL = Paths.support.appendingPathComponent(UpdatePreferencesStore.fileName),
                 fileManager: FileManager = .default) {
         self.url = url
         self.fileManager = fileManager

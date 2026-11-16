@@ -21,11 +21,24 @@
 #include <sstream>
 #include <stdexcept>
 #include <thread>
+#ifndef GOGAKU_LITE
+#define GOGAKU_LITE 0
+#endif
 
 namespace {
 using gw::Json;
 constexpr UINT Completed = WM_APP + 17, DialogCompleted = WM_APP + 18;
-const wchar_t *PageNames[] = {L"学习翻译",L"普通输入",L"自定义词语",L"皮肤",L"快捷键",L"学习与隐私",L"学习片段"};
+static const wchar_t *const FullPageNames[] = {L"学习翻译",L"普通输入",L"自定义词语",L"皮肤",L"快捷键",L"学习与隐私",L"学习片段"};
+static const wchar_t *const LitePageNames[] = {L"普通输入",L"自定义词语",L"皮肤",L"快捷键"};
+static const size_t kFullPageCount = sizeof(FullPageNames)/sizeof(FullPageNames[0]);
+static const size_t kLitePageCount = sizeof(LitePageNames)/sizeof(LitePageNames[0]);
+#if defined(GOGAKU_LITE)
+static const wchar_t *const *PageNames = LitePageNames;
+static size_t PageCount = kLitePageCount;
+#else
+static const wchar_t *const *PageNames = FullPageNames;
+static size_t PageCount = kFullPageCount;
+#endif
 constexpr COLORREF TextColor=RGB(28,43,37),MutedColor=RGB(91,111,102),SideColor=RGB(237,243,239),LineColor=RGB(216,227,220);
 HFONT uiFont(UINT dpi,int size,int weight=FW_NORMAL) {
     return CreateFontW(-MulDiv(size,int(dpi),96),0,0,0,weight,FALSE,FALSE,FALSE,DEFAULT_CHARSET,
@@ -271,7 +284,20 @@ struct App {
     std::string wordBaseline; int currentPage=0,scroll=0,contentHeight=0,themeIndex=0,wordKind=0,recording=-1;
     bool building=false,themeEditing=false,themeTouched=false,themeBusy=false,previewDark=false,closed=false,wordReady=false;
     uint64_t generation=0;UINT dpi=96;std::wstring themeError; std::vector<std::wstring> fonts;
-    explicit App(HINSTANCE h):instance(h){}
+    bool liteInstall = false;
+    bool onPage(const wchar_t *name) const {
+        return currentPage>=0 && size_t(currentPage)<PageCount && wcscmp(PageNames[currentPage], name)==0;
+    }
+    explicit App(HINSTANCE h):instance(h){
+#if defined(GOGAKU_LITE)
+        liteInstall = true;
+#else
+        try{
+            auto info=Json::parse(gw::readFile(gw::installRoot()/L"build-identity.json",1024*1024));
+            liteInstall = info.value("flavor", std::string("full"))=="lite";
+        }catch(...){}
+#endif
+    }
     ~App(){cancel=true;for(auto &job:jobs)if(job.joinable())job.join();if(icons)ImageList_Destroy(icons);if(font)DeleteObject(font);if(titleFont)DeleteObject(titleFont);if(helperFont)DeleteObject(helperFont);if(sideBrush)DeleteObject(sideBrush);}
     int px(int value)const{return MulDiv(value,int(dpi),96);}
     HWND get(int id)const{return GetDlgItem(pageWindow,id);}
@@ -355,7 +381,12 @@ void App::normalPage(){
         actions[210+i]=[this](int n){if(n!=BN_CLICKED)return;Json values=Json::array();for(int k=0;k<9;++k)if(checked(210+k))values.push_back(Fuzzy[k]);patch({{"fuzzyPinyin",values}});};}
     label(L"候选字号（旧默认主题）",240,24,20,190);auto slider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,220,232,250,45,220);SendMessageW(slider,TBM_SETRANGE,TRUE,MAKELONG(12,16));SendMessageW(slider,TBM_SETTICFREQ,1,0);SendMessageW(slider,TBM_SETPOS,TRUE,settings.value("candidateFontSize",14));
     label(std::to_wstring(settings.value("candidateFontSize",14)),242,26,480,50);SetWindowLongPtrW(controls.back(),GWLP_ID,228);
-    bindBool(L"显示英文释义",221,294,"glossEnabled");bindBool(L"显示输入区字母（安全字段仍禁用）",222,326,"inputLettersEnabled");
+    label(L"候选窗排列",270,24,20,110);combo(229,{L"竖排",L"横排"},settings.value("candidateLayout",std::string())=="horizontal"?1:0,140,266);
+    actions[229]=[this](int n){if(n==CBN_SELCHANGE)patch({{"candidateLayout",SendMessageW(get(229),CB_GETCURSEL,0,0)==1?"horizontal":"vertical"}});};
+    label(L"横排每页",270,24,300,90);auto hslider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,298,266,250,45,230);SendMessageW(hslider,TBM_SETRANGE,TRUE,MAKELONG(4,9));
+    SendMessageW(hslider,TBM_SETPOS,TRUE,settings.value("horizontalPageSize",7));
+    label(std::to_wstring(settings.value("horizontalPageSize",7)),300,26,558,50);SetWindowLongPtrW(controls.back(),GWLP_ID,2300);
+    bindBool(L"显示英文释义",221,326,"glossEnabled");bindBool(L"显示输入区字母（安全字段仍禁用）",222,358,"inputLettersEnabled");
     label(L"字母显示",368,24,20,110);combo(223,{L"展开全拼",L"原始编码"},settings.value("fullPinyinPreedit",true)?0:1,140,362);
     actions[223]=[this](int n){if(n==CBN_SELCHANGE)patch({{"fullPinyinPreedit",SendMessageW(get(223),CB_GETCURSEL,0,0)==0}});};
     bindBool(L"中文模式下提供英文候选",224,408,"englishCandidatesEnabled");bindBool(L"学习普通模式完整上屏的中文调频",225,440,"frequencyEnabled");button(L"清空调频…",227,480,438,140);
@@ -368,7 +399,7 @@ void App::normalPage(){
 void App::fillApps(){
     if(!get(241))return;bool previous=building;building=true;ListView_DeleteAllItems(get(241));visibleApps.clear();
     if(icons)ImageList_Destroy(icons);icons=ImageList_Create(px(16),px(16),ILC_COLOR32|ILC_MASK,16,8);ListView_SetImageList(get(241),icons,LVSIL_SMALL);
-    bool excluded=currentPage==5;auto entries=settings.value(excluded?"excludedApplications":"appDefaultEnglish",Json::array());auto metadata=settings.value("windowsApplicationMetadata",Json::object());auto query=lower(content(get(240)));
+    bool excluded=onPage( L"学习与隐私");auto entries=settings.value(excluded?"excludedApplications":"appDefaultEnglish",Json::array());auto metadata=settings.value("windowsApplicationMetadata",Json::object());auto query=lower(content(get(240)));
     for(const auto &entry:entries){Json item=entry.is_string()?Json{{"id",entry},{"enabled",true}}:entry;if(!item.is_object())continue;auto id=item.value("id",std::string());if(id.empty())continue;
         Json meta=metadata.value(id,Json::object());std::wstring path=gw::wide(item.value("path",meta.value("path",std::string()))),name=gw::wide(item.value("name",meta.value("name",id)));
         if(!query.empty() && lower(name+L" "+path+L" "+gw::wide(id)).find(query)==std::wstring::npos)continue;
@@ -388,14 +419,14 @@ void App::addApp(bool browse){
     }else{Form form{instance,window,nullptr,nullptr,font,L"添加包身份",{{L"包身份（PackageFamilyName!ApplicationId）",L""},{L"显示名称（可留空）",L""}}};
         form.validate=[](auto &v){v[0]=trim(v[0]);if(v[0].empty()||v[0].size()>512||v[0].find(L'!')==std::wstring::npos||v[0].find_first_of(L"\r\n\t\\/")!=std::wstring::npos)throw std::runtime_error("请输入完整 PackageFamilyName!ApplicationId；不接受路径或控制字符。");};
         if(!form.run())return;id=lower(form.submitted[0]);name=form.submitted[1].empty()?form.submitted[0]:form.submitted[1];path=form.submitted[0];}
-    auto key=gw::utf8(id),display=gw::utf8(name),location=gw::utf8(path);bool excluded=currentPage==5;
+    auto key=gw::utf8(id),display=gw::utf8(name),location=gw::utf8(path);bool excluded=onPage( L"学习与隐私");
     if(mutate([=](Json &latest){auto &entries=latest[excluded?"excludedApplications":"appDefaultEnglish"];if(!entries.is_array())entries=Json::array();bool found=false;
         for(auto &e:entries){auto existing=e.is_string()?e.get<std::string>():e.value("id",std::string());if(lower(gw::wide(existing))==lower(gw::wide(key))){found=true;if(!excluded)e={{"id",key},{"enabled",true}};}}
         if(!found)entries.push_back(excluded?Json(key):Json{{"id",key},{"enabled",true}});latest["windowsApplicationMetadata"][key]={{"name",display},{"path",location}};}))fillApps();
 }
-void App::removeApp(){int selected=selection(241);if(selected<0||size_t(selected)>=visibleApps.size())return;auto id=visibleApps[size_t(selected)].value("id",std::string());bool excluded=currentPage==5;
+void App::removeApp(){int selected=selection(241);if(selected<0||size_t(selected)>=visibleApps.size())return;auto id=visibleApps[size_t(selected)].value("id",std::string());bool excluded=onPage( L"学习与隐私");
     if(mutate([=](Json &latest){auto &entries=latest[excluded?"excludedApplications":"appDefaultEnglish"];if(!entries.is_array())return;entries.erase(std::remove_if(entries.begin(),entries.end(),[&](const Json &e){return (e.is_string()?e.get<std::string>():e.value("id",std::string()))==id;}),entries.end());}))fillApps();}
-void App::toggleApp(size_t index){if(currentPage!=1||index>=visibleApps.size())return;auto id=visibleApps[index].value("id",std::string());bool enabled=!visibleApps[index].value("enabled",true);
+void App::toggleApp(size_t index){if(!onPage(L"普通输入")||index>=visibleApps.size())return;auto id=visibleApps[index].value("id",std::string());bool enabled=!visibleApps[index].value("enabled",true);
     if(mutate([=](Json &latest){auto &entries=latest["appDefaultEnglish"];for(auto &e:entries)if((e.is_string()?e.get<std::string>():e.value("id",std::string()))==id)e={{"id",id},{"enabled",enabled}};}))fillApps();}
 
 void App::wordPage(){
@@ -526,7 +557,7 @@ void App::readThemeControls(){if(!themeEditing||!get(450))return;
         themeDraft=next;themeError.clear();SetWindowTextW(get(430),L"");refreshPreview();
     }catch(const std::exception &e){themeError=message(e);SetWindowTextW(get(430),(L"草稿未保存："+themeError).c_str());}
 }
-void App::refreshPreview(){if(currentPage!=3)return;try{auto theme=themeEditing?themeDraft:themeList.at(size_t(themeIndex));if(!renderer)renderer=std::make_unique<gw::CandidateRenderer>();renderer->render(gw::candidatePreview(),theme,previewDark,settings.value("candidateFontSize",14),dpi);InvalidateRect(preview,nullptr,TRUE);
+void App::refreshPreview(){if(!onPage(L"皮肤"))return;try{auto theme=themeEditing?themeDraft:themeList.at(size_t(themeIndex));if(!renderer)renderer=std::make_unique<gw::CandidateRenderer>();renderer->render(gw::candidatePreview(),theme,previewDark,settings.value("candidateFontSize",14),dpi,settings);InvalidateRect(preview,nullptr,TRUE);
         const auto &p=previewDark&&theme.contains("dark")?theme["dark"]:theme["light"];auto luminance=[](uint32_t rgb){double sum=0;double weights[]={.2126,.7152,.0722};for(int i=0;i<3;++i){double c=double((rgb>>(16-i*8))&255)/255;sum+=weights[i]*(c<=.04045?c/12.92:std::pow((c+.055)/1.055,2.4));}return sum;};
         double a=luminance(p.value("background",0u)),b=luminance(p.value("text",0u));double contrast=(std::max(a,b)+.05)/(std::min(a,b)+.05);std::wstring warning=contrast<4.5?L"提示：候选文字与纯色背景对比度低于 4.5:1。":L"";
         auto visual=p.value("visual",Json::object());if(p.contains("imageData")||visual.value("opacity",100.0)<100||visual.value("bgOpacity",100.0)<100)warning+=L" 透明／图片背景请检查实际可读性。";
@@ -625,10 +656,22 @@ void App::recordsPage(){label(L"学习片段",18);label(L"真实采集仍关闭�
     for(int id:{803,804})actions[id]=[this,id](int n){int i=selection(800);if(n!=BN_CLICKED||i<0||size_t(i)>=records.size())return;if(id==803&&MessageBoxW(window,L"删除此真实片段并写入删除门禁？",L"删除片段",MB_YESNO|MB_ICONWARNING)!=IDYES)return;auto key=records[size_t(i)].value("id",std::string());job("records-update",[key,id](){Records store;store.update(key,id==804);return Json::object();});};loadRecords();
 }
 void App::loadRecords(){if(get(801))EnableWindow(get(801),FALSE);if(get(805))SetWindowTextW(get(805),L"正在后台读取真实存储…");job("records",[]{Records store;return store.list();});}
-void App::flushText(){KillTimer(window,2);if(currentPage==3&&themeEditing){readThemeControls();return;}if(currentPage==5&&get(701)){std::wistringstream input(content(get(701)));std::wstring token;std::set<std::string> words;while(input>>token){if(token.size()>128)throw std::runtime_error("忽略词不能超过 128 字符");words.insert(gw::utf8(lower(token)));}Json list=Json::array();for(const auto &s:words)list.push_back(s);if(list!=settings.value("ignoredWords",Json::array()))patch({{"ignoredWords",list}});}}
+void App::flushText(){KillTimer(window,2);if(onPage(L"皮肤")&&themeEditing){readThemeControls();return;}if(onPage(L"学习与隐私")&&get(701)){std::wistringstream input(content(get(701)));std::wstring token;std::set<std::string> words;while(input>>token){if(token.size()>128)throw std::runtime_error("忽略词不能超过 128 字符");words.insert(gw::utf8(lower(token)));}Json list=Json::array();for(const auto &s:words)list.push_back(s);if(list!=settings.value("ignoredWords",Json::array()))patch({{"ignoredWords",list}});}}
 void App::buildPage(){
     building=true;recording=-1;KillTimer(window,2);for(auto h:controls)DestroyWindow(h);controls.clear();placements.clear();listColumns.clear();actions.clear();contentHeight=0;scroll=0;ShowWindow(preview,SW_HIDE);
-    try{switch(currentPage){case 0:learningPage();break;case 1:normalPage();break;case 2:wordPage();break;case 3:skinPage();break;case 4:shortcutPage();break;case 5:privacyPage();break;case 6:recordsPage();break;}}catch(const std::exception &e){fail(e);}
+    try{
+        auto render=[&](const wchar_t *name){
+            if(wcscmp(name,L"学习翻译")==0)learningPage();
+            else if(wcscmp(name,L"普通输入")==0)normalPage();
+            else if(wcscmp(name,L"自定义词语")==0)wordPage();
+            else if(wcscmp(name,L"皮肤")==0)skinPage();
+            else if(wcscmp(name,L"快捷键")==0)shortcutPage();
+            else if(wcscmp(name,L"学习与隐私")==0)privacyPage();
+            else if(wcscmp(name,L"学习片段")==0)recordsPage();
+        };
+        if(currentPage<0||size_t(currentPage)>=PageCount) throw std::runtime_error("页面索引非法");
+        render(PageNames[currentPage]);
+    }catch(const std::exception &e){fail(e);}
     building=false;layout();InvalidateRect(pageWindow,nullptr,TRUE);
 }
 // Keep geometry separate from page data/actions. Reflow never rebuilds controls,
@@ -703,8 +746,8 @@ void App::setDpi(UINT next){
         auto large=reinterpret_cast<HICON>(LoadImageW(instance,MAKEINTRESOURCEW(101),IMAGE_ICON,GetSystemMetricsForDpi(SM_CXICON,dpi),GetSystemMetricsForDpi(SM_CYICON,dpi),LR_SHARED));
         SendMessageW(window,WM_SETICON,ICON_SMALL,reinterpret_cast<LPARAM>(small));SendMessageW(window,WM_SETICON,ICON_BIG,reinterpret_cast<LPARAM>(large));
     }
-    if(currentPage==1||currentPage==5){int selected=selection(241);fillApps();if(selected>=0)ListView_SetItemState(get(241),selected,LVIS_SELECTED|LVIS_FOCUSED,LVIS_SELECTED|LVIS_FOCUSED);}
-    if(currentPage==3&&preview)refreshPreview();
+    if(onPage(L"普通输入")||onPage(L"学习与隐私")){int selected=selection(241);fillApps();if(selected>=0)ListView_SetItemState(get(241),selected,LVIS_SELECTED|LVIS_FOCUSED,LVIS_SELECTED|LVIS_FOCUSED);}
+    if(onPage(L"皮肤")&&preview)refreshPreview();
 }
 void App::drawNavigation(const DRAWITEMSTRUCT &item){
     if(item.itemID==UINT(-1))return;auto dc=item.hDC;FillRect(dc,&item.rcItem,sideBrush);
@@ -724,7 +767,7 @@ void App::layout(){
     MoveWindow(footer,sidebar+px(24),height-bottom+px(13),std::max(1,width-sidebar-px(152)),px(32),TRUE);
     MoveWindow(retry,width-px(112),height-bottom+px(10),px(88),px(30),TRUE);
     int bodyWidth=width-sidebar,pageWidth=bodyWidth;
-    if(currentPage==3){int previewWidth=std::clamp(bodyWidth*46/100,px(280),px(460));pageWidth=std::max(px(240),bodyWidth-previewWidth-px(16));
+    if(onPage(L"皮肤")){int previewWidth=std::clamp(bodyWidth*46/100,px(280),px(460));pageWidth=std::max(px(240),bodyWidth-previewWidth-px(16));
         MoveWindow(preview,sidebar+pageWidth+px(16),header, std::max(1,bodyWidth-pageWidth-px(32)),std::max(1,height-header-bottom-px(16)),TRUE);}
     MoveWindow(pageWindow,sidebar,header,std::max(1,pageWidth),std::max(1,height-header-bottom),TRUE);
     reflowControls();RECT page{};GetClientRect(pageWindow,&page);SCROLLINFO si{};si.cbSize=sizeof(si);si.fMask=SIF_RANGE|SIF_PAGE|SIF_DISABLENOSCROLL;si.nMin=0;si.nMax=std::max(0,px(contentHeight)-1);si.nPage=UINT(page.bottom);SetScrollInfo(pageWindow,SB_VERT,&si,TRUE);setScroll(scroll);
@@ -737,19 +780,19 @@ LRESULT App::command(int id,int notification){if(building)return 0;
     }catch(const std::exception &e){fail(e);}return 0;
 }
 LRESULT App::notifyControl(NMHDR *header){if(building)return 0;try{
-    if(header->idFrom==241&&header->code==LVN_ITEMCHANGED&&currentPage==1){auto change=reinterpret_cast<NMLISTVIEW *>(header);if((change->uChanged&LVIF_STATE)&&((change->uNewState^change->uOldState)&LVIS_STATEIMAGEMASK)&&change->iItem>=0)toggleApp(size_t(change->iItem));}
+    if(header->idFrom==241&&header->code==LVN_ITEMCHANGED&&onPage(L"普通输入")){auto change=reinterpret_cast<NMLISTVIEW *>(header);if((change->uChanged&LVIF_STATE)&&((change->uNewState^change->uOldState)&LVIS_STATEIMAGEMASK)&&change->iItem>=0)toggleApp(size_t(change->iItem));}
     if(header->idFrom==302&&header->code==NM_DBLCLK)editWord(false);
-    if(header->idFrom==241&&header->code==NM_DBLCLK&&currentPage==1){int selected=selection(241);if(selected>=0)toggleApp(size_t(selected));}
+    if(header->idFrom==241&&header->code==NM_DBLCLK&&onPage(L"普通输入")){int selected=selection(241);if(selected>=0)toggleApp(size_t(selected));}
     }catch(const std::exception &e){fail(e);}return 0;
 }
 LRESULT App::result(Result &r){
     if(r.type=="reload"){if(r.generation!=generation)return 0;if(!r.error.empty()){retryAction=[this](){notify();};status(r.error,true);}return 0;}
-    if(r.type=="test"){if(currentPage==0){EnableWindow(get(105),TRUE);std::wstring result;
+    if(r.type=="test"){if(onPage(L"学习翻译")){EnableWindow(get(105),TRUE);std::wstring result;
             if(!r.error.empty())result=L"连接测试失败："+r.error;else if(r.value.value("ok",false))result=L"连接成功 · "+std::to_wstring(int(r.value.value("milliseconds",0.0)))+L" ms";
             else {auto error=r.value.contains("error")&&r.value["error"].is_string()?gw::wide(r.value["error"].get<std::string>()):L"backend_error";result=L"最近测试失败："+error;}
             SetWindowTextW(get(107),result.c_str());auto usage=gw::readUsage();SetWindowTextW(get(106),(L"本机本月成功请求字符："+gw::wide(usage.value("month",gw::currentMonth()))+L"  "+std::to_wstring(usage.value("characters",uint64_t(0)))).c_str());}return 0;}
     if(r.type=="import"||r.type=="export"||r.type=="image")themeBusy=false;
-    if(r.type=="records"){if(currentPage!=6)return 0;EnableWindow(get(801),TRUE);ListView_DeleteAllItems(get(800));records=Json::array();if(!r.error.empty()){SetWindowTextW(get(805),r.error.c_str());return 0;}records=r.value;
+    if(r.type=="records"){if(!onPage(L"学习片段"))return 0;EnableWindow(get(801),TRUE);ListView_DeleteAllItems(get(800));records=Json::array();if(!r.error.empty()){SetWindowTextW(get(805),r.error.c_str());return 0;}records=r.value;
         for(size_t i=0;i<records.size();++i){const auto &v=records[i];row(get(800),int(i),{gw::wide(v.value("source",std::string())),gw::wide(v.value("target",std::string())),gw::wide(v.value("direction",std::string())+" / "+v.value("category",std::string()))});}
         SetWindowTextW(get(805),records.empty()?L"没有未过期的真实学习片段。":L"只显示现有未过期记录（最多 1000 条）；真实采集仍关闭。");return 0;}
     if(!r.error.empty()){status(L"失败："+r.error,true);return 0;}
@@ -757,7 +800,7 @@ LRESULT App::result(Result &r){
     else if(r.type=="export")status(L"主题包已导出");
     else if(r.type=="image"){auto appearance=r.value.value("appearance",std::string("light"));themeDraft[appearance]["imageData"]=r.value["imageData"];themeTouched=true;buildPage();status(L"图片已实际解码并规范化为 PNG；主题草稿尚未保存。");}
     else if(r.type=="clear")status(L"输入核心已确认清空调频");
-    else if(r.type=="records-update"){status(L"真实片段已更新");if(currentPage==6)loadRecords();}
+    else if(r.type=="records-update"){status(L"真实片段已更新");if(onPage(L"学习片段"))loadRecords();}
     return 0;
 }
 LRESULT CALLBACK App::pageProc(HWND h,UINT m,WPARAM w,LPARAM l){
@@ -782,7 +825,10 @@ LRESULT CALLBACK App::previewProc(HWND h,UINT m,WPARAM w,LPARAM l){if(m==WM_NCCR
 LRESULT CALLBACK App::proc(HWND h,UINT m,WPARAM w,LPARAM l){if(m==WM_NCCREATE)SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(reinterpret_cast<CREATESTRUCTW *>(l)->lpCreateParams));auto self=reinterpret_cast<App *>(GetWindowLongPtrW(h,GWLP_USERDATA));if(!self)return DefWindowProcW(h,m,w,l);
     try{switch(m){case WM_COMMAND:return self->command(LOWORD(w),HIWORD(w));case WM_NOTIFY:return self->notifyControl(reinterpret_cast<NMHDR *>(l));
         case gw::UpdateAvailableMessage:SetWindowTextW(GetDlgItem(h,12),w?L"检查更新 · 新版":L"检查更新");return 0;
-        case WM_HSCROLL:if(reinterpret_cast<HWND>(l)==self->get(220)){int size=int(SendMessageW(self->get(220),TBM_GETPOS,0,0));SetWindowTextW(self->get(228),std::to_wstring(size).c_str());self->patch({{"candidateFontSize",size}});}return 0;
+        case WM_HSCROLL:
+            if(reinterpret_cast<HWND>(l)==self->get(220)){int size=int(SendMessageW(self->get(220),TBM_GETPOS,0,0));SetWindowTextW(self->get(228),std::to_wstring(size).c_str());self->patch({{"candidateFontSize",size}});}
+            else if(reinterpret_cast<HWND>(l)==self->get(230)){int size=int(SendMessageW(self->get(230),TBM_GETPOS,0,0));SetWindowTextW(self->get(2300),std::to_wstring(size).c_str());self->patch({{"horizontalPageSize",size}});}
+            return 0;
         case WM_TIMER:if(w==2)self->flushText();return 0;
         case WM_SIZE:if(self->nav)self->layout();return 0;
         case WM_DPICHANGED:{self->setDpi(HIWORD(w));auto r=reinterpret_cast<RECT *>(l);SetWindowPos(h,nullptr,r->left,r->top,r->right-r->left,r->bottom-r->top,SWP_NOZORDER|SWP_NOACTIVATE);self->layout();return 0;}
@@ -811,7 +857,7 @@ bool App::create(int show){
     window=CreateWindowExW(WS_EX_CONTROLPARENT,L"GogakuNativeSettings",L"Gogaku 设置",WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,CW_USEDEFAULT,CW_USEDEFAULT,px(1000),px(700),nullptr,nullptr,instance,this);if(!window)return false;
     dpi=GetDpiForWindow(window);if(!dpi)dpi=96;setDpi(dpi);
     nav=add(L"LISTBOX",L"",LBS_NOTIFY|LBS_OWNERDRAWFIXED|LBS_HASSTRINGS|LBS_NOINTEGRALHEIGHT|WS_TABSTOP,10,87,180,400,10,window);
-    for(const auto *s:PageNames)SendMessageW(nav,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(s));SendMessageW(nav,LB_SETITEMHEIGHT,0,px(44));SendMessageW(nav,LB_SETCURSEL,0,0);
+    for(size_t i=0;i<PageCount;++i)SendMessageW(nav,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(PageNames[i]));SendMessageW(nav,LB_SETITEMHEIGHT,0,px(44));SendMessageW(nav,LB_SETCURSEL,0,0);
     brand=add(L"STATIC",L"Gogaku",0,24,25,160,34,14,window);
     heading=add(L"STATIC",PageNames[0],0,224,23,700,34,15,window);
     pageWindow=CreateWindowExW(WS_EX_CONTROLPARENT,L"GogakuSettingsPage",L"",WS_CHILD|WS_VISIBLE|WS_VSCROLL|WS_CLIPCHILDREN,0,0,1,1,window,nullptr,instance,this);

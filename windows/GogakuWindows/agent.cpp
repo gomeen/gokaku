@@ -5,6 +5,10 @@
 #include <objbase.h>
 #include <algorithm>
 #include <chrono>
+#include <filesystem>
+#ifndef GOGAKU_LITE
+#define GOGAKU_LITE 0
+#endif
 #include <map>
 #include <memory>
 #include <mutex>
@@ -17,10 +21,12 @@ struct Core {
 #define API(name) decltype(&::name) name = nullptr;
     API(gc_abi_check) API(gc_normal_session_create) API(gc_normal_session_destroy)
     API(gc_normal_handle) API(gc_normal_copy_raw) API(gc_normal_set_app_defaults)
-    API(gc_normal_update) API(gc_normal_flush) API(gc_normal_reload_custom_words)
+    API(gc_normal_update) API(gc_normal_set_layout) API(gc_normal_flush) API(gc_normal_reload_custom_words)
     API(gc_normal_clear_user_data) API(gc_snapshot_free)
+#if !GOGAKU_LITE
     API(gc_learning_session_create) API(gc_learning_session_destroy)
     API(gc_learning_handle) API(gc_learning_snapshot_free)
+#endif
 #undef API
     GcNormalSession *normal = nullptr;
     Json settings;
@@ -35,10 +41,12 @@ struct Core {
 #define LOAD(name) name = reinterpret_cast<decltype(name)>(GetProcAddress(library,#name)); if (!name) return false;
         LOAD(gc_abi_check) LOAD(gc_normal_session_create) LOAD(gc_normal_session_destroy)
         LOAD(gc_normal_handle) LOAD(gc_normal_copy_raw) LOAD(gc_normal_set_app_defaults)
-        LOAD(gc_normal_update) LOAD(gc_normal_flush) LOAD(gc_normal_reload_custom_words)
+        LOAD(gc_normal_update) LOAD(gc_normal_set_layout) LOAD(gc_normal_flush) LOAD(gc_normal_reload_custom_words)
         LOAD(gc_normal_clear_user_data) LOAD(gc_snapshot_free)
+#if !GOGAKU_LITE
         LOAD(gc_learning_session_create) LOAD(gc_learning_session_destroy)
         LOAD(gc_learning_handle) LOAD(gc_learning_snapshot_free)
+#endif
 #undef LOAD
         if (gc_abi_check(GOGAKU_CORE_ABI_VERSION)) return false;
         settings = gw::readSettings();
@@ -47,8 +55,10 @@ struct Core {
         std::string user = gw::utf8((gw::userRoot()/L"chinese").wstring());
         std::string custom = gw::utf8((gw::userRoot()/L"custom-words.tsv").wstring());
         std::string english = gw::utf8((gw::installRoot()/L"data/english-words.txt").wstring());
-        std::string gloss = gw::utf8((gw::installRoot()/L"data/gloss.tsv").wstring());
-        GcNormalConfig config{dict.c_str(),model.c_str(),user.c_str(),custom.c_str(),english.c_str(),gloss.c_str(),0,0,1,1,1};
+        std::string gloss;
+        auto glossPath = gw::installRoot()/L"data/gloss.tsv";
+        if (std::filesystem::exists(glossPath)) gloss = gw::utf8(glossPath.wstring());
+        GcNormalConfig config{dict.c_str(),model.c_str(),user.c_str(),custom.c_str(),english.c_str(),gloss.empty()?nullptr:gloss.c_str(),0,0,1,1,1};
         char error[256]{};
         if (gc_normal_session_create(&config,&normal,error,sizeof(error))) return false;
         applySettings(); return true;
@@ -69,6 +79,9 @@ struct Core {
         std::vector<const char *> pointers;
         for (auto &name:names) pointers.push_back(name.c_str());
         gc_normal_set_app_defaults(normal,pointers.data(),pointers.size());
+        const std::string layout = settings.value("candidateLayout", std::string("vertical"));
+        const int hps = settings.value("horizontalPageSize", 7);
+        gc_normal_set_layout(normal, layout == "horizontal" ? hps : 0);
     }
     std::string raw() {
         size_t size=gc_normal_copy_raw(normal,nullptr,0);
@@ -83,7 +96,8 @@ struct Core {
            {"commit",s->commit?s->commit:""},{"marked",s->marked?s->marked:""},{"preedit",s->preedit?s->preedit:""},
            {"raw",raw()},{"selected",s->selected},{"page",s->page},{"pageCount",s->page_count},{"status",s->status?s->status:""},
            {"candidates",Json::array()},{"issues",Json::array()},{"learning",false},{"pending",false}};
-        for (size_t i=0;i<s->count;++i) value["candidates"].push_back({{"text",s->candidates[i].text?s->candidates[i].text:""},{"gloss",s->candidates[i].gloss?s->candidates[i].gloss:""}});
+        const bool glossOn=settings.value("glossEnabled",true);
+        for (size_t i=0;i<s->count;++i) value["candidates"].push_back({{"text",s->candidates[i].text?s->candidates[i].text:""},{"gloss",glossOn&&s->candidates[i].gloss?s->candidates[i].gloss:""}});
         gc_snapshot_free(s); return value;
     }
 };
@@ -97,11 +111,13 @@ struct Task {
     std::atomic_bool cancel{false}, done{false};
 };
 struct Session {
+#if !GOGAKU_LITE
     GcLearningSession *learning=nullptr;
+#endif
     std::string id,app,field;
     std::map<std::string,std::string> drafts;
+#if !GOGAKU_LITE
     Json currentPolicy=Json::object();
-    uint64_t focus=0,commitId=0;
     Json view=Json::object(), stamp=Json::object(), sources=Json::array(), pending=Json::object();
     Json scheduled=Json::object();
     ULONGLONG scheduledAt=0;
@@ -110,12 +126,26 @@ struct Session {
     size_t cacheBytes=0;
     bool learningMode=false,englishDirect=false;
     int direction=0;
-    ~Session() { if(task) task->cancel=true; if(learning) core.gc_learning_session_destroy(learning); }
+#else
+    Json view=Json::object(), pending=Json::object();
+#endif
+    uint64_t focus=0,commitId=0;
+    ~Session() {
+#if !GOGAKU_LITE
+        if(task) task->cancel=true;
+        if(learning) core.gc_learning_session_destroy(learning);
+#endif
+    }
+#if !GOGAKU_LITE
     Json preference() const {
         return Json{{"mode",core.settings.value("preferredMode",std::string("normal"))},{"direction",core.settings.value("preferredDirection",std::string("zhToEn"))}};
     }
     std::string draftKey() const {return app+"\n"+field+"\n"+(learningMode?"learning":"normal")+"\n"+std::to_string(direction);}
+#else
+    std::string draftKey() const { return app + "\n" + field + "\nnormal\n0"; }
+#endif
     void stash(const std::string &raw) {if(!raw.empty()&&!field.empty()&&drafts.size()<64)drafts.emplace(draftKey(),raw);}
+#if !GOGAKU_LITE
     Json policy() const {return Json{{"preference",preference()},{"enabled",core.settings.value("learningTranslationEnabled",false)},{"credentials",core.credentialsGeneration},{"ignored",core.settings.value("ignoredWords",Json::array())},{"excluded",core.settings.value("excludedApplications",Json::array())}};}
     void refreshPolicy() {if(!field.empty()&&policy()!=currentPolicy)focusTo({{"app",app},{"field",field}});}
     void resetLearning() {
@@ -139,6 +169,11 @@ struct Session {
         GcLearningEvent ev{}; ev.kind=GC_LEV_CONFIGURE; ev.arg0=(int64_t)focus; ev.arg1=1; ev.arg2=direction;
         learn(ev);
     }
+#else
+    void refreshPolicy() {}
+    void resetLearning() {}
+#endif
+#if !GOGAKU_LITE
     Json learn(GcLearningEvent event) {
         GcLearningSnapshot *s=nullptr;
         if(core.gc_learning_handle(learning,&event,&s) || !s) throw std::runtime_error("学习核心暂不可用");
@@ -207,21 +242,33 @@ struct Session {
         }
         if(task || !scheduled.empty()) view["pending"]=true;
     }
+#else
+    void clearAsync() {}
+#endif
     void focusTo(const Json &r) {
         stash(view.value("raw",std::string()));
-        clearAsync(); pending=Json::object(); app=r.value("app",std::string()); field=r.value("field",std::string()); englishDirect=false;
+        clearAsync(); pending=Json::object(); app=r.value("app",std::string()); field=r.value("field",std::string());
+#if !GOGAKU_LITE
+        englishDirect=false;
+#endif
         if(field.empty()) {
             // A delayed blur belongs to this connection only. Another host may
             // already own the shared normal session and be composing.
             if(core.active==id) {core.normalEvent(GC_EV_FOCUS_SYNC);core.active.clear();}
             ++focus; view=Json::object(); return;
         }
-        core.active=id; view=core.normalEvent(GC_EV_FOCUS_SYNC,{},app,field);
+        core.active=id;
+#if GOGAKU_LITE
+        view=core.normalEvent(GC_EV_FOCUS_SYNC,{},app,field);
+#else
+        view=core.normalEvent(GC_EV_FOCUS_SYNC,{},app,field);
         resetLearning();
         if(!learningMode) view=core.normalEvent(GC_EV_FOCUS_SYNC,{},app,field);
         else view["composing"]=false;
+#endif
     }
     Json event(const Json &r) {
+#if !GOGAKU_LITE
         applyAsync();
         int kind=r.value("kind",-1); std::string text=r.value("text",std::string()), command=r.value("command",std::string());
         if(command=="mode" || command=="direction") {
@@ -274,6 +321,36 @@ struct Session {
         }
         if(!view.value("commit",std::string()).empty()) { pending["token"]=std::to_string(++commitId);view["commitToken"]=pending["token"];clearAsync(); }
         return view;
+#else
+        int kind=r.value("kind",-1);
+        std::string text=r.value("text",std::string()), command=r.value("command",std::string());
+        if(command=="mode" || command=="direction") {
+            view["status"]="Gogaku Lite 不支持学习模式";
+            view["consumed"]=true;
+            return view;
+        }
+        if(command=="restore") {
+            auto found=drafts.find(draftKey());
+            if(found==drafts.end()) return view;
+            std::string restore=found->second;
+            drafts.erase(found);
+            view=core.normalEvent(GC_EV_TEXT,restore,app,field);
+            return view;
+        }
+        std::string recovery=view.value("raw",std::string());
+        if(command=="choose") { kind=GC_EV_TEXT; text=std::to_string(r.value("index",0)+1); }
+        if(kind<GC_EV_TEXT || kind>GC_EV_COMMIT_CONFIRMED || kind==GC_EV_COMMIT_CONFIRMED || kind==GC_EV_FOCUS_SYNC) {
+            view["consumed"]=false;
+            return view;
+        }
+        view=core.normalEvent(kind,text,app,field);
+        if(!view.value("commit",std::string()).empty()) pending={{"raw",recovery},{"learning",false}};
+        if(!view.value("commit",std::string()).empty()) {
+            pending["token"]=std::to_string(++commitId);
+            view["commitToken"]=pending["token"];
+        }
+        return view;
+#endif
     }
 };
 Json responseView(Session &s) { auto value=s.view;value["draftAvailable"]=s.drafts.count(s.draftKey())!=0;value["settingsRevision"]=core.revision;return value; }
@@ -309,7 +386,11 @@ void serve(HANDLE pipe) {
                         if(core.active!=session.id) throw std::runtime_error("焦点已变化，请重新输入");
                         if(!session.pending.empty()) throw std::runtime_error("上次提交尚未确认");
                         session.event(request);
-                    } else if(op=="poll") { if(core.active==session.id && session.learningMode) session.applyAsync(); }
+                    } else if(op=="poll") {
+#if !GOGAKU_LITE
+                        if(core.active==session.id && session.learningMode) session.applyAsync();
+#endif
+                    }
                     else if(op=="confirm" || op=="reject") {
                         if(core.active!=session.id || session.pending.empty() || request.value("token",std::string())!=session.pending.value("token",std::string())) throw std::runtime_error("过期提交");
                         if(op=="confirm" && !session.pending.value("learning",false)) core.normalEvent(GC_EV_COMMIT_CONFIRMED);
@@ -333,8 +414,10 @@ LRESULT CALLBACK trayProcedure(HWND window,UINT message,WPARAM wParam,LPARAM lPa
     if(lParam==WM_RBUTTONUP){
         auto menu=CreatePopupMenu();
         AppendMenuW(menu,MF_STRING,1,L"Gogaku 设置…");
+#if !GOGAKU_LITE
         AppendMenuW(menu,MF_STRING,2,L"切换普通／学习");
         AppendMenuW(menu,MF_STRING,3,L"切换学习方向");
+#endif
         AppendMenuW(menu,MF_SEPARATOR,0,nullptr);
         AppendMenuW(menu,MF_STRING,4,L"退出输入代理");
         POINT point{};GetCursorPos(&point);SetForegroundWindow(window);
@@ -347,6 +430,7 @@ LRESULT CALLBACK trayProcedure(HWND window,UINT message,WPARAM wParam,LPARAM lPa
             std::wstring command=L"\""+path.wstring()+L"\"";
             STARTUPINFOW startup{sizeof(startup)};PROCESS_INFORMATION process{};
             if(CreateProcessW(path.c_str(),command.data(),nullptr,nullptr,FALSE,0,nullptr,path.parent_path().c_str(),&startup,&process)){CloseHandle(process.hThread);CloseHandle(process.hProcess);}
+#if !GOGAKU_LITE
         }else if(selected==2||selected==3){
             bool configured=false;
             {
@@ -362,6 +446,7 @@ LRESULT CALLBACK trayProcedure(HWND window,UINT message,WPARAM wParam,LPARAM lPa
                 }
             }
             if(!configured)MessageBoxW(window,L"请先在设置中保存火山凭据，并显式开启学习翻译。",L"Gogaku",MB_OK|MB_ICONINFORMATION);
+#endif
         }else if(selected==4){
             Json settings;
             {std::lock_guard<std::mutex> lock(core.mutex);if(core.gc_normal_flush(core.normal))throw std::runtime_error("调频保存失败，请重试退出");settings=core.settings;}

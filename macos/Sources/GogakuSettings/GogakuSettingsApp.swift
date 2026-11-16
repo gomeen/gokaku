@@ -38,6 +38,14 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页。
     case normalInput, resources, customWords, skin, shortcuts, privacy, records
     var id: Self { self }
+
+    static var visibleCases: [SettingsPage] {
+        #if GOGAKU_LITE
+        [.normalInput, .customWords, .skin, .shortcuts]
+        #else
+        allCases
+        #endif
+    }
     var title: String {
         switch self {
         case .resources: return "学习翻译"
@@ -147,7 +155,7 @@ private struct SettingsView: View {
                 .padding(.bottom, 10)
             // .nav：gap 1，padding 0 8。
             VStack(alignment: .leading, spacing: 1) {
-                ForEach(SettingsPage.allCases) { item in
+                ForEach(SettingsPage.visibleCases) { item in
                     SidebarItem(title: item.title, isSelected: page == item) {
                         if page == .skin, item != .skin {
                             guard skinEditor.mayLeave() else { return }

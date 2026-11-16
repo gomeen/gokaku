@@ -137,9 +137,16 @@ public struct KeyCombo: Codable, Equatable, Hashable, Sendable {
     public static func fixedOperations() -> [FixedOperation] {
         let ctrl = NSEvent.ModifierFlags([.control]).rawValue
         let cmd = NSEvent.ModifierFlags([.command]).rawValue
+        #if GOGAKU_LITE
+        let learning: [FixedOperation] = []
+        #else
+        let learning = [
+            FixedOperation("原文上屏", "学习组合中明确提交原文，不执行翻译", keyID: "return", modifiers: cmd, modes: "学习"),
+        ]
+        #endif
         return [
             FixedOperation("取消组合", "取消当前输入，不提交到宿主", keyID: "esc", modifiers: 0, modes: "普通＋学习"),
-            FixedOperation("原文上屏", "学习组合中明确提交原文，不执行翻译", keyID: "return", modifiers: cmd, modes: "学习"),
+        ] + learning + [
             FixedOperation("行首／行尾", "组合中移动拼音光标或选择位置", keyID: "a", modifiers: ctrl, modes: "普通"),
             FixedOperation("光标后退／前进", "组合中逐字符移动", keyID: "b", modifiers: ctrl, modes: "普通"),
             FixedOperation("行首／行尾", "组合中移动到行首或行尾", keyID: "e", modifiers: ctrl, modes: "普通"),
@@ -155,7 +162,7 @@ public struct KeyCombo: Codable, Equatable, Hashable, Sendable {
     /// 只检查本输入法实际消费的组合，不宣称能检测其他应用或系统快捷键。
     public static func conflict(target: ConfigurableCommand, keyID: String, modifiers: UInt, settings: Settings) -> String? {
         guard !keyID.isEmpty else { return nil }
-        for command in ConfigurableCommand.allCases where command != target {
+        for command in ConfigurableCommand.uiCases where command != target {
             let other = command.shortcut(in: settings)
             if other.isValid, other.key == keyID, other.modifiers == modifiers {
                 return command.displayName

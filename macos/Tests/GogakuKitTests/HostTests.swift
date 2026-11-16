@@ -68,13 +68,41 @@ final class HostTests: XCTestCase {
         XCTAssertEqual(snapshot?.rectangle, caret)
     }
 
-    func testNoCompositionNeverReadsIndexZeroFallback() {
+    /// 无组合、选区矩形无效：不采纳索引 0（它在无组合时会在相邻字符格间循环）。
+    func testNoCompositionDoesNotAdoptIndexZeroWhenCaretInvalid() {
         let client = IndexedRectClient()
         client.marked = NSRange(location: NSNotFound, length: 0)
         client.rects[0] = NSRect(x: 326, y: 145, width: 1, height: 19)
         let snapshot = gg_read_host(client)
-        XCTAssertEqual(client.indices, [7], "无组合时索引 0 读数不可靠（Orca 实测在相邻字符格间循环），不回退")
-        XCTAssertEqual(snapshot?.rectangleValid, false)
+        XCTAssertEqual(snapshot?.rectangleValid, false, "无组合且光标矩形无效时不能拿索引 0 冒充光标")
+    }
+
+    /// 2026-11-16 诊断事故回归：Orca 无组合时按选区读到屏幕左上角垃圾
+    /// `{{0,1410},{1,12}}`，同一时刻索引 0 稳定返回真实输入行 `{{335,145},{1,19}}`。
+    /// 这类读数有限、正高、在屏内，上层合理性检查拦不住，必须在这里纠正。
+    func testNoCompositionRejectsStaleTopLeftRectUsingIndexZero() {
+        let client = IndexedRectClient()
+        client.marked = NSRange(location: NSNotFound, length: 0)
+        // 贴屏幕最上方（菜单栏区域）＝可疑读数；屏幕 1440 高时 y≈1410。
+        let garbage = NSRect(x: 0, y: NSScreen.screens.first!.frame.maxY - 30, width: 1, height: 12)
+        let real = NSRect(x: 335, y: 145, width: 1, height: 19)
+        client.rects[7] = garbage
+        client.rects[0] = real
+        let snapshot = gg_read_host(client)
+        XCTAssertEqual(snapshot?.rectangle, real, "跨多行的陈旧读数必须用索引 0 纠正")
+        XCTAssertEqual(snapshot?.rectangleValid, true)
+    }
+
+    /// 无组合时插入点与索引 0 同行（真实光标，只是索引 0 取的是行首）→ 保留插入点读数，
+    /// 不把光标拽回行首。
+    func testNoCompositionKeepsCaretWhenIndexZeroOnSameLine() {
+        let client = IndexedRectClient()
+        client.marked = NSRange(location: NSNotFound, length: 0)
+        let caret = NSRect(x: 600, y: 145, width: 1, height: 19)
+        client.rects[7] = caret
+        client.rects[0] = NSRect(x: 326, y: 145, width: 1, height: 19)
+        let snapshot = gg_read_host(client)
+        XCTAssertEqual(snapshot?.rectangle, caret, "同行时以真实插入点为准，不拉回行首")
     }
 
     func testWindowLevelReadFromClient() {

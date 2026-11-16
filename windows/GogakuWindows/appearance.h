@@ -15,7 +15,8 @@ public:
     ~CandidateRenderer();
     CandidateRenderer(const CandidateRenderer &) = delete;
     CandidateRenderer &operator=(const CandidateRenderer &) = delete;
-    void render(const Json &view, const Json &theme, bool dark, int legacyFontSize = 14, UINT dpi = 96);
+    void render(const Json &view, const Json &theme, bool dark, int legacyFontSize = 14, UINT dpi = 96,
+                const Json &settings = Json::object());
     HDC dc() const;
     SIZE size() const;
     BYTE opacity() const;

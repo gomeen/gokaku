@@ -256,3 +256,23 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(merged["foreign"] as? Bool, true, "磁盘独有字段保留")
     }
 }
+
+final class LayoutRoundTripTests: XCTestCase {
+    func testHorizontalLayoutRoundTrip() throws {
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("gogaku-layout-rt")
+        try? FileManager.default.removeItem(at: dir)
+        let store = SettingsStore(directory: dir)
+        var s = Settings()
+        s.candidateLayout = .horizontal
+        s.horizontalPageSize = 6
+        let done = expectation(description: "flush")
+        store.submit(s) { outcome in
+            if case .success = outcome { done.fulfill() } else { XCTFail("submit failed") }
+        }
+        wait(for: [done], timeout: 2)
+        let data = try Data(contentsOf: dir.appendingPathComponent("settings.json"))
+        let obj = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        XCTAssertEqual(obj["candidateLayout"] as? String, "horizontal")
+        XCTAssertEqual(obj["horizontalPageSize"] as? Int, 6)
+    }
+}

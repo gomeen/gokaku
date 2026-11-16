@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>横排候选窗草图（讨论用，可丢弃）</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei UI", system-ui, sans-serif;
+    background: #f5f5f7; color: #1d1d1f; padding: 32px 40px 64px; max-width: 980px; margin: 0 auto;
+  }
+  h1 { font-size: 20px; margin-bottom: 6px; }
+  .sub { font-size: 13px; color: #6e6e73; margin-bottom: 28px; line-height: 1.6; }
+  h2 { font-size: 15px; margin: 34px 0 4px; }
+  .note { font-size: 12.5px; color: #6e6e73; line-height: 1.6; margin-bottom: 14px; }
+  .stage {
+    background: #fff; border: 1px solid #d2d2d7; border-radius: 10px; padding: 48px 24px 24px;
+    position: relative; margin-bottom: 8px; overflow-x: auto;
+  }
+  .hostline { font-size: 15px; color: #1d1d1f; line-height: 1.8; white-space: nowrap; }
+  .preedit { text-decoration: underline; text-underline-offset: 3px; }
+  .caret { display: inline-block; width: 1.5px; height: 18px; background: #12996a; vertical-align: -3px; margin-left: 1px; }
+
+  /* 候选窗：几何按现行规格（内边距 8、圆角 8、候选 14、序号与页码小 3 号、高亮 #12996a） */
+  .panel {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(255,255,255,.98); border: 1px solid #c8c8cd; border-radius: 8px;
+    padding: 8px; margin-top: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.10);
+  }
+  .cand { display: inline-flex; align-items: baseline; gap: 5px; padding: 5px 9px; border-radius: 4px; white-space: nowrap; }
+  .cand .idx { font-size: 11px; color: #6e6e73; }
+  .cand .txt { font-size: 14px; }
+  .cand .gloss { font-size: 12px; color: #7d5800; }
+  .cand.sel { background: #12996a; }
+  .cand.sel .idx { color: rgba(255,255,255,.75); }
+  .cand.sel .txt { color: #fff; }
+  .page { font-size: 11px; color: #6e6e73; margin-left: 6px; }
+  .arrows { font-size: 12px; color: #6e6e73; margin-left: 6px; letter-spacing: 2px; }
+
+  /* 方案 B 的高亮释义行 */
+  .panel.with-gloss-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .panel.with-gloss-row .row { display: inline-flex; align-items: center; gap: 4px; }
+  .glossrow { font-size: 12.5px; color: #7d5800; padding: 0 4px 2px; white-space: nowrap; }
+
+  /* 竖排对照 */
+  .vpanel {
+    display: inline-block; background: rgba(255,255,255,.98); border: 1px solid #c8c8cd; border-radius: 8px;
+    padding: 8px; margin-top: 10px; box-shadow: 0 4px 16px rgba(0,0,0,.10);
+  }
+  .vrow { display: flex; align-items: baseline; gap: 6px; padding: 6px 8px; border-radius: 4px; white-space: nowrap; }
+  .vrow .idx { font-size: 11px; color: #6e6e73; min-width: 14px; }
+  .vrow .txt { font-size: 14px; }
+  .vrow .gloss { font-size: 12px; color: #7d5800; margin-left: 4px; }
+  .vrow.sel { background: #12996a; }
+  .vrow.sel .idx { color: rgba(255,255,255,.75); }
+  .vrow.sel .txt, .vrow.sel .gloss { color: #fff; }
+  .vpanel .page { align-self: flex-end; }
+
+  .verdict { font-size: 12.5px; margin: 6px 0 0; line-height: 1.6; }
+  .verdict.ok { color: #12996a; }
+  .verdict.bad { color: #b25000; }
+
+  ul.rules { font-size: 13px; color: #3a3a3c; line-height: 1.9; margin-top: 10px; padding-left: 20px; }
+</style>
+</head>
+<body>
+
+<h1>横排候选窗草图</h1>
+<div class="sub">
+  讨论用可丢弃草图，不进生产。几何沿用现行竖排规格（内边距 8、圆角 8、候选 14 号、序号与页码小 3 号、高亮 #12996a、释义琥珀色 #7d5800）。
+  完整版与精简版 Gogaku Lite 都加横竖排切换；横排只改候选窗几何，不改排序、按键与上屏规则。
+</div>
+
+<h2>竖排（现行形态，作对照）</h2>
+<p class="note">输入 <code>nihc</code>，完整版带英文释义注释；精简版只是没有注释行，其余相同。</p>
+<div class="stage">
+  <div class="hostline">今天和大家说<span class="preedit">nihc</span><span class="caret"></span></div>
+  <div class="vpanel">
+    <div class="vrow sel"><span class="idx">1.</span><span class="txt">你好</span><span class="gloss">(int.) hello · hi</span></div>
+    <div class="vrow"><span class="idx">2.</span><span class="txt">您号</span><span class="gloss">(int.) (err.) you-number</span></div>
+    <div class="vrow"><span class="idx">3.</span><span class="txt">泥壕</span></div>
+    <div class="vrow"><span class="idx">4.</span><span class="txt">拟好</span></div>
+    <span class="page">1/4</span>
+  </div>
+</div>
+
+<h2>方案 A：横排不显示释义</h2>
+<p class="note">单行从左到右，释义在横排下整组隐藏。业界通行做法（微软拼音、搜狗横排均如此）。精简版横排天然就是这一形态。</p>
+<div class="stage">
+  <div class="hostline">今天和大家说<span class="preedit">nihc</span><span class="caret"></span></div>
+  <div class="panel">
+    <span class="cand sel"><span class="idx">1.</span><span class="txt">你好</span></span>
+    <span class="cand"><span class="idx">2.</span><span class="txt">您号</span></span>
+    <span class="cand"><span class="idx">3.</span><span class="txt">泥壕</span></span>
+    <span class="cand"><span class="idx">4.</span><span class="txt">拟好</span></span>
+    <span class="cand"><span class="idx">5.</span><span class="txt">尼豪</span></span>
+    <span class="page">1/4</span><span class="arrows">‹ ›</span>
+  </div>
+</div>
+<p class="verdict ok">优点是行高最小、宽度可控；代价是横排下完整版丢失释义这个学习反馈点。</p>
+
+<h2>方案 B：横排＋高亮释义行</h2>
+<p class="note">候选仍是单行，但为高亮候选追加一条释义行，随高亮移动更新。完整版横排保留释义反馈。</p>
+<div class="stage">
+  <div class="hostline">今天和大家说<span class="preedit">nihc</span><span class="caret"></span></div>
+  <div class="panel with-gloss-row">
+    <div class="row">
+      <span class="cand sel"><span class="idx">1.</span><span class="txt">你好</span></span>
+      <span class="cand"><span class="idx">2.</span><span class="txt">您号</span></span>
+      <span class="cand"><span class="idx">3.</span><span class="txt">泥壕</span></span>
+      <span class="cand"><span class="idx">4.</span><span class="txt">拟好</span></span>
+      <span class="cand"><span class="idx">5.</span><span class="txt">尼豪</span></span>
+      <span class="page">1/4</span><span class="arrows">‹ ›</span>
+    </div>
+    <div class="glossrow">(int.) hello · hi</div>
+  </div>
+</div>
+<p class="verdict">行高变为约两倍（仍矮于竖排九行）。释义只跟随高亮，未高亮候选不可见释义。</p>
+
+<h2>方案 C：释义写在每个候选行内</h2>
+<p class="note">每个候选后直接跟释义。放出问题示例。</p>
+<div class="stage">
+  <div class="hostline">今天和大家说<span class="preedit">nihc</span><span class="caret"></span></div>
+  <div class="panel">
+    <span class="cand sel"><span class="idx">1.</span><span class="txt">你好</span><span class="gloss">(int.) hello · hi</span></span>
+    <span class="cand"><span class="idx">2.</span><span class="txt">您号</span><span class="gloss">(int.) (err.) you-num…</span></span>
+    <span class="cand"><span class="idx">3.</span><span class="txt">泥壕</span></span>
+    <span class="page">1/4</span><span class="arrows">‹ ›</span>
+  </div>
+</div>
+<p class="verdict bad">五候选时窗口宽 700px 上下，长释义被迫省略号；信息密度反而低于竖排。不推荐，仅作对照。</p>
+
+<h2>英文候选在横排下的显示（两版一致）</h2>
+<p class="note">
+  规则不变，只是几何变化。示例为输入英文词时英文候选照常参与排序（libime 无法覆盖则英文排第一）。
+  精简版保留了英文候选；英文候选本身从不带释义注释，所以两版横排外观完全相同。
+</p>
+<div class="stage">
+  <div class="hostline">please install the p<span class="preedit">rogram</span><span class="caret"></span></div>
+  <div class="panel">
+    <span class="cand sel"><span class="idx">1.</span><span class="txt">program</span></span>
+    <span class="cand"><span class="idx">2.</span><span class="txt">programming</span></span>
+    <span class="cand"><span class="idx">3.</span><span class="txt">programmer</span></span>
+    <span class="cand"><span class="idx">4.</span><span class="txt">programmes</span></span>
+    <span class="page">1/1</span><span class="arrows">‹ ›</span>
+  </div>
+</div>
+
+<h2>横排切换不改的东西</h2>
+<ul class="rules">
+  <li>排序与调频规则、九组模糊音、自定义词、英文候选规则全部不变。</li>
+  <li>数字 1–9 选词、翻页、组合中标点一次上屏等按键规则全部不变。</li>
+  <li>主题继续管颜色、圆角、内边距、字体、透明度；横竖排作为全局设置放普通输入页，不属于主题属性。</li>
+  <li>横排每页数量需要新规格，竖排维持每页 9 个不动。</li>
+</ul>
+
+<h2>设置页按需隐藏（Gogaku Lite）</h2>
+<p class="note">同一代码库按构建形态裁剪，不维护两套设置应用。</p>
+<table style="width:100%; border-collapse:collapse; font-size:13px; margin-top:6px;">
+  <tr style="background:#f0f0f2;"><th style="text-align:left; padding:8px 10px; border:1px solid #d2d2d7;">设置页／入口</th><th style="text-align:left; padding:8px 10px; border:1px solid #d2d2d7;">完整版</th><th style="text-align:left; padding:8px 10px; border:1px solid #d2d2d7;">Lite</th></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">普通输入</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">全部行（含「显示英文释义」）</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">去掉「显示英文释义」，新增横竖排切换</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">自定义词语</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">皮肤</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留（功能不减）</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">快捷键</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">两条学习命令＋固定操作</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">去掉「切普通／学习」「切学习方向」与「原文上屏」固定行，模式标签只剩「普通」</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">学习翻译</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td><td style="padding:8px 10px; border:1px solid #d2d2d7; color:#b25000;">整页不存在</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">学习与隐私</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td><td style="padding:8px 10px; border:1px solid #d2d2d7; color:#b25000;">整页不存在</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">学习片段</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td><td style="padding:8px 10px; border:1px solid #d2d2d7; color:#b25000;">整页不存在</td></tr>
+  <tr><td style="padding:8px 10px; border:1px solid #d2d2d7;">菜单／托盘「切学习」入口</td><td style="padding:8px 10px; border:1px solid #d2d2d7;">保留</td><td style="padding:8px 10px; border:1px solid #d2d2d7; color:#b25000;">不存在</td></tr>
+</table>
+
+</body>
+</html>

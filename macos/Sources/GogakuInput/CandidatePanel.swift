@@ -22,13 +22,30 @@ private extension NSAttributedString {
 
 /// 一次渲染的全部几何与富文本；绘制、命中测试与窗口尺寸都基于它。
 /// 数值来自测量出的青简 rime-macos（翠绿）生效规格。
-private final class PanelLayout {
+/// 候选序号样式（竖排行与横排 chip 共用，只此一处）。
+///
+/// 选中行必须用 `selectedText`（= highlightText）：序号与候选词同属「高亮块
+/// 上的文字」。旧实现给非 rime 主题用 `selectedAnnotation`（= highlightComment，
+/// 皮肤里叫「选中时翻译文字」），序号被染成注释色，与旁边候选词不一致
+/// （2026-11-16 用户报「序号颜色不对」）。
+private func candidateIndexText(_ prefix: String, selected: Bool,
+                                theme: CandidatePanelTheme) -> NSAttributedString {
+    NSAttributedString(string: prefix,
+                       attributes: [.font: theme.indexFont,
+                                    .foregroundColor: selected ? theme.selectedText : theme.indexText])
+}
+
+/// 候选窗几何（单元测试经 `@testable import GogakuInput` 读取横排约束）。
+final class PanelLayout {
     struct Row {
         let indexOfShown: Int
         let frame: NSRect
         let selected: Bool
         let index: NSAttributedString
         let indexWidth: CGFloat
+        /// 序号绘制左缘。竖排所有行同 x；横排每个 chip 各自 x（旧实现硬编码
+        /// 固定 x，横排下序号全叠在左端、被后画的 chip 背景盖住，看起来是乱码）。
+        let indexX: CGFloat
         let wordX: CGFloat
         let word: NSAttributedString
         let wordWidth: CGFloat
@@ -88,13 +105,49 @@ private final class PanelLayout {
     let pageRect: NSRect
     let buttons: [Button]
     let pageLabel: String
+    let compactRowHighlights: Bool
+    let glossLine: NSAttributedString?
+    let glossLineRect: NSRect
 
     init(view: CompositionView, theme: CandidatePanelTheme,
          commitOriginal: (() -> Void)?, switchSource: (() -> Void)?) {
+        if view.stamp.mode == .normal && view.candidateLayoutHorizontal {
+            let h = PanelLayout.horizontalNormal(view: view, theme: theme)
+            compactRowHighlights = h.compactRowHighlights
+            glossLine = h.glossLine
+            glossLineRect = h.glossLineRect
+            innerWidth = h.innerWidth
+            panelWidth = h.panelWidth
+            totalHeight = h.totalHeight
+            header = h.header
+            headerRect = h.headerRect
+            preedit = h.preedit
+            preeditCaretX = h.preeditCaretX
+            preeditLengthUTF16 = h.preeditLengthUTF16
+            preeditCaretUTF16 = h.preeditCaretUTF16
+            preeditTextRect = h.preeditTextRect
+            preeditHitRect = h.preeditHitRect
+            issueNotice = h.issueNotice
+            noticeRect = h.noticeRect
+            rows = h.rows
+            status = h.status
+            statusRect = h.statusRect
+            page = h.page
+            pageRect = h.pageRect
+            buttons = h.buttons
+            pageLabel = h.pageLabel
+            return
+        }
+        compactRowHighlights = false
+        glossLine = nil
+        glossLineRect = .zero
         let m = theme.metrics
         let learning = view.stamp.mode == .learning
-        let pageStart = learning ? view.page * CandidatePage.size : 0
-        let shown = Array(view.candidates.dropFirst(pageStart).prefix(m.maximumRows))
+        let pageSize = view.stamp.mode == .normal ? view.normalPageSize : CandidatePage.size
+        let pageStart = learning ? view.page * CandidatePage.size : view.page * pageSize
+        let shown = view.stamp.mode == .normal
+            ? view.candidates
+            : Array(view.candidates.dropFirst(pageStart).prefix(m.maximumRows))
         let minInner = m.minimumWidth - m.windowPadding * 2
         let maxInner = m.maximumWidth - m.windowPadding * 2
 
@@ -121,10 +174,14 @@ private final class PanelLayout {
         //（2026-11 用户反馈：显示不全）；上限 6 行，超出部分随绘制裁剪。
         let learningZhToEn = learning && view.stamp.direction == .zhToEn
         for (offset, candidate) in shown.enumerated() {
-            let selected = (learning ? pageStart + offset : view.page * CandidatePage.size + offset) == view.selected
+            let selected = (learning ? pageStart + offset : pageStart + offset) == view.selected
             // 学习模式数字直接选词（2026-11 裁决：与普通模式同快捷键，不再用 ⌥数字）。
             let prefix = "\(offset + 1)"
-            let index = NSAttributedString(string: prefix, attributes: attributes(theme.indexFont, selected ? (theme.id == .rimeMacOSLike ? theme.selectedText : theme.selectedAnnotation) : theme.indexText))
+            // 序号与候选词同属「高亮块上的文字」，选中行必须用 selectedText
+            // （= highlightText）。旧实现给非 rime 主题用 selectedAnnotation
+            // （= highlightComment，皮肤里叫「选中时翻译文字」），序号被染成注释
+            // 色，与旁边候选词不一致（2026-11-16 用户报「序号颜色不对」）。
+            let index = candidateIndexText(prefix, selected: selected, theme: theme)
             let fullWord = theme.text(candidate.target, font: theme.candidateFont, englishFont: theme.candidateEnglishFont,
                                       color: selected ? theme.selectedText : theme.candidateText)
             let wordLimit = maxInner - m.rowLeftPadding - m.indexLeftMargin - index.widthPt - m.wordLeftMargin
@@ -252,7 +309,8 @@ private final class PanelLayout {
 
         // 5. 页码（多于一页才显示）
         let total = view.stamp.mode == .normal ? view.totalCandidates : view.candidates.count
-        let totalPages = max(1, (max(total, 1) + CandidatePage.size - 1) / CandidatePage.size)
+        let psz = view.stamp.mode == .normal ? view.normalPageSize : CandidatePage.size
+        let totalPages = max(1, (max(total, 1) + psz - 1) / psz)
         pageLabel = "第 \(view.page + 1)/\(totalPages) 页"
         let pageString = totalPages > 1
             ? NSAttributedString(string: "\(view.page + 1)/\(totalPages)", attributes: attributes(theme.pageFont, theme.pageText))
@@ -285,6 +343,7 @@ private final class PanelLayout {
                               frame: NSRect(x: 0, y: y, width: panelWidth, height: content.rowHeight),
                               selected: content.selected,
                               index: content.index, indexWidth: content.indexWidth,
+                              indexX: m.windowPadding + m.rowLeftPadding + m.indexLeftMargin,
                               wordX: wordX, word: content.word, wordWidth: content.wordWidth,
                               annotation: content.annotation,
                               annotationX: theme.id == .rimeMacOSLike ? wordX + content.wordWidth + m.annotationLeftMargin
@@ -327,6 +386,141 @@ private final class PanelLayout {
         preeditCaretUTF16 = caretUTF16
         totalHeight = y + m.windowPadding
         self.page = pageString
+    }
+
+    private init(compactRowHighlights: Bool, glossLine: NSAttributedString?, glossLineRect: NSRect,
+                 innerWidth: CGFloat, panelWidth: CGFloat, totalHeight: CGFloat,
+                 header: NSAttributedString?, headerRect: NSRect,
+                 preedit: NSAttributedString?, preeditCaretX: CGFloat?,
+                 preeditLengthUTF16: Int, preeditCaretUTF16: Int?,
+                 preeditTextRect: NSRect, preeditHitRect: NSRect,
+                 issueNotice: NSAttributedString?, noticeRect: NSRect,
+                 rows: [Row], status: NSAttributedString?, statusRect: NSRect,
+                 page: NSAttributedString?, pageRect: NSRect, buttons: [Button], pageLabel: String) {
+        self.compactRowHighlights = compactRowHighlights
+        self.glossLine = glossLine
+        self.glossLineRect = glossLineRect
+        self.innerWidth = innerWidth
+        self.panelWidth = panelWidth
+        self.totalHeight = totalHeight
+        self.header = header
+        self.headerRect = headerRect
+        self.preedit = preedit
+        self.preeditCaretX = preeditCaretX
+        self.preeditLengthUTF16 = preeditLengthUTF16
+        self.preeditCaretUTF16 = preeditCaretUTF16
+        self.preeditTextRect = preeditTextRect
+        self.preeditHitRect = preeditHitRect
+        self.issueNotice = issueNotice
+        self.noticeRect = noticeRect
+        self.rows = rows
+        self.status = status
+        self.statusRect = statusRect
+        self.page = page
+        self.pageRect = pageRect
+        self.buttons = buttons
+        self.pageLabel = pageLabel
+    }
+
+    static func horizontalNormal(view: CompositionView, theme: CandidatePanelTheme) -> PanelLayout {
+        let m = theme.metrics
+        let minInner = max(320 - m.windowPadding * 2, 1)
+        let maxInner = max(860 - m.windowPadding * 2, minInner)
+        func attributes(_ font: NSFont, _ color: NSColor) -> [NSAttributedString.Key: Any] {
+            [.font: font, .foregroundColor: color]
+        }
+        let pageSize = view.normalPageSize
+        let inPage = max(0, min(view.selected - view.page * pageSize, view.candidates.count - 1))
+        // 分页标签先算出来：横排候选与它在同一行，必须为它预留右缘宽度，
+        // 否则最后一个候选会压到页码上（旧实现实测出现「蘅/5」粘连并被裁字）。
+        let totalPages = max(1, (max(view.totalCandidates, 1) + pageSize - 1) / pageSize)
+        let pageAttr = totalPages > 1 ? NSAttributedString(string: "\(view.page + 1)/\(totalPages)",
+            attributes: attributes(theme.pageFont, theme.pageText)) : nil
+        let pageReserve = (pageAttr?.widthPt ?? 0) + (pageAttr == nil ? 0 : 12)
+        var chipX = m.windowPadding + m.rowLeftPadding
+        let rowYBase = m.windowPadding
+        let rowH = max(m.rowHeight, m.candidateLineHeight)
+        var rows: [Row] = []
+        for (offset, candidate) in view.candidates.enumerated() {
+            let selected = offset == inPage
+            let index = candidateIndexText("\(offset + 1)", selected: selected, theme: theme)
+            let word = theme.text(candidate.target, font: theme.candidateFont, englishFont: theme.candidateEnglishFont,
+                                  color: selected ? theme.selectedText : theme.candidateText)
+            let pad: CGFloat = 8
+            let chipW = index.widthPt + 5 + word.widthPt + pad * 2
+            rows.append(Row(indexOfShown: offset,
+                              frame: NSRect(x: chipX, y: rowYBase, width: chipW, height: rowH),
+                              selected: selected,
+                              index: index, indexWidth: index.widthPt, indexX: chipX + pad,
+                              wordX: chipX + pad + index.widthPt + 5, word: word, wordWidth: word.widthPt,
+                              annotation: nil, annotationX: 0, annotationWidth: 0, annotationLines: 0))
+            chipX += chipW + 4
+        }
+        var glossLine: NSAttributedString?
+        if view.horizontalGlossRowEnabled, view.candidates.indices.contains(inPage) {
+            let t = view.candidates[inPage].explanation
+            if !t.isEmpty {
+                glossLine = theme.text(t, font: theme.annotationFont, englishFont: theme.annotationEnglishFont,
+                                       color: theme.annotationText)
+                let (trunc, _) = PanelLayout.truncate(glossLine!, maxWidth: maxInner)
+                glossLine = trunc
+            }
+        }
+        let preeditText = view.preedit.isEmpty ? view.raw : view.preedit
+        var pre: NSAttributedString?
+        if !preeditText.isEmpty {
+            let rawPre = theme.text(preeditText, font: theme.preeditFont,
+                                    englishFont: theme.preeditEnglishFont, color: theme.typedText)
+            pre = PanelLayout.truncate(rawPre, maxWidth: maxInner).0
+        }
+        // 页码与候选同一行：优先把面板加宽到「候选 + 页码」而不是直接丢候选；
+        // 只有加宽到上限仍放不下时，才在下面按页码左缘裁剪。
+        let chipsAndPage = chipX + pageReserve
+        var innerW = min(max(chipsAndPage, pre?.widthPt ?? 0), maxInner)
+        innerW = max(innerW, minInner)
+        let panelW = innerW + m.windowPadding * 2
+        // 页码左缘以最终面板宽度为准（不能用 maxInner 估算：候选少时 innerW
+        // 会缩到 minInner，页码随之内移）。放不下的候选直接不显示，宁可少一个
+        // 也不让它压住页码或被窗口右缘裁字。
+        if pageAttr != nil {
+            let pageLeft = panelW - m.windowPadding - (pageAttr?.widthPt ?? 0) - 6
+            let limit = pageLeft - 8
+            if let lastOverflow = rows.firstIndex(where: { $0.frame.maxX > limit }) {
+                rows = Array(rows.prefix(lastOverflow))
+            }
+        }
+        var y = m.windowPadding
+        let preRect = pre != nil ? NSRect(x: m.windowPadding, y: y, width: innerW, height: m.preeditLineHeight) : .zero
+        if pre != nil { y += m.preeditLineHeight + 4 }
+        let rowY = y
+        let shifted = rows.map {
+            Row(indexOfShown: $0.indexOfShown,
+                  frame: NSRect(x: $0.frame.minX, y: rowY, width: $0.frame.width, height: $0.frame.height),
+                  selected: $0.selected,
+                  index: $0.index, indexWidth: $0.indexWidth, indexX: $0.indexX,
+                  wordX: $0.wordX, word: $0.word, wordWidth: $0.wordWidth,
+                  annotation: $0.annotation, annotationX: $0.annotationX, annotationWidth: $0.annotationWidth,
+                  annotationLines: $0.annotationLines)
+        }
+        y += rowH
+        let glossRect: NSRect
+        if glossLine != nil {
+            glossRect = NSRect(x: m.windowPadding + 4, y: y, width: innerW - 8, height: m.annotationLineHeight)
+            y += m.annotationLineHeight + 2
+        } else { glossRect = .zero }
+        let pageRect = pageAttr != nil
+            ? NSRect(x: panelW - m.windowPadding - (pageAttr?.widthPt ?? 0) - 6,
+                     y: rowY + (rowH - m.pageLineHeight) / 2, width: pageAttr?.widthPt ?? 0, height: m.pageLineHeight)
+            : .zero
+        y += m.windowPadding
+        return PanelLayout(compactRowHighlights: true, glossLine: glossLine, glossLineRect: glossRect,
+                           innerWidth: innerW, panelWidth: panelW, totalHeight: y,
+                           header: nil, headerRect: .zero, preedit: pre, preeditCaretX: nil,
+                           preeditLengthUTF16: pre?.length ?? 0, preeditCaretUTF16: nil,
+                           preeditTextRect: preRect, preeditHitRect: preRect,
+                           issueNotice: nil, noticeRect: .zero, rows: shifted, status: nil, statusRect: .zero,
+                           page: pageAttr, pageRect: pageRect, buttons: [],
+                           pageLabel: totalPages > 1 ? "第 \(view.page + 1)/\(totalPages) 页" : "")
     }
 }
 
@@ -422,17 +616,20 @@ final class PanelContent: NSView {
         background.stroke()
         layout.header?.draw(inRect: layout.headerRect)
         layout.preedit?.draw(inRect: layout.preeditTextRect)
+        layout.glossLine?.draw(inRect: layout.glossLineRect)
         for row in layout.rows {
             if row.selected {
+                let highlightRect = layout.compactRowHighlights
+                    ? row.frame.insetBy(dx: 0, dy: 0)
+                    : NSRect(x: m.windowPadding, y: row.frame.minY,
+                             width: layout.innerWidth + m.highlightRightExtension, height: row.frame.height)
                 let highlight = NSBezierPath(
-                    roundedRect: NSRect(x: m.windowPadding, y: row.frame.minY,
-                                        width: layout.innerWidth + m.highlightRightExtension,
-                                        height: row.frame.height),
+                    roundedRect: highlightRect,
                     xRadius: m.selectionRadius, yRadius: m.selectionRadius)
                 theme.selectedFill.setFill()
                 highlight.fill()
             }
-            row.index.draw(inRect: NSRect(x: m.windowPadding + m.rowLeftPadding + m.indexLeftMargin,
+            row.index.draw(inRect: NSRect(x: row.indexX,
                                           y: row.frame.minY + m.indexTopMargin,
                                           width: row.indexWidth, height: m.indexLineHeight))
             row.word.draw(inRect: NSRect(x: row.wordX, y: row.frame.minY + m.wordTopMargin,

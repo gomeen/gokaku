@@ -30,10 +30,11 @@ struct ShortcutsPage: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 用户裁决 2026-11-02：去掉标题行，筛选胶囊与搜索同行。
             headerCard
-            groupHeader("模式切换")
-            commandRows
+            if !ConfigurableCommand.uiCases.isEmpty {
+                groupHeader("模式切换")
+                commandRows
+            }
             groupHeader("组合中的操作")
             fixedRows
         }
@@ -113,7 +114,7 @@ struct ShortcutsPage: View {
     // MARK: 可编辑命令行
 
     @ViewBuilder private var commandRows: some View {
-        let commands = ConfigurableCommand.allCases.filter { visible($0) }
+        let commands = ConfigurableCommand.uiCases.filter { visible($0) }
         if commands.isEmpty {
             emptyRow
         } else {
@@ -135,7 +136,7 @@ struct ShortcutsPage: View {
 
     @ViewBuilder private var fixedRows: some View {
         let operations = KeyCombo.fixedOperations().filter { visible($0) }
-        if operations.isEmpty && ConfigurableCommand.allCases.filter({ visible($0) }).isEmpty {
+        if operations.isEmpty && ConfigurableCommand.uiCases.filter({ visible($0) }).isEmpty {
             emptyRow
         } else {
             VStack(spacing: 0) {
@@ -161,9 +162,9 @@ struct ShortcutsPage: View {
 
     private func count(for filter: Filter) -> Int {
         switch filter {
-        case .all: return ConfigurableCommand.allCases.count + KeyCombo.fixedOperations().count
-        case .changed: return ConfigurableCommand.allCases.filter { isChanged($0) }.count
-        case .conflict: return ConfigurableCommand.allCases.filter { conflictText(for: $0) != nil }.count
+        case .all: return ConfigurableCommand.uiCases.count + KeyCombo.fixedOperations().count
+        case .changed: return ConfigurableCommand.uiCases.filter { isChanged($0) }.count
+        case .conflict: return ConfigurableCommand.uiCases.filter { conflictText(for: $0) != nil }.count
         }
     }
 

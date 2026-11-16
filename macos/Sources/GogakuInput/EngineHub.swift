@@ -79,7 +79,9 @@ final class EngineHub {
         config.userDir = Settings.chineseDirectory.path
         config.customWordsPath = Settings.customWordsPath.path
         config.englishWordsPath = Paths.engineData.appendingPathComponent("english-words.txt").path
+        #if !GOGAKU_LITE
         config.glossPath = Paths.engineData.appendingPathComponent("gloss.tsv").path
+        #endif
         config.scheme = settings.inputScheme == .fullPinyin ? Int32(GC_SCHEME_FULLPINYIN.rawValue) : Int32(GC_SCHEME_XIAOHE.rawValue)
         config.fuzzyMask = settings.fuzzyMask
         config.fullPinyinPreedit = settings.fullPinyinPreedit
@@ -87,6 +89,8 @@ final class EngineHub {
         config.englishEnabled = settings.englishCandidatesEnabled
         let engine = NormalEngine(config: config)
         engine?.setAppDefaults(settings.enabledDefaultEnglishApps)
+        let hps: Int32 = settings.candidateLayout == .horizontal ? Int32(settings.horizontalPageSize) : 0
+        engine?.setLayout(horizontalPageSize: hps)
         if let message = engine?.creationError {
             NSLog("Gogaku NormalEngine: %@", message)
         }

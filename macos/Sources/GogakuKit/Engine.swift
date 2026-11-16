@@ -112,6 +112,12 @@ public struct CompositionView: Sendable {
     public var preeditCaretUTF16: Int?
     /// 候选总数（含后续页），用于页码指示。
     public var totalCandidates = 0
+    /// 普通模式分页大小（与设置 horizontalPageSize／竖排 9 一致）。
+    public var normalPageSize = 9
+    /// 普通模式横排候选窗（学习模式不受影响）。
+    public var candidateLayoutHorizontal = false
+    /// 横排时是否在选中项下显示释义行（完整版 glossEnabled）。
+    public var horizontalGlossRowEnabled = false
     public init(stamp: InputStamp) { self.stamp = stamp }
 }
 public struct Draft: Identifiable, Sendable {

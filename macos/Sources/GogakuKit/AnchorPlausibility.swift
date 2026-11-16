@@ -46,6 +46,31 @@ public enum AnchorPlausibility {
         case escapeAccept
     }
 
+    /// 宿主回报的插入点矩形是否可能是真实光标。
+    ///
+    /// 2026-11-13 微信真机实测：微信有时把**整个屏幕**矩形（0,0,2560,1410）
+    /// 当成插入点矩形回报。它有限、正高、落在屏内，旧规则全部通过，于是
+    /// `PanelPlacement` 把它当锚点算成「上翻到屏幕顶部」——面板钉在左上角
+    /// (8,38)，且后续读数持续相同、逃生门一到就被采纳，再也回不来。
+    ///
+    /// 光标矩形的物理上限：高度永远是一行文本量级。超过屏幕可视区高度的一半，
+    /// 或面积超过可视区的四分之一，就不是光标（整行宽的单行矩形仍合法）。
+    public static func isPlausibleCaret(_ rect: NSRect, screens: [ScreenFrame]) -> Bool {
+        guard rect != .zero,
+              rect.origin.x.isFinite, rect.origin.y.isFinite,
+              rect.size.width.isFinite, rect.size.height.isFinite,
+              rect.size.width >= 0, rect.size.height > 0 else { return false }
+        guard let screen = screens.first(where: {
+            $0.visibleFrame.origin.x.isFinite && $0.visibleFrame.origin.y.isFinite
+                && $0.visibleFrame.intersects(rect)
+        }) else { return false }
+        let visible = screen.visibleFrame
+        guard visible.width > 0, visible.height > 0 else { return false }
+        if rect.height >= visible.height * 0.5 { return false }
+        if rect.width * rect.height >= visible.width * visible.height * 0.25 { return false }
+        return true
+    }
+
     /// - Parameters:
     ///   - previousProvisional: 上次锚点只是组合前的临时锚点（首键 pre-read 或无锚点
     ///     回退），还没有任何组合内读数印证 → 组合内首个有效读数直接采纳。

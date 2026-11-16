@@ -58,6 +58,30 @@ GGHostSnapshot *gg_read_host_state(id value, BOOL includeRectangle) {
                     rectangleValid = YES;
                 }
             }
+            // 无组合时按选区读到的矩形可能是「屏幕左上角垃圾」（2026-11-16 诊断
+            // 实测：Orca 在 sel={1,0} 时返回 {{0,1410},{1,12}}，而同一时刻索引 0
+            // 稳定返回真实输入行 {{335,145},{1,19}}）。这类读数有限、正高、在屏内，
+            // 上层所有合理性检查都拦不住，只能在这里用索引 0 交叉核对：
+            // 两者相差跨多行时以索引 0 为准（打字光标不会离组合起点多行）。
+            // 注意仍只把「索引 0」当交叉证据，不把它当无组合时的首选读数
+            // （无组合时索引 0 会在相邻字符格间循环，见上一条注释）。
+            if (rectangleValid && (marked.location == NSNotFound || marked.length == 0)) {
+                // 只在「看起来可疑」时才多读一次索引 0（省掉原生宿主的额外 IPC）：
+                // 可疑＝贴在屏幕最上方（菜单栏区域）或选区长度异常（sel={1,0} 这类
+                // Orca 抖动特征）。正常光标不受影响。
+                BOOL suspect = NSMinY(rectangle) >= NSMaxY([[NSScreen screens] firstObject].frame) - 60;
+                if (suspect) {
+                    NSRect zeroIndex = NSZeroRect;
+                    @try { [client attributesForCharacterIndex:0 lineHeightRectangle:&zeroIndex]; }
+                    @catch (NSException *nested) { zeroIndex = NSZeroRect; }
+                    if (gg_rectangle_usable(zeroIndex)) {
+                        CGFloat lineHeight = MAX(MAX(rectangle.size.height, zeroIndex.size.height), 12);
+                        if (fabs(NSMidY(rectangle) - NSMidY(zeroIndex)) > lineHeight * 2) {
+                            rectangle = zeroIndex;
+                        }
+                    }
+                }
+            }
         }
         GGHostSnapshot *result = [GGHostSnapshot new];
         result.clientID = @""; result.application = application;

@@ -403,6 +403,21 @@ void test_paging(const Env &env) {
     gc_normal_session_destroy(s);
 }
 
+void test_paging_horizontal(const Env &env) {
+    auto *s = make_session(env, false, GC_SCHEME_FULLPINYIN);
+    gc_normal_set_layout(s, 7);
+    send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "a");
+    DelSnap p1{send(s, GC_EV_TEXT, "o")};
+    check_eq(p1.p ? p1.p->count : 0, 7, "横排每页 7 个");
+    check_eq(p1.p ? p1.p->page_count : 0, 2, "横排两页");
+    DelSnap pd{send(s, GC_EV_PAGE_DOWN)};
+    check_eq(pd.p ? pd.p->count : 0, 5, "横排第 2 页 5 个");
+    DelSnap d7{send(s, GC_EV_TEXT, "7")};
+    check(d7.p != nullptr && d7.p->commit[0] != '\0', "横排页内数字 7 选词");
+    gc_normal_set_layout(s, 0);
+    gc_normal_session_destroy(s);
+}
+
 void test_shift(const Env &env) {
     { // 组合中 Shift：暂存＋剩余原编码一次上屏，同一事件进入临时英文。
         auto *s = make_session(env);
@@ -1500,6 +1515,7 @@ int main() {
         {"in_composition_punct", test_in_composition_punct},
         {"digits", test_digits},
         {"paging", test_paging},
+        {"paging_horizontal", test_paging_horizontal},
         {"shift", test_shift},
         {"per_app_english", test_per_app_english},
         {"english_candidates", test_english_candidates},
