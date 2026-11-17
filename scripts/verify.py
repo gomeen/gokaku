@@ -167,15 +167,21 @@ def check_core_tests(ctx):
     # 必须显式写 -DGOGAKU_LITE=OFF：CMake 把该开关缓存在构建目录里，
     # 之前若跑过 Lite 构建，这里不传就会沿用 ON，核心变成学习桩——Swift 侧
     # EngineTests 全报 invalidCommand（2026-11-16 实测，同 build.py 的坑）。
+    env = {'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data')} if (CACHE / 'data').exists() else {}
+    # 候选窗渲染向量需要字体：优先环境传入，回退到公开苹方（Lark workaround
+    # 副本）或 Hiragino。缺失时测试自行 SKIP（退出码 3，下面会拒未跑项）。
+    if 'GOGAKU_PANEL_FONT' not in env:
+        candidates = [Path.home() / 'Library/Application Support/com.electron.lark.font_workaround/PingFang.ttc',
+                      Path('/System/Library/Fonts/Hiragino Sans GB.ttc')]
+        env['GOGAKU_PANEL_FONT'] = next((str(p) for p in candidates if p.exists()), '')
     result = sh(['cmake', '-S', 'shared/GogakuCore', '-B', ctx['core_dir'],
                  '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', f'-DGOGAKU_DEPS={CACHE}',
-                 '-DGOGAKU_LITE=OFF'])
+                 '-DGOGAKU_LITE=OFF'], env=env)
     if result.returncode != 0:
         return FAIL, 'cmake 配置失败：' + result.stderr[-400:], None
     result = sh(['cmake', '--build', ctx['core_dir'], '-j', str(ctx['jobs'])])
     if result.returncode != 0:
         return FAIL, '核心构建失败：' + (result.stdout[-300:] + result.stderr[-300:]), None
-    env = {'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data')} if (CACHE / 'data').exists() else {}
     result = sh(['ctest', '--test-dir', ctx['core_dir'], '--output-on-failure', '--no-tests=error'], env=env, timeout=1200)
     evidence = ctx.evidence('core-ctest.log', result.stdout + result.stderr)
     problems = validate_ctest_result(result.returncode, result.stdout + result.stderr)

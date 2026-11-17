@@ -40,8 +40,74 @@ if(WIN32)
 endif()
 
 option(GOGAKU_LITE "Build shared core without learning session" OFF)
+
+# ── vendored 文本栈（候选窗位图渲染器）────────────────────────
+# zlib 1.3.1 ＋ libpng 1.6.44（PNG sbix emoji 需要）＋ FreeType 2.14.3
+# （FTL）＋ HarfBuzz 14.5.0（MIT），全部纯静态编入，两端同一份源码。
+# FreeType 禁 brotli/harfbuzz 子集；libpng 只编核心读写源文件。
+set(GOGAKU_FT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/freetype)
+set(GOGAKU_HB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/harfbuzz)
+set(GOGAKU_ZLIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/zlib)
+set(GOGAKU_PNG_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/libpng)
+option(GOGAKU_PANEL_RENDER "Build panel bitmap renderer (HarfBuzz+FreeType)" ON)
+if(GOGAKU_PANEL_RENDER)
+    # zlib 核心（libpng 与 ftgzip 共用；不编 gz* 文件 IO）。静态符号不导出，
+    # Windows 侧不与系统 zlib 冲突。
+    add_library(gogaku_zlib STATIC ${GOGAKU_ZLIB_DIR}/adler32.c
+        ${GOGAKU_ZLIB_DIR}/compress.c ${GOGAKU_ZLIB_DIR}/crc32.c
+        ${GOGAKU_ZLIB_DIR}/deflate.c ${GOGAKU_ZLIB_DIR}/infback.c
+        ${GOGAKU_ZLIB_DIR}/inffast.c ${GOGAKU_ZLIB_DIR}/inflate.c
+        ${GOGAKU_ZLIB_DIR}/inftrees.c ${GOGAKU_ZLIB_DIR}/trees.c
+        ${GOGAKU_ZLIB_DIR}/uncompr.c ${GOGAKU_ZLIB_DIR}/zutil.c)
+    target_include_directories(gogaku_zlib PUBLIC ${GOGAKU_ZLIB_DIR})
+    target_compile_definitions(gogaku_zlib PRIVATE ZLIB_INTERNAL)
+
+    # libpng：pnglibconf.h 用上游预生成版。
+    add_library(gogaku_png STATIC ${GOGAKU_PNG_DIR}/png.c
+        ${GOGAKU_PNG_DIR}/pngerror.c ${GOGAKU_PNG_DIR}/pngget.c
+        ${GOGAKU_PNG_DIR}/pngmem.c ${GOGAKU_PNG_DIR}/pngpread.c
+        ${GOGAKU_PNG_DIR}/pngread.c ${GOGAKU_PNG_DIR}/pngrio.c
+        ${GOGAKU_PNG_DIR}/pngrtran.c ${GOGAKU_PNG_DIR}/pngrutil.c
+        ${GOGAKU_PNG_DIR}/pngset.c ${GOGAKU_PNG_DIR}/pngtrans.c
+        ${GOGAKU_PNG_DIR}/pngwio.c ${GOGAKU_PNG_DIR}/pngwrite.c
+        ${GOGAKU_PNG_DIR}/pngwtran.c ${GOGAKU_PNG_DIR}/pngwutil.c)
+    target_include_directories(gogaku_png PUBLIC ${GOGAKU_PNG_DIR})
+    target_link_libraries(gogaku_png PUBLIC gogaku_zlib)
+
+    # 精简驱动集：base 用官方 unity（ftbase.c，含 ftobjs/ftcalc/ftstream…）
+    # ＋ftbitmap，驱动只编 tt+cff+sfnt+autofit+pshinter+psnames+smooth+cache；
+    # 候选窗只吃 ttc/ttf/otf，ps/bdf/pcf/winfonts/sdf/svg/gzip 不编入。
+    # 自带精简 ftmodule.h（panel_render/ftconfig）只注册编入的模块。
+    add_library(gogaku_freetype STATIC ${GOGAKU_FT_DIR}/src/base/ftsystem.c
+        ${GOGAKU_FT_DIR}/src/base/ftinit.c ${GOGAKU_FT_DIR}/src/base/ftdebug.c
+        ${GOGAKU_FT_DIR}/src/base/ftbase.c ${GOGAKU_FT_DIR}/src/base/ftbitmap.c
+        ${GOGAKU_FT_DIR}/src/base/ftmm.c ${GOGAKU_FT_DIR}/src/base/ftglyph.c
+        ${GOGAKU_FT_DIR}/src/sfnt/sfnt.c
+        ${GOGAKU_FT_DIR}/src/truetype/truetype.c ${GOGAKU_FT_DIR}/src/cff/cff.c
+        ${GOGAKU_FT_DIR}/src/autofit/autofit.c ${GOGAKU_FT_DIR}/src/pshinter/pshinter.c
+        ${GOGAKU_FT_DIR}/src/psnames/psnames.c ${GOGAKU_FT_DIR}/src/psaux/psaux.c
+        ${GOGAKU_FT_DIR}/src/raster/raster.c
+        ${GOGAKU_FT_DIR}/src/smooth/smooth.c ${GOGAKU_FT_DIR}/src/cache/ftcache.c
+        ${GOGAKU_FT_DIR}/src/gzip/ftgzip.c)
+    target_include_directories(gogaku_freetype PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/panel_render/ftconfig)
+    target_compile_definitions(gogaku_freetype PRIVATE FT2_BUILD_LIBRARY
+        FT_CONFIG_MODULES_H=<ftmodule.h> FT_CONFIG_OPTION_USE_PNG)
+    target_include_directories(gogaku_freetype PRIVATE ${GOGAKU_PNG_DIR})
+    target_link_libraries(gogaku_freetype PRIVATE gogaku_png)
+    target_include_directories(gogaku_freetype PUBLIC ${GOGAKU_FT_DIR}/include)
+    add_library(gogaku_harfbuzz STATIC ${GOGAKU_HB_DIR}/src/harfbuzz.cc)
+    target_include_directories(gogaku_harfbuzz PUBLIC ${GOGAKU_HB_DIR}/src)
+    target_compile_definitions(gogaku_harfbuzz PRIVATE HAVE_FREETYPE=1
+        HB_NO_DIRECTWRITE HB_NO_CORETEXT HB_NO_ICU HB_NO_CAIRO HB_NO_GDI HB_NO_UNISCRIBE
+        HB_NO_MT)
+    target_link_libraries(gogaku_harfbuzz PUBLIC gogaku_freetype)
+endif()
+
 set(GOGAKU_CORE_SOURCES core.cpp normal_session.cpp custom_words.cpp
     settings_contract.cpp theme_contract.cpp)
+if(GOGAKU_PANEL_RENDER)
+    list(INSERT GOGAKU_CORE_SOURCES 0 panel_render/panel_render.cpp)
+endif()
 if(GOGAKU_LITE)
     list(APPEND GOGAKU_CORE_SOURCES learning_session_stub.cpp)
 else()
@@ -56,6 +122,9 @@ target_link_libraries(GogakuCore PRIVATE IMEPinyin IMECore Fcitx5Utils)
 target_compile_definitions(GogakuCore PRIVATE GOGAKU_CORE_BUILDING)
 if(GOGAKU_LITE)
     target_compile_definitions(GogakuCore PUBLIC GOGAKU_LITE=1)
+endif()
+if(GOGAKU_PANEL_RENDER)
+    target_link_libraries(GogakuCore PRIVATE gogaku_harfbuzz)
 endif()
 set_target_properties(GogakuCore PROPERTIES
     OUTPUT_NAME gogaku_core
@@ -170,6 +239,21 @@ target_include_directories(gogaku_core_theme_contract_test PRIVATE include "${CM
 target_link_libraries(gogaku_core_theme_contract_test PRIVATE GogakuCore)
 gogaku_enable_sanitizers(gogaku_core_theme_contract_test)
 add_test(NAME theme_contract COMMAND gogaku_core_theme_contract_test)
+
+# 候选窗位图渲染契约向量：布局几何、命中区域、错误路径（需 GOGAKU_PANEL_FONT）。
+add_executable(gogaku_core_panel_render_test tests/panel_render_test.cpp)
+target_include_directories(gogaku_core_panel_render_test PRIVATE include "${CMAKE_CURRENT_SOURCE_DIR}/../third_party")
+target_link_libraries(gogaku_core_panel_render_test PRIVATE GogakuCore)
+gogaku_enable_sanitizers(gogaku_core_panel_render_test)
+add_test(NAME panel_render COMMAND gogaku_core_panel_render_test)
+# 字体路径经环境变量注入（ctest 继承父环境；verify.py 与手动跑都导出
+# GOGAKU_PANEL_FONT）。configure 时为空则不覆盖，让测试进程直接继承。
+set(GOGAKU_PANEL_FONT_DEFAULT "$ENV{GOGAKU_PANEL_FONT}")
+if(GOGAKU_PANEL_FONT_DEFAULT)
+    set_tests_properties(panel_render PROPERTIES ENVIRONMENT
+        "GOGAKU_PANEL_FONT=${GOGAKU_PANEL_FONT_DEFAULT}")
+endif()
+set_tests_properties(panel_render PROPERTIES SKIP_RETURN_CODE 3)
 
 # 数据可靠性测试辅助进程（probes/validate-data-reliability.py 启动／校验）。
 add_executable(gogaku_data_reliability_worker tests/data_reliability_worker.cpp)

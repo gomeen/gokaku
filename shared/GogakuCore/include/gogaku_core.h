@@ -33,6 +33,11 @@
  * gc_contract_free。它们不依赖会话、不碰平台框架，两端读同一份
  * settings.json 时得到同一个规范化结果；解析、默认值、迁移与范围钳制
  * 只有这一份实现。
+ *
+ * 候选窗位图渲染契约（panel_render.h）：gc_panel_render 把帧 JSON＋有效
+ * 主题渲染成预乘 RGBA 位图与命中区域表，一处实现两端贴图；HarfBuzz＋
+ * FreeType 静态编入本库（vendored 源码在 third_party/，见 panel_render/
+ * README.md）。
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -480,6 +485,7 @@ GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
  * 出厂清单；schemaVersion < 2 时按 learningTranslationBackend 迁移学习翻译
  * 开关并删除遗留字段；未知字段原样保留；未来 schema 按已知字段读并输出 2。
  */
+#include "../panel_render.h"
 #include "../settings_contract.h"
 #include "../theme_contract.h"
 
