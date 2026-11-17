@@ -374,27 +374,97 @@ void App::learningPage(){
     SetWindowLongPtrW(controls.back(),GWLP_ID,106);label(L"仅为本机成功请求计量，不代表账户余额或官方免费额度。",450,40);
 }
 void App::normalPage(){
-    label(L"普通输入",18);label(L"输入方案",60,24,20,100);combo(200,{L"小鹤双拼",L"全拼"},settings.value("inputScheme",std::string())=="fullPinyin",140,56);
+    // 行网格：所有控件按同一套列几何排布，避免绝对坐标各自为政。
+    // 列宽：标签 130、主控件 220、次控件 120；行高 34；组间距 14。
+    // reflowControls 按 y 归行，因此同一视觉行的控件必须共用同一 y 基准。
+    constexpr int LabelW=130, CtrlW=220, SmallW=120, RowH=34, GroupGap=14;
+    const int Left=20, CtrlX=Left+LabelW, Ctrl2X=CtrlX+CtrlW+16;
+    int y=20;
+    auto nextRow=[&](int height){ y+=height; };
+    auto groupGap=[&](){ y+=GroupGap; };
+    // 行内标签：与同行控件同 y，垂直居中偏移 4。
+    auto rowLabel=[&](const wchar_t *text,int rowY){ return label(text,rowY+4,22,Left,LabelW); };
+
+    label(L"普通输入",18);
+
+    // ── 输入方案 ──────────────────────────────────────────────
+    rowLabel(L"输入方案",y);
+    combo(200,{L"小鹤双拼",L"全拼"},settings.value("inputScheme",std::string())=="fullPinyin",CtrlX,y,CtrlW);
     actions[200]=[this](int n){if(n==CBN_SELCHANGE)patch({{"inputScheme",SendMessageW(get(200),CB_GETCURSEL,0,0)==1?"fullPinyin":"xiaohe"}});};
-    label(L"模糊音",100);auto fuzzy=settings.value("fuzzyPinyin",Json::array());
-    for(int i=0;i<9;++i){check(gw::wide(Fuzzy[i]).c_str(),210+i,20+(i%3)*180,130+(i/3)*32,std::find(fuzzy.begin(),fuzzy.end(),Fuzzy[i])!=fuzzy.end(),170);
-        actions[210+i]=[this](int n){if(n!=BN_CLICKED)return;Json values=Json::array();for(int k=0;k<9;++k)if(checked(210+k))values.push_back(Fuzzy[k]);patch({{"fuzzyPinyin",values}});};}
-    label(L"候选字号（旧默认主题）",240,24,20,190);auto slider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,220,232,250,45,220);SendMessageW(slider,TBM_SETRANGE,TRUE,MAKELONG(12,16));SendMessageW(slider,TBM_SETTICFREQ,1,0);SendMessageW(slider,TBM_SETPOS,TRUE,settings.value("candidateFontSize",14));
-    label(std::to_wstring(settings.value("candidateFontSize",14)),242,26,480,50);SetWindowLongPtrW(controls.back(),GWLP_ID,228);
-    label(L"候选窗排列",270,24,20,110);combo(229,{L"竖排",L"横排"},settings.value("candidateLayout",std::string())=="horizontal"?1:0,140,266);
+    nextRow(RowH); groupGap();
+
+    // ── 模糊音：三列九项，与标签列对齐 ────────────────────────
+    rowLabel(L"模糊音",y);
+    auto fuzzy=settings.value("fuzzyPinyin",Json::array());
+    const int fuzzyX=CtrlX, fuzzyColW=(CtrlW+16+CtrlW)/3;
+    for(int i=0;i<9;++i){
+        int col=i%3, rowIdx=i/3;
+        check(gw::wide(Fuzzy[i]).c_str(),210+i,fuzzyX+col*fuzzyColW,y+rowIdx*32,150,
+              std::find(fuzzy.begin(),fuzzy.end(),Fuzzy[i])!=fuzzy.end());
+        actions[210+i]=[this](int n){if(n!=BN_CLICKED)return;Json values=Json::array();for(int k=0;k<9;++k)if(checked(210+k))values.push_back(Fuzzy[k]);patch({{"fuzzyPinyin",values}});};
+    }
+    y+=3*32-2; groupGap();
+
+    // ── 候选字号：标签 + 滑块 + 数值同排 ──────────────────────
+    rowLabel(L"候选字号",y);
+    auto slider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,CtrlX,y+6,CtrlW,30,220);
+    SendMessageW(slider,TBM_SETRANGE,TRUE,MAKELONG(12,16));SendMessageW(slider,TBM_SETTICFREQ,1,0);
+    SendMessageW(slider,TBM_SETPOS,TRUE,settings.value("candidateFontSize",14));
+    label(std::to_wstring(settings.value("candidateFontSize",14)),y+9,24,CtrlX+CtrlW+10,44);
+    SetWindowLongPtrW(controls.back(),GWLP_ID,228);
+    nextRow(RowH); 
+
+    // ── 候选窗排列 ────────────────────────────────────────────
+    rowLabel(L"候选窗排列",y);
+    combo(229,{L"竖排",L"横排"},settings.value("candidateLayout",std::string())=="horizontal"?1:0,CtrlX,y,CtrlW);
     actions[229]=[this](int n){if(n==CBN_SELCHANGE)patch({{"candidateLayout",SendMessageW(get(229),CB_GETCURSEL,0,0)==1?"horizontal":"vertical"}});};
-    label(L"横排每页",270,24,300,90);auto hslider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,298,266,250,45,230);SendMessageW(hslider,TBM_SETRANGE,TRUE,MAKELONG(4,9));
+    nextRow(RowH);
+
+    // ── 横排每页：仅横排时可编辑（否则禁用，避免无效控件）────
+    rowLabel(L"横排每页",y);
+    auto hslider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,CtrlX,y+6,CtrlW,30,230);
+    SendMessageW(hslider,TBM_SETRANGE,TRUE,MAKELONG(4,9));
     SendMessageW(hslider,TBM_SETPOS,TRUE,settings.value("horizontalPageSize",7));
-    label(std::to_wstring(settings.value("horizontalPageSize",7)),300,26,558,50);SetWindowLongPtrW(controls.back(),GWLP_ID,2300);
-    bindBool(L"显示英文释义",221,326,"glossEnabled");bindBool(L"显示输入区字母（安全字段仍禁用）",222,358,"inputLettersEnabled");
-    label(L"字母显示",368,24,20,110);combo(223,{L"展开全拼",L"原始编码"},settings.value("fullPinyinPreedit",true)?0:1,140,362);
+    label(std::to_wstring(settings.value("horizontalPageSize",7)),y+9,24,CtrlX+CtrlW+10,44);
+    SetWindowLongPtrW(controls.back(),GWLP_ID,2300);
+    {
+        bool horizontal=settings.value("candidateLayout",std::string())=="horizontal";
+        EnableWindow(hslider,horizontal);EnableWindow(controls.back(),horizontal);
+    }
+    nextRow(RowH); groupGap();
+
+    // ── 开关组：单列左对齐，与标签列同起点 ───────────────────
+    bindBool(L"显示英文释义",221,y,"glossEnabled"); nextRow(30);
+    bindBool(L"显示输入区字母（安全字段仍禁用）",222,y,"inputLettersEnabled"); nextRow(30);
+    rowLabel(L"字母显示",y);
+    combo(223,{L"展开全拼",L"原始编码"},settings.value("fullPinyinPreedit",true)?0:1,CtrlX,y,CtrlW);
     actions[223]=[this](int n){if(n==CBN_SELCHANGE)patch({{"fullPinyinPreedit",SendMessageW(get(223),CB_GETCURSEL,0,0)==0}});};
-    bindBool(L"中文模式下提供英文候选",224,408,"englishCandidatesEnabled");bindBool(L"学习普通模式完整上屏的中文调频",225,440,"frequencyEnabled");button(L"清空调频…",227,480,438,140);
+    nextRow(30);
+    bindBool(L"中文模式下提供英文候选",224,y,"englishCandidatesEnabled"); nextRow(30);
+    bindBool(L"学习普通模式完整上屏的中文调频",225,y,"frequencyEnabled"); nextRow(30);
+    button(L"清空调频…",227,CtrlX,y,SmallW);
     actions[227]=[this](int n){if(n!=BN_CLICKED)return;if(MessageBoxW(window,L"仅清空个人调频，不删除出厂词和自定义词。继续？",L"清空调频",MB_YESNO|MB_ICONWARNING)!=IDYES)return;
         status(L"正在请求输入核心清空调频…");job("clear",[]{gw::RpcClient rpc;Json response;if(!rpc.connect()||!rpc.call({{"op","clear"}},response,4000)||!response.value("ok",false))throw std::runtime_error("输入法未确认清空；未删除任何词库文件，请重试。");return response;});};
-    label(L"按应用默认英文",498);edit(L"",240,20,530,430);button(L"选择 .exe…",242,470,530,120);button(L"输入包身份…",243,604,530,140);
-    list(241,572,240,{{L"应用",220},{L"路径／包身份",570}},840,true);button(L"移除",244,20,826);button(L"启用／停用",245,144,826,130);
-    actions[240]=[this](int n){if(n==EN_CHANGE)fillApps();};actions[242]=[this](int n){if(n==BN_CLICKED)addApp(true);};actions[243]=[this](int n){if(n==BN_CLICKED)addApp(false);};actions[244]=[this](int n){if(n==BN_CLICKED)removeApp();};actions[245]=[this](int n){int i=selection(241);if(n==BN_CLICKED && i>=0)toggleApp(size_t(i));};fillApps();
+    nextRow(RowH); groupGap();
+
+    // ── 按应用默认英文 ────────────────────────────────────────
+    rowLabel(L"按应用默认英文",y);
+    edit(L"",240,CtrlX,y,CtrlW,28);
+    button(L"选择 .exe…",242,Ctrl2X,y,SmallW);
+    button(L"输入包身份…",243,Ctrl2X+SmallW+8,y,SmallW+20);
+    actions[240]=[this](int n){if(n==EN_CHANGE)fillApps();};
+    actions[242]=[this](int n){if(n==BN_CLICKED)addApp(true);};
+    actions[243]=[this](int n){if(n==BN_CLICKED)addApp(false);};
+    nextRow(RowH);
+
+    list(241,y,240,{{L"应用",220},{L"路径／包身份",570}},840,true);
+    nextRow(240);
+    button(L"移除",244,CtrlX,y,SmallW);
+    button(L"启用／停用",245,CtrlX+SmallW+8,y,SmallW+20);
+    actions[244]=[this](int n){if(n==BN_CLICKED)removeApp();};
+    actions[245]=[this](int n){int i=selection(241);if(n==BN_CLICKED && i>=0)toggleApp(size_t(i));};
+    nextRow(RowH);
+    fillApps();
 }
 void App::fillApps(){
     if(!get(241))return;bool previous=building;building=true;ListView_DeleteAllItems(get(241));visibleApps.clear();

@@ -476,10 +476,50 @@ begin
   if not Result then MsgBox(MessageText, mbError, MB_OK);
 end;
 
+{ 结束指定映像名的进程；没在跑时返回非 0，忽略。只结束本产品的 exe：
+  TSF DLL 被宿主（微信、资源管理器等）映射，不能也不该去杀那些宿主。 }
+procedure KillImage(const Image: String);
+var
+  ResultCode: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/im ' + Image + ' /f', '',
+    SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+{ 同版本重装时目标 DLL 与已加载映像撞名：已加载的 PE 不能覆盖，但 Windows
+  允许改名。改成 <原名>.old-<随机> 腾出名字，装完由 DeleteRetiredDlls 删掉；
+  删不掉就登记成重启后删（沿用文件直到宿主退出，不会让用户失去输入法）。
+  这与「先 regsvr32 /u 再覆盖」的区别：注销会让输入法立刻从系统消失，
+  改名则让新旧 DLL 并存、无感升级（借鉴青简的 RetireLoadedDll）。 }
+procedure RetireLoadedDll(const FullPath: String);
+var
+  Retired: String;
+begin
+  if not FileExists(FullPath) then Exit;
+  Retired := FullPath + '.old-' + IntToStr(Random(1000000));
+  if not RenameFile(FullPath, Retired) then
+    Log('改名被占用的 DLL 失败（稍后由锁检查给出原因）: ' + FullPath);
+end;
+
+{ 覆盖前只结束本产品自己的 exe（代理与设置）。 }
+procedure StopOwnProcesses();
+begin
+  KillImage('GogakuAgent.exe');
+  KillImage('GogakuSettings.exe');
+end;
+
 function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Root: String;
 begin
   { 只检查本次目标 payload；旧版本 DLL 可以继续被旧宿主持有。 }
   CapturePreviousState();
+  Root := PayloadRoot();
+  { 顺序：先停自己的 exe，再给被占用的 DLL 腾名字，最后才检查锁。
+    反过来必然误报「无法替换或删除文件」（2026-11-16 用户重装实测）。 }
+  StopOwnProcesses();
+  RetireLoadedDll(Root + '\bin\x64\GogakuTsf.dll');
+  RetireLoadedDll(Root + '\bin\x86\GogakuTsf.dll');
   Result := LockMessage(False);
 end;
 
@@ -509,6 +549,47 @@ begin
     if not RestorePointers(OtherDetail) then MessageText := MessageText + #13#10 + OtherDetail;
     RaiseException(MessageText);
   end;
+end;
+
+{ 删掉 RetireLoadedDll 改名腾位的旧 DLL。仍被宿主映射着的删不掉，
+  登记成重启后删——那些宿主重启前继续用旧 DLL，不会让用户失去输入法。 }
+procedure DeleteRetiredDlls();
+var
+  Dir: String;
+  Found: TFindRec;
+  Path: String;
+begin
+  Dir := PayloadRoot() + '\bin\x64';
+  if FindFirst(Dir + '\GogakuTsf.dll.old-*', Found) then
+  begin
+    try
+      repeat
+        Path := Dir + '\' + Found.Name;
+        if not DeleteFile(Path) then RestartReplace(Path, '');
+      until not FindNext(Found);
+    finally
+      FindClose(Found);
+    end;
+  end;
+  Dir := PayloadRoot() + '\bin\x86';
+  if FindFirst(Dir + '\GogakuTsf.dll.old-*', Found) then
+  begin
+    try
+      repeat
+        Path := Dir + '\' + Found.Name;
+        if not DeleteFile(Path) then RestartReplace(Path, '');
+      until not FindNext(Found);
+    finally
+      FindClose(Found);
+    end;
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+begin
+  { 注册由 [Files] 的 AfterInstall: RegisterComponents 完成；这里只清理
+    PrepareToInstall 改名腾位留下的旧 DLL。 }
+  if CurStep = ssPostInstall then DeleteRetiredDlls();
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
