@@ -536,7 +536,7 @@ final class GogakuInputController: IMKInputController {
         hub.async { [weak self] in
             guard let self else { return }
             guard let normal = self.hub.engine(settings) else { return }
-            normal.update(scheme: settings.inputScheme == .fullPinyin ? Int32(GC_SCHEME_FULLPINYIN.rawValue) : Int32(GC_SCHEME_XIAOHE.rawValue),
+            normal.update(scheme: settings.inputScheme.coreValue,
                           fuzzyMask: settings.fuzzyMask,
                           fullPinyinPreedit: settings.fullPinyinPreedit,
                           freqEnabled: settings.frequencyEnabled,

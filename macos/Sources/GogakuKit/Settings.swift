@@ -202,10 +202,35 @@ public struct CandidateThemeID: RawRepresentable, Codable, Hashable, Sendable {
     public static let grok = Self(rawValue: "grok")!
     public static let witch = Self(rawValue: "witch")!
 }
-/// 普通模式输入方案（共享核心 GcScheme）。
-public enum InputScheme: String, Codable, Sendable {
+/// 普通模式输入方案（共享核心 GcScheme，经 settings_contract 的 gc_scheme_from_id 唯一映射）。
+/// rawValue 即 settings.json 的 inputScheme 字符串；新增方案必须同步共享核心的映射表。
+public enum InputScheme: String, Codable, Sendable, CaseIterable {
     case xiaohe
     case fullPinyin
+    case ziranma
+    case mspy
+    case abc
+    case ziguang
+    case pinyinjiajia
+    case gb
+
+    /// 设置页显示名（与 Windows settings.cpp 的表同文案，双端一致）。
+    public var displayName: String {
+        switch self {
+        case .xiaohe: return "小鹤双拼"
+        case .fullPinyin: return "全拼"
+        case .ziranma: return "自然码"
+        case .mspy: return "微软双拼"
+        case .abc: return "智能ABC"
+        case .ziguang: return "紫光双拼"
+        case .pinyinjiajia: return "拼音加加"
+        case .gb: return "国标双拼"
+        }
+    }
+
+    /// 共享核心 GcScheme 数值；映射表唯一住在 settings_contract（gc_scheme_from_id），
+    /// 未知 ID 由共享核心回退小鹤，平台侧不写第二份容错。
+    public var coreValue: Int32 { gc_scheme_from_id(rawValue) }
     /// 模糊音对，按共享核心 GC_FUZZY_* 位标志。
     public static let fuzzyPairs: [(id: String, mask: UInt32)] = [
         ("z-zh", 1 << 0), ("c-ch", 1 << 1), ("s-sh", 1 << 2),

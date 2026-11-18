@@ -83,7 +83,7 @@ final class EngineHub {
         #if !GOGAKU_LITE
         config.glossPath = Paths.engineData.appendingPathComponent("gloss.tsv").path
         #endif
-        config.scheme = settings.inputScheme == .fullPinyin ? Int32(GC_SCHEME_FULLPINYIN.rawValue) : Int32(GC_SCHEME_XIAOHE.rawValue)
+        config.scheme = settings.inputScheme.coreValue
         config.fuzzyMask = settings.fuzzyMask
         config.fullPinyinPreedit = settings.fullPinyinPreedit
         config.freqEnabled = settings.frequencyEnabled

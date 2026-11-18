@@ -39,8 +39,9 @@ struct NormalInputPage: View {
     private var schemeCard: some View {
         SettingsCard("输入方案") {
             Picker("输入方案", selection: binding(\.inputScheme)) {
-                Text("小鹤双拼（默认）").tag(InputScheme.xiaohe)
-                Text("全拼").tag(InputScheme.fullPinyin)
+                ForEach(InputScheme.allCases, id: \.self) { scheme in
+                    Text(scheme == .xiaohe ? "小鹤双拼（默认）" : scheme.displayName).tag(scheme)
+                }
             }
             .pickerStyle(.radioGroup)
             .labelsHidden()   // 区块标题已是「输入方案」，避免行标签重复
