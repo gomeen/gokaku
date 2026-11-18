@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.1.7",
+  "channel": "stable",
+  "version": "0.1.7",
+  "buildNumber": 118,
+  "releaseId": 449797293,
+  "state": "published",
+  "publishedAt": "2026-11-18",
+  "commit": "974643f5946d6e953d367b597b51a1aab5511302",
+  "assets": {
+    "macos": {
+      "name": "Gogaku-0.1.7-b118.pkg",
+      "sha256": "48187510de9528d2fd876c378d63221b2fba632614ff75bd5b6415e3223ff7c3",
+      "bytes": 52109930
+    },
+    "windows": {
+      "name": "Gogaku-0.1.7-b118-windows-x64-setup.exe",
+      "sha256": "5e55c6b467573b6cbca1a77c528a8aba8878b93b0b421282e6f3b38e9761bd38",
+      "bytes": 58487088
+    },
+    "macosLite": {
+      "name": "GogakuLite-0.1.7-b118.pkg",
+      "sha256": "b72ff927641b4378606fc189308a92e65a6c726da9cad86e6b476946f6ae4f51",
+      "bytes": 48880193
+    },
+    "windowsLite": {
+      "name": "GogakuLite-0.1.7-b118-windows-x64-setup.exe",
+      "sha256": "73533dc4c4ad4797a894192623c0afb42fe798e7c2ae5efedc8ec4147065c62d",
+      "bytes": 56530601
+    },
+    "manifests": [
+      "update-manifest.json",
+      "update-manifest.json.sig",
+      "update-manifest-lite.json",
+      "update-manifest-lite.json.sig"
+    ]
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-b118.json",
+  "releaseReport": "verify/report-release-b118.json",
+  "hostWaiver": "用户 2026-11-18 决定直接发布：新增 Lite 模式与八输入方案的自动化验证（fast 7/7、release 14/14）已通过；真实宿主验收（引导页外观、侧栏切换、⌃⇧K/⌃⇧J 交还、新双拼方案实际打字）待补录。",
+  "notes": "0.1.7 新增完整版内 Lite 模式（首次引导选模式、侧栏快捷切换、学习入口隐藏、释义置灰、⌃⇧K/⌃⇧J 交还宿主、数据保留）与六种双拼方案（自然码/微软/智能ABC/紫光/拼音加加/国标，连同小鹤/全拼共八种，双端同步），修复 Windows 代理 scheme 布尔传参 bug 与微软/紫光分号 ing 键位。实现链：bb553c2（核心+Win）→4f8590e（Mac Lite 模式）→e942f3f（Mac 方案接入）。验证：fast 7/7（287 项 Swift）、release 14/14（十万序列 ASan/UBSan）；host 未运行（豁免理由见 hostWaiver），新增功能真机验收待补。公开清单用 gogaku-prod-2026-11 远端匿名验签通过（signature ok）；标签 v0.1.7 指向构建提交 974643f（先推 main 后发布）。"
+}
