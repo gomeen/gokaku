@@ -690,7 +690,8 @@ def main():
             for arch in ('x64', 'x86'):
                 folder = Path(args.bin_dir or ROOT / f'.build/win-app/{args.channel}/bin') / arch
                 validate_compile_receipt(folder / 'build-receipt.json', folder, args.channel, arch,
-                                         meta={'version': meta[0], 'buildNumber': meta[1]}, source=source)
+                                         meta={'version': meta[0], 'buildNumber': meta[1]}, source=source,
+                                         flavor=args.flavor)
             plan, evidence = binary_plan(args)
             for arch, names in (('x64', ['GogakuTsf.dll', 'GogakuAgent.exe',
                                          'GogakuSettings.exe', 'libgogaku_core.dll']),
@@ -698,7 +699,8 @@ def main():
                 receipt = validate_compile_receipt(
                     Path(args.bin_dir or ROOT / f'.build/win-app/{args.channel}/bin') / arch / 'build-receipt.json',
                     Path(args.bin_dir or ROOT / f'.build/win-app/{args.channel}/bin') / arch,
-                    args.channel, arch, meta={'version': meta[0], 'buildNumber': meta[1]}, source=source)
+                    args.channel, arch, meta={'version': meta[0], 'buildNumber': meta[1]}, source=source,
+                    flavor=args.flavor)
                 for name in names:
                     if evidence[arch][name]['sha256'] != receipt['artifacts'][name]['sha256']:
                         raise InputError(f'{arch}/{name} 与编译收据不符')
