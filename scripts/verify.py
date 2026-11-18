@@ -188,10 +188,35 @@ def check_core_tests(ctx):
 
 
 def check_swift_tests(ctx):
-    """Swift 回归：Release 配置（与交付构建一致；Debug 结果不作为通过证据）。"""
+    """准备 Release EngineBridge，再运行 Swift 回归。"""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('gogaku_build', ROOT / 'scripts' / 'build.py')
+    build = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(build)
+    build_root = build.resolve_build_root(root=ROOT)
+    native_dir = build_root / 'native'
+    env = os.environ.copy()
+    env['GOGAKU_BUILD_ROOT'] = str(build_root)
+    log = []
+
+    result = sh(['cmake', '-S', 'macos/EngineBridge', '-B', native_dir, '-G', 'Ninja',
+                 '-DCMAKE_BUILD_TYPE=Release', f'-DGOGAKU_DEPS={CACHE}'],
+                cwd=ROOT, env=env)
+    log.append('=== EngineBridge configure ===\n' + result.stdout + result.stderr)
+    if result.returncode != 0:
+        evidence = ctx.evidence('swift-tests.log', ''.join(log))
+        return FAIL, f'引擎配置失败（exit={result.returncode}）', evidence
+
+    result = sh(['cmake', '--build', native_dir, '-j', str(ctx['jobs'])], cwd=ROOT, env=env)
+    log.append('=== EngineBridge incremental build ===\n' + result.stdout + result.stderr)
+    if result.returncode != 0:
+        evidence = ctx.evidence('swift-tests.log', ''.join(log))
+        return FAIL, f'引擎构建失败（exit={result.returncode}）', evidence
+
     result = sh(['swift', 'test', '-c', 'release', '-j', str(ctx['jobs'])], timeout=1800,
-                cwd=ROOT / 'macos')  # Swift 包根已迁至 macos/
-    evidence = ctx.evidence('swift-tests.log', result.stdout + result.stderr)
+                cwd=ROOT / 'macos', env=env)  # Swift 包根已迁至 macos/
+    log.append('=== Swift release tests ===\n' + result.stdout + result.stderr)
+    evidence = ctx.evidence('swift-tests.log', ''.join(log))
     executed = re.findall(r'Executed (\d+) tests?, with (\d+) failures?', result.stdout)
     if result.returncode != 0 or not executed:
         return FAIL, f'swift test 未完成（exit={result.returncode}）', evidence
@@ -359,7 +384,9 @@ def check_quality(ctx):
 def check_render(ctx):
     """候选窗离线渲染回归（AppKit 2x 位图逐项核对）。"""
     # 与 check_swift_tests 共用 macos/.build，询问 SwiftPM 而非硬编码架构路径。
-    result = sh(['swift', 'build', '-c', 'release', '--show-bin-path'], cwd=ROOT / 'macos')
+    env = os.environ.copy()
+    env['GOGAKU_BUILD_ROOT'] = str((ROOT / '.build').resolve())
+    result = sh(['swift', 'build', '-c', 'release', '--show-bin-path'], cwd=ROOT / 'macos', env=env)
     if result.returncode != 0 or not result.stdout.strip():
         return BLOCK, '无法确定 Swift Release 构建目录', None
     swift_bin = Path(result.stdout.strip())

@@ -24,6 +24,20 @@ class Snapshot(c.Structure):
 def run(args):
     return subprocess.check_output([str(a) for a in args], text=True, stderr=subprocess.PIPE, timeout=30)
 
+def assert_no_forbidden_runtime_strings(binary, forbidden):
+    """Scan a symbol-stripped temporary copy; never mutate the signed original."""
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix='gogaku-bundle-strip-') as temporary:
+        stripped = Path(temporary) / binary.name
+        result = subprocess.run(['xcrun', 'strip', '-S', '-o', str(stripped), str(binary)],
+                                text=True, capture_output=True, timeout=60)
+        assert result.returncode == 0 and stripped.is_file(), (
+            f'xcrun strip failed for {binary}: {result.stderr[-500:]}')
+        image = stripped.read_bytes()
+        assert not any(marker in image for marker in forbidden), (
+            f'构建产物含旧输入日志代码：{binary}')
+
+
 def inspect(app):
     run(['codesign', '--verify', '--deep', '--strict', app])
     contents = app / 'Contents'
@@ -42,8 +56,7 @@ def inspect(app):
     binaries = [*contents.joinpath('MacOS').iterdir(), *contents.joinpath('Helpers').iterdir()]
     forbidden = (b'/tmp/gogaku-', b'gogaku-keys.log', b'gogaku-debug-enabled')
     for binary in binaries:
-        image = binary.read_bytes()
-        assert not any(marker in image for marker in forbidden), f'构建产物含旧输入日志代码：{binary}'
+        assert_no_forbidden_runtime_strings(binary, forbidden)
     return {'app': str(app), 'signature': 'valid_ad_hoc_local_only', 'dependencyClosure': 'package_and_system_only',
             'inputLogCode': 'absent', 'binaries': libraries,
             'binarySHA256': {str(p.relative_to(contents)): hashlib.sha256(p.read_bytes()).hexdigest() for p in files}}
