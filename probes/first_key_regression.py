@@ -147,6 +147,31 @@ def close_quietly(session):
         pass
 
 
+def focus_session(session, ready_timeout=0):
+    """阶段边界重新聚焦；准备期只等待身份就绪，不重试测试输入。"""
+    session.focus_target()
+    if ready_timeout:
+        deadline = time.monotonic() + ready_timeout
+        last_focus = time.monotonic()
+        while True:
+            info = session.driver.ax(op='check', marker=session.guard_marker)
+            ready = (info.get('ok')
+                     and info.get('frontBundle') == session.guard_bundle
+                     and info.get('axBundle', session.guard_bundle) == session.guard_bundle
+                     and (not session.guard_pid or info.get('pid') == session.guard_pid)
+                     and (not session.guard_marker or info.get('markerOk')))
+            if ready:
+                break
+            if time.monotonic() >= deadline:
+                raise HostError(f'宿主就绪超时：前台 {info.get("frontBundle")!r}'
+                                f' 标题 {info.get("title")!r}')
+            if time.monotonic() - last_focus > 3:
+                session.focus_target()
+                last_focus = time.monotonic()
+            time.sleep(0.3)
+    session.assert_front()
+
+
 class GuardError(RuntimeError):
     """前台身份或专属目标身份断言失败：禁止继续投递按键。"""
 
@@ -764,17 +789,16 @@ def summarize_samples(samples):
 
 
 # --------------------------------------------------------------------------
-# 驱动：探针宿主进程 + 常驻 AX 读取进程
+# 驱动：探针宿主进程 + AX 前台快照
 # --------------------------------------------------------------------------
 
 class Driver:
-    """探针宿主（注入按键＋读取自身文本）与常驻 AX 读取进程。"""
+    """探针宿主（注入按键＋读取自身文本）与 AX 前台快照。"""
 
     def __init__(self, workdir=None):
         self.temp = Path(workdir or tempfile.mkdtemp(prefix='gogaku-firstkey-'))
         self.owns_temp = workdir is None
         self.proc = None
-        self.ax_proc = None
         self.ax_binary = self.temp / 'ax-reader'
         self.notify_binary = None
         self.probe_pid = None
@@ -806,8 +830,6 @@ class Driver:
         self.probe_pid = ready.get('pid')
         self.original_source = ready.get('originalSource', '')
         self.original_application = ready.get('originalApplication', '')
-        self.ax_proc = subprocess.Popen([str(self.ax_binary), '--stdin'], stdin=subprocess.PIPE,
-                                        stdout=subprocess.PIPE, text=True, bufsize=1, env=ENV)
         return ready
 
     def _read_line(self, timeout=30):
@@ -824,14 +846,18 @@ class Driver:
         return self._read_line()
 
     def ax(self, **command):
-        self.ax_proc.stdin.write(json.dumps(command) + '\n')
-        self.ax_proc.stdin.flush()
-        if not select.select([self.ax_proc.stdout], [], [], 15)[0]:
-            raise HostError('AX 读取进程响应超时')
-        line = self.ax_proc.stdout.readline()
-        if not line:
-            raise HostError('AX 读取进程已退出')
-        return json.loads(line)
+        # ax-reader 的 stdin 循环不泵 AppKit run loop，常驻进程会缓存首次前台
+        # 身份。每次独立读取，确保跨宿主与同 bundle 多进程切换都得到当前快照。
+        # 保留 stdin 协议（尤其 texts=False），不读取不必要的宿主正文。
+        try:
+            result = subprocess.run([str(self.ax_binary), '--stdin'],
+                                    input=json.dumps(command) + '\n', text=True,
+                                    capture_output=True, timeout=15, env=ENV)
+        except subprocess.TimeoutExpired as error:
+            raise HostError('AX 读取进程响应超时') from error
+        if result.returncode or not result.stdout.strip():
+            raise HostError('AX 读取进程未返回快照')
+        return json.loads(result.stdout)
 
     def close(self):
         if self.proc is not None and self.proc.poll() is None:
@@ -843,11 +869,10 @@ class Driver:
                     self.ask(op='frontApp', id=self.original_application)
             except (OSError, HostError):
                 pass
-        for proc, payload in ((self.ax_proc, {'op': 'quit'}), (self.proc, {'op': 'quit'})):
-            if proc is None:
-                continue
+        proc = self.proc
+        if proc is not None:
             try:
-                proc.stdin.write(json.dumps(payload) + '\n')
+                proc.stdin.write(json.dumps({'op': 'quit'}) + '\n')
                 proc.stdin.flush()
                 proc.wait(timeout=5)
             except Exception:
@@ -1052,7 +1077,10 @@ end tell
         shutil.rmtree(getattr(self, 'temp_dir', Path('/nonexistent')), ignore_errors=True)
 
     def focus_target(self):
-        osa('tell application "TextEdit" to activate', timeout=15)
+        osa(f'''tell application "TextEdit"
+    set index of (first window whose name contains "{self.marker}") to 1
+    activate
+end tell''', timeout=15)
         time.sleep(0.4)
 
     def reset_field(self):
@@ -1092,6 +1120,10 @@ class BrowserSession(BaseSession):
     value_view = 'committed_only'
 
     def title(self):
+        # AX 指向真实前台进程；同 bundle 的旧 Chrome 不得参与读取。
+        return self.assert_front()['title']
+
+    def activate_window(self):
         raise NotImplementedError
 
     def activate(self, url):
@@ -1105,6 +1137,10 @@ class BrowserSession(BaseSession):
         time.sleep(3.0)
         self.guard_bundle = self.bundle
         self.guard_marker = self.marker
+        # Safari 也绑定本轮已核验前台的进程；Chrome 已绑定自己的 Popen PID。
+        info = self.assert_front()
+        if not self.guard_pid:
+            self.guard_pid = int(info['pid'])
         return {'url': url}
 
     def page_state(self):
@@ -1129,6 +1165,7 @@ class BrowserSession(BaseSession):
         if target not in self.FIELD_IDS:
             raise HostError(f'浏览器会话目标字段非法：{target!r}')
         field = self.FIELD_IDS[target]
+        self.activate_window()
         for _ in range(12):
             try:
                 state = self.page_state()
@@ -1181,13 +1218,18 @@ class ChromeSession(BrowserSession):
             raise HostError('Chrome 未安装')
         self.proc = subprocess.Popen([str(binary), f'--user-data-dir={self.profile}',
                                       '--no-first-run', '--no-default-browser-check', url], env=ENV)
+        self.guard_pid = self.proc.pid
         time.sleep(4.0)
-        osa('tell application "Google Chrome" to activate', timeout=20)
-        time.sleep(0.8)
+        self.activate_window()
 
-    def title(self):
-        return osa('tell application "Google Chrome" to get title of active tab of front window',
-                   timeout=20)
+    def activate_window(self):
+        if self.proc is None or self.proc.poll() is not None:
+            raise HostError('本轮 Chrome 进程已退出')
+        # 独立 profile 只有本轮窗口，按启动进程 PID 激活，不按 bundle 命中旧实例。
+        osa(f'''tell application "System Events"
+    set frontmost of (first application process whose unix id is {self.proc.pid}) to true
+end tell''', timeout=20)
+        time.sleep(0.8)
 
     def close(self):
         if self.proc is not None:
@@ -1206,28 +1248,45 @@ class SafariSession(BrowserSession):
     def __init__(self, driver, run_id, target='textarea'):
         super().__init__(driver, run_id)
         self.target = target
+        self.window_id = None
 
     def activate(self, url):
-        subprocess.check_call(['open', url, '-a', 'Safari'], env=ENV)
+        # make new document 总是新建独立窗口；先记录所有权，再导航。
+        # open URL 会复用用户既有窗口，之后关闭它会伤及用户原有标签。
+        self.window_id = int(osa('''tell application "Safari"
+    set originalIDs to id of every window
+    make new document
+    set createdIDs to {}
+    repeat with w in windows
+        set candidateID to id of w
+        if candidateID is not in originalIDs then set end of createdIDs to candidateID
+    end repeat
+    if (count of createdIDs) is not 1 then error "Cannot identify a unique new Safari window"
+    return item 1 of createdIDs
+end tell''', timeout=20).strip())
+        osa(f'''tell application "Safari"
+    set URL of current tab of window id {self.window_id} to "{url}"
+end tell''', timeout=20)
         time.sleep(3.5)
-        osa('tell application "Safari" to activate', timeout=20)
+        self.activate_window()
+
+    def activate_window(self):
+        if self.window_id is None:
+            raise HostError('本轮 Safari 窗口尚未创建')
+        osa(f'''tell application "Safari"
+    set index of window id {self.window_id} to 1
+    activate
+end tell''', timeout=20)
         time.sleep(0.8)
 
-    def title(self):
-        return osa('tell application "Safari" to name of front window', timeout=20)
-
     def close(self):
-        # 只关闭标题含本轮标记的窗口；不碰用户既有标签页。
+        if self.window_id is None:
+            return
         script = f'''
 tell application "Safari"
-    repeat with w in windows
-        try
-            if name of w contains "{self.run_id}" then
-                close w
-                exit repeat
-            end if
-        end try
-    end repeat
+    try
+        close window id {self.window_id}
+    end try
 end tell
 '''
         try:
@@ -1293,7 +1352,10 @@ end tell
             pass
 
     def focus_target(self):
-        osa('tell application "Terminal" to activate', timeout=20)
+        osa(f'''tell application "Terminal"
+    set index of window id {self.window_id} to 1
+    activate
+end tell''', timeout=20)
         time.sleep(0.5)
 
     def reset_field(self):
@@ -1941,7 +2003,6 @@ def main():
         panel = PanelStateClient(args.panel_state_socket)
 
     driver = Driver()
-    sessions = {}
     skipped = []
     try:
         ready = driver.build()
@@ -1965,55 +2026,38 @@ def main():
         # 输入法进程重启后共享引擎异步就绪：就绪前按键全部透传成 ASCII，
         # 会污染矩阵轮次。稳定等待（socket 真实问答通过）＋额外 1.5 秒。
         time.sleep(1.5)
-        for host in hosts:
-            for target in TARGETS.get(host, ['default']):
-                key = (host, target)
-                session = None  # 防止 make_session 失败时误关上一个已就绪会话
-                try:
-                    session = make_session(driver, host, target, run_id)
-                    session.open()
-                    session.focus_target()
-                    # 就绪等待：冷启动宿主的窗口标题／前台身份需要时间出现在 AX 里；
-                    # 期间重发聚焦（Electron 宿主激活慢），就绪即止；不足时跳过该宿主，
-                    # 不重试投递按键。
-                    deadline = time.time() + 30
-                    last_focus = 0.0
-                    while time.time() < deadline:
-                        info = driver.ax(op='check', marker=session.guard_marker)
-                        ready = (info.get('ok')
-                                 and info.get('frontBundle') == session.guard_bundle
-                                 and (not session.guard_marker or info.get('markerOk')))
-                        if ready:
-                            break
-                        if time.time() - last_focus > 3.0:
-                            session.focus_target()
-                            last_focus = time.time()
-                        time.sleep(0.3)
-                    else:
-                        raise HostError(f'宿主就绪超时：前台 {info.get("frontBundle")!r}'
-                                        f' 标题 {info.get("title")!r}')
-                    sessions[key] = session
-                    print(f'宿主就绪：{host}/{target}')
-                except HostError as error:
-                    skipped.append({'host': host, 'target': target, 'reason': str(error)})
-                    print(f'跳过宿主 {host}/{target}：{error}')
-                    close_quietly(session)
         runner = Runner(driver, panel, args.iterations, warmup=args.warmup,
                         evidence=evidence, stop_on_failure=args.stop_on_failure,
                         panel_observation=args.panel_observation)
-        for group in plan['groups']:
-            session = sessions.get((group['host'], group['target']))
-            if session is None:
-                continue
-            print(f'== {group["id"]} × {runner.iterations} 次 ==', flush=True)
-            runner.run_group(session, group)
-        # 面板专测：每个宿主 × 每种确认方式一次。
-        for (host, target), session in sessions.items():
-            if args.caret_probe:
-                print(f'== 拼音光标真实窗口核对：{host}/{target} ==', flush=True)
-                runner.run_caret_probe(session, shots_dir=args.shots_dir)
-            for confirm in CONFIRMATIONS:
-                runner.run_panel_check(session, confirm)
+        for host in hosts:
+            for target in TARGETS.get(host, ['default']):
+                key = (host, target)
+                session = None
+                try:
+                    try:
+                        session = make_session(driver, host, target, run_id)
+                        session.open()
+                        focus_session(session, ready_timeout=30)
+                    except HostError as error:
+                        skipped.append({'host': host, 'target': target, 'reason': str(error)})
+                        print(f'跳过宿主 {host}/{target}：{error}')
+                        continue
+                    print(f'宿主就绪：{host}/{target}')
+                    for group in plan['groups']:
+                        if (group['host'], group['target']) != key:
+                            continue
+                        print(f'== {group["id"]} × {runner.iterations} 次 ==', flush=True)
+                        focus_session(session)
+                        runner.run_group(session, group)
+                    if args.caret_probe:
+                        print(f'== 拼音光标真实窗口核对：{host}/{target} ==', flush=True)
+                        focus_session(session)
+                        runner.run_caret_probe(session, shots_dir=args.shots_dir)
+                    for confirm in CONFIRMATIONS:
+                        focus_session(session)
+                        runner.run_panel_check(session, confirm)
+                finally:
+                    close_quietly(session)
         report = {
             'schema': 'gogaku.first-key-matrix.v1',
             'checkedAt': now_iso(),
@@ -2067,11 +2111,6 @@ def main():
         print(f'前台身份断言失败，整轮中止（未投递的按键不再补发）：{error}')
         return 5
     finally:
-        for session in list(sessions.values()):
-            try:
-                session.close()
-            except Exception:
-                pass
         driver.close()
 
 

@@ -199,7 +199,7 @@ def main():
     run_id = f'{int(time.time())}{os.getpid() % 10000:04d}'
     checks = StrictChecks()
     driver = fkr.Driver()
-    sessions = {}
+    sessions = set()
     skipped = []
     matrix_report = None
     panel = None if args.no_panel_state else fkr.PanelStateClient(args.panel_state_socket)
@@ -221,49 +221,47 @@ def main():
                 panel = None
             else:
                 print(f'候选窗状态 socket 已连接：{panel.path}')
+        letters_enabled = fkr.input_letters_enabled()
+        plan = fkr.build_plan(hosts, args.iterations)
+        runner = None if args.no_first_key else fkr.Runner(
+            driver, panel, args.iterations, warmup=args.warmup,
+            evidence=args.evidence, stop_on_failure=args.stop_on_failure,
+            panel_observation=args.panel_observation, letters_enabled=letters_enabled)
+        # 一个目标完成所有阶段并关闭后，才打开下一个；共享同一个驱动和输入源。
         for host in hosts:
             for target in fkr.TARGETS.get(host, ['default']):
                 key = (host, target)
                 session = None
                 try:
-                    session = fkr.make_session(driver, host, target, run_id)
-                    session.open()
-                    # BrowserSession.focus_target 需要目标字段（textarea／
-                    # contenteditable 分组各自聚焦），其余会话签名无参。此前
-                    # 一律无参调用，进入浏览器宿主即 TypeError 崩溃（2026-11-10
-                    # host 档实测暴露；基线以来浏览器路径从未跑通）。
-                    if isinstance(session, fkr.BrowserSession):
-                        session.focus_target(target)
-                    else:
-                        session.focus_target()
-                    sessions[key] = session
+                    try:
+                        session = fkr.make_session(driver, host, target, run_id)
+                        session.open()
+                        fkr.focus_session(session, ready_timeout=30)
+                    except fkr.HostError as error:
+                        skipped.append({'host': host, 'target': target, 'reason': str(error)})
+                        print(f'跳过宿主 {host}/{target}：{error}')
+                        continue
+                    sessions.add(key)
                     print(f'宿主就绪：{host}/{target}')
-                except fkr.HostError as error:
-                    skipped.append({'host': host, 'target': target, 'reason': str(error)})
-                    print(f'跳过宿主 {host}/{target}：{error}')
+                    print(f'== 严格场景 {host}/{target} ==')
+                    fkr.focus_session(session)
+                    run_scenarios(session, checks, f'{host}/{target}', letters_enabled)
+                    if runner is not None:
+                        for group in plan['groups']:
+                            if (group['host'], group['target']) != key:
+                                continue
+                            print(f'== {group["id"]} × {args.iterations} 次 ==', flush=True)
+                            fkr.focus_session(session)
+                            runner.run_group(session, group)
+                        for confirm in fkr.CONFIRMATIONS:
+                            fkr.focus_session(session)
+                            runner.run_panel_check(session, confirm)
+                finally:
                     fkr.close_quietly(session)
-        # 严格场景集。
-        letters_enabled = fkr.input_letters_enabled()
-        for (host, target), session in sessions.items():
-            print(f'== 严格场景 {host}/{target} ==')
-            run_scenarios(session, checks, f'{host}/{target}', letters_enabled)
-        # 首键立即输入矩阵。
-        if not args.no_first_key:
+        if runner is not None:
+            # 保留旧报告口径：计划只含至少有一个目标成功准备的宿主。
             plan = fkr.build_plan([h for h in hosts if any(k[0] == h for k in sessions)],
                                   args.iterations)
-            runner = fkr.Runner(driver, panel, args.iterations, warmup=args.warmup,
-                                evidence=args.evidence, stop_on_failure=args.stop_on_failure,
-                                panel_observation=args.panel_observation,
-                                letters_enabled=letters_enabled)
-            for group in plan['groups']:
-                session = sessions.get((group['host'], group['target']))
-                if session is None:
-                    continue
-                print(f'== {group["id"]} × {args.iterations} 次 ==', flush=True)
-                runner.run_group(session, group)
-            for (host, target), session in sessions.items():
-                for confirm in fkr.CONFIRMATIONS:
-                    runner.run_panel_check(session, confirm)
             matrix_report = {
                 'plan': {k: v for k, v in plan.items() if k != 'groups'},
                 'groups': runner.groups,
@@ -306,12 +304,6 @@ def main():
         print(f'前台身份断言失败，整轮中止（未投递的按键不再补发）：{error}')
         return 5
     finally:
-        # 只关闭本轮创建的文档／窗口（会话自己的 close）���
-        for session in list(sessions.values()):
-            try:
-                session.close()
-            except Exception:
-                pass
         driver.close()
 
 
