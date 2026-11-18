@@ -1,0 +1,25 @@
+共享渲染器 ASan＋UBSan 回归通过：/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261117-175709/asan-panel-render.log
+ASan＋UBSan 8 片并行，种子 20261031–20261038，完成 2000/2000 序列
+--- 分片 0 ---
+fuzz: 250 序列 / 3129 事件，失败 0 — PASS
+
+--- 分片 1 ---
+fuzz: 250 序列 / 3094 事件，失败 0 — PASS
+
+--- 分片 2 ---
+fuzz: 250 序列 / 3103 事件，失败 0 — PASS
+
+--- 分片 3 ---
+fuzz: 250 序列 / 3151 事件，失败 0 — PASS
+
+--- 分片 4 ---
+fuzz: 250 序列 / 3318 事件，失败 0 — PASS
+
+--- 分片 5 ---
+fuzz: 250 序列 / 3334 事件，失败 0 — PASS
+
+--- 分片 6 ---
+fuzz: 250 序列 / 3197 事件，失败 0 — PASS
+
+--- 分片 7 ---
+fuzz: 250 序列 / 2952 事件，失败 0 — PASS

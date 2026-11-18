@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "panel_frame.h"
 #include "../../shared/GogakuCore/include/gogaku_core.h"
 #include <sddl.h>
 #include <shellapi.h>
@@ -96,6 +97,7 @@ struct Core {
            {"commit",s->commit?s->commit:""},{"marked",s->marked?s->marked:""},{"preedit",s->preedit?s->preedit:""},
            {"raw",raw()},{"selected",s->selected},{"page",s->page},{"pageCount",s->page_count},{"status",s->status?s->status:""},
            {"candidates",Json::array()},{"issues",Json::array()},{"learning",false},{"pending",false}};
+        value.update(gw::panelPreeditOffsets(value["preedit"].get<std::string>(), s->preedit_caret, s->typed_prefix_len));
         const bool glossOn=settings.value("glossEnabled",true);
         for (size_t i=0;i<s->count;++i) value["candidates"].push_back({{"text",s->candidates[i].text?s->candidates[i].text:""},{"gloss",glossOn&&s->candidates[i].gloss?s->candidates[i].gloss:""}});
         gc_snapshot_free(s); return value;
@@ -181,8 +183,12 @@ struct Session {
         view={{"consumed",true},{"composing",!str(s->raw).empty()},{"english",englishDirect?1:0},{"toast",0},
           {"raw",str(s->raw)},{"preedit",str(s->preedit)},{"marked",""},{"status",str(s->status)},
           {"commit",str(s->commit_text)},{"selected",s->selected},{"page",s->page},{"pageCount",(s->total_candidates+8)/9},
-          {"learning",true},{"pending",false},{"candidates",Json::array()},{"issues",Json::array()}};
-        for(size_t i=0;i<s->candidate_count;++i) view["candidates"].push_back({{"text",str(s->candidates[i].target)},{"gloss",str(s->candidates[i].source)}});
+          {"learning",true},{"direction",s->direction?"enToZh":"zhToEn"},
+          {"typedPrefixUTF16",gw::wide(str(s->typed_prefix)).size()},
+          {"pending",false},{"candidates",Json::array()},{"issues",Json::array()}};
+        // 学习快照包含全集；IPC 与渲染帧只携带当前页，selected 仍为全局。
+        const size_t start = std::min(s->page * 9, s->candidate_count);
+        for(size_t i=start;i<std::min(start+9,s->candidate_count);++i) view["candidates"].push_back({{"text",str(s->candidates[i].target)},{"gloss",str(s->candidates[i].source)}});
         for(size_t i=0;i<s->issue_count;++i) view["issues"].push_back({{"location",s->issues[i].location},{"length",s->issues[i].length},{"explanation",str(s->issues[i].explanation)}});
         sources=Json::array();
         for(size_t i=0;i<s->source_count;++i) sources.push_back({{"sourceId",str(s->sources[i].id)},{"source",str(s->sources[i].text)}});
@@ -290,13 +296,13 @@ struct Session {
         if(learningMode && !englishDirect) {
             GcLearningEvent ev{};
             if(command=="original" || (kind==GC_EV_SHIFT_CLICK && !recovery.empty())) ev.kind=GC_LEV_ORIGINAL;
-            else if(command=="choose") { ev.kind=GC_LEV_CHOOSE; ev.arg0=r.value("index",0); }
+            else if(command=="choose") { ev.kind=GC_LEV_CHOOSE; ev.arg0=int64_t(view.value("page",size_t(0)))*9+r.value("index",int64_t(0)); }
             else switch(kind) {
             case GC_EV_TEXT: ev.kind=GC_LEV_TYPE;ev.text=text.c_str();break;
             case GC_EV_SPACE:
-                if(direction) {ev.kind=GC_LEV_TYPE;ev.text=" ";} else {ev.kind=GC_LEV_CHOOSE;ev.arg0=view.value("selected",size_t(0))-view.value("page",size_t(0))*9;}
+                if(direction) {ev.kind=GC_LEV_TYPE;ev.text=" ";} else {ev.kind=GC_LEV_CHOOSE;ev.arg0=view.value("selected",size_t(0));}
                 break;
-            case GC_EV_ENTER: ev.kind=GC_LEV_CHOOSE;ev.arg0=view.value("selected",size_t(0))-view.value("page",size_t(0))*9;break;
+            case GC_EV_ENTER: ev.kind=GC_LEV_CHOOSE;ev.arg0=view.value("selected",size_t(0));break;
             case GC_EV_BACKSPACE:ev.kind=GC_LEV_BACKSPACE;break;
             case GC_EV_ESC:ev.kind=GC_LEV_CANCEL;clearAsync();break;
             case GC_EV_UP:case GC_EV_CTRL_P:ev.kind=GC_LEV_NAVIGATE;ev.arg0=-1;break;

@@ -127,9 +127,11 @@ def configure_cmake(source, binary, extra: list[str] | None = None):
 def test_core():
     """构建门同 verify 共用判定，CTest 跳过／零测试不算可交付。"""
     from _gogaku_verification import validate_ctest_result
+    from _gogaku_panel_test import panel_font_environment
     result = subprocess.run(
         ['ctest', '--test-dir', str(BUILD_ROOT / 'core'), '--output-on-failure', '--no-tests=error'],
-        cwd=ROOT, env=dict(os.environ, GOGAKU_CORE_TEST_DATA=str(CACHE / 'data')),
+        cwd=ROOT, env=dict(os.environ, GOGAKU_CORE_TEST_DATA=str(CACHE / 'data'),
+                           **panel_font_environment()),
         text=True, capture_output=True)
     combined = result.stdout + result.stderr
     print(combined, end='')
@@ -237,7 +239,10 @@ def licenses(destination):
         shutil.copy2(source, destination / f'{i:02d}-{source.name}')
     # 按实际打包的共享库选择许可；gettext命令行工具的GPL不是libintl的LGPL。
     framework_names = {p.name for p in (destination.parent / 'Frameworks').iterdir()}
-    extra = []
+    # 共享渲染器静态依赖不会出现在 otool 动态依赖列表，始终附带许可。
+    extra = [(ROOT / 'shared/licenses' / name, name) for name in (
+        'HarfBuzz-COPYING.txt', 'FreeType-FTL.txt', 'libpng-LICENSE.txt',
+        'zlib-LICENSE.txt', 'panel-render-NOTICE.txt')]
     if any('zstd' in n for n in framework_names): extra.append((Path('/usr/local/opt/zstd/LICENSE'), 'zstd-BSD-LICENSE'))
     if any('lzma' in n for n in framework_names):
         extra += [(Path('/usr/local/opt/xz/COPYING'), 'xz-COPYING'), (Path('/usr/local/opt/xz/COPYING.0BSD'), 'xz-0BSD-LICENSE')]
@@ -452,7 +457,8 @@ if __name__ == '__main__':
     # 必须显式写 OFF：CMake 把 GOGAKU_LITE 缓存在构建目录里，lite 构建后
     # 再跑 full 若不传就会沿用 ON，全量构建静默链上学习桩（实测导致
     # EngineTests 的 invalidCommand 与 stable 包缺学习会话）。
-    core_extra = ['-DGOGAKU_LITE=ON' if args.flavor == 'lite' else '-DGOGAKU_LITE=OFF']
+    core_extra = ['-DGOGAKU_LITE=ON' if args.flavor == 'lite' else '-DGOGAKU_LITE=OFF',
+                  '-DGOGAKU_PANEL_RENDER=ON']
     configure_cmake('shared/GogakuCore', BUILD_ROOT / 'core', core_extra)
     run(['cmake', '--build', BUILD_ROOT / 'core', '-j', '2'])
     test_core()

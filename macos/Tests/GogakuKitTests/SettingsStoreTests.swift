@@ -45,6 +45,30 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(try readDisk().candidateFontSize, 15)
     }
 
+    func testCandidateRendererLegacyFallbackAndImmediatePersistence() throws {
+        let url = directory.appendingPathComponent("settings.json")
+        try Data("{\"schemaVersion\":2,\"candidateRenderer\":\"native\"}".utf8)
+            .write(to: url, options: .atomic)
+
+        var settings = Settings.load(at: directory)
+        XCTAssertEqual(settings.candidateRenderer, .bitmap, "旧的无效值应由共享契约回退")
+        settings.candidateRenderer = .system
+
+        let done = expectation(description: "renderer saved")
+        let store = SettingsStore(directory: directory)
+        store.submit(settings) { outcome in
+            guard case .success = outcome else { XCTFail("渲染器设置保存失败"); return }
+            done.fulfill()
+        }
+        withExtendedLifetime(store) {
+            wait(for: [done], timeout: 3)
+        }
+
+        XCTAssertEqual(try readDisk().candidateRenderer, .system)
+        let object = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any])
+        XCTAssertEqual(object["candidateRenderer"] as? String, "system")
+    }
+
     func testCoalescedSubmitKeepsLatestValue() throws {
         let store = SettingsStore(directory: directory)
         var first = Settings(); first.candidateFontSize = 12

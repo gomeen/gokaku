@@ -13,6 +13,10 @@ Gogaku 自身代码以 MIT 许可发布（仓库根 `LICENSE`）；MIT 不改变
 | zstd | 本机 1.5.7_1 的 `libzstd.1.dylib` | 选择上游BSD-3-Clause许可，保留LICENSE，不把双许可的GPL文本当作唯一选择 |
 | GNU gettext libintl | 本机 gettext 1.0 的 `libintl.8.dylib` | 安装头文件明确LGPL-2.1-or-later；保留作者声明与LGPL全文，未打包GPL命令行程序 |
 | XZ liblzma | 本机 5.8.4 的 `liblzma.5.dylib`，由Boost间接链接 | 该版本COPYING明确liblzma为0BSD，保留COPYING与COPYING.0BSD |
+| HarfBuzz | 14.5.0，`shared/third_party/harfbuzz/` | Old MIT；保留上游版权与许可，静态编入共享渲染器；随包 `HarfBuzz-COPYING.txt` |
+| FreeType | 2.14.3，`shared/third_party/freetype/` | FTL／GPL 双许可选择 FTL；精简模块配置由 Gogaku 单独提供，上游版权保留；随包 `FreeType-FTL.txt` 和 `panel-render-NOTICE.txt`（FreeType Team 致谢） |
+| libpng | 1.6.44，`shared/third_party/libpng/` | PNG Reference Library License v2；用于主题 PNG 与 sbix emoji，静态链接，随包 `libpng-LICENSE.txt` |
+| zlib | 1.3.1，`shared/third_party/zlib/` | zlib License；libpng／FreeType 依赖，静态链接，随包 `zlib-LICENSE.txt` |
 | SQLite、Apple 框架 | 操作系统提供 | 不打包系统实现、翻译权重或伪造其哈希 |
 | Mayoi 配色参考 | `sorrycc/Mayoi`，`bddd97f0788237d10a2e3ad06c211d5a1dbf4897`，`cmd/mayoi/theme.go` 的 Claude／Grok Bot／女巫主题 | MIT，Copyright (c) 2026 chencheng；按候选窗语义重映射颜色，未复制其界面、图片或字体。许可全文存于 `resources/licenses/MIT-Mayoi.txt`，由现有构建流程随包附 `Contents/Licenses/` |
 | Fira Code WenKai（候选窗字体） | 用户已安装（`~/Library/Fonts`，OFL） | 仅按字体名引用，不随包分发；缺失时回退系统字体，不产生分发义务 |
@@ -33,6 +37,7 @@ Gogaku 自身代码以 MIT 许可发布（仓库根 `LICENSE`）；MIT 不改变
 - **火山翻译**是用户自行配置凭据后调用的在线服务；项目不分发其模型或服务端代码。用户需自行遵守火山引擎服务条款、计费与数据处理约定。客户端不把凭据写入日志、设置导出、主题包或安装包。
 - **Ed25519 验签**使用 macOS CryptoKit（系统框架）与 Windows 随包固定版本 Monocypher 4.0.2 的官方 Ed25519 实现；Windows CNG 只用于 SHA-256／HMAC／随机数，不承担 Ed25519 验签。Monocypher 取 BSD-2-Clause 分支，许可、上游 tag、各源文件 SHA-256 记于 `windows/GogakuWindows/third_party/monocypher-LICENCE.md`；项目不自行实现密码学，不随包私钥。
 - **跨端共用第三方**：nlohmann/json v3.11.3（MIT）位于 `shared/third_party/`，共享核心的设置契约与 Windows 设置应用读同一份头文件；miniz 3.0.2（MIT）仍在 `windows/GogakuWindows/third_party/`，仅用于有限长主题 ZIP／PNG 解压，不调用外部解压程序。图片由系统 WIC 解码，缺少相应 codec 时明确失败。
+- **候选窗文本栈**：HarfBuzz／FreeType／libpng／zlib 固定源码随仓库保存，许可见上表。Mac 核心与 Windows 各架构静态目标从同一源码编译。系统字体和用户字体仅引用本机文件，不随安装包或主题包分发。架构借鉴青简，但未复制其渲染代码；未引入 tiny-skia。上游源码的精简范围和 FreeType 模块配置见 `shared/GogakuCore/panel_render/README.md`。
 - **Windows 静态运行库**：MinGW-w64 14.0.0_3（ZPL-2.1 与逐文件例外）及 GCC 16.2.0 libgcc／libstdc++（GPL-3.0 ＋ GCC Runtime Library Exception 3.1）；不要求用户安装 GCC／Visual C++ 运行库。包内 `MinGW-w64-COPYING.txt`、`MinGW-w64-AUTHORS.txt`、`GCC-COPYING3`、`GCC-COPYING.RUNTIME` 与 `windows-runtime-sources.json` 保存声明、原文来源与哈希。当前 Windows 核心将 libime／Fcitx／KenLM 等静态链接到可替换的 `libgogaku_core.dll`，有别于 Mac 逐库动态链接；公开分发前仍须补齐适用源码与重新链接材料，不能仅凭这份许可目录宣称全部分发义务已满足。
 - **Inno Setup** 仅作为 Windows 安装器的构建工具；生成的安装器按其许可保留声明。本轮未做 Authenticode 签名。
 - 当前不含 Tatoeba、ECDICT、small100 权重、tokenizer 或其他未登记释义词性数据（Tatoeba 因本机无副本、许可与署名无法核对，未引入句对）；英文词表（SCOWL×wordfreq）与 Wiktionary／jieba／CC-CEDICT 释义词性注释已按上表登记并随包。引入新数据时必须逐项记录文件、revision、许可、署名、来源及质量审阅结果。Apple 语言包由系统授权界面管理，项目不复制权重。

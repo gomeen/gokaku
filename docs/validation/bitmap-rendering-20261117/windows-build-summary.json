@@ -1,0 +1,64 @@
+{
+  "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+  "channel": "dev",
+  "hostTested": false,
+  "installerBuilt": false,
+  "flavors": {
+    "full": {
+      "compileExitCode": 0,
+      "stageExitCode": 0,
+      "stage": ".build/s4-windows/package/0.1.5-dev.1-b114-dev",
+      "coreLite": "OFF",
+      "glossPresent": true,
+      "licenses": {
+        "HarfBuzz-COPYING.txt": [
+          "licenses/00-licenses/HarfBuzz-COPYING.txt"
+        ],
+        "FreeType-FTL.txt": [
+          "licenses/00-licenses/FreeType-FTL.txt"
+        ],
+        "libpng-LICENSE.txt": [
+          "licenses/00-licenses/libpng-LICENSE.txt"
+        ],
+        "zlib-LICENSE.txt": [
+          "licenses/00-licenses/zlib-LICENSE.txt"
+        ],
+        "panel-render-NOTICE.txt": [
+          "licenses/00-licenses/panel-render-NOTICE.txt"
+        ]
+      },
+      "peCount": {
+        "x64": 4,
+        "x86": 1
+      }
+    },
+    "lite": {
+      "compileExitCode": 0,
+      "stageExitCode": 0,
+      "stage": ".build/bitmap-win-lite/package/0.1.5-dev.1-b114-dev",
+      "coreLite": "ON",
+      "glossPresent": false,
+      "licenses": {
+        "HarfBuzz-COPYING.txt": [
+          "licenses/00-licenses/HarfBuzz-COPYING.txt"
+        ],
+        "FreeType-FTL.txt": [
+          "licenses/00-licenses/FreeType-FTL.txt"
+        ],
+        "libpng-LICENSE.txt": [
+          "licenses/00-licenses/libpng-LICENSE.txt"
+        ],
+        "zlib-LICENSE.txt": [
+          "licenses/00-licenses/zlib-LICENSE.txt"
+        ],
+        "panel-render-NOTICE.txt": [
+          "licenses/00-licenses/panel-render-NOTICE.txt"
+        ]
+      },
+      "peCount": {
+        "x64": 4,
+        "x86": 1
+      }
+    }
+  }
+}

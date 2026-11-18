@@ -1,0 +1,61 @@
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/s4-windows/core
+ninja: no work to do.
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/s4-windows/panel-x64
+ninja: no work to do.
+编译 x64: windows/GogakuWindows/platform.cpp
+编译 x64: windows/GogakuWindows/appearance.cpp
+编译 x64: windows/GogakuWindows/themes.cpp
+编译 x64: shared/GogakuCore/settings_contract.cpp
+编译 x64: shared/GogakuCore/theme_contract.cpp
+编译 x64: windows/GogakuTsf/src/dllmain.cpp
+编译 x64: windows/GogakuTsf/src/text_service.cpp
+编译 x64: windows/GogakuTsf/src/candidate_window.cpp
+编译 x64: windows/GogakuTsf/src/core_bridge.cpp
+编译 x64: windows/GogakuWindows/agent.cpp
+编译 x64: windows/GogakuWindows/services.cpp
+编译 x64: windows/GogakuWindows/update.cpp
+编译 x64: windows/GogakuWindows/settings.cpp
+链接 x64 TSF
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp: In function 'void {anonymous}::emojiRegression(const Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:51:79: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:3:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+产物：/Users/gomeen/code/gomeen/gogaku/.build/s4-windows/bin/x64/GogakuAgent.exe (17,352,743 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/s4-windows/bin/x64/GogakuSettings.exe (22,272,936 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/s4-windows/bin/x64/GogakuTsf.dll (19,997,044 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/s4-windows/bin/x64/libgogaku_core.dll (28,386,309 bytes)
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/s4-windows/panel-x86
+ninja: no work to do.
+编译 x86: windows/GogakuWindows/platform.cpp
+编译 x86: windows/GogakuWindows/appearance.cpp
+编译 x86: windows/GogakuWindows/themes.cpp
+编译 x86: shared/GogakuCore/settings_contract.cpp
+编译 x86: shared/GogakuCore/theme_contract.cpp
+编译 x86: windows/GogakuTsf/src/dllmain.cpp
+编译 x86: windows/GogakuTsf/src/text_service.cpp
+编译 x86: windows/GogakuTsf/src/candidate_window.cpp
+编译 x86: windows/GogakuTsf/src/core_bridge.cpp
+链接 x86 TSF
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllCanUnloadNow by linking to _DllCanUnloadNow@0
+Use --enable-stdcall-fixup to disable these warnings
+Use --disable-stdcall-fixup to disable these fixups
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllGetClassObject by linking to _DllGetClassObject@12
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllRegisterServer by linking to _DllRegisterServer@0
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllUnregisterServer by linking to _DllUnregisterServer@0
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _GogakuActivateProfile by linking to _GogakuActivateProfile@16
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp: In function 'void {anonymous}::emojiRegression(const Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:51:79: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/i686-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:3:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/i686-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+产物：/Users/gomeen/code/gomeen/gogaku/.build/s4-windows/bin/x86/GogakuTsf.dll (18,099,971 bytes)
+编译完成并写入各架构收据；未运行 Windows 程序。

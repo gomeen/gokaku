@@ -25,6 +25,20 @@ private struct FocusTarget: Equatable {
     var fieldID: String { "\(pid):\(anchor.location):\(anchor.length)" }
 }
 
+enum ShiftHeldEnglishKey {
+    static func textToPassThrough(_ event: NSEvent, composing: Bool) -> String? {
+        let otherModifiers: NSEvent.ModifierFlags = [.command, .control, .option, .function]
+        guard !composing, event.type == .keyDown,
+              event.modifierFlags.contains(.shift),
+              event.modifierFlags.intersection(otherModifiers).isEmpty,
+              let characters = event.characters,
+              characters.unicodeScalars.count == 1,
+              let scalar = characters.unicodeScalars.first,
+              (65...90).contains(scalar.value) else { return nil }
+        return characters
+    }
+}
+
 /// Shift 单击判定：按住期间无其他按键且按时长 <600ms（规格表）。
 private struct ShiftClickTracker {
     private var pressTime: TimeInterval = 0
@@ -533,8 +547,16 @@ final class GogakuInputController: IMKInputController {
         active = true
         shiftPoller.start()
         panel.choose = { [weak self] row in self?.panelChoose(row: row) }
+        panel.pagePrevious = { [weak self] in self?.panelPage(-1) }
+        panel.pageNext = { [weak self] in self?.panelPage(1) }
+        panel.original = { [weak self] in
+            guard let self, self.mode == .learning, self.direction == .enToZh,
+                  self.pendingEdits == 0 else { return }
+            self.commitLearningOriginal()
+        }
         settings = Settings.load()
-        panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
+        panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize),
+                          renderer: settings.candidateRenderer)
         application = gg_read_host(client())?.application ?? ""
         // 全局模式状态（2026-11-04 用户裁决）：切换应用保持一个普通／学习状态，
         // 不按应用记忆；学习开关关闭时学习状态不可用，普通模式始终可用。
@@ -655,7 +677,8 @@ final class GogakuInputController: IMKInputController {
         anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
         composingRaw = ""
         markedShown = ""; markedCaret = -1
-        panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize))
+        panel.updateTheme(settings.resolvedCandidateTheme, fontSize: CGFloat(settings.candidateFontSize),
+                          renderer: settings.candidateRenderer)
         panel.dismiss(); translator.invalidate(); spelling.invalidate(); requestedSpellStamp = nil
         records.policy(recording: settings.recording, excludedApplications: settings.excludedApplications)
         let generation = focus, selectedMode = mode, selectedDirection = direction
@@ -876,6 +899,10 @@ final class GogakuInputController: IMKInputController {
         shiftPoller.markOtherKey()
         if match(settings.modeShortcut, event: event) { toggleMode(nil); return true }
         if match(settings.directionShortcut, event: event) { toggleDirection(nil); return true }
+        if mode == .normal,
+           ShiftHeldEnglishKey.textToPassThrough(event, composing: !composingRaw.isEmpty) != nil {
+            return false
+        }
         // 硬不变量（2026-11-13 用户事故）：组合存在时破坏性按键由输入法拥有。
         // 宿主读数失败、字段判定失败、渲染缓存已清都不能让它漏给宿主——
         // 漏一次就删掉用户已提交的正文。这里先于任何读数判定。
@@ -1372,6 +1399,18 @@ final class GogakuInputController: IMKInputController {
     }
 
     // MARK: - 面板点击与学习模式（保持既有路径）
+
+    private func panelPage(_ delta: Int) {
+        guard pendingEdits == 0, let view = displayed, !view.candidates.isEmpty,
+              let anchor = target,
+              let current = currentTarget(strictComposition: mode == .normal || direction == .zhToEn),
+              current.application == anchor.application, current.pid == anchor.pid else { return }
+        if mode == .normal || direction == .zhToEn {
+            _ = handleNormalSync(delta < 0 ? .pageUp : .pageDown, at: current, fieldChanged: false)
+        } else {
+            edit { try $0.page(delta) }
+        }
+    }
 
     private func panelChoose(row: Int) {
         // 学习中→英与普通模式同一套点击选词；英→中走学习候选直选。

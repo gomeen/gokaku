@@ -48,6 +48,7 @@ from pathlib import Path
 from _gogaku_delivery import (DeliveryError, platform_fingerprints, sha256, source_fingerprint,
                               test_fingerprint, validate_package, working_tree_dirty)
 from _gogaku_verification import HOST_PROFILES, POLICY_VERSION, PROFILE_CHECKS, validate_ctest_result
+from _gogaku_panel_test import panel_font_environment
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / 'scripts'))
@@ -168,15 +169,11 @@ def check_core_tests(ctx):
     # 之前若跑过 Lite 构建，这里不传就会沿用 ON，核心变成学习桩——Swift 侧
     # EngineTests 全报 invalidCommand（2026-11-16 实测，同 build.py 的坑）。
     env = {'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data')} if (CACHE / 'data').exists() else {}
-    # 候选窗渲染向量需要字体：优先环境传入，回退到公开苹方（Lark workaround
-    # 副本）或 Hiragino。缺失时测试自行 SKIP（退出码 3，下面会拒未跑项）。
-    if 'GOGAKU_PANEL_FONT' not in env:
-        candidates = [Path.home() / 'Library/Application Support/com.electron.lark.font_workaround/PingFang.ttc',
-                      Path('/System/Library/Fonts/Hiragino Sans GB.ttc')]
-        env['GOGAKU_PANEL_FONT'] = next((str(p) for p in candidates if p.exists()), '')
+    # 缺字体会显式跳过；下面拒绝跳过项，不把未渲染当通过。
+    env.update(panel_font_environment())
     result = sh(['cmake', '-S', 'shared/GogakuCore', '-B', ctx['core_dir'],
                  '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', f'-DGOGAKU_DEPS={CACHE}',
-                 '-DGOGAKU_LITE=OFF'], env=env)
+                 '-DGOGAKU_LITE=OFF', '-DGOGAKU_PANEL_RENDER=ON'], env=env)
     if result.returncode != 0:
         return FAIL, 'cmake 配置失败：' + result.stderr[-400:], None
     result = sh(['cmake', '--build', ctx['core_dir'], '-j', str(ctx['jobs'])])
@@ -376,6 +373,7 @@ def check_render(ctx):
     compile_cmd = ['swiftc', 'probes/render-candidate-panel.swift',
                    'macos/Sources/GogakuInput/CandidatePanel.swift',
                    'macos/Sources/GogakuInput/CandidatePanelTheme.swift',
+                   'macos/Sources/GogakuInput/SharedPanelBitmap.swift',
                    '-I', str(modules),
                    '-I', 'macos/Sources/CGogakuCore', '-I', 'macos/Sources/CGogakuEngine', '-I', 'macos/Sources/CSQLite',
                    '-L', str(ctx['core_dir']), '-lgogaku_core',
@@ -424,10 +422,11 @@ def check_asan_ubsan(ctx):
                  '-DCMAKE_C_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer',
                  '-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -fno-omit-frame-pointer',
                  '-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address,undefined',
-                 f'-DGOGAKU_DEPS={CACHE}'])
+                 f'-DGOGAKU_DEPS={CACHE}', '-DGOGAKU_LITE=OFF', '-DGOGAKU_PANEL_RENDER=ON'])
     if result.returncode != 0:
         return FAIL, 'ASan 配置失败：' + result.stderr[-300:], None
-    result = sh(['cmake', '--build', asan_dir, '-j', str(ctx['jobs']), '--target', 'gogaku_core_fuzz'],
+    result = sh(['cmake', '--build', asan_dir, '-j', str(ctx['jobs']), '--target',
+                 'gogaku_core_fuzz', 'gogaku_core_panel_render_test'],
                 timeout=1800)
     if result.returncode != 0:
         return FAIL, 'ASan 构建失败', None
@@ -437,6 +436,11 @@ def check_asan_ubsan(ctx):
                 # macOS 的 ASan 不支持 detect_leaks；强行开启会 SIGABRT。
                 'ASAN_OPTIONS': 'detect_leaks=0',
                 'UBSAN_OPTIONS': 'print_stacktrace=1:halt_on_error=1'})
+    env.update(panel_font_environment())
+    panel = sh([asan_dir / 'gogaku_core_panel_render_test'], env=env, timeout=300)
+    panel_evidence = ctx.evidence('asan-panel-render.log', panel.stdout + panel.stderr)
+    if panel.returncode != 0:
+        return FAIL, '共享渲染器 ASan＋UBSan 回归失败（缺字体跳过亦不算通过）', panel_evidence
     total = 2000 if ctx['quick'] else 100000
     # 分片：第 k 片用种子 20261031+k，各自独立临时目录；总序列数不变。
     shards = max(1, min(ctx.get('asan_shards') or 1, total))
@@ -467,7 +471,8 @@ def check_asan_ubsan(ctx):
             failures.append(f'分片 {k} 无完成计数输出')
         else:
             done += count
-    summary = [f'ASan＋UBSan {shards} 片并行，种子 {base_seed}–{base_seed + shards - 1}，'
+    summary = ['共享渲染器 ASan＋UBSan 回归通过：' + str(panel_evidence),
+               f'ASan＋UBSan {shards} 片并行，种子 {base_seed}–{base_seed + shards - 1}，'
                f'完成 {done}/{total} 序列']
     for k, _, log, _, _ in procs:
         summary.append(f'--- 分片 {k} ---\n' + Path(log).read_text(errors='replace')[-2000:])

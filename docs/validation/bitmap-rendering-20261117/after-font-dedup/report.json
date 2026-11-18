@@ -1,0 +1,1369 @@
+{
+  "machine": "macOS-26.7.3-x86_64-i386-64bit-Mach-O",
+  "library": ".build/core/libgogaku_core.dylib",
+  "fonts": [
+    {
+      "path": "/System/Library/Fonts/SFNS.ttf",
+      "index": 0,
+      "role": "latin"
+    },
+    {
+      "path": "/Users/gomeen/Library/Application Support/com.electron.lark.font_workaround/PingFang.ttc",
+      "index": 3
+    },
+    {
+      "path": "/System/Library/Fonts/Apple Color Emoji.ttc",
+      "index": 0,
+      "emoji": true
+    }
+  ],
+  "scale": 2,
+  "repeat": 200,
+  "hostTested": false,
+  "cases": [
+    {
+      "name": "gogaku-vertical-light",
+      "width": 514,
+      "height": 658,
+      "firstMs": 6.50881,
+      "medianMs": 1.088991,
+      "p95Ms": 1.665718,
+      "png": "gogaku-vertical-light.png",
+      "rgbaSha256": "16ba3d4d70c905e3f681f214a1523dd950842b5b29decf9be551e904f29b6837",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "gogaku-vertical-dark",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.173949,
+      "medianMs": 1.09875,
+      "p95Ms": 1.59957,
+      "png": "gogaku-vertical-dark.png",
+      "rgbaSha256": "0da205d32e3d3722484355df54a3a1dd9d1bfefd3bbb9a80a069b8d2799cfa28",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "gogaku-horizontal-light",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.895371,
+      "medianMs": 0.672873,
+      "p95Ms": 0.959103,
+      "png": "gogaku-horizontal-light.png",
+      "rgbaSha256": "011834a3debe9d4c3f2ad54d25d1a7b83211affb145395db7dccc2c229b9e294",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "gogaku-horizontal-dark",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.7364,
+      "medianMs": 0.664452,
+      "p95Ms": 0.93177,
+      "png": "gogaku-horizontal-dark.png",
+      "rgbaSha256": "58c760a8939b359ae658007628d5405ed80cc68eeac809baf568efc4961596d0",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "claude-vertical-light",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.913026,
+      "medianMs": 1.100452,
+      "p95Ms": 1.518744,
+      "png": "claude-vertical-light.png",
+      "rgbaSha256": "87d0221424a88ff4189babfa28a565d2300deaac6aec16f6dcad92137e109624",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "claude-vertical-dark",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.464424,
+      "medianMs": 1.134614,
+      "p95Ms": 1.407065,
+      "png": "claude-vertical-dark.png",
+      "rgbaSha256": "7d51f992786023dc2a5e3ce5c90416d5d278cc59126586632e76638dbda64e84",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "claude-horizontal-light",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.932056,
+      "medianMs": 0.688069,
+      "p95Ms": 0.870201,
+      "png": "claude-horizontal-light.png",
+      "rgbaSha256": "a246e2dc2f7e7966f3ddb601223e725bc256583316de6a663d5ab139b100217f",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "claude-horizontal-dark",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.720559,
+      "medianMs": 0.665731,
+      "p95Ms": 0.941424,
+      "png": "claude-horizontal-dark.png",
+      "rgbaSha256": "dc0f52fa6c88d030f3f16dc840186d1cf867b4e27220767fc2513e28a89e6213",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "grok-vertical-light",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.999572,
+      "medianMs": 1.115836,
+      "p95Ms": 1.480398,
+      "png": "grok-vertical-light.png",
+      "rgbaSha256": "6af4c62ca4569ab9e54f6cee5879b9afa28ac9910bc1b8ad7977aa4a20ba4348",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "grok-vertical-dark",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.187381,
+      "medianMs": 1.142189,
+      "p95Ms": 1.429257,
+      "png": "grok-vertical-dark.png",
+      "rgbaSha256": "9bd8a76894abe4124a2b7e269a55cb850e4a59a543152224d425872228c93661",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "grok-horizontal-light",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.885698,
+      "medianMs": 0.796918,
+      "p95Ms": 0.982423,
+      "png": "grok-horizontal-light.png",
+      "rgbaSha256": "4d9ebaa76c245dfdcd290d49ec43e7deaacb434353b1dad6337cde4357c5f739",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "grok-horizontal-dark",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.763309,
+      "medianMs": 0.688725,
+      "p95Ms": 0.907689,
+      "png": "grok-horizontal-dark.png",
+      "rgbaSha256": "564193c58b260a94cfeb92fe7dda319afb596ea7e4e005a5d3d9dfbef6f84867",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "witch-vertical-light",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.23155,
+      "medianMs": 1.260911,
+      "p95Ms": 1.517314,
+      "png": "witch-vertical-light.png",
+      "rgbaSha256": "556e2e18e844542724f169279123dc44e81eab97f1ed9b6b07a66c6f135da2a5",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "witch-vertical-dark",
+      "width": 514,
+      "height": 658,
+      "firstMs": 1.267562,
+      "medianMs": 1.089715,
+      "p95Ms": 1.425369,
+      "png": "witch-vertical-dark.png",
+      "rgbaSha256": "94662d82d2a8500143ca6ef3ed322497a5070d0f34a29749d38d7d89f2957fae",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 16,
+          "y": 124,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 16,
+          "y": 184,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 16,
+          "y": 244,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 16,
+          "y": 304,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 16,
+          "y": 364,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 16,
+          "y": 424,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 7,
+          "x": 16,
+          "y": 484,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 8,
+          "x": 16,
+          "y": 544,
+          "w": 482,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 481,
+          "y": 604,
+          "w": 25,
+          "h": 34
+        }
+      ]
+    },
+    {
+      "name": "witch-horizontal-light",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.791899,
+      "medianMs": 0.687263,
+      "p95Ms": 1.06257,
+      "png": "witch-horizontal-light.png",
+      "rgbaSha256": "36b1d2c0a0e44c138cdf2b31c22cee1852510865575dd8a83d3e36783968d094",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    },
+    {
+      "name": "witch-horizontal-dark",
+      "width": 1119,
+      "height": 178,
+      "firstMs": 0.901191,
+      "medianMs": 0.800402,
+      "p95Ms": 1.019772,
+      "png": "witch-horizontal-dark.png",
+      "rgbaSha256": "e34837824a89a9e2bcfc35850323c34986b4dbd3444c841e2b94480b7e0038e4",
+      "hits": [
+        {
+          "action": 1,
+          "arg": 0,
+          "x": 16,
+          "y": 64,
+          "w": 109,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 1,
+          "x": 132,
+          "y": 64,
+          "w": 309,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 2,
+          "x": 448,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 3,
+          "x": 567,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 4,
+          "x": 688,
+          "y": 64,
+          "w": 112,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 5,
+          "x": 807,
+          "y": 64,
+          "w": 114,
+          "h": 60
+        },
+        {
+          "action": 1,
+          "arg": 6,
+          "x": 928,
+          "y": 64,
+          "w": 111,
+          "h": 60
+        },
+        {
+          "action": 3,
+          "arg": 0,
+          "x": 1086,
+          "y": 64,
+          "w": 25,
+          "h": 60
+        }
+      ]
+    }
+  ]
+}

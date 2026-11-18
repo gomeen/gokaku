@@ -73,6 +73,7 @@ struct CandidatePanelTheme {
     let backgroundImage: NSImage?
     private let source: CandidateTheme
     private let globalFontSize: CGFloat
+    let coreTheme: SharedPanelBitmapTheme?
     private let lightImage: NSImage?
     private let darkImage: NSImage?
 
@@ -95,7 +96,7 @@ struct CandidatePanelTheme {
     func resolvingAppearance(_ appearance: NSAppearance) -> CandidatePanelTheme {
         Self.make(fontSize: globalFontSize, theme: source,
                   darkAppearance: appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua,
-                  lightImage: lightImage, darkImage: darkImage)
+                  lightImage: lightImage, darkImage: darkImage, coreTheme: coreTheme)
     }
 
     static func resolve(_ id: CandidateThemeID, fontSize: CGFloat = 14) -> CandidatePanelTheme {
@@ -154,7 +155,7 @@ struct CandidatePanelTheme {
     }
 
     private static func make(fontSize: CGFloat, theme: CandidateTheme, darkAppearance: Bool,
-                             lightImage: NSImage?, darkImage: NSImage?) -> CandidatePanelTheme {
+                             lightImage: NSImage?, darkImage: NSImage?, coreTheme: SharedPanelBitmapTheme? = nil) -> CandidatePanelTheme {
         let id = theme.id
         func paletteColor(_ key: KeyPath<CandidatePalette, ThemeColor>) -> NSColor {
             adaptive(light: color(theme.light[keyPath: key].rgb),
@@ -190,6 +191,12 @@ struct CandidatePanelTheme {
         let panelBackground = adaptive(
             light: lightBackground.withAlphaComponent(CGFloat(theme.light.visual.isValid ? theme.light.visual.bgOpacity / 100 : 1)),
             dark: darkBackground.withAlphaComponent(CGFloat(darkPalette.visual.isValid ? darkPalette.visual.bgOpacity / 100 : 1)))
+        var bitmapTheme = theme
+        if legacy {
+            bitmapTheme.typography.fontSize = Double(size)
+            bitmapTheme.typography.indexSize = Double(indexSize)
+        }
+        let preparedTheme = coreTheme ?? (try? SharedPanelBitmapTheme(bitmapTheme))
         return CandidatePanelTheme(
             id: id,
             metrics: Metrics(
@@ -244,7 +251,8 @@ struct CandidatePanelTheme {
             opacity: CGFloat(visual.opacity / 100),
             imageOpacity: CGFloat(visual.imageOpacity / 100),
             backgroundImage: darkAppearance && theme.dark != nil ? darkImage : lightImage,
-            source: theme, globalFontSize: fontSize, lightImage: lightImage, darkImage: darkImage
+            source: theme, globalFontSize: fontSize, coreTheme: preparedTheme,
+            lightImage: lightImage, darkImage: darkImage
         )
     }
 

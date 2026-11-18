@@ -24,7 +24,7 @@ const std::unordered_set<std::string> &knownKeys() {
         "glossEnabled", "inputLettersEnabled", "fullPinyinPreedit", "frequencyEnabled",
         "englishCandidatesEnabled", "appDefaultEnglish", "learningTranslationEnabled",
         "preferredMode", "preferredDirection", "volcengineUsageMonth",
-        "volcengineUsageCharacters", "candidateLayout", "horizontalPageSize",
+        "volcengineUsageCharacters", "candidateLayout", "candidateRenderer", "horizontalPageSize",
     };
     return keys;
 }
@@ -57,6 +57,7 @@ Json defaults() {
         {"volcengineUsageMonth", ""},
         {"volcengineUsageCharacters", 0},
         {"candidateLayout", "vertical"},
+        {"candidateRenderer", "bitmap"},
         {"horizontalPageSize", 7},
     };
 }
@@ -281,6 +282,9 @@ int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
     }
     if (const Json *value = member(input, "candidateLayout"); value && value->is_string()) {
         canonical["candidateLayout"] = oneOf(*value, {"vertical", "horizontal"}, "vertical");
+    }
+    if (const Json *value = member(input, "candidateRenderer"); value && value->is_string()) {
+        canonical["candidateRenderer"] = oneOf(*value, {"bitmap", "system"}, "bitmap");
     }
     if (const Json *value = member(input, "horizontalPageSize")) {
         canonical["horizontalPageSize"] = clampInt(*value, 7, 4, 9);

@@ -212,6 +212,11 @@ public enum CandidateArrangement: String, Codable, Sendable {
     case horizontal
 }
 
+public enum CandidateRenderer: String, Codable, Sendable {
+    case bitmap
+    case system
+}
+
 public struct Settings: Codable {
     public var recording = true
     public var excludedApplications: Set<String> = []
@@ -250,6 +255,7 @@ public struct Settings: Codable {
     public var fuzzyPinyin: Set<String> = []                       // 默认全关
     public var candidateFontSize: Int = 14                         // 12–16
     public var candidateLayout: CandidateArrangement = .vertical
+    public var candidateRenderer: CandidateRenderer = .bitmap
     public var horizontalPageSize: Int = 7                           // 4–9，仅横排
     public var glossEnabled = true                                 // 英文释义注释
     public var inputLettersEnabled = true                          // 输入区字母（marked text）
@@ -277,7 +283,7 @@ public struct Settings: Codable {
         case recording, excludedApplications, ignoredWords, applications
         case modeShortcut, directionShortcut, candidateTheme, userCandidateThemes
         case builtinThemeOverrides
-        case inputScheme, fuzzyPinyin, candidateFontSize, candidateLayout, horizontalPageSize, glossEnabled
+        case inputScheme, fuzzyPinyin, candidateFontSize, candidateLayout, candidateRenderer, horizontalPageSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish
         case learningTranslationEnabled, schemaVersion
@@ -308,6 +314,7 @@ public struct Settings: Codable {
         fuzzyPinyin = try container.decodeIfPresent(Set<String>.self, forKey: .fuzzyPinyin) ?? []
         candidateFontSize = min(16, max(12, try container.decodeIfPresent(Int.self, forKey: .candidateFontSize) ?? 14))
         candidateLayout = CandidateArrangement(rawValue: try container.decodeIfPresent(String.self, forKey: .candidateLayout) ?? "") ?? .vertical
+        candidateRenderer = CandidateRenderer(rawValue: try container.decodeIfPresent(String.self, forKey: .candidateRenderer) ?? "") ?? .bitmap
         horizontalPageSize = min(9, max(4, try container.decodeIfPresent(Int.self, forKey: .horizontalPageSize) ?? 7))
         glossEnabled = try container.decodeIfPresent(Bool.self, forKey: .glossEnabled) ?? true
         inputLettersEnabled = try container.decodeIfPresent(Bool.self, forKey: .inputLettersEnabled) ?? true

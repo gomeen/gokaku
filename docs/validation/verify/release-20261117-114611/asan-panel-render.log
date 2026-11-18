@@ -1,0 +1,5 @@
+emoji advance scale=1: 12pt=12px 24pt=24px
+emoji advance scale=2: 12pt=24px 24pt=48px
+PASS: 本机emoji度量/栅格与VS15/VS16，字体=/System/Library/Fonts/Apple Color Emoji.ttc（不代表其他平台已测）
+panel_render steady 2x (4 rows): median=27.796ms p95=33.594ms
+panel_render: 已执行断言全部通过；未测子项见上方UNTESTED（如有）

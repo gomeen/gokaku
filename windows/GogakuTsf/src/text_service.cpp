@@ -74,7 +74,9 @@ STDMETHODIMP TextService::Activate(ITfThreadMgr *manager,TfClientId client){
         if(SUCCEEDED(hr)){hr=source->AdviseSink(IID_ITfThreadMgrEventSink,(ITfThreadMgrEventSink*)this,&focusCookie_);source->Release();}
         if(FAILED(hr)||!window_.create(g_hInst)){Deactivate();return E_FAIL;}
         settings_=gw::readSettings();
+        window_.updateSettings(settings_);
         window_.onChoose=[this](size_t index){dispatch({{"op","event"},{"command","choose"},{"index",index}});};
+        window_.onPage=[this](int delta){dispatch({{"op","event"},{"kind",delta<0?GC_EV_PAGE_UP:GC_EV_PAGE_DOWN}});};
         window_.onOriginal=[this]{dispatch({{"op","event"},{"command","original"}});};
         window_.onRestore=[this]{dispatch({{"op","event"},{"command","restore"}});};
         WNDCLASSW wc{};wc.hInstance=g_hInst;wc.lpfnWndProc=timerProc;wc.lpszClassName=L"GogakuTsfDispatch";
@@ -386,7 +388,7 @@ void TextService::caret(TfEditCookie cookie){
 void TextService::apply(const Json &view){
     view_=view;
     auto revision=view.value("settingsRevision",uint64_t(0));
-    if(revision!=settingsRevision_){settings_=gw::readSettings();settingsRevision_=revision;}
+    if(revision!=settingsRevision_){settings_=gw::readSettings();window_.updateSettings(settings_);settingsRevision_=revision;}
     std::string text=view.value("commit",std::string()),token=view.value("commitToken",std::string());
     if(!text.empty()){
         if(token.empty()||token==lastCommit_)return;
@@ -404,11 +406,11 @@ void TextService::apply(const Json &view){
         bool learning=view.value("learning",false);
         bool good=edit(context_,true,[&](TfEditCookie cookie){HRESULT hr=setPreedit(cookie,learning?std::string():view.value("marked",std::string()));if(SUCCEEDED(hr))caret(cookie);return hr;});
         if(!good){editing_=false;loseFocus();return;}
-        if(hasCaret_)window_.showView(view,caret_,settings_);else window_.hide();
+        if(hasCaret_)window_.showView(view,caret_);else window_.hide();
     }else{
         if(composition_)edit(context_,true,[&](TfEditCookie cookie){return clearComposition(cookie);});
         edit(context_,false,[&](TfEditCookie cookie){caret(cookie);return S_OK;});
-        if(view.value("draftAvailable",false)&&hasCaret_)window_.showView(view,caret_,settings_);else window_.hide();
+        if(view.value("draftAvailable",false)&&hasCaret_)window_.showView(view,caret_);else window_.hide();
     }
     editing_=false;
     if(view.value("toast",0)==1)window_.showToast(L"中");else if(view.value("toast",0)==2)window_.showToast(L"英");

@@ -12,10 +12,12 @@ public:
     void hide();
     void showToast(const wchar_t *text);
     void showToast(const std::wstring &text) { showToast(text.c_str()); }
-    void showView(const gw::Json &view, const RECT &caret, const gw::Json &settings);
+    void updateSettings(const gw::Json &settings);
+    void showView(const gw::Json &view, const RECT &caret);
     // Compatibility only. The agent-backed TextService should use showView.
     void showCandidates(const GcSnapshot &snapshot, const RECT &caret);
     std::function<void(size_t)> onChoose; // page-local index 0...8
+    std::function<void(int)> onPage; // -1 / +1 through the normal guarded event path
     std::function<void()> onOriginal;
     std::function<void()> onRestore;      // explicit draft restore only
 private:

@@ -112,6 +112,19 @@ struct NormalInputPage: View {
                         .accessibilityElement(children: .contain)
                         .accessibilityLabel("候选窗排列")
                 }
+                SettingsRowDivider()
+                SettingsRow("渲染引擎") {
+                    SegmentedChoice(
+                        options: [(.bitmap, "自绘"), (.system, "系统")],
+                        selection: settings.candidateRenderer,
+                        width: Self.controlWidth) { value in
+                            guard settings.candidateRenderer != value else { return }
+                            settings.candidateRenderer = value
+                            submit()
+                        }
+                        .accessibilityElement(children: .contain)
+                        .accessibilityLabel("渲染引擎")
+                }
                 if settings.candidateLayout == .horizontal {
                     SettingsRowDivider()
                     SettingsRow("横排每页数量") {

@@ -1,0 +1,392 @@
+{
+  "fullVersion": "0.1.5-dev.1",
+  "buildNumber": 114,
+  "phase": "dev",
+  "channel": "dev",
+  "flavor": "full",
+  "platform": "windows",
+  "arch": "x86_64",
+  "builtOn": "macOS-26.7.3-x86_64-i386-64bit-Mach-O",
+  "git": {
+    "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+    "dirty": true
+  },
+  "gitCommit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+  "dirty": true,
+  "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+  "compileReceipts": {
+    "x64": {
+      "schema": 1,
+      "fullVersion": "0.1.5-dev.1",
+      "buildNumber": 114,
+      "channel": "dev",
+      "flavor": "full",
+      "arch": "x64",
+      "configuration": "release",
+      "git": {
+        "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+        "dirty": true
+      },
+      "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+      "dependencies": {
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libasprintf.a": "7d1fb5c8c59c4e879f9b9b45f2e5af8b9d34a35204f2d9f88aecc4b3c8e484a2",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libasprintf.dll.a": "675b53dfd257483bdc3632a326f28ba788fcb5da80d5fe4e4834970c0af678fb",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libcharset.a": "a9e90b455eb2f8f65b0e21614d8391dbc8085b39a3e31649115dbd37cbfcd670",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libcharset.dll.a": "6e885da069be36b6231bc6a063b46bdc3ec955bcc2e1709155cd972d6f11912f",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libdl.a": "4df3c9afc3bf9b8410199bb73124fddf10f0cd5c97aec13b6188765cdb5e2314",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libdl.dll.a": "350143c8676b52ae86ad9b641d527fc1d23187aade3b50496aba094fbafa6502",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libiconv.a": "4ef18795d0369c612c1c4eafdef755e691153da1fd31a83be06a2a5e14379833",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libiconv.dll.a": "bd20064608a48a081255777e4ce70727b5454fef0be988de39da2fbbed7ce87e",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libintl.a": "74194d3deecdd8b86318776153a16996fca4c47f55ad7eee8b024666dc307a7c",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libintl.dll.a": "9c58463e15a98b341e741609bc03704aa1c1198530fbffbb672ef23749e32766",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libz.a": "e08d3bbacb9293e31219c12082872d722809ea2bdcdb4d53d490ca33ef8da9b1",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libz.dll.a": "bc962e3d8122f09578b32f9fa7de9c3e510b532b7ae979df4c73223e16539e2e",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libzstd.a": "40cd65d0a6444c75078b030dd905068b8dc8e4fbacc01455e26d50eacce9c772",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libzstd.dll.a": "1ee6d25afd3e86fa4d5d214743231fa4f89d479654cec3ee82563c9c259b0679",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libFcitx5Utils.a": "3ee7ed271337121b79d6a3d2dc3955e039267878da3f2f2204fafd274efee1c1",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libIMECore.a": "b9aa933a704e2b2f6684e1b7d3b00d8a198c4af208db25dbb2ddcbc381d846ae",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libIMEPinyin.a": "616a784052c91600865bd2febd8210e13f38577f8e2d8972f97aedd2119f8b9d",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/prefix/lib/libFcitx5Utils.a": "3ee7ed271337121b79d6a3d2dc3955e039267878da3f2f2204fafd274efee1c1",
+        "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/toolchain-dll.cmake": "a907f1cf49d428515b879cbe7b465671c50c9b526d6b99236bca11a6a68bb631"
+      },
+      "artifacts": {
+        "GogakuTsf.dll": {
+          "sha256": "9431dcde5d8d8e0d9d394253f1fab6322b20ad517a7a306c93fd2db2bf0d7300",
+          "bytes": 19997044
+        },
+        "GogakuAgent.exe": {
+          "sha256": "39680592f1a60ce9e9594da971befa8baa4dd859686df6cee92434cd31aacca7",
+          "bytes": 17352743
+        },
+        "GogakuSettings.exe": {
+          "sha256": "2405eebfcc5de729b6f2be7d6730f64112ad8dff3183ada85b492b226956e317",
+          "bytes": 22272936
+        },
+        "libgogaku_core.dll": {
+          "sha256": "4602cfffe9f98c25914f0627adb3df193ca56c8353cd1817dabb392ed754656c",
+          "bytes": 28386309
+        }
+      }
+    },
+    "x86": {
+      "schema": 1,
+      "fullVersion": "0.1.5-dev.1",
+      "buildNumber": 114,
+      "channel": "dev",
+      "flavor": "full",
+      "arch": "x86",
+      "configuration": "release",
+      "git": {
+        "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+        "dirty": true
+      },
+      "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+      "dependencies": {},
+      "artifacts": {
+        "GogakuTsf.dll": {
+          "sha256": "1198a9ad19b5880d65452e94018497d1e6141f1270239a0557a50be29556ff5f",
+          "bytes": 18099971
+        }
+      }
+    }
+  },
+  "versionSourceSha256": "fe43d6db997fc68d5b0a18475ad124c2c41b5ef8a4f22bb5728e38a877e66513",
+  "peDependencies": {
+    "x64": {
+      "GogakuAgent.exe": {
+        "arch": "x64",
+        "dll": false,
+        "imports": [
+          "advapi32.dll",
+          "api-ms-win-crt-convert-l1-1-0.dll",
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-filesystem-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-private-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "api-ms-win-crt-time-l1-1-0.dll",
+          "api-ms-win-crt-utility-l1-1-0.dll",
+          "bcrypt.dll",
+          "crypt32.dll",
+          "kernel32.dll",
+          "ole32.dll",
+          "shell32.dll",
+          "user32.dll",
+          "winhttp.dll"
+        ],
+        "sha256": "39680592f1a60ce9e9594da971befa8baa4dd859686df6cee92434cd31aacca7",
+        "bytes": 17352743
+      },
+      "GogakuSettings.exe": {
+        "arch": "x64",
+        "dll": false,
+        "imports": [
+          "advapi32.dll",
+          "api-ms-win-crt-convert-l1-1-0.dll",
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-filesystem-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-private-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "api-ms-win-crt-time-l1-1-0.dll",
+          "api-ms-win-crt-utility-l1-1-0.dll",
+          "bcrypt.dll",
+          "comctl32.dll",
+          "comdlg32.dll",
+          "crypt32.dll",
+          "d2d1.dll",
+          "dwrite.dll",
+          "gdi32.dll",
+          "kernel32.dll",
+          "msimg32.dll",
+          "ole32.dll",
+          "shell32.dll",
+          "user32.dll",
+          "uxtheme.dll",
+          "winhttp.dll"
+        ],
+        "sha256": "2405eebfcc5de729b6f2be7d6730f64112ad8dff3183ada85b492b226956e317",
+        "bytes": 22272936
+      },
+      "GogakuTsf.dll": {
+        "arch": "x64",
+        "dll": true,
+        "imports": [
+          "advapi32.dll",
+          "api-ms-win-crt-convert-l1-1-0.dll",
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-filesystem-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-private-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "api-ms-win-crt-time-l1-1-0.dll",
+          "api-ms-win-crt-utility-l1-1-0.dll",
+          "bcrypt.dll",
+          "crypt32.dll",
+          "d2d1.dll",
+          "dwrite.dll",
+          "gdi32.dll",
+          "kernel32.dll",
+          "msimg32.dll",
+          "ole32.dll",
+          "oleaut32.dll",
+          "shell32.dll",
+          "user32.dll"
+        ],
+        "sha256": "9431dcde5d8d8e0d9d394253f1fab6322b20ad517a7a306c93fd2db2bf0d7300",
+        "bytes": 19997044
+      },
+      "libgogaku_core.dll": {
+        "arch": "x64",
+        "dll": true,
+        "imports": [
+          "advapi32.dll",
+          "api-ms-win-crt-convert-l1-1-0.dll",
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-filesystem-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-private-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "api-ms-win-crt-time-l1-1-0.dll",
+          "api-ms-win-crt-utility-l1-1-0.dll",
+          "bcrypt.dll",
+          "kernel32.dll"
+        ],
+        "sha256": "4602cfffe9f98c25914f0627adb3df193ca56c8353cd1817dabb392ed754656c",
+        "bytes": 28386309
+      }
+    },
+    "x86": {
+      "GogakuTsf.dll": {
+        "arch": "x86",
+        "dll": true,
+        "imports": [
+          "advapi32.dll",
+          "api-ms-win-crt-convert-l1-1-0.dll",
+          "api-ms-win-crt-environment-l1-1-0.dll",
+          "api-ms-win-crt-filesystem-l1-1-0.dll",
+          "api-ms-win-crt-heap-l1-1-0.dll",
+          "api-ms-win-crt-locale-l1-1-0.dll",
+          "api-ms-win-crt-math-l1-1-0.dll",
+          "api-ms-win-crt-private-l1-1-0.dll",
+          "api-ms-win-crt-runtime-l1-1-0.dll",
+          "api-ms-win-crt-stdio-l1-1-0.dll",
+          "api-ms-win-crt-string-l1-1-0.dll",
+          "api-ms-win-crt-time-l1-1-0.dll",
+          "api-ms-win-crt-utility-l1-1-0.dll",
+          "bcrypt.dll",
+          "crypt32.dll",
+          "d2d1.dll",
+          "dwrite.dll",
+          "gdi32.dll",
+          "kernel32.dll",
+          "msimg32.dll",
+          "ole32.dll",
+          "oleaut32.dll",
+          "shell32.dll",
+          "user32.dll"
+        ],
+        "sha256": "1198a9ad19b5880d65452e94018497d1e6141f1270239a0557a50be29556ff5f",
+        "bytes": 18099971
+      }
+    }
+  },
+  "artifacts": {
+    "bin/x64/GogakuAgent.exe": {
+      "sha256": "39680592f1a60ce9e9594da971befa8baa4dd859686df6cee92434cd31aacca7",
+      "bytes": 17352743
+    },
+    "bin/x64/GogakuSettings.exe": {
+      "sha256": "2405eebfcc5de729b6f2be7d6730f64112ad8dff3183ada85b492b226956e317",
+      "bytes": 22272936
+    },
+    "bin/x64/GogakuTsf.dll": {
+      "sha256": "9431dcde5d8d8e0d9d394253f1fab6322b20ad517a7a306c93fd2db2bf0d7300",
+      "bytes": 19997044
+    },
+    "bin/x64/libgogaku_core.dll": {
+      "sha256": "4602cfffe9f98c25914f0627adb3df193ca56c8353cd1817dabb392ed754656c",
+      "bytes": 28386309
+    },
+    "bin/x86/GogakuTsf.dll": {
+      "sha256": "1198a9ad19b5880d65452e94018497d1e6141f1270239a0557a50be29556ff5f",
+      "bytes": 18099971
+    },
+    "data/english-wordlist-sources.json": {
+      "sha256": "5233dd91f1ccfd103df9b406e2f97b8fb2f52da47ba82befda1c36e5ffe909f8",
+      "bytes": 929
+    },
+    "data/english-words.txt": {
+      "sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+      "bytes": 433760
+    },
+    "data/gloss-sources.json": {
+      "sha256": "e9b88618b5e82719ff5ec9e5c08c404157da171c7c7bccf7b528fa5fe7d2aee3",
+      "bytes": 2423
+    },
+    "data/gloss.tsv": {
+      "sha256": "7f3e32be397f9aa2c87457fc207b26fcf10fe911ce9ac6ee4f48a79096cadc5d",
+      "bytes": 6435711
+    },
+    "data/sc.dict": {
+      "sha256": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+      "bytes": 4489669
+    },
+    "data/zh_CN.lm": {
+      "sha256": "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387",
+      "bytes": 34736327
+    },
+    "licenses/00-licenses/Boost-LICENSE.txt": {
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+      "bytes": 1338
+    },
+    "licenses/00-licenses/FreeType-FTL.txt": {
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+      "bytes": 6743
+    },
+    "licenses/00-licenses/HarfBuzz-COPYING.txt": {
+      "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+      "bytes": 1971
+    },
+    "licenses/00-licenses/libintl-NOTICE.txt": {
+      "sha256": "0be40e3c9d326bee38ccdd96a82bb39caddd923c27d67e6beeee91e08abbe0b0",
+      "bytes": 1001
+    },
+    "licenses/00-licenses/libpng-LICENSE.txt": {
+      "sha256": "7317e078e2d3b5d7ba5a6159e650945153262b44b76f6700f8e9edb261c5143e",
+      "bytes": 5345
+    },
+    "licenses/00-licenses/panel-render-NOTICE.txt": {
+      "sha256": "b7017f255d043c38334f4c1d1dfb31a67c742f0250f20eeac413c4171d804ba7",
+      "bytes": 672
+    },
+    "licenses/00-licenses/zlib-LICENSE.txt": {
+      "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243",
+      "bytes": 1002
+    },
+    "licenses/01-licenses/CC-BY-SA-4.0.txt": {
+      "sha256": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+      "bytes": 20138
+    },
+    "licenses/01-licenses/DATA-ATTRIBUTION.txt": {
+      "sha256": "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+      "bytes": 3645
+    },
+    "licenses/01-licenses/MIT-Mayoi.txt": {
+      "sha256": "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+      "bytes": 1086
+    },
+    "licenses/01-licenses/MIT-jieba.txt": {
+      "sha256": "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+      "bytes": 1075
+    },
+    "licenses/01-licenses/SCOWL-Copyright.txt": {
+      "sha256": "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+      "bytes": 11758
+    },
+    "licenses/THIRD-PARTY.md": {
+      "sha256": "ea418563e730f4ee360a94e82cfba1aaeef91610fdc4402d41057d34b6797777",
+      "bytes": 9866
+    },
+    "licenses/fcitx5/LGPL-2.1-or-later.txt": {
+      "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+      "bytes": 25906
+    },
+    "licenses/fcitx5/Unicode-DFS-2016.txt": {
+      "sha256": "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+      "bytes": 2858
+    },
+    "licenses/kenlm/COPYING": {
+      "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+      "bytes": 26530
+    },
+    "licenses/kenlm/COPYING.3": {
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+      "bytes": 35147
+    },
+    "licenses/kenlm/COPYING.LESSER.3": {
+      "sha256": "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+      "bytes": 7637
+    },
+    "licenses/kenlm/LICENSE": {
+      "sha256": "6d9f8894586896ee3b383c962e141f527edeb54f561a6bd189d0eb08380c4cc2",
+      "bytes": 1150
+    },
+    "licenses/libime/LGPL-2.1-or-later.txt": {
+      "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+      "bytes": 25906
+    },
+    "licenses/windows/json-LICENSE.MIT": {
+      "sha256": "59a5abff0cf2deaf76ea12790c7c42256331aa5fbd6478f95b303edf76e67e6b",
+      "bytes": 1623
+    },
+    "licenses/windows/miniz-LICENSE.txt": {
+      "sha256": "8a77c33cd389c8ed4e81b11e4cb2aeac5c5b816a3648d35ebcc6bccfe2a02d8a",
+      "bytes": 1392
+    },
+    "licenses/windows/monocypher-LICENCE.md": {
+      "sha256": "093f8980c0ac0e6e4709dd3a6baf85a24dbec14b3c8130fc1fb97630e8681dce",
+      "bytes": 10613
+    },
+    "resources/update/windows.json": {
+      "sha256": "46f3339527e1544554c11923cf93117c19510aede14a6fefaf68b656a2b308ba",
+      "bytes": 198
+    }
+  }
+}

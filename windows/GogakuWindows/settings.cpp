@@ -420,6 +420,12 @@ void App::normalPage(){
     actions[229]=[this](int n){if(n==CBN_SELCHANGE)patch({{"candidateLayout",SendMessageW(get(229),CB_GETCURSEL,0,0)==1?"horizontal":"vertical"}});};
     nextRow(RowH);
 
+    // ── 渲染引擎：完整版与 Lite 共用普通输入设置 ──────────────
+    rowLabel(L"渲染引擎",y);
+    combo(231,{L"自绘",L"系统"},settings.value("candidateRenderer",std::string("bitmap"))=="system"?1:0,CtrlX,y,CtrlW);
+    actions[231]=[this](int n){if(n==CBN_SELCHANGE)patch({{"candidateRenderer",SendMessageW(get(231),CB_GETCURSEL,0,0)==1?"system":"bitmap"}});};
+    nextRow(RowH);
+
     // ── 横排每页：仅横排时可编辑（否则禁用，避免无效控件）────
     rowLabel(L"横排每页",y);
     auto hslider=add(TRACKBAR_CLASSW,L"",WS_TABSTOP|TBS_AUTOTICKS,CtrlX,y+6,CtrlW,30,230);

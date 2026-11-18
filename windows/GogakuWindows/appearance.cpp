@@ -2,9 +2,15 @@
 #include <d2d1.h>
 #include <dwrite.h>
 #include <wincodec.h>
+#include "../../shared/GogakuCore/panel_render.h"
 #include <algorithm>
 #include <cmath>
+#include <cwctype>
+#include <map>
+#include <mutex>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace gw {
 namespace {
@@ -25,6 +31,66 @@ D2D1_COLOR_F color(const Json &palette, const char *key, float alpha = 1) {
 }
 struct Target { RECT rect{}; CandidateRenderer::Hit hit; };
 RECT pixels(D2D1_RECT_F r, float scale) { return {LONG(std::floor(r.left * scale)), LONG(std::floor(r.top * scale)), LONG(std::ceil(r.right * scale)), LONG(std::ceil(r.bottom * scale))}; }
+struct FontFile {
+    std::string path;
+    int index = -1;
+    explicit operator bool() const { return !path.empty() && index >= 0; }
+};
+std::mutex fontCacheMutex;
+std::map<std::wstring, FontFile> fontCache;
+std::wstring cacheKey(std::wstring name) {
+    std::transform(name.begin(), name.end(), name.begin(), [](wchar_t c) { return (wchar_t)towlower(c); });
+    return name;
+}
+FontFile localFile(IDWriteFontFace *face) {
+    UINT32 count = 0;
+    face->GetFiles(&count, nullptr);
+    if (!count || count > 16) return {};
+    std::vector<IDWriteFontFile *> files(count, nullptr);
+    if (FAILED(face->GetFiles(&count, files.data()))) return {};
+    FontFile result;
+    for (auto *file : files) {
+        if (!file) continue;
+        Com<IDWriteFontFileLoader> loader; file->GetLoader(loader.out());
+        Com<IDWriteLocalFontFileLoader> local;
+        if (loader.p && SUCCEEDED(loader->QueryInterface(__uuidof(IDWriteLocalFontFileLoader), reinterpret_cast<void **>(local.out())))) {
+            const void *key = nullptr; UINT32 keySize = 0, length = 0;
+            if (SUCCEEDED(file->GetReferenceKey(&key, &keySize)) &&
+                SUCCEEDED(local->GetFilePathLengthFromKey(key, keySize, &length)) && length < 32768) {
+                std::wstring path(size_t(length) + 1, L'\0');
+                if (SUCCEEDED(local->GetFilePathFromKey(key, keySize, path.data(), length + 1))) {
+                    path.resize(length);
+                    result.path = utf8(path);
+                    result.index = static_cast<int>(face->GetIndex());
+                }
+            }
+        }
+        file->Release();
+    }
+    return result;
+}
+FontFile familyFile(IDWriteFactory *factory, const std::wstring &familyName) {
+    const auto key = cacheKey(L"family:" + familyName);
+    { std::lock_guard<std::mutex> lock(fontCacheMutex); auto it = fontCache.find(key); if (it != fontCache.end()) return it->second; }
+    Com<IDWriteFontCollection> collection;
+    if (FAILED(factory->GetSystemFontCollection(collection.out()))) return {};
+    UINT32 position = 0; BOOL exists = FALSE;
+    if (FAILED(collection->FindFamilyName(familyName.c_str(), &position, &exists)) || !exists) {
+        std::lock_guard<std::mutex> lock(fontCacheMutex); fontCache[key] = {}; return {};
+    }
+    Com<IDWriteFontFamily> family; Com<IDWriteFont> font; Com<IDWriteFontFace> face;
+    if (FAILED(collection->GetFontFamily(position, family.out())) ||
+        FAILED(family->GetFirstMatchingFont(DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STRETCH_NORMAL,
+                                            DWRITE_FONT_STYLE_NORMAL, font.out())) ||
+        FAILED(font->CreateFontFace(face.out()))) return {};
+    auto found = localFile(face.p);
+    if (found) { std::lock_guard<std::mutex> lock(fontCacheMutex); fontCache[key] = found; }
+    return found;
+}
+std::wstring normalizedFamily(const std::string &family, bool latin) {
+    if (family.empty() || family == "system-ui") return latin ? L"Segoe UI" : L"Microsoft YaHei UI";
+    return wide(family);
+}
 }
 
 bool darkAppearance() {
@@ -40,6 +106,13 @@ struct CandidateRenderer::Impl {
     Com<IDWriteTextFormat> cn, en, small, index;
     Com<IWICBitmap> backgroundImage;
     std::string imageKey, fontKey;
+    Json theme = Json::object();
+    std::unique_ptr<GcPanelTheme, decltype(&gc_panel_theme_free)> preparedTheme{nullptr,gc_panel_theme_free};
+    void setTheme(const Json &value) {
+        if (theme == value) return; // 完整内容比较，只发生在设置/预览更新。
+        preparedTheme.reset(); backgroundImage.reset(); std::string().swap(imageKey);
+        theme = value;
+    }
     HDC memory = nullptr;
     HBITMAP bitmap = nullptr, previous = nullptr;
     SIZE extent{};
@@ -130,7 +203,124 @@ struct CandidateRenderer::Impl {
         if (!bitmap) throw std::runtime_error("无法创建候选像素缓冲。");
         previous=static_cast<HBITMAP>(SelectObject(memory,bitmap)); extent={w,h};
     }
+    void addFont(Json &fonts, const std::wstring &name, bool emoji, const char *role = nullptr) {
+        auto face = familyFile(write.p, name);
+        if (!face) return;
+        for (auto &existing : fonts) {
+            if (existing.value("path", std::string()) == face.path && existing.value("index", -2) == face.index &&
+                existing.value("emoji", false) == emoji) {
+                if (role) existing["role"] = role;
+                return;
+            }
+        }
+        Json entry{{"path", face.path}, {"index", face.index}, {"emoji", emoji}};
+        if (role) entry["role"] = role;
+        fonts.push_back(std::move(entry));
+    }
+    void renderBitmap(const Json &view, const Json &theme, bool dark, int legacy, UINT dpi, const Json &settings) {
+        if (!write.p) check(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), reinterpret_cast<IUnknown **>(write.out())), "DirectWrite 初始化失败。");
+        Json type = theme.value("typography", Json::object());
+        Json fontList = Json::array();
+        addFont(fontList, normalizedFamily(type.value("fontCN", std::string("system-ui")), false), false);
+        addFont(fontList, normalizedFamily(type.value("fontEN", std::string("system-ui")), true), false, "latin");
+        for (const auto *name : {L"Microsoft YaHei UI", L"Segoe UI", L"Arial"}) addFont(fontList, name, false);
+        addFont(fontList, L"Segoe UI Emoji", true);
+        if (fontList.empty()) throw std::runtime_error("无法定位可用的本地字体。");
+
+        const bool learning = view.value("learning", false);
+        const bool horizontal = !learning && settings.value("candidateLayout", std::string()) == "horizontal";
+        const int pageSize = horizontal ? std::clamp(settings.value("horizontalPageSize", 7), 4, 9) : 9;
+        Json candidates = view.value("candidates", Json::array());
+        if (!candidates.is_array()) candidates = Json::array();
+        if (candidates.size() > size_t(pageSize)) candidates.erase(candidates.begin() + pageSize, candidates.end());
+        if (!learning && !settings.value("glossEnabled", true))
+            for (auto &candidate : candidates) candidate["gloss"] = "";
+#ifdef GOGAKU_LITE
+        for (auto &candidate : candidates) candidate["gloss"] = "";
+#endif
+        const size_t visibleCandidates = candidates.size();
+        std::string direction = settings.value("preferredDirection", std::string("zhToEn"));
+        if (view.contains("direction")) {
+            if (view["direction"].is_string()) direction = view["direction"].get<std::string>();
+            else if (view["direction"].is_number_integer()) direction = view["direction"].get<int>() == 1 ? "enToZh" : "zhToEn";
+        }
+        Json frame = {{"fonts", std::move(fontList)}, {"candidates", std::move(candidates)},
+                      {"selected", view.value("selected", size_t(0))},
+                      {"page", view.value("page", size_t(0))},
+                      {"pageCount", std::max(size_t(1), view.value("pageCount", size_t(1)))},
+                      {"pageSize", pageSize}, {"layout", horizontal ? "horizontal" : "vertical"},
+                      {"glossRow", horizontal && settings.value("glossEnabled", true)},
+                      {"fontSize", std::clamp(legacy, 12, 16)},
+                      {"preedit", view.value("preedit", std::string())},
+                      {"preeditCaretUTF16", view.value("preeditCaretUTF16", -1)},
+                      {"typedPrefixUTF16", view.value("typedPrefixUTF16", 0)},
+                      {"learning", learning}, {"direction", direction},
+                      {"status", view.value("status", std::string())}, {"toast", view.value("toast", std::string())},
+                      {"hasOriginal", view.value("hasOriginal", learning && (visibleCandidates || !text(view,"preedit").empty() || !text(view,"raw").empty()))},
+                      {"hasRestore", view.value("hasRestore", view.value("draftAvailable", false))},
+                      {"issues", view.value("issues", Json::array())}};
+        if (frame["preedit"].get<std::string>().empty()) frame["preedit"] = view.value("raw", std::string());
+        if (view.value("pending", false) && frame["status"].get<std::string>().empty()) frame["status"] = "翻译处理中…";
+        const auto frameText = frame.dump();
+        if (!preparedTheme) {
+            const auto themeText = theme.dump(); // 仅主题更新后的第一次渲染序列化。
+            GcPanelTheme *rawTheme = nullptr;
+            const auto code = gc_panel_theme_create(themeText.data(),themeText.size(),&rawTheme);
+            preparedTheme.reset(rawTheme);
+            if (code || !preparedTheme) throw std::runtime_error("共享候选主题准备失败。");
+        }
+        GcPanelResult *raw = nullptr;
+        const int32_t code = gc_panel_render_prepared(frameText.data(), frameText.size(), preparedTheme.get(),
+                                                       double(dpi ? dpi : 96) / 96.0, dark ? 1 : 0, &raw);
+        std::unique_ptr<GcPanelResult, decltype(&gc_panel_result_free)> result(raw, gc_panel_result_free);
+        if (code || !result || !result->pixels || result->width <= 0 || result->height <= 0)
+            throw std::runtime_error("共享候选位图渲染失败。");
+        surface(result->width, result->height);
+        DIBSECTION section{};
+        if (!GetObjectW(bitmap, sizeof(section), &section)) throw std::runtime_error("无法访问候选像素缓冲。");
+        auto *dst = static_cast<uint8_t *>(section.dsBm.bmBits);
+        const size_t count = size_t(result->width) * size_t(result->height);
+        for (size_t i = 0; i < count; ++i) {
+            const auto *src = result->pixels + i * 4;
+            dst[i * 4] = src[2]; dst[i * 4 + 1] = src[1]; dst[i * 4 + 2] = src[0]; dst[i * 4 + 3] = src[3];
+        }
+        targets.clear();
+        const int64_t pageBase = int64_t(view.value("page", size_t(0))) * pageSize;
+        for (size_t i = 0; i < result->hit_count; ++i) {
+            const auto &source = result->hits[i];
+            Hit hit;
+            if (source.action == GC_PANEL_HIT_CHOOSE) {
+                const int64_t local = int64_t(source.arg) - pageBase;
+                if (local < 0 || size_t(local) >= visibleCandidates) continue;
+                hit.action = Action::Choose;
+                hit.index = size_t(local);
+            } else if (source.action == GC_PANEL_HIT_ORIGINAL) hit.action = Action::Original;
+            else if (source.action == GC_PANEL_HIT_RESTORE) hit.action = Action::Restore;
+            else if (source.action == GC_PANEL_HIT_PAGE_PREV) hit.action = Action::PagePrev;
+            else if (source.action == GC_PANEL_HIT_PAGE_NEXT) hit.action = Action::PageNext;
+            else if (source.action == GC_PANEL_HIT_EXPLAIN) {
+                if (!view.contains("issues") || !view["issues"].is_array() || source.arg < 0 || size_t(source.arg) >= view["issues"].size()) continue;
+                hit.action = Action::Explain;
+                hit.index = size_t(source.arg);
+                hit.explanation = text(view["issues"][hit.index], "explanation");
+            } else continue;
+            RECT rect{source.x, source.y, source.x + source.w, source.y + source.h};
+            targets.push_back({rect, std::move(hit)});
+        }
+        alpha = 255;
+    }
     void render(const Json &view, const Json &theme, bool dark, int legacy, UINT dpi, const Json &settings) {
+        if (settings.value("candidateRenderer", std::string()) == "system") {
+            renderSystem(view, theme, dark, legacy, dpi, settings);
+            return;
+        }
+        try {
+            renderBitmap(view, theme, dark, legacy, dpi, settings);
+        } catch (...) {
+            renderSystem(view, theme, dark, legacy, dpi, settings);
+        }
+    }
+    void renderSystem(const Json &view, const Json &theme, bool dark, int legacy, UINT dpi, const Json &settings) {
         factories(); fonts(theme, legacy); targets.clear();
         const auto &palette = dark && theme.contains("dark") && theme["dark"].is_object() ? theme["dark"] : theme.at("light");
         auto visual=palette.value("visual",Json::object());
@@ -284,7 +474,10 @@ struct CandidateRenderer::Impl {
             if (footer) {
                 float pageWidth=0;
                 if (pages>1) { auto value=std::to_wstring(page+1)+L"/"+std::to_wstring(pages); pageWidth=measure(value,index.p)+8;
-                    draw(value,index.p,D2D1::RectF(width-pad-pageWidth,y,width-pad,y+24),"page"); }
+                    draw(value,index.p,D2D1::RectF(width-pad-pageWidth,y,width-pad,y+24),"page");
+                    const float middle=width-pad-pageWidth/2;
+                    if(page>0) targets.push_back({pixels(D2D1::RectF(width-pad-pageWidth,y,middle,y+24),scale),{Action::PagePrev}});
+                    if(page+1<pages) targets.push_back({pixels(D2D1::RectF(middle,y,width-pad,y+24),scale),{Action::PageNext}}); }
                 draw(status,index.p,D2D1::RectF(pad,y,width-pad-pageWidth,y+24),"page"); y+=24;
             }
             if (actions) {
@@ -305,7 +498,9 @@ struct CandidateRenderer::Impl {
 };
 CandidateRenderer::CandidateRenderer():impl_(new Impl) {}
 CandidateRenderer::~CandidateRenderer()=default;
-void CandidateRenderer::render(const Json &view,const Json &theme,bool dark,int font,UINT dpi,const Json &settings) { impl_->render(view,theme,dark,font,dpi,settings); }
+void CandidateRenderer::setTheme(const Json &theme) { impl_->setTheme(theme); }
+void CandidateRenderer::render(const Json &view,bool dark,int font,UINT dpi,const Json &settings) { impl_->render(view,impl_->theme,dark,font,dpi,settings); }
+void CandidateRenderer::render(const Json &view,const Json &theme,bool dark,int font,UINT dpi,const Json &settings) { setTheme(theme); render(view,dark,font,dpi,settings); }
 HDC CandidateRenderer::dc() const { return impl_->memory; }
 SIZE CandidateRenderer::size() const { return impl_->extent; }
 BYTE CandidateRenderer::opacity() const { return impl_->alpha; }

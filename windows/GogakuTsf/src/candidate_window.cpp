@@ -1,4 +1,5 @@
 #include "candidate_window.h"
+#include "../../GogakuWindows/panel_frame.h"
 #include <algorithm>
 #include <windowsx.h>
 
@@ -15,6 +16,7 @@ bool CandidateWindow::create(HINSTANCE instance) {
         WindowClass,L"Gogaku 候选",WS_POPUP,0,0,1,1,nullptr,nullptr,instance,this);
     if (!m_hwnd) return false;
     m_renderer=std::make_unique<gw::CandidateRenderer>();
+    m_renderer->setTheme(gw::resolvedTheme(m_settings));
     return true;
 }
 void CandidateWindow::destroy() {
@@ -25,10 +27,14 @@ void CandidateWindow::hide() {
     if (m_hwnd) { KillTimer(m_hwnd,1); ShowWindow(m_hwnd,SW_HIDE); }
     m_view=gw::Json::object();
 }
-void CandidateWindow::showView(const gw::Json &view,const RECT &caret,const gw::Json &settings) {
+void CandidateWindow::updateSettings(const gw::Json &settings) {
+    m_settings=settings;
+    if (m_renderer) m_renderer->setTheme(gw::resolvedTheme(m_settings));
+}
+void CandidateWindow::showView(const gw::Json &view,const RECT &caret) {
     if (!m_hwnd || !view.is_object()) return;
     KillTimer(m_hwnd,1);
-    m_view=view; m_settings=settings; m_caret=caret; m_haveCaret=true;
+    m_view=view; m_caret=caret; m_haveCaret=true;
     // Core normal snapshots use integer toast/english enums; public views may
     // already contain the display string. Normalize before entering the renderer.
     if (m_view.contains("toast") && m_view["toast"].is_number_integer()) {
@@ -47,9 +53,11 @@ void CandidateWindow::showCandidates(const GcSnapshot &snapshot,const RECT &care
     for (size_t i=0;i<snapshot.count;++i) candidates.push_back({
         {"text",snapshot.candidates[i].text?snapshot.candidates[i].text:""},
         {"gloss",snapshot.candidates[i].gloss?snapshot.candidates[i].gloss:""}});
-    showView({{"composing",snapshot.count || (snapshot.preedit && *snapshot.preedit)},
+    gw::Json view={{"composing",snapshot.count || (snapshot.preedit && *snapshot.preedit)},
         {"preedit",snapshot.preedit?snapshot.preedit:""},{"candidates",candidates},
-        {"selected",snapshot.selected},{"page",snapshot.page},{"pageCount",snapshot.page_count}},caret,m_settings);
+        {"selected",snapshot.selected},{"page",snapshot.page},{"pageCount",snapshot.page_count}};
+    view.update(gw::panelPreeditOffsets(view["preedit"].get<std::string>(), snapshot.preedit_caret, snapshot.typed_prefix_len));
+    showView(view,caret);
 }
 void CandidateWindow::showToast(const wchar_t *value) {
     // Never use mouse position or an unrelated window as a synthetic anchor.
@@ -63,7 +71,7 @@ void CandidateWindow::redraw() {
     if (!m_renderer || !m_haveCaret) return;
     try {
         UINT dpi=GetDpiForWindow(m_hwnd); if (!dpi) dpi=96;
-        m_renderer->render(m_view,gw::resolvedTheme(m_settings),gw::darkAppearance(),m_settings.value("candidateFontSize",14),dpi,m_settings);
+        m_renderer->render(m_view,gw::darkAppearance(),m_settings.value("candidateFontSize",14),dpi,m_settings);
         auto size=m_renderer->size();
         MONITORINFO info{}; info.cbSize=sizeof(info);
         if (!GetMonitorInfoW(MonitorFromRect(&m_caret,MONITOR_DEFAULTTONEAREST),&info)) return;
@@ -101,6 +109,8 @@ LRESULT CALLBACK CandidateWindow::s_wndProc(HWND hwnd,UINT message,WPARAM wp,LPA
             // Do not SetFocus, SendInput, or directly mutate host text here.
             switch (hit.action) {
             case gw::CandidateRenderer::Action::Choose: { auto fn=self->onChoose; if (fn) fn(hit.index); break; }
+            case gw::CandidateRenderer::Action::PagePrev: { auto fn=self->onPage; if (fn) fn(-1); break; }
+            case gw::CandidateRenderer::Action::PageNext: { auto fn=self->onPage; if (fn) fn(1); break; }
             case gw::CandidateRenderer::Action::Original: { auto fn=self->onOriginal; if (fn) fn(); break; }
             case gw::CandidateRenderer::Action::Restore: { auto fn=self->onRestore; if (fn) fn(); break; }
             case gw::CandidateRenderer::Action::Explain:

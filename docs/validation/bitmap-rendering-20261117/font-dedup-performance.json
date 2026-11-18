@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-17",
+  "machine": "Intel Mac, macOS 26.7.3",
+  "cpuSpeedLimitPercent": 100,
+  "availableCPUs": 16,
+  "library": ".build/core/libgogaku_core.dylib",
+  "librarySha256": "5cb56298c5cdec97224b78bcddea59fd0a6f2d1289f42093a3a6076dd48cb11b",
+  "fixture": {
+    "theme": "gogaku",
+    "scale": 2,
+    "verticalCandidates": 9,
+    "horizontalCandidates": 7,
+    "fontFacesBeforeMerge": 4,
+    "fontFacesAfterMerge": 3,
+    "fontResolution": "SFNS regular+latin duplicate merged; PingFangSC-Regular and AppleColorEmoji resolved by PostScript name"
+  },
+  "coldFirstRenderMs": {
+    "beforeMerge": {
+      "processes": 5,
+      "wallMedian": 8.554,
+      "wallRange": [8.357, 8.778],
+      "cpuMedian": 8.513
+    },
+    "afterMerge": {
+      "processes": 9,
+      "wallMedian": 7.358,
+      "wallRange": [6.377, 19.909],
+      "cpuMedian": 7.341,
+      "cpuRange": [6.373, 10.027]
+    },
+    "note": "Fresh renderer process per sample; dylib and theme loading were outside the timed interval. OS font-file cache was not purged. Small samples are diagnostic, not formal cold-start acceptance."
+  },
+  "warmRenderMs": {
+    "vertical": {
+      "samples": 300,
+      "sizePixels": [514, 658],
+      "wall": {"median": 1.171, "p95": 1.754, "p99": 2.489, "max": 2.655},
+      "cpu": {"median": 1.168, "p95": 1.752, "p99": 2.409, "max": 2.608},
+      "wallMinusCpuP95": 0.054
+    },
+    "horizontal": {
+      "samples": 300,
+      "sizePixels": [1119, 178],
+      "wall": {"median": 0.702, "p95": 0.947, "p99": 1.224, "max": 1.648},
+      "cpu": {"median": 0.700, "p95": 0.934, "p99": 1.221, "max": 1.577},
+      "wallMinusCpuP95": 0.038
+    },
+    "note": "Samples were measured after one warm-up call in the same process."
+  },
+  "fullSuite": {
+    "report": "after-font-dedup/report.json",
+    "themes": 4,
+    "appearances": 2,
+    "layouts": 2,
+    "framesPerCase": 200,
+    "fontFaceIndices": "explicit indices; equivalent output verified for PostScript-name resolution",
+    "firstColdFrameMs": 6.509,
+    "verticalMedianRangeMs": [1.089, 1.261],
+    "verticalP95RangeMs": [1.407, 1.666],
+    "horizontalMedianRangeMs": [0.664, 0.800],
+    "horizontalP95RangeMs": [0.870, 1.063],
+    "hostTested": false
+  },
+  "pixelEquivalence": {
+    "oldFourFaceListEqualsMergedThreeFaceList": true,
+    "verticalLightSha256": "16ba3d4d70c905e3f681f214a1523dd950842b5b29decf9be551e904f29b6837",
+    "verticalDarkSha256": "0da205d32e3d3722484355df54a3a1dd9d1bfefd3bbb9a80a069b8d2799cfa28",
+    "horizontalLightSha256": "011834a3debe9d4c3f2ad54d25d1a7b83211affb145395db7dccc2c229b9e294",
+    "horizontalDarkSha256": "58c760a8939b359ae658007628d5405ed80cc68eeac809baf568efc4961596d0"
+  },
+  "verification": {
+    "command": "python3 scripts/verify.py --profile fast",
+    "passedChecks": 7,
+    "ctest": "11/11",
+    "swiftReleaseTests": "273/273",
+    "report": "../verify/report-fast-20261117-141826.json"
+  },
+  "limits": [
+    "Measures gc_panel_render only; excludes Swift encoding, CGImage wrapping, window submission, and real IMK input.",
+    "Windows, real input-source hosts, and a rebuilt/installed Mac app have not been tested after the Mac font-list change.",
+    "The named-face cold-start sample was small, had a high outlier, and did not purge the OS font-file cache; it is not formal cold-start acceptance.",
+    "A separate 300-frame vertical run measured p99 above 2 ms despite p95 meeting 2 ms."
+  ]
+}

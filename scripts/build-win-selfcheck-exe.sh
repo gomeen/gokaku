@@ -289,7 +289,7 @@ rm -rf $SC/core-build
 BOOST_INCLUDE=/usr/local/opt/boost/include \
 cmake -S core-src -B core-build -G Ninja -DCMAKE_MAKE_PROGRAM=$NINJA \
   -DCMAKE_TOOLCHAIN_FILE=$SC/toolchain-static.cmake -DCMAKE_BUILD_TYPE=Release \
-  -DGOGAKU_DEPS=$SC/deps-root >/dev/null
+  -DGOGAKU_DEPS=$SC/deps-root -DGOGAKU_PANEL_EXPORTS=OFF >/dev/null
 cmake --build core-build -j 8 > /tmp/static-core-build.log 2>&1 || {
   grep -E "error|FAILED" /tmp/static-core-build.log | head -10; exit 1; }
 
@@ -321,6 +321,7 @@ $CC  $INC -Dmain=test_main_abi       -c $CORE_SRC/tests/abi_version_test.c      
 $CXX $INC -Dmain=test_main_settings  -c $CORE_SRC/tests/settings_contract_test.cpp -o settings.o
 # 主题契约向量：内置调色板数据冻结（共享数据源）。
 $CXX $INC -Dmain=test_main_themes    -c $CORE_SRC/tests/theme_contract_test.cpp   -o themes.o
+$CXX $INC -Dmain=test_main_panel     -c $CORE_SRC/tests/panel_render_test.cpp     -o panel.o
 
 # 数据内嵌（短文件名控制符号名）
 cp "$DATA/sc.dict"  embed_sc_dict.bin
@@ -337,6 +338,7 @@ cat > runner.cpp <<'EOF'
 #include <string>
 #include <direct.h>
 #include <stdlib.h>
+#include <windows.h>
 
 extern "C" int test_main_abi(void);
 int test_main_safety(void);
@@ -345,6 +347,7 @@ int test_main_learning(void);
 int test_main_quality(void);
 int test_main_settings(void);
 int test_main_themes(void);
+int test_main_panel(void);
 int test_main_fuzz(int argc, char** argv);
 
 extern const unsigned char _binary_embed_sc_dict_bin_start[];
@@ -381,6 +384,16 @@ int main() {
     snprintf(envBuf, sizeof(envBuf), "GOGAKU_CORE_TEST_DATA=%s", dir.c_str());
     _putenv(envBuf);
 
+    if (!getenv("GOGAKU_PANEL_FONT")) {
+        wchar_t windir[MAX_PATH]{}; GetWindowsDirectoryW(windir, MAX_PATH);
+        std::wstring font = std::wstring(windir) + L"\\Fonts\\msyh.ttc";
+        if (GetFileAttributesW(font.c_str()) == INVALID_FILE_ATTRIBUTES)
+            font = std::wstring(windir) + L"\\Fonts\\segoeui.ttf";
+        int n = WideCharToMultiByte(CP_UTF8, 0, font.c_str(), -1, nullptr, 0, nullptr, nullptr);
+        std::string utf8(n, '\0');
+        WideCharToMultiByte(CP_UTF8, 0, font.c_str(), -1, utf8.data(), n, nullptr, nullptr);
+        _putenv_s("GOGAKU_PANEL_FONT", utf8.c_str());
+    }
     struct { const char* name; int (*run)(); } tests[] = {
         {"ABI 版本合同",       [] { return test_main_abi(); }},
         {"翻译加固层",         [] { return test_main_safety(); }},
@@ -389,6 +402,7 @@ int main() {
         {"质量回归（120 条）", [] { return test_main_quality(); }},
         {"设置契约向量",     [] { return test_main_settings(); }},
         {"主题契约向量",     [] { return test_main_themes(); }},
+        {"共享位图契约",     [] { return test_main_panel(); }},
         {"随机序列冒烟",       [] { char n0[] = "fuzz"; char s0[] = "20261031"; char c0[] = "2000";
                                    char* av[] = {n0, s0, c0}; return test_main_fuzz(3, av); }},
     };
@@ -407,9 +421,11 @@ int main() {
 }
 EOF
 $CXX $INC -c runner.cpp -o runner.o
-$CXX -static runner.o abi.o safety.o normal.o learning.o quality.o settings.o themes.o fuzz.o \
+$CXX -static runner.o abi.o safety.o normal.o learning.o quality.o settings.o themes.o panel.o fuzz.o \
   embed_sc_dict.bin.o embed_zh_cn_lm.bin.o \
   $BIN/libgogaku_core.a \
+  $BIN/panel_render/libGogakuPanelRender.a $BIN/panel_render/libgogaku_harfbuzz.a \
+  $BIN/panel_render/libgogaku_freetype.a $BIN/panel_render/libgogaku_png.a $BIN/panel_render/libgogaku_zlib.a \
   -L$SC/deps-root/build/bin -L$SC/prefix/lib -L$WC/msys-sysroot/clang64/lib \
   -lIMEPinyin -lIMECore -lFcitx5Utils -lzstd -lintl -liconv -ldl -lz -lbcrypt -ladvapi32 \
   -o gogaku-selfcheck.exe

@@ -1,0 +1,53 @@
+{
+  "schema": 1,
+  "fullVersion": "0.1.5-dev.1",
+  "buildNumber": 114,
+  "channel": "dev",
+  "flavor": "lite",
+  "arch": "x64",
+  "configuration": "release",
+  "git": {
+    "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+    "dirty": true
+  },
+  "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+  "dependencies": {
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libasprintf.a": "7d1fb5c8c59c4e879f9b9b45f2e5af8b9d34a35204f2d9f88aecc4b3c8e484a2",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libasprintf.dll.a": "675b53dfd257483bdc3632a326f28ba788fcb5da80d5fe4e4834970c0af678fb",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libcharset.a": "a9e90b455eb2f8f65b0e21614d8391dbc8085b39a3e31649115dbd37cbfcd670",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libcharset.dll.a": "6e885da069be36b6231bc6a063b46bdc3ec955bcc2e1709155cd972d6f11912f",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libdl.a": "4df3c9afc3bf9b8410199bb73124fddf10f0cd5c97aec13b6188765cdb5e2314",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libdl.dll.a": "350143c8676b52ae86ad9b641d527fc1d23187aade3b50496aba094fbafa6502",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libiconv.a": "4ef18795d0369c612c1c4eafdef755e691153da1fd31a83be06a2a5e14379833",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libiconv.dll.a": "bd20064608a48a081255777e4ce70727b5454fef0be988de39da2fbbed7ce87e",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libintl.a": "74194d3deecdd8b86318776153a16996fca4c47f55ad7eee8b024666dc307a7c",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libintl.dll.a": "9c58463e15a98b341e741609bc03704aa1c1198530fbffbb672ef23749e32766",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libz.a": "e08d3bbacb9293e31219c12082872d722809ea2bdcdb4d53d490ca33ef8da9b1",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libz.dll.a": "bc962e3d8122f09578b32f9fa7de9c3e510b532b7ae979df4c73223e16539e2e",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libzstd.a": "40cd65d0a6444c75078b030dd905068b8dc8e4fbacc01455e26d50eacce9c772",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/msys-sysroot/clang64/lib/libzstd.dll.a": "1ee6d25afd3e86fa4d5d214743231fa4f89d479654cec3ee82563c9c259b0679",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libFcitx5Utils.a": "3ee7ed271337121b79d6a3d2dc3955e039267878da3f2f2204fafd274efee1c1",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libIMECore.a": "b9aa933a704e2b2f6684e1b7d3b00d8a198c4af208db25dbb2ddcbc381d846ae",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/libime-build/bin/libIMEPinyin.a": "616a784052c91600865bd2febd8210e13f38577f8e2d8972f97aedd2119f8b9d",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/prefix/lib/libFcitx5Utils.a": "3ee7ed271337121b79d6a3d2dc3955e039267878da3f2f2204fafd274efee1c1",
+    "/Users/gomeen/code/gomeen/gogaku/.build/win-cross/static/toolchain-dll.cmake": "a907f1cf49d428515b879cbe7b465671c50c9b526d6b99236bca11a6a68bb631"
+  },
+  "artifacts": {
+    "GogakuTsf.dll": {
+      "sha256": "13b4fd13bb26bd6910869f267d94e496a1f1821f86e72e5c127d2c93589722dd",
+      "bytes": 19997044
+    },
+    "GogakuAgent.exe": {
+      "sha256": "e3cd1554ae70a92e9d5c1c2c31e928da20f74b9c53c1cd513f493855a18ae6db",
+      "bytes": 17262776
+    },
+    "GogakuSettings.exe": {
+      "sha256": "b906848fdae4af94c529bf19cc7bffa1066f52f805285ce5193def5873e4db4c",
+      "bytes": 22273448
+    },
+    "libgogaku_core.dll": {
+      "sha256": "323b466ebb2769b3ba4cbcf9df9f4efa19645c7e886d20c47c5e58187538aaf4",
+      "bytes": 28224798
+    }
+  }
+}

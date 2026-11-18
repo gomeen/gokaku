@@ -1,0 +1,92 @@
+{
+  "beforeLibrarySha256": "5cb56298c5cdec97224b78bcddea59fd0a6f2d1289f42093a3a6076dd48cb11b",
+  "afterLibrarySha256": "480ca1e93c4bc5a9a1acaedbcda478bc4306fa253cff422956728b67df142892",
+  "cases": [
+    {
+      "pngBytes": 0,
+      "matchingInputsAndPixels": {
+        "pngBytes": true,
+        "pngSha256": true,
+        "themeSha256": true,
+        "frame": true,
+        "scale": true,
+        "dimensions": true,
+        "rgbaSha256": true
+      },
+      "beforeP95Ms": 0.69007,
+      "afterP95Ms": 0.545344,
+      "prepareMs": 0.922475,
+      "coldRenderMs": 14.588683,
+      "coldTotalMs": 15.511158
+    },
+    {
+      "pngBytes": 262144,
+      "matchingInputsAndPixels": {
+        "pngBytes": true,
+        "pngSha256": true,
+        "themeSha256": true,
+        "frame": true,
+        "scale": true,
+        "dimensions": true,
+        "rgbaSha256": true
+      },
+      "beforeP95Ms": 3.987944,
+      "afterP95Ms": 1.187106,
+      "prepareMs": 1.662865,
+      "coldRenderMs": 7.052832,
+      "coldTotalMs": 8.715697
+    },
+    {
+      "pngBytes": 1048576,
+      "matchingInputsAndPixels": {
+        "pngBytes": true,
+        "pngSha256": true,
+        "themeSha256": true,
+        "frame": true,
+        "scale": true,
+        "dimensions": true,
+        "rgbaSha256": true
+      },
+      "beforeP95Ms": 10.890002,
+      "afterP95Ms": 1.151221,
+      "prepareMs": 6.253576,
+      "coldRenderMs": 13.543861,
+      "coldTotalMs": 19.797437
+    },
+    {
+      "pngBytes": 4194304,
+      "matchingInputsAndPixels": {
+        "pngBytes": true,
+        "pngSha256": true,
+        "themeSha256": true,
+        "frame": true,
+        "scale": true,
+        "dimensions": true,
+        "rgbaSha256": true
+      },
+      "beforeP95Ms": 77.91402,
+      "afterP95Ms": 1.390869,
+      "prepareMs": 33.56904,
+      "coldRenderMs": 48.706269,
+      "coldTotalMs": 82.275309
+    },
+    {
+      "pngBytes": 8388608,
+      "matchingInputsAndPixels": {
+        "pngBytes": true,
+        "pngSha256": true,
+        "themeSha256": true,
+        "frame": true,
+        "scale": true,
+        "dimensions": true,
+        "rgbaSha256": true
+      },
+      "beforeP95Ms": 81.888074,
+      "afterP95Ms": 1.125502,
+      "prepareMs": 68.954466,
+      "coldRenderMs": 89.601583,
+      "coldTotalMs": 158.556049
+    }
+  ],
+  "hostTested": false
+}

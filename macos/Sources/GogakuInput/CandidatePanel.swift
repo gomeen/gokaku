@@ -1,5 +1,6 @@
 import AppKit
 import CoreText
+import CGogakuCore
 import GogakuKit
 
 private extension NSAttributedString {
@@ -529,18 +530,28 @@ final class PanelContent: NSView {
     private(set) var theme = CandidatePanelThemeCatalog.resolve(.rimeMacOSLike)
     private var layout: PanelLayout?
     private var composition: CompositionView?
+    private var bitmap: SharedPanelBitmap?
+    private var bitmapScale: CGFloat = 1
+    private var renderer: CandidateRenderer = .system
+    private var renderFailure: String?
     var themeDidChange: (() -> Void)?
     private var issueNoticeVisible = false
     var choose: ((Int) -> Void)?
     var commitOriginal: (() -> Void)?
     var switchSource: (() -> Void)?
+    var pagePrevious: (() -> Void)?
+    var pageNext: (() -> Void)?
+    var restoreDraft: (() -> Void)?
+    var explainIssue: ((Int) -> Void)?
+    var toast = ""
 
     override var isFlipped: Bool { true }
     override var acceptsFirstResponder: Bool { false }
 
-    func updateTheme(_ value: CandidatePanelTheme) {
+    func updateTheme(_ value: CandidatePanelTheme, renderer: CandidateRenderer? = nil) {
         theme = value.resolvingAppearance(effectiveAppearance)
-        if let composition { update(composition) }
+        if let renderer { self.renderer = renderer }
+        if let composition { update(composition, backingScale: bitmapScale) }
         needsDisplay = true
         themeDidChange?()
     }
@@ -550,18 +561,95 @@ final class PanelContent: NSView {
         updateTheme(theme)
     }
 
-    func update(_ view: CompositionView) {
+    func update(_ view: CompositionView, backingScale: CGFloat? = nil) {
+        renderContent(view, backingScale: backingScale, issueExplanationIndex: nil)
+    }
+
+    private func renderContent(_ view: CompositionView, backingScale: CGFloat?, issueExplanationIndex: Int?) {
         composition = view
-        layout = PanelLayout(view: view, theme: theme,
-                             commitOriginal: commitOriginal, switchSource: switchSource)
-        setAccessibilityLabel("候选列表，\(layout?.rows.count ?? 0) 项，\(layout?.pageLabel ?? "")")
+        let requestedScale = backingScale ?? window?.backingScaleFactor ?? NSScreen.main?.backingScaleFactor ?? 1
+        bitmapScale = requestedScale.isFinite && (0.5...4).contains(requestedScale) ? requestedScale : 1
+        bitmap = nil
+        renderFailure = nil
+        if renderer == .bitmap {
+            do {
+                let explanation = issueExplanationIndex.flatMap { index in
+                    view.issues.indices.contains(index) ? view.issues[index].explanation : nil
+                }
+                bitmap = try SharedPanelBitmapRenderer.render(
+                    view: view, theme: theme, scale: bitmapScale,
+                    dark: effectiveAppearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua,
+                    toast: toast, statusOverride: explanation,
+                    hasRestore: restoreDraft != nil,
+                    hasOriginal: view.stamp.mode == .learning && !view.raw.isEmpty && commitOriginal != nil)
+            } catch {
+                renderFailure = String(describing: error)
+            }
+        }
+        if bitmap == nil {
+            layout = PanelLayout(view: view, theme: theme,
+                                 commitOriginal: commitOriginal, switchSource: switchSource)
+        } else {
+            layout = nil
+        }
+        let itemCount = bitmap?.hits.filter { $0.action == Int32(GC_PANEL_HIT_CHOOSE) }.count
+            ?? layout?.rows.count ?? 0
+        setAccessibilityLabel("候选列表，\(itemCount) 项，\(layout?.pageLabel ?? "")")
         needsDisplay = true
     }
 
+    func handleHit(at point: NSPoint) -> Bool {
+        guard let bitmap, let composition else { return false }
+        let pixel = CGPoint(x: floor(point.x * bitmap.scale), y: floor(point.y * bitmap.scale))
+        guard let hit = bitmap.hits.first(where: { $0.rect.contains(pixel) }) else { return false }
+        switch hit.action {
+        case Int32(GC_PANEL_HIT_CHOOSE):
+            let pageSize = composition.stamp.mode == .normal && composition.candidateLayoutHorizontal
+                ? composition.normalPageSize : CandidatePage.size
+            let local = Int(hit.argument) - composition.page * pageSize
+            let visibleCandidateCount = composition.stamp.mode == .learning
+                ? max(0, composition.candidates.count - composition.page * pageSize)
+                : composition.candidates.count
+            guard local >= 0, local < pageSize, local < visibleCandidateCount else { return true }
+            choose?(local)
+        case Int32(GC_PANEL_HIT_PAGE_PREV):
+            pagePrevious?()
+        case Int32(GC_PANEL_HIT_PAGE_NEXT):
+            pageNext?()
+        case Int32(GC_PANEL_HIT_ORIGINAL):
+            guard commitOriginal != nil else { return true }
+            commitOriginal?()
+        case Int32(GC_PANEL_HIT_RESTORE):
+            guard restoreDraft != nil else { return true }
+            restoreDraft?()
+        case Int32(GC_PANEL_HIT_EXPLAIN):
+            let index = Int(hit.argument)
+            guard composition.issues.indices.contains(index) else { return true }
+            issueNoticeVisible = true
+            if renderer == .bitmap {
+                renderContent(composition, backingScale: bitmapScale, issueExplanationIndex: index)
+                themeDidChange?()
+                explainIssue?(index)
+            } else if let explainIssue {
+                explainIssue(index)
+            } else {
+                needsDisplay = true
+            }
+        default:
+            return false
+        }
+        return true
+    }
+
     var layoutSize: NSSize {
+        if let bitmap { return bitmap.pointSize }
         guard let layout else { return NSSize(width: theme.metrics.minimumWidth, height: 120) }
         return NSSize(width: layout.panelWidth, height: layout.totalHeight)
     }
+
+    var debugBitmap: SharedPanelBitmap? { bitmap }
+    var debugRenderer: CandidateRenderer { bitmap == nil ? .system : .bitmap }
+    var debugRenderFailure: String? { renderFailure }
 
     // MARK: 离线渲染检查专用（probes/render-candidate-panel.swift）；输入热路径不调用。
     var debugRowWords: [NSAttributedString] { layout?.rows.map(\.word) ?? [] }
@@ -576,16 +664,30 @@ final class PanelContent: NSView {
     var debugPanelWidth: CGFloat { CGFloat(layout?.panelWidth ?? 0) }
     var debugTheme: CandidatePanelTheme { theme }
 
-    #if GOGAKU_VALIDATION
-    /// 验收接口：真实窗口当前渲染的拼音插入点（UTF16 长度＋插入点，仅数值）。
+    /// 当前组合视图的预编辑 UTF16 长度与插入点，供宿主验收和离线测试读取。
     var validationPreeditCaret: [Int]? {
-        guard let layout, let caret = layout.preeditCaretUTF16 else { return nil }
-        return [layout.preeditLengthUTF16, caret]
+        guard let composition else { return nil }
+        let preedit = composition.preedit.isEmpty ? composition.raw : composition.preedit
+        guard !preedit.isEmpty else { return nil }
+        let length = preedit.utf16.count
+        let caret: Int
+        if let supplied = composition.preeditCaretUTF16 {
+            caret = max(0, min(supplied, length))
+        } else if composition.stamp.mode == .normal || composition.stamp.direction == .enToZh {
+            caret = length
+        } else {
+            caret = -1
+        }
+        return [length, caret]
     }
-    #endif
 
     override func draw(_ dirtyRect: NSRect) {
         super.draw(dirtyRect)
+        if let bitmap {
+            bitmap.image.draw(in: bounds, from: .zero, operation: .sourceOver,
+                             fraction: 1, respectFlipped: true, hints: nil)
+            return
+        }
         guard let layout, let context = NSGraphicsContext.current?.cgContext else { return }
         context.saveGState()
         context.setAlpha(theme.opacity)
@@ -652,8 +754,9 @@ final class PanelContent: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        guard let layout else { return }
         let point = convert(event.locationInWindow, from: nil)
+        if handleHit(at: point) { return }
+        guard let layout else { return }
         for row in layout.rows where row.frame.contains(point) {
             choose?(row.indexOfShown)
             return
@@ -687,8 +790,26 @@ final class CandidatePanel: NSPanel {
     override var canBecomeMain: Bool { false }
 
     var choose: ((Int) -> Void)?
-    var original: (() -> Void)?
+    var original: (() -> Void)? {
+        didSet { content.commitOriginal = original }
+    }
     var switchSource: (() -> Void)?
+    var pagePrevious: (() -> Void)? {
+        get { content.pagePrevious }
+        set { content.pagePrevious = newValue }
+    }
+    var pageNext: (() -> Void)? {
+        get { content.pageNext }
+        set { content.pageNext = newValue }
+    }
+    var restoreDraft: (() -> Void)? {
+        get { content.restoreDraft }
+        set { content.restoreDraft = newValue }
+    }
+    var explainIssue: ((Int) -> Void)? {
+        get { content.explainIssue }
+        set { content.explainIssue = newValue }
+    }
 
     #if GOGAKU_VALIDATION
     /// 验收接口：当前布局的拼音插入点（仅数值）与窗口号（真实窗口截图用）。
@@ -716,9 +837,8 @@ final class CandidatePanel: NSPanel {
         hasShadow = true
         isOpaque = false
         backgroundColor = .clear
-        content.updateTheme(theme)
+        content.updateTheme(theme, renderer: .bitmap)
         content.choose = { [weak self] row in self?.choose?(row) }
-        content.commitOriginal = { [weak self] in self?.original?() }
         content.switchSource = { [weak self] in self?.switchSource?() }
         contentView = content
         content.themeDidChange = { [weak self] in
@@ -727,15 +847,20 @@ final class CandidatePanel: NSPanel {
         }
     }
 
-    func updateTheme(_ selected: CandidateTheme, fontSize: CGFloat = 14) {
+    func updateTheme(_ selected: CandidateTheme, fontSize: CGFloat = 14, renderer: CandidateRenderer = .bitmap) {
         // 同一 ID 的用户主题也可能被编辑；不能仅凭 ID 跳过更新。
-        content.updateTheme(CandidatePanelTheme.resolve(selected, fontSize: fontSize))
+        content.updateTheme(CandidatePanelTheme.resolve(selected, fontSize: fontSize), renderer: renderer)
         dismiss()
+    }
+
+    private func backingScale(at anchor: NSRect) -> CGFloat {
+        NSScreen.screens.first(where: { $0.frame.intersects(anchor) })?.backingScaleFactor
+            ?? backingScaleFactor
     }
 
     /// 延迟矩阵探针专用：只做布局计算，返回目标窗口 frame；无法安全显示时返回 nil。
     func layoutPanel(_ view: CompositionView, at anchor: NSRect) -> NSRect? {
-        content.update(view)
+        content.update(view, backingScale: backingScale(at: anchor))
         let size = content.layoutSize
         let screens = NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }
         guard let proposed = PanelPlacement.origin(anchor: anchor, panelSize: size, screens: screens) else { return nil }

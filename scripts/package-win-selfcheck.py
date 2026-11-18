@@ -30,6 +30,7 @@ TEST_EXES = [
     'gogaku_core_abi_test.exe',
     'gogaku_core_settings_contract_test.exe',
     'gogaku_core_theme_contract_test.exe',
+    'gogaku_core_panel_render_test.exe',
     'gogaku_core_translate_safety_test.exe',
     'gogaku_core_normal_test.exe',
     'gogaku_core_learning_test.exe',
@@ -59,11 +60,13 @@ RUN_BAT = r'''@echo off
 setlocal EnableDelayedExpansion
 cd /d "%~dp0"
 set "GOGAKU_CORE_TEST_DATA=%~dp0data"
+if not defined GOGAKU_PANEL_FONT set "GOGAKU_PANEL_FONT=%WINDIR%\Fonts\msyh.ttc"
+if not exist "%GOGAKU_PANEL_FONT%" set "GOGAKU_PANEL_FONT=%WINDIR%\Fonts\segoeui.ttf"
 set "LOG=%~dp0selfcheck-report.txt"
 set "JSON=%~dp0selfcheck-report.json"
 > "%LOG%" echo Gogaku core self-check
 >> "%LOG%" echo host=%COMPUTERNAME% user=%USERNAME% date=%DATE% %TIME%
-for %%T in (gogaku_core_abi_test gogaku_core_settings_contract_test gogaku_core_theme_contract_test gogaku_core_translate_safety_test gogaku_core_normal_test gogaku_core_learning_test gogaku_core_quality_test gogaku_core_fuzz) do (
+for %%T in (gogaku_core_abi_test gogaku_core_settings_contract_test gogaku_core_theme_contract_test gogaku_core_panel_render_test gogaku_core_translate_safety_test gogaku_core_normal_test gogaku_core_learning_test gogaku_core_quality_test gogaku_core_fuzz) do (
   >> "%LOG%" echo === %%T ===
   %%T.exe >> "%LOG%" 2>&1
   >> "%LOG%" echo exitcode=!errorlevel!
@@ -110,8 +113,9 @@ README = '''Gogaku 共享核心 Windows 自检包
 内容清单
 --------
 - libgogaku_core.dll 等核心与依赖库
-- 8 个测试程序（ABI 合同、设置契约、主题契约与覆盖补丁、翻译加固、
+- 9 个测试程序（ABI 合同、设置契约、主题契约与覆盖补丁、共享位图、翻译加固、
   普通模式轨迹、学习模式轨迹、质量回归、随机序列冒烟）
+- 位图测试使用本机微软雅黑（缺失时 Segoe UI），不分发字体；可用 GOGAKU_PANEL_FONT 覆盖路径。
 - data/ 出厂数据（用于测试的词典与语言模型，来自固定数据源）
 '''
 

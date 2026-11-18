@@ -1,0 +1,671 @@
+{
+  "fullVersion": "0.1.5-dev.1",
+  "buildNumber": 114,
+  "stage": "dev",
+  "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+  "dirty": true,
+  "arch": "x86_64",
+  "git": {
+    "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+    "dirty": true
+  },
+  "channel": "dev",
+  "flavor": "lite",
+  "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+  "configuration": "release",
+  "validationBuild": false,
+  "toolchain": {
+    "swift": "Apple Swift version 6.3.2 (swiftlang-6.3.2.1.108 clang-2100.1.1.101)",
+    "cmake": "cmake version 4.4.4"
+  },
+  "apps": {
+    "Gogaku Lite Dev.app": {
+      "bundleSha256": "1b1e674dccca028e61a03ffc13b1fb3ab01b8c86825fa470d0390ed94864f15d",
+      "files": {
+        "Contents/Frameworks/libFcitx5Utils.2.dylib": {
+          "sha256": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62",
+          "bytes": 628736
+        },
+        "Contents/Frameworks/libGogakuEngine.dylib": {
+          "sha256": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1",
+          "bytes": 41888
+        },
+        "Contents/Frameworks/libIMECore.0.dylib": {
+          "sha256": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5",
+          "bytes": 1196944
+        },
+        "Contents/Frameworks/libIMEPinyin.0.dylib": {
+          "sha256": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35",
+          "bytes": 797024
+        },
+        "Contents/Frameworks/libboost_iostreams.dylib": {
+          "sha256": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b",
+          "bytes": 135120
+        },
+        "Contents/Frameworks/libboost_random.dylib": {
+          "sha256": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013",
+          "bytes": 52000
+        },
+        "Contents/Frameworks/libgogaku_core.dylib": {
+          "sha256": "a5e3a114e3ac13af650ee1eaa5788b8e66e40a1d2da4bf36b6dcbf1cfffd75c3",
+          "bytes": 2824512
+        },
+        "Contents/Frameworks/libintl.8.dylib": {
+          "sha256": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb",
+          "bytes": 209600
+        },
+        "Contents/Frameworks/liblzma.5.dylib": {
+          "sha256": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259",
+          "bytes": 164896
+        },
+        "Contents/Frameworks/libzstd.1.dylib": {
+          "sha256": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a",
+          "bytes": 766304
+        },
+        "Contents/Info.plist": {
+          "sha256": "20549e4f02dded49817649e3f413eeec4532a867d7917983a145fbb584160a0b",
+          "bytes": 1084
+        },
+        "Contents/Licenses/00-LGPL-2.1-or-later.txt": {
+          "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+          "bytes": 25906
+        },
+        "Contents/Licenses/01-REUSE.toml": {
+          "sha256": "d314176a91e08c0affc0017c9994d9440a4ac1c18ddf8eab1842117c0d6c806e",
+          "bytes": 805
+        },
+        "Contents/Licenses/02-CMakeLists.txt": {
+          "sha256": "c73cbe828525a0c3f9da52d483d2a7edc3cad6211afdc5ce61b4878624cd7c73",
+          "bytes": 3375
+        },
+        "Contents/Licenses/03-COPYING": {
+          "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+          "bytes": 26530
+        },
+        "Contents/Licenses/04-COPYING.3": {
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "bytes": 35147
+        },
+        "Contents/Licenses/05-COPYING.LESSER.3": {
+          "sha256": "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+          "bytes": 7637
+        },
+        "Contents/Licenses/06-LICENSE": {
+          "sha256": "4af93c12062c58058378de2397dc1c92bbff9ddfb1d583a01c84127557ce97ca",
+          "bytes": 1527
+        },
+        "Contents/Licenses/07-string_piece.hh": {
+          "sha256": "cc4de0949793b958fa6da1eecd4335b58fdf779dc6652ac323502ba9e0a58d8b",
+          "bytes": 9185
+        },
+        "Contents/Licenses/08-murmur_hash.cc": {
+          "sha256": "77c4cd0fb91f67d9f1149964180cf1cf5c80793ab810f8bbce55ede1b980412b",
+          "bytes": 4074
+        },
+        "Contents/Licenses/09-integer_to_string.cc": {
+          "sha256": "368848d6b70e5537d7bd8a4942a9fd2ba8ad0f78dec67bc7b2436129dc8dfae0",
+          "bytes": 22498
+        },
+        "Contents/Licenses/10-getopt.c": {
+          "sha256": "0a523a06b49384ace3cff98b60b45063299d3ca642de46e0e47ccc51d8cb08f4",
+          "bytes": 1441
+        },
+        "Contents/Licenses/11-COPYING-CMAKE-SCRIPTS": {
+          "sha256": "46cde7dc11e64c78d650b4851b88f6704b4665ff60f22a1caf68ceb15e217e5b",
+          "bytes": 1327
+        },
+        "Contents/Licenses/12-LGPL-2.1-or-later.txt": {
+          "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+          "bytes": 25906
+        },
+        "Contents/Licenses/13-Unicode-DFS-2016.txt": {
+          "sha256": "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+          "bytes": 2858
+        },
+        "Contents/Licenses/Boost-LICENSE.txt": {
+          "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+          "bytes": 1338
+        },
+        "Contents/Licenses/CC-BY-SA-4.0.txt": {
+          "sha256": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+          "bytes": 20138
+        },
+        "Contents/Licenses/DATA-ATTRIBUTION.txt": {
+          "sha256": "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+          "bytes": 3645
+        },
+        "Contents/Licenses/FreeType-FTL.txt": {
+          "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+          "bytes": 6743
+        },
+        "Contents/Licenses/HarfBuzz-COPYING.txt": {
+          "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+          "bytes": 1971
+        },
+        "Contents/Licenses/MIT-Mayoi.txt": {
+          "sha256": "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+          "bytes": 1086
+        },
+        "Contents/Licenses/MIT-jieba.txt": {
+          "sha256": "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+          "bytes": 1075
+        },
+        "Contents/Licenses/SCOWL-Copyright.txt": {
+          "sha256": "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+          "bytes": 11758
+        },
+        "Contents/Licenses/THIRD-PARTY.md": {
+          "sha256": "ea418563e730f4ee360a94e82cfba1aaeef91610fdc4402d41057d34b6797777",
+          "bytes": 9866
+        },
+        "Contents/Licenses/libintl-LGPL-2.1.txt": {
+          "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+          "bytes": 26419
+        },
+        "Contents/Licenses/libintl-NOTICE.txt": {
+          "sha256": "0be40e3c9d326bee38ccdd96a82bb39caddd923c27d67e6beeee91e08abbe0b0",
+          "bytes": 1001
+        },
+        "Contents/Licenses/libpng-LICENSE.txt": {
+          "sha256": "7317e078e2d3b5d7ba5a6159e650945153262b44b76f6700f8e9edb261c5143e",
+          "bytes": 5345
+        },
+        "Contents/Licenses/panel-render-NOTICE.txt": {
+          "sha256": "b7017f255d043c38334f4c1d1dfb31a67c742f0250f20eeac413c4171d804ba7",
+          "bytes": 672
+        },
+        "Contents/Licenses/upstream-manifest.json": {
+          "sha256": "1e601e619e75f074adbf2a397d13b90fd1fe39fefe71b148f1b934c0fc20bc1b",
+          "bytes": 29517
+        },
+        "Contents/Licenses/xz-0BSD-LICENSE": {
+          "sha256": "0b01625d853911cd0e2e088dcfb743261034a091bb379246cb25a14cc4c74bf1",
+          "bytes": 607
+        },
+        "Contents/Licenses/xz-COPYING": {
+          "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8",
+          "bytes": 3119
+        },
+        "Contents/Licenses/zlib-LICENSE.txt": {
+          "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243",
+          "bytes": 1002
+        },
+        "Contents/Licenses/zstd-BSD-LICENSE": {
+          "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8",
+          "bytes": 1549
+        },
+        "Contents/MacOS/GogakuInput": {
+          "sha256": "15300c18fa60faee0ffe70112077e0e84aeddfc2bcc77d4be6fad363ad93ce8c",
+          "bytes": 2289840
+        },
+        "Contents/Resources/AppIcon.icns": {
+          "sha256": "f3bebe46731c63bf78e7147c2bd7bc2d81efd4fb24fbb1640ce4b265381120b9",
+          "bytes": 1453592
+        },
+        "Contents/Resources/EngineData/english-words.txt": {
+          "sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e",
+          "bytes": 433760
+        },
+        "Contents/Resources/EngineData/sc.dict": {
+          "sha256": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+          "bytes": 4489669
+        },
+        "Contents/Resources/EngineData/zh_CN.lm": {
+          "sha256": "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387",
+          "bytes": 34736327
+        },
+        "Contents/Resources/build-identity.json": {
+          "sha256": "9f864673f184d73a4642718e85768741e0326a7f6652fd0fa5c3cf8ba002de3b",
+          "bytes": 4902
+        },
+        "Contents/Resources/dependencies.lock.json": {
+          "sha256": "5835c6fa0b752878130f16a57a7753fb9715d7f2115170f4491de67fb245bdf0",
+          "bytes": 631
+        },
+        "Contents/Resources/en.lproj/InfoPlist.strings": {
+          "sha256": "7e50b5209be2ea75fa35f8525fecaa9282f9483b742f852f7a99c83ced7e94f2",
+          "bytes": 396
+        },
+        "Contents/Resources/gogaku-menu.pdf": {
+          "sha256": "75ccabc99d0150cab64ab590909c121942cb8614a4e0d71034cc49a4b1514fa2",
+          "bytes": 3148
+        },
+        "Contents/Resources/update-config.json": {
+          "sha256": "46f3339527e1544554c11923cf93117c19510aede14a6fefaf68b656a2b308ba",
+          "bytes": 198
+        },
+        "Contents/Resources/zh-Hans.lproj/InfoPlist.strings": {
+          "sha256": "7e50b5209be2ea75fa35f8525fecaa9282f9483b742f852f7a99c83ced7e94f2",
+          "bytes": 396
+        },
+        "Contents/_CodeSignature/CodeResources": {
+          "sha256": "14d5806f7d93cdccae78d021c63b4781ee9450a52637a811845339243f3561ec",
+          "bytes": 11994
+        }
+      },
+      "identity": {
+        "fullVersion": "0.1.5-dev.1",
+        "shortVersion": "0.1.5",
+        "stage": "dev",
+        "buildNumber": 114,
+        "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+        "dirty": true,
+        "git": {
+          "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+          "dirty": true
+        },
+        "channel": "dev",
+        "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+        "arch": "x86_64",
+        "configuration": "release",
+        "validationBuild": false,
+        "flavor": "lite",
+        "abiVersion": 2,
+        "dependencies": {
+          "libime": "5be1300ea00e899b3f2c46d1e9f6bca21139cdeb",
+          "fcitx5": "dfb1278cce616a771eb51a99a468bbd69f02613f",
+          "ecm": "7dd28cc56c339c3f8fb356f7c53c0e8f61433d81",
+          "kenlm": "4cb443e60b7bf2c0ddf3c745378f76cb59e254e5",
+          "archives": {
+            "dict-20260907.tar.zst": "fb75a179065e690dfc4559ce1807cbaf4fbe4f0111a5005615be9f435e6b9d76",
+            "lm_sc.arpa-20260629.tar.zst": "06808333b9173e5374cf2cb5afc12d08f5625bf9abb536489cac376fc05f2e7f"
+          },
+          "artifacts": {
+            "sc.dict": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+            "zh_CN.lm": "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387"
+          }
+        },
+        "dataSources": {
+          "english-wordlist-sources.json": {
+            "description": "普通模式英文候选词表（SCOWL en_US size≤60 × wordfreq 英文词频排序）",
+            "license": {
+              "scowl": "MIT-like 集体作品；逐来源声明见 SCOWL-Copyright.txt（随包附 README_en.txt）",
+              "wordfreq_data": "CC BY-SA 4.0；须署名 Robyn Speer 与 SUBTLEX 作者；衍生词表按同许可分发"
+            },
+            "sources": {
+              "scowl": {
+                "version": "2020.12.07",
+                "url": "https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz",
+                "tarball_sha256": "5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc",
+                "generator": "mk-list -d final en_US 60（官方 hunspell en_US 构建同一命令）"
+              },
+              "wordfreq": {
+                "package": "wordfreq==3.1.1",
+                "list": "top_n_list('en', 200000)"
+              }
+            },
+            "word_count": 50000,
+            "output_sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e"
+          },
+          "gloss-sources.json": {
+            "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义；单字词性层 jieba；Wiktionary 缺失单字由 CC-CEDICT 补义项）",
+            "license": {
+              "wiktionary": "CC BY-SA 4.0（双许可取 CC 一支）；署名 Wiktionary contributors，声明修改，逐词条原文 URI",
+              "wiktextract": "MIT（提取工具，不覆盖输出数据许可）",
+              "jieba": "MIT（词性标注层，来自 jieba/dict.txt，github.com/fxsjy/jieba）",
+              "cc-cedict": "CC BY-SA 4.0（Wiktionary 缺失单字补义项，mdbg/chineselanguageproject dump）"
+            },
+            "sources": {
+              "kaikki": {
+                "file": "kaikki.org-dictionary-Chinese.jsonl.gz",
+                "bytes": 155996266,
+                "sha256": "4e54d7a3d2974b5efb6bf80ec0a6d8c71d916b90b30a350bdd71bdfda0dce36b",
+                "url": "https://kaikki.org/dictionary/Chinese/"
+              },
+              "jieba": {
+                "file": "jieba-dict.txt",
+                "bytes": 5071852,
+                "sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+                "url": "https://github.com/fxsjy/jieba"
+              },
+              "cc-cedict": {
+                "file": "cedict_ts.u8.gz",
+                "bytes": 3983033,
+                "sha256": "e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb",
+                "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
+              },
+              "collocations": {
+                "file": "collocation-gloss.tsv",
+                "bytes": 2825,
+                "sha256": "a573ed33cb62f77f1fb6fe869a60a69414d0c39a246e79bb7b9f267f8d79deb9",
+                "note": "Gogaku 人工整理语法组合注解，无外部来源"
+              }
+            },
+            "entry_count": 200858,
+            "supplement_count": 39768,
+            "curated_count": 61,
+            "cleaningRules": {
+              "version": "v8.2",
+              "date": "2026-11-03",
+              "rules": [
+                "括号内容一律移除",
+                "分号同义枚举只取首项",
+                "synonym of/alternative form of 等字形指代义项剔除",
+                "单条≤36字符静默词边界截断(截断态即行尾)",
+                "拼接总长≤46字符",
+                "分隔符统一为点号·",
+                "词性层：jieba 补标无词性词条（含多字词）",
+                "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成",
+                "人工组合层：语法组合（我想/很大类）人工精选补注"
+              ],
+              "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
+            },
+            "output_sha256": "7f3e32be397f9aa2c87457fc207b26fcf10fe911ce9ac6ee4f48a79096cadc5d"
+          }
+        }
+      }
+    },
+    "Gogaku Lite Settings Dev.app": {
+      "bundleSha256": "8a103917fbddad012073e59d0201cd2057e05813319c2611cfc62f7581a9d08c",
+      "files": {
+        "Contents/Frameworks/libFcitx5Utils.2.dylib": {
+          "sha256": "15cc8d0d64392b8973d6998e26b3abbb3501af4f6fc575b5bbbd359daff41a62",
+          "bytes": 628736
+        },
+        "Contents/Frameworks/libGogakuEngine.dylib": {
+          "sha256": "f39ac46e161ed292e313d58729c8b849899530769f0207018250cca832fe14c1",
+          "bytes": 41888
+        },
+        "Contents/Frameworks/libIMECore.0.dylib": {
+          "sha256": "b4c551537a2bc498692a33b716f81c7db515497221c58545dc4d9154973387a5",
+          "bytes": 1196944
+        },
+        "Contents/Frameworks/libIMEPinyin.0.dylib": {
+          "sha256": "d7f1b196f476c2b5bb7cddbd26821b1ac82250d5aaddcff81d75b32537a04d35",
+          "bytes": 797024
+        },
+        "Contents/Frameworks/libboost_iostreams.dylib": {
+          "sha256": "8cb12ae96bd68af2ce230a88ac1c512883d343ec93b8042385bf680e395e9f1b",
+          "bytes": 135120
+        },
+        "Contents/Frameworks/libboost_random.dylib": {
+          "sha256": "4f7a6447af4b01dfda7b198acb23bd9b86832983555a29d7af69823745d3e013",
+          "bytes": 52000
+        },
+        "Contents/Frameworks/libgogaku_core.dylib": {
+          "sha256": "a5e3a114e3ac13af650ee1eaa5788b8e66e40a1d2da4bf36b6dcbf1cfffd75c3",
+          "bytes": 2824512
+        },
+        "Contents/Frameworks/libintl.8.dylib": {
+          "sha256": "ce98050d95d05f91ed6795177085c36a62b2cc860585291e182248d13f127ccb",
+          "bytes": 209600
+        },
+        "Contents/Frameworks/liblzma.5.dylib": {
+          "sha256": "ff960a0de78ca90d8e5d8f6d16f1e2453116ac7ceccda19da5c46516e09dd259",
+          "bytes": 164896
+        },
+        "Contents/Frameworks/libzstd.1.dylib": {
+          "sha256": "ebd3d9fa44609d18b427d4e6945433e87be833698494ed7a5b364d28184f1d7a",
+          "bytes": 766304
+        },
+        "Contents/Info.plist": {
+          "sha256": "d4f20f1e6ec210a0fd8257306c998a40f52e73513d5ee4f4a40fe10b4feedd5d",
+          "bytes": 863
+        },
+        "Contents/Licenses/00-LGPL-2.1-or-later.txt": {
+          "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+          "bytes": 25906
+        },
+        "Contents/Licenses/01-REUSE.toml": {
+          "sha256": "d314176a91e08c0affc0017c9994d9440a4ac1c18ddf8eab1842117c0d6c806e",
+          "bytes": 805
+        },
+        "Contents/Licenses/02-CMakeLists.txt": {
+          "sha256": "c73cbe828525a0c3f9da52d483d2a7edc3cad6211afdc5ce61b4878624cd7c73",
+          "bytes": 3375
+        },
+        "Contents/Licenses/03-COPYING": {
+          "sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+          "bytes": 26530
+        },
+        "Contents/Licenses/04-COPYING.3": {
+          "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903",
+          "bytes": 35147
+        },
+        "Contents/Licenses/05-COPYING.LESSER.3": {
+          "sha256": "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1",
+          "bytes": 7637
+        },
+        "Contents/Licenses/06-LICENSE": {
+          "sha256": "4af93c12062c58058378de2397dc1c92bbff9ddfb1d583a01c84127557ce97ca",
+          "bytes": 1527
+        },
+        "Contents/Licenses/07-string_piece.hh": {
+          "sha256": "cc4de0949793b958fa6da1eecd4335b58fdf779dc6652ac323502ba9e0a58d8b",
+          "bytes": 9185
+        },
+        "Contents/Licenses/08-murmur_hash.cc": {
+          "sha256": "77c4cd0fb91f67d9f1149964180cf1cf5c80793ab810f8bbce55ede1b980412b",
+          "bytes": 4074
+        },
+        "Contents/Licenses/09-integer_to_string.cc": {
+          "sha256": "368848d6b70e5537d7bd8a4942a9fd2ba8ad0f78dec67bc7b2436129dc8dfae0",
+          "bytes": 22498
+        },
+        "Contents/Licenses/10-getopt.c": {
+          "sha256": "0a523a06b49384ace3cff98b60b45063299d3ca642de46e0e47ccc51d8cb08f4",
+          "bytes": 1441
+        },
+        "Contents/Licenses/11-COPYING-CMAKE-SCRIPTS": {
+          "sha256": "46cde7dc11e64c78d650b4851b88f6704b4665ff60f22a1caf68ceb15e217e5b",
+          "bytes": 1327
+        },
+        "Contents/Licenses/12-LGPL-2.1-or-later.txt": {
+          "sha256": "1ccf09bf2f598308df4bed9cd8e9657dc5cd0973d2800318f2e241486e2edf3f",
+          "bytes": 25906
+        },
+        "Contents/Licenses/13-Unicode-DFS-2016.txt": {
+          "sha256": "a307313c2500d85dec8b3dd7e86b17e5dc08b6bda00daebe4d68f7d36beda42d",
+          "bytes": 2858
+        },
+        "Contents/Licenses/Boost-LICENSE.txt": {
+          "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566",
+          "bytes": 1338
+        },
+        "Contents/Licenses/CC-BY-SA-4.0.txt": {
+          "sha256": "28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5",
+          "bytes": 20138
+        },
+        "Contents/Licenses/DATA-ATTRIBUTION.txt": {
+          "sha256": "5d79cf7a4ff39f42863b6421d40e716cd66db9fca8de1872f9eb96a8ac0c72e6",
+          "bytes": 3645
+        },
+        "Contents/Licenses/FreeType-FTL.txt": {
+          "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+          "bytes": 6743
+        },
+        "Contents/Licenses/HarfBuzz-COPYING.txt": {
+          "sha256": "ba8f810f2455c2f08e2d56bb49b72f37fcf68f1f4fade38977cfd7372050ad64",
+          "bytes": 1971
+        },
+        "Contents/Licenses/MIT-Mayoi.txt": {
+          "sha256": "d0ab3d39f23b23a30fdfff2039f533588c766cc7624ce6a8ac414975e76652e1",
+          "bytes": 1086
+        },
+        "Contents/Licenses/MIT-jieba.txt": {
+          "sha256": "18ba0984839f85853b29fadaf992f7dba8fd0ca0fbeae34de2b8735222dc7a37",
+          "bytes": 1075
+        },
+        "Contents/Licenses/SCOWL-Copyright.txt": {
+          "sha256": "283326a422e29c510e2ba6805518c418ce3c35ed1fadc3eec83d2da4f6c5a055",
+          "bytes": 11758
+        },
+        "Contents/Licenses/THIRD-PARTY.md": {
+          "sha256": "ea418563e730f4ee360a94e82cfba1aaeef91610fdc4402d41057d34b6797777",
+          "bytes": 9866
+        },
+        "Contents/Licenses/libintl-LGPL-2.1.txt": {
+          "sha256": "20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95",
+          "bytes": 26419
+        },
+        "Contents/Licenses/libintl-NOTICE.txt": {
+          "sha256": "0be40e3c9d326bee38ccdd96a82bb39caddd923c27d67e6beeee91e08abbe0b0",
+          "bytes": 1001
+        },
+        "Contents/Licenses/libpng-LICENSE.txt": {
+          "sha256": "7317e078e2d3b5d7ba5a6159e650945153262b44b76f6700f8e9edb261c5143e",
+          "bytes": 5345
+        },
+        "Contents/Licenses/panel-render-NOTICE.txt": {
+          "sha256": "b7017f255d043c38334f4c1d1dfb31a67c742f0250f20eeac413c4171d804ba7",
+          "bytes": 672
+        },
+        "Contents/Licenses/upstream-manifest.json": {
+          "sha256": "1e601e619e75f074adbf2a397d13b90fd1fe39fefe71b148f1b934c0fc20bc1b",
+          "bytes": 29517
+        },
+        "Contents/Licenses/xz-0BSD-LICENSE": {
+          "sha256": "0b01625d853911cd0e2e088dcfb743261034a091bb379246cb25a14cc4c74bf1",
+          "bytes": 607
+        },
+        "Contents/Licenses/xz-COPYING": {
+          "sha256": "616a3ad264ce29b8f1cb97e53037b139d406899ca8d1f799651e17bfa09830b8",
+          "bytes": 3119
+        },
+        "Contents/Licenses/zlib-LICENSE.txt": {
+          "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243",
+          "bytes": 1002
+        },
+        "Contents/Licenses/zstd-BSD-LICENSE": {
+          "sha256": "7055266497633c9025b777c78eb7235af13922117480ed5c674677adc381c9d8",
+          "bytes": 1549
+        },
+        "Contents/MacOS/GogakuSettings": {
+          "sha256": "3df3067f8103bdb466d080ecc983a6d33dff2372ee0a5bf56328cb37cd2520aa",
+          "bytes": 4750352
+        },
+        "Contents/Resources/AppIcon.icns": {
+          "sha256": "f3bebe46731c63bf78e7147c2bd7bc2d81efd4fb24fbb1640ce4b265381120b9",
+          "bytes": 1453592
+        },
+        "Contents/Resources/EngineData/sc.dict": {
+          "sha256": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+          "bytes": 4489669
+        },
+        "Contents/Resources/build-identity.json": {
+          "sha256": "9f864673f184d73a4642718e85768741e0326a7f6652fd0fa5c3cf8ba002de3b",
+          "bytes": 4902
+        },
+        "Contents/Resources/update-config.json": {
+          "sha256": "46f3339527e1544554c11923cf93117c19510aede14a6fefaf68b656a2b308ba",
+          "bytes": 198
+        },
+        "Contents/_CodeSignature/CodeResources": {
+          "sha256": "8ace407e58a14d744c84300ba070f2b6d71e83fddad7e218b2946c4b28ca5b46",
+          "bytes": 10258
+        }
+      },
+      "identity": {
+        "fullVersion": "0.1.5-dev.1",
+        "shortVersion": "0.1.5",
+        "stage": "dev",
+        "buildNumber": 114,
+        "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+        "dirty": true,
+        "git": {
+          "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+          "dirty": true
+        },
+        "channel": "dev",
+        "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+        "arch": "x86_64",
+        "configuration": "release",
+        "validationBuild": false,
+        "flavor": "lite",
+        "abiVersion": 2,
+        "dependencies": {
+          "libime": "5be1300ea00e899b3f2c46d1e9f6bca21139cdeb",
+          "fcitx5": "dfb1278cce616a771eb51a99a468bbd69f02613f",
+          "ecm": "7dd28cc56c339c3f8fb356f7c53c0e8f61433d81",
+          "kenlm": "4cb443e60b7bf2c0ddf3c745378f76cb59e254e5",
+          "archives": {
+            "dict-20260907.tar.zst": "fb75a179065e690dfc4559ce1807cbaf4fbe4f0111a5005615be9f435e6b9d76",
+            "lm_sc.arpa-20260629.tar.zst": "06808333b9173e5374cf2cb5afc12d08f5625bf9abb536489cac376fc05f2e7f"
+          },
+          "artifacts": {
+            "sc.dict": "38b9ca9a350b68fb3c4dd1028ccb9a4f4fb9a14d01a6a71839aa074bdd34ef10",
+            "zh_CN.lm": "3588b3942c8fd62e1a6bd3bae8c7cadc0faf928c175b245224ed475862218387"
+          }
+        },
+        "dataSources": {
+          "english-wordlist-sources.json": {
+            "description": "普通模式英文候选词表（SCOWL en_US size≤60 × wordfreq 英文词频排序）",
+            "license": {
+              "scowl": "MIT-like 集体作品；逐来源声明见 SCOWL-Copyright.txt（随包附 README_en.txt）",
+              "wordfreq_data": "CC BY-SA 4.0；须署名 Robyn Speer 与 SUBTLEX 作者；衍生词表按同许可分发"
+            },
+            "sources": {
+              "scowl": {
+                "version": "2020.12.07",
+                "url": "https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz",
+                "tarball_sha256": "5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc",
+                "generator": "mk-list -d final en_US 60（官方 hunspell en_US 构建同一命令）"
+              },
+              "wordfreq": {
+                "package": "wordfreq==3.1.1",
+                "list": "top_n_list('en', 200000)"
+              }
+            },
+            "word_count": 50000,
+            "output_sha256": "442adb6bc744f426727b27162ce00548752c3301e9f75884abe9bc42220cc45e"
+          },
+          "gloss-sources.json": {
+            "description": "候选窗「词性＋译文」注释（Wiktionary/wiktextract 中文词条，英文释义；单字词性层 jieba；Wiktionary 缺失单字由 CC-CEDICT 补义项）",
+            "license": {
+              "wiktionary": "CC BY-SA 4.0（双许可取 CC 一支）；署名 Wiktionary contributors，声明修改，逐词条原文 URI",
+              "wiktextract": "MIT（提取工具，不覆盖输出数据许可）",
+              "jieba": "MIT（词性标注层，来自 jieba/dict.txt，github.com/fxsjy/jieba）",
+              "cc-cedict": "CC BY-SA 4.0（Wiktionary 缺失单字补义项，mdbg/chineselanguageproject dump）"
+            },
+            "sources": {
+              "kaikki": {
+                "file": "kaikki.org-dictionary-Chinese.jsonl.gz",
+                "bytes": 155996266,
+                "sha256": "4e54d7a3d2974b5efb6bf80ec0a6d8c71d916b90b30a350bdd71bdfda0dce36b",
+                "url": "https://kaikki.org/dictionary/Chinese/"
+              },
+              "jieba": {
+                "file": "jieba-dict.txt",
+                "bytes": 5071852,
+                "sha256": "7197c3211ddd98962b036cdf40324d1ea2bfaa12bd028e68faa70111a88e12a8",
+                "url": "https://github.com/fxsjy/jieba"
+              },
+              "cc-cedict": {
+                "file": "cedict_ts.u8.gz",
+                "bytes": 3983033,
+                "sha256": "e203bbf4a28c2ab54762e9b1fb813e53aa9112939704e71a5117f3b3555a46cb",
+                "url": "https://www.mdbg.net/chinese/dictionary?page=cc-cedict"
+              },
+              "collocations": {
+                "file": "collocation-gloss.tsv",
+                "bytes": 2825,
+                "sha256": "a573ed33cb62f77f1fb6fe869a60a69414d0c39a246e79bb7b9f267f8d79deb9",
+                "note": "Gogaku 人工整理语法组合注解，无外部来源"
+              }
+            },
+            "entry_count": 200858,
+            "supplement_count": 39768,
+            "curated_count": 61,
+            "cleaningRules": {
+              "version": "v8.2",
+              "date": "2026-11-03",
+              "rules": [
+                "括号内容一律移除",
+                "分号同义枚举只取首项",
+                "synonym of/alternative form of 等字形指代义项剔除",
+                "单条≤36字符静默词边界截断(截断态即行尾)",
+                "拼接总长≤46字符",
+                "分隔符统一为点号·",
+                "词性层：jieba 补标无词性词条（含多字词）",
+                "覆盖补缺：Wiktionary 缺失词（单字＋词组）由 CC-CEDICT+jieba 合成",
+                "人工组合层：语法组合（我想/很大类）人工精选补注"
+              ],
+              "script": "scripts/build-gloss-data.py（规则即代码，重跑可复现）"
+            },
+            "output_sha256": "7f3e32be397f9aa2c87457fc207b26fcf10fe911ce9ac6ee4f48a79096cadc5d"
+          }
+        }
+      }
+    }
+  }
+}

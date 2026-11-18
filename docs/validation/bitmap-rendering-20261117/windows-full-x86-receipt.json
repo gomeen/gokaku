@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "fullVersion": "0.1.5-dev.1",
+  "buildNumber": 114,
+  "channel": "dev",
+  "flavor": "full",
+  "arch": "x86",
+  "configuration": "release",
+  "git": {
+    "commit": "dd868c1b6442790ac6e3b131eff40d408e864f37",
+    "dirty": true
+  },
+  "sourceSha256": "d43e6a062ec6a821bf3bebb76eb006a2e3339d20368f15e98c7ba0308ec24f87",
+  "dependencies": {},
+  "artifacts": {
+    "GogakuTsf.dll": {
+      "sha256": "1198a9ad19b5880d65452e94018497d1e6141f1270239a0557a50be29556ff5f",
+      "bytes": 18099971
+    }
+  }
+}

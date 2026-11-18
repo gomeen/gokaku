@@ -1,0 +1,12 @@
+{
+  "observedAfterRuns": true,
+  "initialThermalSample": {
+    "localTime": "2026-11-17 12:06:31 +0800",
+    "CPU_Scheduler_Limit": 100,
+    "CPU_Available_CPUs": 16,
+    "CPU_Speed_Limit": 39
+  },
+  "thermal": "Note: No thermal warning level has been recorded\nNote: No performance warning level has been recorded\n2026-11-17 12:07:12 +0800 CPU Power notify\n\tCPU_Scheduler_Limit \t= 100\n\tCPU_Available_CPUs \t= 16\n\tCPU_Speed_Limit \t= 45\n",
+  "uptime": "12:07  up 1 day, 19:59, 11 users, load averages: 5.68 6.97 6.28\n",
+  "note": "三轮复测后采样，不证明每帧的CPU限速值；不能认定为空闲主机。未调整电源设置或停止其他应用。"
+}

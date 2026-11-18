@@ -1,0 +1,479 @@
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 16.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/local/bin/x86_64-w64-mingw32-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local/bin/x86_64-w64-mingw32-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (0.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/core
+[1/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/compress.c.obj
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/compress.c:8:9: warning: 'ZLIB_INTERNAL' redefined
+    8 | #define ZLIB_INTERNAL
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[2/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/adler32.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/adler32.c:8:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[3/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/crc32.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/crc32.c:30:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[4/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/infback.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/infback.c:13:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[5/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.h:16,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.c:52:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[6/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inffast.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inffast.c:6:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[7/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inftrees.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inftrees.c:6:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[8/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/trees.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.h:16,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/trees.c:37:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[9/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/uncompr.c.obj
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/uncompr.c:8:9: warning: 'ZLIB_INTERNAL' redefined
+    8 | #define ZLIB_INTERNAL
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[10/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inflate.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inflate.c:83:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[11/58] Building C object panel_render/CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.c:8:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[12/58] Linking C static library panel_render/libgogaku_zlib.a
+[13/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngerror.c.obj
+[14/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/png.c.obj
+[15/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngget.c.obj
+[16/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngmem.c.obj
+[17/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngpread.c.obj
+[18/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrio.c.obj
+[19/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngread.c.obj
+[20/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrutil.c.obj
+[21/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrtran.c.obj
+[22/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngset.c.obj
+[23/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngtrans.c.obj
+[24/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwio.c.obj
+[25/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwrite.c.obj
+[26/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwtran.c.obj
+[27/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftsystem.c.obj
+[28/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftinit.c.obj
+[29/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftdebug.c.obj
+[30/58] Building C object panel_render/CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwutil.c.obj
+[31/58] Linking C static library panel_render/libgogaku_png.a
+[32/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftbitmap.c.obj
+[33/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftmm.c.obj
+[34/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftglyph.c.obj
+[35/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftbase.c.obj
+[36/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/sfnt/sfnt.c.obj
+[37/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/truetype/truetype.c.obj
+[38/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/cff/cff.c.obj
+[39/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/pshinter/pshinter.c.obj
+[40/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/psnames/psnames.c.obj
+[41/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/autofit/autofit.c.obj
+[42/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/raster/raster.c.obj
+[43/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/smooth/smooth.c.obj
+[44/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/cache/ftcache.c.obj
+[45/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/psaux/psaux.c.obj
+[46/58] Building C object panel_render/CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/gzip/ftgzip.c.obj
+[47/58] Linking C static library panel_render/libgogaku_freetype.a
+[48/58] Building CXX object panel_render/CMakeFiles/GogakuPanelRender.dir/panel_render.cpp.obj
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp: In constructor '{anonymous}::Fonts::Fonts(const {anonymous}::Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp:128:60: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+  128 |                 std::ifstream input(std::filesystem::u8path(path), std::ios::binary | std::ios::ate);
+      |                                     ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp:4:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+  847 |     u8path(const _Source& __source)
+      |     ^~~~~~
+[49/58] Building CXX object CMakeFiles/GogakuCore.dir/core.cpp.obj
+[50/58] Building CXX object CMakeFiles/GogakuCore.dir/normal_session.cpp.obj
+[51/58] Building CXX object CMakeFiles/GogakuCore.dir/custom_words.cpp.obj
+[52/58] Building CXX object CMakeFiles/GogakuCore.dir/settings_contract.cpp.obj
+[53/58] Building CXX object CMakeFiles/GogakuCore.dir/theme_contract.cpp.obj
+[54/58] Building CXX object CMakeFiles/GogakuCore.dir/learning_session_stub.cpp.obj
+[55/58] Building CXX object panel_render/CMakeFiles/gogaku_harfbuzz.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/harfbuzz.cc.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb.hh:573,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-decycler.hh:30,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/VARC.hh:4,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/VARC.cc:5,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/harfbuzz.cc:1:
+In function 'int hb_memcmp(const void*, const void*, unsigned int)',
+    inlined from 'int hb_array_t< <template-parameter-1-1> >::cmp(const hb_array_t< <template-parameter-1-1> >&) const [with Type = const char]' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-array.hh:169:22,
+    inlined from 'static int OT::post::accelerator_t::cmp_key(const void*, const void*, void*)' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/hb-ot-post-table.hh:250:44,
+    inlined from 'bool hb_bsearch_impl(unsigned int*, const K&, V*, size_t, size_t, int (*)(const void*, const void*, Ts ...), Ts ...) [with V = short unsigned int; K = hb_array_t<const char>; Ts = {void*}]' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-algs.hh:1421:20,
+    inlined from 'V* hb_bsearch(const K&, V*, size_t, size_t, int (*)(const void*, const void*, Ts ...), Ts ...) [with V = short unsigned int; K = hb_array_t<const char>; Ts = {void*}]' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-algs.hh:1459:26,
+    inlined from 'bool OT::post::accelerator_t::get_glyph_from_name(const char*, int, hb_codepoint_t*) const' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/hb-ot-post-table.hh:214:30,
+    inlined from 'hb_bool_t hb_ot_get_glyph_from_name(hb_font_t*, void*, const char*, int, hb_codepoint_t*, void*)' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/hb-ot-font.cc:861:42:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-algs.hh:1247:17: warning: 'int memcmp(const void*, const void*, size_t)' specified bound [2147483648, 4294967295] exceeds source size 1850 [-Wstringop-overread]
+ 1247 |   return memcmp (a, b, len);
+      |          ~~~~~~~^~~~~~~~~~~
+[56/58] Linking CXX static library panel_render/libgogaku_harfbuzz.a
+[57/58] Linking CXX static library panel_render/libGogakuPanelRender.a
+[58/58] Linking CXX shared library bin/libgogaku_core.dll
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 16.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/local/bin/x86_64-w64-mingw32-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local/bin/x86_64-w64-mingw32-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (1.4s)
+-- Generating done (0.0s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/panel-x64
+[1/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/compress.c.obj
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/compress.c:8:9: warning: 'ZLIB_INTERNAL' redefined
+    8 | #define ZLIB_INTERNAL
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[2/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/adler32.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/adler32.c:8:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[3/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/crc32.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/crc32.c:30:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[4/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/infback.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/infback.c:13:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[5/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.h:16,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.c:52:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[6/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inffast.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inffast.c:6:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[7/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inftrees.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inftrees.c:6:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[8/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/trees.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.h:16,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/trees.c:37:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[9/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/uncompr.c.obj
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/uncompr.c:8:9: warning: 'ZLIB_INTERNAL' redefined
+    8 | #define ZLIB_INTERNAL
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[10/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inflate.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inflate.c:83:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[11/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.c:8:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[12/51] Linking C static library libgogaku_zlib.a
+[13/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngerror.c.obj
+[14/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/png.c.obj
+[15/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngget.c.obj
+[16/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngmem.c.obj
+[17/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngpread.c.obj
+[18/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrio.c.obj
+[19/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngread.c.obj
+[20/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrutil.c.obj
+[21/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrtran.c.obj
+[22/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngset.c.obj
+[23/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngtrans.c.obj
+[24/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwio.c.obj
+[25/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwrite.c.obj
+[26/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwtran.c.obj
+[27/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftsystem.c.obj
+[28/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftinit.c.obj
+[29/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftdebug.c.obj
+[30/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwutil.c.obj
+[31/51] Linking C static library libgogaku_png.a
+[32/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftbitmap.c.obj
+[33/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftmm.c.obj
+[34/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftglyph.c.obj
+[35/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftbase.c.obj
+[36/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/sfnt/sfnt.c.obj
+[37/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/truetype/truetype.c.obj
+[38/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/cff/cff.c.obj
+[39/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/pshinter/pshinter.c.obj
+[40/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/psnames/psnames.c.obj
+[41/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/autofit/autofit.c.obj
+[42/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/raster/raster.c.obj
+[43/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/smooth/smooth.c.obj
+[44/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/cache/ftcache.c.obj
+[45/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/psaux/psaux.c.obj
+[46/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/gzip/ftgzip.c.obj
+[47/51] Linking C static library libgogaku_freetype.a
+[48/51] Building CXX object CMakeFiles/GogakuPanelRender.dir/panel_render.cpp.obj
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp: In constructor '{anonymous}::Fonts::Fonts(const {anonymous}::Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp:128:60: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+  128 |                 std::ifstream input(std::filesystem::u8path(path), std::ios::binary | std::ios::ate);
+      |                                     ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp:4:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+  847 |     u8path(const _Source& __source)
+      |     ^~~~~~
+[49/51] Building CXX object CMakeFiles/gogaku_harfbuzz.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/harfbuzz.cc.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb.hh:573,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-decycler.hh:30,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/VARC.hh:4,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/VARC.cc:5,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/harfbuzz.cc:1:
+In function 'int hb_memcmp(const void*, const void*, unsigned int)',
+    inlined from 'int hb_array_t< <template-parameter-1-1> >::cmp(const hb_array_t< <template-parameter-1-1> >&) const [with Type = const char]' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-array.hh:169:22,
+    inlined from 'static int OT::post::accelerator_t::cmp_key(const void*, const void*, void*)' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/hb-ot-post-table.hh:250:44,
+    inlined from 'bool hb_bsearch_impl(unsigned int*, const K&, V*, size_t, size_t, int (*)(const void*, const void*, Ts ...), Ts ...) [with V = short unsigned int; K = hb_array_t<const char>; Ts = {void*}]' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-algs.hh:1421:20,
+    inlined from 'V* hb_bsearch(const K&, V*, size_t, size_t, int (*)(const void*, const void*, Ts ...), Ts ...) [with V = short unsigned int; K = hb_array_t<const char>; Ts = {void*}]' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-algs.hh:1459:26,
+    inlined from 'bool OT::post::accelerator_t::get_glyph_from_name(const char*, int, hb_codepoint_t*) const' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/hb-ot-post-table.hh:214:30,
+    inlined from 'hb_bool_t hb_ot_get_glyph_from_name(hb_font_t*, void*, const char*, int, hb_codepoint_t*, void*)' at /Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/hb-ot-font.cc:861:42:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/OT/Var/VARC/../../../hb-algs.hh:1247:17: warning: 'int memcmp(const void*, const void*, size_t)' specified bound [2147483648, 4294967295] exceeds source size 1850 [-Wstringop-overread]
+ 1247 |   return memcmp (a, b, len);
+      |          ~~~~~~~^~~~~~~~~~~
+[50/51] Linking CXX static library libgogaku_harfbuzz.a
+[51/51] Linking CXX static library libGogakuPanelRender.a
+编译 x64: windows/GogakuWindows/platform.cpp
+编译 x64: windows/GogakuWindows/appearance.cpp
+编译 x64: windows/GogakuWindows/themes.cpp
+编译 x64: shared/GogakuCore/settings_contract.cpp
+编译 x64: shared/GogakuCore/theme_contract.cpp
+编译 x64: windows/GogakuTsf/src/dllmain.cpp
+编译 x64: windows/GogakuTsf/src/text_service.cpp
+编译 x64: windows/GogakuTsf/src/candidate_window.cpp
+编译 x64: windows/GogakuTsf/src/core_bridge.cpp
+编译 x64: windows/GogakuWindows/agent.cpp
+编译 x64: windows/GogakuWindows/services.cpp
+编译 x64: windows/GogakuWindows/update.cpp
+编译 x64: windows/GogakuWindows/settings.cpp
+链接 x64 TSF
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp: In function 'void {anonymous}::emojiRegression(const Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:51:79: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:3:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-x86_64/x86_64-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+产物：/Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/bin/x64/GogakuAgent.exe (17,262,776 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/bin/x64/GogakuSettings.exe (22,273,448 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/bin/x64/GogakuTsf.dll (19,997,044 bytes)
+产物：/Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/bin/x64/libgogaku_core.dll (28,224,798 bytes)
+-- The C compiler identification is GNU 16.2.0
+-- The CXX compiler identification is GNU 16.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/local/bin/i686-w64-mingw32-gcc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/local/bin/i686-w64-mingw32-g++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Configuring done (2.2s)
+-- Generating done (0.1s)
+-- Build files have been written to: /Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/panel-x86
+[1/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/compress.c.obj
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/compress.c:8:9: warning: 'ZLIB_INTERNAL' redefined
+    8 | #define ZLIB_INTERNAL
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[2/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/adler32.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/adler32.c:8:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[3/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/crc32.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/crc32.c:30:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[4/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/infback.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/infback.c:13:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[5/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inffast.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inffast.c:6:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[6/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.h:16,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.c:52:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[7/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inftrees.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inftrees.c:6:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[8/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/trees.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/deflate.h:16,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/trees.c:37:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[9/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/uncompr.c.obj
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/uncompr.c:8:9: warning: 'ZLIB_INTERNAL' redefined
+    8 | #define ZLIB_INTERNAL
+      |         ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[10/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inflate.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/inflate.c:83:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[11/51] Building C object CMakeFiles/gogaku_zlib.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.c.obj
+In file included from /Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.c:8:
+/Users/gomeen/code/gomeen/gogaku/shared/third_party/zlib/zutil.h:19:11: warning: 'ZLIB_INTERNAL' redefined
+   19 | #  define ZLIB_INTERNAL
+      |           ^~~~~~~~~~~~~
+<command-line>: note: this is the location of the previous definition
+[12/51] Linking C static library libgogaku_zlib.a
+[13/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngerror.c.obj
+[14/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngget.c.obj
+[15/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/png.c.obj
+[16/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngmem.c.obj
+[17/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngpread.c.obj
+[18/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrio.c.obj
+[19/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngread.c.obj
+[20/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrtran.c.obj
+[21/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngrutil.c.obj
+[22/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngset.c.obj
+[23/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngtrans.c.obj
+[24/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwio.c.obj
+[25/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwtran.c.obj
+[26/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwrite.c.obj
+[27/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftsystem.c.obj
+[28/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftinit.c.obj
+[29/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftdebug.c.obj
+[30/51] Building C object CMakeFiles/gogaku_png.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/libpng/pngwutil.c.obj
+[31/51] Linking C static library libgogaku_png.a
+[32/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftbitmap.c.obj
+[33/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftmm.c.obj
+[34/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftglyph.c.obj
+[35/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/base/ftbase.c.obj
+[36/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/sfnt/sfnt.c.obj
+[37/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/cff/cff.c.obj
+[38/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/truetype/truetype.c.obj
+[39/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/pshinter/pshinter.c.obj
+[40/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/psnames/psnames.c.obj
+[41/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/autofit/autofit.c.obj
+[42/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/raster/raster.c.obj
+[43/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/smooth/smooth.c.obj
+[44/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/cache/ftcache.c.obj
+[45/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/psaux/psaux.c.obj
+[46/51] Building C object CMakeFiles/gogaku_freetype.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/freetype/src/gzip/ftgzip.c.obj
+[47/51] Linking C static library libgogaku_freetype.a
+[48/51] Building CXX object CMakeFiles/GogakuPanelRender.dir/panel_render.cpp.obj
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp: In constructor '{anonymous}::Fonts::Fonts(const {anonymous}::Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp:128:60: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+  128 |                 std::ifstream input(std::filesystem::u8path(path), std::ios::binary | std::ios::ate);
+      |                                     ~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/i686-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/panel_render/panel_render.cpp:4:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/i686-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+  847 |     u8path(const _Source& __source)
+      |     ^~~~~~
+[49/51] Building CXX object CMakeFiles/gogaku_harfbuzz.dir/Users/gomeen/code/gomeen/gogaku/shared/third_party/harfbuzz/src/harfbuzz.cc.obj
+[50/51] Linking CXX static library libgogaku_harfbuzz.a
+[51/51] Linking CXX static library libGogakuPanelRender.a
+编译 x86: windows/GogakuWindows/platform.cpp
+编译 x86: windows/GogakuWindows/appearance.cpp
+编译 x86: windows/GogakuWindows/themes.cpp
+编译 x86: shared/GogakuCore/settings_contract.cpp
+编译 x86: shared/GogakuCore/theme_contract.cpp
+编译 x86: windows/GogakuTsf/src/dllmain.cpp
+编译 x86: windows/GogakuTsf/src/text_service.cpp
+编译 x86: windows/GogakuTsf/src/candidate_window.cpp
+编译 x86: windows/GogakuTsf/src/core_bridge.cpp
+链接 x86 TSF
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllCanUnloadNow by linking to _DllCanUnloadNow@0
+Use --enable-stdcall-fixup to disable these warnings
+Use --disable-stdcall-fixup to disable these fixups
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllGetClassObject by linking to _DllGetClassObject@12
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllRegisterServer by linking to _DllRegisterServer@0
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _DllUnregisterServer by linking to _DllUnregisterServer@0
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/bin/i686-w64-mingw32-ld: warning: resolving _GogakuActivateProfile by linking to _GogakuActivateProfile@16
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp: In function 'void {anonymous}::emojiRegression(const Json&)':
+/Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:51:79: warning: 'std::filesystem::__cxx11::path std::filesystem::__cxx11::u8path(const _Source&) [with _Source = std::__cxx11::basic_string<char>; _Require = path; _CharT = char]' is deprecated: use 'path((const char8_t*)&*source)' instead [-Wdeprecated-declarations]
+In file included from /usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/i686-w64-mingw32/include/c++/16.2.0/filesystem:55,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/../../third_party/json.hpp:4643,
+                 from /Users/gomeen/code/gomeen/gogaku/shared/GogakuCore/tests/panel_render_test.cpp:3:
+/usr/local/Cellar/mingw-w64/14.0.0_3/toolchain-i686/i686-w64-mingw32/include/c++/16.2.0/bits/fs_path.h:847:5: note: declared here
+产物：/Users/gomeen/code/gomeen/gogaku/.build/bitmap-win-lite/bin/x86/GogakuTsf.dll (18,100,483 bytes)
+编译完成并写入各架构收据；未运行 Windows 程序。

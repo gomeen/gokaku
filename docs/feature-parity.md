@@ -82,8 +82,9 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 | --- | --- | --- | --- |
 | 竖排／横排设置 | 普通输入页 | 普通输入页组合控件 | 共享 `candidateLayout`／`horizontalPageSize` |
 | 分页核心 | `gc_normal_set_layout` | 代理 `applySettings` | 竖排 9；横排 4–9 |
-| 横排渲染 | `CandidatePanel.horizontalNormal` | `CandidateRenderer` 横排分支 | 宽 [320,860]；完整版释义行 |
-| 离屏回归 | 待 `verify` 扩展 | 待 selfcheck | 核心向量已加 `paging_horizontal` |
+| 横排渲染 | 共享 `gc_panel_render`＋CGImage；AppKit 系统回退 | 同源 `GogakuPanelRender` x86／x64＋分层窗口；D2D 系统回退 | 宽 [320,860]；完整版高亮释义行；长文本省略但保留全页候选命中 |
+| 渲染引擎设置 | 普通输入页「自绘／系统」 | 普通输入页「自绘／系统」 | 共享 `candidateRenderer`，默认自绘，失败自动系统回退 |
+| 离屏回归 | 共享 C++ 向量＋`SharedPanelBitmapTests` | 同一 C++ 向量＋`appearance_test.cpp` 自检程序 | 运行与构建证据分列于[接入记录](validation/bitmap-rendering.md)，真实宿主仍待验 |
 
 ## Gogaku Lite（实施中）
 

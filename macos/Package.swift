@@ -16,8 +16,8 @@ let package = Package(
         .systemLibrary(name: "CGogakuEngine"), .systemLibrary(name: "CGogakuCore"), .systemLibrary(name: "CSQLite"),
         .target(name: "GogakuHost", linkerSettings: [.linkedFramework("InputMethodKit")]),
         .target(name: "GogakuKit", dependencies: ["CGogakuEngine", "CGogakuCore", "CSQLite"], linkerSettings: nativeFlags),
-        .executableTarget(name: "GogakuInput", dependencies: ["GogakuKit", "GogakuHost"], linkerSettings: nativeFlags + [.linkedFramework("InputMethodKit"), .linkedFramework("Carbon")]),
+        .executableTarget(name: "GogakuInput", dependencies: ["GogakuKit", "GogakuHost", "CGogakuCore"], linkerSettings: nativeFlags + [.linkedFramework("InputMethodKit"), .linkedFramework("Carbon")]),
         .executableTarget(name: "GogakuSettings", dependencies: ["GogakuKit"], linkerSettings: nativeFlags),
         .executableTarget(name: "GogakuTranslator", dependencies: ["GogakuKit"], linkerSettings: nativeFlags),
-        .testTarget(name: "GogakuKitTests", dependencies: ["GogakuKit", "GogakuHost", "GogakuInput", "GogakuSettings"], linkerSettings: nativeFlags)
+        .testTarget(name: "GogakuKitTests", dependencies: ["GogakuKit", "GogakuHost", "GogakuInput", "GogakuSettings", "CGogakuCore"], linkerSettings: nativeFlags)
     ], swiftLanguageModes: [.v5])

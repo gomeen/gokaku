@@ -1,0 +1,101 @@
+{
+  "sourceSha256": "b11f2c6b00816f8711fd3b957fd0006c0a48b0da2e85115c419f6c06ff492810",
+  "buildReceipt": ".build/review-fix-windows/bin/x64/build-receipt.json",
+  "receiptBuildNumber": 114,
+  "receiptFlavor": "full",
+  "receiptConfiguration": "release",
+  "artifacts": {
+    "x64": {
+      "GogakuAgent.exe": {
+        "bytes": 17352743,
+        "sha256": "fa1a5f40f4a3e143352813b00c1b5cb07e9002be33714b2a70167fb7a45b6971"
+      },
+      "GogakuSettings.exe": {
+        "bytes": 22285167,
+        "sha256": "00059ed140a4ee7518d63caada27540615968dfb60928b2ce23f9c32cefca181"
+      },
+      "GogakuTsf.dll": {
+        "bytes": 20008985,
+        "sha256": "69a64bf7b5f7aa8dd343b7b25023c1856b9233d5250321e0570835ca248ae81f"
+      },
+      "libgogaku_core.dll": {
+        "bytes": 28393477,
+        "sha256": "c1b8c13d33be9812bed64badc14a1b1bb555886170105da500d5c94a231d3146"
+      }
+    },
+    "x86": {
+      "GogakuTsf.dll": {
+        "bytes": 18114118,
+        "sha256": "ab34ff5ac33bea821b51a065e5aa4d7fa86b9f6606c1e66bb9cbde7d4fd61e38"
+      }
+    }
+  },
+  "executed": false,
+  "hostTested": false,
+  "testSha256": "419da2dc9009ca1a9b9c7645563b3ba54f11fa5cf0bc32f73980066634bade17",
+  "checks": {
+    "fast": {
+      "report": "report-fast-20261117-175645.json",
+      "sourceMatches": true,
+      "testsMatch": true,
+      "runIdentityStable": true,
+      "summary": {
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "blocked": 0
+      },
+      "gatePassed": true
+    },
+    "asanQuick": {
+      "report": "report-release-20261117-175801.json",
+      "sourceMatches": true,
+      "testsMatch": true,
+      "runIdentityStable": true,
+      "summary": {
+        "passed": 1,
+        "failed": 0,
+        "skipped": 13,
+        "blocked": 0
+      },
+      "gatePassed": false
+    }
+  },
+  "windowsReceipts": {
+    "x64": {
+      "sourceSha256": "b11f2c6b00816f8711fd3b957fd0006c0a48b0da2e85115c419f6c06ff492810",
+      "sourceMatches": true,
+      "artifactHashesVerified": true,
+      "receiptSha256": "9422ad3c29da812ffabbae40b53024d3b4fb8930c870515e8550f20b1fedaa70"
+    },
+    "x86": {
+      "sourceSha256": "b11f2c6b00816f8711fd3b957fd0006c0a48b0da2e85115c419f6c06ff492810",
+      "sourceMatches": true,
+      "artifactHashesVerified": true,
+      "receiptSha256": "0e6af7ddf15de0c8f28af18eb4d3a73dfc19afba00ff12a07151cce377ee6a4c"
+    }
+  },
+  "selfcheckArtifacts": {
+    "x64": {
+      "gogaku_core_panel_render_test.exe": {
+        "bytes": 18798585,
+        "sha256": "a5c03b10a136c9a33b26cd3efaf21ec59026028bb124bbd44479f62f17a8889b"
+      },
+      "gogaku_windows_appearance_test.exe": {
+        "bytes": 19859429,
+        "sha256": "d5db6bb86eef391dce09c92421bf4bcbb7a1756c675fd3db55deeac47422655f"
+      }
+    },
+    "x86": {
+      "gogaku_core_panel_render_test.exe": {
+        "bytes": 16887802,
+        "sha256": "866fc9620bfe74ed2c4ae2b59fba5e8afc81516bb15d2ef9a81acc31d3e6a52c"
+      },
+      "gogaku_windows_appearance_test.exe": {
+        "bytes": 17953148,
+        "sha256": "1dc00501cc3096663c4095483edce122dd9ec301b7d2a760e03551346bbbe255"
+      }
+    }
+  },
+  "macCoreSha256": "480ca1e93c4bc5a9a1acaedbcda478bc4306fa253cff422956728b67df142892"
+}
