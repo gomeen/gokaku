@@ -14,6 +14,16 @@
 - 更新签名公钥轮换为生产密钥 `gogaku-prod-2026-11`。
 - 已发布：Release 449677317，tag `v0.1.6`（构建提交 721e8a3），发布记录见 [release-b117.json](docs/validation/release-b117.json)。四包哈希与公开清单签名均已远端验证。host 未运行（桌面锁屏豁免，理由见发布记录），待解锁后补录。
 
+### 变更（2026-11-18：补齐常用双拼方案，工作区）
+
+- **行为变化：内置输入方案从两项扩到八项**。小鹤双拼（默认）与全拼之外新增自然码（`ziranma`）、微软双拼（`mspy`）、智能ABC（`abc`）、紫光双拼（`ziguang`）、拼音加加（`pinyinjiajia`）、国标双拼（`gb`），全局切换，模糊音／调频／英文候选／编辑键规则对所有方案一致。
+- **实现位置**：键位表与方案枚举仍然只有一份——libime 的 `libime::ShuangpinBuiltinProfile`（`shuangpinprofile.h`：`Ziranma`／`MS`／`Ziguang`／`ABC`／`PinyinJiajia`／`GB`／`Xiaohe`）。共享核心只做枚举透传：`GcScheme` 追加六个值（`0`／`1` 旧值不变，未知数值与未知 ID 回退小鹤），`gc_normal_update` 按方案构造对应的 `libime::ShuangpinProfile`，全拼仍走 `setUseShuangpin(false)`。新增附加导出 `gc_scheme_id`／`gc_scheme_from_id` 作为 `settings.json` 的 `inputScheme` 字符串与枚举的唯一映射（未升 ABI，不破坏现有布局），`settings_contract.cpp` 的 `inputScheme` 白名单改用同一映射，未知 ID 仍回退 `xiaohe`。
+- **修复：分号键在微软／紫光里是 `ing`**。组合中该键命中本方案键位集（`ShuangpinProfile::validInput`）时按拼音键继续组合，否则微软双拼与紫光双拼无法输入任何 `ing` 韵母；未使用分号的方案（如小鹤）保持「组合中标点上屏」原行为。
+- **Windows**：设置页「输入方案」下拉改为八项（小鹤双拼／自然码／微软双拼／智能ABC／紫光双拼／拼音加加／国标双拼／全拼），显示名与 ID 同表维护，映射走共享核心；代理 `applySettings` 原先把字符串比较结果当 `bool` 传给 `scheme` 参数（只能区分小鹤与全拼），改用 `gc_scheme_from_id`。x64 交叉编译通过，设置页 UI 未运行。
+- **Mac 待接**：`macos/Sources/GogakuKit/Settings.swift:191` 的 `InputScheme` 枚举与 `NormalInputPage` 单选列表仍只有小鹤／全拼；本仓库改动未触碰 `macos/`（并行改「完整版内 Lite 模式」）。接上时新增六个 case 并把 `InputController`／`EngineHub` 的 `Int32(GC_SCHEME_...)` 映射改为按 ID 走 `gc_scheme_from_id` 即可。
+- **测试**：`normal_session_test` 新增 `shuangpin_schemes` 向量（六方案 × 你好／今天／平，含上屏与未知方案回退、分号键两种行为）；`settings_contract_test` 新增六个 ID 保留向量与 `gc_scheme_id`／`gc_scheme_from_id` 往返、未知 ID／数值回退断言。核心 ctest 10/10 通过。
+- **未做**：用户裁决清单里的「吕氏双拼」在 libime 1.1.17 与公开双拼方案里都没有对应键位表（`ShuangpinBuiltinProfile` 只有上列八项）；自造键位表会变成第二份契约实现，因此本轮以紫光双拼与国标双拼替代，是否另加吕氏需用户提供键位来源。
+
 ### 0.1.5（构建 113，stable 定版，2026-11-12）
 
 - **行为变化：皮肤支持编辑当前主题与内置主题原地修改**。新增「编辑当前主题」，直接打开正在使用的主题（当前为旧默认 `rime-macos-like` 或已应用主题失效回退到它时，打开 Gogaku），与列表选中项无关。内置主题不再只能「复制并编辑」：修改以相对出厂数据的 JSON Merge Patch（RFC 7386）存入 `settings.json` 顶层字段 `builtinThemeOverrides`，补丁之外的字段继续跟随出厂数据，可一键「恢复默认」；列表副标题对有覆盖的内置主题显示「内置 · 已修改」。

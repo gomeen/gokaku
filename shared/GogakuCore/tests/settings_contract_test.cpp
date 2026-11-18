@@ -284,6 +284,15 @@ int main() {
          Json{{"inputScheme", "xiaohe"}},
          {},
          0},
+        // 新增内置双拼方案：settings.json 里的 ID 原样保留（两端共跑）。
+        {"input-scheme-zrm", R"({"inputScheme":"ziranma"})", Json{{"inputScheme", "ziranma"}}, {}, 0},
+        {"input-scheme-mspy", R"({"inputScheme":"mspy"})", Json{{"inputScheme", "mspy"}}, {}, 0},
+        {"input-scheme-abc", R"({"inputScheme":"abc"})", Json{{"inputScheme", "abc"}}, {}, 0},
+        {"input-scheme-ziguang", R"({"inputScheme":"ziguang"})", Json{{"inputScheme", "ziguang"}}, {}, 0},
+        {"input-scheme-pinyinjiajia",
+         R"({"inputScheme":"pinyinjiajia"})",
+         Json{{"inputScheme", "pinyinjiajia"}}, {}, 0},
+        {"input-scheme-gb", R"({"inputScheme":"gb"})", Json{{"inputScheme", "gb"}}, {}, 0},
         {"preference-enums",
          R"({"preferredMode":"auto","preferredDirection":"enToZh"})",
          Json{{"preferredMode", "normal"}, {"preferredDirection", "enToZh"}},
@@ -399,6 +408,18 @@ int main() {
     };
 
     for (const Case &test : cases) runCase(test);
+
+    // 方案 ID 与枚举的映射只有一份：每个 ID 往返一致，未知 ID／数值都回小鹤。
+    for (const char *id : {"xiaohe", "fullPinyin", "ziranma", "mspy", "abc", "ziguang",
+                          "pinyinjiajia", "gb"}) {
+        check(std::strcmp(gc_scheme_id(gc_scheme_from_id(id)), id) == 0, "scheme-id-roundtrip",
+              std::string("方案 ID 往返不一致：") + id);
+    }
+    check(gc_scheme_from_id("doublePinyin") == GC_SCHEME_XIAOHE, "scheme-id-unknown-id",
+          "未知 ID 应回退小鹤");
+    check(gc_scheme_from_id(nullptr) == GC_SCHEME_XIAOHE, "scheme-id-null", "NULL 应回退小鹤");
+    check(std::strcmp(gc_scheme_id(99), "xiaohe") == 0, "scheme-id-unknown-value",
+          "未知数值应回退小鹤");
 
     if (failures == 0) {
         std::printf("settings contract: %zu cases passed\n", cases.size());

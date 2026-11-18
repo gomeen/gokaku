@@ -71,7 +71,10 @@ struct Core {
         return mask;
     }
     void applySettings() {
-        gc_normal_update(normal,settings.value("inputScheme",std::string())=="fullPinyin",fuzzy(),settings.value("fullPinyinPreedit",true),settings.value("frequencyEnabled",true),settings.value("englishCandidatesEnabled",true));
+        // 方案字符串→枚举的映射只有一份（共享核心 gc_scheme_from_id）；
+        // 以前这里把字符串比较结果当 bool 传给 scheme 参数，只能区分小鹤与全拼。
+        const int32_t scheme = gc_scheme_from_id(settings.value("inputScheme",std::string("xiaohe")).c_str());
+        gc_normal_update(normal,scheme,fuzzy(),settings.value("fullPinyinPreedit",true),settings.value("frequencyEnabled",true),settings.value("englishCandidatesEnabled",true));
         std::vector<std::string> names;
         for (auto &entry:settings.value("appDefaultEnglish",Json::array())) {
             if (entry.is_string()) names.push_back(entry.get<std::string>());

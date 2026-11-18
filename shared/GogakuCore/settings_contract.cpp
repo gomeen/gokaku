@@ -272,7 +272,10 @@ int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
         canonical["builtinThemeOverrides"] = builtinOverrides(*value);
     }
     if (const Json *value = member(input, "inputScheme"); value && value->is_string()) {
-        canonical["inputScheme"] = oneOf(*value, {"xiaohe", "fullPinyin"}, "xiaohe");
+        // 方案 ID 与枚举的映射只有一份（gc_scheme_id／gc_scheme_from_id）；
+        // 未知 ID 与旧版本一样回退 "xiaohe"。
+        const std::string id = value->get<std::string>();
+        canonical["inputScheme"] = gc_scheme_id(gc_scheme_from_id(id.c_str()));
     }
     if (const Json *value = member(input, "fuzzyPinyin")) {
         canonical["fuzzyPinyin"] = uniqueStrings(*value);
@@ -371,4 +374,35 @@ extern "C" int32_t gc_settings_normalize(const char *raw, size_t raw_len, char *
 
 extern "C" void gc_contract_free(void *buffer) {
     std::free(buffer);
+}
+
+// 输入方案 ID ↔ 枚举的唯一映射。新增方案只在这里加一行：读侧规范化、会话创建、
+// 两端设置界面全部调这一份（Windows 静态编入时同样生效）。
+namespace {
+struct SchemeId {
+    int32_t scheme;
+    const char *id;
+};
+constexpr SchemeId kSchemeIds[] = {
+    {GC_SCHEME_XIAOHE, "xiaohe"},        {GC_SCHEME_FULLPINYIN, "fullPinyin"},
+    {GC_SCHEME_ZRM, "ziranma"},          {GC_SCHEME_MSPY, "mspy"},
+    {GC_SCHEME_ABC, "abc"},              {GC_SCHEME_ZIGUANG, "ziguang"},
+    {GC_SCHEME_PINYINJIAJIA, "pinyinjiajia"}, {GC_SCHEME_GB, "gb"},
+};
+}  // namespace
+
+extern "C" const char *gc_scheme_id(int32_t scheme) {
+    for (const auto &entry : kSchemeIds) {
+        if (entry.scheme == scheme) return entry.id;
+    }
+    return "xiaohe";
+}
+
+extern "C" int32_t gc_scheme_from_id(const char *id) {
+    if (id != nullptr) {
+        for (const auto &entry : kSchemeIds) {
+            if (std::strcmp(id, entry.id) == 0) return entry.scheme;
+        }
+    }
+    return GC_SCHEME_XIAOHE;
 }

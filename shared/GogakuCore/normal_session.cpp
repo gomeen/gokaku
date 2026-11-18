@@ -311,6 +311,8 @@ bool atomic_write(const std::string &path, const std::string &data) {
 struct GcNormalSession {
     std::unique_ptr<libime::PinyinIME> ime;
     std::unique_ptr<libime::PinyinContext> context;
+    // 当前双拼方案（全拼时为空）。保留作组合中判断「该标点键是否是本方案的韵母键」。
+    std::shared_ptr<libime::ShuangpinProfile> shuangpin;
 
     std::string dictPath, modelPath, userDir, customWordsPath, englishWordsPath, glossPath;
     int32_t scheme = GC_SCHEME_XIAOHE;
@@ -375,6 +377,45 @@ uint32_t fuzzy_bit_to_flag(uint32_t bit) {
     case GC_FUZZY_EN_ENG: return static_cast<uint32_t>(libime::PinyinFuzzyFlag::EN_ENG);
     case GC_FUZZY_IN_ING: return static_cast<uint32_t>(libime::PinyinFuzzyFlag::IN_ING);
     default: return 0;
+    }
+}
+
+// 双拼方案的键位表只在 libime 里（ShuangpinBuiltinProfile）；核心这里只是枚举透传。
+// 未知值归一为小鹤，与 gc_scheme_from_id 的容错一致。
+int32_t normalize_scheme(int32_t scheme) {
+    switch (scheme) {
+        case GC_SCHEME_FULLPINYIN:
+        case GC_SCHEME_ZRM:
+        case GC_SCHEME_MSPY:
+        case GC_SCHEME_ABC:
+        case GC_SCHEME_ZIGUANG:
+        case GC_SCHEME_PINYINJIAJIA:
+        case GC_SCHEME_GB:
+            return scheme;
+        default:
+            return GC_SCHEME_XIAOHE;
+    }
+}
+
+constexpr bool uses_shuangpin(int32_t scheme) { return scheme != GC_SCHEME_FULLPINYIN; }
+
+libime::ShuangpinBuiltinProfile to_libime_shuangpin(int32_t scheme) {
+    switch (scheme) {
+        case GC_SCHEME_ZRM:
+            return libime::ShuangpinBuiltinProfile::Ziranma;
+        case GC_SCHEME_MSPY:
+            return libime::ShuangpinBuiltinProfile::MS;
+        case GC_SCHEME_ABC:
+            return libime::ShuangpinBuiltinProfile::ABC;
+        case GC_SCHEME_ZIGUANG:
+            return libime::ShuangpinBuiltinProfile::Ziguang;
+        case GC_SCHEME_PINYINJIAJIA:
+            return libime::ShuangpinBuiltinProfile::PinyinJiajia;
+        case GC_SCHEME_GB:
+            return libime::ShuangpinBuiltinProfile::GB;
+        case GC_SCHEME_XIAOHE:
+        default:
+            return libime::ShuangpinBuiltinProfile::Xiaohe;
     }
 }
 
@@ -973,7 +1014,7 @@ extern "C" int gc_normal_session_create(const GcNormalConfig *config, GcNormalSe
         s->customWordsPath = config->custom_words_path == nullptr ? "" : config->custom_words_path;
         s->englishWordsPath = config->english_words_path == nullptr ? "" : config->english_words_path;
         s->glossPath = config->gloss_path == nullptr ? "" : config->gloss_path;
-        s->scheme = config->scheme;
+        s->scheme = normalize_scheme(config->scheme);
         s->fuzzyMask = config->fuzzy_mask;
         s->fullPinyinPreedit = config->full_pinyin_preedit != 0;
         s->freqEnabled = config->freq_enabled != 0;
@@ -1078,19 +1119,22 @@ extern "C" int gc_normal_update(GcNormalSession *s, int32_t scheme, uint32_t fuz
                                 int32_t full_pinyin_preedit, int32_t freq_enabled,
                                 int32_t english_enabled) {
     if (s == nullptr) return 1;
-    s->scheme = scheme == GC_SCHEME_FULLPINYIN ? GC_SCHEME_FULLPINYIN : GC_SCHEME_XIAOHE;
+    s->scheme = normalize_scheme(scheme);
     s->fuzzyMask = fuzzy_mask;
     s->fullPinyinPreedit = full_pinyin_preedit != 0;
     s->freqEnabled = freq_enabled != 0;
     s->englishEnabled = english_enabled != 0;
     if (s->ime != nullptr) {
         s->ime->setFuzzyFlags(to_libime_fuzzy(s->fuzzyMask));
-        if (s->scheme == GC_SCHEME_XIAOHE) {
-            s->ime->setShuangpinProfile(std::make_shared<libime::ShuangpinProfile>(libime::ShuangpinBuiltinProfile::Xiaohe));
+        if (uses_shuangpin(s->scheme)) {
+            s->shuangpin = std::make_shared<libime::ShuangpinProfile>(to_libime_shuangpin(s->scheme));
+            s->ime->setShuangpinProfile(s->shuangpin);
+        } else {
+            s->shuangpin.reset();
         }
     }
     if (s->context != nullptr) {
-        s->context->setUseShuangpin(s->scheme == GC_SCHEME_XIAOHE);
+        s->context->setUseShuangpin(uses_shuangpin(s->scheme));
     }
     invalidate_merge(*s);
     return 0;
@@ -1407,6 +1451,20 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 // 完整覆盖的短码／拼音词／英文候选同样按「暂存＋候选＋标点」提交。
                 const bool isPunct = !punct_map(ch).empty() || ch == '"' || ch == '\'';
                 if (isPunct) {
+                    // 双拼方案的键位集里可能有标点键：微软双拼与紫光双拼的 ing 在 `;`。
+                    // 命中本方案键位时按拼音键继续组合，否则这两种方案无法输入 ing。
+                    if (s->shuangpin != nullptr && s->shuangpin->validInput().count(ch) != 0) {
+                        if (c.size() >= kMaxInputScalars) {
+                            beep = true;
+                            status = "输入上限 512 个字母";
+                            break;
+                        }
+                        c.type(text);
+                        invalidate_merge(*s);
+                        s->selected = 0;
+                        *out = build_snapshot(*s, "", status, 0, beep, consumed, &ensure_view());
+                        return 0;
+                    }
                     std::string prefix;
                     const size_t total = candidate_count();
                     if (total > 0) {

@@ -25,6 +25,11 @@
  * 版本 2 新增：普通模式会话（组合状态机＋libime 绑定）、自定义词语存储与校验。
  * 版本 1 函数保持原样。
  *
+ * 输入方案扩充（同样为附加项，不升 ABI 版本）：GcScheme 追加自然码／微软双拼／
+ * 智能ABC／紫光双拼／拼音加加／国标双拼六个值（0／1 旧值不变），并新增
+ * gc_scheme_id／gc_scheme_from_id 作为 settings.json 字符串与枚举的唯一映射。
+ * 键位表仍只在 libime 的 ShuangpinBuiltinProfile 里，核心不复制第二份。
+ *
  * 附加只读接口（不改动任何已有结构布局与函数签名，旧加载方不受影响）：
  * gc_normal_copy_raw —— 取当前组合的原始编码，供平台存草稿与恢复。
  * gc_normal_set_layout —— 横排每页数量（0=竖排每页 9，4–9=横排每页数量）。
@@ -71,10 +76,24 @@ GOGAKU_CORE_EXPORT int64_t gc_utf8_scalar_count(const char *text, size_t length)
 
 /* ---------- 普通模式会话 ---------- */
 
+/* 输入方案。键位→音节的映射全部由 libime 内置双拼方案提供，核心只做透传；
+ * 新增值只追加在尾部，0／1 的旧值保持不变。未知数值按小鹤处理。 */
 typedef enum GcScheme {
-    GC_SCHEME_XIAOHE = 0,
-    GC_SCHEME_FULLPINYIN = 1
+    GC_SCHEME_XIAOHE = 0,          /* 小鹤双拼（默认） */
+    GC_SCHEME_FULLPINYIN = 1,      /* 全拼 */
+    GC_SCHEME_ZRM = 2,             /* 自然码 */
+    GC_SCHEME_MSPY = 3,            /* 微软双拼 */
+    GC_SCHEME_ABC = 4,             /* 智能ABC */
+    GC_SCHEME_ZIGUANG = 5,         /* 紫光双拼 */
+    GC_SCHEME_PINYINJIAJIA = 6,    /* 拼音加加 */
+    GC_SCHEME_GB = 7               /* 国标双拼 */
 } GcScheme;
+
+/* 方案 ID（settings.json 的 inputScheme）与 GcScheme 的唯一映射。
+ * 未知 ID 与未知数值都回退 GC_SCHEME_XIAOHE／"xiaohe"，与 gc_normal_update 的容错一致；
+ * gc_scheme_id 返回值是静态字符串，不需要释放。
+ * 声明在 ../settings_contract.h（与读侧规范化同处，含 Windows 静态编入的
+ * 导出归属；Windows 平台进程以 GOGAKU_SETTINGS_CONTRACT_STATIC 把它们直接编进自身）。 */
 
 /* 模糊音位标志，对应规格 9 对；默认全关（0）。 */
 enum {

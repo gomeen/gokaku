@@ -21,6 +21,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <thread>
+#include <vector>
 #ifndef GOGAKU_LITE
 #define GOGAKU_LITE 0
 #endif
@@ -47,6 +48,15 @@ HFONT uiFont(UINT dpi,int size,int weight=FW_NORMAL) {
 struct Placement { HWND window; int x,y,width,height; std::wstring kind; bool auxiliary=false; };
 constexpr unsigned Shift = 1u<<17, Control = 1u<<18, Alt = 1u<<19, Windows = 1u<<20;
 const char *Fuzzy[] = {"z-zh","c-ch","s-sh","n-l","f-h","l-r","an-ang","en-eng","in-ing"};
+// 输入方案显示名与 settings.json 的 ID 同表维护：ID 由共享核心解释
+// （gc_scheme_from_id／gc_scheme_id），双拼键位表只在 libime，本端不另写一份。
+struct SchemeOption { const char *id; const wchar_t *label; };
+const SchemeOption SchemeOptions[] = {
+    {"xiaohe",L"小鹤双拼"}, {"ziranma",L"自然码"}, {"mspy",L"微软双拼"},
+    {"abc",L"智能ABC"}, {"ziguang",L"紫光双拼"}, {"pinyinjiajia",L"拼音加加"},
+    {"gb",L"国标双拼"}, {"fullPinyin",L"全拼"},
+};
+constexpr size_t kSchemeOptionCount = sizeof(SchemeOptions)/sizeof(SchemeOptions[0]);
 const char *ColorKeys[] = {"background","border","text","comment","index","highlight","highlightText","highlightComment","cursor","page"};
 const wchar_t *ColorLabels[] = {L"背景",L"边框",L"候选文字",L"翻译文字",L"序号",L"高亮背景",L"高亮文字",L"选中翻译",L"输入与光标",L"页码"};
 const char *VisualKeys[] = {"radius","padding","rowHeight","opacity","bgOpacity","imageOpacity"};
@@ -389,8 +399,18 @@ void App::normalPage(){
 
     // ── 输入方案 ──────────────────────────────────────────────
     rowLabel(L"输入方案",y);
-    combo(200,{L"小鹤双拼",L"全拼"},settings.value("inputScheme",std::string())=="fullPinyin",CtrlX,y,CtrlW);
-    actions[200]=[this](int n){if(n==CBN_SELCHANGE)patch({{"inputScheme",SendMessageW(get(200),CB_GETCURSEL,0,0)==1?"fullPinyin":"xiaohe"}});};
+    {
+        std::vector<std::wstring> labels;
+        int selected=0;
+        const std::string current=settings.value("inputScheme",std::string("xiaohe"));
+        for(size_t i=0;i<kSchemeOptionCount;++i){
+            labels.emplace_back(SchemeOptions[i].label);
+            if(current==SchemeOptions[i].id) selected=int(i);
+        }
+        combo(200,labels,selected,CtrlX,y,CtrlW);
+        actions[200]=[this](int n){if(n!=CBN_SELCHANGE)return;const int i=int(SendMessageW(get(200),CB_GETCURSEL,0,0));
+            if(i>=0 && size_t(i)<kSchemeOptionCount) patch({{"inputScheme",std::string(SchemeOptions[i].id)}});};
+    }
     nextRow(RowH); groupGap();
 
     // ── 模糊音：三列九项，与标签列对齐 ────────────────────────

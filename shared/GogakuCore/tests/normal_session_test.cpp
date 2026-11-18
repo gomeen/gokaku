@@ -113,6 +113,7 @@ const char *kTestDictText = R"(你好 ni'hao
 开会 kai'hui
 会议 hui'yi
 李好 li'hao
+平 ping
 脏 zang
 章 zhang
 民 min
@@ -779,6 +780,72 @@ void test_full_pinyin_scheme(const Env &env) {
     DelSnap sp{send(s, GC_EV_SPACE)};
     check_eq(sp.p ? sp.p->commit : "", "今天", "全拼上屏");
     gc_normal_session_destroy(s);
+}
+
+// 内置双拼方案的键位表来自 libime（ShuangpinBuiltinProfile），核心只透传。
+// 三个词按各方案的实际键位表展开：
+//   你好 ni+hao、今天 jin+tian、平 ping（ing 在微软／紫光落在分号键）
+void test_shuangpin_schemes(const Env &env) {
+    struct Case {
+        int32_t scheme;
+        const char *name;
+        const char *nihao;
+        const char *jintian;
+        const char *ping;
+    };
+    const Case cases[] = {
+        {GC_SCHEME_ZRM, "自然码", "nihk", "jntm", "py"},
+        {GC_SCHEME_MSPY, "微软双拼", "nihk", "jntm", "p;"},
+        {GC_SCHEME_ABC, "智能ABC", "nihk", "jctw", "py"},
+        {GC_SCHEME_ZIGUANG, "紫光双拼", "nihq", "jytf", "p;"},
+        {GC_SCHEME_PINYINJIAJIA, "拼音加加", "nihd", "jltj", "pq"},
+        {GC_SCHEME_GB, "国标双拼", "nihc", "jltd", "pj"},
+    };
+    for (const Case &c : cases) {
+        const std::string name = c.name;
+        const std::pair<const char *, const char *> words[] = {
+            {c.nihao, "你好"}, {c.jintian, "今天"}, {c.ping, "平"},
+        };
+        for (const auto &[keys, want] : words) {
+            auto *s = make_session(env, false, c.scheme);
+            if (s == nullptr) continue;
+            const std::string text = keys;
+            for (size_t i = 0; i + 1 < text.size(); ++i) {
+                DelSnap d{send(s, GC_EV_TEXT, std::string(1, text[i]))};
+            }
+            DelSnap v{send(s, GC_EV_TEXT, std::string(1, text.back()))};
+            check_eq(cand_text(v.p, 0), want, name + " " + text + " 首选 " + want);
+            DelSnap sp{send(s, GC_EV_SPACE)};
+            check_eq(sp.p ? sp.p->commit : "", want, name + " 上屏 " + want);
+            gc_normal_session_destroy(s);
+        }
+    }
+    { // 未知方案数值回退小鹤（保持现有容错风格）
+        auto *s = make_session(env, false, 99);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i"); send(s, GC_EV_TEXT, "h");
+        DelSnap c{send(s, GC_EV_TEXT, "c")};
+        check_eq(cand_text(c.p, 0), "你好", "未知方案回退小鹤");
+        gc_normal_session_destroy(s);
+    }
+    { // 分号键在本方案里是 ing：组合中按拼音键处理，而不是上屏「；」
+        auto *s = make_session(env, false, GC_SCHEME_MSPY);
+        send(s, GC_EV_TEXT, "p");
+        DelSnap semi{send(s, GC_EV_TEXT, ";")};
+        check(semi.p != nullptr && semi.p->composing == 1, "微软双拼分号键不结束组合");
+        check_eq(semi.p ? semi.p->commit : "", "", "微软双拼分号键不提交标点");
+        check_eq(semi.p ? semi.p->preedit : "", "ping", "微软双拼 p; 展开全拼 ping");
+        DelSnap c{send(s, GC_EV_SPACE)};
+        check_eq(c.p ? c.p->commit : "", "平", "微软双拼 p; 上屏 平");
+        gc_normal_session_destroy(s);
+    }
+    { // 键位表里没有分号的方案（小鹤）保持原标点行为
+        auto *s = make_session(env, false, GC_SCHEME_XIAOHE);
+        send(s, GC_EV_TEXT, "n"); send(s, GC_EV_TEXT, "i");
+        DelSnap semi{send(s, GC_EV_TEXT, ";")};
+        const std::string commit = semi.p ? semi.p->commit : "";
+        check(commit.find("；") != std::string::npos, "小鹤组合中分号仍上屏标点");
+        gc_normal_session_destroy(s);
+    }
 }
 
 void test_fuzzy(const Env &env) {
@@ -1526,6 +1593,7 @@ int main() {
         {"copy_raw", test_copy_raw},
         {"marked_matches_preedit", test_marked_matches_preedit},
         {"full_pinyin", test_full_pinyin_scheme},
+        {"shuangpin_schemes", test_shuangpin_schemes},
         {"fuzzy", test_fuzzy},
         {"custom_words", test_custom_words},
         {"factory_custom_pinyin", test_factory_custom_pinyin},

@@ -46,6 +46,13 @@ GC_SETTINGS_CONTRACT_EXPORT int32_t gc_settings_normalize(const char *raw, size_
                                                           int32_t *migrated);
 GC_SETTINGS_CONTRACT_EXPORT void gc_contract_free(void *buffer);
 
+/* 输入方案 ID（settings.json 的 inputScheme）与 GcScheme（gogaku_core.h）的唯一映射。
+ * 读侧规范化、会话创建与两端设置界面都调这一份，不再各自维护字符串表；
+ * 双拼键位表只在 libime。未知 ID／未知数值都回退 "xiaohe"／GC_SCHEME_XIAOHE。
+ * gc_scheme_id 返回静态字符串，不需要释放。 */
+GC_SETTINGS_CONTRACT_EXPORT const char *gc_scheme_id(int32_t scheme);
+GC_SETTINGS_CONTRACT_EXPORT int32_t gc_scheme_from_id(const char *id);
+
 #ifdef __cplusplus
 }
 #endif
