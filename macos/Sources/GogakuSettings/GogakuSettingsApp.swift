@@ -11,13 +11,15 @@ enum BuildIdentity {
               let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               let full = object["fullVersion"] as? String else {
             let short = bundle.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
-            let build = bundle.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "?"
-            return "\(short)（构建 \(build)，无身份记录）"
+            return short
         }
-        let build = object["buildNumber"] as? Int ?? 0
-        let dirty = (object["dirty"] as? Bool ?? false) ? " dirty" : ""
-        return "\(full) 构建\(build)\(dirty)"
+        return full
     }()
+
+    /// dev 通道（Gogaku Dev，bundle ID 带 .dev 后缀）才在侧栏标「开发版」；
+    /// stable 不再显示通道标签与构建号，避免把正式安装误读为开发版。
+    static let isDevChannel: Bool =
+        Bundle.main.bundleIdentifier?.hasSuffix(".dev") ?? false
 }
 
 @main struct GogakuSettingsApp: App {
@@ -223,7 +225,7 @@ private struct SettingsView: View {
             #endif
             // .side__foot：meta 11 / ver mono 10，padding 12 16 14。
             VStack(alignment: .leading, spacing: 5) {
-                Text("本机开发版")
+                Text(BuildIdentity.isDevChannel ? "本机开发版" : "Gogaku")
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
                 Text(BuildIdentity.displayVersion)
