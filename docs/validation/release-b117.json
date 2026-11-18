@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.1.6",
+  "channel": "stable",
+  "version": "0.1.6",
+  "buildNumber": 117,
+  "releaseId": 449677317,
+  "state": "published",
+  "publishedAt": "2026-11-18",
+  "commit": "721e8a3222a519ed430564b2ec7c09221995e9f0",
+  "assets": {
+    "macos": {"name": "Gogaku-0.1.6-b117.pkg", "sha256": "93ae36350f51753a08f33e0e5115b0f322ac0b6c9153e767204e57f23f85e4b4", "bytes": 52050207},
+    "windows": {"name": "Gogaku-0.1.6-b117-windows-x64-setup.exe", "sha256": "935811091f0d04653b46358419b3cd873004a5f92859941f1323f6512cbc7a43", "bytes": 58483512},
+    "macosLite": {"name": "GogakuLite-0.1.6-b117.pkg", "sha256": "24c522ae645b5f6e03b1b471f0e2735a0daf9d43be30287750fa17659909a8df", "bytes": 48839337},
+    "windowsLite": {"name": "GogakuLite-0.1.6-b117-windows-x64-setup.exe", "sha256": "095744545e7f5a475f9dbab4b606e5356bbe28454705e5547c49503439e379a6", "bytes": 56518397},
+    "manifests": ["update-manifest.json", "update-manifest.json.sig", "update-manifest-lite.json", "update-manifest-lite.json.sig"]
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-b117-final.json",
+  "releaseReport": "verify/report-release-b117-final.json",
+  "hostWaiver": "用户 2026-11-18 决定先行发布：真实宿主验收因桌面锁屏暂缓（会话内用户选择稍后验收，不做锁屏下按键注入）；fast 7/7 与 release 14/14 均已通过，host 结果待桌面解锁后按验收记录补录。",
+  "notes": "0.1.6 新增 Gogaku Lite 双端安装包与横排候选窗，接入双端共享 C++ 位图渲染器（自绘／系统可选、失败回退），修复 Mac Shift 连续大写第二字母无法输入与大背景图主题重复处理的性能问题。更新签名公钥轮换为 gogaku-prod-2026-11（旧客户端仍可校验历史清单）。构建号因验证工具修复（EngineBridge 显式构建、包检查误报）与密钥轮换从 116 递增至 117；版本 0.1.6 按 2026-11-18 版本规则裁决（常规更新递增末位）。fast 7/7、release 14/14 通过（十万序列 ASan/UBSan、干净重建、包检查、渲染 53 项、数据可靠性 40 轮）；host 未运行（锁屏豁免，见 hostWaiver），待解锁补录。公开清单用新公钥远端验签通过（signature ok）。标签 v0.1.6 指向构建提交 721e8a3（先推 main 后发布，未复现标签误指）。"
+}
