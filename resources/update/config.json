@@ -4,8 +4,8 @@
   "repo": "gokaku",
   "trustedKeys": [
     {
-      "keyId": "gogaku-dev-2026-11",
-      "publicKey": "nUKPP3gAnuUM8PAKSTULL9BnlK3piTXM/WLAKAezfoE="
+      "keyId": "gogaku-prod-2026-11",
+      "publicKey": "cg+VS5Zm2Bgu3qwEzI/rWZan0aKBT0Z0cOJ8bZLC5g0="
     }
   ]
 }
