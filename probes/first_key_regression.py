@@ -68,6 +68,7 @@
 """
 import argparse
 import hashlib
+from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
 import os
 from datetime import datetime, timezone
@@ -79,7 +80,9 @@ import socket
 import statistics
 import subprocess
 import tempfile
+import threading
 import time
+from urllib.parse import urlencode
 
 ROOT = Path(__file__).resolve().parent.parent
 ENV = dict(os.environ)
@@ -1119,6 +1122,59 @@ class BrowserSession(BaseSession):
 
     value_view = 'committed_only'
 
+    def __init__(self, driver, run_id, guard_check=True):
+        super().__init__(driver, run_id, guard_check)
+        self.fixture_server = None
+        self.fixture_thread = None
+
+    def start_fixture_server(self):
+        """只服务本轮合成页面；不使用可访问目录或任意文件的 handler。"""
+        content = self.page.read_bytes()
+
+        class FixtureHandler(BaseHTTPRequestHandler):
+            def setup(self):
+                super().setup()
+                # 浏览器可能预连接但不发请求；收尾不能被空连接无限阻塞。
+                self.connection.settimeout(1)
+
+            def do_GET(self):
+                if self.path.partition('?')[0] != '/host.html':
+                    self.send_error(404)
+                    return
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/html; charset=utf-8')
+                self.send_header('Content-Length', str(len(content)))
+                self.send_header('Cache-Control', 'no-store')
+                self.end_headers()
+                self.wfile.write(content)
+
+            def log_message(self, format, *args):
+                pass
+
+        server = HTTPServer(('127.0.0.1', 0), FixtureHandler)
+        thread = threading.Thread(target=server.serve_forever,
+                                  kwargs={'poll_interval': 0.05},
+                                  name='gogaku-host-fixture', daemon=True)
+        try:
+            thread.start()
+        except BaseException:
+            server.server_close()
+            raise
+        self.fixture_server, self.fixture_thread = server, thread
+        return f'http://127.0.0.1:{server.server_port}/host.html?{urlencode({"run": self.run_id})}'
+
+    def close(self):
+        server, thread = self.fixture_server, self.fixture_thread
+        self.fixture_server = self.fixture_thread = None
+        if server is not None:
+            try:
+                server.shutdown()
+            finally:
+                try:
+                    server.server_close()
+                finally:
+                    thread.join()
+
     def title(self):
         # AX 指向真实前台进程；同 bundle 的旧 Chrome 不得参与读取。
         return self.assert_front()['title']
@@ -1132,16 +1188,21 @@ class BrowserSession(BaseSession):
     def open(self):
         self.marker = self.run_id
         self.page = ROOT / 'probes/real-host-test-page.html'
-        url = f'file://{self.page}?run={self.run_id}'
-        self.activate(url)
-        time.sleep(3.0)
-        self.guard_bundle = self.bundle
-        self.guard_marker = self.marker
-        # Safari 也绑定本轮已核验前台的进程；Chrome 已绑定自己的 Popen PID。
-        info = self.assert_front()
-        if not self.guard_pid:
-            self.guard_pid = int(info['pid'])
-        return {'url': url}
+        try:
+            url = self.start_fixture_server()
+            self.activate(url)
+            time.sleep(3.0)
+            self.guard_bundle = self.bundle
+            self.guard_marker = self.marker
+            # Safari 也绑定本轮已核验前台的进程；Chrome 已绑定自己的 Popen PID。
+            info = self.assert_front()
+            if not self.guard_pid:
+                self.guard_pid = int(info['pid'])
+            return {'url': url}
+        except BaseException:
+            # 窗口仍由调用方 finally 关闭；即使 open 未完成也不留下监听线程。
+            BrowserSession.close(self)
+            raise
 
     def page_state(self):
         title = self.title()
@@ -1232,13 +1293,16 @@ end tell''', timeout=20)
         time.sleep(0.8)
 
     def close(self):
-        if self.proc is not None:
-            self.proc.terminate()
-            try:
-                self.proc.wait(timeout=5)
-            except Exception:
-                self.proc.kill()
-        shutil.rmtree(self.profile, ignore_errors=True)
+        try:
+            if self.proc is not None:
+                self.proc.terminate()
+                try:
+                    self.proc.wait(timeout=5)
+                except Exception:
+                    self.proc.kill()
+            shutil.rmtree(self.profile, ignore_errors=True)
+        finally:
+            super().close()
 
 
 class SafariSession(BrowserSession):
@@ -1280,19 +1344,22 @@ end tell''', timeout=20)
         time.sleep(0.8)
 
     def close(self):
-        if self.window_id is None:
-            return
-        script = f'''
+        try:
+            if self.window_id is None:
+                return
+            script = f'''
 tell application "Safari"
     try
         close window id {self.window_id}
     end try
 end tell
 '''
-        try:
-            osa(script, timeout=20)
-        except HostError:
-            pass
+            try:
+                osa(script, timeout=20)
+            except HostError:
+                pass
+        finally:
+            super().close()
 
 
 class TerminalSession(BaseSession):

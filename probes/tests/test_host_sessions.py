@@ -220,6 +220,95 @@ class AXSnapshotTests(unittest.TestCase):
                 driver.close()
 
 
+class BrowserFixtureServerTests(unittest.TestCase):
+    @staticmethod
+    def get(url, path=None):
+        from http.client import HTTPConnection
+        from urllib.parse import urlsplit
+        parsed = urlsplit(url)
+        connection = HTTPConnection(parsed.hostname, parsed.port, timeout=2)
+        try:
+            connection.request('GET', path or parsed.path + '?' + parsed.query)
+            response = connection.getresponse()
+            return response.status, response.read(), response.getheader('Content-Type')
+        finally:
+            connection.close()
+
+    def test_both_browsers_serve_only_exact_fixture_and_close_listener(self):
+        from urllib.parse import parse_qs, urlsplit
+        for factory in (fkr.ChromeSession, fkr.SafariSession):
+            with self.subTest(browser=factory.name):
+                session = factory(unittest.mock.Mock(), 'fixture-run')
+                try:
+                    with patch.object(session, 'activate'), \
+                            patch.object(session, 'assert_front', return_value={'pid': 123}), \
+                            patch.object(fkr.time, 'sleep'):
+                        url = session.open()['url']
+                    parsed = urlsplit(url)
+                    self.assertEqual(parsed.hostname, '127.0.0.1')
+                    self.assertEqual(parsed.scheme, 'http')
+                    self.assertEqual(parsed.path, '/host.html')
+                    self.assertEqual(parse_qs(parsed.query), {'run': ['fixture-run']})
+                    self.assertGreater(parsed.port, 0)
+                    self.assertEqual(session.fixture_server.server_address, ('127.0.0.1', parsed.port))
+                    status, body, content_type = self.get(url)
+                    self.assertEqual(status, 200)
+                    self.assertEqual(body, session.page.read_bytes())
+                    self.assertEqual(content_type, 'text/html; charset=utf-8')
+                    for path in ('/', '/favicon.ico', '/README.md', '/../README.md',
+                                 '/%2e%2e/README.md', '/host.html/extra'):
+                        self.assertEqual(self.get(url, path)[0], 404, path)
+                    thread = session.fixture_thread
+                finally:
+                    session.close()
+                self.assertFalse(thread.is_alive())
+                self.assertIsNone(session.fixture_server)
+                with self.assertRaises(OSError):
+                    self.get(url)
+
+    def test_navigation_failure_stops_server_before_open_raises(self):
+        session = fkr.SafariSession(unittest.mock.Mock(), 'fixture-run')
+        observed = {}
+
+        def fail_navigation(url):
+            observed.update(url=url, thread=session.fixture_thread)
+            self.assertEqual(self.get(url)[0], 200)
+            raise fkr.HostError('synthetic navigation failure')
+
+        with patch.object(session, 'activate', side_effect=fail_navigation):
+            with self.assertRaisesRegex(fkr.HostError, 'synthetic navigation failure'):
+                session.open()
+        self.assertFalse(observed['thread'].is_alive())
+        with self.assertRaises(OSError):
+            self.get(observed['url'])
+        session.close()  # main 的 finally 可重复清理。
+
+    def test_close_error_still_joins_server_thread(self):
+        for factory in (fkr.ChromeSession, fkr.SafariSession):
+            with self.subTest(browser=factory.name):
+                session = factory(unittest.mock.Mock(), 'fixture-run')
+                with patch.object(session, 'activate'), \
+                        patch.object(session, 'assert_front', return_value={'pid': 123}), \
+                        patch.object(fkr.time, 'sleep'):
+                    url = session.open()['url']
+                thread = session.fixture_thread
+                if factory is fkr.ChromeSession:
+                    session.proc = unittest.mock.Mock()
+                    session.proc.terminate.side_effect = RuntimeError('close failed')
+                else:
+                    session.window_id = 123
+                with patch.object(fkr, 'osa', side_effect=RuntimeError('close failed')):
+                    with self.assertRaisesRegex(RuntimeError, 'close failed'):
+                        session.close()
+                self.assertFalse(thread.is_alive())
+                with self.assertRaises(OSError):
+                    self.get(url)
+                # Chrome 的模拟进程没有真实资源，只清理测试所建 profile。
+                if factory is fkr.ChromeSession:
+                    session.proc = None
+                    session.close()
+
+
 class BrowserOwnershipTests(unittest.TestCase):
     def test_title_comes_from_guarded_front_ax_window(self):
         driver = unittest.mock.Mock()
