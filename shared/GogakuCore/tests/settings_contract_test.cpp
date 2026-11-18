@@ -106,7 +106,9 @@ int main() {
                       {"preferredMode", "normal"},
                       {"preferredDirection", "zhToEn"},
                       {"volcengineUsageMonth", ""},
-                      {"volcengineUsageCharacters", 0}};
+                      {"volcengineUsageCharacters", 0},
+                      {"liteModeEnabled", false},
+                      {"modeOnboardingCompleted", false}};
         for (auto entry = expected.begin(); entry != expected.end(); ++entry) {
             auto found = result.value.find(entry.key());
             check(found != result.value.end() && *found == entry.value(), "empty-object",
@@ -405,6 +407,32 @@ int main() {
          Json{{"candidateLayout", "horizontal"}, {"horizontalPageSize", 5}},
          {},
          0},
+        {"lite-mode-absent-defaults-off",
+         R"({"schemaVersion":2,"candidateFontSize":14})",
+         Json{{"liteModeEnabled", false}, {"modeOnboardingCompleted", false}},
+         {},
+         0},
+        {"lite-mode-enabled-preserved",
+         R"({"liteModeEnabled":true,"modeOnboardingCompleted":true})",
+         Json{{"liteModeEnabled", true}, {"modeOnboardingCompleted", true}},
+         {},
+         0},
+        {"lite-mode-enabled-does-not-touch-gloss",
+         R"({"glossEnabled":true,"liteModeEnabled":true})",
+         Json{{"glossEnabled", true}, {"liteModeEnabled", true}},
+         {},
+         0},
+        {"lite-mode-wrong-types-fall-back-off",
+         R"({"liteModeEnabled":"yes","modeOnboardingCompleted":1})",
+         Json{{"liteModeEnabled", false}, {"modeOnboardingCompleted", false}},
+         {},
+         0},
+        {"lite-mode-schema1-migration-keeps-flags",
+         R"({"schemaVersion":1,"liteModeEnabled":true,"modeOnboardingCompleted":true})",
+         Json{{"schemaVersion", 2}, {"liteModeEnabled", true},
+              {"modeOnboardingCompleted", true}, {"learningTranslationEnabled", false}},
+         {"learningTranslationBackend"},
+         1},
     };
 
     for (const Case &test : cases) runCase(test);

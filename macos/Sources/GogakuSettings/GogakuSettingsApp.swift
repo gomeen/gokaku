@@ -34,17 +34,32 @@ enum BuildIdentity {
     }
 }
 
-private enum SettingsPage: String, CaseIterable, Identifiable {
+/// 设置页。侧栏可见页由「编译形态＋运行时 Lite 模式」共同决定：
+/// GOGAKU_LITE 构建固定四页（没有学习代码）；完整版在 Lite 模式生效时也只留四页，
+/// 切回完整模式即恢复七页（数据不受影响）。
+enum SettingsPage: String, CaseIterable, Identifiable {
     // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页。
     case normalInput, resources, customWords, skin, shortcuts, privacy, records
     var id: Self { self }
 
-    static var visibleCases: [SettingsPage] {
+    /// Lite 观感下的四页（也是 Gogaku Lite 独立安装包的全部页面）。
+    static let liteCases: [SettingsPage] = [.normalInput, .customWords, .skin, .shortcuts]
+
+    /// 侧栏可见页：编译期裁剪（GOGAKU_LITE）与运行时 liteMode 任一生效即四页。
+    static func visibleCases(liteModeEnabled: Bool) -> [SettingsPage] {
         #if GOGAKU_LITE
-        [.normalInput, .customWords, .skin, .shortcuts]
+        return liteCases
         #else
-        allCases
+        return liteModeEnabled ? liteCases : allCases
         #endif
+    }
+
+    /// 该页是否属于学习功能入口（Lite 模式下不显示）。
+    var isLearningPage: Bool {
+        switch self {
+        case .resources, .privacy, .records: return true
+        case .normalInput, .customWords, .skin, .shortcuts: return false
+        }
     }
     var title: String {
         switch self {
@@ -75,19 +90,74 @@ private struct SettingsView: View {
     private let store = LearningStore()
 
     var body: some View {
+        Group {
+            if ModeOnboarding.shouldShow(for: settings) {
+                // 首次打开设置：一次性模式选择（完整版专有）。未选择就关窗不落盘。
+                ModeOnboardingView(settings: $settings) { confirmOnboarding() }
+            } else {
+                shell
+            }
+        }
+        .background(SettingsPalette.windowBackground)
+        .font(.system(size: 13))
+        .tint(SettingsPalette.accent)
+        .onAppear {
+            SettingsAppDelegate.editor = skinEditor
+            updates.startAutoLoop()
+            SettingsStore.shared.onStatus = { newStatus in
+                status = SaveStatus(storeStatus: newStatus)
+                if case .saved = newStatus {
+                    // 输入法收到通知重载后，同步一份最新值避免界面显示旧缓存。
+                    settings = Settings.load()
+                }
+            }
+            refreshRecords()
+        }
+        .onChange(of: page) { _, newValue in
+            if newValue == .records { refreshRecords() }
+        }
+        // Lite 切换后当前页可能已隐藏：退回普通输入页（皮肤页在 Lite 下仍可见）。
+        .onChange(of: settings.liteModeEnabled) { _, _ in
+            if !visiblePages.contains(page) { page = .normalInput }
+        }
+        .onDisappear {
+            // 关闭窗口／视图销毁时提交剩余有效改动（如 300ms 合并中的文本）。
+            SettingsStore.shared.flushPending()
+        }
+    }
+
+    /// 侧栏可见页：GOGAKU_LITE 固定四页，完整版按运行时 liteMode 组合。
+    private var visiblePages: [SettingsPage] {
+        SettingsPage.visibleCases(liteModeEnabled: settings.liteModeEnabled)
+    }
+
+    /// 引导确认：选择已写入 settings，立即提交（输入法据此即时切换）。
+    private func confirmOnboarding() {
+        if !visiblePages.contains(page) { page = .normalInput }
+        SettingsStore.shared.submit(settings)
+    }
+
+    private var shell: some View {
         HStack(spacing: 0) {
             sidebar
             // 侧栏右描边（.side { border-right: 1px solid var(--border) }）。
             Rectangle().fill(SettingsPalette.border).frame(width: 1)
             VStack(alignment: .leading, spacing: 0) {
-                // 页面只保留标题（原型 .pagehead：22/600，padding 22 26 14）。
+                // 页面只保留标题（原型 .pagehead：22/600，padding 22 26 14）；
+                // 右侧模式徽标同原型（Lite 模式／完整模式）。
                 if page != .skin {
-                    Text(page.title).font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(SettingsPalette.primaryText)
-                        .accessibilityAddTraits(.isHeader)
-                        .padding(.horizontal, 26)
-                        .padding(.top, 22)
-                        .padding(.bottom, 14)
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(page.title).font(.system(size: 22, weight: .semibold))
+                            .foregroundStyle(SettingsPalette.primaryText)
+                            .accessibilityAddTraits(.isHeader)
+                        Spacer(minLength: 12)
+                        #if !GOGAKU_LITE
+                        ModeBadge(liteMode: settings.liteModeEnabled)
+                        #endif
+                    }
+                    .padding(.horizontal, 26)
+                    .padding(.top, 22)
+                    .padding(.bottom, 14)
                 }
                 if page == .skin {
                     SkinPage(settings: $settings, editor: skinEditor)
@@ -117,29 +187,7 @@ private struct SettingsView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
-        .background(SettingsPalette.windowBackground)
         .background(SkinWindowGuard(editor: skinEditor).frame(width: 0, height: 0))
-        .font(.system(size: 13))
-        .tint(SettingsPalette.accent)
-        .onAppear {
-            SettingsAppDelegate.editor = skinEditor
-            updates.startAutoLoop()
-            SettingsStore.shared.onStatus = { newStatus in
-                status = SaveStatus(storeStatus: newStatus)
-                if case .saved = newStatus {
-                    // 输入法收到通知重载后，同步一份最新值避免界面显示旧缓存。
-                    settings = Settings.load()
-                }
-            }
-            refreshRecords()
-        }
-        .onChange(of: page) { _, newValue in
-            if newValue == .records { refreshRecords() }
-        }
-        .onDisappear {
-            // 关闭窗口／视图销毁时提交剩余有效改动（如 300ms 合并中的文本）。
-            SettingsStore.shared.flushPending()
-        }
     }
 
     // MARK: 侧栏（.side：side-bg 底、文字导航、底部版本）
@@ -155,7 +203,7 @@ private struct SettingsView: View {
                 .padding(.bottom, 10)
             // .nav：gap 1，padding 0 8。
             VStack(alignment: .leading, spacing: 1) {
-                ForEach(SettingsPage.visibleCases) { item in
+                ForEach(visiblePages) { item in
                     SidebarItem(title: item.title, isSelected: page == item) {
                         if page == .skin, item != .skin {
                             guard skinEditor.mayLeave() else { return }
@@ -168,6 +216,11 @@ private struct SettingsView: View {
             .padding(.horizontal, 8)
             .accessibilityElement(children: .contain)
             Spacer(minLength: 0)
+            #if !GOGAKU_LITE
+            // .litebar：侧栏底部固定的 Lite 模式开关（仅完整版；Lite 独立安装包
+            // 没有这个概念，不显示开关）。切完立即落盘，输入法随设置通知生效。
+            liteBar
+            #endif
             // .side__foot：meta 11 / ver mono 10，padding 12 16 14。
             VStack(alignment: .leading, spacing: 5) {
                 Text("本机开发版")
@@ -199,6 +252,43 @@ private struct SettingsView: View {
         .frame(width: 200)
         .frame(maxHeight: .infinity, alignment: .topLeading)
         .background(SettingsPalette.sidebarBackground)
+    }
+
+    /// 侧栏底部固定开关（原型 .litebar）。只改 liteModeEnabled：学习数据、
+    /// 释义存储值（glossEnabled）与候选窗排列／渲染都不动，切回即恢复。
+    private var liteBar: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 8) {
+                Text("Lite 模式")
+                    .font(.system(size: 11.5, weight: .semibold))
+                    .foregroundStyle(SettingsPalette.primaryText)
+                Spacer(minLength: 8)
+                Toggle("", isOn: Binding(get: { settings.liteModeEnabled },
+                                         set: { on in
+                                             guard settings.liteModeEnabled != on else { return }
+                                             settings.liteModeEnabled = on
+                                             SettingsStore.shared.submit(settings)
+                                         }))
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .accessibilityLabel("Lite 模式")
+            }
+            .padding(.top, 8)
+            Text(settings.liteModeEnabled
+                 ? "已隐藏学习页与学习快捷键；数据保留，随时切回。"
+                 : "打开后设置只留四页，学习入口与释义关闭。")
+                .font(.system(size: 10.5))
+                .foregroundStyle(SettingsPalette.tertiaryText)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, 2)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(RoundedRectangle(cornerRadius: 9).fill(SettingsPalette.cardBackground))
+        .overlay(RoundedRectangle(cornerRadius: 9)
+            .strokeBorder(SettingsPalette.border, lineWidth: 1))
+        .padding(.horizontal, 6)
+        .padding(.vertical, 8)
     }
 
     /// 固定底部状态栏（.statusbar：min-height 36、win-bg 底、顶部 border 线、
@@ -235,6 +325,23 @@ private struct SettingsView: View {
             case .failure: break   // 片段读取失败只在片段页展示；不影响输入。
             }
         } }
+    }
+}
+
+/// 页头右侧模式徽标（原型 .pagehead__badge）：Lite 为强调色底，完整模式为中性底。
+/// 只在完整版构建使用（GOGAKU_LITE 没有「完整／Lite 观感」之分）。
+private struct ModeBadge: View {
+    let liteMode: Bool
+
+    var body: some View {
+        Text(liteMode ? "Lite 模式" : "完整模式")
+            .font(.system(size: 10.5, weight: .semibold))
+            .foregroundStyle(liteMode ? SettingsPalette.accentText : SettingsPalette.secondaryText)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 2)
+            .background(RoundedRectangle(cornerRadius: 6)
+                .fill(liteMode ? SettingsPalette.accentSoft : SettingsPalette.tagBackground))
+            .accessibilityLabel(liteMode ? "当前为 Lite 模式" : "当前为完整模式")
     }
 }
 

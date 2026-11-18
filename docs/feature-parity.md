@@ -100,6 +100,7 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 | 清单隔离 | Mac 的 `bundle-manifest` 文件名带形态（`-lite`）：Lite 与完整版 dev 同为 dev 通道，共用文件名会互相覆盖、装第二个时清单校验必然失败（2026-11-16 修） |
 | 本地命令 | Mac：`python3 scripts/build.py --flavor lite --prepare`。Win：`python3 scripts/compile-win-native.py --flavor lite` → `python3 scripts/build-win-app.py --flavor lite` |
 | 数据目录 | 与完整版共用；并发写为已知受限项 |
+| 完整版内 Lite 模式 | 完整版内 Lite 模式：Mac 已实现，Windows UI 待跟进（设置字段已经由共享契约规范化）：首次引导、侧栏开关、四页过滤、快捷键与学习门禁同一口径；真机外观未验收 |
 | 真实宿主双产品验收 | 欠账与完整版同门槛，未豁免 |
 
 尚未达到双端功能完全一致。多候选预译、共享学习协调、WebP 随包解码、旧文本设置迁移、历史片段管理与跨通道调频仍是实现缺口；Windows 完整故障恢复／卸载和旧版本清理仍待补齐，不因成功生成 EXE 改写为已完成。

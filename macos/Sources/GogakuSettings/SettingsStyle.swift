@@ -84,6 +84,15 @@ enum SettingsPalette {
     /// --ok：状态栏「已保存」圆点。
     static let ok = paletteColor(
         light: (31, 138, 76, 1), dark: (76, 196, 127, 1))
+    /// --warn-border：提示条（.callout）描边。
+    static let warningBorder = paletteColor(
+        light: (229, 194, 109, 1), dark: (138, 115, 38, 1))
+    /// --warn-bg：提示条背景。
+    static let warningBackground = paletteColor(
+        light: (253, 246, 228, 1), dark: (45, 39, 19, 1))
+    /// --warn-fg：提示条文字。
+    static let warningText = paletteColor(
+        light: (122, 93, 24, 1), dark: (226, 200, 119, 1))
 
     /// 卡片圆角（--panel radius 9）。
     static let cardCornerRadius: CGFloat = 9

@@ -24,6 +24,16 @@
 - **测试**：`normal_session_test` 新增 `shuangpin_schemes` 向量（六方案 × 你好／今天／平，含上屏与未知方案回退、分号键两种行为）；`settings_contract_test` 新增六个 ID 保留向量与 `gc_scheme_id`／`gc_scheme_from_id` 往返、未知 ID／数值回退断言。核心 ctest 10/10 通过。
 - **未做**：用户裁决清单里的「吕氏双拼」在 libime 1.1.17 与公开双拼方案里都没有对应键位表（`ShuangpinBuiltinProfile` 只有上列八项）；自造键位表会变成第二份契约实现，因此本轮以紫光双拼与国标双拼替代，是否另加吕氏需用户提供键位来源。
 
+### 变更（2026-11-18：完整版内 Lite 模式，工作区）
+
+- **新增：完整版可在运行时切到 Lite 观感**。完整版（编译期无 `GOGAKU_LITE`）学习入口全隐藏、英文释义关闭，学习数据、凭据与用户偏好原样保留，随时切回；Gogaku Lite 独立安装包不参与本功能，行为不变（没有学习代码，不显示引导、不加开关）。三个用户可见行为：①首次打开设置应用时一次性「选择你的使用模式」（完整／Lite 两张卡片；选择后不再出现，未选择就关窗下次仍显示）；②设置侧栏底部常驻「Lite 模式」开关；③Lite 生效时设置只留四页（普通输入／自定义词语／皮肤／快捷键）、快捷键页隐藏「普通／学习」「学习方向」两项、普通输入页「显示英文释义」置灰并注明原因、⌃⇧K／⌃⇧J 交还宿主不切换、竖排注释与横排释义行同时关闭。
+- **存储与契约**：`settings.json` 新增 `liteModeEnabled`／`modeOnboardingCompleted` 两个布尔字段（可选解码默认 `false`，`schemaVersion` 仍为 2）；读侧规范化仍只有共享核心一份（`shared/GogakuCore/settings_contract.cpp`：布尔类型校验、默认 false），`settings_contract_test` 新增缺键／显式保留／类型不符／schema 1 迁移四组向量。Lite 模式只改生效值：不覆写用户存储的 `glossEnabled`，切回完整模式即恢复；学习门禁收敛为 `Settings.learningEnabled`（学习翻译已启用且未处于 Lite 模式），输入法、共享学习会话与设置页共用这一处判断。
+- **Mac 实现位置**：`GogakuKit/Settings.swift`（字段、`effectiveGlossEnabled`、`learningEnabled`、`ConfigurableCommand.uiCases(liteModeEnabled:)`）、`GogakuSettings/ModeOnboarding.swift`（引导视图与「只显示一次」判定）、`GogakuSettingsApp.swift`（`SettingsPage.visibleCases(liteModeEnabled:)`、侧栏开关、页头模式徽标）、`NormalInputPage`／`ShortcutsPage`、`GogakuInput/InputController.swift` 与 `EngineHub.swift`（门禁、竖排注释与横排释义行两处消费点、快捷键交还宿主）。
+- **菜单**：Mac 输入法菜单自 2026-11-04 起只保留「设置…」入口，本来就没有学习模式切换项，因此本轮不新增也不隐藏菜单项；Lite 的学习快捷键是同一条门禁下的表现（交还宿主，不切换）。
+- **测试**：Swift 新增 `LiteModeTests` 8 项（字段编解码与共享契约规范化、引导只显示一次、`visibleCases` 过滤、`uiCases` 过滤与冲突范围、学习门禁、释义生效值），Lite 形态下同组用例另跑一遍；fast 档通过。
+- **文档与 Windows**：`docs/product.md`、`docs/feature-parity.md` 同步。Windows 本轮不改 UI：两个字段已经由共享契约规范化，设置页与代理仍按原七页、无 Lite 开关运行。
+- **未验证**：真实输入源里的外观与交互（引导排版、侧栏开关、置灰行、释义消失、⌃⇧K 交还宿主）尚未在真机验收，本条目只代表实现与自动化测试通过。
+
 ### 0.1.5（构建 113，stable 定版，2026-11-12）
 
 - **行为变化：皮肤支持编辑当前主题与内置主题原地修改**。新增「编辑当前主题」，直接打开正在使用的主题（当前为旧默认 `rime-macos-like` 或已应用主题失效回退到它时，打开 Gogaku），与列表选中项无关。内置主题不再只能「复制并编辑」：修改以相对出厂数据的 JSON Merge Patch（RFC 7386）存入 `settings.json` 顶层字段 `builtinThemeOverrides`，补丁之外的字段继续跟随出厂数据，可一键「恢复默认」；列表副标题对有覆盖的内置主题显示「内置 · 已修改」。

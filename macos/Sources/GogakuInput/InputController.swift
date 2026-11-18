@@ -237,13 +237,18 @@ final class GogakuInputController: IMKInputController {
     /// 组合中的位置复查定时器（100ms；处理滚动／窗口移动；无组合或失焦立即停止）。
     private var positionTimer: Timer?
     // 学习功能门禁（2026-11-06 双端统一计划）：默认关闭；用户保存火山凭据并
-    // 显式启用后才进入学习模式。关闭即回门禁态，与 EngineHub.learningSession
-    // 同源（同一设置字段）。
-    private var learningEnabled: Bool {
+    // 显式启用后才进入学习模式。完整版内 Lite 模式生效时同一门禁关闭（
+    // 2026-11-18）；GOGAKU_LITE 构建没有学习代码。口径只有一处：
+    // `Settings.learningEnabled`，与 EngineHub.learningSession 同源。
+    private var learningEnabled: Bool { settings.learningEnabled }
+    /// 学习快捷键（⌃⇧K／⌃⇧J）是否参与按键匹配。GOGAKU_LITE 保持既有行为
+    /// （按下只提示未启用）；完整版内 Lite 模式入口已隐藏，按键交还宿主，
+    /// 不切换也不蜂鸣。
+    private var learningShortcutsActive: Bool {
         #if GOGAKU_LITE
-        return false
+        return true
         #else
-        return settings.learningTranslationEnabled
+        return !settings.liteModeEnabled
         #endif
     }
 
@@ -764,23 +769,23 @@ final class GogakuInputController: IMKInputController {
         let previous = settings
         suspend()
         settings = Settings.load()
-        // 学习开关关闭即回门禁态：学习组合已随 suspend 结束，模式回普通，
-        // 共享学习会话释放（第二份词库内存一并回收）。
-        if !settings.learningTranslationEnabled, mode == .learning { mode = .normal }
+        // 学习开关关闭（含切到 Lite 模式）即回门禁态：学习组合已随 suspend 结束，
+        // 模式回普通，共享学习会话释放（第二份词库内存一并回收）。
+        if !learningEnabled, mode == .learning { mode = .normal }
         rebuildLearningTranslatorIfNeeded(from: previous)
         applyEngineSettings()
         // configure 更新候选窗主题并沿用既有焦点／组合失效流程。
         configure()
-        if !settings.learningTranslationEnabled {
+        if !learningEnabled {
             hub.async { [weak self] in self?.hub.closeLearningSession() }
         }
     }
 
-    /// 学习开关变更时销毁重建辅助进程：旧进程由 deinit 终止，进行中的组合按
-    /// 现行失效规则处理（invalidate 丢弃迟到结果）。凭据由 helper 按请求热读，
-    /// 保存／移除凭据无需重建进程。
+    /// 学习开关变更（含运行时切到／切回 Lite 模式）时销毁重建辅助进程：旧进程
+    /// 由 deinit 终止，进行中的组合按现行失效规则处理（invalidate 丢弃迟到
+    /// 结果）。凭据由 helper 按请求热读，保存／移除凭据无需重建进程。
     private func rebuildLearningTranslatorIfNeeded(from previous: Settings) {
-        guard previous.learningTranslationEnabled != settings.learningTranslationEnabled else { return }
+        guard previous.learningEnabled != settings.learningEnabled else { return }
         translator.invalidate()
         translator = makeTranslator()
         eagerTranslator.invalidate()
@@ -1063,10 +1068,11 @@ final class GogakuInputController: IMKInputController {
         view.selected = snap.selected
         view.normalPageSize = settings.effectiveNormalPageSize
         view.candidateLayoutHorizontal = settings.candidateLayout == .horizontal
+        // 横排释义行：编译形态与运行时 Lite 模式任一生效即关闭（与竖排注释同源）。
         #if GOGAKU_LITE
         view.horizontalGlossRowEnabled = false
         #else
-        view.horizontalGlossRowEnabled = settings.glossEnabled
+        view.horizontalGlossRowEnabled = settings.effectiveGlossEnabled
         #endif
         view.candidates = snap.candidates.map { item in
             let isHighlighted = item.text == highlightedCandidateText(snap)
@@ -1079,7 +1085,9 @@ final class GogakuInputController: IMKInputController {
                       // 2026-11 用户裁决：其余不显示）；历史缓存不外溢。
                       explanation: learningSwap
                           ? (isHighlighted ? (translationMemory[item.text] ?? "") : "")
-                          : (settings.glossEnabled ? item.gloss : ""),
+                          // 竖排注释与释义行同一口径：Lite 模式生效即不发释义文本
+                      // （生效值强制 false，存储的 glossEnabled 不被覆写）。
+                      : (settings.effectiveGlossEnabled ? item.gloss : ""),
                       resource: "gogaku-core")
         }
         view.status = snap.status

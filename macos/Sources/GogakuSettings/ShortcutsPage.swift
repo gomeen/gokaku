@@ -28,10 +28,15 @@ struct ShortcutsPage: View {
         case conflict = "冲突"
     }
 
+    /// 当前应显示的可配置命令：GOGAKU_LITE 构建与完整版内 Lite 模式都只留通用项
+    /// （知识门禁在 GogakuKit，页面不另写一份判断）。
+    private var commands: [ConfigurableCommand] { ConfigurableCommand.uiCases(for: settings) }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             headerCard
-            if !ConfigurableCommand.uiCases.isEmpty {
+            // Lite 模式（编译形态与运行时）下没有模式切换类命令：整组不显示。
+            if !commands.isEmpty {
                 groupHeader("模式切换")
                 commandRows
             }
@@ -114,19 +119,19 @@ struct ShortcutsPage: View {
     // MARK: 可编辑命令行
 
     @ViewBuilder private var commandRows: some View {
-        let commands = ConfigurableCommand.uiCases.filter { visible($0) }
-        if commands.isEmpty {
+        let shown = commands.filter { visible($0) }
+        if shown.isEmpty {
             emptyRow
         } else {
             VStack(spacing: 0) {
-                ForEach(Array(commands.enumerated()), id: \.element) { index, command in
+                ForEach(Array(shown.enumerated()), id: \.element) { index, command in
                     CommandRow(command: command,
                                settings: settings,
                                conflictText: conflictText(for: command),
                                onCommit: { commit($0, for: command) },
                                onConflictDraft: { recordConflictDraft(command, attempted: $0, clash: $1) },
                                onEditingStart: { clearConflictDraft(except: $0) })
-                    if index < commands.count - 1 { SettingsRowDivider() }
+                    if index < shown.count - 1 { SettingsRowDivider() }
                 }
             }
         }
@@ -136,7 +141,7 @@ struct ShortcutsPage: View {
 
     @ViewBuilder private var fixedRows: some View {
         let operations = KeyCombo.fixedOperations().filter { visible($0) }
-        if operations.isEmpty && ConfigurableCommand.uiCases.filter({ visible($0) }).isEmpty {
+        if operations.isEmpty && commands.filter({ visible($0) }).isEmpty {
             emptyRow
         } else {
             VStack(spacing: 0) {
@@ -162,9 +167,9 @@ struct ShortcutsPage: View {
 
     private func count(for filter: Filter) -> Int {
         switch filter {
-        case .all: return ConfigurableCommand.uiCases.count + KeyCombo.fixedOperations().count
-        case .changed: return ConfigurableCommand.uiCases.filter { isChanged($0) }.count
-        case .conflict: return ConfigurableCommand.uiCases.filter { conflictText(for: $0) != nil }.count
+        case .all: return commands.count + KeyCombo.fixedOperations().count
+        case .changed: return commands.filter { isChanged($0) }.count
+        case .conflict: return commands.filter { conflictText(for: $0) != nil }.count
         }
     }
 

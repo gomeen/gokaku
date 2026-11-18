@@ -37,13 +37,14 @@ final class EngineHub {
         creationLogged = false
     }
 
-    /// 学习会话门禁：只有用户启用学习翻译（且凭据就绪）时才创建真实共享会话
-    /// （含第二份词库加载，仅首次约 1s，在用户实际进入学习输入时发生）；
-    /// 关闭返回 nil 即回门禁态。与 GogakuInputController.learningEnabled 同源。
+    /// 学习会话门禁：只有用户启用学习翻译（且未处于 Lite 模式、凭据就绪）时才
+    /// 创建真实共享会话（含第二份词库加载，仅首次约 1s，在用户实际进入学习
+    /// 输入时发生）；关闭返回 nil 即回门禁态。与 GogakuInputController 同源：
+    /// `Settings.learningEnabled`。
     /// 只能在引擎队列上调用创建；读侧用 existingLearningSession。
     /// 学习组合状态机在共享 C++ 核心（ABI v3）中；这里只创建薄封装。
     func learningSession(_ settings: Settings) -> CompositionSession? {
-        guard settings.learningTranslationEnabled else { return nil }
+        guard settings.learningEnabled else { return nil }
         if let learning { return learning }
         do {
             let session = try CompositionSession(config: CompositionSession.Config(

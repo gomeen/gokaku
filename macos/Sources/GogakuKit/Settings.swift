@@ -127,6 +127,21 @@ public enum ConfigurableCommand: String, CaseIterable, Sendable {
         #endif
     }
 
+    /// 运行时过滤（完整版内 Lite 模式）：Lite 生效时不提供学习类命令。
+    /// GOGAKU_LITE 构建恒为空，与编译期裁剪一致。
+    public static func uiCases(liteModeEnabled: Bool) -> [ConfigurableCommand] {
+        #if GOGAKU_LITE
+        return []
+        #else
+        return liteModeEnabled ? [] : Array(allCases)
+        #endif
+    }
+
+    /// 按设置取当前应显示的命令（设置页唯一入口）。
+    public static func uiCases(for settings: Settings) -> [ConfigurableCommand] {
+        uiCases(liteModeEnabled: settings.liteModeEnabled)
+    }
+
     public var displayName: String {
         switch self {
         case .modeSwitch: return "普通／学习"
@@ -278,6 +293,12 @@ public struct Settings: Codable {
     /// 自行累计（与火山计费口径 input_characters 对齐），自然月自动清零。
     public var volcengineUsageMonth = ""
     public var volcengineUsageCharacters = 0
+    /// 完整版内 Lite 模式（2026-11-18）：学习入口全隐藏、释义关闭的运行时观感，
+    /// 数据全部保留、随时可切回。仅完整版有意义；GOGAKU_LITE 构建没有学习代码，
+    /// 不读写这两个字段的语义（仍参与解码与共享契约规范化）。
+    public var liteModeEnabled = false
+    /// 首次打开设置应用时的一次性「选择你的使用模式」是否已完成。
+    public var modeOnboardingCompleted = false
 
     private enum CodingKeys: String, CodingKey {
         case recording, excludedApplications, ignoredWords, applications
@@ -289,6 +310,7 @@ public struct Settings: Codable {
         case learningTranslationEnabled, schemaVersion
         case preferredMode, preferredDirection
         case volcengineUsageMonth, volcengineUsageCharacters
+        case liteModeEnabled, modeOnboardingCompleted
     }
 
     public init() {}
@@ -336,6 +358,23 @@ public struct Settings: Codable {
         preferredDirection = Direction(rawValue: try container.decodeIfPresent(String.self, forKey: .preferredDirection) ?? "") ?? .zhToEn
         volcengineUsageMonth = try container.decodeIfPresent(String.self, forKey: .volcengineUsageMonth) ?? ""
         volcengineUsageCharacters = try container.decodeIfPresent(Int.self, forKey: .volcengineUsageCharacters) ?? 0
+        // 新字段可选解码：旧文件缺键＝关闭且未完成引导（仍会显示一次引导）。
+        liteModeEnabled = try container.decodeIfPresent(Bool.self, forKey: .liteModeEnabled) ?? false
+        modeOnboardingCompleted = try container.decodeIfPresent(Bool.self, forKey: .modeOnboardingCompleted) ?? false
+    }
+
+    /// 生效的英文释义开关：Lite 模式强制关闭，但**不覆写**存储的 `glossEnabled`，
+    /// 切回完整模式后恢复用户此前的选择。
+    public var effectiveGlossEnabled: Bool { liteModeEnabled ? false : glossEnabled }
+
+    /// 学习功能门禁的唯一口径：学习翻译已启用且未处于 Lite 模式。
+    /// 输入法、共享引擎会话与设置页的运行时过滤都只看这一处。
+    public var learningEnabled: Bool {
+        #if GOGAKU_LITE
+        return false
+        #else
+        return learningTranslationEnabled && !liteModeEnabled
+        #endif
     }
 
     /// 输入法使用的启用中的按应用默认英文 bundle id 列表。

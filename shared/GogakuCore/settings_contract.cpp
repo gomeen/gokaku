@@ -25,6 +25,8 @@ const std::unordered_set<std::string> &knownKeys() {
         "englishCandidatesEnabled", "appDefaultEnglish", "learningTranslationEnabled",
         "preferredMode", "preferredDirection", "volcengineUsageMonth",
         "volcengineUsageCharacters", "candidateLayout", "candidateRenderer", "horizontalPageSize",
+        // 完整版内 Lite 模式（运行时观感切换）与首次引导完成标记。
+        "liteModeEnabled", "modeOnboardingCompleted",
     };
     return keys;
 }
@@ -59,6 +61,8 @@ Json defaults() {
         {"candidateLayout", "vertical"},
         {"candidateRenderer", "bitmap"},
         {"horizontalPageSize", 7},
+        {"liteModeEnabled", false},
+        {"modeOnboardingCompleted", false},
     };
 }
 
@@ -243,7 +247,8 @@ int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
     };
     for (const char *key : {"recording", "glossEnabled", "inputLettersEnabled",
                             "fullPinyinPreedit", "frequencyEnabled",
-                            "englishCandidatesEnabled"}) {
+                            "englishCandidatesEnabled", "liteModeEnabled",
+                            "modeOnboardingCompleted"}) {
         applyBool(key);
     }
     if (const Json *value = member(input, "excludedApplications")) {

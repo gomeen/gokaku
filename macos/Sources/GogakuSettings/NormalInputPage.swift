@@ -154,13 +154,22 @@ struct NormalInputPage: View {
                 }
                 SettingsRowDivider()
                 // 英文释义（用户裁决：显示名「显示英文释义」＋帮助文案；Lite 无释义数据）。
+                // 完整版内 Lite 模式：行仍在，但置灰关闭并注明原因（生效值强制 false，
+                // 存储的 glossEnabled 不覆写，切回完整后恢复）。
                 #if !GOGAKU_LITE
                 SettingsRow("显示英文释义",
-                            detail: "候选词的英文词义参考，不随中文上屏") {
-                    Toggle("", isOn: binding(\.glossEnabled))
+                            detail: settings.liteModeEnabled
+                                ? "Lite 模式下不可用 · 切回完整后恢复"
+                                : "候选词的英文词义参考，不随中文上屏") {
+                    Toggle("", isOn: settings.liteModeEnabled ? .constant(false) : binding(\.glossEnabled))
                         .toggleStyle(.switch)
-                        .accessibilityLabel("显示英文释义")
+                        .disabled(settings.liteModeEnabled)
+                        .accessibilityLabel(settings.liteModeEnabled
+                                            ? "显示英文释义，Lite 模式下不可用"
+                                            : "显示英文释义")
                 }
+                // 原型 .row--off：不可用行整行变淡（只影响显示，不影响点击目标外的行为）。
+                .opacity(settings.liteModeEnabled ? 0.45 : 1)
                 SettingsRowDivider()
                 #endif
                 SettingsRow("在宿主正文显示输入的字母（下划线）") {

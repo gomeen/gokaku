@@ -162,7 +162,8 @@ public struct KeyCombo: Codable, Equatable, Hashable, Sendable {
     /// 只检查本输入法实际消费的组合，不宣称能检测其他应用或系统快捷键。
     public static func conflict(target: ConfigurableCommand, keyID: String, modifiers: UInt, settings: Settings) -> String? {
         guard !keyID.isEmpty else { return nil }
-        for command in ConfigurableCommand.uiCases where command != target {
+        // 与当前实际展示的命令比较：运行时 Lite 模式下学习类命令不参与冲突判断。
+        for command in ConfigurableCommand.uiCases(for: settings) where command != target {
             let other = command.shortcut(in: settings)
             if other.isValid, other.key == keyID, other.modifiers == modifiers {
                 return command.displayName
