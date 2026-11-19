@@ -2,6 +2,14 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-19：就地热更新＋数据／代码包分离，工作区，定 0.3.0 主题）
+
+- **就地热更新（Mac，用户裁决）**：「安装更新」不再打开系统 Installer——客户端自己完成 pkg 解包（xar → Scripts gzip+cpio → Gogaku-apps.zip ditto）→ stage 双 App 校验（bundle ID／构建号／TIS 身份／codesign --deep --strict）→ ditto 备份 → 事务替换 → transaction.txt 状态机（installing/success，与 pkg postinstall 同格式同位置，中断可恢复）→ lsregister。任一步失败恢复备份、可重试；工具链缺失时自动回落旧的 open-installer 路径。输入法交接：安装成功后发 `org.gogaku.inputmethod.restart`（DistributedNotificationCenter），GogakuInput 启动早期注册监听，结束在途组合（草稿落盘）后 1.5 秒 `NSApp.terminate` 正常退出，imklaunchagent 按需拉起新版；绝不 SIGKILL。更新窗口显示「就地更新（不弹安装器）」与解包→校验→替换→重启输入法→完成的阶段进度，完成后显示「已更新到 X.Y.Z；输入法将在下次激活时使用新版」。
+- **数据／代码包分离（用户裁决）**：Mac 构包拆两个 pkg——`Gogaku-<版本>.pkg`（代码包，zip 剔除双 App 的 EngineData，且剔除发生在签名之前，使代码包密封不覆盖数据）＋ `Gogaku-Data-<版本>.pkg`（数据包，只含 EngineData，同 postinstall 机制落位、逐文件 SHA-256 校验、事务备份替换；Lite 同理）。更新清单升 schema 2 并采用**双清单**：每版同时发 `update-manifest.json`（schema 1，只含主包，0.2.0 及更早旧客户端照常升级）与 `update-manifest-v2.json`（schema 2，dataPackage 必填）；新客户端优先拉 v2、404 回落 v1。数据内容指纹（排序 (路径, sha256) 清单的 SHA-256 前 16 位）作为 `dataVersion`，数据未变的版本之间相同：发布侧经 `--previous-state` 复制上一版数据包资产引用（不重发资产），客户端按 dataVersion 命中 `~/Library/Caches/Gogaku/updates/data/<dataVersion>/` 缓存不再下载——稳定态代码更新下载量约 50MB→15MB。数据包安装失败为部分成功态：主包照常更新、词库回退旧版（核心兼容旧数据），UI 明示。
+- **旧客户端兼容**：schema 1 清单永不携带 dataPackage；主包 postinstall 与就地安装器都会把备份里的旧 EngineData 结转进新包，仅装主包的旧客户端升级后输入法仍可用。Windows 本轮保留整包（Inno 拆包与 update.cpp 的 schema 2／数据链路待跟进，Windows 客户端继续读 schema 1 清单不受影响）。
+- 验证：Swift 全量测试 315 项通过（新增 UpdateInstallerTests——真 xar/cpio/ditto/codesign 的最小 bundle 夹具覆盖校验拒绝、事务中断恢复、成功全流程、数据包成功/哈希拒绝/部分成功；UpdateTests 扩 schema 2 解码、双清单回落、数据包下载缓存与绑定校验）；交付管道 unittest 28 项通过；`make-update-manifest --self-test` 扩双清单生成、上一版引用复用与无数据包拒绝；数据包 postinstall 在沙箱 HOME 完成成功/失败恢复实测。真实替换双 App 的宿主验收、客户端在线更新 E2E 仍未做，见 docs/update.md「本轮边界与已知限制」。
+- 不递增 version.json（发布期由主代理定版 0.3.0／b121）；不动 bsdiff 路线（二进制 delta 已证伪）。
+
 ### 变更（2026-11-19：设置界面整理＋竖排每页数量，工作区，定 0.2.0 主题）
 
 - 用户裁决（四项）：删除设置侧栏顶部「Gogaku」标题与底部页脚（本机开发版／Gogaku 标签、版本号、「检查更新」按钮）；新增「关于」页（侧栏最后一页，所有安装形态都有），版本号与「检查更新」移入其中——产品名＋版本号（复用包内 build-identity.json 的 displayVersion）、dev 通道加「本机开发版」标注、检查更新按钮打开既有更新窗口并保留有可用更新的绿点提示，包内构建身份存在时另附 commit 前 8 位＋dirty 的只读完整身份行。

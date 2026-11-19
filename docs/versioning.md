@@ -49,7 +49,7 @@ macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发�
 
 ## 版本边界
 
-应用版本（`version.json`）、核心 C ABI 版本（`gc_abi_version`，当前 4）、用户数据格式版本、更新清单 schema（当前 1）四者独立管理。升版本不构成修改 ABI、存储格式或清单 schema 的理由。
+应用版本（`version.json`）、核心 C ABI 版本（`gc_abi_version`，当前 4）、用户数据格式版本、更新清单 schema（当前 1 与 2 双清单并行：schema 1 只含主包，旧客户端兼容；schema 2 增加必填 `dataPackage`，新客户端优先读取）四者独立管理。升版本不构成修改 ABI、存储格式或清单 schema 的理由。
 
 ## 更新身份
 
