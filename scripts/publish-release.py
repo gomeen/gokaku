@@ -380,8 +380,7 @@ def validate_state(args, meta):
     records = state.get('assets', {})
     # dataPackage／liteDataPackage 是元数据键（记录数据版本供下版复用），
     # 不是上传资产；校验与遍历都在真实资产子集上进行。
-    data_keys = {key for key in ('dataPackage', 'liteDataPackage')
-                 if isinstance(records.get(key), dict) and 'name' not in records.get(key, {})}
+    data_keys = {key for key in ('dataPackage', 'liteDataPackage') if key in records}
     upload_records = {key: value for key, value in records.items() if key not in data_keys}
     files = local_files(args, meta)
     expected_names = {path.name for path in files}
