@@ -28,8 +28,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from _gogaku_delivery import (HOST_WAIVER_NOTE, DeliveryError, current_meta, read_json, sha256,
-                              validate_package, validate_reports, write_json)
+from _gogaku_delivery import (HOST_WAIVER_NOTE, DeliveryError, current_meta, package_receipt_path,
+                              read_json, sha256, validate_package, validate_reports, write_json)
 
 ROOT = Path(__file__).resolve().parent.parent
 API = 'https://api.github.com'
