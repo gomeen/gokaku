@@ -13,7 +13,9 @@ Gogaku 的版本管理覆盖**双端开发测试版与 stable 定版**：本地 
 - `version`：完整 SemVer。三段数字，预发布段只允许 `dev.N`；2026-11-10 起不再使用 `rc.N`，构建脚本与发布门禁拒绝 rc。
 - `buildNumber`：单调递增整数，写入 `CFBundleVersion`；每次对外提供安装包都必须递增。更新判断只按构建号，不按版本字符串字典序；同版本更高构建号可更新，不自动降级。
 
-macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发布版本另存包内 `Contents/Resources/build-identity.json`，并在设置应用侧栏与诊断输出中显示。
+macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发布版本另存包内 `Contents/Resources/build-identity.json`。
+
+**面向用户的版本展示（2026-11-18 裁决）**：设置侧栏不显示构建号，只显示产品名与纯版本号；「开发版」标签只有 dev 通道（bundle ID 带 `.dev` 后缀的 Gogaku Dev）才显示，stable 安装永不显示。构建号仍保留在安装包文件名、检查更新页与诊断输出中，作为定位问题用的人机接口，但不作为侧栏的默认展示。诊断输出（诊断文件、`build-identity.json`、收据）始终携带完整身份（含构建号与 dirty），不受侧栏简化影响。
 
 ## 阶段规则
 

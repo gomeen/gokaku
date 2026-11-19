@@ -2,6 +2,12 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-18：侧栏版本标签不再把 stable 误标为开发版，工作区）
+
+- 用户报告：设置侧栏页脚无条件显示「本机开发版」与「0.1.7 构建118」，stable 用户会误读自己装的是开发版。根因是该标签是硬编码文案，从不判断实际通道。
+- 修复：页脚按 bundle ID 判断通道——dev 通道（Gogaku Dev，`.dev` 后缀）才显示「本机开发版」，stable 显示「Gogaku」；版本行去掉「构建 N」尾巴只留纯版本号。构建号仍保留在安装包文件名、检查更新页与诊断输出中（展示规则见[版本管理](versioning.md)）。
+- 验证：fast swift-tests 288 项通过；新增 `BuildIdentityLabelTests`；本机 stable 安装后辅助功能树实测侧栏显示「Gogaku／0.1.7」。
+
 ### 0.1.7（构建 118，stable 定版，2026-11-18）
 
 - 完整版新增「Lite 模式」：首次打开设置时可选择完整／Lite 使用模式，侧栏底部可随时切换。Lite 下隐藏学习三页与学习快捷键、英文释义置灰、⌃⇧K／⌃⇧J 交还宿主；学习数据与凭据保留，切回即恢复。独立安装包 Gogaku Lite 行为不变。Windows 设置 UI 待跟进（设置字段已由共享契约规范化）。
