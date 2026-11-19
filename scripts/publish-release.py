@@ -431,10 +431,11 @@ def validate_remote(args, meta, state, token):
     expected_count = 6 * len(release_products(meta)) + data_pkg_count
     if not isinstance(assets, list) or len(assets) != expected_count:
         fail(f'远端资产列表变化：必须恰好 {expected_count} 项')
-    # 远端资产名不含 dataPackage 键；只在比较文件资产时使用。
-    expected = {name: record for name, record in state['assets'].items()
-                if name != 'dataPackage' or args.macos_data_pkg is not None}
-    if {asset.get('name') for asset in assets} != {name for name in expected if name != 'dataPackage'}:
+    # 远端资产名与 release-state 的上传资产子集比较（排除 dataPackage/liteDataPackage
+    # 元数据键；它们描述数据版本，不是 GitHub 资产）。
+    meta_keys = {key for key in ('dataPackage', 'liteDataPackage') if key in state['assets']}
+    expected_names = {name for name in state['assets'] if name not in meta_keys}
+    if {asset.get('name') for asset in assets} != expected_names:
         fail('远端资产名称／列表变化')
     for asset in assets:
         record = expected[asset['name']]
