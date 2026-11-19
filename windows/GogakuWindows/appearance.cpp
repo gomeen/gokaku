@@ -229,7 +229,10 @@ struct CandidateRenderer::Impl {
 
         const bool learning = view.value("learning", false);
         const bool horizontal = !learning && settings.value("candidateLayout", std::string()) == "horizontal";
-        const int pageSize = horizontal ? std::clamp(settings.value("horizontalPageSize", 7), 4, 9) : 9;
+        // 竖排每页数量可配置（4–9，默认 9；2026-11-19 裁决）。
+        const int pageSize = horizontal
+            ? std::clamp(settings.value("horizontalPageSize", 7), 4, 9)
+            : std::clamp(settings.value("verticalPageSize", 9), 4, 9);
         Json candidates = view.value("candidates", Json::array());
         if (!candidates.is_array()) candidates = Json::array();
         if (candidates.size() > size_t(pageSize)) candidates.erase(candidates.begin() + pageSize, candidates.end());
@@ -339,7 +342,9 @@ struct CandidateRenderer::Impl {
         size_t pages=view.value("pageCount",size_t(0)), page=view.value("page",size_t(0));
         size_t selected=view.value("selected",size_t(0));
         const bool horizontal=!learning && settings.value("candidateLayout",std::string())=="horizontal";
-        const size_t psz=horizontal?size_t(std::clamp(settings.value("horizontalPageSize",7),4,9)):size_t(9);
+        const size_t psz=horizontal
+            ?size_t(std::clamp(settings.value("horizontalPageSize",7),4,9))
+            :size_t(std::clamp(settings.value("verticalPageSize",9),4,9));
         size_t local=selected>=page*psz?selected-page*psz:0;
         if (count && local>=count) local=count-1;
         const bool glossOn=settings.value("glossEnabled",true);

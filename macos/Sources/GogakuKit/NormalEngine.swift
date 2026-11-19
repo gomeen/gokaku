@@ -227,10 +227,18 @@ public final class NormalEngine {
                          freqEnabled ? 1 : 0, englishEnabled ? 1 : 0)
     }
 
-    /// 候选窗分页：horizontalPageSize=0 表示竖排（每页 9）；4–9 为横排每页数量。
+    /// 候选窗分页：horizontalPageSize=0 表示竖排（每页数量由
+    /// setVerticalPageSize 单独设置，默认 9）；4–9 为横排每页数量。
     public func setLayout(horizontalPageSize: Int32) {
         guard let session else { return }
         _ = gc_normal_set_layout(session, horizontalPageSize)
+    }
+
+    /// 竖排每页候选数量（4–9，默认 9；核心钳制越界值）。共享核心附加导出，
+    /// 不升 ABI 版本。
+    public func setVerticalPageSize(_ pageSize: Int32) {
+        guard let session else { return }
+        _ = gc_normal_set_vertical_page_size(session, pageSize)
     }
 
     /// 平台确认宿主插入成功：核心此刻才写入调频与已学习词（ABI v4）。

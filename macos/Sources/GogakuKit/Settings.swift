@@ -297,6 +297,7 @@ public struct Settings: Codable {
     public var candidateLayout: CandidateArrangement = .vertical
     public var candidateRenderer: CandidateRenderer = .bitmap
     public var horizontalPageSize: Int = 7                           // 4–9，仅横排
+    public var verticalPageSize: Int = 9                            // 4–9，仅竖排
     public var glossEnabled = true                                 // 英文释义注释
     public var inputLettersEnabled = true                          // 输入区字母（marked text）
     public var fullPinyinPreedit = true                            // ni'hao / nihc
@@ -329,7 +330,7 @@ public struct Settings: Codable {
         case recording, excludedApplications, ignoredWords, applications
         case modeShortcut, directionShortcut, candidateTheme, userCandidateThemes
         case builtinThemeOverrides
-        case inputScheme, fuzzyPinyin, candidateFontSize, candidateLayout, candidateRenderer, horizontalPageSize, glossEnabled
+        case inputScheme, fuzzyPinyin, candidateFontSize, candidateLayout, candidateRenderer, horizontalPageSize, verticalPageSize, glossEnabled
         case inputLettersEnabled, fullPinyinPreedit, frequencyEnabled
         case englishCandidatesEnabled, appDefaultEnglish
         case learningTranslationEnabled, schemaVersion
@@ -363,6 +364,7 @@ public struct Settings: Codable {
         candidateLayout = CandidateArrangement(rawValue: try container.decodeIfPresent(String.self, forKey: .candidateLayout) ?? "") ?? .vertical
         candidateRenderer = CandidateRenderer(rawValue: try container.decodeIfPresent(String.self, forKey: .candidateRenderer) ?? "") ?? .bitmap
         horizontalPageSize = min(9, max(4, try container.decodeIfPresent(Int.self, forKey: .horizontalPageSize) ?? 7))
+        verticalPageSize = min(9, max(4, try container.decodeIfPresent(Int.self, forKey: .verticalPageSize) ?? 9))
         glossEnabled = try container.decodeIfPresent(Bool.self, forKey: .glossEnabled) ?? true
         inputLettersEnabled = try container.decodeIfPresent(Bool.self, forKey: .inputLettersEnabled) ?? true
         fullPinyinPreedit = try container.decodeIfPresent(Bool.self, forKey: .fullPinyinPreedit) ?? true
@@ -408,9 +410,10 @@ public struct Settings: Codable {
     }
 
 
-    /// 普通模式分页大小（竖排 9；横排由 horizontalPageSize 决定）。
+    /// 普通模式分页大小（横排用 horizontalPageSize，竖排用 verticalPageSize；
+    /// 解码与共享契约都已钳制 4–9）。
     public var effectiveNormalPageSize: Int {
-        candidateLayout == .horizontal ? horizontalPageSize : 9
+        candidateLayout == .horizontal ? horizontalPageSize : verticalPageSize
     }
 
     /// 模糊音位标志（与共享核心 GC_FUZZY_* 一致）。

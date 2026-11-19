@@ -419,6 +419,58 @@ void test_paging_horizontal(const Env &env) {
     gc_normal_session_destroy(s);
 }
 
+void test_paging_vertical_page_size(const Env &env) {
+    // 竖排每页数量可配置（附加导出，不升 ABI）：会话内另一字段，与横排
+    // gc_normal_set_layout(0) 互不覆盖。
+    auto *s = make_session(env, false, GC_SCHEME_FULLPINYIN);
+    gc_normal_set_vertical_page_size(s, 5);
+    send(s, GC_EV_TEXT, "h"); send(s, GC_EV_TEXT, "a");
+    DelSnap p1{send(s, GC_EV_TEXT, "o")};
+    check_eq(p1.p ? p1.p->count : 0, 5, "竖排每页 5 个");
+    check_eq(p1.p ? p1.p->page_count : 0, 3, "竖排 12 个候选分 3 页");
+    DelSnap pd{send(s, GC_EV_PAGE_DOWN)};
+    check_eq(pd.p ? pd.p->page : 0, 1, "Page Down 进第 2 页");
+    check_eq(pd.p ? pd.p->count : 0, 5, "第 2 页 5 个");
+    DelSnap pd2{send(s, GC_EV_PAGE_DOWN)};
+    check_eq(pd2.p ? pd2.p->count : 0, 2, "第 3 页 2 个");
+    DelSnap back{send(s, GC_EV_PAGE_UP)};
+    check_eq(back.p ? back.p->page : 0, 1, "Page Up 逐页回退");
+    DelSnap back2{send(s, GC_EV_PAGE_UP)};
+    check_eq(back2.p ? back2.p->page : 0, 0, "Page Up 回第 1 页");
+    DelSnap d2{send(s, GC_EV_TEXT, "2")};
+    check(d2.p != nullptr && d2.p->commit[0] != '\0', "竖排页内数字 2 选词");
+    gc_normal_session_destroy(s);
+
+    // 默认仍是 9：不调用新导出的会话行为不变。
+    auto *d = make_session(env, false, GC_SCHEME_FULLPINYIN);
+    send(d, GC_EV_TEXT, "h"); send(d, GC_EV_TEXT, "a");
+    DelSnap def{send(d, GC_EV_TEXT, "o")};
+    check_eq(def.p ? def.p->count : 0, 9, "未设置时竖排仍每页 9");
+    // 非法值钳制到 4–9：0 与 99 都不能越界（与设置读侧同口径）。
+    gc_normal_set_vertical_page_size(d, 0);
+    send(d, GC_EV_TEXT, "h"); send(d, GC_EV_TEXT, "a");
+    DelSnap after_zero{send(d, GC_EV_TEXT, "o")};
+    check_eq(after_zero.p ? after_zero.p->count : 0, 4, "0 钳到 4");
+    gc_normal_set_vertical_page_size(d, 99);
+    send(d, GC_EV_TEXT, "h"); send(d, GC_EV_TEXT, "a");
+    DelSnap after_big{send(d, GC_EV_TEXT, "o")};
+    check_eq(after_big.p ? after_big.p->count : 0, 9, "99 钳到 9");
+    gc_normal_set_vertical_page_size(d, 1);
+    send(d, GC_EV_TEXT, "h"); send(d, GC_EV_TEXT, "a");
+    DelSnap after_small{send(d, GC_EV_TEXT, "o")};
+    check_eq(after_small.p ? after_small.p->count : 0, 4, "1 钳到 4");
+    // 竖排页大小与横排互不干扰：切横排仍用 set_layout 的值，切回竨排保留 4。
+    gc_normal_set_layout(d, 7);
+    send(d, GC_EV_TEXT, "h"); send(d, GC_EV_TEXT, "a");
+    DelSnap horizontal{send(d, GC_EV_TEXT, "o")};
+    check_eq(horizontal.p ? horizontal.p->count : 0, 7, "切横排仍每页 7");
+    gc_normal_set_layout(d, 0);
+    send(d, GC_EV_TEXT, "h"); send(d, GC_EV_TEXT, "a");
+    DelSnap back_vertical{send(d, GC_EV_TEXT, "o")};
+    check_eq(back_vertical.p ? back_vertical.p->count : 0, 4, "切回竖排保留已设页大小");
+    gc_normal_session_destroy(d);
+}
+
 void test_shift(const Env &env) {
     { // 组合中 Shift：暂存＋剩余原编码一次上屏，同一事件进入临时英文。
         auto *s = make_session(env);
@@ -1583,6 +1635,7 @@ int main() {
         {"digits", test_digits},
         {"paging", test_paging},
         {"paging_horizontal", test_paging_horizontal},
+        {"paging_vertical_page_size", test_paging_vertical_page_size},
         {"shift", test_shift},
         {"per_app_english", test_per_app_english},
         {"english_candidates", test_english_candidates},

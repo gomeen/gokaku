@@ -81,8 +81,8 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 
 | 功能 | macOS | Windows | 说明 |
 | --- | --- | --- | --- |
-| 竖排／横排设置 | 普通输入页 | 普通输入页组合控件 | 共享 `candidateLayout`／`horizontalPageSize` |
-| 分页核心 | `gc_normal_set_layout` | 代理 `applySettings` | 竖排 9；横排 4–9 |
+| 竖排／横排设置 | 普通输入页 | 普通输入页组合控件 | 共享 `candidateLayout`／`horizontalPageSize`／`verticalPageSize` |
+| 分页核心 | `gc_normal_set_layout`＋附加导出 `gc_normal_set_vertical_page_size` | 代理 `applySettings` | 竖排 4–9（默认 9，2026-11-19 裁决）；横排 4–9 |
 | 横排渲染 | 共享 `gc_panel_render`＋CGImage；AppKit 系统回退 | 同源 `GogakuPanelRender` x86／x64＋分层窗口；D2D 系统回退 | 宽 [320,860]；完整版高亮释义行；长文本省略但保留全页候选命中 |
 | 渲染引擎设置 | 普通输入页「自绘／系统」 | 普通输入页「自绘／系统」 | 共享 `candidateRenderer`，默认自绘，失败自动系统回退 |
 | 离屏回归 | 共享 C++ 向量＋`SharedPanelBitmapTests` | 同一 C++ 向量＋`appearance_test.cpp` 自检程序 | 运行与构建证据分列于[接入记录](validation/bitmap-rendering.md)，真实宿主仍待验 |
@@ -92,15 +92,15 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 | 项 | 状态 |
 | --- | --- |
 | 构建 | `scripts/build.py --flavor lite`（`GOGAKU_LITE`、核心学习桩、独立 bundle ID） |
-| 设置四页 | macOS 侧栏四页＋快捷键裁学习项；Windows 按 `PageNames`/build-identity 裁四页 |
+| 设置页 | macOS 侧栏四个功能页＋关于页（2026-11-19 裁决：关于页所有形态可见）＋快捷键裁学习项；Windows 按 `PageNames`/build-identity 裁功能页 |
 | 更新清单 | `update-manifest-lite.json`（`make-update-manifest.py --product lite`；发布可 `--lite-macos-pkg` 同 Draft） |
 | Mac 打包 | 不随包 `GogakuTranslator`／`gloss.tsv`；`check-bundle.py --lite` |
-| Win 打包 | `compile-win-native.py --flavor lite` → `build-win-app.py --flavor lite`：**已验证可交叉编译并暂存**（隔离 AppId／`GogakuLiteDev` 目录／`GogakuLite-` 前缀，出厂数据不含 gloss）；agent 无学习会话，设置裁到四页 |
+| Win 打包 | `compile-win-native.py --flavor lite` → `build-win-app.py --flavor lite`：**已验证可交叉编译并暂存**（隔离 AppId／`GogakuLiteDev` 目录／`GogakuLite-` 前缀，出厂数据不含 gloss）；agent 无学习会话，设置裁到功能页 |
 | 形态隔离 | Mac 按 flavor＋validation 分 scratch 目录；CMake 显式 `-DGOGAKU_LITE=ON/OFF`；Windows 编译收据写入并校验 `flavor`（跨形态打包被拒） |
 | 清单隔离 | Mac 的 `bundle-manifest` 文件名带形态（`-lite`）：Lite 与完整版 dev 同为 dev 通道，共用文件名会互相覆盖、装第二个时清单校验必然失败（2026-11-16 修） |
 | 本地命令 | Mac：`python3 scripts/build.py --flavor lite --prepare`。Win：`python3 scripts/compile-win-native.py --flavor lite` → `python3 scripts/build-win-app.py --flavor lite` |
 | 数据目录 | 与完整版共用；并发写为已知受限项 |
-| 完整版内 Lite 模式 | 完整版内 Lite 模式：Mac 已实现，Windows UI 待跟进（设置字段已经由共享契约规范化）：首次引导、侧栏开关、四页过滤、快捷键与学习门禁同一口径；真机外观未验收 |
+| 完整版内 Lite 模式 | 完整版内 Lite 模式：Mac 已实现，Windows UI 待跟进（设置字段已经由共享契约规范化）：首次引导、侧栏开关、功能页过滤（关于页除外）、快捷键与学习门禁同一口径；真机外观未验收 |
 | 真实宿主双产品验收 | 欠账与完整版同门槛，未豁免 |
 
 尚未达到双端功能完全一致。多候选预译、共享学习协调、WebP 随包解码、旧文本设置迁移、历史片段管理与跨通道调频仍是实现缺口；Windows 完整故障恢复／卸载和旧版本清理仍待补齐，不因成功生成 EXE 改写为已完成。

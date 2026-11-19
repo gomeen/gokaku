@@ -351,12 +351,21 @@ struct GcNormalSession {
     std::vector<libime::HistoryBigram::WordWithCode> pendingSentence;
     std::string pendingJoined, pendingPinyin;
     bool pendingLearnValid = false;
-    /// 0 = 竖排（每页 9）；4–9 = 横排每页数量（由 gc_normal_set_layout 设置）。
+    /// 0 = 竖排（4–9 = 横排每页数量，由 gc_normal_set_layout 设置）；
+    /// 竖排每页数量另见 layoutVerticalPageSize。
     int32_t layoutHorizontal = 0;
+    /// 竖排每页候选数量（4–9，默认 9，由 gc_normal_set_vertical_page_size 设置；
+    /// 附加会话字段，不改任何已有 ABI 结构布局）。
+    int32_t layoutVerticalPageSize = 9;
 };
 
 inline size_t page_size(const GcNormalSession &s) {
-    if (s.layoutHorizontal == 0) return 9;
+    if (s.layoutHorizontal == 0) {
+        int32_t n = s.layoutVerticalPageSize;
+        if (n < 4) n = 4;
+        if (n > 9) n = 9;
+        return static_cast<size_t>(n);
+    }
     int32_t n = s.layoutHorizontal;
     if (n < 4) n = 4;
     if (n > 9) n = 9;
@@ -1216,6 +1225,14 @@ extern "C" int gc_normal_set_layout(GcNormalSession *session, int32_t horizontal
     if (horizontal_page_size < 4) horizontal_page_size = 4;
     if (horizontal_page_size > 9) horizontal_page_size = 9;
     session->layoutHorizontal = horizontal_page_size;
+    return 0;
+}
+
+extern "C" int gc_normal_set_vertical_page_size(GcNormalSession *session, int32_t page_size) {
+    if (session == nullptr) return 1;
+    if (page_size < 4) page_size = 4;
+    if (page_size > 9) page_size = 9;
+    session->layoutVerticalPageSize = page_size;
     return 0;
 }
 

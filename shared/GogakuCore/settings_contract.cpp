@@ -25,6 +25,7 @@ const std::unordered_set<std::string> &knownKeys() {
         "englishCandidatesEnabled", "appDefaultEnglish", "learningTranslationEnabled",
         "preferredMode", "preferredDirection", "volcengineUsageMonth",
         "volcengineUsageCharacters", "candidateLayout", "candidateRenderer", "horizontalPageSize",
+        "verticalPageSize",
         // 完整版内 Lite 模式（运行时观感切换）与首次引导完成标记。
         "liteModeEnabled", "modeOnboardingCompleted",
     };
@@ -61,6 +62,7 @@ Json defaults() {
         {"candidateLayout", "vertical"},
         {"candidateRenderer", "bitmap"},
         {"horizontalPageSize", 7},
+        {"verticalPageSize", 9},
         {"liteModeEnabled", false},
         {"modeOnboardingCompleted", false},
     };
@@ -296,6 +298,9 @@ int32_t settingsNormalize(const char *raw, size_t raw_len, char **out,
     }
     if (const Json *value = member(input, "horizontalPageSize")) {
         canonical["horizontalPageSize"] = clampInt(*value, 7, 4, 9);
+    }
+    if (const Json *value = member(input, "verticalPageSize")) {
+        canonical["verticalPageSize"] = clampInt(*value, 9, 4, 9);
     }
     if (const Json *value = member(input, "appDefaultEnglish")) {
         // 缺这个键与「用户把列表清空」不是同一件事：缺键时下面不写这个键，

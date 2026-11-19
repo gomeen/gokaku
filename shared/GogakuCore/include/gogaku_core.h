@@ -30,9 +30,12 @@
  * gc_scheme_id／gc_scheme_from_id 作为 settings.json 字符串与枚举的唯一映射。
  * 键位表仍只在 libime 的 ShuangpinBuiltinProfile 里，核心不复制第二份。
  *
- * 附加只读接口（不改动任何已有结构布局与函数签名，旧加载方不受影响）：
+ * 附加接口（不改动任何已有结构布局与函数签名，旧加载方不受影响）：
  * gc_normal_copy_raw —— 取当前组合的原始编码，供平台存草稿与恢复。
- * gc_normal_set_layout —— 横排每页数量（0=竖排每页 9，4–9=横排每页数量）。
+ * gc_normal_set_layout —— 横排每页数量（0=竖排，竖排每页数量另见
+ *   gc_normal_set_vertical_page_size；4–9=横排每页数量）。
+ * gc_normal_set_vertical_page_size —— 竖排每页数量（4–9，默认 9；附加项，
+ *   不升 ABI 版本）。
  *
  * 契约接口（同样为附加项，不升 ABI 版本）：gc_settings_normalize 与
  * gc_contract_free。它们不依赖会话、不碰平台框架，两端读同一份
@@ -250,8 +253,14 @@ GOGAKU_CORE_EXPORT int gc_normal_flush(GcNormalSession *session);
  * 本函数为纯新增，不改动 GcSnapshot／GcKeyEvent 等任何结构布局。 */
 GOGAKU_CORE_EXPORT size_t gc_normal_copy_raw(GcNormalSession *session, char *buffer, size_t capacity);
 
-/* 0 = 竖排（每页 9）；4–9 = 横排每页数量。即时生效，不改变组合与排序。返回 0 成功，1 参数错误。 */
+/* 4–9 = 横排每页数量；0 = 竖排（每页数量由 gc_normal_set_vertical_page_size
+ * 单独设置，默认 9）。即时生效，不改变组合与排序。返回 0 成功，1 参数错误。 */
 GOGAKU_CORE_EXPORT int gc_normal_set_layout(GcNormalSession *session, int32_t horizontal_page_size);
+
+/* 竖排每页候选数量（4–9，默认 9；范围外的值一律钳制进 4–9，如 0→4、99→9）。
+ * 即时生效，不改变组合与排序。附加导出：不改动任何已有结构与函数签名，
+ * 不升 ABI 版本。返回 0 成功，1 参数错误。 */
+GOGAKU_CORE_EXPORT int gc_normal_set_vertical_page_size(GcNormalSession *session, int32_t page_size);
 
 /* ---------- 自定义词语存储（设置进程使用） ---------- */
 

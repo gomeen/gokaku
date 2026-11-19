@@ -69,6 +69,24 @@ final class SettingsStoreTests: XCTestCase {
         XCTAssertEqual(object["candidateRenderer"] as? String, "system")
     }
 
+    func testVerticalPageSizeNormalizedBySharedContract() throws {
+        // 读盘统一先过共享核心规范化：缺键默认 9、超范围钳制、非法类型丢弃。
+        let url = directory.appendingPathComponent("settings.json")
+        try Data("{\"schemaVersion\":2,\"verticalPageSize\":99}".utf8)
+            .write(to: url, options: .atomic)
+        XCTAssertEqual(Settings.load(at: directory).verticalPageSize, 9)
+
+        try Data("{\"schemaVersion\":2,\"verticalPageSize\":\"many\"}".utf8)
+            .write(to: url, options: .atomic)
+        XCTAssertEqual(Settings.load(at: directory).verticalPageSize, 9)
+
+        try Data("{\"schemaVersion\":2,\"candidateFontSize\":13}".utf8)
+            .write(to: url, options: .atomic)
+        let loaded = Settings.load(at: directory)
+        XCTAssertEqual(loaded.verticalPageSize, 9, "缺键默认 9")
+        XCTAssertEqual(loaded.candidateFontSize, 13, "同份设置其他字段不受影响")
+    }
+
     func testCoalescedSubmitKeepsLatestValue() throws {
         let store = SettingsStore(directory: directory)
         var first = Settings(); first.candidateFontSize = 12
@@ -298,5 +316,24 @@ final class LayoutRoundTripTests: XCTestCase {
         let obj = try JSONSerialization.jsonObject(with: data) as! [String: Any]
         XCTAssertEqual(obj["candidateLayout"] as? String, "horizontal")
         XCTAssertEqual(obj["horizontalPageSize"] as? Int, 6)
+    }
+
+    func testVerticalPageSizeRoundTripThroughSharedContract() throws {
+        // 竖排每页数量经共享契约规范化后落盘、读回（4–9 钳制在共享核心一份）。
+        let dir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("gogaku-vps-rt")
+        try? FileManager.default.removeItem(at: dir)
+        let store = SettingsStore(directory: dir)
+        var s = Settings()
+        s.candidateLayout = .vertical
+        s.verticalPageSize = 5
+        let done = expectation(description: "flush")
+        store.submit(s) { outcome in
+            if case .success = outcome { done.fulfill() } else { XCTFail("submit failed") }
+        }
+        wait(for: [done], timeout: 2)
+        let data = try Data(contentsOf: dir.appendingPathComponent("settings.json"))
+        let obj = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        XCTAssertEqual(obj["verticalPageSize"] as? Int, 5)
+        XCTAssertEqual(Settings.load(at: dir).verticalPageSize, 5)
     }
 }

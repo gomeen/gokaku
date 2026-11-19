@@ -90,8 +90,7 @@ final class EngineHub {
         config.englishEnabled = settings.englishCandidatesEnabled
         let engine = NormalEngine(config: config)
         engine?.setAppDefaults(settings.enabledDefaultEnglishApps)
-        let hps: Int32 = settings.candidateLayout == .horizontal ? Int32(settings.horizontalPageSize) : 0
-        engine?.setLayout(horizontalPageSize: hps)
+        Self.applyPageSizes(to: engine, settings: settings)
         if let message = engine?.creationError {
             NSLog("Gogaku NormalEngine: %@", message)
         }
@@ -103,4 +102,16 @@ final class EngineHub {
 
     /// 引擎队列上异步执行。
     func async(_ body: @escaping () -> Void) { queue.async(execute: body) }
+
+    /// 每页数量随排列分流：横排走 setLayout 的 4–9，竖排走附加导出
+    /// setVerticalPageSize（默认 9）。设置变更热更新与创建时同口径。
+    static func applyPageSizes(to engine: NormalEngine?, settings: Settings) {
+        guard let engine else { return }
+        if settings.candidateLayout == .horizontal {
+            engine.setLayout(horizontalPageSize: Int32(settings.horizontalPageSize))
+        } else {
+            engine.setLayout(horizontalPageSize: 0)
+            engine.setVerticalPageSize(Int32(settings.verticalPageSize))
+        }
+    }
 }

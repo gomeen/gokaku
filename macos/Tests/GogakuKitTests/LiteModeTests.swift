@@ -86,19 +86,26 @@ final class LiteModeTests: XCTestCase {
 
     func testSettingsPageVisibleCasesFollowLiteMode() {
         #if GOGAKU_LITE
-        // Lite 独立安装包固定四页，与运行开关无关。
+        // Lite 独立安装包固定五页（四个功能页＋关于），与运行开关无关。
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: false),
-                       [.normalInput, .customWords, .skin, .shortcuts])
+                       [.normalInput, .customWords, .skin, .shortcuts, .about])
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: true),
-                       [.normalInput, .customWords, .skin, .shortcuts])
+                       [.normalInput, .customWords, .skin, .shortcuts, .about])
         #else
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: false), SettingsPage.allCases)
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: true),
-                       [.normalInput, .customWords, .skin, .shortcuts])
+                       [.normalInput, .customWords, .skin, .shortcuts, .about])
         XCTAssertTrue(SettingsPage.visibleCases(liteModeEnabled: true).allSatisfy { !$0.isLearningPage })
         #endif
         XCTAssertEqual(SettingsPage.allCases.filter(\.isLearningPage),
                        [.resources, .privacy, .records])
+        // 关于页在所有安装形态可见（2026-11-19 裁决）：排 allCases 最后、
+        // 不属于学习页、Lite 集合包含它。
+        XCTAssertEqual(SettingsPage.allCases.last, .about)
+        XCTAssertFalse(SettingsPage.about.isLearningPage)
+        XCTAssertTrue(SettingsPage.liteCases.contains(.about))
+        XCTAssertFalse(SettingsPage.visibleCases(liteModeEnabled: true).isEmpty)
+        XCTAssertTrue(SettingsPage.visibleCases(liteModeEnabled: true).contains(.about))
     }
 
     // MARK: 快捷键命令过滤

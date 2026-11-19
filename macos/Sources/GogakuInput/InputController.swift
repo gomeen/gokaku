@@ -542,8 +542,7 @@ final class GogakuInputController: IMKInputController {
                           freqEnabled: settings.frequencyEnabled,
                           englishEnabled: settings.englishCandidatesEnabled)
             normal.setAppDefaults(settings.enabledDefaultEnglishApps)
-            let hps: Int32 = settings.candidateLayout == .horizontal ? Int32(settings.horizontalPageSize) : 0
-            normal.setLayout(horizontalPageSize: hps)
+            EngineHub.applyPageSizes(to: normal, settings: settings)
             normal.reloadCustomWords()
         }
     }

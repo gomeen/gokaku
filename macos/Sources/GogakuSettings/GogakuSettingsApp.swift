@@ -2,7 +2,7 @@ import SwiftUI
 import GogakuKit
 
 /// 包内构建身份（Contents/Resources/build-identity.json）。
-/// 设置页与诊断输出展示完整预发布版本；缺失时回退 Info.plist 三段版本。
+/// 「关于」页与诊断输出展示完整预发布版本；缺失时回退 Info.plist 三段版本。
 enum BuildIdentity {
     static let displayVersion: String = {
         let bundle = Bundle.main
@@ -16,10 +16,22 @@ enum BuildIdentity {
         return full
     }()
 
-    /// dev 通道（Gogaku Dev，bundle ID 带 .dev 后缀）才在侧栏标「开发版」；
-    /// stable 不再显示通道标签与构建号，避免把正式安装误读为开发版。
+    /// dev 通道（Gogaku Dev，bundle ID 带 .dev 后缀）才在「关于」页标「本机开发版」；
+    /// stable 不显示通道标签。
     static let isDevChannel: Bool =
         Bundle.main.bundleIdentifier?.hasSuffix(".dev") ?? false
+
+    /// 完整构建身份行（commit 前 8 位＋dirty；诊断口径）。build-identity.json
+    /// 缺失（开发直接运行二进制）时返回 nil，「关于」页省略该行。
+    static let buildDetailLine: String? = {
+        let bundle = Bundle.main
+        guard let url = bundle.url(forResource: "build-identity", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let object = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let commit = object["commit"] as? String, commit.count >= 8 else { return nil }
+        let dirty = (object["dirty"] as? Bool) == true ? " · dirty" : ""
+        return String(commit.prefix(8)) + dirty
+    }()
 }
 
 @main struct GogakuSettingsApp: App {
@@ -37,17 +49,20 @@ enum BuildIdentity {
 }
 
 /// 设置页。侧栏可见页由「编译形态＋运行时 Lite 模式」共同决定：
-/// GOGAKU_LITE 构建固定四页（没有学习代码）；完整版在 Lite 模式生效时也只留四页，
-/// 切回完整模式即恢复七页（数据不受影响）。
+/// GOGAKU_LITE 构建固定五页（没有学习代码）；完整版在 Lite 模式生效时也只留
+/// 四个功能页＋关于，切回完整模式即恢复八页（数据不受影响）。
+/// 2026-11-19 裁决：侧栏标题与页脚移除；版本与检查更新移入「关于」页。
 enum SettingsPage: String, CaseIterable, Identifiable {
-    // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页。
-    case normalInput, resources, customWords, skin, shortcuts, privacy, records
+    // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页；
+    // 「关于」排最后。
+    case normalInput, resources, customWords, skin, shortcuts, privacy, records, about
     var id: Self { self }
 
-    /// Lite 观感下的四页（也是 Gogaku Lite 独立安装包的全部页面）。
-    static let liteCases: [SettingsPage] = [.normalInput, .customWords, .skin, .shortcuts]
+    /// Lite 观感下的页面（也是 Gogaku Lite 独立安装包的全部页面）：
+    /// 四个功能页＋关于。所有安装形态都有关于页（版本与检查更新的唯一入口）。
+    static let liteCases: [SettingsPage] = [.normalInput, .customWords, .skin, .shortcuts, .about]
 
-    /// 侧栏可见页：编译期裁剪（GOGAKU_LITE）与运行时 liteMode 任一生效即四页。
+    /// 侧栏可见页：编译期裁剪（GOGAKU_LITE）与运行时 liteMode 任一生效即五页。
     static func visibleCases(liteModeEnabled: Bool) -> [SettingsPage] {
         #if GOGAKU_LITE
         return liteCases
@@ -56,11 +71,11 @@ enum SettingsPage: String, CaseIterable, Identifiable {
         #endif
     }
 
-    /// 该页是否属于学习功能入口（Lite 模式下不显示）。
+    /// 该页是否属于学习功能入口（Lite 模式下不显示）。关于页不是学习入口。
     var isLearningPage: Bool {
         switch self {
         case .resources, .privacy, .records: return true
-        case .normalInput, .customWords, .skin, .shortcuts: return false
+        case .normalInput, .customWords, .skin, .shortcuts, .about: return false
         }
     }
     var title: String {
@@ -72,6 +87,7 @@ enum SettingsPage: String, CaseIterable, Identifiable {
         case .shortcuts: return "快捷键"
         case .privacy: return "学习与隐私"
         case .records: return "学习片段"
+        case .about: return "关于"
         }
     }
 }
@@ -82,7 +98,6 @@ enum SettingsPage: String, CaseIterable, Identifiable {
 /// 快捷键改动立即提交，连续文本输入合并 300ms，失焦或关闭窗口时提交剩余有效改动；
 /// 保存状态由 SettingsStore 回调驱动。
 private struct SettingsView: View {
-    @Environment(\.openWindow) private var openWindow
     @ObservedObject private var updates = UpdateController.shared
     @State private var page: SettingsPage = .normalInput
     @State private var settings = Settings.load()
@@ -118,7 +133,8 @@ private struct SettingsView: View {
         .onChange(of: page) { _, newValue in
             if newValue == .records { refreshRecords() }
         }
-        // Lite 切换后当前页可能已隐藏：退回普通输入页（皮肤页在 Lite 下仍可见）。
+        // Lite 切换后当前页可能已隐藏：退回普通输入页（皮肤页在 Lite 下仍可见；
+        // 关于页在所有形态可见）。
         .onChange(of: settings.liteModeEnabled) { _, _ in
             if !visiblePages.contains(page) { page = .normalInput }
         }
@@ -176,6 +192,7 @@ private struct SettingsView: View {
                         case .shortcuts: ShortcutsPage(settings: $settings)
                         case .privacy: PrivacyPage(settings: $settings)
                         case .records: RecordsPage(records: $records) { refreshRecords() }
+                        case .about: AboutPage()
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -196,13 +213,8 @@ private struct SettingsView: View {
 
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // .side__title：14/600，padding 18 16 10。
-            Text("Gogaku")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(SettingsPalette.primaryText)
-                .padding(.horizontal, 16)
-                .padding(.top, 18)
-                .padding(.bottom, 10)
+            // 2026-11-19 裁决：侧栏不再显示标题与页脚（版本／检查更新移入
+            // 「关于」页）；导航列表直接顶上去。
             // .nav：gap 1，padding 0 8。
             VStack(alignment: .leading, spacing: 1) {
                 ForEach(visiblePages) { item in
@@ -216,6 +228,7 @@ private struct SettingsView: View {
                 }
             }
             .padding(.horizontal, 8)
+            .padding(.top, 14)
             .accessibilityElement(children: .contain)
             Spacer(minLength: 0)
             #if !GOGAKU_LITE
@@ -223,33 +236,6 @@ private struct SettingsView: View {
             // 没有这个概念，不显示开关）。切完立即落盘，输入法随设置通知生效。
             liteBar
             #endif
-            // .side__foot：meta 11 / ver mono 10，padding 12 16 14。
-            VStack(alignment: .leading, spacing: 5) {
-                Text(BuildIdentity.isDevChannel ? "本机开发版" : "Gogaku")
-                    .font(.system(size: 11))
-                    .foregroundStyle(SettingsPalette.secondaryText)
-                Text(BuildIdentity.displayVersion)
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundStyle(SettingsPalette.tertiaryText)
-                Button {
-                    openWindow(id: "updates")
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("检查更新")
-                            .font(.system(size: 11))
-                        if updates.hasUpdate {
-                            Circle().fill(Color.green).frame(width: 6, height: 6)
-                                .accessibilityLabel("有可用更新")
-                        }
-                    }
-                    .foregroundStyle(SettingsPalette.accentText)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(updates.hasUpdate ? "检查更新，有可用更新" : "检查更新")
-            }
-            .padding(.horizontal, 16)
-            .padding(.top, 12)
-            .padding(.bottom, 14)
         }
         .frame(width: 200)
         .frame(maxHeight: .infinity, alignment: .topLeading)
@@ -278,7 +264,7 @@ private struct SettingsView: View {
             .padding(.top, 8)
             Text(settings.liteModeEnabled
                  ? "已隐藏学习页与学习快捷键；数据保留，随时切回。"
-                 : "打开后设置只留四页，学习入口与释义关闭。")
+                 : "打开后设置只留四个功能页＋关于，学习入口与释义关闭。")
                 .font(.system(size: 10.5))
                 .foregroundStyle(SettingsPalette.tertiaryText)
                 .fixedSize(horizontal: false, vertical: true)
@@ -327,6 +313,55 @@ private struct SettingsView: View {
             case .failure: break   // 片段读取失败只在片段页展示；不影响输入。
             }
         } }
+    }
+}
+
+// MARK: - 关于页（2026-11-19 裁决：版本与检查更新从侧栏页脚移入；
+// 所有安装形态（完整版／Lite 独立包／完整版内 Lite 模式）都有本页）
+
+private struct AboutPage: View {
+    @Environment(\.openWindow) private var openWindow
+    @ObservedObject private var updates = UpdateController.shared
+
+    var body: some View {
+        SettingsCard("关于 Gogaku") {
+            VStack(alignment: .leading, spacing: 0) {
+                SettingsRow("Gogaku" + (BuildIdentity.isDevChannel ? " 本机开发版" : "")) {
+                    Text(BuildIdentity.displayVersion)
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(SettingsPalette.primaryText)
+                        .accessibilityLabel("版本 \(BuildIdentity.displayVersion)")
+                }
+                SettingsRowDivider()
+                SettingsRow("检查更新") {
+                    Button {
+                        openWindow(id: "updates")
+                    } label: {
+                        HStack(spacing: 6) {
+                            Text("检查更新")
+                                .font(.system(size: 12))
+                            if updates.hasUpdate {
+                                Circle().fill(Color.green).frame(width: 6, height: 6)
+                                    .accessibilityLabel("有可用更新")
+                            }
+                        }
+                        .foregroundStyle(SettingsPalette.accentText)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(updates.hasUpdate ? "检查更新，有可用更新" : "检查更新")
+                }
+                if let detail = BuildIdentity.buildDetailLine {
+                    SettingsRowDivider()
+                    SettingsRow("构建") {
+                        Text(detail)
+                            .font(.system(size: 12, design: .monospaced))
+                            .foregroundStyle(SettingsPalette.secondaryText)
+                            .textSelection(.enabled)
+                            .accessibilityLabel("构建身份 \(detail)")
+                    }
+                }
+            }
+        }
     }
 }
 

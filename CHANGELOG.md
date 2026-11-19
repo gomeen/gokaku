@@ -2,6 +2,13 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-19：设置界面整理＋竖排每页数量，工作区，定 0.2.0 主题）
+
+- 用户裁决（四项）：删除设置侧栏顶部「Gogaku」标题与底部页脚（本机开发版／Gogaku 标签、版本号、「检查更新」按钮）；新增「关于」页（侧栏最后一页，所有安装形态都有），版本号与「检查更新」移入其中——产品名＋版本号（复用包内 build-identity.json 的 displayVersion）、dev 通道加「本机开发版」标注、检查更新按钮打开既有更新窗口并保留有可用更新的绿点提示，包内构建身份存在时另附 commit 前 8 位＋dirty 的只读完整身份行。
+- 竖排每页候选数量可配置（4–9，默认 9）：设置新增 `verticalPageSize`（共享契约 `settings_contract.cpp` 同步 knownKeys/defaults/钳制，schemaVersion 仍为 2）；普通输入页「横排每页数量」行改为通用「每页候选数量」，在两种排列下都显示并跟随排列读写对应字段。共享核心新增附加导出 `gc_normal_set_vertical_page_size`（4–9 钳制，默认 9），不改任何已有结构与函数签名，ABI 版本不升；Mac（EngineHub／InputController）与 Windows（agent／appearance）消费点同步改为竖排读 `verticalPageSize`。
+- 验证：共享核心契约与普通会话测试新增向量（缺键默认 9、超范围钳制、非法类型丢弃；竖排 5/页翻页、默认 9 不变、非法值钳制、与横排互不干扰）；Swift 侧新增 verticalPageSize 编解码／钳制、effectiveNormalPageSize 两分支、关于页在五页集合（完整／Lite 两形态）断言；ASan quick 冒烟通过；Windows 侧交叉编译 x64／x86、full／lite 形态验证。
+- 不发布不装本机：本条只改代码与验证，不递增版本号、不构包、不发布、不安装；对外发布由主代理统一发 0.2.0。
+
 ### 变更（2026-11-19：对外命名只用版本号，构建号降级为纯内部计数器，工作区）
 
 - 用户裁决：对外一切只用版本号，构建号不再出现在任何安装包文件名、tag 或用户可见 UI；发布记录按版本号命名（如 `release-0.1.8.json`）。

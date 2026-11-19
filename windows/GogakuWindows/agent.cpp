@@ -22,7 +22,8 @@ struct Core {
 #define API(name) decltype(&::name) name = nullptr;
     API(gc_abi_check) API(gc_normal_session_create) API(gc_normal_session_destroy)
     API(gc_normal_handle) API(gc_normal_copy_raw) API(gc_normal_set_app_defaults)
-    API(gc_normal_update) API(gc_normal_set_layout) API(gc_normal_flush) API(gc_normal_reload_custom_words)
+    API(gc_normal_update) API(gc_normal_set_layout) API(gc_normal_set_vertical_page_size)
+    API(gc_normal_flush) API(gc_normal_reload_custom_words)
     API(gc_normal_clear_user_data) API(gc_snapshot_free)
 #if !GOGAKU_LITE
     API(gc_learning_session_create) API(gc_learning_session_destroy)
@@ -42,7 +43,8 @@ struct Core {
 #define LOAD(name) name = reinterpret_cast<decltype(name)>(GetProcAddress(library,#name)); if (!name) return false;
         LOAD(gc_abi_check) LOAD(gc_normal_session_create) LOAD(gc_normal_session_destroy)
         LOAD(gc_normal_handle) LOAD(gc_normal_copy_raw) LOAD(gc_normal_set_app_defaults)
-        LOAD(gc_normal_update) LOAD(gc_normal_set_layout) LOAD(gc_normal_flush) LOAD(gc_normal_reload_custom_words)
+        LOAD(gc_normal_update) LOAD(gc_normal_set_layout) LOAD(gc_normal_set_vertical_page_size)
+        LOAD(gc_normal_flush) LOAD(gc_normal_reload_custom_words)
         LOAD(gc_normal_clear_user_data) LOAD(gc_snapshot_free)
 #if !GOGAKU_LITE
         LOAD(gc_learning_session_create) LOAD(gc_learning_session_destroy)
@@ -84,7 +86,11 @@ struct Core {
         for (auto &name:names) pointers.push_back(name.c_str());
         gc_normal_set_app_defaults(normal,pointers.data(),pointers.size());
         const std::string layout = settings.value("candidateLayout", std::string("vertical"));
+        // 竖排每页数量可配置（4–9，默认 9；与横排同规格）：经附加导出下发，
+        // 0 仍表示竖排（每页数量由 set_vertical_page_size 单独控制）。
         const int hps = settings.value("horizontalPageSize", 7);
+        const int vps = std::clamp(settings.value("verticalPageSize", 9), 4, 9);
+        gc_normal_set_vertical_page_size(normal, vps);
         gc_normal_set_layout(normal, layout == "horizontal" ? hps : 0);
     }
     std::string raw() {

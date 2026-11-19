@@ -126,31 +126,29 @@ struct NormalInputPage: View {
                         .accessibilityElement(children: .contain)
                         .accessibilityLabel("渲染引擎")
                 }
-                if settings.candidateLayout == .horizontal {
-                    SettingsRowDivider()
-                    SettingsRow("横排每页数量") {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Slider(value: Binding(
-                                get: { Double(settings.horizontalPageSize) },
-                                set: { value in
-                                    let clamped = min(9, max(4, Int(value.rounded())))
-                                    if clamped != settings.horizontalPageSize {
-                                        settings.horizontalPageSize = clamped
-                                        submit()
-                                    }
-                                }), in: 4...9, step: 1)
-                            // 滑轨两端各让出滑块半径（macOS 分段滑块约 10pt），
-                            // 刻度按同一有效宽度等分，才不会出现「9 之后还有一格」。
-                            .frame(width: Self.controlWidth)
-                            .accessibilityLabel("横排每页数量")
-                            SliderTicks(values: Array(4...9), current: settings.horizontalPageSize) { n in
-                                if settings.horizontalPageSize != n {
-                                    settings.horizontalPageSize = n
-                                    submit()
+                SettingsRowDivider()
+                // 每页候选数量：横排与竖排各自可配（都 4–9），排列切换后
+                // 滑块显示对应排列的当前值；样式与「候选字号」同款刻度。
+                SettingsRow("每页候选数量") {
+                    VStack(alignment: .leading, spacing: 1) {
+                        Slider(value: Binding(
+                            get: { Double(pageSizeForLayout) },
+                            set: { value in
+                                let clamped = min(9, max(4, Int(value.rounded())))
+                                if clamped != pageSizeForLayout {
+                                    setPageSizeForLayout(clamped)
                                 }
+                            }), in: 4...9, step: 1)
+                        // 滑轨两端各让出滑块半径（macOS 分段滑块约 10pt），
+                        // 刻度按同一有效宽度等分，才不会出现「9 之后还有一格」。
+                        .frame(width: Self.controlWidth)
+                        .accessibilityLabel(pageSizeAccessibilityLabel)
+                        SliderTicks(values: Array(4...9), current: pageSizeForLayout) { n in
+                            if pageSizeForLayout != n {
+                                setPageSizeForLayout(n)
                             }
-                            .accessibilityLabel("横排每页数量刻度")
                         }
+                        .accessibilityLabel(pageSizeAccessibilityLabel + "刻度")
                     }
                 }
                 SettingsRowDivider()
@@ -197,6 +195,25 @@ struct NormalInputPage: View {
                 }
             }
         }
+    }
+
+    /// 每页候选数量：跟随当前排列读写对应字段（竖排 verticalPageSize，
+    /// 横排 horizontalPageSize；都 4–9，互不覆盖）。
+    private var pageSizeForLayout: Int {
+        settings.candidateLayout == .horizontal ? settings.horizontalPageSize : settings.verticalPageSize
+    }
+
+    private func setPageSizeForLayout(_ value: Int) {
+        if settings.candidateLayout == .horizontal {
+            settings.horizontalPageSize = value
+        } else {
+            settings.verticalPageSize = value
+        }
+        submit()
+    }
+
+    private var pageSizeAccessibilityLabel: String {
+        settings.candidateLayout == .horizontal ? "横排每页数量" : "竖排每页数量"
     }
 
     /// 刻度行：按滑块**实际行程**（两端各让出滑块半径）精确对位。
