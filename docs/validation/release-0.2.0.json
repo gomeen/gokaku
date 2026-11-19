@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.2.0",
+  "channel": "stable",
+  "version": "0.2.0",
+  "buildNumber": 120,
+  "releaseId": 450899262,
+  "state": "published",
+  "publishedAt": "2026-11-19",
+  "commit": "ae5b9f16fe74dfac92d05a12616aeefa1fa2aac9",
+  "assets": {
+    "macos": {"name": "Gogaku-0.2.0.pkg", "sha256": "f590da96231d9dea0dee07300ab749c73e46925ce36540fb72b748f19bc54699"},
+    "windows": {"name": "Gogaku-0.2.0-windows-x64-setup.exe", "sha256": "b2ea6174347336770a6287f07ef813edd377525fa597851683ed10ca4fceee0a"},
+    "macosLite": {"name": "GogakuLite-0.2.0.pkg", "sha256": "3375c90ddaf2c6803de36797fbd2abdcf4c22b681b7c652e09d92f489ef3f5cf"},
+    "windowsLite": {"name": "GogakuLite-0.2.0-windows-x64-setup.exe", "sha256": "f1fa304e322298bc121a2113821090644f7ae37f8d7057d0da036ee0d3a10a71"},
+    "manifests": ["update-manifest.json", "update-manifest.json.sig", "update-manifest-lite.json", "update-manifest-lite.json.sig"]
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.2.0.json",
+  "releaseReport": "verify/report-release-0.2.0.json",
+  "hostWaiver": "用户 2026-11-19 决定直接发布：fast 7/7、release 14/14、ASan 冒烟已通过；设置界面整理与竖排分页的真机验收，以及 0.1.6 起累计的宿主验收欠账待补录。",
+  "notes": "0.2.0：设置侧栏去掉顶部产品名与底部版本页脚，新增「关于」页（最后一个 tab，含版本号、构建身份、检查更新入口；dev 通道标注本机开发版；所有安装形态显示）；竖排候选窗每页数量可配置（4–9 默认 9，新增 gc_normal_set_vertical_page_size 附加导出、ABI 仍为 4，双端共用同一核心实现，Windows agent/appearance 竖排分支改读 verticalPageSize）。实现见 630f6f4。验证：fast 7/7（Swift 293 项）、release 14/14、ASan quick 冒烟、Windows x64/x86×full/lite 交叉编译；公开清单远端匿名验签 signature ok；tag v0.2.0 指向 ae5b9f1。host 未运行（豁免见 hostWaiver）；0.1.6 起累计宿主验收欠账待补。用户明确要求：发布后不自动更新本机，由用户手动「检查更新」验证升级链路。"
+}
