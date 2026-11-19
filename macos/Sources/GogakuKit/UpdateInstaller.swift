@@ -157,28 +157,37 @@ public final class UpdateInstaller {
         if let sites {
             self.sites = sites
         } else {
-            let inputID = (Bundle.main.bundleIdentifier ?? "org.gogaku.inputmethod")
-            let isLite = inputID.contains("lite")
-            let channelSuffix = inputID.hasSuffix(".dev") ? " Dev" : ""
-            let productPrefix = isLite ? "Gogaku Lite" : "Gogaku"
-            let inputApp = productPrefix + channelSuffix + ".app"
-            let settingsApp = productPrefix + " Settings" + channelSuffix + ".app"
-            let inputIDFull = inputID
-            let settingsIDFull = isLite
-                ? "org.gogaku.lite.settings" + (inputID.hasSuffix(".dev") ? ".dev" : "")
-                : "org.gogaku.settings" + (inputID.hasSuffix(".dev") ? ".dev" : "")
-            self.sites = [
-                Site(installDirectory: home.appendingPathComponent("Library/Input Methods", isDirectory: true),
-                     appName: inputApp, bundleIdentifier: inputIDFull, requiresTISIdentity: true),
-                Site(installDirectory: home.appendingPathComponent("Applications", isDirectory: true),
-                     appName: settingsApp, bundleIdentifier: settingsIDFull),
-            ]
+            self.sites = Self.defaultSites(
+                settingsBundleIdentifier: Bundle.main.bundleIdentifier ?? "org.gogaku.settings",
+                home: home)
         }
         self.stateDirectory = home.appendingPathComponent(Self.stateRelativePath, isDirectory: true)
         self.backupRoot = home.appendingPathComponent(Self.backupRelativePath, isDirectory: true)
     }
 
     var transactionURL: URL { stateDirectory.appendingPathComponent("transaction.txt") }
+
+    /// 运行方是设置应用：从其 bundle ID 派生产品／通道与输入法身份。
+    /// org.gogaku.settings(.dev) ↔ org.gogaku.inputmethod(.dev)；
+    /// org.gogaku.lite.settings(.dev) ↔ org.gogaku.lite.inputmethod(.dev)。
+    /// 与 package-macos-pkg.py 的 CHANNELS 表逐项对应（测试绑定）。
+    public static func defaultSites(settingsBundleIdentifier: String,
+                                    home: URL) -> [Site] {
+        let settingsID = settingsBundleIdentifier
+        let isLite = settingsID.contains(".lite.")
+        let isDev = settingsID.hasSuffix(".dev")
+        let inputID = settingsID.replacingOccurrences(of: ".settings", with: ".inputmethod")
+        let channelSuffix = isDev ? " Dev" : ""
+        let productPrefix = isLite ? "Gogaku Lite" : "Gogaku"
+        return [
+            Site(installDirectory: home.appendingPathComponent("Library/Input Methods", isDirectory: true),
+                 appName: productPrefix + channelSuffix + ".app",
+                 bundleIdentifier: inputID, requiresTISIdentity: true),
+            Site(installDirectory: home.appendingPathComponent("Applications", isDirectory: true),
+                 appName: productPrefix + " Settings" + channelSuffix + ".app",
+                 bundleIdentifier: settingsID),
+        ]
+    }
 
     // MARK: - 工具进程（xar／gzip｜cpio／ditto／codesign）
 

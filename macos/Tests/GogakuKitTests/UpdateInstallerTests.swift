@@ -302,8 +302,26 @@ final class UpdateInstallerTests: XCTestCase {
         XCTAssertLessThanOrEqual(backups.count, 2)
     }
 
-    func testNotificationObserverRegistrationIsIdempotent() throws {
-        // 单元级：注册函数可重复调用且返回有效观察者（真实分发已在集成验收）。
+    func testDefaultSitesDerivationMatchesPackagingChannels() {
+        // 与 package-macos-pkg.py CHANNELS 表逐项对应；派生错误会让运行时
+        // 校验拿错身份（输入法 bundle ID ≠ 设置应用 bundle ID）。
+        func names(_ settingsID: String) -> (input: String, inputID: String, settings: String) {
+            let sites = UpdateInstaller.defaultSites(settingsBundleIdentifier: settingsID, home: home)
+            return (sites[0].appName, sites[0].bundleIdentifier, sites[1].appName)
+        }
+        XCTAssertEqual(names("org.gogaku.settings").input, "Gogaku.app")
+        XCTAssertEqual(names("org.gogaku.settings").inputID, "org.gogaku.inputmethod")
+        XCTAssertEqual(names("org.gogaku.settings").settings, "Gogaku Settings.app")
+        XCTAssertEqual(names("org.gogaku.settings.dev").input, "Gogaku Dev.app")
+        XCTAssertEqual(names("org.gogaku.settings.dev").inputID, "org.gogaku.inputmethod.dev")
+        XCTAssertEqual(names("org.gogaku.lite.settings").input, "Gogaku Lite.app")
+        XCTAssertEqual(names("org.gogaku.lite.settings").inputID, "org.gogaku.lite.inputmethod")
+        XCTAssertEqual(names("org.gogaku.lite.settings.dev").input, "Gogaku Lite Dev.app")
+        XCTAssertEqual(names("org.gogaku.lite.settings.dev").inputID, "org.gogaku.lite.inputmethod.dev")
+        XCTAssertEqual(names("org.gogaku.lite.settings.dev").settings, "Gogaku Lite Settings Dev.app")
+    }
+
+    func testNotificationObserverRegistrationIsIdempotent() throws {        // 单元级：注册函数可重复调用且返回有效观察者（真实分发已在集成验收）。
         let first = UpdateInstaller.observeInputMethodRestart { }
         let second = UpdateInstaller.observeInputMethodRestart { }
         XCTAssertNotEqual(ObjectIdentifier(first as AnyObject), ObjectIdentifier(second as AnyObject))
