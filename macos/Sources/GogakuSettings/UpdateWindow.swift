@@ -14,6 +14,8 @@ final class UpdateController: ObservableObject {
         case checking
         case downloading
         case ready
+        case installing(UpdateInstallPhase)
+        case installed(String?)
     }
 
     @Published private(set) var phase: Phase = .idle
@@ -24,6 +26,10 @@ final class UpdateController: ObservableObject {
     @Published private(set) var autoCheck: Bool = false
     @Published private(set) var hasUpdate: Bool = false
     @Published private(set) var lastInstallMessage: String?
+    /// 数据包部分成功说明（主包已装、数据未换时的词库回退提示）。
+    @Published private(set) var dataNotice: String?
+    /// 就地安装需要下载的数据包资产（schema 2；nil＝无数据包或 schema 1 清单）。
+    @Published private(set) var pendingDataPackage: UpdateDataPackage?
 
     let installation: UpdateInstallation
     private let config: UpdateSourceConfig?
@@ -106,6 +112,9 @@ final class UpdateController: ObservableObject {
     private func apply(_ result: UpdateCheckOutcome, previous: UpdateCheckOutcome?) {
         outcome = result
         hasUpdate = result.kind == .available
+        pendingDataPackage = result.candidate?.manifest.dataPackage.flatMap {
+            $0.platform == installation.platform ? $0 : nil
+        }
         if result.kind == .available {
             downloadedFile = nil
             progress = 0
@@ -136,6 +145,8 @@ final class UpdateController: ObservableObject {
         progress = 0
         errorMessage = nil
         lastInstallMessage = nil
+        dataNotice = nil
+        let dataPackage = pendingDataPackage
         downloadTask = Task { [weak self] in
             guard let self else { return }
             do {
@@ -144,9 +155,24 @@ final class UpdateController: ObservableObject {
                         if self.phase == .downloading { self.progress = fraction }
                     }
                 }
+                // 数据包：主包就绪后按需下载（本地已有该数据版本则复用缓存）。
+                var dataFile: URL?
+                if let dataPackage {
+                    let resolved = UpdateEngine.dataPackageRegistry.lookup(
+                        manifestVersion: candidate.manifest.version,
+                        buildNumber: candidate.manifest.buildNumber,
+                        dataVersion: dataPackage.dataVersion)
+                    dataFile = try await self.downloader.downloadDataPackage(
+                        candidate: candidate, dataPackage: dataPackage, resolved: resolved) { fraction in
+                        Task { @MainActor in
+                            if case .downloading = self.phase { self.progress = fraction }
+                        }
+                    }
+                }
                 await MainActor.run {
                     self.downloadTask = nil
                     self.downloadedFile = file
+                    self.downloadedDataFile = dataFile
                     self.phase = .ready
                     self.progress = 1
                 }
@@ -169,15 +195,89 @@ final class UpdateController: ObservableObject {
         errorMessage = "已取消下载"
     }
 
+    /// 就地更新的已下载数据包 zip（跟随下载阶段填充）。
+    @Published private(set) var downloadedDataFile: URL?
+
+    static func phaseTitle(_ phase: UpdateInstallPhase) -> String {
+        switch phase {
+        case .extracting: return "解包安装内容…"
+        case .validating: return "校验签名与身份…"
+        case .replacing: return "替换应用…"
+        case .dataPackage: return "更新出厂数据…"
+        case .restartingInputMethod: return "通知输入法重启…"
+        case .done: return "完成"
+        }
+    }
+
+    /// 「就地更新（不弹安装器）」：客户端自己完成解包→校验→事务替换→
+    /// 输入法交接。工具链缺失（installerUnavailable）时回落旧的 open-installer。
     func install() {
         guard let candidate, let file = downloadedFile else { return }
+        guard phase == .idle || phase == .ready else { return }
         do {
             try downloader.verifyBeforeInstall(candidate, file: file)
-            try downloader.install(candidate, file: file)
-            lastInstallMessage = "已打开系统安装器；按向导完成安装后重新打开设置。"
-            errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
+            return
+        }
+        phase = .installing(.extracting)
+        errorMessage = nil
+        lastInstallMessage = nil
+        dataNotice = nil
+        let dataZip = downloadedDataFile
+        installTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let notice = try await Task.detached(priority: .userInitiated) {
+                    try self.downloader.installInPlace(candidate, file: file,
+                                                       dataPackageZip: dataZip) { phase in
+                        Task { @MainActor in
+                            if case .installing = self.phase { self.phase = .installing(phase) }
+                        }
+                    }
+                }.value
+                await MainActor.run {
+                    self.installTask = nil
+                    self.phase = .installed(notice)
+                    self.dataNotice = notice
+                    let version = candidate.manifest.version
+                    self.lastInstallMessage = notice == nil
+                        ? "已更新到 \(version)；输入法将在下次激活时使用新版。"
+                        : "已更新到 \(version)；输入法将在下次激活时使用新版。\(notice!)"
+                }
+            } catch is CancellationError {
+                await MainActor.run {
+                    self.installTask = nil
+                    self.phase = .ready
+                }
+            } catch {
+                await MainActor.run {
+                    self.installTask = nil
+                    if case .ready = self.phase { return }
+                    // 回落：就地安装不可用（缺 xar/cpio 等）时保留旧路径。
+                    if (error as? UpdateDownloadError) == .installerUnavailable
+                        || (error as? UpdateInstallError) == .installerUnavailable {
+                        self.fallbackToSystemInstaller(candidate, file: file)
+                        return
+                    }
+                    self.phase = .ready
+                    self.errorMessage = "就地更新失败（可重试）：\(error.localizedDescription)"
+                }
+            }
+        }
+    }
+
+    private var installTask: Task<Void, Never>?
+
+    /// 旧的 open-installer 路径（fallback）：交给系统 Installer，用户点向导。
+    private func fallbackToSystemInstaller(_ candidate: UpdateCandidate, file: URL) {
+        do {
+            try downloader.install(candidate, file: file)
+            phase = .idle
+            lastInstallMessage = "已打开系统安装器；按向导完成安装后重新打开设置。"
+        } catch {
+            phase = .ready
+            errorMessage = "系统安装器也启动失败：\(error.localizedDescription)"
         }
     }
 
@@ -210,6 +310,9 @@ struct UpdateView: View {
                     }
                     if controller.phase == .downloading {
                         downloadBlock
+                    }
+                    if case let .installing(installPhase) = controller.phase {
+                        installingBlock(installPhase)
                     }
                     if controller.phase == .ready {
                         readyBlock
@@ -309,19 +412,40 @@ struct UpdateView: View {
                     .fill(SettingsPalette.secondaryText.opacity(0.06)))
             HStack(spacing: 10) {
                 if controller.phase == .ready {
-                    Button("安装更新") { controller.install() }
+                    Button("就地更新（不弹安装器）") { controller.install() }
                         .buttonStyle(.borderedProminent)
                         .tint(SettingsPalette.accent)
                 } else {
                     Button("下载安装包") { controller.download() }
                         .buttonStyle(.borderedProminent)
                         .tint(SettingsPalette.accent)
-                        .disabled(controller.phase == .downloading)
+                        .disabled(controller.phase != .idle)
                 }
                 Text("签名已验证；下载后还会核对大小与 SHA-256。")
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
             }
+            if let data = controller.pendingDataPackage {
+                Text("新版包含数据包 \(data.name)（\(ByteCountFormatter.string(fromByteCount: data.size, countStyle: .file))，数据版本 \(data.dataVersion)）；本地已有同版本数据时不再下载。")
+                    .font(.system(size: 11))
+                    .foregroundStyle(SettingsPalette.secondaryText)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    private func installingBlock(_ phase: UpdateInstallPhase) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                ProgressView().controlSize(.small)
+                Text(UpdateController.phaseTitle(phase))
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(SettingsPalette.primaryText)
+            }
+            Text("解包 → 校验 → 替换 → 重启输入法 → 完成；不会弹出系统安装器，失败会自动恢复旧版本。")
+                .font(.system(size: 11))
+                .foregroundStyle(SettingsPalette.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -343,7 +467,7 @@ struct UpdateView: View {
         HStack(spacing: 8) {
             Image(systemName: "checkmark.seal")
                 .foregroundStyle(Color.green)
-            Text("安装包已下载并通过校验。点击「安装更新」交给系统安装器；不会自动重启。")
+            Text("安装包已下载并通过校验。点击「就地更新（不弹安装器）」由客户端完成替换；不会自动重启，输入法下次激活时用新版。")
                 .font(.system(size: 11))
                 .foregroundStyle(SettingsPalette.secondaryText)
         }

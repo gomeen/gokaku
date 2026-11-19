@@ -36,10 +36,15 @@ public final class UpdateEngine {
     #if GOGAKU_LITE
     public static let manifestName = "update-manifest-lite.json"
     public static let signatureName = "update-manifest-lite.json.sig"
+    public static let v2ManifestName = "update-manifest-lite-v2.json"
     #else
     public static let manifestName = "update-manifest.json"
     public static let signatureName = "update-manifest.json.sig"
+    public static let v2ManifestName = "update-manifest-v2.json"
     #endif
+    /// 双清单：新客户端优先拉 v2（schema 2，含 dataPackage）；老 Release 没有
+    /// v2 资产时回落 schema 1（只含主包）。每个新发布仍同时带 schema 1 清单，
+    /// 0.2.0 及更早的旧客户端继续可用（见 docs/update.md）。
     public static let manifestLimit = 256 * 1024
     public static let signatureLimit = 8 * 1024
     public static let releasesPerPage = 30
@@ -166,16 +171,34 @@ public final class UpdateEngine {
         for release in releases where !release.draft {
             // 通道预筛：stable 不读取预发布；dev 可读取 dev／rc／正式。
             if installation.channel == .stable, release.prerelease { continue }
-            guard let manifestAsset = release.assets.first(where: { $0.name == Self.manifestName }),
-                  let signatureAsset = release.assets.first(where: { $0.name == Self.signatureName }) else {
-                continue
+            // 优先 schema 2 双清单；404／缺失回落 schema 1。两者都没有才算
+            // 「发布缺少清单」。v2 验签失败按 invalidManifest 处理，不静默回落。
+            let manifest: UpdateManifest
+            let dataPackage: UpdateDataPackage?
+            do {
+                if let v2 = try await loadVerifiedManifest(release: release, config: config,
+                                                           name: Self.v2ManifestName) {
+                    manifest = v2
+                    dataPackage = v2.dataPackage.flatMap {
+                        $0.platform == installation.platform ? $0 : nil
+                    }
+                } else if let fallback = try await loadVerifiedManifest(release: release, config: config,
+                                                                        name: Self.manifestName) {
+                    manifest = fallback
+                    dataPackage = nil
+                } else {
+                    continue
+                }
+            } catch let error as UpdateTransportError where error == .http(404) {
+                // v2 资产在列表里但下载 404：按缺失处理，回落 schema 1。
+                guard let fallback = try await loadVerifiedManifest(release: release, config: config,
+                                                                    name: Self.manifestName) else {
+                    continue
+                }
+                manifest = fallback
+                dataPackage = nil
             }
             sawManifest = true
-            let manifestBytes = try await downloadSmall(manifestAsset, limit: Self.manifestLimit)
-            let signatureBytes = try await downloadSmall(signatureAsset, limit: Self.signatureLimit)
-            let manifest = try UpdateManifestVerifier.verify(
-                manifestBytes: manifestBytes, signature: signatureBytes,
-                trustedKeys: config.trustedKeys)
             if manifest.channel != installation.channel {
                 sawWrongChannel = true
                 continue
@@ -198,14 +221,28 @@ public final class UpdateEngine {
             }
             try URLSessionUpdateTransport.validate(url: releaseAsset.browserDownloadURL,
                                                    requireAPIHost: false)
+            // 数据包资产同样必须真实存在于该 Release。
+            var dataDownloadURL: URL?
+            if let data = dataPackage {
+                guard let dataAsset = release.assets.first(where: { $0.id == data.assetId }),
+                      dataAsset.name == data.name,
+                      dataAsset.size == data.size else {
+                    throw UpdateManifestError.invalidField("release dataPackage 与清单不一致")
+                }
+                try URLSessionUpdateTransport.validate(url: dataAsset.browserDownloadURL,
+                                                       requireAPIHost: false)
+                dataDownloadURL = dataAsset.browserDownloadURL
+            }
             let candidate = UpdateCandidate(
                 releaseTag: release.tagName,
                 releaseName: release.name ?? release.tagName,
                 manifest: manifest, asset: asset,
                 downloadURL: releaseAsset.browserDownloadURL,
                 publishedAt: release.publishedAt)
-            return outcome(.available, "发现新版本 \(manifest.version)（构建 \(manifest.buildNumber)）",
-                           candidate: candidate)
+            return outcome(.available,
+                           "发现新版本 \(manifest.version)（构建 \(manifest.buildNumber)）",
+                           candidate: candidate, dataPackage: dataPackage, checkedAt: now(),
+                           dataDownloadURL: dataDownloadURL)
         }
         if !sawManifest {
             return outcome(.noManifest, "当前通道的发布没有 update-manifest.json 与签名")
@@ -214,6 +251,36 @@ public final class UpdateEngine {
             return outcome(.noRelease, "当前通道（\(installation.channel.rawValue)）没有可用发布")
         }
         return outcome(.noRelease, "当前通道没有可用发布")
+    }
+
+    /// 下载指定名字的清单与签名并验签。v2 清单不存在（资产缺失）返回 nil；
+    /// schema 1 清单缺失抛 malformedManifest（由 evaluate 转 noManifest）。
+    private func loadVerifiedManifest(release: GitHubRelease, config: UpdateSourceConfig,
+                                      name: String) async throws -> UpdateManifest? {
+        guard let manifestAsset = release.assets.first(where: { $0.name == name }),
+              let signatureAsset = release.assets.first(where: { $0.name == name + ".sig" }) else {
+            return nil
+        }
+        let manifestBytes = try await downloadSmall(manifestAsset, limit: Self.manifestLimit)
+        let signatureBytes = try await downloadSmall(signatureAsset, limit: Self.signatureLimit)
+        return try UpdateManifestVerifier.verify(
+            manifestBytes: manifestBytes, signature: signatureBytes,
+            trustedKeys: config.trustedKeys)
+    }
+
+    private func outcome(_ kind: UpdateCheckOutcome.Kind, _ message: String,
+                         candidate: UpdateCandidate? = nil,
+                         dataPackage: UpdateDataPackage? = nil,
+                         checkedAt: Date? = nil,
+                         dataDownloadURL: URL? = nil) -> UpdateCheckOutcome {
+        if kind == .available, let candidate, let dataPackage, let url = dataDownloadURL {
+            Self.dataPackageRegistry.record(manifestVersion: candidate.manifest.version,
+                                            buildNumber: candidate.manifest.buildNumber,
+                                            dataPackage: dataPackage, url: url)
+        }
+        return UpdateCheckOutcome(kind: kind, message: message, candidate: candidate,
+                                  dataPackage: dataPackage,
+                                  checkedAt: checkedAt ?? now())
     }
 
     private func downloadSmall(_ asset: GitHubRelease.Asset, limit: Int) async throws -> Data {
@@ -241,6 +308,39 @@ public final class UpdateEngine {
                                  URLQueryItem(name: "page", value: String(page))]
         return components.url
     }
+
+    /// 本进程内缓存的数据包下载记录（供下载阶段取地址）。
+    private struct DataPackageRecord {
+        let dataVersion: String
+        let sha256: String
+        let size: Int64
+        let url: URL
+    }
+    /// 数据包下载地址注册表：检查阶段把候选→数据包资产绑定写入，
+    /// 下载阶段按（版本＋构建号＋数据指纹）取出。进程内存态，不落盘。
+    public final class DataPackageRegistry: @unchecked Sendable {
+        private let lock = NSLock()
+        private var records: [String: DataPackageRecord] = [:]
+        public init() {}
+        func record(manifestVersion: String, buildNumber: Int,
+                    dataPackage: UpdateDataPackage, url: URL) {
+            lock.lock(); defer { lock.unlock() }
+            records["\(manifestVersion)#\(buildNumber)#\(dataPackage.dataVersion)"] =
+                DataPackageRecord(dataVersion: dataPackage.dataVersion,
+                                  sha256: dataPackage.sha256, size: dataPackage.size, url: url)
+        }
+        public func lookup(manifestVersion: String, buildNumber: Int,
+                           dataVersion: String) -> (url: URL, sha256: String, size: Int64)? {
+            lock.lock(); defer { lock.unlock() }
+            guard let record = records["\(manifestVersion)#\(buildNumber)#\(dataVersion)"] else {
+                return nil
+            }
+            return (record.url, record.sha256, record.size)
+        }
+    }
+
+    /// 默认注册表：UpdateEngine.check 写入，UpdateDownloader 读取。
+    public static let dataPackageRegistry = DataPackageRegistry()
 
     private func outcome(_ kind: UpdateCheckOutcome.Kind, _ message: String,
                          candidate: UpdateCandidate? = nil) -> UpdateCheckOutcome {

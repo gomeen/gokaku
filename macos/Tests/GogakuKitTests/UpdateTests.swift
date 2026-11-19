@@ -137,9 +137,15 @@ final class UpdateTests: XCTestCase {
 
     func testManifestValidationRejectsBadFields() throws {
         XCTAssertThrowsError(try UpdateManifestVerifier.validate(
+            UpdateManifest(schema: 3, keyId: "k", version: "0.1.2", buildNumber: 1,
+                           channel: .stable, notes: "", assets: manifest().assets))) {
+            XCTAssertEqual($0 as? UpdateManifestError, .unsupportedSchema(3))
+        }
+        // schema 2 必须携带 dataPackage（防静默丢数据包）。
+        XCTAssertThrowsError(try UpdateManifestVerifier.validate(
             UpdateManifest(schema: 2, keyId: "k", version: "0.1.2", buildNumber: 1,
                            channel: .stable, notes: "", assets: manifest().assets))) {
-            XCTAssertEqual($0 as? UpdateManifestError, .unsupportedSchema(2))
+            XCTAssertEqual($0 as? UpdateManifestError, .missingDataPackage)
         }
         XCTAssertThrowsError(try UpdateManifestVerifier.validate(
             UpdateManifest(keyId: "k", version: "0.1", buildNumber: 1,
@@ -564,5 +570,230 @@ final class UpdateTests: XCTestCase {
         XCTAssertThrowsError(try UpdateDownloader.verify(file: file, asset: asset)) {
             XCTAssertEqual($0 as? UpdateDownloadError, .sizeMismatch(expected: 99, actual: 3))
         }
+    }
+
+    // MARK: schema 2 双清单（数据包分离）
+
+    func dataPackage(platform: String = "macos") -> UpdateDataPackage {
+        UpdateDataPackage(platform: platform, name: "Gogaku-Data-0.1.2.pkg", size: 4_096,
+                          sha256: String(repeating: "b", count: 64), assetId: 8,
+                          dataVersion: "ab12cd34ef56ab12")
+    }
+
+    func v2Manifest() -> UpdateManifest {
+        UpdateManifest(schema: 2, keyId: "test-key", version: "0.1.2", buildNumber: 10,
+                       channel: .stable, notes: "", assets: manifest().assets,
+                       dataPackage: dataPackage())
+    }
+
+    func routeManifest(_ transport: FakeTransport, manifestData: Data, signatureData: Data,
+                       releasesJSON: Data, v2ManifestData: Data? = nil, v2SignatureData: Data? = nil,
+                       v2Status: Int = 404) {
+        transport.handler = { url, _ in
+            if url.path.hasPrefix("/repos/") {
+                return UpdateHTTPResponse(status: 200, headers: ["etag": "\"v1\""],
+                                          body: releasesJSON, finalURL: url)
+            }
+            if url.lastPathComponent == "update-manifest-v2.json" {
+                guard let v2ManifestData else {
+                    return UpdateHTTPResponse(status: v2Status, headers: [:], body: Data(), finalURL: url)
+                }
+                return UpdateHTTPResponse(status: 200, headers: [:], body: v2ManifestData, finalURL: url)
+            }
+            if url.lastPathComponent == "update-manifest-v2.json.sig" {
+                guard let v2SignatureData else {
+                    return UpdateHTTPResponse(status: v2Status, headers: [:], body: Data(), finalURL: url)
+                }
+                return UpdateHTTPResponse(status: 200, headers: [:], body: v2SignatureData, finalURL: url)
+            }
+            if url.lastPathComponent == "update-manifest.json" {
+                return UpdateHTTPResponse(status: 200, headers: [:], body: manifestData, finalURL: url)
+            }
+            if url.lastPathComponent == "update-manifest.json.sig" {
+                return UpdateHTTPResponse(status: 200, headers: [:], body: signatureData, finalURL: url)
+            }
+            return UpdateHTTPResponse(status: 404, headers: [:], body: Data(), finalURL: url)
+        }
+    }
+
+    func testSchema2ManifestCarriesDataPackage() async throws {
+        let v2 = v2Manifest()
+        let (v2Data, v2Sig) = try signedRelease(v2)
+        let v1 = manifest()
+        let (v1Data, v1Sig) = try signedRelease(v1)
+        let releases = try releaseJSONWithV2(v2ManifestData: v2Data, v2SignatureData: v2Sig,
+                                             v1ManifestData: v1Data, v1SignatureData: v1Sig)
+        let transport = FakeTransport()
+        routeManifest(transport, manifestData: v1Data, signatureData: v1Sig,
+                      releasesJSON: releases, v2ManifestData: v2Data, v2SignatureData: v2Sig,
+                      v2Status: 200)
+        let result = await engine(transport).check(automatic: false)
+        XCTAssertEqual(result.kind, .available)
+        XCTAssertEqual(result.dataPackage, dataPackage())
+        XCTAssertEqual(result.candidate?.manifest.schema, 2)
+    }
+
+    func testMissingV2FallsBackToSchema1() async throws {
+        // 404 v2 → 回落 schema 1：可升级，无数据包（老发布形态）。
+        let (v1Data, v1Sig) = try signedRelease(manifest())
+        let releases = try releaseJSON(manifestData: v1Data, signatureData: v1Sig)
+        let transport = FakeTransport()
+        routeManifest(transport, manifestData: v1Data, signatureData: v1Sig, releasesJSON: releases)
+        let result = await engine(transport).check(automatic: false)
+        XCTAssertEqual(result.kind, .available)
+        XCTAssertNil(result.dataPackage)
+        XCTAssertEqual(result.candidate?.manifest.schema, 1)
+    }
+
+    func testOldClientStyleSchema1OnlyReleaseStillUpgradable() async throws {
+        // 0.2.0 旧客户端视角：发布只有 schema 1 清单（旧名字），无 v2 资产。
+        // 客户端照常 available；v1 清单没有 dataPackage 字段时解码不报错。
+        let manifestData = try JSONEncoder().encode(manifest())
+        let decoded = try JSONDecoder().decode(UpdateManifest.self, from: manifestData)
+        XCTAssertNil(decoded.dataPackage)
+        let (data, sig) = try signedRelease(manifest())
+        let releases = try releaseJSON(manifestData: data, signatureData: sig)
+        let transport = FakeTransport()
+        routeManifest(transport, manifestData: data, signatureData: sig, releasesJSON: releases)
+        let result = await engine(transport).check(automatic: false)
+        XCTAssertEqual(result.kind, .available)
+    }
+
+    func testSchema2WithoutDataPackageIsRejected() throws {
+        // schema 2 缺 dataPackage 字段：解码即拒（不能静默丢数据包）。
+        let json = "{" +
+            "\"schema\":2,\"keyId\":\"k\",\"version\":\"0.1.2\",\"buildNumber\":10," +
+            "\"channel\":\"stable\",\"notes\":\"\",\"assets\":[]}"
+        XCTAssertThrowsError(try JSONDecoder().decode(UpdateManifest.self, from: Data(json.utf8)))
+        // validate 层同样拒绝（dataPackage == nil）。
+        let bad = UpdateManifest(schema: 2, keyId: "k", version: "0.1.2", buildNumber: 10,
+                                 channel: .stable, notes: "", assets: manifest().assets,
+                                 dataPackage: nil)
+        XCTAssertThrowsError(try UpdateManifestVerifier.validate(bad)) {
+            XCTAssertEqual($0 as? UpdateManifestError, .missingDataPackage)
+        }
+    }
+
+    func testDataPackageFieldValidation() throws {
+        // 无主包的平台不允许声明数据包。
+        let wrongPlatform = UpdateManifest(schema: 2, keyId: "k", version: "0.1.2", buildNumber: 10,
+                                           channel: .stable, notes: "", assets: manifest().assets,
+                                           dataPackage: UpdateDataPackage(platform: "ios", name: "x.pkg", size: 1,
+                                                                          sha256: String(repeating: "b", count: 64),
+                                                                          assetId: 8, dataVersion: "ab12cd34ef56ab12"))
+        XCTAssertThrowsError(try UpdateManifestVerifier.validate(wrongPlatform))
+        // dataVersion 必须 16 位十六进制。
+        let shortVersion = UpdateManifest(schema: 2, keyId: "k", version: "0.1.2", buildNumber: 10,
+                                          channel: .stable, notes: "", assets: manifest().assets,
+                                          dataPackage: UpdateDataPackage(platform: "macos", name: "x.pkg", size: 1,
+                                                                         sha256: String(repeating: "b", count: 64),
+                                                                         assetId: 8, dataVersion: "short"))
+        XCTAssertThrowsError(try UpdateManifestVerifier.validate(shortVersion))
+    }
+
+    func testRegistryBindsDataPackageDownloadRecord() async throws {
+        let v2 = v2Manifest()
+        let (v2Data, v2Sig) = try signedRelease(v2)
+        let v1 = manifest()
+        let (v1Data, v1Sig) = try signedRelease(v1)
+        let releases = try releaseJSONWithV2(v2ManifestData: v2Data, v2SignatureData: v2Sig,
+                                             v1ManifestData: v1Data, v1SignatureData: v1Sig)
+        let transport = FakeTransport()
+        routeManifest(transport, manifestData: v1Data, signatureData: v1Sig,
+                      releasesJSON: releases, v2ManifestData: v2Data, v2SignatureData: v2Sig,
+                      v2Status: 200)
+        _ = await engine(transport).check(automatic: false)
+        let resolved = UpdateEngine.dataPackageRegistry.lookup(
+            manifestVersion: "0.1.2", buildNumber: 10, dataVersion: "ab12cd34ef56ab12")
+        XCTAssertNotNil(resolved)
+        XCTAssertEqual(resolved?.sha256, dataPackage().sha256)
+        XCTAssertNil(UpdateEngine.dataPackageRegistry.lookup(
+            manifestVersion: "0.1.2", buildNumber: 10, dataVersion: "other"))
+    }
+
+    func testDataPackageDownloadVerifiesHashAndCachesByVersion() async throws {
+        let payload = Data("data-zip-content".utf8)
+        let hash = UpdateDownloader.sha256(of: payload)
+        let asset = UpdateAsset(platform: "macos", arch: "x86_64", minOS: "26.0",
+                                assetId: 9, name: "Gogaku-Data-0.1.2.pkg",
+                                size: Int64(payload.count), sha256: hash)
+        let manifest = UpdateManifest(keyId: "test-key", version: "0.1.2", buildNumber: 10,
+                                      channel: .stable, notes: "", assets: [asset])
+        let candidate = UpdateCandidate(releaseTag: "v0.1.2", releaseName: "x",
+                                        manifest: manifest, asset: asset,
+                                        downloadURL: URL(string: "https://github.com/g/d.pkg")!,
+                                        publishedAt: nil)
+        let dataPackage = UpdateDataPackage(platform: "macos", name: "Gogaku-Data-0.1.2.pkg",
+                                            size: Int64(payload.count), sha256: hash,
+                                            assetId: 9, dataVersion: "ab12cd34ef56ab12")
+        let transport = FakeTransport()
+        var downloads = 0
+        transport.downloadHandler = { _ in
+            downloads += 1
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("d-\(UUID().uuidString)")
+            try payload.write(to: file)
+            return (file, Int64(payload.count))
+        }
+        let downloader = UpdateDownloader(transport: transport,
+                                          cacheRoot: root.appendingPathComponent("cache"))
+        let resolved = (URL(string: "https://github.com/g/d.pkg")!, hash, Int64(payload.count))
+        let file = try await downloader.downloadDataPackage(
+            candidate: candidate, dataPackage: dataPackage, resolved: resolved) { _ in }
+        XCTAssertEqual(try Data(contentsOf: file!), payload)
+        XCTAssertEqual(downloads, 1)
+        // 同 dataVersion 再请求：命中缓存不重新下载（数据未变跨版本复用）。
+        _ = try await downloader.downloadDataPackage(
+            candidate: candidate, dataPackage: dataPackage, resolved: resolved) { _ in }
+        XCTAssertEqual(downloads, 1)
+        // 清单哈希与 resolved 记录不一致：拒绝（绑定校验；不同 dataVersion
+        // 走独立缓存目录，真正落到下载路径）。
+        let stale = UpdateDataPackage(platform: "macos", name: dataPackage.name,
+                                      size: dataPackage.size, sha256: dataPackage.sha256,
+                                      assetId: dataPackage.assetId, dataVersion: "ffffffffffffffff")
+        do {
+            _ = try await downloader.downloadDataPackage(
+                candidate: candidate, dataPackage: stale,
+                resolved: (resolved.0, String(repeating: "0", count: 64), resolved.2)) { _ in }
+            XCTFail("哈希绑定不一致应拒绝")
+        } catch { }
+        // 无数据包（schema 1）：直接返回 nil。
+        let none = try await downloader.downloadDataPackage(
+            candidate: candidate, dataPackage: nil, resolved: nil) { _ in }
+        XCTAssertNil(none)
+    }
+
+    func releaseJSONWithV2(tag: String = "v0.1.2", v2ManifestData: Data, v2SignatureData: Data,
+                           v1ManifestData: Data?, v1SignatureData: Data?,
+                           packageName: String = "Gogaku-0.1.2-b10.pkg",
+                           packageSize: Int64 = 1_024, packageAssetId: Int64 = 7,
+                           dataAssetId: Int64 = 8, prerelease: Bool = false) throws -> Data {
+        var assets: [[String: Any]] = []
+        func add(_ id: Int, _ name: String, _ data: Data) {
+            assets.append(["id": id, "name": name, "size": data.count,
+                           "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/\(tag)/\(name)"])
+        }
+        add(30, "update-manifest-v2.json", v2ManifestData)
+        add(31, "update-manifest-v2.json.sig", v2SignatureData)
+        if let v1ManifestData, let v1SignatureData {
+            add(1, "update-manifest.json", v1ManifestData)
+            add(2, "update-manifest.json.sig", v1SignatureData)
+        }
+        assets.append(["id": packageAssetId, "name": packageName, "size": packageSize,
+                       "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/\(tag)/\(packageName)"])
+        assets.append(["id": dataAssetId, "name": "Gogaku-Data-0.1.2.pkg", "size": 4_096,
+                       "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/\(tag)/Gogaku-Data-0.1.2.pkg"])
+        let release: [String: Any] = [
+            "id": 42, "tag_name": tag, "name": tag, "body": "notes",
+            "draft": false, "prerelease": prerelease,
+            "published_at": "2026-11-06T10:00:00Z", "assets": assets,
+        ]
+        return try JSONSerialization.data(withJSONObject: [release])
+    }
+
+    func testManifestNameHelpers() {
+        XCTAssertEqual(UpdateManifestSourcing.baseManifestName(), "update-manifest.json")
+        XCTAssertEqual(UpdateManifestSourcing.baseManifestName(flavor: "lite"), "update-manifest-lite.json")
+        XCTAssertEqual(UpdateManifestSourcing.v2ManifestName(), "update-manifest-v2.json")
+        XCTAssertEqual(UpdateManifestSourcing.v2ManifestName(flavor: "lite"), "update-manifest-lite-v2.json")
     }
 }

@@ -163,6 +163,8 @@ private final class ShiftTapPoller {
 final class GogakuInputController: IMKInputController {
     /// 共享引擎（词库只加载一次）；本控制器只是调用方。
     private let hub = EngineHub.shared
+    /// 活跃控制器弱引用：热更新退出请求按它结束当前组合。
+    static weak var active: GogakuInputController?
     // 学习会话不再由控制器持有：共享会话在 EngineHub，全部经
     // hub.learningSession（创建）／existingLearningSession（读）访问。
     private var focus: UInt64 = 0
@@ -549,6 +551,7 @@ final class GogakuInputController: IMKInputController {
 
     override func activateServer(_ sender: Any!) {
         active = true
+        Self.active = self
         shiftPoller.start()
         panel.choose = { [weak self] row in self?.panelChoose(row: row) }
         panel.pagePrevious = { [weak self] in self?.panelPage(-1) }
@@ -1859,6 +1862,25 @@ final class GogakuInputController: IMKInputController {
     }
 
     @objc private func clearDrafts(_ sender: Any?) { DraftStore.shared.clear() }
+
+    // MARK: 热更新交接
+
+    /// 就地更新后的优雅退出（org.gogaku.inputmethod.restart）：
+    /// 延迟 1.5 秒（让在途组合／待插入译文落地），先结束当前组合再
+    /// NSApp.terminate 正常退出。绝不 SIGKILL；imklaunchagent 在连接断开后
+    /// 按需拉起新版进程。已请求则不再重复（进程退出前只走一次）。
+    static func requestGracefulExitForUpdate() {
+        DispatchQueue.main.async {
+            guard !gracefulExitScheduled else { return }
+            gracefulExitScheduled = true
+            GogakuInputController.active?.suspend()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                NSApp.terminate(nil)
+            }
+        }
+    }
+
+    private static var gracefulExitScheduled = false
 
     override func menu() -> NSMenu! {
         // 菜单精简（2026-11-04 用户裁决）：模式状态由菜单栏状态项图标填充态

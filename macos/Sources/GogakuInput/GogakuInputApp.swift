@@ -1,5 +1,6 @@
 import AppKit
 import InputMethodKit
+import GogakuKit
 
 @main struct GogakuInput {
     private static var server: IMKServer?
@@ -28,6 +29,13 @@ import InputMethodKit
         // 'InputMethodConnectionName' value”拒绝——dev 选中即回弹、进程拉不起。
         let bundleID = Bundle.main.bundleIdentifier ?? "org.gogaku.inputmethod"
         server = IMKServer(name: bundleID + "_connection", bundleIdentifier: bundleID)
+        // 热更新交接：进程启动早期注册（幂等）。安装器替换双 App 后发
+        // org.gogaku.inputmethod.restart；本进程延迟结束在途组合后
+        // NSApp.terminate 正常退出，imklaunchagent 检测断线后按需拉起新版。
+        // 绝不 SIGKILL：旧进程多活几秒无副作用（持有旧 inode 继续打字正常）。
+        UpdateInstaller.observeInputMethodRestart {
+            DispatchQueue.main.async { GogakuInputController.requestGracefulExitForUpdate() }
+        }
         #if GOGAKU_VALIDATION
         GogakuInput.diag("=== session start \(Date()) pid=\(ProcessInfo.processInfo.processIdentifier)")
         #endif

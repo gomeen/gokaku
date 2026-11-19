@@ -39,6 +39,25 @@ public struct UpdateAsset: Codable, Equatable, Sendable {
     }
 }
 
+/// 数据包资产（schema 2 可选字段）：与主包同 postinstall 机制的 pkg，
+/// 只含双 App 的 EngineData；`dataVersion` 是数据内容指纹短哈希，
+/// 数据没变的版本之间相同（清单可引用上一个数据未变版本的数据包资产）。
+public struct UpdateDataPackage: Codable, Equatable, Sendable {
+    public let platform: String
+    public let name: String
+    public let size: Int64
+    public let sha256: String
+    public let assetId: Int64
+    /// 数据内容指纹（16 位十六进制；算法见 UpdateDataManifest.fingerprint）。
+    public let dataVersion: String
+
+    public init(platform: String, name: String, size: Int64, sha256: String,
+                assetId: Int64, dataVersion: String) {
+        self.platform = platform; self.name = name; self.size = size
+        self.sha256 = sha256; self.assetId = assetId; self.dataVersion = dataVersion
+    }
+}
+
 public struct UpdateManifest: Codable, Equatable, Sendable {
     public let schema: Int
     public let keyId: String
@@ -47,12 +66,54 @@ public struct UpdateManifest: Codable, Equatable, Sendable {
     public let channel: UpdateChannel
     public let notes: String
     public let assets: [UpdateAsset]
+    /// schema 2 起：数据包资产（仅主包所在平台；按本机平台取用）。
+    /// schema 1 清单解码为 nil（向后兼容）。
+    public let dataPackage: UpdateDataPackage?
 
     public init(schema: Int = 1, keyId: String, version: String, buildNumber: Int,
-                channel: UpdateChannel, notes: String, assets: [UpdateAsset]) {
+                channel: UpdateChannel, notes: String, assets: [UpdateAsset],
+                dataPackage: UpdateDataPackage? = nil) {
         self.schema = schema; self.keyId = keyId; self.version = version
         self.buildNumber = buildNumber; self.channel = channel
-        self.notes = notes; self.assets = assets
+        self.notes = notes; self.assets = assets; self.dataPackage = dataPackage
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case schema, keyId, version, buildNumber, channel, notes, assets, dataPackage
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        schema = try container.decode(Int.self, forKey: .schema)
+        keyId = try container.decode(String.self, forKey: .keyId)
+        version = try container.decode(String.self, forKey: .version)
+        buildNumber = try container.decode(Int.self, forKey: .buildNumber)
+        channel = try container.decode(UpdateChannel.self, forKey: .channel)
+        notes = try container.decode(String.self, forKey: .notes)
+        assets = try container.decode([UpdateAsset].self, forKey: .assets)
+        // schema 1 没有 dataPackage；schema 2 必须有（缺失按结构非法处理，
+        // 避免静默丢数据包导致“只升代码不升数据”）。
+        if schema >= 2 {
+            guard container.contains(.dataPackage) else {
+                throw DecodingError.dataCorruptedError(forKey: .dataPackage, in: container,
+                                                       debugDescription: "schema 2 清单缺少 dataPackage")
+            }
+            dataPackage = try container.decodeIfPresent(UpdateDataPackage.self, forKey: .dataPackage)
+        } else {
+            dataPackage = try container.decodeIfPresent(UpdateDataPackage.self, forKey: .dataPackage)
+        }
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(schema, forKey: .schema)
+        try container.encode(keyId, forKey: .keyId)
+        try container.encode(version, forKey: .version)
+        try container.encode(buildNumber, forKey: .buildNumber)
+        try container.encode(channel, forKey: .channel)
+        try container.encode(notes, forKey: .notes)
+        try container.encode(assets, forKey: .assets)
+        try container.encodeIfPresent(dataPackage, forKey: .dataPackage)
     }
 
     /// 选出当前平台／架构且系统版本满足的资产。资产不唯一视为清单非法。
@@ -72,6 +133,7 @@ public enum UpdateManifestError: Error, Equatable, LocalizedError {
     case malformedSignature
     case invalidSignature
     case invalidField(String)
+    case missingDataPackage
 
     public var errorDescription: String? {
         switch self {
@@ -82,6 +144,7 @@ public enum UpdateManifestError: Error, Equatable, LocalizedError {
         case .malformedSignature: return "更新清单签名格式非法"
         case .invalidSignature: return "更新清单签名验证失败"
         case let .invalidField(field): return "更新清单字段非法：\(field)"
+        case .missingDataPackage: return "schema 2 清单缺少 dataPackage"
         }
     }
 }
@@ -120,6 +183,10 @@ public enum UpdateVersion {
 }
 
 public enum UpdateManifestVerifier {
+    /// schema 2 双清单资产名：update-manifest-v2.json（schema 1 仍为
+    /// update-manifest.json，旧客户端继续读取；客户端优先拉 v2、404 回落 v1）。
+    public static let v2ManifestSuffix = "-v2"
+
     /// 校验原始清单字节的分离 Ed25519 签名，再解析并做字段校验。
     /// 签名文件允许原始 64 字节或 base64 文本（含换行）。
     public static func verify(manifestBytes: Data, signature: Data,
@@ -154,7 +221,12 @@ public enum UpdateManifestVerifier {
     }
 
     public static func validate(_ manifest: UpdateManifest) throws {
-        guard manifest.schema == 1 else { throw UpdateManifestError.unsupportedSchema(manifest.schema) }
+        guard manifest.schema == 1 || manifest.schema == 2 else {
+            throw UpdateManifestError.unsupportedSchema(manifest.schema)
+        }
+        guard manifest.schema < 2 || manifest.dataPackage != nil else {
+            throw UpdateManifestError.missingDataPackage
+        }
         guard UpdateVersion.isValidVersion(manifest.version) else {
             throw UpdateManifestError.invalidField("version")
         }
@@ -192,6 +264,27 @@ public enum UpdateManifestVerifier {
             let key = "\(asset.platform)/\(asset.arch)"
             guard seen.insert(key).inserted else {
                 throw UpdateManifestError.invalidField("assets 重复：\(key)")
+            }
+        }
+        // 数据包资产与主包同一套字段约束；只在主包平台声明。
+        if let data = manifest.dataPackage {
+            guard manifest.assets.contains(where: { $0.platform == data.platform }) else {
+                throw UpdateManifestError.invalidField("dataPackage.platform 无主包")
+            }
+            guard !data.name.isEmpty, data.name.utf8.count <= 255,
+                  !data.name.contains("/"), !data.name.contains("\\"),
+                  data.name != ".", data.name != ".." else {
+                throw UpdateManifestError.invalidField("dataPackage.name")
+            }
+            guard data.size > 0, data.assetId > 0 else {
+                throw UpdateManifestError.invalidField("dataPackage.id/size")
+            }
+            guard data.sha256.count == 64, data.sha256.allSatisfy({ $0.isHexDigit }) else {
+                throw UpdateManifestError.invalidField("dataPackage.sha256")
+            }
+            guard data.dataVersion.count == 16,
+                  data.dataVersion.allSatisfy({ $0.isHexDigit }) else {
+                throw UpdateManifestError.invalidField("dataPackage.dataVersion")
             }
         }
         // stable 只接受正式版本；dev 可接受 dev／rc／正式。
@@ -290,9 +383,36 @@ public struct UpdateCheckOutcome: Codable, Equatable, Sendable {
     public let message: String
     public let candidate: UpdateCandidate?
     public let checkedAt: Date
+    /// 发现新版本时携带（schema 2 且本平台有数据包；schema 1 或无数据包为 nil）。
+    /// Codable 兼容旧缓存：缺键解码为 nil。
+    public let dataPackage: UpdateDataPackage?
 
-    public init(kind: Kind, message: String, candidate: UpdateCandidate? = nil, checkedAt: Date) {
-        self.kind = kind; self.message = message; self.candidate = candidate; self.checkedAt = checkedAt
+    public init(kind: Kind, message: String, candidate: UpdateCandidate? = nil,
+                dataPackage: UpdateDataPackage? = nil, checkedAt: Date) {
+        self.kind = kind; self.message = message; self.candidate = candidate
+        self.dataPackage = dataPackage; self.checkedAt = checkedAt
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case kind, message, candidate, dataPackage, checkedAt
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        kind = try container.decode(Kind.self, forKey: .kind)
+        message = try container.decode(String.self, forKey: .message)
+        candidate = try container.decodeIfPresent(UpdateCandidate.self, forKey: .candidate)
+        dataPackage = try container.decodeIfPresent(UpdateDataPackage.self, forKey: .dataPackage)
+        checkedAt = try container.decode(Date.self, forKey: .checkedAt)
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(kind, forKey: .kind)
+        try container.encode(message, forKey: .message)
+        try container.encodeIfPresent(candidate, forKey: .candidate)
+        try container.encodeIfPresent(dataPackage, forKey: .dataPackage)
+        try container.encode(checkedAt, forKey: .checkedAt)
     }
 }
 
@@ -309,5 +429,24 @@ public struct UpdateCandidate: Codable, Equatable, Sendable {
         self.releaseTag = releaseTag; self.releaseName = releaseName
         self.manifest = manifest; self.asset = asset
         self.downloadURL = downloadURL; self.publishedAt = publishedAt
+    }
+}
+
+/// 双清单：新客户端优先 update-manifest-v2.json（schema 2，含 dataPackage），
+/// 404／缺失回落 update-manifest.json（schema 1，只含主包——0.2.0 及更早
+/// 客户端只认这个名字，照常升级主包）。
+public enum UpdateManifestSourcing {
+    /// 本安装形态的清单资产名（不含 -v2 后缀）。
+    public static func baseManifestName(flavor: String = "full") -> String {
+        flavor == "lite" ? "update-manifest-lite.json" : "update-manifest.json"
+    }
+
+    /// schema 2 清单资产名：基础名去掉 .json、加 -v2 再补回后缀
+    /// （update-manifest.json → update-manifest-v2.json；
+    ///   update-manifest-lite.json → update-manifest-lite-v2.json）。
+    public static func v2ManifestName(flavor: String = "full") -> String {
+        let base = baseManifestName(flavor: flavor)
+        guard base.hasSuffix(".json") else { return base }
+        return base.dropLast(5) + "-v2.json"
     }
 }
