@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.1.8",
+  "channel": "stable",
+  "version": "0.1.8",
+  "buildNumber": 119,
+  "releaseId": 450807351,
+  "state": "published",
+  "publishedAt": "2026-11-19",
+  "commit": "523db1790c6315b93401935cfcfe1c72bab29c28",
+  "assets": {
+    "macos": {"name": "Gogaku-0.1.8.pkg", "sha256": "f7b9c49345370b1cf34a47762d78098212552fb4025e4887a4df2666478ed0ae"},
+    "windows": {"name": "Gogaku-0.1.8-windows-x64-setup.exe", "sha256": "7be61a296de27bd637be942bd32d0c633b53dca77b135e112a5a1501b5059813"},
+    "macosLite": {"name": "GogakuLite-0.1.8.pkg", "sha256": "d1c7d0063f5a769bee93fe43939aedd62e8b09b2f3c2bd29ab11c1b3a6d414b4"},
+    "windowsLite": {"name": "GogakuLite-0.1.8-windows-x64-setup.exe", "sha256": "3008f7cdf267edd1781eb9bc5b6e826edb6148dc16479e2dd01026b9d510f26e"},
+    "manifests": ["update-manifest.json", "update-manifest.json.sig", "update-manifest-lite.json", "update-manifest-lite.json.sig"]
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.1.8.json",
+  "releaseReport": "verify/report-release-0.1.8.json",
+  "hostWaiver": "用户 2026-11-19 决定直接发布：本次为文档性质发布（侧栏标签修复＋对外命名去构建号），fast 7/7 与 release 14/14 已通过；0.1.6–0.1.7 累计的 host 宿主验收欠账仍待补录。",
+  "notes": "0.1.8 修复设置侧栏版本标签（stable 不再误显「本机开发版」与构建号）并落实对外命名去构建号：安装包文件名、tag、清单资产名只含版本号（Gogaku-0.1.8.pkg），构建号降级为纯内部对账字段（保留在 version.json、update-manifest 的 buildNumber、客户端更新比较、收据与诊断输出）。版本规则改为三档递增（修复→小版本、新功能→中版本、重大→大版本）＋发布即占用。命名改革实现见 9946880；标签修复见 8706a4b。验证：fast 7/7（Swift 288 项）、release 14/14；公开清单远端匿名验签通过（signature ok，keyId gogaku-prod-2026-11）；tag v0.1.8 指向构建提交 523db17。历史发布（v0.1.6/v0.1.7）资产与 release-b*.json 记录未改名。host 未运行（豁免理由见 hostWaiver），0.1.6 起累计宿主验收欠账待补。"
+}
