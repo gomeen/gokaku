@@ -424,11 +424,11 @@ def validate_remote(args, meta, state, token):
         fail('远端不是指定仓库中已审阅的同版本／构建／通道 Draft')
     # 显式取资产列表，不能相信 release 响应中可能截断的 assets。
     assets = api_request('GET', url + '/assets?per_page=100', token)
-    # 主包双端×产品（2）+ 双清单×产品（4）+ 数据包（如本轮提供；复用上一版
-    # 引用时远端资产就是上一版资产，不在本版列表里）。
-    reused_reference = args.macos_data_pkg is None
-    expected_count = (6 * len(release_products(meta))
-                      + (0 if reused_reference else 1))
+    # 主包双端×产品（2）+ 双清单×产品（4）+ 数据包（本轮提供的 full/lite 各 1；
+    # 复用上一版引用时该产品的数据包不在本版列表里）。
+    data_pkg_count = ((0 if args.macos_data_pkg is None else 1)
+                      + (0 if args.lite_macos_data_pkg is None else 1))
+    expected_count = 6 * len(release_products(meta)) + data_pkg_count
     if not isinstance(assets, list) or len(assets) != expected_count:
         fail(f'远端资产列表变化：必须恰好 {expected_count} 项')
     # 远端资产名不含 dataPackage 键；只在比较文件资产时使用。
