@@ -366,7 +366,6 @@ def main() -> None:
 
     digest = sha256(pkg_path)
     (DIST / (pkg_name + '.sha256')).write_text(digest + '  ' + pkg_name + '\n')
-    print(f'   构建收据：{receipt_path}')
     print(f'✅ PKG：{pkg_path}')
     print(f'   大小：{pkg_path.stat().st_size / 1048576:.1f} MB')
     print(f'   SHA-256：{digest}')
