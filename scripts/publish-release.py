@@ -437,8 +437,10 @@ def validate_remote(args, meta, state, token):
     expected_names = {name for name in state['assets'] if name not in meta_keys}
     if {asset.get('name') for asset in assets} != expected_names:
         fail('远端资产名称／列表变化')
+    upload_records = {name: record for name, record in state['assets'].items()
+                      if name not in meta_keys}
     for asset in assets:
-        record = expected[asset['name']]
+        record = upload_records[asset['name']]
         if (type(asset.get('id')) is not int or asset['id'] != record['id']
                 or asset.get('size') != record['bytes'] or asset.get('state') != 'uploaded'):
             fail('远端资产 ID／大小／上传状态变化')
