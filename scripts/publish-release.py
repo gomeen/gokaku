@@ -250,7 +250,7 @@ def run_manifest(args, asset_ids: Path, product: str, macos_pkg: Path,
                '--asset-ids', str(asset_ids), '--key', str(args.key), '--key-id', args.key_id,
                '--out', str(output_dir(args))]
     # 数据包按产品取：full 用 --macos-data-pkg，lite 用 --lite-macos-data-pkg。
-    data_pkg = args.macos_data_pkg if product == 'full' else args.lite_macos_data_pkg
+    data_pkg = args.macos_data_pkg if product == 'full' else getattr(args, 'lite_macos_data_pkg', None)
     if data_pkg is not None:
         command += ['--macos-data-pkg', str(data_pkg)]
     if args.previous_state is not None:
@@ -277,8 +277,8 @@ def local_files(args, meta):
     # 数据包是发布资产（macOS only；Windows 仍整包）。
     if args.macos_data_pkg is not None:
         files.append(Path(args.macos_data_pkg))
-    if 'lite' in [prod for _, _, prod in meta['assets']] and args.lite_macos_data_pkg is not None:
-        files.append(Path(args.lite_macos_data_pkg))
+    if 'lite' in [prod for _, _, prod in meta['assets']] and getattr(args, 'lite_macos_data_pkg', None) is not None:
+        files.append(Path(getattr(args, 'lite_macos_data_pkg', None)))
     for product in release_products(meta):
         manifest, signature = manifest_names(product)
         files += [output_dir(args) / manifest, output_dir(args) / signature]
@@ -344,7 +344,7 @@ def verify_manifest(args, meta, records, product: str, macos_pkg: Path, windows_
         fail('schema 2 清单缺少 dataPackage 或 dataVersion')
     if data['platform'] != 'macos':
         fail('schema 2 dataPackage 只允许 macOS（本轮范围）')
-    data_local = Path(args.macos_data_pkg) if product == 'full' else args.lite_macos_data_pkg
+    data_local = Path(args.macos_data_pkg) if product == 'full' else getattr(args, 'lite_macos_data_pkg', None)
     if data_local is not None:
         # 本轮提供了数据包：必须与本地资产完全绑定。
         data_local = Path(data_local)
@@ -387,7 +387,7 @@ def validate_state(args, meta):
     products = release_products(meta)
     # 主包双端×产品（2）+ 双清单×产品（schema 1/2 各 json+sig，4）+ 数据包（full/lite 各 1）。
     data_pkg_count = ((1 if args.macos_data_pkg is not None else 0)
-                      + (1 if args.lite_macos_data_pkg is not None else 0))
+                      + (1 if getattr(args, 'lite_macos_data_pkg', None) is not None else 0))
     asset_count = 6 * len(products) + data_pkg_count
     if (not isinstance(upload_records, dict) or set(upload_records) != expected_names
             or len(upload_records) != asset_count):
@@ -427,7 +427,7 @@ def validate_remote(args, meta, state, token):
     # 主包双端×产品（2）+ 双清单×产品（4）+ 数据包（本轮提供的 full/lite 各 1；
     # 复用上一版引用时该产品的数据包不在本版列表里）。
     data_pkg_count = ((0 if args.macos_data_pkg is None else 1)
-                      + (0 if args.lite_macos_data_pkg is None else 1))
+                      + (0 if getattr(args, 'lite_macos_data_pkg', None) is None else 1))
     expected_count = 6 * len(release_products(meta)) + data_pkg_count
     if not isinstance(assets, list) or len(assets) != expected_count:
         fail(f'远端资产列表变化：必须恰好 {expected_count} 项')
@@ -497,10 +497,10 @@ def publish(args) -> None:
         ids['macos-data'] = ids[Path(args.macos_data_pkg).name] = data_asset_id
         data_record = file_record(Path(args.macos_data_pkg), data_asset_id)
         records[data_record['name']] = data_record
-    if args.lite_macos_data_pkg is not None:
-        lite_data_asset_id = upload_asset(args.repo, release_id, token, Path(args.lite_macos_data_pkg))
-        ids[Path(args.lite_macos_data_pkg).name] = lite_data_asset_id
-        lite_data_record = file_record(Path(args.lite_macos_data_pkg), lite_data_asset_id)
+    if getattr(args, 'lite_macos_data_pkg', None) is not None:
+        lite_data_asset_id = upload_asset(args.repo, release_id, token, Path(getattr(args, 'lite_macos_data_pkg', None)))
+        ids[Path(getattr(args, 'lite_macos_data_pkg', None)).name] = lite_data_asset_id
+        lite_data_record = file_record(Path(getattr(args, 'lite_macos_data_pkg', None)), lite_data_asset_id)
         records[lite_data_record['name']] = lite_data_record
     write_json(out / 'asset-ids.json', ids)
     full_mac = next(path for plat, path, prod in meta['assets'] if plat == 'macos' and prod == 'full')
@@ -527,7 +527,7 @@ def publish(args) -> None:
         data_assets['dataPackage'] = {'platform': 'macos', **data_record,
                                       'dataVersion': receipt.get('dataVersion')}
     if lite_data_record is not None:
-        receipt = read_json(package_receipt_path(Path(args.lite_macos_data_pkg)))
+        receipt = read_json(package_receipt_path(Path(getattr(args, 'lite_macos_data_pkg', None))))
         data_assets['liteDataPackage'] = {'platform': 'macos', **lite_data_record,
                                           'dataVersion': receipt.get('dataVersion')}
     state['assets'] = {**records, **data_assets}
