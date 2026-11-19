@@ -378,6 +378,11 @@ def validate_state(args, meta):
     if any(state.get(key) != value for key, value in binding(args, meta, args.publish_existing).items()):
         fail('release-state 与 repo／Release ID／源码／Git／版本／通道不符')
     records = state.get('assets', {})
+    # dataPackage／liteDataPackage 是元数据键（记录数据版本供下版复用），
+    # 不是上传资产；校验与遍历都在真实资产子集上进行。
+    data_keys = {key for key in ('dataPackage', 'liteDataPackage')
+                 if isinstance(records.get(key), dict) and 'name' not in records.get(key, {})}
+    upload_records = {key: value for key, value in records.items() if key not in data_keys}
     files = local_files(args, meta)
     expected_names = {path.name for path in files}
     products = release_products(meta)
@@ -385,8 +390,10 @@ def validate_state(args, meta):
     data_pkg_count = ((1 if args.macos_data_pkg is not None else 0)
                       + (1 if args.lite_macos_data_pkg is not None else 0))
     asset_count = 6 * len(products) + data_pkg_count
-    if not isinstance(records, dict) or set(records) != expected_names or len(records) != asset_count:
+    if (not isinstance(upload_records, dict) or set(upload_records) != expected_names
+            or len(upload_records) != asset_count):
         fail(f'release-state 必须绑定且只绑定 {asset_count} 个发布资产')
+    records = upload_records
     ids = []
     for path in files:
         record = records[path.name]
