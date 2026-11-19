@@ -1123,8 +1123,9 @@ def main():
     suffix = '-dev' if CHANNEL == 'dev' else ''
     version = json.loads(VERSION_FILE.read_text())
     names = {
-        'macos': ROOT / f'dist/Gogaku-{version["version"]}-b{version["buildNumber"]}{suffix}.pkg',
-        'windows': ROOT / f'dist/gogaku-win/Gogaku-{version["version"]}-b{version["buildNumber"]}{suffix}-windows-x64-setup.exe',
+        # 对外文件名只用版本号＋通道后缀；构建号只进包内身份与清单对账。
+        'macos': ROOT / f'dist/Gogaku-{version["version"]}{suffix}.pkg',
+        'windows': ROOT / f'dist/gogaku-win/Gogaku-{version["version"]}{suffix}-windows-x64-setup.exe',
     }
     if any(path.is_file() for path in names.values()):
         try:

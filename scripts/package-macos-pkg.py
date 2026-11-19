@@ -15,7 +15,7 @@
 - 版本取 version.json 三段数字（pkg version 不接受预发布段），构建号进标题。
 
 用法：python3 scripts/package-macos-pkg.py [--channel stable|dev]
-前置：先跑 scripts/build.py（同通道）。输出 dist/Gogaku-<版本>-b<构建号>[-dev].pkg。
+前置：先跑 scripts/build.py（同通道）。输出 dist/Gogaku-<版本>[-dev].pkg（对外只用版本号，构建号不进文件名）。
 """
 import argparse
 import hashlib
@@ -287,7 +287,7 @@ def main() -> None:
     # 资产名前缀按产品：Lite 用 GogakuLite-，否则与完整版同名会互相覆盖
     # （publish-release.py 的 expected_names 也按这个规则校验）。
     product_prefix = 'GogakuLite' if args.flavor == 'lite' else 'Gogaku'
-    pkg_name = f"{product_prefix}-{meta['version']}-b{meta['buildNumber']}{channel['suffix']}.pkg"
+    pkg_name = f"{product_prefix}-{meta['version']}{channel['suffix']}.pkg"
     pkg_path = DIST / pkg_name
     if pkg_path.exists():
         pkg_path.unlink()

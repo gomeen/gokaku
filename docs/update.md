@@ -40,7 +40,7 @@
       "arch": "x86_64",
       "minOS": "26.0",
       "assetId": 123456,
-      "name": "Gogaku-0.1.2-b90.pkg",
+      "name": "Gogaku-0.1.2.pkg",
       "size": 47185920,
       "sha256": "64 位小写十六进制"
     },
@@ -49,7 +49,7 @@
       "arch": "x86_64",
       "minOS": "10.0.22000",
       "assetId": 123457,
-      "name": "Gogaku-0.1.2-b90-windows-x64-setup.exe",
+      "name": "Gogaku-0.1.2-windows-x64-setup.exe",
       "size": 104857600,
       "sha256": "64 位小写十六进制"
     }
@@ -98,7 +98,7 @@
 ```
 
 - `owner`／`repo` 留空＝本机构建未配置更新源；客户端明确显示未配置。
-- 当前仓库配置为 `gomeen/gokaku`；b113 stable（0.1.5）已完成发布侧资产和清单签名验证，但客户端安装闭环仍待验证。
+- 当前仓库配置为 `gomeen/gokaku`；0.1.7 stable（b118）已完成发布侧资产和清单签名验证（当时资产名仍含构建号，见 [release-b118.json](validation/release-b118.json)），客户端安装闭环仍待验证。2026-11-19 起资产名只用版本号，不再含构建号。
 - 公钥可轮换：保留旧 keyId 直到所有受支持版本升级完成；私钥只存发布环境，绝不入库。
 - 开发公钥 `gogaku-dev-2026-11` 仅用于协议回归；生产发布前替换为生产公钥。
   发布脚本会拒绝 `trustedKeys` 中不存在的 `keyId`，避免客户端无法验证的清单上线。
@@ -117,8 +117,8 @@ python3 scripts/verify.py --profile host --channel stable --yes
 # 2. 本地检查（不联网；实际报告文件名以 verify.py 输出为准）
 python3 scripts/publish-release.py --dry-run \
   --repo gomeen/gokaku --channel stable \
-  --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
-  --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
+  --macos-pkg dist/Gogaku-0.1.2.pkg \
+  --windows-setup dist/Gogaku-0.1.2-windows-x64-setup.exe \
   --verification-report docs/validation/verify/report-fast-YYYYMMDD-HHMMSS.json \
   --verification-report docs/validation/verify/report-release-YYYYMMDD-HHMMSS.json \
   --verification-report docs/validation/verify/report-host-YYYYMMDD-HHMMSS.json \
@@ -127,8 +127,8 @@ python3 scripts/publish-release.py --dry-run \
 # 3. 创建 Draft、上传 pkg／setup、生成并上传清单与签名
 GITHUB_TOKEN=... python3 scripts/publish-release.py \
   --repo gomeen/gokaku --channel stable \
-  --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
-  --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
+  --macos-pkg dist/Gogaku-0.1.2.pkg \
+  --windows-setup dist/Gogaku-0.1.2-windows-x64-setup.exe \
   --verification-report docs/validation/verify/report-fast-YYYYMMDD-HHMMSS.json \
   --verification-report docs/validation/verify/report-release-YYYYMMDD-HHMMSS.json \
   --verification-report docs/validation/verify/report-host-YYYYMMDD-HHMMSS.json \

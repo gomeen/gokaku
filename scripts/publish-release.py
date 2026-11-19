@@ -47,11 +47,13 @@ def fail(message):
 
 
 def expected_names(version: str, build: int, channel: str, product: str = 'full') -> dict:
+    # 对外文件名只用版本号＋通道后缀；构建号只用于内部对账，不进文件名或 tag。
+    del build
     suffix = '-dev' if channel == 'dev' else ''
     prefix = 'GogakuLite' if product == 'lite' else 'Gogaku'
     return {
-        'macos': f'{prefix}-{version}-b{build}{suffix}.pkg',
-        'windows': f'{prefix}-{version}-b{build}{suffix}-windows-x64-setup.exe',
+        'macos': f'{prefix}-{version}{suffix}.pkg',
+        'windows': f'{prefix}-{version}{suffix}-windows-x64-setup.exe',
     }
 
 
@@ -126,7 +128,7 @@ def validate(args) -> dict:
         fail('发布说明超过 64 KiB')
     if not args.publish_existing and not args.dry_run and not Path(args.key or '').is_file():
         fail('创建 Draft 需要 Ed25519 私钥：--key 或 GOGAKU_UPDATE_KEY')
-    tag = args.tag or (f'v{version["version"]}-b{version["buildNumber"]}-dev'
+    tag = args.tag or (f'v{version["version"]}{"-dev" if args.channel == "dev" else ""}'
                        if args.channel == 'dev' else f'v{version["version"]}')
     products = ['full'] + (['lite'] if len(assets) > 2 else [])
     return {'version': version['version'], 'build': version['buildNumber'],

@@ -34,8 +34,8 @@ class DeliveryPipelineTests(unittest.TestCase):
         self.git = {'commit': 'a' * 40, 'dirty': True}
         self.packages = []
         for platform, extension in [('macos', 'pkg'), ('windows', 'exe')]:
-            name = ('Gogaku-0.1.0-dev.1-b12-dev.pkg' if platform == 'macos' else
-                    'Gogaku-0.1.0-dev.1-b12-dev-windows-x64-setup.exe')
+            name = ('Gogaku-0.1.0-dev.1-dev.pkg' if platform == 'macos' else
+                    'Gogaku-0.1.0-dev.1-dev-windows-x64-setup.exe')
             package = self.root / name
             package.write_bytes((platform + ' package').encode())
             receipt = {'schema': 1, 'kind': 'installer', 'platform': platform, 'arch': 'x86_64',
@@ -432,7 +432,7 @@ class DeliveryPipelineTests(unittest.TestCase):
         args = self.args()
         args.publish_existing = 71
         args.dry_run = False
-        meta = {'tag': 'v0.1.0-dev.1-b12-dev', 'name': 'Gogaku 0.1.0-dev.1（构建 12）'}
+        meta = {'tag': 'v0.1.0-dev.1-dev', 'name': 'Gogaku 0.1.0-dev.1（构建 12）'}
         records = {}
         for index, (_, path) in enumerate(self.packages):
             records[path.name] = {'id': index + 1, 'name': path.name,
@@ -470,7 +470,7 @@ class DeliveryPipelineTests(unittest.TestCase):
         records = {path.name: {'id': i + 1, 'name': path.name, 'bytes': path.stat().st_size,
                                'sha256': delivery.sha256(path)}
                    for i, (_, path) in enumerate(self.packages)}
-        meta = {'tag': 'v0.1.0-dev.1-b12-dev', 'version': '0.1.0-dev.1', 'build': 12,
+        meta = {'tag': 'v0.1.0-dev.1-dev', 'version': '0.1.0-dev.1', 'build': 12,
                 'channel': 'dev', 'name': 'Gogaku 0.1.0-dev.1（构建 12）'}
         state = {'tag': meta['tag'], 'assets': records}
         calls = []

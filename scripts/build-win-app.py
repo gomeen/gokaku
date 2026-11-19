@@ -384,9 +384,11 @@ def stage(args, *, version_file=VERSION_FILE, git=None):
     resources = resource_plan(args)
     suffix = '-dev' if args.channel == 'dev' else ''
     product = 'GogakuLite' if flavor == 'lite' else 'Gogaku'
-    output_base = f'{product}-{version}-b{build}{suffix}-windows-x64-setup'
+    # 对外文件名只用版本号＋通道后缀（2026-11-19 裁决）；构建号只进包内身份。
+    output_base = f'{product}-{version}{suffix}-windows-x64-setup'
     out_root = Path(args.out or ROOT / 'dist/gogaku-win').resolve()
-    stage_dir = out_root / f'{version}-b{build}{suffix}'
+    # 暂存目录不带构建号：同版本重试直接复用同一目录，避免旧 b{N} 残留混淆。
+    stage_dir = out_root / f'{version}{suffix}'
     # 校验完成才替换旧暂存目录；不能删除恰好被指定为输入的目录。
     sources = [p for entries in plans.values() for _, p in entries] + [p.resolve() for p, _ in resources]
     source_hashes = {p.resolve(): sha256(p) for p, _ in resources}

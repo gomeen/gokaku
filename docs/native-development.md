@@ -106,8 +106,8 @@ python3 probes/validate-imk-host.py --channel dev --report local/imk-host-smoke-
 ```sh
 python3 scripts/build.py --channel stable
 python3 scripts/package-macos-pkg.py --channel stable
-# 双击 dist/Gogaku-<版本>-b<构建号>.pkg，或：
-installer -pkg dist/Gogaku-<版本>-b<构建号>.pkg -target CurrentUserHomeDirectory
+# 双击 dist/Gogaku-<版本>[-dev].pkg（文件名不含构建号），或：
+installer -pkg dist/Gogaku-<版本>[-dev].pkg -target CurrentUserHomeDirectory
 ```
 
 pkg 为用户级安装，不需管理员密码。身份注入与签名在**打包阶段**完成：staging App 注入输入源身份、由内向外签名（Developer ID 或 ad-hoc）、打成 zip；postinstall 解包后只校验身份／构建号／签名，备份旧包、替换、重注册，不再重签。任一步失败恢复旧包；事务状态在 `~/Library/Application Support/Gogaku/install/transaction.txt`。**Mac 对外只交付 pkg，不再生成或交付 DMG。** 正式分发签名／公证命令见[发布流程](release.md)「2.3 签名与公证」。

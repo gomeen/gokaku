@@ -65,14 +65,14 @@ Windows 上可将 `--iscc` 改为实际 `ISCC.exe` 路径。本机 Wine wrapper 
 
 根 `version.json` 是唯一版本来源。版本须为三段 SemVer，可带 `dev.N`／`rc.N`；构建号为 1–65535 整数，Windows 数值版本为三段版本＋构建号。兼容 `--version`／`--build` 只能传与根文件完全相同的值，不能覆盖。stable 只接受正式版本；dev 通道可接受 dev／rc／正式，但 rc／正式无论通道都要求已跟踪文件干净，dev 版本允许 dirty。Git 状态按 `git status --porcelain --untracked-files=no` 计算，与仓库版本规则一致。
 
-输出默认在 `dist/gogaku-win/`：版本暂存子目录、`Gogaku-<version>-b<build>[-dev]-windows-x64-setup.exe` 和 `.exe.sha256`。包内 `build-identity.json` 包含根版本文件哈希、Git commit／dirty、版本阶段、两架构 PE 导入闭包和每个 payload 文件的 SHA-256／大小。`.iss` 位于暂存根，但 `[Files]` 只列 bin、data、resources、licenses 及 identity，不包含 `.iss` 自身。未传 `--iscc` 只暂存；传入后要求编译成功且生成非空 EXE，旧同名输出不会冒充本轮成功。
+输出默认在 `dist/gogaku-win/`：版本暂存子目录（`<version>[-dev]`，不带构建号）、`Gogaku-<version>[-dev]-windows-x64-setup.exe` 和 `.exe.sha256`（2026-11-19 起文件名不含构建号）。包内 `build-identity.json` 包含根版本文件哈希、Git commit／dirty、版本阶段、两架构 PE 导入闭包和每个 payload 文件的 SHA-256／大小。`.iss` 位于暂存根，但 `[Files]` 只列 bin、data、resources、licenses 及 identity，不包含 `.iss` 自身。未传 `--iscc` 只暂存；传入后要求编译成功且生成非空 EXE，旧同名输出不会冒充本轮成功。
 
 ## 安装与卸载行为
 
 - 只允许 Windows 11 x64（10.0.22000+），Program Files 安装。机器级 COM／TSF 注册使用 UAC；x64 用 System32 的 `regsvr32`，x86 用 SysWOW64，调用时显式控制文件系统重定向。
 - 注册位于文件安装阶段的 `AfterInstall`，检查进程启动结果和退出码；任一架构失败会尝试撤销本次注册、恢复旧双架构注册与路径指针，并抛错触发文件回滚。清理／恢复错误附在失败信息中；真实故障恢复矩阵需另行验证。
 - 不激活、不设默认输入法、不改用户语言列表。设置应用默认不打开；只有用户勾选后才以原用户身份启动。登录启动默认关闭，仅用户勾选后由代理以 `runasoriginaluser` 写入自己的 Run 项。安装期间不无条件启动常驻代理。
-- 程序与只读资源放入 `{app}\versions\<version>-b<build>-<channel>`；卸载器留在固定 `{app}`。升级只检查新目标目录，不覆盖旧宿主持有的 DLL；同一构建重装和卸载仍检查占用，提示用户手动退出后重试。`CloseApplications=no`、`RestartApplications=no`，不强杀宿主、不自动注销／重启，也不安排重启后替换。
+- 程序与只读资源放入 `{app}\versions\<version>-b<build>-<channel>`（构建号属安装器内部目录名，非对外文件名）；卸载器留在固定 `{app}`。升级只检查新目标目录，不覆盖旧宿主持有的 DLL；同一构建重装和卸载仍检查占用，提示用户手动退出后重试。`CloseApplications=no`、`RestartApplications=no`，不强杀宿主、不自动注销／重启，也不安排重启后替换。
 - 注册前保存双架构旧 DLL 路径；新注册失败时撤销本次注册、恢复旧注册和路径指针。成功后以 64 位 `HKLM\Software\Gogaku\<channel>\ActiveRoot`／`PreviousRoot` 记录当前与上一 payload；没有旧指针时从旧 DLL 路径推导。新 TSF 只信任这两个受保护根下的准确代理路径，健康旧代理可继续持有调频；旧宿主释放后的版本清理尚未自动化。
 - 升级仅迁移已加载用户 hive 中、准确指向旧 payload 的既有自启动值；没有启用自启动的用户保持关闭。离线用户 hive 不加载、不迁移。
 - `[UninstallRun]` 不使用非法的 `runasoriginaluser`。确认卸载后，Pascal 清理从 HKEY_USERS 枚举已加载用户 hive，只删除当前通道命名、且命令完整匹配本安装目录代理的 Run 值，不在提升账户的 HKCU 执行用户代理命令。离线用户 hive 不加载、不修改，界面提示这类用户可在 Windows 启动应用中移除失效项。双架构 `regsvr32 /u /s` 注销在文件删除前执行并检查结果。

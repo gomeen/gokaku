@@ -4,6 +4,8 @@
 
 **状态标注**：✅ 已验证可用；🚧 部分就绪；⬜ 未开始。**未在真实安装包／真实宿主上验证的，不标 ✅。**
 
+**对外命名（2026-11-19 裁决）**：对外一切只用版本号——安装包文件名、tag、发布记录都不含构建号：`Gogaku-0.1.8.pkg`、`Gogaku-0.1.8-windows-x64-setup.exe`（dev 通道加 `-dev` 后缀）；发布记录如 `docs/validation/release-0.1.8.json`，发布期工作目录如 `dist/release-0.1.8/`（发布时手建）。`buildNumber` 降级为纯内部过程计数器，只在 update-manifest 字段、客户端更新比较、包内身份与收据／诊断中出现。历史 `release-b*.json` 与已发布 Release 的资产不改名。规则见[版本管理](versioning.md)。
+
 ## 0. 交付等级
 
 | 等级 | 版本形态 | 给谁 | 门槛 | 产物 |
@@ -12,7 +14,7 @@
 | 功能交付包 | dev 版 | 自己＋朋友（测试与试用） | fast＋构建身份＋安装冒烟 | Mac pkg；Windows Setup.exe |
 | 定版 | `0.1.x`＋标签 `v0.1.x` | stable 用户 | **工作区干净**＋fast＋release＋host（短档）；用户书面豁免 host 时，必须记录理由、在发布说明中写明未运行 host，并写入 `release-state.json`；核心／IMK 改动或里程碑用 host-full | 双端安装包＋身份记录＋验证报告 |
 
-不再有候选版 rc（2026-11-10 裁决）。**每次正式发布的常规修复或小改进递增末位版本号；重大功能更新递增中间位并将末位归零**，示例与边界见[版本管理](versioning.md)。定版号决定后固定，验证失败的修复只递增构建号；正式发布后，下一次发布按版本递增规则使用新版本号。每次**对外提供安装包前递增 `version.json` 构建号**；定版构建由脚本强制要求干净工作区。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
+不再有候选版 rc（2026-11-10 裁决）。**对外发布过的版本号永久占用**；下一次发布的版本号按三档递增规则确定（修复递增小版本，新功能递增中版本、末位归零，重大／破坏性更新递增大版本），未发布出去的包重试不算发布、不占号，只递增构建号——示例与边界见[版本管理](versioning.md)。每次**对外提供安装包前递增 `version.json` 构建号**；定版构建由脚本强制要求干净工作区。构建身份（包内 `build-identity.json`＋外部 `dist/build-identity.json` 含 SHA-256）必须与验收报告绑定，报告不回写源码。
 
 ## 1. 双通道安装（stable＋dev）
 
@@ -37,7 +39,7 @@
 
 ```
 python3 scripts/build.py                     # 依赖→核心 ctest→Swift Release→组装双 App→身份
-python3 scripts/package-macos-pkg.py         # 生成 dist/Gogaku-<版本>-b<构建号>.pkg
+python3 scripts/package-macos-pkg.py         # 生成 dist/Gogaku-<版本>[-dev].pkg（不含构建号）
 python3 scripts/verify.py --profile fast     # 验证门槛
 python3 scripts/manage-install.py install    # 当前用户安装（可选 uninstall/recover/diagnose）
 ```
@@ -52,7 +54,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 
 ### 2.2 PKG（唯一对外 Mac 产物）🚧
 
-`scripts/package-macos-pkg.py` 生成 `dist/Gogaku-<版本>-b<构建号>[-dev].pkg`：
+`scripts/package-macos-pkg.py` 生成 `dist/Gogaku-<版本>[-dev].pkg`（文件名只用版本号＋通道后缀）：
 
 - 用户级安装，无需管理员密码；`domains` 限定当前用户主目录，payload 为空，postinstall 落位＋`lsregister` 重注册。
 - pkg 装出的文件不带隔离标记（DMG 拷出会带，会拦输入法进程——这是输入法普遍用 pkg 而非 DMG 的原因）。**本轮不再生成或交付 DMG。**
@@ -95,7 +97,7 @@ python3 scripts/package-macos-pkg.py --channel stable \
 
 ## 3. Windows 构建（Setup.exe）
 
-构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。当前 stable b113 安装包名称见[发布记录](validation/release-b113.json)；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为 b113 通过。
+构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。当前 stable 历史安装包名称见各[发布记录](validation/release-b118.json)（2026-11-19 起文件名不再含构建号）；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为 b113 通过。
 
 | 部件 | 构建线 | 工具链 | 状态 |
 | --- | --- | --- | --- |

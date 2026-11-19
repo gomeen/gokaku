@@ -10,8 +10,8 @@
 
 用法：
   python3 scripts/make-update-manifest.py --channel stable \
-      --macos-pkg dist/Gogaku-0.1.2-b90.pkg \
-      --windows-setup dist/Gogaku-0.1.2-b90-windows-x64-setup.exe \
+      --macos-pkg dist/Gogaku-0.1.2.pkg \
+      --windows-setup dist/Gogaku-0.1.2-windows-x64-setup.exe \
       --asset-ids dist/update/asset-ids.json \
       --key ~/Library/Application Support/Gogaku/update-signing/prod-private-key.txt \
       --key-id gogaku-prod-2026
@@ -60,11 +60,13 @@ def load_version():
 
 
 def expected_name(platform: str, version: str, build: int, channel: str, product: str = 'full') -> str:
+    # 对外文件名只用版本号＋通道后缀；构建号只用于内部对账（清单 buildNumber 字段），不进文件名。
+    del build
     suffix = '-dev' if channel == 'dev' else ''
     prefix = 'GogakuLite' if product == 'lite' else 'Gogaku'
     if platform == 'macos':
-        return f'{prefix}-{version}-b{build}{suffix}.pkg'
-    return f'{prefix}-{version}-b{build}{suffix}-windows-x64-setup.exe'
+        return f'{prefix}-{version}{suffix}.pkg'
+    return f'{prefix}-{version}{suffix}-windows-x64-setup.exe'
 
 
 def manifest_basename(product: str) -> str:
@@ -217,8 +219,8 @@ def sign(key_path: Path, key_id: str, manifest: Path, signature: Path) -> None:
 def self_test() -> None:
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
-        pkg = root / 'Gogaku-0.1.2-b90.pkg'
-        setup = root / 'Gogaku-0.1.2-b90-windows-x64-setup.exe'
+        pkg = root / 'Gogaku-0.1.2.pkg'
+        setup = root / 'Gogaku-0.1.2-windows-x64-setup.exe'
         pkg.write_bytes(b'fake-pkg-content' * 100)
         setup.write_bytes(b'fake-setup-content' * 100)
         key = root / 'private.txt'

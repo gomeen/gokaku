@@ -2,6 +2,14 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-19：对外命名只用版本号，构建号降级为纯内部计数器，工作区）
+
+- 用户裁决：对外一切只用版本号，构建号不再出现在任何安装包文件名、tag 或用户可见 UI；发布记录按版本号命名（如 `release-0.1.8.json`）。
+- 安装包文件名去掉 `-b{构建号}`：stable 如 `Gogaku-0.1.8.pkg`／`Gogaku-0.1.8-windows-x64-setup.exe`，dev 通道只留 `-dev` 后缀（如 `Gogaku-0.1.8-dev.1-dev.pkg`）。dev 发布 tag 同步改为 `v<版本>-dev`；Windows 安装器内部 `versions\<版本>-<通道>` 目录照旧带构建号（非对外标识）。发布期工作目录习惯改为按版本号（如 `dist/release-0.1.8/`）。
+- 版本递增规则改为三档：修复或小改进递增小版本（0.1.7 → 0.1.8）；新功能递增中版本、末位归零（0.1.x → 0.2.0）；重大／破坏性更新递增大版本。**发布即占用**：对外发布过的版本号永久占用；未发布出去的包（构包失败、验证失败、签名错误等重试）不算发布、不占号，只递增构建号——原「定版失败只递增构建号」规则整体替换。
+- `buildNumber` 保留在 `version.json`：仍单调递增、每次对外构包前递增，用途只剩内部对账（update-manifest 的 `buildNumber` 字段、客户端更新比较、包内 `build-identity.json`、收据、诊断输出），明确不得出现在安装包文件名、tag 与面向用户的默认 UI。客户端更新逻辑（比构建号）不变。
+- 改动范围：打包与发布脚本（`package-macos-pkg.py`、`build-win-app.py`、`publish-release.py`、`make-update-manifest.py`、`verify.py`）的文件名模板与期望名、交付管道自测、版本与发布／更新文档。历史 `release-b*.json` 与已发布 Release（v0.1.6／v0.1.7）的资产不改名，git 历史可考。本条为发布工具行为，不影响已发布客户端。
+
 ### 变更（2026-11-18：侧栏版本标签不再把 stable 误标为开发版，工作区）
 
 - 用户报告：设置侧栏页脚无条件显示「本机开发版」与「0.1.7 构建118」，stable 用户会误读自己装的是开发版。根因是该标签是硬编码文案，从不判断实际通道。

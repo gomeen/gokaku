@@ -150,7 +150,7 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 
 ### macOS：仅 PKG
 
-产物为 `Gogaku-<version>-b<build>[-dev].pkg`，保留当前用户级安装位置和手动启用输入源语义。
+产物为 `Gogaku-<version>[-dev].pkg`（2026-11-19 起文件名不含构建号），保留当前用户级安装位置和手动启用输入源语义。
 
 - 构建与交付流程不再生成 DMG 或提供 DMG 指引。
 - 安装前完整解包并检查双 App（身份、构建号、签名），备份旧输入法和设置应用，再替换；任一步失败恢复两者，不先删除唯一可用副本。身份与签名在打包阶段完成，postinstall 不重签；Developer ID 签名／公证流水线已备，缺证书时明确失败。
@@ -160,7 +160,7 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 
 ### Windows：完整 Setup.exe
 
-产物为 `Gogaku-<version>-b<build>[-dev]-windows-x64-setup.exe`，包含双位数 TSF、x64 用户代理与核心依赖、设置、普通输入资源、许可与构建清单。
+产物为 `Gogaku-<version>[-dev]-windows-x64-setup.exe`（2026-11-19 起文件名不含构建号），包含双位数 TSF、x64 用户代理与核心依赖、设置、普通输入资源、许可与构建清单。
 
 - Inno Setup 可在 Windows 构建机，或本轮已打通的 Mac＋Wine 上运行编译器生成；程序与只读资源安装到受保护的 Program Files，用户数据放 `%LOCALAPPDATA%\Gogaku`。
 - UAC 完成机器级注册，启用和用户配置以原用户身份执行，不误写管理员账户。
