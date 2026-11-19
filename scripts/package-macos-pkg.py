@@ -351,9 +351,11 @@ def main() -> None:
     productbuild.append(pkg_path)
     run(productbuild)
     size_mb = pkg_path.stat().st_size / 1048576
-    if size_mb < 10:
+    if size_mb < 8:
         # productbuild 曾静默产出无组件的空壳（见上）；不放过带病产物。
-        raise SystemExit(f'pkg 异常：仅 {size_mb:.1f} MB（应为约 45+ MB），组件包未嵌入')
+        # 数据／代码分离后代码包约为 10–11 MB（full）、10 MB（Lite），
+        # 8 MB 以下仍视为空壳。
+        raise SystemExit(f'pkg 异常：仅 {size_mb:.1f} MB（代码包应为约 10+ MB），组件包未嵌入')
     if args.installer_sign_identity:
         run(['pkgutil', '--check-signature', pkg_path])
     if args.notarize:
