@@ -161,6 +161,21 @@ for role in input settings; do
     [ "$actual_build" = "$EXPECTED_BUILD" ] || fail "安装后构建号不符：$actual_build"
 done
 
+# 数据／代码包分离（2026-11 裁决）：主包不再携带 EngineData。从备份把旧
+# 数据结转进新包，保证仅装主包的旧客户端（schema 1 清单路径）升级后词库
+# 仍可用（核心兼容旧数据）；Gogaku-Data 数据包随后可整体替换 EngineData。
+# 注意：结转发生在签名校验之后（EngineData 不在新包密封内，逐文件哈希由
+# 数据包清单负责）；结转失败不回滚安装，只如实提示。
+for role in input settings; do
+    target="$(target_for "$role")"
+    data_dir="$target/Contents/Resources/EngineData"
+    mkdir -p "$data_dir"
+    old_data="$(backup_for "$role")/Contents/Resources/EngineData"
+    if [ ! -e "$data_dir/sc.dict" ] && [ -f "$old_data/sc.dict" ]; then
+        ditto "$old_data" "$data_dir" || echo "警告：旧词库结转失败；请安装 Gogaku-Data 数据包补齐出厂数据" >&2
+    fi
+done
+
 "$LSREGISTER" -f "$IM_DIR/$INPUT_APP" >/dev/null 2>&1 || true
 write_state success
 

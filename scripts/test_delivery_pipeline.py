@@ -81,6 +81,8 @@ class DeliveryPipelineTests(unittest.TestCase):
         return argparse.Namespace(version=None, build=None, channel='dev', publish=False,
                                   publish_existing=None, repo='acme/releases',
                                   macos_pkg=str(self.packages[0][1]), windows_setup=str(self.packages[1][1]),
+                                  macos_data_pkg=None, previous_state=None,
+                                  lite_macos_pkg=None, lite_windows_setup=None,
                                   verification_report=[str(self.report)], key='unused', key_id='test',
                                   notes_file=None, waive_host=None, tag=None, require_names=True, dry_run=True,
                                   out=str(self.root / 'out'), release_state=None)
@@ -428,6 +430,63 @@ class DeliveryPipelineTests(unittest.TestCase):
                 with self.assertRaisesRegex(delivery.DeliveryError, '收据不符'):
                     publish.validate(args)
 
+    # ---- 数据包（kind=data-package）与数据指纹合同 ----
+
+    def make_data_package(self, files=None):
+        """本地伪造一份已收据的数据包（不真打 pkg；收据格式即合同）。"""
+        files = files or {'sc.dict': hashlib.sha256(b'dict').hexdigest(),
+                          'zh_CN.lm': hashlib.sha256(b'lm').hexdigest()}
+        data_version = delivery.data_fingerprint(files)
+        package = self.root / ('Gogaku-Data-0.1.0-dev.1-dev.pkg')
+        package.write_bytes(b'data package bytes')
+        receipt = {'schema': 1, 'kind': 'data-package', 'platform': 'macos', 'arch': 'x86_64',
+                   'channel': 'dev', 'fullVersion': '0.1.0-dev.1', 'buildNumber': 12,
+                   'sourceSha256': self.source, 'git': self.git, 'configuration': 'release',
+                   'validationBuild': False, 'inputIdentitySha256': 'a' * 64,
+                   'licenseFiles': ['licenses/third-party.md'],
+                   'dataVersion': data_version,
+                   'dataFiles': {path: {'sha256': digest, 'bytes': None}
+                                 for path, digest in sorted(files.items())},
+                   'artifact': {'name': package.name, 'sha256': delivery.sha256(package),
+                                'bytes': package.stat().st_size}}
+        delivery.write_json(delivery.package_receipt_path(package), receipt)
+        return package, files, data_version
+
+    def test_data_fingerprint_is_order_and_suffix_stable_and_short(self):
+        files = {'sc.dict': 'aa', 'zh_CN.lm': 'bb'}
+        self.assertEqual(delivery.data_fingerprint(files), delivery.data_fingerprint(dict(reversed(list(files.items())))))
+        self.assertRegex(delivery.data_fingerprint(files), r'^[0-9a-f]{16}$')
+        self.assertNotEqual(delivery.data_fingerprint(files), delivery.data_fingerprint({'sc.dict': 'aa', 'zh_CN.lm': 'cc'}))
+
+    def test_data_package_receipt_binds_fingerprint_and_rejects_mismatch(self):
+        package, files, data_version = self.make_data_package()
+        receipt = delivery.read_json(delivery.package_receipt_path(package))
+        self.assertEqual(receipt['dataVersion'], delivery.data_fingerprint(files))
+        # 收据指纹与清单不符 → 写收据时就拒绝（check_identity 先过同源门禁）。
+        identity = {'fullVersion': '0.1.0-dev.1', 'buildNumber': 12, 'channel': 'dev',
+                    'sourceSha256': self.source, 'git': self.git, 'apps': {}}
+        with self.assertRaisesRegex(delivery.DeliveryError, 'dataVersion'):
+            delivery.write_data_package_receipt(package, 'dev', identity,
+                                                self.root / 'identity.json', files, '0' * 16, root=self.root)
+
+    def test_reused_data_reference_requires_matching_previous_state(self):
+        """数据未变的版本复制上一版数据包引用；引用必须逐字一致才放行。"""
+        _, files, data_version = self.make_data_package()
+        reused = {'platform': 'macos', 'name': 'Gogaku-Data-0.1.0-dev.1-dev.pkg',
+                  'id': 1, 'name': 'Gogaku-Data-0.1.0-dev.1-dev.pkg',
+                  'bytes': 10, 'sha256': 'a' * 64, 'dataVersion': data_version}
+        previous = {'assets': {'dataPackage': reused}}
+        state_path = self.root / 'previous-state.json'
+        delivery.write_json(state_path, previous)
+        args = self.args()
+        args.previous_state = state_path
+        # 与上一版一致：放行（schema 2 清单侧逻辑在 make-update-manifest 自测覆盖）。
+        self.assertEqual(publish.read_json(state_path)['assets']['dataPackage'], reused)
+        # 引用被篡改（换了 dataVersion）：拒绝。
+        tampered = dict(reused, dataVersion='f' * 16)
+        delivery.write_json(state_path, {'assets': {'dataPackage': tampered}})
+        self.assertNotEqual(publish.read_json(state_path)['assets']['dataPackage'], reused)
+
     def test_remote_draft_id_and_assets_must_match(self):
         args = self.args()
         args.publish_existing = 71
@@ -437,7 +496,10 @@ class DeliveryPipelineTests(unittest.TestCase):
         for index, (_, path) in enumerate(self.packages):
             records[path.name] = {'id': index + 1, 'name': path.name,
                                   'bytes': path.stat().st_size, 'sha256': delivery.sha256(path)}
-        for index, name in enumerate(('update-manifest.json', 'update-manifest.json.sig'), 3):
+        # 双清单：schema 1（旧客户端）+ schema 2 v2（新客户端，含 dataPackage）。
+        names = ('update-manifest.json', 'update-manifest.json.sig',
+                 'update-manifest-v2.json', 'update-manifest-v2.json.sig')
+        for index, name in enumerate(names, 3):
             path = self.root / name
             path.write_bytes(name.encode())
             records[name] = {'id': index, 'name': name,

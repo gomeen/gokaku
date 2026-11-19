@@ -14,8 +14,16 @@
 - pkg 只针对当前用户主目录（domains current-user-home），不请求管理员密码；
 - 版本取 version.json 三段数字（pkg version 不接受预发布段），构建号进标题。
 
-用法：python3 scripts/package-macos-pkg.py [--channel stable|dev]
-前置：先跑 scripts/build.py（同通道）。输出 dist/Gogaku-<版本>[-dev].pkg（对外只用版本号，构建号不进文件名）。
+用法：python3 scripts/package-macos-pkg.py [--channel stable|dev] [--flavor full|lite]
+前置：先跑 scripts/build.py（同通道）。
+输出（2026-11 裁决，数据／代码包分离，下载量 50MB→约 15MB）：
+- dist/Gogaku-<版本>[-dev].pkg（代码包）：zip 内剔除两个 App 的
+  Contents/Resources/EngineData；客户端就地安装时数据从数据包来。
+- dist/Gogaku-Data-<版本>[-dev].pkg（数据包）：只含 EngineData（同
+  postinstall 机制，双 App 各落一份），postinstall 校验哈希与数据指纹；
+  收据 kind=data-package，含数据文件清单与 dataVersion（数据内容指纹）。
+- Lite 同理（GogakuLite-Data-<版本>…）。
+主包对外文件名不变：0.2.0 及更早客户端读 schema 1 清单继续可用。
 """
 import argparse
 import hashlib
@@ -28,7 +36,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 from _gogaku_delivery import (DeliveryError, package_receipt_path, validate_macos_apps,
-                              write_package_receipt)
+                              write_data_package_receipt, write_package_receipt)
 DIST = ROOT / 'dist'
 LSREGISTER = ('/System/Library/Frameworks/CoreServices.framework/Frameworks/'
               'LaunchServices.framework/Support/lsregister')
@@ -53,6 +61,22 @@ CHANNELS = {
 }
 
 POSTINSTALL_TEMPLATE = ROOT / 'macos/packaging/pkg-postinstall.sh'
+DATA_POSTINSTALL_TEMPLATE = ROOT / 'macos/packaging/pkg-postinstall-data.sh'
+
+
+def engine_data_files(app: Path) -> dict:
+    """相对 EngineData 的 {文件: sha256}；数据包收据与 dataVersion 都来自它。"""
+    root = app / 'Contents/Resources/EngineData'
+    return {str(p.relative_to(root)): sha256(p)
+            for p in sorted(root.rglob('*')) if p.is_file()}
+
+
+def data_fingerprint(entries: dict) -> str:
+    """数据内容指纹（16 位十六进制）：对排序后的 (相对路径, sha256) 文本
+    再取一次 SHA-256。数据不变则指纹不变；客户端按它跨版本复用下载缓存。
+    与 Mac 客户端 UpdateDataManifest.fingerprint 逐字一致（测试绑定）。"""
+    joined = '\n'.join(f'{path}:{digest}' for path, digest in sorted(entries.items()))
+    return hashlib.sha256(joined.encode()).hexdigest()[:16]
 
 
 def sha256(path: Path) -> str:
@@ -152,12 +176,20 @@ CONCLUSION_HTML = '''<html><head><meta charset="utf-8"><style>body{{font:13px/1.
 <body><h2>安装完成</h2>
 <p><b>{label}</b> 已装入当前用户目录。</p>
 <ol>
+<li>安装 <b>{label} 数据包</b>（Gogaku-Data pkg，含出厂词库；本包不再内置数据）；</li>
 <li>打开「系统设置 → 键盘 → 文本输入 → 输入法」点 <b>＋</b>，添加 <b>{label}</b>；</li>
 <li>从菜单栏输入法菜单切换到 {label}；</li>
 <li>打开「{label} 设置」可配置普通输入、学习翻译与检查更新。</li>
 </ol>
 <p style="color:#666">{signature_note}</p>
 <p style="color:#666">不需要重启，也不会修改默认输入法。若输入源列表未出现，注销并重新登录一次即可。</p></body></html>'''
+
+DATA_README_HTML = '''<html><head><meta charset="utf-8"><style>body{{font:13px/1.6 -apple-system,PingFang SC;margin:24px;color:#222}}</style></head>
+<body><h2>Gogaku 数据包</h2>
+<p><b>{label}</b> {version}（构建号 {build}）的出厂数据（词库等 EngineData）。</p>
+<p>先安装同版本的主安装包（Gogaku pkg），再安装本数据包。客户端「检查更新」
+会自动下载安装数据；手动安装仅用于系统 Installer 路由。</p>
+<p style="color:#666">{signature_note}</p></body></html>'''
 
 
 def run(cmd, **kw):
@@ -238,7 +270,24 @@ def main() -> None:
         if identifier.startswith('org.gogaku.inputmethod'):
             (staged / 'Contents/Info.plist').write_bytes(
                 deterministic_plist_bytes(apply_tis_identity(info, identifier)))
-        sign_app(staged, args.app_sign_identity)
+    # 数据／代码包分离（2026-11 裁决）：数据清单先取（两个 App 的 EngineData
+    # 同源同哈希），再从 staging 剔除 EngineData，然后才签名——代码包的
+    # 密封不覆盖 EngineData，postinstall／就地安装器的 --deep --strict 校验
+    # 才能通过（EngineData 由数据包按清单哈希另行校验）。
+    data_files = engine_data_files(input_app)
+    for name, digest in engine_data_files(settings_app).items():
+        if data_files.get(name) != digest:
+            raise SystemExit(f'双 App 的 EngineData/{name} 哈希不一致，无法打数据包')
+        data_files[name] = digest
+    if not data_files:
+        raise SystemExit('两个 App 都没有 EngineData；数据包无法生成（构建脚本变了？）')
+    data_version = data_fingerprint(data_files)
+    for name in (channel['input'], channel['settings']):
+        shutil.rmtree(staging / name / 'Contents/Resources/EngineData')
+    for source, name, identifier in [
+            (input_app, channel['input'], channel['input_id']),
+            (settings_app, channel['settings'], channel['settings_id'])]:
+        sign_app(staging / name, args.app_sign_identity)
     run(['zip', '-q', '-r', scripts / 'Gogaku-apps.zip',
          channel['input'], channel['settings']], cwd=staging)
     post = scripts / 'postinstall'
@@ -262,6 +311,7 @@ def main() -> None:
     (res / 'welcome.html').write_text(WELCOME_HTML.format(**fmt))
     (res / 'readme.html').write_text(README_HTML.format(**fmt))
     (res / 'conclusion.html').write_text(CONCLUSION_HTML.format(**fmt))
+    (res / 'data-readme.html').write_text(DATA_README_HTML.format(**fmt))
 
     # productbuild 手写 distribution 的 choice 结构会被静默丢弃组件包（实测
     # 输出 2KB 壳），必须用 --synthesize 生成基线再补丁：插入 domains（用户级
@@ -313,6 +363,100 @@ def main() -> None:
         run(['xcrun', 'stapler', 'validate', pkg_path])
         # 公证后 Gatekeeper 的安装评估必须通过；失败不交付。
         run(['spctl', '-a', '-vv', '-t', 'install', pkg_path])
+
+    digest = sha256(pkg_path)
+    (DIST / (pkg_name + '.sha256')).write_text(digest + '  ' + pkg_name + '\n')
+    print(f'   构建收据：{receipt_path}')
+    print(f'✅ PKG：{pkg_path}')
+    print(f'   大小：{pkg_path.stat().st_size / 1048576:.1f} MB')
+    print(f'   SHA-256：{digest}')
+    print(f'   签名：{signature_note}')
+
+    # ---- 数据包：只含 EngineData 的同机制 pkg（kind=data-package 收据）----
+    data_scripts = work / 'data-scripts'
+    if data_scripts.exists():
+        shutil.rmtree(data_scripts)
+    data_scripts.mkdir()
+    # 数据 zip 布局与客户端 UpdateInstaller.installData 约定一致：
+    # manifest.json + 相对路径文件（不套 EngineData 目录）。
+    data_stage = work / 'data-stage'
+    if data_stage.exists():
+        shutil.rmtree(data_stage)
+    data_stage.mkdir()
+    for relative in sorted(data_files):
+        source = input_app / 'Contents/Resources/EngineData' / relative
+        destination = data_stage / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+    manifest_entries = [{'path': relative, 'sha256': data_files[relative]}
+                        for relative in sorted(data_files)]
+    (data_stage / 'manifest.json').write_text(json.dumps(
+        {'schema': 1, 'dataVersion': data_version, 'files': manifest_entries},
+        ensure_ascii=False, indent=2, sort_keys=True) + '\n')
+    run(['zip', '-q', '-r', data_scripts / 'Gogaku-data.zip', '.'], cwd=data_stage)
+    data_post = data_scripts / 'postinstall'
+    data_post.write_text(DATA_POSTINSTALL_TEMPLATE.read_text()
+                         .replace('@INPUT_APP@', channel['input'])
+                         .replace('@SETTINGS_APP@', channel['settings'])
+                         .replace('@BUILD@', str(meta['buildNumber']))
+                         .replace('@DATA_VERSION@', data_version)
+                         .replace('@DATA_MANIFEST@', json.dumps(
+                             {'schema': 1, 'dataVersion': data_version,
+                              'files': manifest_entries}, ensure_ascii=False)))
+    data_post.chmod(0o755)
+    data_core = work / f'gogaku-data-core{channel["suffix"]}.pkg'
+    run(['pkgbuild', '--root', work / 'empty-payload',
+         '--scripts', data_scripts,
+         '--identifier', 'org.gogaku.inputmethod.data.pkg',
+         '--version', version_release,
+         '--install-location', '/private/tmp/gogaku-empty',
+         data_core])
+    data_res = work / 'data-resources'
+    data_res.mkdir(exist_ok=True)
+    (data_res / 'readme.html').write_text(DATA_README_HTML.format(**fmt))
+    data_synth = work / 'data-distribution.xml'
+    run(['productbuild', '--synthesize', '--package', data_core, data_synth])
+    xml = data_synth.read_text().replace(
+        '<options',
+        f'<title>{channel["label"]} 数据 {meta["version"]}</title>\n'
+        '    <readme file="readme.html" mime-type="text/html"/>\n'
+        '    <domains enable_anywhere="false" enable_currentUserHome="true" '
+        'enable_localSystem="false"/>\n    <options', 1)
+    data_synth.write_text(xml)
+    data_pkg_name = f'{product_prefix}-Data-{meta["version"]}{channel["suffix"]}.pkg'
+    data_pkg_path = DIST / data_pkg_name
+    if data_pkg_path.exists():
+        data_pkg_path.unlink()
+    package_receipt_path(data_pkg_path).unlink(missing_ok=True)
+    data_productbuild = ['productbuild', '--distribution', data_synth,
+                         '--resources', data_res,
+                         '--package-path', work,
+                         '--identifier', 'org.gogaku.inputmethod.data']
+    if args.installer_sign_identity:
+        data_productbuild += ['--sign', args.installer_sign_identity]
+    data_productbuild.append(data_pkg_path)
+    run(data_productbuild)
+    if data_pkg_path.stat().st_size <= 0:
+        raise SystemExit('数据包异常：空产物')
+    if args.installer_sign_identity:
+        run(['pkgutil', '--check-signature', data_pkg_path])
+    if args.notarize:
+        run(['xcrun', 'notarytool', 'submit', data_pkg_path,
+             '--keychain-profile', args.notary_profile, '--wait'])
+        run(['xcrun', 'stapler', 'staple', data_pkg_path])
+        run(['xcrun', 'stapler', 'validate', data_pkg_path])
+    # 数据包收据：kind=data-package，含数据文件清单与 dataVersion。
+    data_receipt_path = write_data_package_receipt(
+        data_pkg_path, args.channel, build_identity, identity_path, data_files,
+        data_version, root=ROOT)
+    data_digest = sha256(data_pkg_path)
+    (DIST / (data_pkg_name + '.sha256')).write_text(data_digest + '  ' + data_pkg_name + '\n')
+    print(f'   构建收据：{data_receipt_path}')
+    print(f'✅ 数据包：{data_pkg_path}')
+    print(f'   大小：{data_pkg_path.stat().st_size / 1048576:.1f} MB')
+    print(f'   SHA-256：{data_digest}')
+    print(f'   dataVersion：{data_version}')
+    print(f'   签名：{signature_note}')
     shutil.rmtree(work)
 
     # 卫生：dist 内的 .app 会被 LaunchServices 周期扫描重新注册成输入源幽灵

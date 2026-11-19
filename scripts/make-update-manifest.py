@@ -18,6 +18,13 @@
 
 本地协议自测（不联网、临时密钥）：
   python3 scripts/make-update-manifest.py --self-test
+
+双清单（2026-11 裁决）：每次运行生成两份清单——
+- update-manifest[-lite].json（schema 1，只含主包）：0.2.0 及更早旧客户端
+  继续读取，无数据包引用；
+- update-manifest[-lite]-v2.json（schema 2，含 dataPackage）：新客户端优先
+  拉取。schema 2 必须有 dataPackage；数据未变时用 --previous-state 复制上一
+  版数据包资产引用（同一 dataVersion），数据变了则指向本轮数据包。
 """
 from __future__ import annotations
 import argparse
@@ -69,6 +76,65 @@ def expected_name(platform: str, version: str, build: int, channel: str, product
     return f'{prefix}-{version}{suffix}-windows-x64-setup.exe'
 
 
+def expected_data_name(platform: str, version: str, channel: str, product: str = 'full') -> str:
+    """数据包资产名（本轮范围只有 macOS 有数据包；Windows 仍整包）。"""
+    suffix = '-dev' if channel == 'dev' else ''
+    prefix = 'GogakuLite' if product == 'lite' else 'Gogaku'
+    if platform == 'macos':
+        return f'{prefix}-Data-{version}{suffix}.pkg'
+    raise ValueError(f'平台 {platform} 暂无数据包')
+
+
+def load_previous_state(path: str | None) -> dict:
+    """读上一版 release-state.json（复制数据包资产引用用）。容缺：文件缺失
+    或没有数据包记录时返回空 dict，由调用方决定是否报错。"""
+    if not path:
+        return {}
+    try:
+        value = json.loads(Path(path).read_text())
+        return value if isinstance(value, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def data_package_asset(platform: str, args, version: str, data_path: Path | None,
+                       ids: dict, product: str) -> dict | None:
+    """schema 2 的 dataPackage 对象。
+
+    - 本轮数据包存在：用本轮资产的哈希／大小／ID 与数据收据里的 dataVersion。
+    - 数据包缺失：若 --previous-state 的上一版记录有同产品数据包资产，复制
+      该引用（dataVersion 未变——发布侧校验数据指纹一致后才允许这样做）。
+    - 两者都没有：返回 None；publish-release.py 拒绝无 dataPackage 的 schema 2。"""
+    if platform != 'macos':
+        return None
+    prefix = 'GogakuLite' if product == 'lite' else 'Gogaku'
+    name_key = f'{prefix}-Data'
+    if data_path is not None:
+        receipt_path = Path(str(data_path) + '.receipt.json')
+        try:
+            receipt = json.loads(receipt_path.read_text())
+        except (OSError, ValueError):
+            fail(f'数据包收据缺失或不可读：{receipt_path}')
+        if receipt.get('kind') != 'data-package' or not receipt.get('dataVersion'):
+            fail(f'数据包收据必须是 data-package 且含 dataVersion：{receipt_path}')
+        return {
+            'platform': platform,
+            'name': data_path.name,
+            'size': data_path.stat().st_size,
+            'sha256': sha256(data_path),
+            'assetId': asset_id_for(ids, name_key, data_path.name, args.allow_placeholder_ids),
+            'dataVersion': receipt['dataVersion'],
+        }
+    # 复制上一版引用：release-state.json 的 assets.dataPackage（publish 侧写入）。
+    previous = load_previous_state(args.previous_state)
+    record = (previous.get('assets', {}).get('dataPackage') or {})
+    if record.get('name') and str(record.get('name', '')).startswith(name_key):
+        print(f"提示：本轮无新数据包；复用上一版数据包引用 {record['name']}"
+              f"（dataVersion {record.get('dataVersion')}）")
+        return dict(record)
+    return None
+
+
 def manifest_basename(product: str) -> str:
     return 'update-manifest-lite.json' if product == 'lite' else 'update-manifest.json'
 
@@ -106,6 +172,11 @@ def asset_id_for(ids: dict, platform: str, filename: str, allow_placeholder: boo
 
 
 def build_manifest(args) -> tuple[dict, Path, Path | None]:
+    """生成 schema 1（无数据包）与 schema 2（含 dataPackage）两份清单并签名。
+    返回 (schema1清单, schema1签名, schema2清单, schema2签名) 的简化形式：
+    schema1 必有；schema2 仅在能解析出 dataPackage 时生成（调用方缺数据包
+    且无上一版引用时明确报错，而不是悄悄只发 schema1——那会让新客户端永远
+    拿不到数据包）。"""
     version, build = load_version()
     if args.version:
         version = args.version
@@ -138,6 +209,7 @@ def build_manifest(args) -> tuple[dict, Path, Path | None]:
             fail(f'未知平台：{platform}')
 
     supplied = {'macos': args.macos_pkg, 'windows': args.windows_setup}
+    data_supplied = {'macos': args.macos_data_pkg}
     assets = []
     for platform in platforms:
         path = supplied.get(platform)
@@ -169,16 +241,45 @@ def build_manifest(args) -> tuple[dict, Path, Path | None]:
         'notes': notes,
         'assets': assets,
     }
+
+    # schema 2：主包 + dataPackage（本轮数据包或上一版引用）。
+    product = getattr(args, 'product', 'full')
+    data_path = Path(data_supplied['macos']) if data_supplied['macos'] else None
+    if data_path is not None and not data_path.is_file():
+        fail(f'macOS 数据包不存在：{data_path}')
+    if data_path is not None and args.require_names:
+        expected_data = expected_data_name('macos', version, args.channel, product)
+        if data_path.name != expected_data:
+            fail(f'macOS 数据包文件名应为 {expected_data}，实际 {data_path.name}')
+    data_package = data_package_asset('macos', args, version, data_path, ids, product)
+    manifest_v2 = dict(manifest)
+    manifest_v2['schema'] = 2
+    manifest_v2['dataPackage'] = data_package
+
     out_dir = Path(args.out or (ROOT / 'dist/update'))
     out_dir.mkdir(parents=True, exist_ok=True)
-    product = getattr(args, 'product', 'full')
     base = manifest_basename(product)
     manifest_path = out_dir / base
     manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     signature_path = None
+    manifest_v2_path = None
+    signature_v2_path = None
     if not args.no_sign:
         signature_path = out_dir / (base + '.sig')
         sign(Path(args.key), args.key_id, manifest_path, signature_path)
+    if data_package is not None:
+        v2_base = base[:-len('.json')] + '-v2.json'
+        manifest_v2_path = out_dir / v2_base
+        manifest_v2_path.write_text(json.dumps(manifest_v2, ensure_ascii=False, indent=2) + '\n')
+        if not args.no_sign:
+            signature_v2_path = out_dir / (v2_base + '.sig')
+            sign(Path(args.key), args.key_id, manifest_v2_path, signature_v2_path)
+    else:
+        fail('无法生成 schema 2 清单：既无本轮数据包，上一版状态也没有可复用的'
+             '数据包引用（--previous-state）。主包清单已生成，但发布侧要求双清单。')
+    print(f'✅ 清单：{manifest_path}')
+    if manifest_v2_path:
+        print(f'✅ schema 2 清单：{manifest_v2_path}')
     return manifest, manifest_path, signature_path
 
 
@@ -221,8 +322,14 @@ def self_test() -> None:
         root = Path(temporary)
         pkg = root / 'Gogaku-0.1.2.pkg'
         setup = root / 'Gogaku-0.1.2-windows-x64-setup.exe'
+        data = root / 'Gogaku-Data-0.1.2.pkg'
         pkg.write_bytes(b'fake-pkg-content' * 100)
         setup.write_bytes(b'fake-setup-content' * 100)
+        data.write_bytes(b'fake-data-content' * 100)
+        # 数据包收据（kind=data-package，含 dataVersion 指纹）。
+        data_version = 'ab12cd34ef56ab12'
+        (root / 'Gogaku-Data-0.1.2.pkg.receipt.json').write_text(json.dumps(
+            {'kind': 'data-package', 'dataVersion': data_version}))
         key = root / 'private.txt'
         public_out = root / 'public.txt'
         env = dict(os.environ)
@@ -237,15 +344,46 @@ def self_test() -> None:
         args = argparse.Namespace(
             channel='stable', version='0.1.2', build=90, notes_file=None,
             asset_ids=None, platforms='macos,windows', macos_pkg=str(pkg),
+            macos_data_pkg=str(data), previous_state=None,
             windows_setup=str(setup), arch=None, min_os=None, key=str(key),
             key_id='self-test', out=str(root / 'out'), no_sign=False,
             allow_placeholder_ids=True, require_names=False)
         manifest, manifest_path, signature_path = build_manifest(args)
         assert manifest['buildNumber'] == 90
         assert len(manifest['assets']) == 2
+        assert manifest['schema'] == 1
         for asset, source in zip(manifest['assets'], [pkg, setup]):
             assert asset['size'] == source.stat().st_size
             assert asset['sha256'] == sha256(source)
+        # schema 2 双清单：v2 含 dataPackage，v1 不含。
+        v2_path = root / 'out' / 'update-manifest-v2.json'
+        assert v2_path.is_file(), 'schema 2 清单未生成'
+        v2 = json.loads(v2_path.read_text())
+        assert v2['schema'] == 2
+        assert v2['dataPackage']['name'] == data.name
+        assert v2['dataPackage']['dataVersion'] == data_version
+        assert v2['dataPackage']['sha256'] == sha256(data)
+        assert 'dataPackage' not in json.loads(manifest_path.read_text())
+        # 数据未变：无本轮数据包时复用上一版 release-state 引用。
+        previous_state = root / 'previous-state.json'
+        previous_state.write_text(json.dumps({'assets': {'dataPackage': {
+            'platform': 'macos', 'name': 'Gogaku-Data-0.1.1.pkg', 'size': 1234,
+            'sha256': 'c' * 64, 'assetId': 99, 'dataVersion': data_version}}}))
+        args.previous_state = str(previous_state)
+        args.macos_data_pkg = None
+        args.out = str(root / 'out2')
+        _, v1_reuse_path, _ = build_manifest(args)
+        v2_reuse = json.loads((root / 'out2' / 'update-manifest-v2.json').read_text())
+        assert v2_reuse['dataPackage']['name'] == 'Gogaku-Data-0.1.1.pkg'
+        assert v2_reuse['dataPackage']['assetId'] == 99
+        # 既无数据包也无上一版引用：明确拒绝。
+        args.previous_state = None
+        args.out = str(root / 'out3')
+        try:
+            build_manifest(args)
+            fail('无数据包时未拒绝 schema 2')
+        except SystemExit:
+            pass
         verify = subprocess.run(
             ['swift', str(SIGNER), 'verify', '--public',
              public_out.read_text().strip(), '--input', str(manifest_path),
@@ -264,7 +402,7 @@ def self_test() -> None:
         if tampered.returncode == 0:
             fail('自测：篡改后的清单仍通过验签')
         manifest_path.write_bytes(original)
-        print('✅ update-manifest self-test：生成、哈希、签名与篡改拒绝均通过')
+        print('✅ update-manifest self-test：生成、双清单、哈希、签名与篡改拒绝均通过')
 
 
 def main() -> None:
@@ -278,6 +416,8 @@ def main() -> None:
     parser.add_argument('--build', type=int)
     parser.add_argument('--notes-file')
     parser.add_argument('--macos-pkg')
+    parser.add_argument('--macos-data-pkg', help='macOS 数据包（Gogaku-Data-<版本>.pkg）；schema 2 清单必需或可复用上一版引用')
+    parser.add_argument('--previous-state', help='上一版 release-state.json；数据未变时复用其 dataPackage 资产引用')
     parser.add_argument('--windows-setup')
     parser.add_argument('--asset-ids')
     parser.add_argument('--platforms', default='macos,windows')

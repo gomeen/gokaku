@@ -282,6 +282,15 @@ def check_delivery_contracts(ctx):
             problems.append('pkg postinstall 语法错误：' + result.stderr[-200:])
         else:
             notes.append('pkg postinstall 语法通过')
+    data_script = ROOT / 'macos/packaging/pkg-postinstall-data.sh'
+    if not data_script.exists():
+        problems.append('缺少 pkg 数据包 postinstall 模板（数据／代码包分离）')
+    else:
+        result = sp.run(['bash', '-n', str(data_script)], text=True, capture_output=True)
+        if result.returncode != 0:
+            problems.append('数据包 postinstall 语法错误：' + result.stderr[-200:])
+        else:
+            notes.append('数据包 postinstall 语法通过')
     if (ROOT / 'scripts/package-macos-dmg.py').exists():
         problems.append('DMG 打包脚本仍在（本轮 Mac 只交付 pkg）')
     config_path = ROOT / 'resources/update/config.json'

@@ -262,6 +262,39 @@ def write_package_receipt(package, platform, channel, identity, identity_path, l
     return path
 
 
+def data_fingerprint(files: dict) -> str:
+    """数据内容指纹（16 位十六进制）：排序后的 (路径, sha256) 文本再取一次
+    SHA-256。与 Mac 客户端 UpdateDataManifest.fingerprint 逐字一致。
+    单独导出供测试直接断言两侧算法一致。"""
+    import hashlib
+    joined = '\n'.join(f'{path}:{digest}' for path, digest in sorted(files.items()))
+    return hashlib.sha256(joined.encode()).hexdigest()[:16]
+
+
+def write_data_package_receipt(package, channel, identity, identity_path, files,
+                               data_version, *, root=ROOT):
+    """数据包收据（kind=data-package）：除安装包收据字段外，附数据文件清单
+    与数据指纹；数据未变的版本之间 dataVersion 相同（清单可复用引用）。"""
+    check_identity(identity, channel, root=root)
+    package = Path(package)
+    if not files:
+        raise DeliveryError('数据包收据需要非空数据文件清单')
+    if data_version != data_fingerprint(files):
+        raise DeliveryError('dataVersion 与数据文件清单不符')
+    license_files = [f'{name}/{relative}' for name, entry in identity['apps'].items()
+                     for relative in entry['files'] if relative.startswith('Contents/Licenses/')]
+    receipt = {key: identity[key] for key in ('fullVersion', 'buildNumber', 'sourceSha256', 'git')}
+    receipt.update(schema=1, kind='data-package', platform='macos', arch='x86_64', channel=channel,
+                   configuration='release', validationBuild=False,
+                   inputIdentitySha256=sha256(identity_path), licenseFiles=sorted(license_files),
+                   dataVersion=data_version,
+                   dataFiles={path: {'sha256': info, 'bytes': None} for path, info in sorted(files.items())},
+                   artifact={'name': package.name, 'sha256': sha256(package), 'bytes': package.stat().st_size})
+    path = package_receipt_path(package)
+    write_json(path, receipt)
+    return path
+
+
 def validate_package(package, platform, channel, *, root=ROOT):
     package = Path(package)
     receipt = read_json(package_receipt_path(package))
