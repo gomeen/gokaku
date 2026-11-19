@@ -249,8 +249,10 @@ def run_manifest(args, asset_ids: Path, product: str, macos_pkg: Path,
                '--macos-pkg', str(macos_pkg), '--windows-setup', str(windows_setup),
                '--asset-ids', str(asset_ids), '--key', str(args.key), '--key-id', args.key_id,
                '--out', str(output_dir(args))]
-    if args.macos_data_pkg is not None:
-        command += ['--macos-data-pkg', str(args.macos_data_pkg)]
+    # 数据包按产品取：full 用 --macos-data-pkg，lite 用 --lite-macos-data-pkg。
+    data_pkg = args.macos_data_pkg if product == 'full' else args.lite_macos_data_pkg
+    if data_pkg is not None:
+        command += ['--macos-data-pkg', str(data_pkg)]
     if args.previous_state is not None:
         command += ['--previous-state', str(args.previous_state)]
     if args.notes_file:
@@ -275,6 +277,8 @@ def local_files(args, meta):
     # 数据包是发布资产（macOS only；Windows 仍整包）。
     if args.macos_data_pkg is not None:
         files.append(Path(args.macos_data_pkg))
+    if 'lite' in [prod for _, _, prod in meta['assets']] and args.lite_macos_data_pkg is not None:
+        files.append(Path(args.lite_macos_data_pkg))
     for product in release_products(meta):
         manifest, signature = manifest_names(product)
         files += [output_dir(args) / manifest, output_dir(args) / signature]
@@ -340,9 +344,10 @@ def verify_manifest(args, meta, records, product: str, macos_pkg: Path, windows_
         fail('schema 2 清单缺少 dataPackage 或 dataVersion')
     if data['platform'] != 'macos':
         fail('schema 2 dataPackage 只允许 macOS（本轮范围）')
-    if args.macos_data_pkg is not None:
+    data_local = Path(args.macos_data_pkg) if product == 'full' else args.lite_macos_data_pkg
+    if data_local is not None:
         # 本轮提供了数据包：必须与本地资产完全绑定。
-        data_local = Path(args.macos_data_pkg)
+        data_local = Path(data_local)
         record = records.get(data_local.name)
         if record is None:
             fail('schema 2 dataPackage 指向的资产不在本轮发布资产里')
@@ -376,8 +381,10 @@ def validate_state(args, meta):
     files = local_files(args, meta)
     expected_names = {path.name for path in files}
     products = release_products(meta)
-    # 主包双端×产品（2）+ 双清单×产品（schema 1/2 各 json+sig，4）+ 数据包。
-    asset_count = 6 * len(products) + (1 if args.macos_data_pkg is not None else 0)
+    # 主包双端×产品（2）+ 双清单×产品（schema 1/2 各 json+sig，4）+ 数据包（full/lite 各 1）。
+    data_pkg_count = ((1 if args.macos_data_pkg is not None else 0)
+                      + (1 if args.lite_macos_data_pkg is not None else 0))
+    asset_count = 6 * len(products) + data_pkg_count
     if not isinstance(records, dict) or set(records) != expected_names or len(records) != asset_count:
         fail(f'release-state 必须绑定且只绑定 {asset_count} 个发布资产')
     ids = []
@@ -478,11 +485,17 @@ def publish(args) -> None:
         records[path.name] = file_record(path, asset_id)
     # 数据包先上传：schema 2 清单的 dataPackage.assetId 需要真实 ID。
     data_record = None
+    lite_data_record = None
     if args.macos_data_pkg is not None:
         data_asset_id = upload_asset(args.repo, release_id, token, Path(args.macos_data_pkg))
         ids['macos-data'] = ids[Path(args.macos_data_pkg).name] = data_asset_id
         data_record = file_record(Path(args.macos_data_pkg), data_asset_id)
         records[data_record['name']] = data_record
+    if args.lite_macos_data_pkg is not None:
+        lite_data_asset_id = upload_asset(args.repo, release_id, token, Path(args.lite_macos_data_pkg))
+        ids[Path(args.lite_macos_data_pkg).name] = lite_data_asset_id
+        lite_data_record = file_record(Path(args.lite_macos_data_pkg), lite_data_asset_id)
+        records[lite_data_record['name']] = lite_data_record
     write_json(out / 'asset-ids.json', ids)
     full_mac = next(path for plat, path, prod in meta['assets'] if plat == 'macos' and prod == 'full')
     full_win = next(path for plat, path, prod in meta['assets'] if plat == 'windows' and prod == 'full')
@@ -502,13 +515,16 @@ def publish(args) -> None:
             records[path.name] = file_record(path, upload_asset(args.repo, release_id, token, path))
     state = binding(args, meta, release_id)
     # 数据包资产记录进 release-state（数据未变时下一版复制这个引用）。
+    data_assets = {}
     if data_record is not None:
         receipt = read_json(package_receipt_path(Path(args.macos_data_pkg)))
-        state['assets'] = {**records,
-                           'dataPackage': {'platform': 'macos', **data_record,
-                                           'dataVersion': receipt.get('dataVersion')}}
-    else:
-        state['assets'] = records
+        data_assets['dataPackage'] = {'platform': 'macos', **data_record,
+                                      'dataVersion': receipt.get('dataVersion')}
+    if lite_data_record is not None:
+        receipt = read_json(package_receipt_path(Path(args.lite_macos_data_pkg)))
+        data_assets['liteDataPackage'] = {'platform': 'macos', **lite_data_record,
+                                          'dataVersion': receipt.get('dataVersion')}
+    state['assets'] = {**records, **data_assets}
     write_json(state_path(args), state)
     print(f'Draft 已就绪；保存 {state_path(args)} 及清单／签名，人工审阅后 --publish-existing {release_id}。')
 
@@ -523,6 +539,8 @@ def main() -> None:
     parser.add_argument('--macos-pkg', required=True)
     parser.add_argument('--macos-data-pkg', type=Path,
                         help='macOS 数据包（Gogaku-Data-<版本>.pkg）；schema 2 双清单必需（或上一版引用）')
+    parser.add_argument('--lite-macos-data-pkg', type=Path,
+                        help='macOS Lite 数据包（GogakuLite-Data-<版本>.pkg）；发布 Lite 时 schema 2 必需')
     parser.add_argument('--previous-state', type=Path,
                         help='上一版 release-state.json；数据未变时复用其 dataPackage 资产引用')
     parser.add_argument('--windows-setup', required=True)
