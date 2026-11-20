@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.3.2",
+  "channel": "stable",
+  "version": "0.3.2",
+  "buildNumber": 124,
+  "releaseId": 452373907,
+  "state": "published",
+  "publishedAt": "2026-11-20",
+  "commit": "ce754083c55591d8737002d6a679a73d983c46ef",
+  "assets": {
+    "macos": {
+      "name": "Gogaku-0.3.2.pkg",
+      "sha256": "c381df178f90dd7abf2cbae69df9d2b18803d55869543671493f86ec32f5d107"
+    },
+    "windows": {
+      "name": "Gogaku-0.3.2-windows-x64-setup.exe",
+      "sha256": "5f80822451ed8ca317d30b4956b73fb372845c65221cc06a426971a17965a76f"
+    },
+    "macosLite": {
+      "name": "GogakuLite-0.3.2.pkg",
+      "sha256": "b51970470cfdb0b2e39b5054e242d66ac4953c70e15a2ff9d8064a3900b29e68"
+    },
+    "windowsLite": {
+      "name": "GogakuLite-0.3.2-windows-x64-setup.exe",
+      "sha256": "1697cfaf82a2c6aa203ea4885c81bbf380ac06e533f6cd3170bf2e7f0aea94ff"
+    },
+    "manifests": [
+      "update-manifest.json(+sig,schema1)",
+      "update-manifest-v2.json(+sig,schema2 含 dataPackage)",
+      "lite 同构"
+    ],
+    "macosData": {
+      "name": "Gogaku-Data-0.3.2.pkg",
+      "sha256": "1cb06deb667119c7ba3a702831801e23054e8e20ffe4c4972e16a94937d581ff",
+      "bytes": 36695320
+    },
+    "macosLiteData": {
+      "name": "GogakuLite-Data-0.3.2.pkg",
+      "sha256": "0de2428a7b0d6690e2a359917c261b475f55bce389adbb863e21a01ec43e47b7",
+      "bytes": 34121009
+    }
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.3.2.json",
+  "releaseReport": "verify/report-release-0.3.2.json",
+  "hostWaiver": "用户 2026-11-20 裁决直接发布：代码 review 通过即发布，不做额外测试；fast 7/7、release 14/14 已通过，host 真实宿主档豁免，候选框沉底修复的真机验收由用户升级时进行。0.1.6 起累计宿主验收欠账待补。",
+  "notes": "0.3.2：候选框高度收缩沉底修复——同锚点候选变少、面板变矮时旧粘性逻辑复用左下角 origin 致顶边下塌整体沉底；改为粘「锚定边」（光标下方顶边固定、高度向底部伸缩，上翻保持底边），越界回退重算，粘边高度用未取整布局尺寸防像素对齐飘移；CandidatePanelStickyTests 3 项回归（提交 119d653）。验证：fast 7/7（Swift 324 项）、release 14/14。host 未运行（豁免见 hostWaiver）。0.3.1 发布期 stash 的「并行会话遗留」（CandidatePanel 粘性原点）即本修复的前身，已由本线完成并发布。发布插曲：首次 Draft 452373491 上传中断成半成品，已删除；全量重传为 Draft 452373907 后一次发布成功。tag v0.3.2 → 同提交。"
+}
