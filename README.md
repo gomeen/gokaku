@@ -45,6 +45,7 @@ Mac 开发版与 stable 的旧构建记录仍可从 Git 历史和发布记录追
 - [版本与构建管理](docs/versioning.md)：version.json 单一版本来源、构建身份、阶段规则与拒绝路径。
 - [发布与构包](docs/release.md)：日常 fast 档、release 与 host 验证、双端构包、publish-release 与 Draft 发布步骤。
 - [Windows 安装说明](docs/windows-testing.md)：Setup.exe 安装、启用输入法、限定验证边界。
+- [Windows 安装体验优化调研](docs/research-windows-install-optimization.md)：自动启用、签名、winget 分发与升级占用的方案对比。
 - [主题与皮肤规格](docs/skin-themes.md)：四套内置主题、单／双色、主题包格式与预览几何。
 - [变更记录](CHANGELOG.md)：各版本变更摘要。
 - [工程化检查](docs/validation/engineering-readiness.md)：交付链路六项检查、整改与发布阻塞分列。
