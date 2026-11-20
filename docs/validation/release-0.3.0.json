@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.3.0",
+  "channel": "stable",
+  "version": "0.3.0",
+  "buildNumber": 121,
+  "releaseId": 451325873,
+  "state": "published",
+  "publishedAt": "2026-11-19",
+  "commit": "4568f595",
+  "assets": {
+    "macos": {
+      "name": "Gogaku-0.3.0.pkg",
+      "sha256": "02b01192e75db50b15e4dcaa7e918042315276b517759a748d639e7ffeef1e25"
+    },
+    "macosData": {
+      "name": "Gogaku-Data-0.3.0.pkg",
+      "dataVersion": "0740d56417e0d6d3",
+      "sha256": "f760b3e8164cbe0d0956b23b082bb23c1877212260b6fa40d996f435e6dcf842",
+      "bytes": 36695314
+    },
+    "macosLite": {
+      "name": "GogakuLite-0.3.0.pkg",
+      "sha256": "8b68afe4d429b525291e609299bcda2404cc89f65c4d6088800a6dc115fd41da"
+    },
+    "macosLiteData": {
+      "name": "GogakuLite-Data-0.3.0.pkg",
+      "dataVersion": "b81cc760128efd74",
+      "sha256": "3d0e73c51d19fce44985194825ad8e3d62c86ba30d3712230f134c52349783d1",
+      "bytes": 34121017
+    },
+    "windows": {
+      "name": "Gogaku-0.3.0-windows-x64-setup.exe",
+      "sha256": "b51c2104323d6e68133fe428083fc60f1c659a5ca4aa67ab80bfc991b66ff543"
+    },
+    "windowsLite": {
+      "name": "GogakuLite-0.3.0-windows-x64-setup.exe",
+      "sha256": "846ca04de2d96b33cd8f63d8eda40c0605955ee90f3c92803e457f6b56af342b"
+    },
+    "manifests": [
+      "update-manifest.json(+sig, schema1)",
+      "update-manifest-v2.json(+sig, schema2 含 dataPackage)",
+      "lite 同构"
+    ]
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.3.0.json",
+  "releaseReport": "verify/report-release-0.3.0-final10.json",
+  "hostWaiver": "用户 2026-11-19 决定直接发布：fast 7/7、release 14/14 已通过；热更新与数据包安装的端到端真机验收由用户升级时进行（用户明确要求发布后不自动更新本机）。0.1.6 起累计宿主验收欠账待补。",
+  "notes": "0.3.0：就地热更新（客户端自解包 pkg→复刻 postinstall 事务→DistributedNotificationCenter 优雅重启输入法，不经系统安装器；旧路径保留为 fallback）＋数据/代码包分离（Gogaku-Data-0.3.0.pkg 只含 EngineData，dataVersion 指纹 0740d564…，代码包 10.7MB）＋schema 2 双清单（update-manifest[-lite]-v2.json 含 dataPackage；v1 无该键，旧客户端兼容已远端验签）。Windows 保持整包（热更新/拆分待跟进）。实现：33a265d/9ea421e/9c474f1/5e4d2b7＋发布侧修复 6 连（e2b7e76、2338d31、299b583、fd42519、9ea2855、481c2f1、1bf6dcb、87eb431、0ed8686、4568f59——Lite 数据包独立上传、元数据键排除、远端资产计数/名称/逐项核对）。验证：fast 7/7（Swift 316 项）、release 14/14×多轮（final10 绑定 4568f59）；数据包 postinstall 沙箱实测成功/失败恢复；双清单远端匿名验签均 signature ok；tag v0.3.0→4568f59。发布过程教训：scripts/ 全目录计入测试指纹导致发布工具修复必须整档重验（10 轮循环），「发布工具改动豁免指纹重绑」待立项。host 未运行（豁免见 hostWaiver）。用户要求发布后不自动更新本机。"
+}
