@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "tag": "v0.3.1",
+  "channel": "stable",
+  "version": "0.3.1",
+  "buildNumber": 122,
+  "releaseId": 452247562,
+  "state": "published",
+  "publishedAt": "2026-11-20",
+  "commit": "01d874899f49c12148f0f2f53883850e419da9f9",
+  "assets": {
+    "macos": {
+      "name": "Gogaku-0.3.1.pkg",
+      "sha256": "2c767c2e3baaa92c1365f428bbc11770225c4ab1c97d3ecbf463b92e5eeb0f72"
+    },
+    "windows": {
+      "name": "Gogaku-0.3.1-windows-x64-setup.exe",
+      "sha256": "7ccde471d11e36ef8b6f65f1c5916c7fc44af5baae4c5684b1303f4868a4ff9f"
+    },
+    "macosLite": {
+      "name": "GogakuLite-0.3.1.pkg",
+      "sha256": "839b6b86cad7b99ab15c89abf67df761a6516952e8003ed9be8daba954c27fa6"
+    },
+    "windowsLite": {
+      "name": "GogakuLite-0.3.1-windows-x64-setup.exe",
+      "sha256": "19adc0eb4146b60bb96f3e497feb164b284f683b4cfc768d4caf3fe620d153af"
+    },
+    "manifests": [
+      "update-manifest.json(+sig,schema1)",
+      "update-manifest-v2.json(+sig,schema2 含 dataPackage)",
+      "lite 同构"
+    ],
+    "macosData": {
+      "name": "Gogaku-Data-0.3.1.pkg",
+      "sha256": "cf385e0d8b54cf3b5d9f6cfae62e891c0db5a755e5394729522d5b85a7b4dee2",
+      "bytes": 36695328
+    },
+    "macosLiteData": {
+      "name": "GogakuLite-Data-0.3.1.pkg",
+      "sha256": "f0b06eeb861cc049e23de15ed4916dce454ae3681237ba5d77fe415221f46cff",
+      "bytes": 34121013
+    }
+  },
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.3.1.json",
+  "releaseReport": "verify/report-release-0.3.1.json",
+  "hostWaiver": "用户 2026-11-20 决定直接发布：fast 7/7、release 14/14 已通过；一步式更新与预译显示的真机验收由用户升级时进行（用户明确要求发布后不自动更新本机）。0.1.6 起累计宿主验收欠账待补。",
+  "notes": "0.3.1：检查更新一步化（单按钮状态机：检查→下载→校验→就地安装→完成，自动检查静默预下载后仅「一键更新到 X」；installerUnavailable 时唯一第二步回落系统安装器）＋学习中→英预译时序修复（去 0.25s 防抖首键即发；空格提交遇同源文预译在飞挂起提交≤400ms 等结果直接上屏，消除弹框常无英文与 eager+commit 双重复请求；CommitMergeWindow 组件＋5 项单测）。实现 bbd1e45（Mac Swift 7 文件）。验证：fast 7/7（Swift 321 项）、release 14/14；v1/v2 清单远端匿名验签均 signature ok；dataVersion 0740d564… 与 0.3.0 相同（词库未变，客户端复用已缓存数据包，下载量仅代码包 ~10.7MB）。tag v0.3.1→01d8748。host 未运行（豁免见 hostWaiver）。用户要求发布后不自动更新本机。发布插曲：并行会话在发布窗口修改 CandidatePanel（粘性原点），已 stash 保存为「并行会话遗留」供其恢复。"
+}
