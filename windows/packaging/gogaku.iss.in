@@ -1,4 +1,7 @@
-; Gogaku Windows 安装向导（Inno Setup 6）。只注册，不激活/设默认输入法。
+; Gogaku Windows 安装向导（Inno Setup 6）。
+; 机器级注册（HKLM）在文件安装事务内完成；用户级启用（HKCU 输入法列表）在
+; ssPostInstall 以原用户身份幂等完成一次，退出码只记日志，失败降级为设置应用的启用引导。
+; 不设默认输入法。
 ; bin/x86 与 bin/x64 的 TSF 均通过私有管道连接 x64 代理。
 ; 用户数据 %LOCALAPPDATA%\Gogaku 默认保留；不强杀宿主，不自动注销/重启。
 #define AppName "@APP_NAME@"
@@ -64,7 +67,9 @@ Name: "{group}\卸载 {#AppName}"; Filename: "{uninstallexe}"; Tasks: startmenu
 [Run]
 ; 仅用户显式选择的操作，以原始用户身份运行；不写提升账户的 HKCU。
 Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuAgent.exe"; Parameters: "--set-autostart on"; Flags: runasoriginaluser runhidden waituntilterminated; Tasks: autostartagent
-Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuSettings.exe"; Description: "打开 Gogaku 设置"; Flags: postinstall unchecked runasoriginaluser nowait skipifsilent
+; 默认勾选：向导完成即打开设置，启用状态卡片直接告知是否已进输入法列表并提供重启
+; 资源管理器（任务栏／Win+Space 刷新）——这是自动启用后唯一还需用户动手的一步。
+Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuSettings.exe"; Description: "打开 Gogaku 设置"; Flags: postinstall runasoriginaluser nowait skipifsilent
 
 [Code]
 var
@@ -585,11 +590,44 @@ begin
   end;
 end;
 
+{ 用户级启用：以原用户身份把本通道条目登记进当前用户的输入法列表。
+
+  为什么不用 [Run]：Inno 的 [Run] 不把子进程退出码交给脚本，也就无法把
+  --register-profile 的结果写进安装日志。ExecAsOriginalUser 同时满足两件事——
+  以「UAC 之前的用户」身份运行（标准用户借管理员凭据安装时不会写错 hive）
+  且返回 ResultCode。
+
+  失败一律不中止安装：文件与机器级注册已落盘，用户级启用是额外一步，兜底
+  是设置应用普通输入页的状态卡片（「立即启用」／深链引导）。这里只记日志。 }
+procedure EnableUserProfile();
+var
+  ExitCode: Integer;
+begin
+  ExitCode := -1;
+  try
+    if not ExecAsOriginalUser(PayloadRoot() + '\bin\x64\GogakuAgent.exe',
+      '--register-profile', '', SW_HIDE, ewWaitUntilTerminated, ExitCode) then
+    begin
+      Log('用户级启用未能启动（exit=' + IntToStr(ExitCode) + '）；请到设置→普通输入重试');
+      Exit;
+    end;
+  except
+    Log('用户级启用抛出异常：' + GetExceptionMessage() + '；请到设置→普通输入重试');
+    Exit;
+  end;
+  { 0 = 已启用（含已包含的幂等路径）；非 0 由 enable.cpp 给出具体失败码。 }
+  Log('GogakuAgent --register-profile exit=' + IntToStr(ExitCode));
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  { 注册由 [Files] 的 AfterInstall: RegisterComponents 完成；这里只清理
-    PrepareToInstall 改名腾位留下的旧 DLL。 }
-  if CurStep = ssPostInstall then DeleteRetiredDlls();
+  { 注册由 [Files] 的 AfterInstall: RegisterComponents 完成；这里清理
+    PrepareToInstall 改名腾位留下的旧 DLL，再做一次用户级启用。 }
+  if CurStep = ssPostInstall then
+  begin
+    DeleteRetiredDlls();
+    EnableUserProfile();
+  end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);

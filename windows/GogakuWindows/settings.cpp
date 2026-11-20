@@ -1,8 +1,10 @@
 // Native Win32 settings. UI operations stay outside the TSF keystroke path.
 // No webview, fabricated records, success-placeholder MessageBoxes, or host input.
 #include "platform.h"
+#include "enable.h"
 #include "update.h"
 #include "appearance.h"
+#include "../gogaku-ids.h"
 #include "../../shared/GogakuCore/include/gogaku_core.h"
 #include <commctrl.h>
 #include <commdlg.h>
@@ -396,6 +398,56 @@ void App::normalPage(){
     auto rowLabel=[&](const wchar_t *text,int rowY){ return label(text,rowY+4,22,Left,LabelW); };
 
     label(L"普通输入",18);
+
+    // ── 启用状态 ──────────────────────────────────────────────
+    // 检测只读、每次进入页面重查：系统的输入法列表会被整表重写（剔除），
+    // 缓存状态比没有状态更糟。未启用时给出「立即启用」与深链引导，不自动循环重试。
+    {
+        const std::wstring tip = gogaku::profileTipString();
+        bool enabled = false;
+        try { enabled = gw::profileEnabled(tip); } catch(...) { enabled = false; }
+        rowLabel(L"输入法列表",y);
+        add(L"STATIC",enabled ? L"✓ 已在当前用户的输入法列表中" : L"⚠ 尚未启用",
+            0,CtrlX,y+4,CtrlW+16+SmallW,22,250);
+        if(enabled){
+            button(L"重启资源管理器…",252,CtrlX,y,SmallW+40);
+            actions[252]=[this](int n){if(n!=BN_CLICKED)return;
+                if(MessageBoxW(window,L"任务栏输入指示器与 Win+Space 列表在资源管理器启动时读入内存，"
+                    L"启用输入法后要重启它才会出现 Gogaku。\n\n"
+                    L"这会关闭所有资源管理器窗口（桌面图标与任务栏会短暂消失后自动恢复），"
+                    L"不会关闭其它应用，也不会丢失未保存的文档。继续？",
+                    L"重启资源管理器",MB_YESNO|MB_ICONQUESTION)!=IDYES)return;
+                STARTUPINFOW startup{sizeof(startup)};PROCESS_INFORMATION process{};
+                std::wstring command=L"taskkill /f /im explorer.exe";
+                if(CreateProcessW(nullptr,command.data(),nullptr,nullptr,FALSE,CREATE_NO_WINDOW,nullptr,nullptr,&startup,&process)){
+                    WaitForSingleObject(process.hProcess,5000);CloseHandle(process.hThread);CloseHandle(process.hProcess);
+                }
+                command=L"explorer.exe";
+                if(CreateProcessW(nullptr,command.data(),nullptr,nullptr,FALSE,0,nullptr,nullptr,&startup,&process)){
+                    CloseHandle(process.hThread);CloseHandle(process.hProcess);
+                }
+                status(L"资源管理器已重启；现在可在任务栏或 Win+Space 里选择 "+std::wstring(gogaku::profileName()));};
+        }else{
+            button(L"立即启用",251,CtrlX,y,SmallW);
+            button(L"打开系统设置",253,CtrlX+SmallW+8,y,SmallW+20);
+            actions[251]=[this](int n){if(n!=BN_CLICKED)return;
+                long result=gw::kEnableRejected;
+                try { result=gw::enableProfile(); } catch(...) { result=gw::kEnableRejected; }
+                if(result==0){buildPage();status(L"已登记到当前用户的输入法列表；若任务栏还没显示，点「重启资源管理器」");return;}
+                const std::wstring reason=result==gw::kEnableInvalidIdentity?L"无法拼出本通道的输入法条目。"
+                    :result==gw::kEnableUnavailable?L"系统未提供安装输入法所需的接口。"
+                    :L"系统拒绝了这次启用，通常是因为当前用户的语言列表里还没有中文（简体，中国）。";
+                status(L"未能自动启用："+reason+L"请用「打开系统设置」手动添加。",true);};
+            actions[253]=[this](int n){if(n!=BN_CLICKED)return;
+                ShellExecuteW(window,L"open",L"ms-settings:regionlanguage",nullptr,nullptr,SW_SHOWNORMAL);
+                status(L"系统设置里：语言和区域 → 中文（简体，中国）→ 语言选项 → 键盘 → 添加键盘 → "+std::wstring(gogaku::profileName()));};
+        }
+        nextRow(30);
+        label(enabled?(L"任务栏输入指示器与 Win+Space 需重启资源管理器后才会列出 "+std::wstring(gogaku::profileName())+L"；用 Win+Space 选择它。")
+                     :L"安装器已尝试自动登记；这里可重试。系统整表重写后条目可能消失，届时重新启用即可。",
+              y,40,CtrlX,CtrlW+16+SmallW);
+        nextRow(42); groupGap();
+    }
 
     // ── 输入方案 ──────────────────────────────────────────────
     rowLabel(L"输入方案",y);

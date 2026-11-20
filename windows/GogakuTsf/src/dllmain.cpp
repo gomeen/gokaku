@@ -1,20 +1,17 @@
 #include "stdafx.h"
 #include "text_service.h"
+#include "../../gogaku-ids.h"
 #include <olectl.h>
 #include <new>
 
 HINSTANCE g_hInst=nullptr;
 LONG g_objects=0;
 static LONG g_locks=0;
-#ifdef GOGAKU_DEV
-const GUID CLSID_GogakuTsf={0xA3C5D7E9,0x1B2F,0x4A6C,{0x8E,0x0D,0x2F,0x4B,0x6A,0x8C,0x0E,0x13}};
-const GUID GUID_GOGAKU_PROFILE={0xC9E1F3A5,0x7B8D,0x4E2F,{0x6A,0x0C,0x1D,0x3E,0x5F,0x7A,0x9B,0x12}};
-constexpr const wchar_t *description=L"Gogaku Dev";
-#else
-const GUID CLSID_GogakuTsf={0xA3C5D7E9,0x1B2F,0x4A6C,{0x8E,0x0D,0x2F,0x4B,0x6A,0x8C,0x0E,0x12}};
-const GUID GUID_GOGAKU_PROFILE={0xC9E1F3A5,0x7B8D,0x4E2F,{0x6A,0x0C,0x1D,0x3E,0x5F,0x7A,0x9B,0x11}};
-constexpr const wchar_t *description=L"Gogaku";
-#endif
+// GUID 只在 gogaku-ids.h 定义一份：注册（HKLM）与用户级启用（HKCU）必须拼出
+// 同一条目串，两侧各写一份是这里唯一的历史漂移点。
+const GUID CLSID_GogakuTsf=gogaku::kTsfClsid;
+const GUID GUID_GOGAKU_PROFILE=gogaku::profileGuid();
+constexpr const wchar_t *description=gogaku::kDevChannel?L"Gogaku Dev":L"Gogaku";
 BOOL APIENTRY DllMain(HMODULE module,DWORD reason,LPVOID){
     if(reason==DLL_PROCESS_ATTACH){g_hInst=(HINSTANCE)module;DisableThreadLibraryCalls(module);}return TRUE;
 }
@@ -65,7 +62,7 @@ STDAPI DllRegisterServer(){
         ITfInputProcessorProfileMgr *profiles=nullptr;HRESULT hr=profileManager(&profiles);
         if(FAILED(hr))return hr;
         // 官方 SDK vtable，字符数不含 NUL。不激活、不设语言默认、不改用户语言列表。
-        hr=profiles->RegisterProfile(CLSID_GogakuTsf,MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED),GUID_GOGAKU_PROFILE,
+        hr=profiles->RegisterProfile(CLSID_GogakuTsf,gogaku::kLangId,GUID_GOGAKU_PROFILE,
             description,(ULONG)wcslen(description),path.c_str(),(ULONG)path.size(),0,nullptr,0,FALSE,0);
         profiles->Release();if(FAILED(hr))return hr;
         ITfCategoryMgr *categories=nullptr;hr=CoCreateInstance(CLSID_TF_CategoryMgr,nullptr,CLSCTX_INPROC_SERVER,IID_ITfCategoryMgr,(void**)&categories);
@@ -77,7 +74,7 @@ STDAPI DllRegisterServer(){
 STDAPI DllUnregisterServer(){
     Apartment apartment;HRESULT result=S_OK;
     if(apartment.ok()){
-        ITfInputProcessorProfileMgr *profiles=nullptr;if(SUCCEEDED(profileManager(&profiles))){profiles->UnregisterProfile(CLSID_GogakuTsf,MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED),GUID_GOGAKU_PROFILE,0);profiles->Release();}
+        ITfInputProcessorProfileMgr *profiles=nullptr;if(SUCCEEDED(profileManager(&profiles))){profiles->UnregisterProfile(CLSID_GogakuTsf,gogaku::kLangId,GUID_GOGAKU_PROFILE,0);profiles->Release();}
         ITfCategoryMgr *categories=nullptr;if(SUCCEEDED(CoCreateInstance(CLSID_TF_CategoryMgr,nullptr,CLSCTX_INPROC_SERVER,IID_ITfCategoryMgr,(void**)&categories))){categories->UnregisterCategory(CLSID_GogakuTsf,GUID_TFCAT_TIP_KEYBOARD,CLSID_GogakuTsf);categories->Release();}
     }else result=apartment.status;
     auto path=L"CLSID\\"+guidString(CLSID_GogakuTsf);LONG status=RegDeleteTreeW(HKEY_CLASSES_ROOT,path.c_str());
@@ -86,5 +83,5 @@ STDAPI DllUnregisterServer(){
 // 显式用户操作的辅助入口；安装器从不调用激活／默认设置入口。
 extern "C" __declspec(dllexport) void CALLBACK GogakuActivateProfile(HWND,HINSTANCE,LPSTR,int){
     Apartment apartment;if(!apartment.ok())return;ITfInputProcessorProfileMgr *profiles=nullptr;
-    if(SUCCEEDED(profileManager(&profiles))){profiles->ActivateProfile(TF_PROFILETYPE_INPUTPROCESSOR,MAKELANGID(LANG_CHINESE,SUBLANG_CHINESE_SIMPLIFIED),CLSID_GogakuTsf,GUID_GOGAKU_PROFILE,nullptr,0);profiles->Release();}
+    if(SUCCEEDED(profileManager(&profiles))){profiles->ActivateProfile(TF_PROFILETYPE_INPUTPROCESSOR,gogaku::kLangId,CLSID_GogakuTsf,GUID_GOGAKU_PROFILE,nullptr,0);profiles->Release();}
 }

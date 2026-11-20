@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "checkedAt": "2026-11-20T09:46:17.200404+00:00",
+  "version": {
+    "version": "0.4.0-dev.1",
+    "buildNumber": 123
+  },
+  "channel": "dev",
+  "change": {
+    "id": "windows-install-enable",
+    "summary": "安装器以原用户身份幂等执行 GogakuAgent.exe --register-profile，把本通道条目写进当前用户输入法列表（InstallLayoutOrTip，只写 HKCU）；设置应用普通输入页新增启用状态卡片（立即启用／ms-settings:regionlanguage 深链／确认后重启资源管理器）",
+    "scope": "机器级注册（HKLM）不变；不设默认输入法、不写 Set-WinDefaultInputMethodOverride、失败不后台重试"
+  },
+  "sourceSha256": "54530157eded5e8acf4c28b010e0ba6c5851dead3687fbcec06fc7ee0ac22486",
+  "testSha256": "f681fcf29b32524b578fde9e4a6e797958d6181ecf85716ee6a7961a1b797134",
+  "packages": [
+    {
+      "platform": "windows",
+      "artifact": {
+        "name": "Gogaku-0.4.0-dev.1-dev-windows-x64-setup.exe",
+        "sha256": "24180e3bde5f1ba48bd021f80b294fbb7d449b53b47dab35c4a2e431d770d291",
+        "bytes": 58493844
+      }
+    }
+  ],
+  "fast": {
+    "passed": true,
+    "evidence": "verify/report-fast-20261120-174320.json"
+  },
+  "buildChecks": {
+    "crossCompile": "python3 scripts/compile-win-native.py --arch all --channel dev --flavor full 通过（x64 TSF／代理／设置／核心，x86 TSF）",
+    "installer": "python3 scripts/build-win-app.py --channel dev --iscc 实际 Inno 编译通过（含 EnableUserProfile 的 ExecAsOriginalUser 与 Log）",
+    "packagingSelfTest": "python3 scripts/build-win-app.py --self-test 通过，含 --register-profile 条目断言",
+    "enableSelfTest": "windows/tests/enable_test.cpp 编译为 gogaku_windows_enable_test.exe（只读自检，需在 Windows 运行）",
+    "fast": "python3 scripts/verify.py --profile fast 7/7 通过（含 Windows 组装 self-test）"
+  },
+  "windowsAcceptance": {
+    "status": "not-run",
+    "reason": "需要在 Windows 11 x64 真机／VM 上安装；本轮只在 macOS 交叉编译与静态验证",
+    "checklist": [
+      "安装日志含 --register-profile 执行记录与退出码",
+      "reg query \"HKCU\\Control Panel\\International\\User Profile\\zh-Hans-CN\" /v InputMethodTips 含 0804:{A3C5D7E9-…}{…9B12}",
+      "系统设置键盘列表出现 Gogaku Dev；设置卡片显示已启用",
+      "点重启资源管理器后 Win+Space 出现 Gogaku Dev，记事本小鹤双拼打出「你好」",
+      "等待 ≥30 分钟复查条目仍在且可再次打字（剔除专验）",
+      "同构建重复安装：--register-profile 幂等（exit 0、无重复条目）",
+      "干净 VM 用户 /VERYSILENT /SUPPRESSMSGBOXES /NORESTART 后启用仍生效",
+      "英文裸系统：降级引导与深链文案",
+      "删除条目构造未启用状态：设置卡片「立即启用」可恢复"
+    ]
+  },
+  "notRun": [
+    "Windows 真机／VM 安装与启用验收（上列清单）",
+    "剔除竞态是否复发（需 ≥30 分钟观察）",
+    "完整 release profile／十万序列",
+    "代码签名、winget、应用内更新静默化、卸载改名退避（本轮范围外）"
+  ],
+  "overallProductAccepted": false,
+  "published": false,
+  "platformFingerprints": {
+    "macos": {
+      "sourceSha256": "f029414038cc6681168a9a97fc0e10fd18c918721f1e998aa8428b2b2a9b2397",
+      "testSha256": "415ace349050e08bb51fa84ca317013d83a82ae644edfaeaa8ced853704dde92"
+    },
+    "windows": {
+      "sourceSha256": "e24bcca91e0a0f94f122f3e2126e463731077fc4b880f70904bd043e0ad32df3",
+      "testSha256": "63576f13272719f2e9d65402c19d7da284fe907053e046e9d02e4205a2ac3f82"
+    }
+  },
+  "versionNote": "version.json 定为 0.4.0 / b123；工作区未提交，而定版构建要求已跟踪文件干净，因此安装包以临时 dev 版本串 0.4.0-dev.1（同一 buildNumber）构建，二进制与当前源码一致，差异只有 version.json 内容。发布前需提交后用 0.4.0 重新构包并重跑 fast。"
+}

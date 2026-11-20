@@ -61,7 +61,9 @@ def compile_arch(args, arch):
     tsf = ROOT / 'windows/GogakuTsf'
     common = ['platform', 'appearance', 'themes']
     service = ['dllmain', 'text_service', 'candidate_window', 'core_bridge']
-    sources = [(windows / f'{name}.cpp', obj / f'{name}.o') for name in common]
+    # enable 是用户级启用（HKCU 输入法列表）的唯一实现：安装器静默调用、设置页
+    # 按钮和自检程序共用，不另写第二份「拼条目串／查列表」逻辑。
+    sources = [(windows / f'{name}.cpp', obj / f'{name}.o') for name in common + ['enable']]
     sources += [(ROOT / 'shared/GogakuCore/settings_contract.cpp', obj / 'settings_contract.o')]
     sources += [(ROOT / 'shared/GogakuCore/theme_contract.cpp', obj / 'theme_contract.o')]
     sources += [(tsf / 'src' / f'{name}.cpp', obj / f'{name}.o') for name in service]
@@ -93,13 +95,13 @@ def compile_arch(args, arch):
             run([cc, '-std=c11', '-O2', '-c', windows / 'third_party' / f'{name}.c',
                  '-o', obj / f'{name}.o'])
         run([cxx, '-static', '-municode', '-mwindows', '-o', out / 'GogakuAgent.exe',
-             *[obj / f'{name}.o' for name in ('agent', 'services', 'platform')],
+             *[obj / f'{name}.o' for name in ('agent', 'services', 'platform', 'enable')],
              obj / 'settings_contract.o', app_resource, *libs, '-lwinhttp'])
         settings_resource = obj / 'settings-resource.o'
         run([windres, '-I', windows, '-i', windows / 'settings.rc', '-o', settings_resource])
         run([cxx, '-static', '-municode', '-mwindows', '-o', out / 'GogakuSettings.exe',
              *[obj / f'{name}.o' for name in ('settings', 'services', 'update',
-                 'platform', 'appearance', 'themes', 'monocypher', 'monocypher-ed25519')],
+                 'platform', 'appearance', 'themes', 'enable', 'monocypher', 'monocypher-ed25519')],
              obj / 'settings_contract.o', obj / 'theme_contract.o', settings_resource,
              *panel_libs, *libs, '-lwinhttp', '-lcomctl32', '-lcomdlg32', '-luxtheme'])
     # 自检单独放在 tests/；不混入安装包或发行收据。这里只编译，不执行。
@@ -110,6 +112,10 @@ def compile_arch(args, arch):
     run([cxx, *flags, ROOT / 'windows/tests/appearance_test.cpp',
          *[obj / f'{name}.o' for name in common], obj / 'settings_contract.o', obj / 'theme_contract.o',
          '-static', '-o', test_out / 'gogaku_windows_appearance_test.exe', *panel_libs, *libs])
+    # 只读自检：身份条目串、通道区分与探测口径；不写 HKCU、不启用输入法。
+    run([cxx, *flags, ROOT / 'windows/tests/enable_test.cpp', obj / 'enable.o',
+         obj / 'platform.o', obj / 'settings_contract.o',
+         '-static', '-o', test_out / 'gogaku_windows_enable_test.exe', *libs])
     for artifact in sorted(out.glob('*')):
         if artifact.suffix.lower() in ('.dll', '.exe'):
             print(f'产物：{artifact} ({artifact.stat().st_size:,} bytes)', flush=True)

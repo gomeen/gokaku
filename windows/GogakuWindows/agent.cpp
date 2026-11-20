@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "enable.h"
 #include "panel_frame.h"
 #include "../../shared/GogakuCore/include/gogaku_core.h"
 #include <sddl.h>
@@ -495,6 +496,9 @@ int registration(const std::wstring &command) {
     }
     // --install 仅准备用户目录；不设置默认输入法，不擅自启用登录启动。
     if(command==L"--install") {gw::userRoot();return 0;}
+    // --register-profile 只做用户级启用（HKCU 输入法列表），供安装器以原用户身份
+    // 静默调用：不启动代理、不弹窗、不写日志文件，退出码即 enableProfile 的结果。
+    if(command==L"--register-profile") {return int(gw::enableProfile());}
     return -1;
 }
 }

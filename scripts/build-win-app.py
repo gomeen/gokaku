@@ -623,6 +623,21 @@ def self_test(iscc=None):
         assert 'DestDir: "{app}\\versions\\{#AppVersion}-b{#AppBuild}-{#AppChannel}\\bin\\x64"' in text
         assert 'DestDir: "{app}\\bin\\x64"' not in text
         assert 'GogakuAgent.exe"; Parameters: "--set-autostart on"' in text
+        # 用户级启用放在 ssPostInstall 的 ExecAsOriginalUser 里，而不是 [Run]：
+        # [Run] 不把子进程退出码交给脚本，也就无法把 --register-profile 的结果写进日志。
+        assert 'Parameters: "--register-profile"' not in text
+        assert 'procedure EnableUserProfile();' in text
+        assert "ExecAsOriginalUser(PayloadRoot() + '\\bin\\x64\\GogakuAgent.exe'" in text
+        assert "'--register-profile'" in text
+        assert 'GogakuAgent --register-profile exit=' in text
+        post = text.split('procedure CurStepChanged(CurStep: TSetupStep);')[1]
+        assert 'if CurStep = ssPostInstall then' in post
+        assert 'EnableUserProfile();' in post
+        # 设置应用默认勾选：向导完成即见启用状态卡片。
+        settings_run = [line for line in text.splitlines()
+                        if 'Description: "打开 Gogaku 设置"' in line]
+        assert len(settings_run) == 1, settings_run
+        assert 'unchecked' not in settings_run[0], settings_run[0]
         assert 'Regsvr(Architecture: String; DllPath: String; Unregister: Boolean' in text
         assert '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}' in text
         assert '\n[UninstallRun]\n' not in text and '@STAGE_DIR@' not in text

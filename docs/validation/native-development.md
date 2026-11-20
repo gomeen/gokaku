@@ -1,5 +1,37 @@
 # 原生工程实施验收记录
 
+## Windows「安装即启用」：自动登记用户输入法列表＋设置引导卡片（2026-11-20，`0.4.0 / b123`，仅构包与静态验证）
+
+安装后不再需要用户手动走六层设置路径启用输入法。方案依据 [Windows 安装体验优化调研](../research-windows-install-optimization.md)（水杉 PR #1218 的 `runasoriginaluser` 姿势 ＋ Weasel PR #1959 的幂等增量思路），并受 [Windows 11 剔除调研](../research-ime-windows11-pruning.md) §7 约束：**原用户身份、幂等、未包含才执行一次、失败不重试**。
+
+- **共享身份（新 `windows/gogaku-ids.h`）**：CLSID（双通道一致）、stable／dev 档案 GUID、`kLangId=0x0804` 与 `profileTipString()` 只有一份实现。TSF 的 `DllRegisterServer`（机器级注册）与用户级启用拼出同一条目串，消除 GUID 两处维护。属纯移动，GUID 值不变。
+- **用户级启用（新 `windows/GogakuWindows/enable.cpp`）**：`profileEnabled()` 枚举 `HKCU\Control Panel\International\User Profile\*`（键名是 BCP-47 语言标签，不硬编码 `zh-Hans-CN`），大小写不敏感整条比对 `InputMethodTips` 的 REG_MULTI_SZ；`enableProfile()` 已包含即返回 0，否则 `LoadLibrary(input.dll)` → `InstallLayoutOrTip(tip, 0)` 单次调用。不设默认输入法、不写 `Set-WinDefaultInputMethodOverride`、不改其它语言条目、无后台重试。
+- **代理入口**：`GogakuAgent.exe --register-profile` 直接以 `enableProfile()` 结果作退出码，不启动代理主循环、不弹窗、不写日志文件（与 `--set-autostart` 同款单命令模式）。
+- **Inno 接线**：`CurStepChanged(ssPostInstall)` 调 `EnableUserProfile()`，用 `ExecAsOriginalUser` 执行 `--register-profile` 并把 `ExitCode` 写进安装日志。放在 Pascal 而不是 `[Run]` 的原因：`[Run]` 不把子进程退出码交给脚本，无法留下可核对的失败证据；`ssPostInstall` 位于 `[Files]` 的 `AfterInstall: RegisterComponents` 之后，机器级注册已就绪，且 `ExecAsOriginalUser` 同样以「UAC 之前的用户」身份运行。退出码非 0 只记日志、不中止安装，兜底交给设置卡片。postinstall「打开 Gogaku 设置」翻转为默认勾选（完成「重启资源管理器」闭环的最后一步）。
+- **设置应用启用状态卡片**（普通输入页顶部，每次进入只读重查）：已启用 → 状态行＋「重启资源管理器…」（确认框说明影响后 `taskkill /f /im explorer.exe` → 重启 explorer，仅用户明确点击时执行）；未启用 → 状态行＋「立即启用」（进程内单次调同一启用逻辑，成功即重建页面）＋「打开系统设置」（`ShellExecuteW(ms-settings:regionlanguage)` 与两步图文）。不新增页、不动侧栏。
+
+验证状态（本机 macOS，不执行 Windows 程序）：
+
+- 交叉编译：`compile-win-native.py --arch all --channel dev --flavor full` 通过（x64 TSF／代理／设置／核心，x86 TSF）。
+- `scripts/build-win-app.py --self-test` 通过，并新增 Inno 布局断言：`[Run]` 里没有 `--register-profile`、模板含 `procedure EnableUserProfile()` 与 `ExecAsOriginalUser(...'--register-profile'...)`、日志行存在、`ssPostInstall` 分支调用它；设置条目不再带 `unchecked`。实际 ISCC 编译通过，证明这段 Pascal（含 `ExecAsOriginalUser` 与 `Log`）语法与符号正确。
+- 新增只读自检 `windows/tests/enable_test.cpp`（`gogaku_windows_enable_test.exe`）：固定两个通道的条目串格式（`0804:{CLSID}{PROFILE}` 大写十六进制）、通道互不相等、编译期通道选择与 `profileGuid()` 一致、空串不算启用、整条匹配（前缀不算命中、大小写不敏感）。它**不写 HKCU、不启用输入法**。
+- 构建身份与包哈希：见 [dev-b123.json](dev-b123.json)（含 fast 7/7 报告、双端平台指纹与启用验收清单）。
+- **版本串说明**：`version.json` 定为 `0.4.0 / b123`，但工作区未提交而定版构包要求已跟踪文件干净，所以安装包用临时 `0.4.0-dev.1`（同一 buildNumber）构建；二进制与当前源码一致，只有 version.json 内容不同。发布前需提交后用 `0.4.0` 重新构包并重跑 fast。
+
+**未验收（需 Windows 11 x64 真机／VM，用户配合）**：
+
+1. 安装 dev 包 → 安装日志含 `GogakuAgent --register-profile exit=0`（非 0 时记录同样行并说明降级到设置卡片）。
+2. `reg query "HKCU\Control Panel\International\User Profile\zh-Hans-CN" /v InputMethodTips` 含 `0804:{A3C5D7E9-…}{…9B12}`（stable 为 `…9B11`）。
+3. 系统「设置→语言→键盘」出现 Gogaku Dev；设置卡片显示「已启用」。
+4. 点「重启资源管理器」→ Win+Space 出现 Gogaku Dev → 记事本小鹤双拼打出「你好」。
+5. **等待 ≥30 分钟复查注册表条目仍在且可再次打字**（剔除专验）。若复发，按剔除调研 §5 取证另立轮次；本方案的终态与手动启用相同，不劣于现状。
+6. 同构建重复安装 → `--register-profile` 幂等（exit 0、无重复条目）。
+7. 另一干净 VM 用户跑 `/VERYSILENT /SUPPRESSMSGBOXES /NORESTART` → 启用仍生效。
+8. （可选）英文裸系统：确认降级引导文案与深链。
+9. 构造未启用状态（删条目）→ 设置卡片「立即启用」恢复。
+
+**显式假设**：`ExecAsOriginalUser` 在静默安装下有效（Git.Git 的 `runasoriginaluser` 同款姿势；由场景 7 实证，失败不阻塞合入——设置卡片兜底）；`ExecAsOriginalUser` 在 Setup 被「以管理员身份运行」启动时退化为继承管理员凭据，此时会写管理员 hive（Inno 官方文档明确的限制，本轮不额外规避，靠设置卡片在用户会话里重试）。**本轮不做**：卸载改名退避、卸载幽灵条目清理、应用内更新静默化、代码签名、winget。
+
 ## 共享位图候选窗接入（2026-11-17）
 
 双端候选窗默认接入共享 C++ 位图渲染，并保留「自绘／系统」选择及失败自动回退。横竖排、字体回退、主题图层与点击区域采用同一实现，Windows x86／x64 分别静态编译。当前开发与构建验证记录见[位图渲染接入验收](bitmap-rendering.md)，架构与已知差异见[共享渲染说明](../bitmap-rendering.md)。本轮不沿用旧构建的真实宿主结果，也未执行系统按键注入。

@@ -2,6 +2,21 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-20：候选窗去掉页码，工作区）
+
+- 候选窗不再绘制页码（用户裁决）。原因：页码原先独占页脚一行（约 17–20pt），只在多于一页时出现，于是候选跨过「一页」门槛时面板凭空长高一行——最典型的是竖排每页 9 个时，9 个候选（单页、无页码）与 10 个候选（两页、第一页仍是 9 行）内容完全相同、框高却差一行；0.3.2 的粘锚定边只解决了顶边下塌，没解决这个纯装饰性的高度跳变。
+- 三条渲染路径同步：共享位图渲染器（`panel_render.cpp`，默认路径）、macOS 系统渲染（`PanelLayout` 竖排与横排）、Windows 系统渲染（`appearance.cpp`）。横排原先为页码预留右缘宽度、必要时按页码左缘丢弃候选，现在不再预留、不再丢候选。
+- 翻页能力不变：`.`／`,`、Page Up／Page Down、↑↓ 跨页、Control＋n/p、数字选当前页候选全部保留；`GC_PANEL_HIT_PAGE_PREV/NEXT` 不再产生命中区（枚举值保留，两端点击处理仍兼容旧命中表）。无障碍标签仍报「第 N/M 页」。
+- 主题的「页码」颜色字段保留（已导出主题不受影响），只是当前没有绘制对象；文档已注明。
+- 验证：fast 7/7（核心 ctest 11/11、Swift 327 项，新增 3 项：多页无翻页命中区、单页与多页等高、横排不再按页码丢候选）；渲染探针 53 项全过（含新增的「单页与多页等高」像素断言）。
+
+### 变更（2026-11-20：Windows 安装即启用，工作区定 0.4.0）
+
+- **安装器自动登记用户输入法列表**：不再要求用户安装后手动走六层设置路径启用。`ssPostInstall` 新增 `EnableUserProfile()`，以 `ExecAsOriginalUser` 静默、幂等地执行 `GogakuAgent.exe --register-profile`，把本通道条目（`0804:{CLSID}{ProfileGUID}`）写进当前用户的 `HKCU\Control Panel\International\User Profile\*\InputMethodTips`。实现是「已包含就不写」＋单次 `input.dll!InstallLayoutOrTip(tip, 0)`＋失败不重试：不设默认输入法、不写 `Set-WinDefaultInputMethodOverride`、不改其它语言条目。标准用户借管理员凭据安装时写的是原用户 hive。
+- **设置应用启用状态卡片**（普通输入页顶部，每次进入只读重查）：已启用时给「重启资源管理器…」（确认框说明影响后才 `taskkill /f /im explorer.exe` 并重启它）；未启用时给「立即启用」（进程内调同一启用逻辑）与「打开系统设置」（`ms-settings:regionlanguage` 深链＋两步图文）。向导完成页的「打开 Gogaku 设置」翻转为默认勾选。
+- **共享身份头**：新增 `windows/gogaku-ids.h`，CLSID／stable 与 dev 档案 GUID／LangID 与条目串拼接只有一份实现，TSF 注册与用户级启用共同引用（纯移动，GUID 值不变）。
+- 验证：交叉编译（x64 TSF／代理／设置／核心、x86 TSF）与 Inno 实际编译通过；`build-win-app.py --self-test` 新增 `EnableUserProfile`／`ExecAsOriginalUser` 与默认勾选断言；新增只读自检 `windows/tests/enable_test.cpp`（身份条目串格式、通道区分、整条匹配）；fast 7/7。**真机验收未做**：启用是否落地、30 分钟后的剔除复查、静默安装与重复安装幂等均需 Windows 11 x64，清单见[原生验收记录](docs/validation/native-development.md)与[dev-b123.json](docs/validation/dev-b123.json)。
+
 ### 变更（2026-11-20：慢速网络下载超时自适应，工作区）
 
 - 修复检查更新下载在慢速网络永远超时：GitHub 资产域名实测可低至 ~80KB/s（2026-11-20 用户 0.3.0→0.3.2 升级：主包 11MB 能下完，36.7MB 数据包需 ~7 分钟，超过固定 300s 资源超时；无字节级续传，重试从头下载导致永远超时）。下载总超时改为按资产大小自适应（50KB/s 保底估算，下限 300s：36.7MB→~734s）；空闲断流上限独立固定 60s（不再随总预算放大，连接挂起仍能及时报错）。新增 UpdateTests.downloadTimeout 纯函数与传输层超时断言。
