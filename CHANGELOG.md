@@ -2,6 +2,13 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 变更（2026-11-20：更新窗口一步化＋预译时序修复，工作区，定 0.3.1 主题）
+
+- **检查更新一步化（用户裁决）**：更新窗口收敛为「检查更新」单按钮状态机——点击后自动完成 检查→（有新版）下载→校验→就地安装→完成，各阶段在按钮文案与状态行体现（「检查中…」「下载中 45%」「安装中：替换文件」「已更新到 X，下次打字生效」）；原「下载安装包」「就地更新（不弹安装器）」等分离按钮全部合并。无新版按钮回「检查更新」、状态行「已是最新」；任一步失败按钮变「重试」（保留失败处凭据：下载失败续传下载、安装失败就地重装），错误行显示原因。唯一可能出现第二步的场景是就地安装工具链缺失（installerUnavailable）：自动转系统安装器路径，按钮变「打开安装器」（系统安装器被关闭可再次点开），状态行说明原因；旧 open pkg 方法仅为该 fallback 保留，UI 不再单独暴露。自动检查（若开启）发现新版后直接静默预下载（含数据包缓存复用），UI 只显示「一键更新到 X」单按钮，点击即装；仍不自动安装、不自动重启。
+- **预译时序修复（用户裁决 A＋B 组合）**：诊断确认学习 zhToEn「输入四键＋空格」全流程常 <1s，旧 0.25s 防抖＋火山 RTT 使预译几乎总在提交之后才回来——弹框从未显示英文，而空格提交链自发请求照常上屏，且同一源文重复发出 eager＋commit 两个请求。修复：①去掉 0.25s 防抖——applyNormal 重建 backlog 后立即泵预译队列，pumpEagerBacklog 对「源文与在飞相同」去重，连续输入不放大请求量（裁决 A）；②提交合并——空格提交时若同一源文预译正在飞，挂起提交（复用 PendingTranslatedCommit 缓冲后续按键）等待 eager 结果直接上屏（结果处理置于渲染 guard 之前），超时 400ms（CommitMergeWindow.waitLimit 兜底）仍无结果回退自发 commit 请求（裁决 B）。等待窗口提取为 GogakuKit.CommitMergeWindow，新增 CommitMergeWindowTests 覆盖源文匹配等待／超时回退两分支；结果入 memory、失败计次（eagerAttempts）与「仅高亮候选显示英文」裁决不变；现有预译测试（EagerAnnotationTests）不依赖防抖，无需同步。
+- 验证：fast 档全绿（核心 ctest＋Swift 全量）；真实按键链路与真实点击更新待输入源／宿主验收。
+- 不递增 version.json（发布期由主代理定版 0.3.1／122）；不动 scripts/、shared/、windows/。
+
 ### 变更（2026-11-19：就地热更新＋数据／代码包分离，工作区，定 0.3.0 主题）
 
 - **就地热更新（Mac，用户裁决）**：「安装更新」不再打开系统 Installer——客户端自己完成 pkg 解包（xar → Scripts gzip+cpio → Gogaku-apps.zip ditto）→ stage 双 App 校验（bundle ID／构建号／TIS 身份／codesign --deep --strict）→ ditto 备份 → 事务替换 → transaction.txt 状态机（installing/success，与 pkg postinstall 同格式同位置，中断可恢复）→ lsregister。任一步失败恢复备份、可重试；工具链缺失时自动回落旧的 open-installer 路径。输入法交接：安装成功后发 `org.gogaku.inputmethod.restart`（DistributedNotificationCenter），GogakuInput 启动早期注册监听，结束在途组合（草稿落盘）后 1.5 秒 `NSApp.terminate` 正常退出，imklaunchagent 按需拉起新版；绝不 SIGKILL。更新窗口显示「就地更新（不弹安装器）」与解包→校验→替换→重启输入法→完成的阶段进度，完成后显示「已更新到 X.Y.Z；输入法将在下次激活时使用新版」。

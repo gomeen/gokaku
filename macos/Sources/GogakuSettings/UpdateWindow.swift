@@ -2,9 +2,16 @@ import SwiftUI
 import AppKit
 import GogakuKit
 
-/// 检查更新控制器。只在设置应用内运行：输入法进程不发起更新请求，也不在
-/// 按键路径执行网络或磁盘检查。自动检查默认关闭；开启后设置应用启动及运行
-/// 期间按 24 小时间隔尝试，失败不紧密重试。发现新版只在设置内提示，不抢焦点。
+/// 检查更新控制器（2026-11-20 用户裁决：检查更新交互一步化）。
+/// 只在设置应用内运行：输入法进程不发起更新请求，也不在按键路径执行网络或
+/// 磁盘检查。自动检查默认关闭；开启后设置应用启动及运行期间按 24 小时间隔
+/// 尝试，失败不紧密重试。发现新版只在设置内提示，不抢焦点。
+///
+/// 单按钮状态机：「检查更新」一个按钮贯穿全流程——点击后自动完成
+/// 检查 →（有新版）下载 → 就地安装 → 完成；各阶段在按钮文案与状态行体现。
+/// 任一步失败按钮变「重试」，错误行显示原因。唯一可能暂停等用户的是
+/// installerUnavailable fallback：自动转系统安装器（按钮变「打开安装器」）。
+/// 自动检查发现新版只静默预下载，UI 呈现「一键更新到 X」单按钮，点击即装。
 @MainActor
 final class UpdateController: ObservableObject {
     static let shared = UpdateController()
@@ -16,6 +23,8 @@ final class UpdateController: ObservableObject {
         case ready
         case installing(UpdateInstallPhase)
         case installed(String?)
+        /// 就地安装不可用，已转系统安装器路径（用户点向导完成）。
+        case awaitingSystemInstaller
     }
 
     @Published private(set) var phase: Phase = .idle
@@ -30,6 +39,12 @@ final class UpdateController: ObservableObject {
     @Published private(set) var dataNotice: String?
     /// 就地安装需要下载的数据包资产（schema 2；nil＝无数据包或 schema 1 清单）。
     @Published private(set) var pendingDataPackage: UpdateDataPackage?
+    /// 就地更新的已下载数据包 zip（跟随下载阶段填充）。
+    @Published private(set) var downloadedDataFile: URL?
+    /// 下载中是否为自动检查触发的静默预下载（此时按钮呈「一键更新到 X」）。
+    @Published private(set) var isSilentPrefetch = false
+    /// fallback 说明（转系统安装器的原因）；回到检查/空闲时清空。
+    @Published private(set) var fallbackNotice: String?
 
     let installation: UpdateInstallation
     private let config: UpdateSourceConfig?
@@ -38,6 +53,7 @@ final class UpdateController: ObservableObject {
     private let downloader: UpdateDownloader
     private var checkTask: Task<Void, Never>?
     private var downloadTask: Task<Void, Never>?
+    private var installTask: Task<Void, Never>?
     private var timer: Timer?
 
     init(bundle: Bundle = .main,
@@ -86,11 +102,18 @@ final class UpdateController: ObservableObject {
         startCheck(automatic: true)
     }
 
-    // MARK: - 手动／自动检查
+    // MARK: - 检查（手动与自动同一条链）
 
+    /// 一键入口：检查 →（有新版）下载 → 安装。无新版回到「检查更新」。
     func checkNow() {
         guard phase != .checking, phase != .downloading else { return }
         startCheck(automatic: false)
+    }
+
+    /// 自动检查发现新版后的静默预下载入口（不自动安装；按钮呈「一键更新到 X」）。
+    private func startSilentPrefetch() {
+        isSilentPrefetch = true
+        startDownload()
     }
 
     private func startCheck(automatic: Bool) {
@@ -105,6 +128,10 @@ final class UpdateController: ObservableObject {
                 self.checkTask = nil
                 self.phase = .idle
                 self.apply(result, previous: previousOutcome)
+                if self.hasUpdate, self.downloadedFile == nil, automatic {
+                    // 自动发现新版：静默预下载（裁决），UI 只显示「一键更新到 X」。
+                    self.startSilentPrefetch()
+                }
             }
         }
     }
@@ -134,17 +161,15 @@ final class UpdateController: ObservableObject {
         }
     }
 
-    // MARK: - 下载与安装
+    // MARK: - 下载与安装（一步化链路内部阶段）
 
     var candidate: UpdateCandidate? { outcome?.candidate }
 
-    func download() {
+    private func startDownload() {
         guard let candidate else { return }
-        guard phase == .idle || phase == .ready else { return }
         phase = .downloading
         progress = 0
         errorMessage = nil
-        lastInstallMessage = nil
         dataNotice = nil
         let dataPackage = pendingDataPackage
         downloadTask = Task { [weak self] in
@@ -173,8 +198,8 @@ final class UpdateController: ObservableObject {
                     self.downloadTask = nil
                     self.downloadedFile = file
                     self.downloadedDataFile = dataFile
-                    self.phase = .ready
                     self.progress = 1
+                    self.installDownloaded()
                 }
             } catch {
                 await MainActor.run {
@@ -195,34 +220,22 @@ final class UpdateController: ObservableObject {
         errorMessage = "已取消下载"
     }
 
-    /// 就地更新的已下载数据包 zip（跟随下载阶段填充）。
-    @Published private(set) var downloadedDataFile: URL?
-
     static func phaseTitle(_ phase: UpdateInstallPhase) -> String {
         switch phase {
         case .extracting: return "解包安装内容…"
         case .validating: return "校验签名与身份…"
-        case .replacing: return "替换应用…"
+        case .replacing: return "安装中：替换文件"
         case .dataPackage: return "更新出厂数据…"
         case .restartingInputMethod: return "通知输入法重启…"
         case .done: return "完成"
         }
     }
 
-    /// 「就地更新（不弹安装器）」：客户端自己完成解包→校验→事务替换→
-    /// 输入法交接。工具链缺失（installerUnavailable）时回落旧的 open-installer。
-    func install() {
+    /// 安装已通过校验的安装包（就地热更新；链路的最后一段）。
+    private func installDownloaded() {
         guard let candidate, let file = downloadedFile else { return }
-        guard phase == .idle || phase == .ready else { return }
-        do {
-            try downloader.verifyBeforeInstall(candidate, file: file)
-        } catch {
-            errorMessage = error.localizedDescription
-            return
-        }
         phase = .installing(.extracting)
         errorMessage = nil
-        lastInstallMessage = nil
         dataNotice = nil
         let dataZip = downloadedDataFile
         installTask = Task { [weak self] in
@@ -242,8 +255,8 @@ final class UpdateController: ObservableObject {
                     self.dataNotice = notice
                     let version = candidate.manifest.version
                     self.lastInstallMessage = notice == nil
-                        ? "已更新到 \(version)；输入法将在下次激活时使用新版。"
-                        : "已更新到 \(version)；输入法将在下次激活时使用新版。\(notice!)"
+                        ? "已更新到 \(version)，下次打字生效。"
+                        : "已更新到 \(version)，下次打字生效。\(notice!)"
                 }
             } catch is CancellationError {
                 await MainActor.run {
@@ -267,17 +280,89 @@ final class UpdateController: ObservableObject {
         }
     }
 
-    private var installTask: Task<Void, Never>?
-
     /// 旧的 open-installer 路径（fallback）：交给系统 Installer，用户点向导。
     private func fallbackToSystemInstaller(_ candidate: UpdateCandidate, file: URL) {
         do {
             try downloader.install(candidate, file: file)
-            phase = .idle
-            lastInstallMessage = "已打开系统安装器；按向导完成安装后重新打开设置。"
+            phase = .awaitingSystemInstaller
+            fallbackNotice = "本环境缺少就地安装工具（xar/cpio 等），已改用系统安装器；按向导完成安装后重新打开设置。"
         } catch {
             phase = .ready
             errorMessage = "系统安装器也启动失败：\(error.localizedDescription)"
+        }
+    }
+
+    // MARK: - 按钮状态机（UpdateView 消费）
+
+    enum ButtonState: Equatable {
+        case check
+        case checking
+        case oneClickInstall(version: String)
+        case downloading
+        case installing
+        case openInstaller
+        case retry
+        case updated(version: String)
+    }
+
+    /// 按钮状态：单按钮贯穿全流程（检查→下载→安装→完成；重试/打开安装器）。
+    var buttonState: ButtonState {
+        switch phase {
+        case .checking:
+            return .checking
+        case .downloading:
+            return .downloading
+        case .installing:
+            return .installing
+        case .installed(let noticeVersion):
+            return .updated(version: noticeVersion ?? outcome?.candidate?.manifest.version ?? installation.version)
+        case .awaitingSystemInstaller:
+            return .openInstaller
+        case .idle, .ready:
+            if errorMessage != nil { return .retry }
+            if let version = outcome?.candidate?.manifest.version, hasUpdate {
+                return .oneClickInstall(version: version)
+            }
+            return .check
+        }
+    }
+
+    /// 按钮点击：按当前阶段继续同一条链（检查/一键安装/重试/打开安装器）。
+    func primaryAction() {
+        switch buttonState {
+        case .check, .retry:
+            checkNow()
+        case .oneClickInstall:
+            startDownload()
+        case .openInstaller:
+            // 系统安装器可能被用户关闭而未装完：重新打开（包已在本地缓存）。
+            if let candidate, let file = downloadedFile {
+                fallbackToSystemInstaller(candidate, file: file)
+            } else {
+                checkNow()
+            }
+        case .checking, .downloading, .installing, .updated:
+            break
+        }
+    }
+
+    /// 按钮旁的状态行：各阶段人话描述（含下载百分比与安装阶段）。
+    var statusLine: String? {
+        switch phase {
+        case .checking:
+            return "检查中…"
+        case .downloading:
+            return isSilentPrefetch
+                ? "已发现新版，正在后台预下载 \(Int((progress * 100).rounded()))%"
+                : "下载中 \(Int((progress * 100).rounded()))%"
+        case .installing(let installPhase):
+            return Self.phaseTitle(installPhase)
+        case .installed:
+            return lastInstallMessage
+        case .awaitingSystemInstaller:
+            return fallbackNotice
+        case .idle, .ready:
+            return nil
         }
     }
 
@@ -294,7 +379,8 @@ final class UpdateController: ObservableObject {
     }
 }
 
-/// 独立更新窗口（版本信息旁「检查更新」打开）。不自动下载、不自动安装。
+/// 独立更新窗口（关于页「检查更新」打开）。单按钮一步化：
+/// 检查 →（有新版）自动下载安装 → 完成；不弹系统安装器（fallback 除外）。
 struct UpdateView: View {
     @ObservedObject private var controller = UpdateController.shared
 
@@ -305,17 +391,17 @@ struct UpdateView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 14) {
                     statusBlock
-                    if let candidate = controller.candidate {
+                    if let candidate = controller.candidate, controller.hasUpdate {
                         releaseBlock(candidate)
                     }
-                    if controller.phase == .downloading {
+                    if controller.phase == .downloading, !controller.isSilentPrefetch {
                         downloadBlock
                     }
-                    if case let .installing(installPhase) = controller.phase {
-                        installingBlock(installPhase)
-                    }
-                    if controller.phase == .ready {
-                        readyBlock
+                    if let line = controller.statusLine {
+                        Text(line)
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundStyle(SettingsPalette.primaryText)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                     if let error = controller.errorMessage {
                         Text(error)
@@ -323,10 +409,10 @@ struct UpdateView: View {
                             .foregroundStyle(Color.red)
                             .fixedSize(horizontal: false, vertical: true)
                     }
-                    if let message = controller.lastInstallMessage {
+                    if let message = controller.dataNotice {
                         Text(message)
                             .font(.system(size: 12))
-                            .foregroundStyle(Color.green)
+                            .foregroundStyle(Color.orange)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -351,15 +437,50 @@ struct UpdateView: View {
                     .foregroundStyle(SettingsPalette.secondaryText)
             }
             Spacer()
-            if controller.phase == .checking {
-                ProgressView().controlSize(.small)
-            } else {
-                Button("检查更新") { controller.checkNow() }
-                    .font(.system(size: 12))
-                    .disabled(controller.phase == .downloading || controller.phase == .checking)
-            }
+            primaryButton
         }
         .padding(22)
+    }
+
+    /// 单按钮：检查更新 → 下载中 → 安装中 → 已更新；失败变重试；
+    /// fallback 变打开安装器。检查/下载/安装阶段置灰。
+    @ViewBuilder
+    private var primaryButton: some View {
+        switch controller.buttonState {
+        case .check:
+            button("检查更新", prominent: true) { controller.primaryAction() }
+        case .checking:
+            button("检查中…", prominent: true) {}
+        case let .oneClickInstall(version):
+            button("一键更新到 \(version)", prominent: true) { controller.primaryAction() }
+        case .downloading:
+            button("下载中…", prominent: true) {}
+        case .installing:
+            button("安装中…", prominent: true) {}
+        case .openInstaller:
+            button("打开安装器", prominent: true) { controller.primaryAction() }
+        case .retry:
+            button("重试", prominent: true) { controller.primaryAction() }
+        case let .updated(version):
+            button("已更新到 \(version)", prominent: false) {}
+        }
+    }
+
+    private func button(_ title: String, prominent: Bool,
+                        action: @escaping () -> Void) -> some View {
+        Group {
+            if prominent {
+                Button(title, action: action)
+                    .buttonStyle(.borderedProminent)
+                    .tint(SettingsPalette.accent)
+            } else {
+                Button(title, action: action)
+                    .buttonStyle(.bordered)
+                    .disabled(true)
+            }
+        }
+        .font(.system(size: 12))
+        .disabled(title.hasSuffix("…"))
     }
 
     private var statusBlock: some View {
@@ -372,6 +493,8 @@ struct UpdateView: View {
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
+            } else if controller.hasUpdate {
+                EmptyView()
             } else if let outcome = controller.outcome {
                 Label(outcomeTitle(outcome), systemImage: outcomeIcon(outcome))
                     .font(.system(size: 13, weight: .medium))
@@ -381,7 +504,7 @@ struct UpdateView: View {
                     .foregroundStyle(SettingsPalette.primaryText)
                     .fixedSize(horizontal: false, vertical: true)
             } else {
-                Text("尚未检查。手动检查始终可用；自动检查默认关闭。")
+                Text("尚未检查。点击「检查更新」自动完成检查、下载与安装；不会弹出系统安装器。")
                     .font(.system(size: 12))
                     .foregroundStyle(SettingsPalette.secondaryText)
             }
@@ -410,42 +533,16 @@ struct UpdateView: View {
                 .padding(10)
                 .background(RoundedRectangle(cornerRadius: 6)
                     .fill(SettingsPalette.secondaryText.opacity(0.06)))
-            HStack(spacing: 10) {
-                if controller.phase == .ready {
-                    Button("就地更新（不弹安装器）") { controller.install() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(SettingsPalette.accent)
-                } else {
-                    Button("下载安装包") { controller.download() }
-                        .buttonStyle(.borderedProminent)
-                        .tint(SettingsPalette.accent)
-                        .disabled(controller.phase != .idle)
-                }
-                Text("签名已验证；下载后还会核对大小与 SHA-256。")
-                    .font(.system(size: 11))
-                    .foregroundStyle(SettingsPalette.secondaryText)
-            }
+            Text("点击「一键更新到 \(candidate.manifest.version)」自动完成下载、校验与就地安装；不会弹出系统安装器，失败会自动恢复旧版本。")
+                .font(.system(size: 11))
+                .foregroundStyle(SettingsPalette.secondaryText)
+                .fixedSize(horizontal: false, vertical: true)
             if let data = controller.pendingDataPackage {
                 Text("新版包含数据包 \(data.name)（\(ByteCountFormatter.string(fromByteCount: data.size, countStyle: .file))，数据版本 \(data.dataVersion)）；本地已有同版本数据时不再下载。")
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)
             }
-        }
-    }
-
-    private func installingBlock(_ phase: UpdateInstallPhase) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 8) {
-                ProgressView().controlSize(.small)
-                Text(UpdateController.phaseTitle(phase))
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(SettingsPalette.primaryText)
-            }
-            Text("解包 → 校验 → 替换 → 重启输入法 → 完成；不会弹出系统安装器，失败会自动恢复旧版本。")
-                .font(.system(size: 11))
-                .foregroundStyle(SettingsPalette.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -463,16 +560,6 @@ struct UpdateView: View {
         }
     }
 
-    private var readyBlock: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "checkmark.seal")
-                .foregroundStyle(Color.green)
-            Text("安装包已下载并通过校验。点击「就地更新（不弹安装器）」由客户端完成替换；不会自动重启，输入法下次激活时用新版。")
-                .font(.system(size: 11))
-                .foregroundStyle(SettingsPalette.secondaryText)
-        }
-    }
-
     private var footer: some View {
         VStack(alignment: .leading, spacing: 8) {
             Toggle(isOn: Binding(get: { controller.autoCheck },
@@ -482,7 +569,7 @@ struct UpdateView: View {
             }
             .toggleStyle(.switch)
             .controlSize(.small)
-            Text("默认关闭。开启后仅在设置应用启动及运行期间每天最多尝试一次；不自动下载、安装或重启，不会在输入按键路径检查。检查会连接 GitHub，不携带输入内容、火山凭据、学习记录或设备唯一标识。")
+            Text("默认关闭。开启后仅在设置应用启动及运行期间每天最多尝试一次；发现新版只静默预下载，安装仍需点击「一键更新」。不会在输入按键路径检查。检查会连接 GitHub，不携带输入内容、火山凭据、学习记录或设备唯一标识。")
                 .font(.system(size: 10.5))
                 .foregroundStyle(SettingsPalette.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)

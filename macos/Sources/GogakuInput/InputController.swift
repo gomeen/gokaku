@@ -304,10 +304,21 @@ final class GogakuInputController: IMKInputController {
         var buffer: [NSEvent]
     }
     private var pendingTranslatedCommit: PendingTranslatedCommit?
+    /// 提交合并等待窗口（2026-11-20 裁决 B）：同一源文预译在飞时挂起提交
+    /// 等待其结果直接上屏；超时回退自发 commit 请求（原有路径）。消除同一
+    /// 源文 eager＋commit 双请求。语义见 GogakuKit.CommitMergeWindow。
+    private lazy var commitMergeWindow = CommitMergeWindow { [weak self] source in
+        // 超时兜底（主线程）：预译仍未回，按原路径自发 commit 请求；
+        // pending 与按键缓冲保持原状，commit 结果由 finishCommitSwap 上屏。
+        guard let self, let pending = self.pendingTranslatedCommit,
+              pending.source == source else { return }
+        self.translator.requestImmediately(TranslationRequest(
+            stamp: InputStamp(mode: .learning, direction: .zhToEn),
+            sourceID: "commit", source: source,
+            resource: LearningTranslation.resourceID))
+    }
     /// 英→中无译文阶段的延迟隐藏任务（防逐键闪烁）。
     private var enToZhHideWork: DispatchWorkItem?
-    /// 中→英预译的空闲防抖任务（2026-11 用户反馈：连续输入加防抖）。
-    private var eagerDebounceWork: DispatchWorkItem?
     /// 本机本月请求字符统计：成功结果才计数，优先使用服务端计费口径
     /// `Extra.input_characters`，缺失时按 Unicode 标量估算；自然月自动清零。
     /// 该统计只代表本机发出且成功的请求，不代表账户余额或官方账本。
@@ -395,13 +406,12 @@ final class GogakuInputController: IMKInputController {
         translationMemory[source] = target.lowercased()
     }
 
-    /// 中→英连续输入防抖：停顿 0.25s 才泵预译（2026-11 用户反馈）。
-    /// 结果链式续泵（applyEagerTranslation defer）不受防抖影响。
+    /// 预译泵：applyNormal 重建 backlog 后立即执行（2026-11-20 用户裁决，
+    /// 去掉 0.25s 防抖——「输入四键＋空格」全程常小于预译防抖＋火山 RTT，
+    /// 注释从未来得及显示；首键即发，源文相同由 pump 去重，不增请求）。
+    /// 结果链式续泵（applyEagerTranslation defer）不受影响。
     private func scheduleEagerPump() {
-        eagerDebounceWork?.cancel()
-        let work = DispatchWorkItem { [weak self] in self?.pumpEagerBacklog() }
-        eagerDebounceWork = work
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
+        pumpEagerBacklog()
     }
 
     /// 顺序泵出预译队列：一次只一个在飞请求；结果回来后续泵下一个。
@@ -412,6 +422,9 @@ final class GogakuInputController: IMKInputController {
               let next = eagerBacklog.first(where: {
                   translationMemory[$0] == nil && (eagerAttempts[$0] ?? 0) < 2
               }) else { return }
+        // 防重复请求（裁决 A）：同一源文已在飞或 backlog 与在飞相同均不重发——
+        // applyNormal 每键重建 backlog 为同一高亮候选，逐键直泵不能放大请求。
+        guard eagerInFlight != next else { return }
         guard eagerInFlight == nil else {
             // 在飞未返回：短延重泵兜底（上限≈10s，与服务超时对齐）。正常路径
             // 由在飞结果的续链先完成；此前泵遇在飞静默放弃且无重试，慢结果／
@@ -444,6 +457,18 @@ final class GogakuInputController: IMKInputController {
             // 预译失败（错误或空译文）计次：超限后泵跳过该候选。
             eagerAttempts[finished, default: 0] += 1
         }
+        // 提交合并（裁决 B）：该结果正是挂起提交等待的预译回包——直接完成
+        // 提交上屏，不再等自发 commit 请求。必须在渲染 guard 之前：组合已随
+        // 提交结束（displayed 已清空），渲染分支会提前 return，挂起提交就
+        // 永远等不到结果（此前弹框从未显示英文的根因）。窗口已回退后的迟到
+        // 结果不合并（fulfil 返回 false），照常只入 memory。
+        if let pending = pendingTranslatedCommit, pending.source == result.source,
+           commitMergeWindow.fulfilIfWaiting(source: result.source) {
+            pendingTranslatedCommit = nil
+            finishCommitSwap(result)
+            pumpEagerBacklog()
+            return
+        }
         defer { pumpEagerBacklog() }
         // 注释入视图只受组合代次门控：渲染条件不满足（坐标暂不可读等）也要
         // 把注释留在 displayed——位置复查恢复显示时 re-enqueue 的就是已带
@@ -473,6 +498,13 @@ final class GogakuInputController: IMKInputController {
         guard hasCJK else { insertCommit(text, at: anchor, preWriteCheck: preWriteCheck); return }
         if let translated = translationMemory[text] {
             insertCommit(Self.withTrailingSpace(translated), at: anchor, preWriteCheck: preWriteCheck)
+            return
+        }
+        // 提交合并（裁决 B）：同一源文的预译在飞时挂起提交等待其结果
+        //（≤400ms 兜底），不再自发重复请求；超时或失败走原 requestImmediately。
+        if eagerInFlight == text {
+            pendingTranslatedCommit = PendingTranslatedCommit(source: text, anchor: anchor, buffer: [])
+            commitMergeWindow.begin(source: text)
             return
         }
         pendingTranslatedCommit = PendingTranslatedCommit(source: text, anchor: anchor, buffer: [])
@@ -710,14 +742,14 @@ final class GogakuInputController: IMKInputController {
     private func suspend(clearMarked: Bool = true, rawOverride: String? = nil) {
         let app = application, oldMode = mode, oldDirection = direction
         let raw = rawOverride ?? displayed?.raw ?? ""
-        // 待插入译文未落地即失焦：原中文入草稿可恢复，缓冲丢弃。
+        // 待插入译文未落地即失焦：原中文入草稿可恢复，缓冲与等待兜底丢弃。
         if let pending = pendingTranslatedCommit {
+            commitMergeWindow.cancel()
             pendingTranslatedCommit = nil
             DraftStore.shared.save(application: app, mode: .learning, direction: .zhToEn,
                                    raw: pending.source, literal: true)
         }
         eagerBacklog = []
-        eagerDebounceWork?.cancel()
         // 预译泵状态随组合结束复位：eagerInFlight 残留曾让新组合的泵全程
         // 静默 no-op（只能靠 warmup 结果兜底）。残留请求的迟到结果不再写
         // memory（commit 路径会重新覆盖），换取泵状态与新组合的干净边界。
@@ -1168,7 +1200,8 @@ final class GogakuInputController: IMKInputController {
             // marked text 更新后读取最新插入位置（合并刷新：同一事件内只读一次；
             // 额外宿主读取经 ValidationMonitor 的 hostReadNs 纳入性能测量）。
             refreshDisplayPosition()
-            // displayed 已更新为当前视图后按防抖泵预译队列（stamp 匹配面板代次）。
+            // displayed 已更新为当前视图后立即泵预译队列（stamp 匹配面板代次；
+            // 2026-11-20 裁决：不再防抖，首键即发）。
             scheduleEagerPump()
         } else {
             displayed = nil
@@ -1181,7 +1214,6 @@ final class GogakuInputController: IMKInputController {
             stopPositionRefresh()
             panel.dismiss()
             eagerBacklog = []
-            eagerDebounceWork?.cancel()
             eagerPumpRetryWork?.cancel(); eagerPumpRetryWork = nil
             eagerPumpRetryCount = 0
         }
