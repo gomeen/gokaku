@@ -135,11 +135,14 @@ public final class URLSessionUpdateTransport: NSObject, UpdateTransport, URLSess
                          progress: @escaping @Sendable (Int64) -> Void) async throws -> (URL, UpdateHTTPResponse) {
         try Self.validate(url: url, requireAPIHost: false)
         var request = URLRequest(url: url)
-        request.timeoutInterval = timeout
+        // 空闲断流上限独立固定：慢速网络（~80KB/s）下数据持续流动不会触发，
+        // 而连接挂起 60s 即报错；total 预算由 timeout 承担（按资产大小自适应，
+        // 见 UpdateDownloader.downloadTimeout），不再与空闲断流共用同一值。
+        request.timeoutInterval = 60
         request.httpMethod = "GET"
         let delegate = DownloadDelegate(progress: progress)
         let config = URLSessionConfiguration.ephemeral
-        config.timeoutIntervalForRequest = timeout
+        config.timeoutIntervalForRequest = 60
         config.timeoutIntervalForResource = max(timeout, 300)
         config.httpMaximumConnectionsPerHost = 1
         let session = URLSession(configuration: config, delegate: delegate, delegateQueue: nil)

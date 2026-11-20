@@ -82,6 +82,7 @@ final class UpdateTests: XCTestCase {
         var handler: ((URL, [String: String]) -> UpdateHTTPResponse)!
         var downloadHandler: ((URL) throws -> (URL, Int64))?
         var requested: [URL] = []
+        var downloadTimeouts: [TimeInterval] = []
 
         func get(_ url: URL, headers: [String: String], timeout: TimeInterval,
                  maxBytes: Int) async throws -> UpdateHTTPResponse {
@@ -92,6 +93,7 @@ final class UpdateTests: XCTestCase {
         func download(_ url: URL, timeout: TimeInterval,
                       progress: @escaping @Sendable (Int64) -> Void) async throws -> (URL, UpdateHTTPResponse) {
             requested.append(url)
+            downloadTimeouts.append(timeout)
             guard let downloadHandler else { throw UpdateTransportError.transport("no handler") }
             let (file, size) = try downloadHandler(url)
             progress(size)
@@ -760,6 +762,69 @@ final class UpdateTests: XCTestCase {
         let none = try await downloader.downloadDataPackage(
             candidate: candidate, dataPackage: nil, resolved: nil) { _ in }
         XCTAssertNil(none)
+    }
+
+    /// 下载总超时按资产大小自适应：固定 300s 在 ~80KB/s 慢速网络下下不完
+    /// 36.7MB 数据包，且无字节级续传，重试从头下载导致永远超时
+    /// （2026-11-20 用户 0.3.0→0.3.2 升级实测）。
+    func testDownloadTimeoutScalesWithAssetSize() async throws {
+        // 纯函数：小包保持 300s 下限；大包按 50KB/s 保底速度估算。
+        XCTAssertEqual(UpdateDownloader.downloadTimeout(forBytes: 0), 300)
+        XCTAssertEqual(UpdateDownloader.downloadTimeout(forBytes: 11_217_422), 300)
+        XCTAssertEqual(UpdateDownloader.downloadTimeout(forBytes: 36_695_320), 733.9, accuracy: 0.1)
+        XCTAssertEqual(UpdateDownloader.downloadTimeout(forBytes: 104_857_600), 2097.2, accuracy: 0.1)
+        // 传输层实际收到的超时也随大小变化。
+        let smallPayload = Data(repeating: 0x61, count: 1024)
+        let smallHash = UpdateDownloader.sha256(of: smallPayload)
+        let bigPayload = Data(repeating: 0x62, count: 20_000_000)
+        let bigHash = UpdateDownloader.sha256(of: bigPayload)
+        let mainPayload = Data(repeating: 0x63, count: 11_217_422)
+        let mainHash = UpdateDownloader.sha256(of: mainPayload)
+        let asset = UpdateAsset(platform: "macos", arch: "x86_64", minOS: "26.0",
+                                assetId: 9, name: "Gogaku-Data-0.1.2.pkg",
+                                size: Int64(bigPayload.count), sha256: bigHash)
+        let manifest = UpdateManifest(keyId: "test-key", version: "0.1.2", buildNumber: 10,
+                                      channel: .stable, notes: "", assets: [asset])
+        let candidate = UpdateCandidate(releaseTag: "v0.1.2", releaseName: "x",
+                                        manifest: manifest, asset: asset,
+                                        downloadURL: URL(string: "https://github.com/g/d.pkg")!,
+                                        publishedAt: nil)
+        let dataPackage = UpdateDataPackage(platform: "macos", name: asset.name,
+                                            size: Int64(bigPayload.count), sha256: bigHash,
+                                            assetId: 9, dataVersion: "ab12cd34ef56ab12")
+        let transport = FakeTransport()
+        transport.downloadHandler = { url in
+            let p: Data = url.path.contains("s.pkg") ? smallPayload
+                : (url.path.contains("d.pkg") ? bigPayload : mainPayload)
+            let file = FileManager.default.temporaryDirectory.appendingPathComponent("dt-\(UUID().uuidString)")
+            try p.write(to: file)
+            return (file, Int64(p.count))
+        }
+        let downloader = UpdateDownloader(transport: transport,
+                                          cacheRoot: root.appendingPathComponent("cache-scale"))
+        let small = UpdateDataPackage(platform: "macos", name: asset.name,
+                                      size: Int64(smallPayload.count), sha256: smallHash,
+                                      assetId: 9, dataVersion: "0123456789abcdef")
+        _ = try await downloader.downloadDataPackage(
+            candidate: candidate, dataPackage: small,
+            resolved: (URL(string: "https://github.com/g/s.pkg")!, smallHash, Int64(smallPayload.count))) { _ in }
+        _ = try await downloader.downloadDataPackage(
+            candidate: candidate, dataPackage: dataPackage,
+            resolved: (URL(string: "https://github.com/g/d.pkg")!, bigHash, Int64(bigPayload.count))) { _ in }
+        XCTAssertEqual(transport.downloadTimeouts.count, 2)
+        XCTAssertEqual(transport.downloadTimeouts[0], 300, accuracy: 0.1,
+                       "小包保持 300s 下限")
+        XCTAssertEqual(transport.downloadTimeouts[1], 400, accuracy: 0.1,
+                       "20MB 数据包按 50KB/s 保底估算总超时（400s）")
+        _ = try await downloader.download(
+            UpdateCandidate(releaseTag: "v0.1.2", releaseName: "x",
+                                       manifest: manifest, asset: UpdateAsset(
+                                        platform: "macos", arch: "x86_64", minOS: "26.0", assetId: 10,
+                                        name: "Gogaku-0.1.2.pkg", size: 11_217_422, sha256: mainHash),
+                                       downloadURL: URL(string: "https://github.com/g/m.pkg")!,
+                                       publishedAt: nil)) { _ in }
+        XCTAssertEqual(transport.downloadTimeouts[2], 300, accuracy: 0.1,
+                       "11MB 主包仍在 300s 下限内")
     }
 
     func releaseJSONWithV2(tag: String = "v0.1.2", v2ManifestData: Data, v2SignatureData: Data,

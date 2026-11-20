@@ -59,6 +59,15 @@ public final class UpdateDownloader {
         defaultCacheRoot().appendingPathComponent("data", isDirectory: true)
     }
 
+    /// 按资产大小自适应的下载总超时：GitHub 资产域名实测可低至 ~80KB/s
+    /// （2026-11-20 用户 0.3.0→0.3.2 升级：36.7MB 数据包在固定 300s 资源超时内
+    /// 下不完；无字节级续传，重试从头下载导致永远超时）。按 50KB/s 保底速度
+    /// 估算总时长，下限 300s：11MB 主包仍 300s，36.7MB 数据包 ≈ 734s。
+    /// 空闲断流由传输层独立的请求级超时兑底，不会无限挂起。
+    public static func downloadTimeout(forBytes bytes: Int64, floor: TimeInterval = 300) -> TimeInterval {
+        max(floor, TimeInterval(bytes) / 50_000)
+    }
+
     /// 下载并校验数据包（若 candidate 携带且本地缓存没有该数据版本）。
     /// 返回已校验的数据包 zip 路径；清单无数据包时返回 nil。
     /// - Parameters:
@@ -98,7 +107,8 @@ public final class UpdateDownloader {
         }
         let temporary: URL
         do {
-            (temporary, _) = try await transport.download(resolved.url, timeout: 300) { written in
+            (temporary, _) = try await transport.download(
+                resolved.url, timeout: Self.downloadTimeout(forBytes: dataPackage.size)) { written in
                 let fraction = dataPackage.size > 0
                     ? min(1, Double(written) / Double(dataPackage.size)) : 0
                 progress(fraction)
@@ -150,7 +160,8 @@ public final class UpdateDownloader {
 
         let temporary: URL
         do {
-            (temporary, _) = try await transport.download(candidate.downloadURL, timeout: 300) { written in
+            (temporary, _) = try await transport.download(
+                candidate.downloadURL, timeout: Self.downloadTimeout(forBytes: candidate.asset.size)) { written in
                 let fraction = candidate.asset.size > 0
                     ? min(1, Double(written) / Double(candidate.asset.size)) : 0
                 progress(fraction)
