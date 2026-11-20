@@ -785,6 +785,9 @@ final class CandidatePanel: NSPanel {
     var theme: CandidatePanelTheme { content.debugTheme }
     private var placementAnchor: NSRect?
     private var placementOrigin: NSPoint?
+    /// 上次布局的精确尺寸：窗口 frame 会被 AppKit 像素对齐取整，粘边计算
+    /// 需要未取整的高度才能保持顶边不飘。
+    private var placementSize: NSSize?
 
     override var canBecomeKey: Bool { false }
     override var canBecomeMain: Bool { false }
@@ -858,18 +861,37 @@ final class CandidatePanel: NSPanel {
             ?? backingScaleFactor
     }
 
+    /// 粘性复用的几何：面板上次显示在锚点下方时保持顶边（贴光标的一侧不动，
+    /// 高度变化向底部伸缩），在锚点上方时保持底边。若直接复用左下角 origin，
+    /// 候选变少、高度收缩时顶边下塌，面板整体沉底、离光标越来越远
+    /// （用户反馈：候选项变少后候选框贴到底部而不是贴着光标）。
+    static func stickyOrigin(previous: NSPoint, previousHeight: CGFloat,
+                             anchor: NSRect, panelSize: NSSize) -> NSPoint {
+        var origin = previous
+        if previous.y + previousHeight <= anchor.minY {
+            // 上次在锚点下方：顶边 = previous.y + previousHeight 不变，向底部伸缩。
+            origin.y = previous.y + previousHeight - panelSize.height
+        }
+        return origin
+    }
+
     /// 延迟矩阵探针专用：只做布局计算，返回目标窗口 frame；无法安全显示时返回 nil。
     func layoutPanel(_ view: CompositionView, at anchor: NSRect) -> NSRect? {
         content.update(view, backingScale: backingScale(at: anchor))
         let size = content.layoutSize
         let screens = NSScreen.screens.map { ScreenFrame(frame: $0.frame, visibleFrame: $0.visibleFrame) }
         guard let proposed = PanelPlacement.origin(anchor: anchor, panelSize: size, screens: screens) else { return nil }
-        // 同一坐标不重复布局：同锚点复用上次 origin，但重算尺寸后必须仍在
+        // 同一坐标不重复布局：同锚点复用上次位置以避免面板上下翻转抖动，但
+        // 复用的是「锚定边」而非左下角（见 stickyOrigin）；重算尺寸后必须仍在
         // 屏幕可视区内，越界时回退到重新计算的位置。
-        var origin = (isVisible && placementAnchor == anchor && placementOrigin != nil)
-            ? placementOrigin! : proposed
-        if !PanelPlacement.isContained(origin: origin, panelSize: size, screens: screens) {
-            origin = proposed
+        var origin = proposed
+        if isVisible, placementAnchor == anchor, let sticky = placementOrigin {
+            origin = Self.stickyOrigin(previous: sticky,
+                                       previousHeight: placementSize?.height ?? frame.height,
+                                       anchor: anchor, panelSize: size)
+            if !PanelPlacement.isContained(origin: origin, panelSize: size, screens: screens) {
+                origin = proposed
+            }
         }
         content.frame = NSRect(origin: .zero, size: size)
         return NSRect(origin: origin, size: size)
@@ -883,6 +905,7 @@ final class CandidatePanel: NSPanel {
             setFrame(frame, display: false)
             placementAnchor = anchor
             placementOrigin = frame.origin
+            placementSize = frame.size
         }
     }
 
@@ -900,6 +923,7 @@ final class CandidatePanel: NSPanel {
         hideCount &+= 1
         placementAnchor = nil
         placementOrigin = nil
+        placementSize = nil
         contentVisible = false
         alphaValue = 0
         if primed, frame.origin != NSPoint(x: -10000, y: -10000) {
@@ -955,6 +979,7 @@ final class CandidatePanel: NSPanel {
         if nextFrame != frame { setFrame(nextFrame, display: false) }
         placementAnchor = anchor
         placementOrigin = nextFrame.origin
+        placementSize = nextFrame.size
         content.displayIfNeeded()
         contentVisible = true
         renderCount &+= 1
