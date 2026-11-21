@@ -530,7 +530,11 @@ Panel layout(Fonts &fonts, const Json &frame, const Palette &p) {
     Panel panel;
     bool learning=frame.value("learning",false), horizontal=!learning && string(frame,"layout",32)=="horizontal";
     bool glossOn=frame.value("glossRow",true), original=frame.value("hasOriginal",false), restore=frame.value("hasRestore",false);
-    int page=int(number(frame,"page",0,0,1000000)), pages=int(number(frame,"pageCount",1,1,1000001));
+    // 页码自 2026-11-20 起不绘制（用户裁决）：单页与多页的候选窗高度必须一致，
+    // 否则候选跨过「一页」门槛时面板凭空长出一行。page／pageCount 仍照旧校验，
+    // page 继续参与 CHOOSE 的全局下标换算。
+    int page=int(number(frame,"page",0,0,1000000));
+    number(frame,"pageCount",1,1,1000001);
     int pageSize=int(number(frame,"pageSize",9,1,9)), selected=int(number(frame,"selected",0,0,10000000));
     auto candidates=frame.value("candidates",Json::array());
     if (!candidates.is_array() || candidates.size()>size_t(pageSize)) throw Invalid{};
@@ -541,8 +545,7 @@ Panel layout(Fonts &fonts, const Json &frame, const Palette &p) {
     double pad=p.padding, minW=horizontal?320:180, maxW=horizontal?860:440;
     double innerMax=maxW-2*pad, smallH=std::ceil(p.small*1.4), preeditH=std::ceil(p.preeditFont*1.5);
     double rowH=std::max({(p.legacy?46*p.font/21:30)*p.rowHeight/100,p.font*1.5,p.indexFont*1.5});
-    Run source=fonts.shape(preedit,p.preeditFont), statusRun=fonts.shape(status,p.small), pageRun;
-    if (pages>1) pageRun=fonts.shape(std::to_string(page+1)+"/"+std::to_string(pages),p.indexFont);
+    Run source=fonts.shape(preedit,p.preeditFont), statusRun=fonts.shape(status,p.small);
     struct Row { Run index,word,gloss; bool selected; double width=0; };
     std::vector<Row> rows; double widest=0;
     for (size_t i=0;i<candidates.size();++i) {
@@ -554,9 +557,8 @@ Panel layout(Fonts &fonts, const Json &frame, const Palette &p) {
         widest=std::max(widest,r.width); rows.push_back(std::move(r));
     }
     double desired=std::max({widest,source.width,statusRun.width,original||restore?240.0:0.0});
-    double pageReserve=pages>1?pageRun.width+16:0;
     if(horizontal) {
-        desired=pageReserve;
+        desired=0;
         for(auto &r:rows) desired+=r.index.width+5+r.word.width+16;
         if(!rows.empty()) desired+=4*(rows.size()-1);
     }
@@ -610,7 +612,7 @@ Panel layout(Fonts &fonts, const Json &frame, const Palette &p) {
         y+=4;
     }
     if(horizontal && !rows.empty()) {
-        double available=inner-pageReserve-4*(rows.size()-1),used=0;
+        double available=inner-4*(rows.size()-1),used=0;
         std::vector<double> widths(rows.size());
         // 水位分配：短候选取所需宽度，长候选平分剩余空间；页内候选永不丢弃。
         double remaining=available;size_t pending=rows.size();
@@ -630,9 +632,6 @@ Panel layout(Fonts &fonts, const Json &frame, const Palette &p) {
             put(truncate(fonts,std::move(r.word),std::max(0.0,w-r.index.width-21)),r.selected?p.selected:p.text,x+13+r.index.width,y+(rowH+p.font*.7)/2);
             hit(box,GC_PANEL_HIT_CHOOSE,page*pageSize+int(i));used+=w+4;
         }
-        if(pages>1){double x=panel.w-pad-pageRun.width;put(pageRun,p.page,x,y+(rowH+p.indexFont*.7)/2);
-            if(page>0)hit({x-4,y,pageRun.width/2+4,rowH},GC_PANEL_HIT_PAGE_PREV);
-            if(page+1<pages)hit({x+pageRun.width/2,y,pageRun.width/2+4,rowH},GC_PANEL_HIT_PAGE_NEXT);}
         y+=rowH;
         for(auto &r:rows)if(r.selected && glossOn && r.gloss.width>0){put(truncate(fonts,std::move(r.gloss),inner-8),p.comment,pad+4,y+p.small);y+=smallH+2;break;}
     } else {
@@ -650,9 +649,6 @@ Panel layout(Fonts &fonts, const Json &frame, const Palette &p) {
             for(size_t n=0;n<lines.size();++n)put(lines[n],r.selected?p.selectedComment:p.comment,glossX,y+(rowH+p.small*.7)/2+n*smallH);
             hit(box,GC_PANEL_HIT_CHOOSE,page*pageSize+int(i));y+=height;
         }
-        if(pages>1){double x=panel.w-pad-pageRun.width;put(pageRun,p.page,x,y+p.indexFont+2);
-            if(page>0)hit({x-4,y,pageRun.width/2+4,smallH},GC_PANEL_HIT_PAGE_PREV);
-            if(page+1<pages)hit({x+pageRun.width/2,y,pageRun.width/2+4,smallH},GC_PANEL_HIT_PAGE_NEXT);y+=smallH+2;}
     }
     if(!status.empty()){auto lines=wrap(fonts,statusRun,inner,3,false);for(auto &line:lines){put(line,p.cursor,pad,y+p.small);y+=smallH;}y+=2;}
     if(!toast.empty()){put(truncate(fonts,fonts.shape(toast,p.small),inner),p.cursor,pad,y+p.small);y+=smallH+2;}

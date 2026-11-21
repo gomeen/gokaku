@@ -339,7 +339,8 @@ struct CandidateRenderer::Impl {
         if (view.value("pending",false) && status.empty()) status=L"翻译处理中…";
         if (!toast.empty() && !toastOnly) status=toast;
         bool learning=view.value("learning",false), draft=view.value("draftAvailable",false);
-        size_t pages=view.value("pageCount",size_t(0)), page=view.value("page",size_t(0));
+        // 页码自 2026-11-20 起不绘制；page 仍参与页内下标换算。
+        size_t page=view.value("page",size_t(0));
         size_t selected=view.value("selected",size_t(0));
         const bool horizontal=!learning && settings.value("candidateLayout",std::string())=="horizontal";
         const size_t psz=horizontal
@@ -361,7 +362,9 @@ struct CandidateRenderer::Impl {
             source.p=layout(preedit,small.p,width-2*pad,180,true); source->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
             DWRITE_TEXT_METRICS metrics{}; source->GetMetrics(&metrics); sourceHeight=std::min(180.0f,std::max(24.0f,metrics.height+8));
         }
-        float footer=(!status.empty() || pages>1)?24.0f:0, actions=(learning && (!preedit.empty() || count)) || draft ? 30.0f : 0;
+        // 页码自 2026-11-20 起不绘制（与共享位图渲染同一裁决）：页脚高度只看
+        // 状态行，单页与多页等高，不再有 PagePrev／PageNext 命中区。
+        float footer=!status.empty()?24.0f:0, actions=(learning && (!preedit.empty() || count)) || draft ? 30.0f : 0;
         float height=2*pad+sourceHeight+row*count+footer+actions;
         if (horizontal && !toastOnly && count) {
             const float minW=320.0f, maxW=860.0f;
@@ -477,13 +480,7 @@ struct CandidateRenderer::Impl {
                 targets.push_back({pixels(rect,scale),hit}); y+=row;
             }
             if (footer) {
-                float pageWidth=0;
-                if (pages>1) { auto value=std::to_wstring(page+1)+L"/"+std::to_wstring(pages); pageWidth=measure(value,index.p)+8;
-                    draw(value,index.p,D2D1::RectF(width-pad-pageWidth,y,width-pad,y+24),"page");
-                    const float middle=width-pad-pageWidth/2;
-                    if(page>0) targets.push_back({pixels(D2D1::RectF(width-pad-pageWidth,y,middle,y+24),scale),{Action::PagePrev}});
-                    if(page+1<pages) targets.push_back({pixels(D2D1::RectF(middle,y,width-pad,y+24),scale),{Action::PageNext}}); }
-                draw(status,index.p,D2D1::RectF(pad,y,width-pad-pageWidth,y+24),"page"); y+=24;
+                draw(status,index.p,D2D1::RectF(pad,y,width-pad,y+24),"page"); y+=24;
             }
             if (actions) {
                 float x=pad;

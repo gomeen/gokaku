@@ -26,7 +26,8 @@ final class HorizontalCandidatePanelTests: XCTestCase {
     }
 }
 
-/// 横排布局的序号与页码合同（2026-11-16 用户报「序号显示有问题」「9 之后还可选」）。
+/// 横排布局的序号与分页合同（2026-11-16 用户报「序号显示有问题」「9 之后还可选」）。
+/// 2026-11-20 裁决去掉页码：横排也不再为页码预留右缘宽度、不再丢弃放不下的候选。
 final class HorizontalLayoutContractTests: XCTestCase {
     private func makeView(words: [String], selected: Int = 0, page: Int = 0,
                           pageSize: Int = 9, total: Int? = nil,
@@ -66,18 +67,21 @@ final class HorizontalLayoutContractTests: XCTestCase {
         XCTAssertGreaterThan(xs.last! - xs.first!, 100)
     }
 
-    /// 候选不得压到分页标签上（旧实现出现「蘅/5」粘连并被窗口裁字）。
-    func testRowsNeverOverlapPageLabel() {
+    /// 页码已去掉（2026-11-20 裁决），横排不再绘制任何分页标签。
+    func testNoPageLabelIsDrawn() {
         let words = ["橫", "行", "恒", "哼", "衡", "亨", "隈", "蘅"] + Array(repeating: "测试词语", count: 8)
         let view = makeView(words: Array(words.prefix(9)), pageSize: 9, total: 45)
         let layout = PanelLayout.horizontalNormal(view: view, theme: theme)
-        guard let page = layout.page else { return XCTFail("多页时应有分页标签") }
-        XCTAssertGreaterThan(page.length, 0)
-        let pageLeft = layout.pageRect.minX
-        for row in layout.rows {
-            XCTAssertLessThanOrEqual(row.frame.maxX, pageLeft + 0.5,
-                                     "候选不得侵入分页标签区域")
-        }
+        XCTAssertNil(layout.page, "多页也不得绘制页码")
+        XCTAssertEqual(layout.pageRect, .zero)
+    }
+
+    /// 去掉页码后，横排不再因「放不下页码」而丢弃候选。
+    func testNoCandidateIsDroppedByPageReserve() {
+        let words = (0..<9).map { "很长的候选词语第\($0)个占位宽度" }
+        let view = makeView(words: words, pageSize: 9, total: 45)
+        let layout = PanelLayout.horizontalNormal(view: view, theme: theme)
+        XCTAssertEqual(layout.rows.count, 9, "九候选全保留（旧实现按页码左缘裁剪）")
     }
 
     /// 宽度上限不变：横排面板仍夹在 [320, 860]。

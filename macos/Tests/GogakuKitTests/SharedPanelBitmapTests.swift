@@ -72,16 +72,30 @@ final class SharedPanelBitmapTests: XCTestCase {
         XCTAssertNotNil(image.dataProvider?.data, "预乘 RGBA 像素必须实际保留在图像数据中")
     }
 
-    func testLearningPageCountUsesAllCandidatesWhenTotalIsUnset() throws {
+    /// 页码已去掉（2026-11-20 裁决）：多页面板不得再产生翻页命中区，但页内
+    /// CHOOSE 仍按全局下标给出（翻页只走键盘与 `.`/`,`）。
+    func testMultiPageBitmapHasNoPageHitRegions() throws {
         let content = PanelContent()
         content.updateTheme(CandidatePanelTheme.resolve(.gogaku), renderer: .bitmap)
         content.update(learningView(candidateCount: 20, page: 1), backingScale: 1)
 
         let bitmap = try XCTUnwrap(content.debugBitmap, content.debugRenderFailure ?? "共享位图渲染失败")
-        XCTAssertTrue(bitmap.hits.contains { $0.action == Int32(GC_PANEL_HIT_PAGE_PREV) })
-        XCTAssertTrue(bitmap.hits.contains { $0.action == Int32(GC_PANEL_HIT_PAGE_NEXT) },
-                      "20 个学习候选应为三页，当前第二页仍可翻到第三页")
+        XCTAssertFalse(bitmap.hits.contains { $0.action == Int32(GC_PANEL_HIT_PAGE_PREV) })
+        XCTAssertFalse(bitmap.hits.contains { $0.action == Int32(GC_PANEL_HIT_PAGE_NEXT) },
+                       "页码去掉后不再有翻页命中区")
         XCTAssertEqual(bitmap.hits.filter { $0.action == Int32(GC_PANEL_HIT_CHOOSE) }.map(\.argument), Array(9...17).map(Int32.init))
+    }
+
+    /// 单页与多页同内容必须等高：页码不再凭空占一行（用户报 7→9 个候选项框变高）。
+    func testSingleAndMultiPageShareHeight() throws {
+        let content = PanelContent()
+        content.updateTheme(CandidatePanelTheme.resolve(.gogaku), renderer: .bitmap)
+        content.update(learningView(candidateCount: 9, page: 0), backingScale: 1)
+        let single = try XCTUnwrap(content.debugBitmap, content.debugRenderFailure ?? "共享位图渲染失败")
+        content.update(learningView(candidateCount: 10, page: 0), backingScale: 1)
+        let multi = try XCTUnwrap(content.debugBitmap, content.debugRenderFailure ?? "共享位图渲染失败")
+        XCTAssertEqual(single.pointSize.height, multi.pointSize.height, accuracy: 0.001,
+                       "9 个与 10 个候选的首页面板高度必须一致")
     }
 
     func testExplainHitRendersIssueExplanationInBitmap() throws {

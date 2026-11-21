@@ -190,11 +190,12 @@ int main(){
         expect(samePixels(a.get(),repeat.get()),"缓存热冷不改变位图");
         auto hits=choices(a.get());expect(hits.size()==4,"竖排保留四候选");
         if(hits.size()==4){expect(hits[1].y>hits[0].y&&hits[1].x==hits[0].x,"竖排同列递增");expect(hits.back().arg==3,"CHOOSE全局索引");}
-        expect(action(a.get(),GC_PANEL_HIT_PAGE_NEXT),"多页下一页命中");bounds(a.get());
+        // 页码自 2026-11-20 起不绘制：多页与单页高度、命中表均一致。
+        expect(!action(a.get(),GC_PANEL_HIT_PAGE_NEXT),"不再产生翻页命中区");bounds(a.get());
         for(size_t i=0;i<size_t(a->width)*a->height;++i){const auto *p=a->pixels+4*i;expect(p[0]<=p[3]&&p[1]<=p[3]&&p[2]<=p[3],"RGBA必须预乘");}
     }
     {auto no=f;for(auto &c:no["candidates"])c["gloss"]="";auto b=call(no,t);expect(!samePixels(a.get(),b.get()),"竖排释义实际绘出");}
-    {auto one=f;one["pageCount"]=1;auto b=call(one,t);if(a&&b){expect(a->height>b->height,"仅多页占页码行");expect(!action(b.get(),GC_PANEL_HIT_PAGE_NEXT),"单页无翻页命中");}}
+    {auto one=f;one["pageCount"]=1;auto b=call(one,t);if(a&&b){expect(a->height==b->height,"单页与多页等高（页码不占行）");expect(!action(b.get(),GC_PANEL_HIT_PAGE_NEXT),"单页无翻页命中");}}
     {auto dark=call(f,t,2,1);expect(!samePixels(a.get(),dark.get()),"深色配色生效");}
     {auto caret=f;caret["preeditCaretUTF16"]=-1;auto b=call(caret,t);expect(!samePixels(a.get(),b.get()),"预编辑光标可见");}
     {auto small=f;small["preedit"]="";small["pageCount"]=1;auto x=call(small,t,1),y=call(small,t,2);

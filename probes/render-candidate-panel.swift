@@ -1,11 +1,11 @@
 // 候选窗离线渲染比对：AppKit 2x 位图逐项核对 demo 规格，误差 ≤1pt。
 //
 // 覆盖项（docs/prototype-input-habits.md 裁决规格）：
-// - 字号：候选 14／注释 13（−1）／序号与页码 11（−3）
+// - 字号：候选 14／注释 13（−1）／序号 11（−3）
 // - 行高：46×字号/21 ＝ 30.67pt（14 号）
 // - 内边距：窗口 8；高亮 #12996A 左起 x=8、右扩 4、高度＝行高、圆角 4
 // - 注释琥珀色 #7D5800（浅色）／#E3A82E（深色）
-// - 页码「1/2」多于一页才显示、右对齐
+// - 不绘制页码（2026-11-20 用户裁决）：单页与多页高度一致
 // - 长注释截断省略号且面板宽不超 440；单行短内容时面板 ≥180
 // - 预编辑光标字形随文本排版；深色主题背景 #2D1E1F
 // 产物：GOGAKU_RENDER_OUTPUT_DIR 下的 panel-render-{light,dark}-2x.png，
@@ -114,8 +114,7 @@ for (i, w) in words.enumerated() {
     let content = PanelContent(frame: NSRect(x: 0, y: 0, width: 400, height: 400))
 content.update(view)
     check(content.debugRowFrames.count == 9, "渲染 9 行（实际 \(content.debugRowFrames.count)）")
-    check(content.debugPageString == "1/2", "两页时绘制页码 1/2（实际 \(content.debugPageString)）")
-    check(!content.debugPageRect.isEmpty, "两页时页码有绘制位置")
+    check(content.debugPageString == "" && content.debugPageRect.isEmpty, "不再绘制页码（2026-11-20 裁决）")
     check(content.debugPreedit?.string == "ni'hao|", "展开拼音光标字形在末尾")
     // 分段选择场景：预编辑开头为已暂存中文，插入点画在其后。
     var staged = CompositionView(stamp: InputStamp(mode: .normal))
@@ -143,15 +142,22 @@ content.update(view)
     check(!scanForColor(lightRep, hex: 0x12996A, rect: outsideTop), "高亮不超过行高（上边界外无高亮色）")
     check(content.debugSelectedRow == 0, "高亮在第 0 行")
 
-// ── 单页短内容：不显示页码，最小宽 180 ────────────────────────
+// ── 单页短内容：同样无页码，最小宽 180 ────────────────────────
     var small = CompositionView(stamp: InputStamp(mode: .normal))
 small.totalCandidates = 1
 small.candidates = [Candidate(stamp: small.stamp, sourceID: "t", source: "m",
                               range: RawRange(start: 0, length: 0), target: "你", explanation: "", resource: "t")]
     let smallContent = PanelContent(frame: NSRect(x: 0, y: 0, width: 400, height: 400))
 smallContent.update(small)
-    check(smallContent.debugPageString == "" && smallContent.debugPageRect.isEmpty, "单页不渲染页码")
+    check(smallContent.debugPageString == "" && smallContent.debugPageRect.isEmpty, "单页无页码")
     check(approx(smallContent.debugPanelWidth, 180, tol: 0.01), "最小宽 180（实际 \(smallContent.debugPanelWidth)）")
+// 同一页 9 行内容，单页（9 个）与多页（18 个）必须等高：页码不再凭空占一行。
+    var singlePage = view
+singlePage.totalCandidates = 9
+    let singleContent = PanelContent(frame: NSRect(x: 0, y: 0, width: 400, height: 400))
+singleContent.update(singlePage)
+    check(singleContent.layoutSize.height == content.layoutSize.height,
+          "单页与多页等高（单页 \(singleContent.layoutSize.height) / 多页 \(content.layoutSize.height)）")
 
 // ── 长注释截断省略号 ─────────────────────────────────────────
     var longView = CompositionView(stamp: InputStamp(mode: .normal))

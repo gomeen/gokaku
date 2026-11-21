@@ -308,14 +308,13 @@ final class PanelLayout {
         innerWidth = min(max(widestRow, preeditWidth, statusString?.widthPt ?? 0, headerString?.widthPt ?? 0, minInner), maxInner)
         panelWidth = innerWidth + m.windowPadding * 2
 
-        // 5. 页码（多于一页才显示）
+        // 5. 页码自 2026-11-20 起不绘制（用户裁决）：单页与多页的候选窗高度
+        // 必须一致，否则候选跨过「一页」门槛时面板凭空长出一行（7→9 个候选时
+        // 内容行数不变、框却变高）。无障碍标签仍报页数，键盘／点击翻页不变。
         let total = view.stamp.mode == .normal ? view.totalCandidates : view.candidates.count
         let psz = view.stamp.mode == .normal ? view.normalPageSize : CandidatePage.size
         let totalPages = max(1, (max(total, 1) + psz - 1) / psz)
-        pageLabel = "第 \(view.page + 1)/\(totalPages) 页"
-        let pageString = totalPages > 1
-            ? NSAttributedString(string: "\(view.page + 1)/\(totalPages)", attributes: attributes(theme.pageFont, theme.pageText))
-            : nil
+        pageLabel = totalPages > 1 ? "第 \(view.page + 1)/\(totalPages) 页" : ""
 
         // 6. 纵向排布
         var y = m.windowPadding
@@ -364,16 +363,10 @@ final class PanelLayout {
             status = nil
             statusRect = .zero
         }
-        if let pageString {
-            pageRect = NSRect(x: m.windowPadding + innerWidth - pageString.widthPt - (theme.id == .rimeMacOSLike ? 0 : 5),
-                              y: y + m.pageFooterTopMargin, width: pageString.widthPt, height: m.pageLineHeight)
-            y += m.pageFooterTopMargin + m.pageLineHeight + (theme.id == .rimeMacOSLike ? 0 : 3)
-        } else {
-            pageRect = .zero
-        }
-        var placedButtons: [Button] = []
+        pageRect = .zero
         // 原文上屏／切换来源按钮行已移除（2026-11 用户裁决：学习面板底部与
         // 中→英界面保持一致）；原文上屏保留 ⌘↩ 隐藏快捷键。
+        let placedButtons: [Button] = []
         buttons = placedButtons
         if issueNotice != nil {
             noticeRect = NSRect(x: m.windowPadding, y: y, width: innerWidth, height: m.annotationLineHeight * 2)
@@ -386,7 +379,7 @@ final class PanelLayout {
         preeditLengthUTF16 = preeditString?.length ?? 0
         preeditCaretUTF16 = caretUTF16
         totalHeight = y + m.windowPadding
-        self.page = pageString
+        self.page = nil
     }
 
     private init(compactRowHighlights: Bool, glossLine: NSAttributedString?, glossLineRect: NSRect,
@@ -432,12 +425,9 @@ final class PanelLayout {
         }
         let pageSize = view.normalPageSize
         let inPage = max(0, min(view.selected - view.page * pageSize, view.candidates.count - 1))
-        // 分页标签先算出来：横排候选与它在同一行，必须为它预留右缘宽度，
-        // 否则最后一个候选会压到页码上（旧实现实测出现「蘅/5」粘连并被裁字）。
+        // 页码自 2026-11-20 起不绘制（用户裁决）：不再为它预留右缘宽度，也就
+        // 不会因为「最后一页放不下页码」而丢掉候选（旧实现按页码左缘裁剪行）。
         let totalPages = max(1, (max(view.totalCandidates, 1) + pageSize - 1) / pageSize)
-        let pageAttr = totalPages > 1 ? NSAttributedString(string: "\(view.page + 1)/\(totalPages)",
-            attributes: attributes(theme.pageFont, theme.pageText)) : nil
-        let pageReserve = (pageAttr?.widthPt ?? 0) + (pageAttr == nil ? 0 : 12)
         var chipX = m.windowPadding + m.rowLeftPadding
         let rowYBase = m.windowPadding
         let rowH = max(m.rowHeight, m.candidateLineHeight)
@@ -474,22 +464,10 @@ final class PanelLayout {
                                     englishFont: theme.preeditEnglishFont, color: theme.typedText)
             pre = PanelLayout.truncate(rawPre, maxWidth: maxInner).0
         }
-        // 页码与候选同一行：优先把面板加宽到「候选 + 页码」而不是直接丢候选；
-        // 只有加宽到上限仍放不下时，才在下面按页码左缘裁剪。
-        let chipsAndPage = chipX + pageReserve
-        var innerW = min(max(chipsAndPage, pre?.widthPt ?? 0), maxInner)
+        // 宽度只由候选与预编辑决定（页码不再占位）。
+        var innerW = min(max(chipX, pre?.widthPt ?? 0), maxInner)
         innerW = max(innerW, minInner)
         let panelW = innerW + m.windowPadding * 2
-        // 页码左缘以最终面板宽度为准（不能用 maxInner 估算：候选少时 innerW
-        // 会缩到 minInner，页码随之内移）。放不下的候选直接不显示，宁可少一个
-        // 也不让它压住页码或被窗口右缘裁字。
-        if pageAttr != nil {
-            let pageLeft = panelW - m.windowPadding - (pageAttr?.widthPt ?? 0) - 6
-            let limit = pageLeft - 8
-            if let lastOverflow = rows.firstIndex(where: { $0.frame.maxX > limit }) {
-                rows = Array(rows.prefix(lastOverflow))
-            }
-        }
         var y = m.windowPadding
         let preRect = pre != nil ? NSRect(x: m.windowPadding, y: y, width: innerW, height: m.preeditLineHeight) : .zero
         if pre != nil { y += m.preeditLineHeight + 4 }
@@ -509,10 +487,6 @@ final class PanelLayout {
             glossRect = NSRect(x: m.windowPadding + 4, y: y, width: innerW - 8, height: m.annotationLineHeight)
             y += m.annotationLineHeight + 2
         } else { glossRect = .zero }
-        let pageRect = pageAttr != nil
-            ? NSRect(x: panelW - m.windowPadding - (pageAttr?.widthPt ?? 0) - 6,
-                     y: rowY + (rowH - m.pageLineHeight) / 2, width: pageAttr?.widthPt ?? 0, height: m.pageLineHeight)
-            : .zero
         y += m.windowPadding
         return PanelLayout(compactRowHighlights: true, glossLine: glossLine, glossLineRect: glossRect,
                            innerWidth: innerW, panelWidth: panelW, totalHeight: y,
@@ -520,7 +494,7 @@ final class PanelLayout {
                            preeditLengthUTF16: pre?.length ?? 0, preeditCaretUTF16: nil,
                            preeditTextRect: preRect, preeditHitRect: preRect,
                            issueNotice: nil, noticeRect: .zero, rows: shifted, status: nil, statusRect: .zero,
-                           page: pageAttr, pageRect: pageRect, buttons: [],
+                           page: nil, pageRect: .zero, buttons: [],
                            pageLabel: totalPages > 1 ? "第 \(view.page + 1)/\(totalPages) 页" : "")
     }
 }

@@ -62,7 +62,8 @@ int main() {
         renderer.render(view, theme, false);
         expect(renderer.opacity() == 255, "default selects shared bitmap, no shell opacity");
         expect(choices(renderer) == std::set<size_t>({0,1,2,3,4,5,6,7,8}), "global page 2 chooses map to local 0..8");
-        expect(has(renderer, Renderer::Action::PagePrev) && has(renderer, Renderer::Action::PageNext), "page hit actions");
+        expect(!has(renderer, Renderer::Action::PagePrev) && !has(renderer, Renderer::Action::PageNext),
+               "页码去掉后系统渲染路径不再产生翻页命中区（2026-11-20 裁决）");
         bitmap(renderer);
         const auto originalPixels=pixels(renderer);
         const auto originalTheme=theme;
