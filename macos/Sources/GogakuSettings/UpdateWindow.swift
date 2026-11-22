@@ -80,7 +80,8 @@ final class UpdateController: ObservableObject {
     }
 
     var currentVersionText: String {
-        "\(installation.version)（构建 \(installation.buildNumber)）"
+        // 构建号不上面向用户的 UI（2026-11-19 裁决）：只显纯版本号。
+        installation.version
     }
 
     var isConfigured: Bool { config?.isConfigured == true }
@@ -516,14 +517,13 @@ struct UpdateView: View {
             HStack(spacing: 8) {
                 Text("新版 \(candidate.manifest.version)")
                     .font(.system(size: 14, weight: .semibold))
-                Text("构建 \(candidate.manifest.buildNumber)")
-                    .font(.system(size: 11, design: .monospaced))
-                    .foregroundStyle(SettingsPalette.secondaryText)
                 Spacer()
                 Text(ByteCountFormatter.string(fromByteCount: candidate.asset.size, countStyle: .file))
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
             }
+            // 说明区是清单里的应用内短文本（纯文本）：发布侧保证不超 12 行；
+            // 再长由外层 ScrollView 滚动，不嵌套内层滚动视图（会抢手势）。
             Text(candidate.manifest.notes)
                 .font(.system(size: 12))
                 .foregroundStyle(SettingsPalette.primaryText)
@@ -538,7 +538,8 @@ struct UpdateView: View {
                 .foregroundStyle(SettingsPalette.secondaryText)
                 .fixedSize(horizontal: false, vertical: true)
             if let data = controller.pendingDataPackage {
-                Text("新版包含数据包 \(data.name)（\(ByteCountFormatter.string(fromByteCount: data.size, countStyle: .file))，数据版本 \(data.dataVersion)）；本地已有同版本数据时不再下载。")
+                // 数据包文件名与数据版本指纹属内部身份，不在 UI 展示（2026-11-19 同口径）。
+                Text("本次更新包含出厂数据（\(ByteCountFormatter.string(fromByteCount: data.size, countStyle: .file))）；本地已有同版本数据时不重复下载。")
                     .font(.system(size: 11))
                     .foregroundStyle(SettingsPalette.secondaryText)
                     .fixedSize(horizontal: false, vertical: true)

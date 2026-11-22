@@ -768,11 +768,12 @@ Json checkUpdate(std::atomic_bool *cancel) {
         if (!sawEligible) return outcome("noRelease", "当前通道没有公开的正式 Release。");
         if (!sawManifest) return outcome("noManifest", "当前通道的发布没有完整的 update-manifest.json 与独立签名。");
         if (!sawChannel) return failed(UpdateError("channel_mismatch"));
-        if (bestBuild <= current.build) return outcome("upToDate", "已是最新（" + current.version + "，构建 " + std::to_string(current.build) + "）。");
+        // 用户可见文案不写构建号（2026-11-19 裁决：构建号是纯内部计数器）。
+        if (bestBuild <= current.build) return outcome("upToDate", "已是最新（" + current.version + "）。");
         const auto asset = windowsAsset(bestManifest, current);
         const auto downloadURL = bindAssets(bestRelease, bestManifest, asset);
         const auto offer = makeOffer(source, bestRelease, bestManifest, asset, bestRaw, bestSignature, downloadURL);
-        return outcome("available", "发现新版本 " + bestManifest["version"].get<std::string>() + "（构建 " + std::to_string(bestBuild) + "）。", offer);
+        return outcome("available", "发现新版本 " + bestManifest["version"].get<std::string>() + "。", offer);
     } catch (const UpdateError &error) { return failed(error); }
     catch (...) { return failed(UpdateError("internal_error")); }
 }
@@ -900,8 +901,8 @@ void refresh(UpdateUI &ui) {
     if (ui.automatic) SendMessageW(ui.automatic, BM_SETCHECK, ui.autoCheck ? BST_CHECKED : BST_UNCHECKED, 0);
     if (ui.last.is_object()) setText(ui.status, ui.last.value("message", std::string()));
     if (ui.offer.is_object()) {
-        setText(ui.notes, "新版 " + ui.offer.value("version", std::string()) + "，构建 "
-            + std::to_string(ui.offer.value("buildNumber", uint64_t(0))) + "\r\n\r\n"
+        // 清单 notes 是应用内短纯文本（发布侧已与 GitHub 正文分开）；不再拼构建号。
+        setText(ui.notes, "新版 " + ui.offer.value("version", std::string()) + "\r\n\r\n"
             + ui.offer.value("notes", std::string()));
     } else setText(ui.notes, "下载和安装分别由你点击触发。独立 Ed25519 清单签名不等于 Windows Authenticode；不会自动安装、重启或关闭输入应用。");
 }
@@ -999,7 +1000,7 @@ LRESULT CALLBACK updateProcedure(HWND window, UINT message, WPARAM wParam, LPARA
             ui->cancel = control(*ui, L"BUTTON", L"取消任务", BS_PUSHBUTTON | WS_TABSTOP, 113);
             try {
                 const auto current = installation();
-                setText(ui->current, "当前 " + current.version + "（构建 " + std::to_string(current.build) + "）· " + current.channel);
+                setText(ui->current, "当前 " + current.version + " · " + current.channel);
             } catch (...) { setText(ui->current, "无法读取当前安装版本身份"); }
             if (ui->last.is_null()) {
                 try { loadSource(); } catch (const UpdateError &error) { ui->last = failed(error); }

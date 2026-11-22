@@ -204,15 +204,15 @@ public final class UpdateEngine {
                 continue
             }
             // 只按构建号判定升级；同版本更高构建号可更新，不自动降级。
+            // 用户可见文案不写构建号（2026-11-19 裁决：构建号是纯内部计数器）。
             if manifest.buildNumber <= installation.buildNumber {
-                return outcome(.upToDate,
-                               "已是最新（\(installation.version) 构建 \(installation.buildNumber)）")
+                return outcome(.upToDate, "已是最新（\(installation.version)）")
             }
             guard let asset = manifest.asset(platform: installation.platform,
                                              arch: installation.arch,
                                              currentOS: installation.osVersion) else {
                 return outcome(.unsupported,
-                               "新版本 \(manifest.version)（构建 \(manifest.buildNumber)）不支持当前系统或架构（\(installation.platform)/\(installation.arch) ≥ \(installation.osVersion)）")
+                               "新版本 \(manifest.version) 不支持当前系统或架构（\(installation.platform)/\(installation.arch) ≥ \(installation.osVersion)）")
             }
             guard let releaseAsset = release.assets.first(where: { $0.id == asset.assetId }),
                   releaseAsset.name == asset.name,
@@ -240,7 +240,7 @@ public final class UpdateEngine {
                 downloadURL: releaseAsset.browserDownloadURL,
                 publishedAt: release.publishedAt)
             return outcome(.available,
-                           "发现新版本 \(manifest.version)（构建 \(manifest.buildNumber)）",
+                           "发现新版本 \(manifest.version)",
                            candidate: candidate, dataPackage: dataPackage, checkedAt: now(),
                            dataDownloadURL: dataDownloadURL)
         }

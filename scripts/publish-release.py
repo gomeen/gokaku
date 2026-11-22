@@ -85,6 +85,50 @@ def state_path(args):
     return Path(args.release_state) if args.release_state else output_dir(args) / 'release-state.json'
 
 
+def derive_update_notes(args) -> str:
+    """应用内「更新说明」：纯文本、≤ 1200 字、不超过 12 行。
+
+    优先 --update-notes-file（人工写好的短说明，原样使用，不得含 markdown）；
+    未提供时从 --notes-file 的 markdown 里取条目并去掉 heading／表格／粗体。
+    两条路都没有时返回空串，清单 notes 回落到 `Gogaku <版本>。`。
+    """
+    def plain(text: str) -> str:
+        lines = []
+        for raw in text.splitlines():
+            line = raw.strip()
+            # 「下载」之后是 GitHub 页面才需要的内容（包名、体积、链接、安装指引）。
+            if line.startswith('## 下载') or line.startswith('## Download'):
+                break
+            if not line or line.startswith('#') or line.startswith('|'):
+                continue                       # 标题、表格行、空行不进应用内说明
+            if line.startswith('- '):
+                line = '· ' + line[2:]
+            line = line.replace('**', '').replace('`', '')
+            lines.append(line)
+        return '\n'.join(lines)
+
+    explicit = getattr(args, 'update_notes_file', None)
+    if explicit:
+        try:
+            text = Path(explicit).read_text(encoding='utf-8').strip()
+        except OSError as error:
+            fail(f'无法读取应用内更新说明：{error}')
+        # 应用内说明是纯文本控件的内容：带 markdown 记号就不能入库（会以字面量显示）。
+        if any(marker in text for marker in ('\n# ', '\n## ', '**', '\n| ')):
+            fail('--update-notes-file 必须是纯文本：不得含标题、粗体或表格记号')
+    elif args.notes_file:
+        text = plain(Path(args.notes_file).read_text(encoding='utf-8'))
+    else:
+        text = ''
+    if not text:
+        return ''
+    kept = [line for line in text.splitlines() if line.strip()][:12]
+    text = '\n'.join(kept)
+    if len(text) > 1200:
+        text = text[:1200].rstrip() + '…'
+    return text
+
+
 def validate(args) -> dict:
     """任何网络操作、签名或 dry-run 成功之前都必须经过同一门禁。"""
     version = current_meta(ROOT)
@@ -142,6 +186,11 @@ def validate(args) -> dict:
         fail('受信任 Ed25519 公钥格式非法')
     if args.notes_file and len(Path(args.notes_file).read_bytes()) > 65536:
         fail('发布说明超过 64 KiB')
+    # 应用内更新说明与 GitHub 发布正文是两份不同用途的文本（2026-11-21 裁决）：
+    # 正文用 markdown（表格、下载清单、链接）；应用内只能用纯文本、几行以内。
+    # 未提供时从正文里取「更新内容」条目自动压缩（无 heading／表格／粗体）。
+    update_notes = derive_update_notes(args)
+    args.update_notes_text = update_notes
     if not args.publish_existing and not args.dry_run and not Path(args.key or '').is_file():
         fail('创建 Draft 需要 Ed25519 私钥：--key 或 GOGAKU_UPDATE_KEY')
     tag = args.tag or (f'v{version["version"]}{"-dev" if args.channel == "dev" else ""}'
@@ -255,8 +304,13 @@ def run_manifest(args, asset_ids: Path, product: str, macos_pkg: Path,
         command += ['--macos-data-pkg', str(data_pkg)]
     if args.previous_state is not None:
         command += ['--previous-state', str(args.previous_state)]
-    if args.notes_file:
-        command += ['--notes-file', str(args.notes_file)]
+    # 清单 notes → 应用内显示，只给纯文本短说明；GitHub 正文仍用 --notes-file
+    # 的完整 markdown。两者分离（2026-11-21 裁决）。
+    update_notes = Path(output_dir(args) / 'update-notes.txt')
+    if getattr(args, 'update_notes_text', ''):
+        update_notes.parent.mkdir(parents=True, exist_ok=True)
+        update_notes.write_text(args.update_notes_text, encoding='utf-8')
+        command += ['--notes-file', str(update_notes)]
     if not args.require_names:
         command += ['--no-require-names']
     result = subprocess.run(command, text=True, capture_output=True)
@@ -319,6 +373,12 @@ def verify_manifest(args, meta, records, product: str, macos_pkg: Path, windows_
                                 'size': record['bytes'], 'sha256': record['sha256']})
     if value.get('assets') != expected_assets:
         fail('签名清单未准确绑定双端本地安装包与已上传 asset IDs')
+    # 清单 notes 是应用内展示文本：必须是发布侧派生的短纯文本，不得是 GitHub 正文 markdown。
+    expected_notes = getattr(args, 'update_notes_text', '') or f'Gogaku {meta["version"]}。'
+    if value.get('notes') != expected_notes:
+        fail('签名清单 notes 与应用内更新说明不一致（应用内只收纯文本短说明）')
+    if any(marker in value.get('notes', '') for marker in ('\n# ', '\n## ', '**', '\n| ')):
+        fail('签名清单 notes 含 markdown 记号（应用内显示为字面量，不得入库）')
     env = dict(os.environ)
     if Path('/Applications/Xcode.app/Contents/Developer').is_dir():
         env.setdefault('DEVELOPER_DIR', '/Applications/Xcode.app/Contents/Developer')
@@ -570,7 +630,9 @@ def main() -> None:
     parser.add_argument('--lite-macos-pkg', type=Path, help='可选：同一 Draft 同时发布 Gogaku Lite')
     parser.add_argument('--lite-windows-setup', type=Path, help='可选：同一 Draft 同时发布 Gogaku Lite')
     parser.add_argument('--verification-report', action='append', required=True)
-    parser.add_argument('--notes-file')
+    parser.add_argument('--notes-file', help='GitHub 发布正文（markdown，≤ 64 KiB）；也会用来压缩出应用内更新说明')
+    parser.add_argument('--update-notes-file',
+                        help='应用内「更新说明」纯文本（≤ 12 行／≤ 1200 字）；不给时从 --notes-file 自动压缩')
     parser.add_argument('--waive-host', metavar='REASON',
                         help='定版时用户明确决定不跑 host 档的理由；记入 release-state，发布说明须写明「未运行 host」')
     parser.add_argument('--key', default=os.environ.get('GOGAKU_UPDATE_KEY', ''))

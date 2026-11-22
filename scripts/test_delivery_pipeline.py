@@ -469,6 +469,52 @@ class DeliveryPipelineTests(unittest.TestCase):
             delivery.write_data_package_receipt(package, 'dev', identity,
                                                 self.root / 'identity.json', files, '0' * 16, root=self.root)
 
+    # ---- 应用内更新说明（清单 notes）与 GitHub 正文分离 ----
+
+    def test_update_notes_strip_markdown_from_release_body(self):
+        """从 markdown 正文自动压缩：去掉标题／表格／粗体，保留条目与摘要。"""
+        body = self.root / 'notes.md'
+        body.write_text(
+            '# Gogaku 0.1.2\n\n一句话作用摘要。\n\n## 更新内容\n\n'
+            '- **粗体要点**：说明文字。\n- 第二条。\n\n'
+            '## 下载\n\n| 产品 | 包 |\n| --- | --- |\n| Gogaku | `x.pkg` |\n\n'
+            '源码与构建说明：https://example.invalid\n', encoding='utf-8')
+        args = self.args()
+        args.notes_file = str(body)
+        args.update_notes_file = None
+        notes = publish.derive_update_notes(args)
+        self.assertEqual(notes, '一句话作用摘要。\n· 粗体要点：说明文字。\n· 第二条。')
+        for marker in ('# ', '**', '| ', '`', 'example.invalid'):
+            self.assertNotIn(marker, notes)
+
+    def test_update_notes_prefers_explicit_plain_text_file(self):
+        """显式文件原样使用；含 markdown 记号直接拒绝（应用内是纯文本控件）。"""
+        plain = self.root / 'update-notes.txt'
+        plain.write_text('修复候选窗高度跳变。\n回车键行为不变。\n', encoding='utf-8')
+        body = self.root / 'notes.md'
+        body.write_text('# 标题\n\n- **要点**\n', encoding='utf-8')
+        args = self.args()
+        args.notes_file = str(body)
+        args.update_notes_file = str(plain)
+        self.assertEqual(publish.derive_update_notes(args), '修复候选窗高度跳变。\n回车键行为不变。')
+        plain.write_text('修复某功能。\n\n- **粗体**不该出现\n', encoding='utf-8')
+        with self.assertRaises(SystemExit):
+            publish.derive_update_notes(args)
+
+    def test_update_notes_are_bounded(self):
+        """行数与字数都有上限，避免应用内说明把窗口撞出屏幕。"""
+        body = self.root / 'notes.md'
+        body.write_text('# 标题\n\n' + '\n'.join(f'- 第 {i} 条要点。' for i in range(30)), encoding='utf-8')
+        args = self.args()
+        args.notes_file = str(body)
+        args.update_notes_file = None
+        notes = publish.derive_update_notes(args)
+        self.assertLessEqual(len(notes.splitlines()), 12)
+        long_body = self.root / 'long.md'
+        long_body.write_text('一' * 5000, encoding='utf-8')
+        args.notes_file = str(long_body)
+        self.assertLessEqual(len(publish.derive_update_notes(args)), 1201)
+
     def test_reused_data_reference_requires_matching_previous_state(self):
         """数据未变的版本复制上一版数据包引用；引用必须逐字一致才放行。"""
         _, files, data_version = self.make_data_package()

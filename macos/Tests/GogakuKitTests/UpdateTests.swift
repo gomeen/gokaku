@@ -343,7 +343,9 @@ final class UpdateTests: XCTestCase {
         let result = await engine(transport, installation: installation(build: 10)).check(automatic: false)
         XCTAssertEqual(result.kind, .upToDate)
         XCTAssertNil(result.candidate)
-        XCTAssertTrue(result.message.contains("构建 10"))
+        // 用户可见文案不写构建号（2026-11-19 裁决）：只确认“已是最新”与版本。
+        XCTAssertTrue(result.message.contains("已是最新"))
+        XCTAssertFalse(result.message.contains("构建"), "用户可见状态行不得出现构建号")
         XCTAssertEqual(transport.requested.count, 3, "304 仍需重新验证清单与签名")
     }
 

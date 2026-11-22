@@ -196,7 +196,8 @@ def build_manifest(args) -> tuple[dict, Path, Path | None]:
         except OSError as error:
             fail(f'无法读取发布说明：{error}')
     else:
-        notes = f'Gogaku {version}（构建 {build}）。'
+        # 清单 notes 进应用内更新窗口，不写构建号（2026-11-19 裁决）。
+        notes = f'Gogaku {version}。'
     if len(notes.encode('utf-8')) > 65536:
         fail('发布说明超过 64 KiB')
 

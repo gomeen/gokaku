@@ -33,6 +33,7 @@
 - 完整版与 Lite 的清单各自独立（Lite 客户端不读完整版清单，反之亦然）。
 - 签名均为对**清单原始 UTF-8 字节**的 Ed25519 分离签名；两份清单各自签名。客户端接受原始 64 字节或 base64 文本（含换行）。
 - `version`／`buildNumber`／`channel`／`notes` 两份清单逐字一致（同一发布）；`assets` 在两份清单里完全相同（数据包只出现在 `dataPackage` 字段，不进 `assets`）。
+- **`notes` 是应用内短纯文本，不是 GitHub 发布正文**（2026-11-21 裁决）：更新窗口用纯文本控件显示它（SwiftUI 的 `Text(String)` 与 Win32 `EDIT` 都不解析 Markdown），所以不得包含标题（`#`）、粗体（`**`）或表格（`|`）记号。发布时由 `publish-release.py` 从 `--notes-file`（GitHub 正文 markdown）自动压缩成摘要（去标题／表格／粗体，`- ` 转 `· `，`## 下载` 之后丢弃，上限 12 行／1200 字）；也可用 `--update-notes-file` 直接给一份手写的纯文本（含 Markdown 记号会被门禁拒绝）。
 
 schema 1 清单示例（旧客户端视角，无数据包字段）：
 
@@ -43,7 +44,7 @@ schema 1 清单示例（旧客户端视角，无数据包字段）：
   "version": "0.1.2",
   "buildNumber": 90,
   "channel": "stable",
-  "notes": "发布说明（纯文本，≤64 KiB）",
+  "notes": "应用内更新说明（纯文本，≤ 12 行／1200 字；不得含 Markdown 记号）",
   "assets": [
     {
       "platform": "macos",
