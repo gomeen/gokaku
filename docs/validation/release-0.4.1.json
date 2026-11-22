@@ -1,0 +1,125 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "releaseId": 454264761,
+  "version": "0.4.1",
+  "buildNumber": 126,
+  "channel": "stable",
+  "sourceSha256": "71fb7e5ae2e34e966c0ec32fa21d31e4777ff70efb7daf7c421b8ec53a69acc7",
+  "git": {
+    "commit": "fa0942151b3902dc374f33eebfc34a8f075342ff",
+    "dirty": false
+  },
+  "tag": "v0.4.1",
+  "keyId": "gogaku-prod-2026-11",
+  "hostWaiver": "用户 2026-11-22 裁决：书面豁免 host，本次仅改更新窗口显示，真机验收随升级进行",
+  "assets": {
+    "Gogaku-0.4.1.pkg": {
+      "id": 778198709,
+      "name": "Gogaku-0.4.1.pkg",
+      "bytes": 11210694,
+      "sha256": "0f718e335087ee441e31eb53008e8ad9fcd3eb1835f55cf7dee297aa0a0b623f"
+    },
+    "Gogaku-0.4.1-windows-x64-setup.exe": {
+      "id": 778198928,
+      "name": "Gogaku-0.4.1-windows-x64-setup.exe",
+      "bytes": 58488365,
+      "sha256": "e0e96b07bf41e5398ecb68270f806b0f13ba9846e83da14254f6a7aced42a7e7"
+    },
+    "GogakuLite-0.4.1.pkg": {
+      "id": 778200161,
+      "name": "GogakuLite-0.4.1.pkg",
+      "bytes": 10471729,
+      "sha256": "366e7f0f7c0a1fa61ea08a307ed52493cf44f0ac9a2622453b7fb7456c6c2257"
+    },
+    "GogakuLite-0.4.1-windows-x64-setup.exe": {
+      "id": 778200413,
+      "name": "GogakuLite-0.4.1-windows-x64-setup.exe",
+      "bytes": 56524904,
+      "sha256": "ecf9ddb666f3bc2e220f8ded46b2c32bd99dfd3b20b70e72f2117ddb8aad8361"
+    },
+    "Gogaku-Data-0.4.1.pkg": {
+      "id": 778201469,
+      "name": "Gogaku-Data-0.4.1.pkg",
+      "bytes": 36695324,
+      "sha256": "7bd9d84dcc5a53dba1257780ba3d30a65fff24d2386710dacbc7fcd138591ba1"
+    },
+    "GogakuLite-Data-0.4.1.pkg": {
+      "id": 778202384,
+      "name": "GogakuLite-Data-0.4.1.pkg",
+      "bytes": 34121014,
+      "sha256": "4e60000fcd79d64499acdf76a4bd826f2ef62b32046c1c7c5b54313e50b4c0bc"
+    },
+    "update-manifest.json": {
+      "id": 778203372,
+      "name": "update-manifest.json",
+      "bytes": 1145,
+      "sha256": "a166b082fff8b5cd7ab0dbce05caf805d42c516bad0311d351f1f8256fccb488"
+    },
+    "update-manifest.json.sig": {
+      "id": 778203421,
+      "name": "update-manifest.json.sig",
+      "bytes": 89,
+      "sha256": "8e14ea72705f3d9f733f87c2301becc396bcf9ad26589a65c8040b69713f1ec0"
+    },
+    "update-manifest-v2.json": {
+      "id": 778203505,
+      "name": "update-manifest-v2.json",
+      "bytes": 1399,
+      "sha256": "a00473fe380386c5f1b1d82da3674c85a5ffe860298be65b32b2c166753f336a"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 778203571,
+      "name": "update-manifest-v2.json.sig",
+      "bytes": 89,
+      "sha256": "f5369b28e415f9142146178cb5a2e2b46d39e496b73f7db936ec227aea642476"
+    },
+    "update-manifest-lite.json": {
+      "id": 778203622,
+      "name": "update-manifest-lite.json",
+      "bytes": 1153,
+      "sha256": "80618e718c8c0a5c378477bc68d6c17fa6be5ef1f60f8e3fdd3514b6c59b8f2f"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 778203691,
+      "name": "update-manifest-lite.json.sig",
+      "bytes": 89,
+      "sha256": "8bbce2e777057fa68f2ee3c09a2d8d3206299537c9737f3b6610c5c893fc0eac"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 778203751,
+      "name": "update-manifest-lite-v2.json",
+      "bytes": 1411,
+      "sha256": "8c94f3673137821a2eaca6ee29a7cc7f68a57a6e302fd30f913cc3a917976d98"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 778203826,
+      "name": "update-manifest-lite-v2.json.sig",
+      "bytes": 89,
+      "sha256": "fb4e646caec17b8bdd6fea60444004123f4c34102fde7fa98efcc8bd2dc102f1"
+    },
+    "dataPackage": {
+      "platform": "macos",
+      "id": 778201469,
+      "name": "Gogaku-Data-0.4.1.pkg",
+      "bytes": 36695324,
+      "sha256": "7bd9d84dcc5a53dba1257780ba3d30a65fff24d2386710dacbc7fcd138591ba1",
+      "dataVersion": "0740d56417e0d6d3"
+    },
+    "liteDataPackage": {
+      "platform": "macos",
+      "id": 778202384,
+      "name": "GogakuLite-Data-0.4.1.pkg",
+      "bytes": 34121014,
+      "sha256": "4e60000fcd79d64499acdf76a4bd826f2ef62b32046c1c7c5b54313e50b4c0bc",
+      "dataVersion": "b81cc760128efd74"
+    }
+  },
+  "publishedAt": "2026-11-22",
+  "state": "published",
+  "commit": "fa0942151b3902dc374f33eebfc34a8f075342ff",
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.4.1.json",
+  "releaseReport": "verify/report-release-0.4.1.json",
+  "notes": "0.4.1：修复更新窗口的信息显示。①应用内「更新说明」与 GitHub 发布正文拆开——此前 publish-release.py --notes-file 把同一份 markdown 同时喂给 GitHub 正文与签名清单的 notes，而更新窗口用纯文本控件（SwiftUI Text(String) / Win32 EDIT 均不解析 Markdown），用户看到 「# Gogaku 0.4.0」「## 更新内容」「**粗体**」与下载表格竖线，说明区高 779pt 需滚 2–3 屏；现在清单 notes 只放应用内短纯文本（发布侧自动压缩或 --update-notes-file 手写，上限 12 行／1200 字，含记号被门禁拒绝，实测说明区 779pt→320pt）。②按 2026-11-19 裁决去掉更新窗口里的构建号（两端同口径）：窗口头部、新版本标题、检查结果状态行均只显版本号；数据包说明不再列出内部文件名与数据版本指纹。验证：fast 7/7（核心 ctest 11/11、Swift 327 项）、release 14/14（含十万序列 ASan/UBSan 八片并行）；test_delivery_pipeline 31 项（新增 3 项）。host 未运行（豁免见 hostWaiver）。发布流程改进已验证生效：tag v0.4.1 一次指向发布提交 fa09421（0.4.0 曾因未传 target_commitish 钉错提交）。注意：0.4.0 的清单已签名发布，其 notes 仍是旧 markdown；0.4.1 客户端的构建号隐藏要在 0.4.2 才能真正进入窗口。"
+}

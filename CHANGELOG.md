@@ -2,6 +2,16 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 0.4.1（2026-11-22，stable 定版）
+
+更新窗口信息修复。发布记录见 [release-0.4.1.json](docs/validation/release-0.4.1.json)。
+
+- 应用内「更新说明」与 GitHub 发布正文拆开：清单 `notes` 只放应用内短纯文本（发布侧自动压缩或 `--update-notes-file` 手写，上限 12 行／1200 字，含 Markdown 记号被门禁拒绝）。实测说明区 779pt → 320pt。
+- 按 2026-11-19 裁决去掉更新窗口里的构建号（两端同口径）；数据包说明不再列出内部文件名与数据版本指纹。
+- 验证：fast 7/7、release 14/14（含十万序列 ASan／UBSan）；`test_delivery_pipeline` 31 项（新增 3 项）。**host 未运行**（用户书面豁免）。
+- 发布流程改进已验证生效：tag `v0.4.1` 一次指向发布提交 `fa09421`（0.4.0 曾因未传 `target_commitish` 钉错提交）。
+- 时序说明：0.4.0 的清单已签名发布，其 notes 仍是旧 markdown；构建号隐藏要在 0.4.2 才能真正进入窗口（读清单的是已安装的旧客户端）。
+
 ### 0.4.0（2026-11-21，stable 定版）
 
 发布内容：Windows 安装即启用、候选窗去掉页码。发布记录见 [release-0.4.0.json](docs/validation/release-0.4.0.json)。
@@ -10,7 +20,7 @@
 - 发布后修正 tag：首次发布时 tag `v0.4.0` 因 `publish-release.py` 未传 `target_commitish` 而指向旧提交 `839c3c9`；0 下载时点按用户裁决删除并重建至 `507b78c`，Release 退回 Draft 后重新发布。脚本已修（显式传 `target_commitish` ＋ 发布前校验提交已在远端）。
 - 验证：fast 7/7、release 14/14（含十万序列 ASan／UBSan）。**host 未运行**（用户书面豁免，见发布记录）。Windows 真机验收未做。
 
-### 变更（2026-11-21：更新窗口信息可读化，工作区）
+### 变更（2026-11-21：更新窗口信息可读化，已并入 0.4.1）
 
 - **应用内「更新说明」与 GitHub 发布正文拆开**。此前 `publish-release.py --notes-file` 把同一份 markdown 同时喂给 GitHub 正文和签名清单的 `notes`，而更新窗口用的是纯文本控件（SwiftUI `Text(String)`、Win32 `EDIT` 都不解析 Markdown）——用户看到的是 `# Gogaku 0.4.0`、`## 更新内容`、`**粗体**` 和下载表格的管道符。现在清单 `notes` 只放应用内短纯文本：发布侧从正文自动压缩（去标题／表格／粗体，`- ` 转 `· `，`## 下载` 之后丢弃，上限 12 行／1200 字），也可用新增的 `--update-notes-file` 手写一份（含 Markdown 记号会被门禁拒绝）；发布门禁校验清单 `notes` 与派生结果逐字一致，含记号直接失败。
 - **按 2026-11-19 裁决去掉更新窗口里的构建号**：`当前版本 0.4.0（构建 125）` → `当前版本 0.4.0`，`新版 0.4.1 构建 126` → `新版 0.4.1`，状态行「已是最新（0.4.0 构建 125）」→「已是最新（0.4.0）」。macOS 与 Windows 两端同口径。
