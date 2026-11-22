@@ -413,6 +413,15 @@ def validate_state(args, meta):
     return state
 
 
+def require_remote_commit(args, commit, token):
+    """发布前确认该提交已在远端：tag 会直接钉它，本地未 push 时先 push。
+    只认 API 返回的提交对象（而非 ref 存在性），避免反射任何凭据。"""
+    url = f'{API}/repos/{args.repo}/commits/{commit}'
+    result = api_request('GET', url, token)
+    if result.get('sha') != commit:
+        fail('当前提交不在远端仓库；先 git push 再发布（tag 必须指向已推送的提交）')
+
+
 def validate_remote(args, meta, state, token):
     release_id = args.publish_existing
     url = f'{API}/repos/{args.repo}/releases/{release_id}'
@@ -478,8 +487,13 @@ def publish(args) -> None:
     if state_path(args).exists():
         fail('release-state 已存在；请续发该 Draft 或使用独立 --out 目录')
     body = Path(args.notes_file).read_text(encoding='utf-8') if args.notes_file else meta['name']
+    # tag 必须打在本轮实际发布的提交上。不给 target_commitish 时 GitHub 会用
+    # 远端默认分支的当前 HEAD——本地提交尚未 push 时会静默把 tag 钉到旧提交，
+    # 使 `git checkout <tag>` 拿到的源码与安装包身份不一致（0.4.0 曾发生）。
+    commit = meta['git']['commit']
+    require_remote_commit(args, commit, token)
     release = api_request('POST', f'{API}/repos/{args.repo}/releases', token, payload={
-        'tag_name': meta['tag'], 'name': meta['name'], 'body': body,
+        'tag_name': meta['tag'], 'target_commitish': commit, 'name': meta['name'], 'body': body,
         'draft': True, 'prerelease': args.channel == 'dev'})
     release_id = release.get('id')
     if type(release_id) is not int or release_id <= 0 or release.get('draft') is not True:

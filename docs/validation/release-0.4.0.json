@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "releaseId": 453368389,
+  "version": "0.4.0",
+  "buildNumber": 125,
+  "channel": "stable",
+  "sourceSha256": "cbc0e852de653fd04bd9d63e9d3d25b1413c8a3c7ab5aa86334298ce6ddd5826",
+  "git": {
+    "commit": "507b78c537a98060c80eec3c369eb48c22926527",
+    "dirty": false
+  },
+  "tag": "v0.4.0",
+  "keyId": "gogaku-prod-2026-11",
+  "hostWaiver": "用户 2026-11-21 裁决：书面豁免 host，真机验收随用户升级进行",
+  "assets": {
+    "Gogaku-0.4.0.pkg": {
+      "id": 774076735,
+      "name": "Gogaku-0.4.0.pkg",
+      "bytes": 11213282,
+      "sha256": "6b5bb6a1cd34e75123fde642d5329490094cf6ee564b649d7d688e9ae99ab650"
+    },
+    "Gogaku-0.4.0-windows-x64-setup.exe": {
+      "id": 774076948,
+      "name": "Gogaku-0.4.0-windows-x64-setup.exe",
+      "bytes": 58488719,
+      "sha256": "342d606ada3f51135cf65a60489d2fea2d1812957f67444b8efbc338673d2887"
+    },
+    "GogakuLite-0.4.0.pkg": {
+      "id": 774077985,
+      "name": "GogakuLite-0.4.0.pkg",
+      "bytes": 10473206,
+      "sha256": "2e94ffb5ee3fadf301d5732e62d37a9cf5eb73a2ef9fa8f54cad2356df945524"
+    },
+    "GogakuLite-0.4.0-windows-x64-setup.exe": {
+      "id": 774078161,
+      "name": "GogakuLite-0.4.0-windows-x64-setup.exe",
+      "bytes": 56528366,
+      "sha256": "aa27fe9b34ec40aee33cb12120000254bad60791fa29b28c6ebdd2777a041168"
+    },
+    "Gogaku-Data-0.4.0.pkg": {
+      "id": 774079018,
+      "name": "Gogaku-Data-0.4.0.pkg",
+      "bytes": 36695314,
+      "sha256": "b187e13b5105c6bcd19424f15c64d26f404c424256ad4e3e1213574197ec4009"
+    },
+    "GogakuLite-Data-0.4.0.pkg": {
+      "id": 774079666,
+      "name": "GogakuLite-Data-0.4.0.pkg",
+      "bytes": 34121005,
+      "sha256": "38ae5b6d9879ecf48946bed67c57c0c1a853822117c28e2f80844d38303c96fa"
+    },
+    "update-manifest.json": {
+      "id": 774080474,
+      "name": "update-manifest.json",
+      "bytes": 3389,
+      "sha256": "720c54d9cbf8d6db3c9cea9bb4f8c34c5de1da02c0d0a45aebf974aa91b77598"
+    },
+    "update-manifest.json.sig": {
+      "id": 774080572,
+      "name": "update-manifest.json.sig",
+      "bytes": 89,
+      "sha256": "7c50548f2cd69bf9f062712e0cb625802772d46c9a500e61e51031285403880c"
+    },
+    "update-manifest-v2.json": {
+      "id": 774080635,
+      "name": "update-manifest-v2.json",
+      "bytes": 3643,
+      "sha256": "4a93cd37447a970fa992e873549c0d99db93a548de766a73ee38ac7813da3e1f"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 774080724,
+      "name": "update-manifest-v2.json.sig",
+      "bytes": 89,
+      "sha256": "025320e2df1afb41e2f7235ae99952dec247c306858bd59056d3113858206c2c"
+    },
+    "update-manifest-lite.json": {
+      "id": 774080797,
+      "name": "update-manifest-lite.json",
+      "bytes": 3397,
+      "sha256": "5d1e7ddb6d50f42bcf0e6898bc5263cee82d57d9e986b000a74217fd7c2602ea"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 774080883,
+      "name": "update-manifest-lite.json.sig",
+      "bytes": 89,
+      "sha256": "86340d4dc974ea99ec44555fad8b51943996b637dbd6fccd2be62ebf8e44cdcc"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 774080948,
+      "name": "update-manifest-lite-v2.json",
+      "bytes": 3655,
+      "sha256": "c897810d38334dfac97bd3660ac8335f059cf217a6844d3f0260989f0b31acc0"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 774081008,
+      "name": "update-manifest-lite-v2.json.sig",
+      "bytes": 89,
+      "sha256": "86ff4e81d8cda8b053eb3d51581764efcf0d4310090e3a0a3301449ebc06f8a7"
+    },
+    "dataPackage": {
+      "platform": "macos",
+      "id": 774079018,
+      "name": "Gogaku-Data-0.4.0.pkg",
+      "bytes": 36695314,
+      "sha256": "b187e13b5105c6bcd19424f15c64d26f404c424256ad4e3e1213574197ec4009",
+      "dataVersion": "0740d56417e0d6d3"
+    },
+    "liteDataPackage": {
+      "platform": "macos",
+      "id": 774079666,
+      "name": "GogakuLite-Data-0.4.0.pkg",
+      "bytes": 34121005,
+      "sha256": "38ae5b6d9879ecf48946bed67c57c0c1a853822117c28e2f80844d38303c96fa",
+      "dataVersion": "b81cc760128efd74"
+    }
+  },
+  "publishedAt": "2026-11-21",
+  "state": "published",
+  "commit": "507b78c537a98060c80eec3c369eb48c22926527",
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.4.0.json",
+  "releaseReport": "verify/report-release-0.4.0.json",
+  "notes": "0.4.0：①候选窗去掉页码——页码原先独占页脚一行且只在多于一页时出现，导致候选跨过「一页」门槛时面板凭空长高一行（9 个候选单页 vs 10 个候选两页，首页内容相同、框高不同）；三条渲染路径（共享位图 panel_render.cpp、macOS PanelLayout 竖排/横排、Windows appearance.cpp）同步去掉页码，横排不再为页码预留右缘宽度、不再按页码左缘丢候选；翻页能力不变，GC_PANEL_HIT_PAGE_PREV/NEXT 不再产生命中区，主题「页码」颜色字段保留（提交 371557c）。②Windows 安装即启用（并行会话 0a58ae3）：安装器 ssPostInstall 以原用户身份静默幂等登记输入法列表，设置页新增启用状态卡片；仅交叉编译与 Inno 编译验证，真机未验收。验证：fast 7/7（核心 ctest 11/11、Swift 327 项）、release 14/14（含十万序列 ASan/UBSan 8 片并行）。host 未运行（豁免见 hostWaiver）。构建号注意：0.3.2 定版占用 b124，并行会话曾把 0.4.0 写成 b123（倒退），本次修正为 b125 后重新构包与验证。",
+  "tagIncident": "发布后核对发现 tag v0.4.0 初始指向 839c3c9（0.3.2 状态）而非发布提交 507b78c：publish-release.py 创建 Draft 时未传 target_commitish，GitHub 取远端默认分支 HEAD，而本地 3 个提交当时尚未 push。0 下载时点按用户裁决删除并重建 tag 至 507b78c（「标签不移动」规则的例外，详见本条）；删除 tag 使 Release 退回 Draft，已用同一 --publish-existing 重新发布为 Release 453368389。发布脚本已修：创建 Draft 显式传 target_commitish，并新增 require_remote_commit() 拒绝未推送提交。"
+}

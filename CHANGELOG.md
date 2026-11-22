@@ -2,7 +2,15 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
-### 变更（2026-11-20：候选窗去掉页码，工作区）
+### 0.4.0（2026-11-21，stable 定版）
+
+发布内容：Windows 安装即启用、候选窗去掉页码。发布记录见 [release-0.4.0.json](docs/validation/release-0.4.0.json)。
+
+- 构建号 b125（0.3.2 已占用 b124；并行线曾写成 b123，属倒退，已修正并重新构包与验证）。
+- 发布后修正 tag：首次发布时 tag `v0.4.0` 因 `publish-release.py` 未传 `target_commitish` 而指向旧提交 `839c3c9`；0 下载时点按用户裁决删除并重建至 `507b78c`，Release 退回 Draft 后重新发布。脚本已修（显式传 `target_commitish` ＋ 发布前校验提交已在远端）。
+- 验证：fast 7/7、release 14/14（含十万序列 ASan／UBSan）。**host 未运行**（用户书面豁免，见发布记录）。Windows 真机验收未做。
+
+### 变更（2026-11-20：候选窗去掉页码，工作区已并入 0.4.0）
 
 - 候选窗不再绘制页码（用户裁决）。原因：页码原先独占页脚一行（约 17–20pt），只在多于一页时出现，于是候选跨过「一页」门槛时面板凭空长高一行——最典型的是竖排每页 9 个时，9 个候选（单页、无页码）与 10 个候选（两页、第一页仍是 9 行）内容完全相同、框高却差一行；0.3.2 的粘锚定边只解决了顶边下塌，没解决这个纯装饰性的高度跳变。
 - 三条渲染路径同步：共享位图渲染器（`panel_render.cpp`，默认路径）、macOS 系统渲染（`PanelLayout` 竖排与横排）、Windows 系统渲染（`appearance.cpp`）。横排原先为页码预留右缘宽度、必要时按页码左缘丢弃候选，现在不再预留、不再丢候选。

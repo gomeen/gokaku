@@ -1,5 +1,14 @@
 # 原生工程实施验收记录
 
+## 0.4.0 定版发布（2026-11-21，`0.4.0 / b125`）
+
+发布内容：①候选窗去掉页码（本线，提交 `371557c`）；②Windows 安装即启用（并行线，提交 `0a58ae3`）；③版本准备（`507b78c`）。详见 [release-0.4.0.json](release-0.4.0.json)。
+
+- **验证**：fast 7/7（核心 ctest 11/11、Swift 327 项；[报告](verify/report-fast-0.4.0.json)）；release 14/14，含十万序列 ASan／UBSan 8 片并行（[报告](verify/report-release-0.4.0.json)）。**host 未运行**：用户 2026-11-21 书面豁免，理由与影响已写入发布记录 `hostWaiver` 与发布说明；候选窗渲染改动的真机验收随用户升级进行。
+- **构建号修正**：0.3.2 定版占用 b124，而并行线把 0.4.0 写成 b123（倒退，`build.py` 会拒绝定版构建）。本次改为 **b125** 后重新构包并重跑全部验证；b123 的 Windows 包从未对外发布。
+- **tag 事故与修正**：首次发布后核对发现 tag `v0.4.0` 指向 `839c3c9`（0.3.2 状态）而非发布提交 `507b78c`。根因：`publish-release.py` 创建 Draft 时未传 `target_commitish`，GitHub 取远端默认分支 HEAD，而本地 3 个提交当时尚未 push。0 下载时点按用户裁决删除并重建 tag 至 `507b78c`（「标签不移动」规则的例外）；删除 tag 使 Release 退回 Draft，已用同一 `--publish-existing 453368389` 重新发布。**脚本已修**：创建 Draft 显式传 `target_commitish`，并新增 `require_remote_commit()` 在发布前拒绝未推送的提交。最终 Release 453368389 已公开，tag／`release-state.json`／包内身份三者均为 `507b78c`。
+- **Windows 真机欠账**：0.4.0 的自动启用功能仍只有交叉编译、Inno 实际编译与静态自检，未在 Windows 11 x64 验证启用落地、30 分钟后的输入法列表剔除复查、静默安装与重复安装幂等。发布说明已写明。
+
 ## Windows「安装即启用」：自动登记用户输入法列表＋设置引导卡片（2026-11-20，`0.4.0 / b123`，仅构包与静态验证）
 
 安装后不再需要用户手动走六层设置路径启用输入法。方案依据 [Windows 安装体验优化调研](../research-windows-install-optimization.md)（水杉 PR #1218 的 `runasoriginaluser` 姿势 ＋ Weasel PR #1959 的幂等增量思路），并受 [Windows 11 剔除调研](../research-ime-windows11-pruning.md) §7 约束：**原用户身份、幂等、未包含才执行一次、失败不重试**。
