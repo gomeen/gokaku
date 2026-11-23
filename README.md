@@ -18,7 +18,7 @@
 
 ## 0.5.0 扩展词库
 
-完整版和 Lite 的设置侧栏新增「扩展词库」，可导入本地词表并控制挂载。候选构建 127 的专项验证、渠道发布进度和宿主验收状态见[扩展词库验收](docs/validation/dictionaries-0.5.0.md)。最近公开版本见[0.4.1 发布记录](docs/validation/release-0.4.1.json)。
+完整版和 Lite 的设置侧栏新增「扩展词库」，可导入本地词表并控制挂载。候选构建 128 的专项验证、渠道发布进度和宿主验收状态见[扩展词库验收](docs/validation/dictionaries-0.5.0.md)。最近公开版本见[0.4.1 发布记录](docs/validation/release-0.4.1.json)。
 
 ## 历史工程基线（2026-11-10）
 

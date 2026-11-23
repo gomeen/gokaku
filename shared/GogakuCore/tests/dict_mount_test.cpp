@@ -122,10 +122,15 @@ bool make_case(Case &c) {
     GcLearningConfig lcfg{};
     lcfg.dict_path = c.dictPath.c_str();
     lcfg.model_path = c.modelPath.c_str();
+#if defined(GOGAKU_LITE)
+    check(gc_learning_session_create(&lcfg, &c.learning, err, sizeof(err)) != 0 && !c.learning,
+          "Lite 不创建学习会话", err);
+#else
     if (gc_learning_session_create(&lcfg, &c.learning, err, sizeof(err)) != 0) {
         std::fprintf(stderr, "SKIP: 学习会话创建失败：%s\n", err);
         return false;
     }
+#endif
     return true;
 }
 
@@ -386,6 +391,9 @@ int main() {
         check(!top.empty() && top[0] == "我们", "权重 0 不越权", top.empty() ? "(空)" : top[0]);
     }
 
+#if defined(GOGAKU_LITE)
+    check(gc_learning_dicts_apply(nullptr, nullptr, nullptr, 0) != 0, "Lite 不挂载学习词库", "");
+#else
     {   // ── 学习会话：阈值过滤（单本 8MiB／累计 16MiB；每次 apply 都是完整目标集合） ──
         const std::string small = import_dict(c, "s.txt", "小词库 xiao'ci'ku\n");
         const char *idSmall[1] = {small.c_str()};
@@ -466,8 +474,9 @@ int main() {
         }
     }
 
-    gc_normal_session_destroy(c.normal);
     gc_learning_session_destroy(c.learning);
+#endif
+    gc_normal_session_destroy(c.normal);
 
     if (failures != 0) {
         std::fprintf(stderr, "dict_mount: %d 项失败\n", failures);
