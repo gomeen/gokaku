@@ -553,6 +553,9 @@ final class GogakuInputController: IMKInputController {
             DispatchQueue.main.async { self.engineAvailable = true }
         }
         DistributedNotificationCenter.default().addObserver(self, selector: #selector(reloadSettings), name: Notification.Name("org.gogaku.settings.changed"), object: nil)
+        // 扩展词库变更（设置应用导入／开关／删除／安装官方词库后发出）：
+        // 后台串行队列解析，回引擎队列挂载；组合中核心延迟到组合结束后生效。
+        DistributedNotificationCenter.default().addObserver(self, selector: #selector(reloadDictionaries), name: EngineHub.dictionariesChangedNotification, object: nil)
         // 设置页「清空调频数据」成功后通知：引擎队列上清内存＋删持久化文件，
         // 运行中的引擎不再把旧调频写回（2026-11 整改）。
         DistributedNotificationCenter.default().addObserver(self, selector: #selector(frequencyDataCleared), name: SettingsStore.frequencyClearedNotification, object: nil)
@@ -797,6 +800,11 @@ final class GogakuInputController: IMKInputController {
     /// suspend→toast.hide），刚显示的切换提示会被立即杀掉；切换后的短窗口内
     /// 忽略自源通知（外部设置变更仍靠后续通知处理）。
     private var suppressSettingsReloadUntil = Date.distantPast
+
+    /// 扩展词库变更：后台串行队列（QoS utility）加载词库，回引擎队列挂载。
+    @objc private func reloadDictionaries() {
+        EngineHub.shared.reloadDictionaries(learningEnabled: learningEnabled)
+    }
 
     @objc private func reloadSettings() {
         guard Date() >= suppressSettingsReloadUntil else { return }
@@ -1057,6 +1065,10 @@ final class GogakuInputController: IMKInputController {
         applyNormal(snap, target: target, swapTranslation: swapTranslation)
         if !snap.consumed {
             if snap.composing { suspend() } else { panel.dismiss() }
+        }
+        // 组合结束后的下一个事件前重试挂载（docs/dictionaries.md §六）。
+        if EngineHub.shared.hasPendingDictApply, !snap.composing {
+            EngineHub.shared.flushPendingDictApply()
         }
         return snap.consumed
     }

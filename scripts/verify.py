@@ -886,8 +886,8 @@ def check_host_stability(ctx):
                      memory.get('maxRSSKB'), memory.get('meanRSSKB'))), log
 
 
-GUI_PAGES = ('learning-translation', 'normal-input', 'custom-words', 'skin',
-             'shortcuts', 'learning-privacy', 'learning-snippets')
+GUI_PAGES = ('learning-translation', 'normal-input', 'custom-words', 'dictionaries',
+             'skin', 'shortcuts', 'learning-privacy', 'learning-snippets')
 # 设置窗口最小宽 1000（皮肤页定稿，见 docs/skin-themes.md）；首项为短档抽查尺寸。
 GUI_SIZES = ((1000, 620), (1000, 520))
 GUI_APPEARANCES = ('light', 'dark')

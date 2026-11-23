@@ -48,7 +48,7 @@ if(GOGAKU_PANEL_RENDER)
 endif()
 
 set(GOGAKU_CORE_SOURCES core.cpp normal_session.cpp custom_words.cpp
-    settings_contract.cpp theme_contract.cpp)
+    settings_contract.cpp theme_contract.cpp dict_contract.cpp)
 if(GOGAKU_LITE)
     list(APPEND GOGAKU_CORE_SOURCES learning_session_stub.cpp)
 else()
@@ -199,3 +199,35 @@ add_executable(gogaku_data_reliability_worker tests/data_reliability_worker.cpp)
 target_include_directories(gogaku_data_reliability_worker PRIVATE include)
 target_link_libraries(gogaku_data_reliability_worker PRIVATE GogakuCore)
 gogaku_enable_sanitizers(gogaku_data_reliability_worker)
+
+# 扩展词库导入转换向量：五种格式、丢弃原因、错误码、取消与重复导入。
+# 直接使用 libime 头生成测试词典；词典路径同普通模式测试。
+add_executable(gogaku_core_dict_import_test tests/dict_import_test.cpp)
+target_include_directories(gogaku_core_dict_import_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_core_dict_import_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_core_dict_import_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_core_dict_import_test)
+add_test(NAME dict_import COMMAND gogaku_core_dict_import_test)
+
+# 扩展词库元数据与官方清单向量：list／开关／删除／verify／catalog 合同与安装。
+add_executable(gogaku_core_dict_catalog_test tests/dict_catalog_test.cpp)
+target_include_directories(gogaku_core_dict_catalog_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_core_dict_catalog_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_core_dict_catalog_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_core_dict_catalog_test)
+add_test(NAME dict_catalog COMMAND gogaku_core_dict_catalog_test)
+
+# 扩展词库挂载向量：普通／学习会话挂载、组合中延迟、学习阈值、删词提示。
+add_executable(gogaku_core_dict_mount_test tests/dict_mount_test.cpp)
+target_include_directories(gogaku_core_dict_mount_test PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_core_dict_mount_test PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_core_dict_mount_test PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_core_dict_mount_test)
+add_test(NAME dict_mount COMMAND gogaku_core_dict_mount_test)
+
+# 发布侧词库构建工具（与导入共用同一份转换实现；不计入 ctest）。
+add_executable(gogaku_dict_tool tools/gogaku_dict_tool.cpp)
+target_include_directories(gogaku_dict_tool PRIVATE include "${GOGAKU_DEPS}/source/src" "${GOGAKU_DEPS}/build/src" "${GOGAKU_DEPS}/prefix/include/Fcitx5/Utils" "${BOOST_INCLUDE}")
+target_link_directories(gogaku_dict_tool PRIVATE "${GOGAKU_DEPS}/build/bin" "${GOGAKU_DEPS}/prefix/lib")
+target_link_libraries(gogaku_dict_tool PRIVATE GogakuCore IMEPinyin IMECore Fcitx5Utils)
+gogaku_enable_sanitizers(gogaku_dict_tool)

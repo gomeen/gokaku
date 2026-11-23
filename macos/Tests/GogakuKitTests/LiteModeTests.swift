@@ -86,15 +86,20 @@ final class LiteModeTests: XCTestCase {
 
     func testSettingsPageVisibleCasesFollowLiteMode() {
         #if GOGAKU_LITE
-        // Lite 独立安装包固定五页（四个功能页＋关于），与运行开关无关。
+        // Lite 独立安装包固定六页（五个功能页＋关于；2026-11-26 扩展词库裁决），
+        // 与运行开关无关。
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: false),
-                       [.normalInput, .customWords, .skin, .shortcuts, .about])
+                       [.normalInput, .customWords, .dictionaries, .skin, .shortcuts, .about])
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: true),
-                       [.normalInput, .customWords, .skin, .shortcuts, .about])
+                       [.normalInput, .customWords, .dictionaries, .skin, .shortcuts, .about])
         #else
+        // 完整版九页；扩展词库紧跟「自定义词语」（2026-11-26 裁决）。
+        XCTAssertEqual(SettingsPage.allCases,
+                       [.normalInput, .resources, .customWords, .dictionaries, .skin,
+                        .shortcuts, .privacy, .records, .about])
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: false), SettingsPage.allCases)
         XCTAssertEqual(SettingsPage.visibleCases(liteModeEnabled: true),
-                       [.normalInput, .customWords, .skin, .shortcuts, .about])
+                       [.normalInput, .customWords, .dictionaries, .skin, .shortcuts, .about])
         XCTAssertTrue(SettingsPage.visibleCases(liteModeEnabled: true).allSatisfy { !$0.isLearningPage })
         #endif
         XCTAssertEqual(SettingsPage.allCases.filter(\.isLearningPage),

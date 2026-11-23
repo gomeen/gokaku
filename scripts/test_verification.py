@@ -58,7 +58,8 @@ class VerificationTests(unittest.TestCase):
 
     def test_gui_complete_current_matrix(self):
         report, expected = self.gui_fixture()
-        self.assertEqual(len(report['screens']), 28)
+        # 8 页 × 2 尺寸 × 2 外观（2026-11-26 扩展词库页加入 GUI_PAGES）。
+        self.assertEqual(len(report['screens']), len(verify.GUI_PAGES) * 4)
         self.assertEqual(verify.gui_problems(report, self.root, expected), [])
 
     def fake_fuzz(self, fail_seed=None):
@@ -92,7 +93,7 @@ class VerificationTests(unittest.TestCase):
     def test_gui_short_profile_needs_default_size_only(self):
         report, expected = self.gui_fixture()
         short = verify.gui_required_cells('host')
-        self.assertEqual(len(short), 14)
+        self.assertEqual(len(short), len(verify.GUI_PAGES) * 2)
         report['screens'] = [s for s in report['screens'] if s['size'] == [1000, 620]]
         self.assertEqual(verify.gui_problems(report, self.root, expected, short), [])
         # 短档证据不满足完整档；完整档证据满足短档。

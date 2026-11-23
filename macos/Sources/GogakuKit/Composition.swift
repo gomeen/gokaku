@@ -94,6 +94,23 @@ public final class CompositionSession {
         if let handle { gc_learning_session_destroy(handle) }
     }
 
+    // MARK: - 扩展词库挂载（引擎队列上调用；学习阈值过滤在核心）
+
+    /// 应用扩展词库完整目标集合（超阈值词库被核心过滤；非空句柄一律由核心
+    /// 释放）。返回码同 gc_normal_dicts_apply。
+    @discardableResult
+    public func applyDicts(ids: [String], handles: [OpaquePointer?]) -> Int32 {
+        guard let handle, ids.count == handles.count else { return 1 }
+        guard !ids.isEmpty else {
+            return gc_learning_dicts_apply(handle, nil, nil, 0)
+        }
+        let copies = ids.map { $0.unsafeConstUTF8Copy() }
+        defer { copies.forEach { freeConst($0) } }
+        var idPointers: [UnsafePointer<CChar>?] = copies.map { $0 }
+        var handlePointers = handles
+        return gc_learning_dicts_apply(handle, &idPointers, &handlePointers, ids.count)
+    }
+
     // MARK: - 事件编组
 
     /// 发送事件并落地快照。返回是否产生有效快照；rc=1（无效请求）静默保留

@@ -55,12 +55,14 @@ enum BuildIdentity {
 enum SettingsPage: String, CaseIterable, Identifiable {
     // 顺序即侧栏顺序：普通输入是核心高频页，排首位并作为默认落地页；
     // 「关于」排最后。
-    case normalInput, resources, customWords, skin, shortcuts, privacy, records, about
+    case normalInput, resources, customWords, dictionaries, skin, shortcuts, privacy, records, about
     var id: Self { self }
 
     /// Lite 观感下的页面（也是 Gogaku Lite 独立安装包的全部页面）：
-    /// 四个功能页＋关于。所有安装形态都有关于页（版本与检查更新的唯一入口）。
-    static let liteCases: [SettingsPage] = [.normalInput, .customWords, .skin, .shortcuts, .about]
+    /// 五个功能页＋关于。所有安装形态都有关于页（版本与检查更新的唯一入口）。
+    /// 扩展词库页排在「自定义词语」之后（2026-11-26 裁决）。
+    static let liteCases: [SettingsPage] =
+        [.normalInput, .customWords, .dictionaries, .skin, .shortcuts, .about]
 
     /// 侧栏可见页：编译期裁剪（GOGAKU_LITE）与运行时 liteMode 任一生效即五页。
     static func visibleCases(liteModeEnabled: Bool) -> [SettingsPage] {
@@ -75,7 +77,7 @@ enum SettingsPage: String, CaseIterable, Identifiable {
     var isLearningPage: Bool {
         switch self {
         case .resources, .privacy, .records: return true
-        case .normalInput, .customWords, .skin, .shortcuts, .about: return false
+        case .normalInput, .customWords, .dictionaries, .skin, .shortcuts, .about: return false
         }
     }
     var title: String {
@@ -83,6 +85,7 @@ enum SettingsPage: String, CaseIterable, Identifiable {
         case .resources: return "学习翻译"
         case .normalInput: return "普通输入"
         case .customWords: return "自定义词语"
+        case .dictionaries: return "扩展词库"
         case .skin: return "皮肤"
         case .shortcuts: return "快捷键"
         case .privacy: return "学习与隐私"
@@ -144,9 +147,14 @@ private struct SettingsView: View {
         }
     }
 
-    /// 侧栏可见页：GOGAKU_LITE 固定四页，完整版按运行时 liteMode 组合。
+    /// 侧栏可见页：GOGAKU_LITE 固定五页，完整版按运行时 liteMode 组合。
     private var visiblePages: [SettingsPage] {
         SettingsPage.visibleCases(liteModeEnabled: settings.liteModeEnabled)
+    }
+
+    /// 扩展词库页的学习可用性：与输入侧同一门禁（学习翻译启用且未在 Lite 模式）。
+    var learningGateEnabled: Bool {
+        settings.learningTranslationEnabled && !settings.liteModeEnabled
     }
 
     /// 引导确认：选择已写入 settings，立即提交（输入法据此即时切换）。
@@ -188,6 +196,7 @@ private struct SettingsView: View {
                         case .resources: ResourcesPage(settings: $settings)
                         case .normalInput: NormalInputPage(settings: $settings)
                         case .customWords: CustomWordsPage(status: $status)
+                        case .dictionaries: DictionariesPage(learningGateEnabled: learningGateEnabled)
                         case .skin: EmptyView()
                         case .shortcuts: ShortcutsPage(settings: $settings)
                         case .privacy: PrivacyPage(settings: $settings)

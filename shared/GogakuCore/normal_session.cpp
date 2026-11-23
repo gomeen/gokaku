@@ -2,6 +2,9 @@
 // 不引用 Apple 框架；同一实现供 macOS（IMK）与 Windows（TSF）调用。
 // 事件轨迹规格见 docs/product.md「普通模式行为规格」与 tests/normal_session_test.cpp。
 #include "gogaku_core.h"
+#include "dict_mount.h"
+
+#include "../third_party/json.hpp"
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -10,6 +13,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <cstring>
 #include <filesystem>
@@ -314,6 +318,9 @@ struct GcNormalSession {
     // 当前双拼方案（全拼时为空）。保留作组合中判断「该标点键是否是本方案的韵母键」。
     std::shared_ptr<libime::ShuangpinProfile> shuangpin;
 
+    // 扩展词库挂载状态：dictSlots[i] 对应词典槽位 2+i（docs/dictionaries.md §四）。
+    std::vector<gogaku::DictSlot> dictSlots;
+
     std::string dictPath, modelPath, userDir, customWordsPath, englishWordsPath, glossPath;
     int32_t scheme = GC_SCHEME_XIAOHE;
     uint32_t fuzzyMask = 0;
@@ -490,6 +497,56 @@ void rebuild_custom_indexes(GcNormalSession &s) {
 // 合并结果与状态绑定：任何影响候选的变更都必须让它失效。
 void invalidate_merge(GcNormalSession &s) { s.mergedValid = false; }
 
+// 扩展词判定：候选词＋它的实际音节序列恰好出现在某本已挂载扩展词库的 trie 里。
+// 音节从候选的 lattice path 取（兼容全拼与双拼）；多词条句子不判定，仍按
+// 「出厂词」处理。出厂数据（槽 0）与用户词典（槽 1）不在遍历范围。
+bool is_extended_dict_word(GcNormalSession &s, size_t libimeIndex, const std::string &word) {
+    if (word.empty()) return false;
+    auto &c = *s.context;
+    const auto &chinese = c.candidatesToCursor();
+    if (libimeIndex >= chinese.size()) return false;
+    const auto &sentence = chinese[libimeIndex].sentence();
+    if (sentence.size() != 1) return false;
+    const auto &path = sentence.front()->path();
+    if (path.size() < 2) return false;
+    // 音节边界：path 相邻节点对；节点下标相对未消费部分，加已暂存长度还原。
+    const std::string raw = c.userInput();
+    const size_t stagedLen = c.selectedLength();
+    std::string span;
+    for (size_t k = 0; k + 1 < path.size(); ++k) {
+        const size_t begin = path[k]->index();
+        const size_t end = path[k + 1]->index();
+        if (begin >= end || stagedLen + end > raw.size()) return false;
+        if (!span.empty()) span.push_back('\'');
+        span += raw.substr(stagedLen + begin, end - begin);
+    }
+    // 双拼方案把原码转成全拼；全拼模式原样。编码可能拒绝非法音节（模糊
+    // 随机输入），一律按非扩展词处理。
+    std::string fullPinyin = span;
+    try {
+        if (s.shuangpin != nullptr) {
+            fullPinyin = libime::PinyinEncoder::shuangpinToPinyin(span, *s.shuangpin);
+        }
+        auto key = libime::PinyinEncoder::encodeFullPinyinWithFlags(
+            fullPinyin, libime::PinyinFuzzyFlag::VE_UE);
+        key.push_back('!');
+        key.insert(key.end(), word.begin(), word.end());
+        for (size_t i = 0; i < s.dictSlots.size(); ++i) {
+            if (s.dictSlots[i].disabled) continue;
+            const auto *trie = s.ime->dict()->trie(2 + i);
+            if (trie == nullptr) continue;
+            const float value = trie->exactMatchSearch(key.data(), key.size());
+            if (!std::isnan(value)) return true;
+        }
+    } catch (...) {
+        return false;
+    }
+    return false;
+}
+
+// 扩展词判定：候选词＋读音恰好出现在某本已挂载扩展词库的 trie 里。
+// 出厂词典（槽 0）与用户词典（槽 1）不在遍历范围；多词条句子不会恰好
+// 等于单词条键，仍按「出厂词」处理。
 void sync_custom_dict(GcNormalSession &s) {
     std::vector<CustomEntry> want;
     for (const auto &w : s.customWords) {
@@ -1610,9 +1667,9 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 MergedSet &ms = ensure_view();
                 const size_t hi = std::min(s->selected, ms.entries.size() - 1);
                 const MaterializedCandidate &m = materialize_candidate(*s, ms, hi);
+                // 展示文本包含暂存前缀；词典和 learnedWords 的键只含裸词。
+                const std::string word = m.text.substr(ms.staged.size());
                 if (m.deletable) {
-                    // 展示文本包含暂存前缀；词典和 learnedWords 的键只含裸词。
-                    const std::string word = m.text.substr(ms.staged.size());
                     s->ime->dict()->removeWord(kUserDictIdx, m.pinyin, word);
                     s->learnedWords.erase(word);
                     s->learnedDirty = true;
@@ -1626,6 +1683,9 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     status = "自定义词请在设置中删除";
                 } else if (m.kind == GC_CAND_ENGLISH) {
                     status = "英文候选不参与删词";
+                } else if (m.kind == GC_CAND_CHINESE &&
+                           is_extended_dict_word(*s, ms.entries[hi].libimeIndex, word)) {
+                    status = "扩展词请到设置停用或删除词库";
                 } else {
                     status = "出厂词不能删除";
                 }
@@ -1742,6 +1802,58 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
         MergedSet *snapshotMerged = nullptr;
         if (c.selectedLength() > 0 || !c.empty()) snapshotMerged = &ensure_view();
         *out = build_snapshot(*s, commit, status, toast, beep, consumed, snapshotMerged);
+        return 0;
+    } catch (...) {
+        return 2;
+    }
+}
+
+// ── 扩展词库挂载（docs/dictionaries.md §四／§五；合同在 dict_contract.h） ──
+
+namespace {
+// 把 ids/handles 变成挂载目标集合；id 为 NULL 或重复时返回 false（未吞任何句柄）。
+bool collect_mount_targets(const char *const *ids, GcDictHandle *const *handles, size_t n,
+                           std::vector<std::pair<std::string, GcDictHandle *>> &wanted) {
+    std::unordered_set<std::string> seen;
+    wanted.reserve(n);
+    for (size_t i = 0; i < n; ++i) {
+        if (ids[i] == nullptr) return false;
+        if (!seen.insert(ids[i]).second) return false;
+        wanted.emplace_back(ids[i], handles == nullptr ? nullptr : handles[i]);
+    }
+    return true;
+}
+}  // namespace
+
+extern "C" int gc_normal_dicts_apply(GcNormalSession *s, const char *const *ids,
+                                     GcDictHandle *const *handles, size_t n) {
+    if (s == nullptr || (n > 0 && ids == nullptr) || (n > 0 && handles == nullptr)) return 1;
+    // 组合进行中不接受挂载变更（合同：组合结束后的下一个事件前生效）。
+    if (s->context->selectedLength() > 0 || !s->context->empty()) return 3;
+    std::vector<std::pair<std::string, GcDictHandle *>> wanted;
+    if (!collect_mount_targets(ids, handles, n, wanted)) return 1;
+    try {
+        std::vector<size_t> consumed;
+        const int rc = gogaku::dict_mount_apply(*s->ime->dict(), s->dictSlots, wanted, consumed);
+        // 非空句柄一律由核心释放：挂载的 trie 已移入词典；外壳在此统一 delete
+        //（内部错误路径下未消费的句柄同样释放，所有权合同与学习侧一致）。
+        for (auto &entry : wanted) delete entry.second;
+        if (rc != 0) return 2;
+        invalidate_merge(*s);
+        return 0;
+    } catch (...) {
+        return 2;
+    }
+}
+
+extern "C" int gc_normal_dicts_mounted(GcNormalSession *s, char **json) {
+    if (s == nullptr || json == nullptr) return 1;
+    try {
+        nlohmann::json out = nlohmann::json::array();
+        for (const auto &slot : s->dictSlots) {
+            if (!slot.disabled && !slot.id.empty()) out.push_back(slot.id);
+        }
+        *json = copy_cstr(out.dump());
         return 0;
     } catch (...) {
         return 2;

@@ -380,6 +380,10 @@ def assemble(name, executable, identifier, input_method=False, configuration='re
     update_config = ROOT / 'resources/update/config.json'
     if update_config.exists():
         shutil.copy2(update_config, contents / 'Resources/update-config.json')
+    # 扩展词库渠道配置（公开仓库＋可信 keyId；公钥材料复用 update-config）。
+    dict_catalog_config = ROOT / 'resources/dictionaries/catalog-config.json'
+    if dict_catalog_config.exists():
+        shutil.copy2(dict_catalog_config, contents / 'Resources/dictionary-catalog-config.json')
     (contents / 'Info.plist').write_bytes(plistlib.dumps(info))
     write_build_identity(contents, meta)
     licenses(contents / 'Licenses')

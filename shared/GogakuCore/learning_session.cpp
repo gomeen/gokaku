@@ -3,6 +3,9 @@
 // 事件轨迹规格见 tests/learning_session_test.cpp 与同一 Swift 行为合同。
 // 不引用 Apple 框架；翻译请求的进程与传输仍在平台侧。
 #include "gogaku_core.h"
+#include "dict_mount.h"
+
+#include "../third_party/json.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -11,6 +14,8 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 #include <libime/core/userlanguagemodel.h>
@@ -232,6 +237,8 @@ struct Cand {
 
 struct GcLearningSession {
     DecodeCore core;
+    // 扩展词库挂载状态（学习阈值过滤后的小词库；docs/dictionaries.md §四）。
+    std::vector<gogaku::DictSlot> dictSlots;
     // 身份
     uint64_t focus = 0, epoch = 0, revision = 0;
     int32_t mode = GC_LEARN_MODE_NORMAL;
@@ -746,6 +753,81 @@ extern "C" int gc_learning_handle(GcLearningSession *session, const GcLearningEv
             return 1;
         }
         *out = make_snapshot(s);
+        return 0;
+    } catch (...) {
+        return 2;
+    }
+}
+
+// ── 扩展词库挂载：学习会话只挂小词库（docs/dictionaries.md §四） ──
+
+namespace {
+char *learning_copy_cstr(const std::string &s) {
+    auto *r = static_cast<char *>(std::malloc(s.size() + 1));
+    if (r == nullptr) throw std::bad_alloc();
+    memcpy(r, s.c_str(), s.size() + 1);
+    return r;
+}
+}  // namespace
+
+extern "C" int gc_learning_dicts_apply(GcLearningSession *s, const char *const *ids,
+                                       GcDictHandle *const *handles, size_t n) {
+    if (s == nullptr || (n > 0 && (ids == nullptr || handles == nullptr))) return 1;
+    std::unordered_set<std::string> seen;
+    for (size_t i = 0; i < n; ++i) {
+        if (ids[i] == nullptr) return 1;
+        if (!seen.insert(ids[i]).second) return 1;
+    }
+    // 组合进行中不接受挂载变更；等组合结束后的下一个事件前生效。
+    if (!s->core.context.empty()) return 3;
+    try {
+        // 先累计保留槽（NULL 句柄）的大小，再按挂载顺序过滤新挂载项。
+        std::unordered_map<std::string, uint64_t> keptSizes;
+        uint64_t running = 0;
+        for (size_t i = 0; i < n; ++i) {
+            if (handles[i] != nullptr) continue;
+            for (const auto &slot : s->dictSlots) {
+                if (!slot.disabled && slot.id == ids[i]) {
+                    keptSizes[ids[i]] = slot.sizeBytes;
+                    running += slot.sizeBytes;
+                    break;
+                }
+            }
+        }
+        std::vector<std::pair<std::string, GcDictHandle *>> filtered;
+        filtered.reserve(n);
+        for (size_t i = 0; i < n; ++i) {
+            if (handles[i] == nullptr) {
+                filtered.emplace_back(ids[i], nullptr);
+                continue;
+            }
+            const uint64_t size = handles[i]->sizeBytes;
+            if (size <= gogaku::kLearningPerDictMax && running + size <= gogaku::kLearningTotalMax) {
+                running += size;
+                filtered.emplace_back(ids[i], handles[i]);
+            }
+            // 超限词库不挂；句柄统一在下方释放。
+        }
+        std::vector<size_t> consumed;
+        const int rc =
+            gogaku::dict_mount_apply(*s->core.ime.dict(), s->dictSlots, filtered, consumed);
+        // 传入的非空句柄一律由核心释放：挂载的 trie 已移入词典，超限的在此释放。
+        for (size_t i = 0; i < n; ++i) delete handles[i];
+        if (rc != 0) return 2;
+        return 0;
+    } catch (...) {
+        return 2;
+    }
+}
+
+extern "C" int gc_learning_dicts_mounted(GcLearningSession *s, char **json) {
+    if (s == nullptr || json == nullptr) return 1;
+    try {
+        nlohmann::json out = nlohmann::json::array();
+        for (const auto &slot : s->dictSlots) {
+            if (!slot.disabled && !slot.id.empty()) out.push_back(slot.id);
+        }
+        *json = learning_copy_cstr(out.dump());
         return 0;
     } catch (...) {
         return 2;

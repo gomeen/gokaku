@@ -164,6 +164,9 @@ def volcengine_helper_smoke(app):
 def update_config_smoke(app):
     path = app / 'Contents/Resources/update-config.json'
     assert path.is_file(), '设置应用缺少 update-config.json'
+    # 扩展词库渠道配置（0.5.0 起；缺失视为未配置渠道，构包检查不通过）。
+    dict_config = app / 'Contents/Resources/dictionary-catalog-config.json'
+    assert dict_config.is_file(), '设置应用缺少 dictionary-catalog-config.json'
     config = json.loads(path.read_text())
     assert config.get('schema') == 1
     assert isinstance(config.get('trustedKeys'), list) and config['trustedKeys']

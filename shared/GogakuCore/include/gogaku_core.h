@@ -46,6 +46,11 @@
  * 主题渲染成预乘 RGBA 位图与命中区域表，一处实现两端贴图；HarfBuzz＋
  * FreeType 静态编入本库（vendored 源码在 third_party/，见 panel_render/
  * README.md）。
+ *
+ * 扩展词库契约（同样为附加项，不升 ABI 版本）：声明在 ../dict_contract.h，
+ * 实现在 dict_contract.cpp，行为向量在 tests/dict_import_test.cpp 与
+ * tests/dict_catalog_test.cpp。导入转换、元数据、清单校验与挂载计划
+ * 只有这一份实现；合同见 docs/dictionaries.md。
  */
 #include <stddef.h>
 #include <stdint.h>
@@ -516,6 +521,7 @@ GOGAKU_CORE_EXPORT int gc_learning_handle(GcLearningSession *session,
 #include "../panel_render.h"
 #include "../settings_contract.h"
 #include "../theme_contract.h"
+#include "../dict_contract.h"
 
 #ifdef __cplusplus
 }

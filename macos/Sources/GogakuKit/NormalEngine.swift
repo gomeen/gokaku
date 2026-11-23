@@ -241,6 +241,35 @@ public final class NormalEngine {
         _ = gc_normal_set_vertical_page_size(session, pageSize)
     }
 
+    // MARK: - 扩展词库挂载（引擎队列上调用；合同见 docs/dictionaries.md §五）
+
+    /// 应用扩展词库完整目标集合。非空句柄移交核心（成功或被拒后由核心释放）；
+    /// 返回码：0 成功；3 组合进行中（调用方保留句柄在组合结束后重试）。
+    /// 注意：返回非 0 且非 3 时核心已释放已消费句柄，未消费的由调用方释放。
+    @discardableResult
+    public func applyDicts(ids: [String], handles: [OpaquePointer?]) -> Int32 {
+        guard let session, ids.count == handles.count else { return 1 }
+        guard !ids.isEmpty else {
+            return gc_normal_dicts_apply(session, nil, nil, 0)
+        }
+        let copies = ids.map { $0.unsafeConstUTF8Copy() }
+        defer { copies.forEach { freeConst($0) } }
+        var idPointers: [UnsafePointer<CChar>?] = copies.map { $0 }
+        var handlePointers = handles
+        return gc_normal_dicts_apply(session, &idPointers, &handlePointers, ids.count)
+    }
+
+    /// 当前挂载的扩展词库 id 列表（调试与测试）。
+    public func mountedDicts() -> [String] {
+        guard let session else { return [] }
+        var json: UnsafeMutablePointer<CChar>?
+        guard gc_normal_dicts_mounted(session, &json) == 0, let json else { return [] }
+        defer { gc_contract_free(json) }
+        guard let data = String(cString: json).data(using: .utf8),
+              let array = try? JSONSerialization.jsonObject(with: data) as? [String] else { return [] }
+        return array
+    }
+
     /// 平台确认宿主插入成功：核心此刻才写入调频与已学习词（ABI v4）。
     /// 学习模式哨兵提交与上屏失败不发送本事件，不再污染普通输入排序。
     @discardableResult
@@ -401,12 +430,13 @@ extension String {
     }
 
     /// const 字段用拷贝；释放仍由调用方对同一指针 free。
-    func unsafeConstUTF8Copy() -> UnsafePointer<CChar>! {
+    /// public：GogakuInput 的 EngineHub 词库加载链路同用（跨 target）。
+    public func unsafeConstUTF8Copy() -> UnsafePointer<CChar>! {
         UnsafePointer(unsafeUTF8Copy())
     }
 }
 
-func freeConst(_ p: UnsafePointer<CChar>!) {
+public func freeConst(_ p: UnsafePointer<CChar>!) {
     free(UnsafeMutablePointer(mutating: p))
 }
 

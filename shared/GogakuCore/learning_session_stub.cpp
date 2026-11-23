@@ -34,3 +34,19 @@ extern "C" void gc_learning_snapshot_free(GcLearningSnapshot *snapshot) {
     if (snapshot->commit_recovery_raw) free(snapshot->commit_recovery_raw);
     free(snapshot);
 }
+
+extern "C" int gc_learning_dicts_apply(GcLearningSession *, const char *const *,
+                                       GcDictHandle *const *, size_t) {
+    return 2;  // Lite 无学习会话：挂载不可用。
+}
+
+extern "C" int gc_learning_dicts_mounted(GcLearningSession *, char **json) {
+    if (json) {
+        char *empty = static_cast<char *>(std::malloc(3));
+        if (empty) {
+            memcpy(empty, "[]", 3);
+            *json = empty;
+        }
+    }
+    return 0;
+}

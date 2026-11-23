@@ -146,6 +146,22 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 - 发布使用 GitHub Releases；每个 Release 附清单与 Ed25519 签名；先上传资产取得 ID，再生成清单、上传清单与签名，先形成 Draft，人工审阅后发布。stable／dev 互不自动切换；stable 只接受正式版本，dev 可接受 dev 与正式版；按构建号判断，不自动降级。
 - 未配置更新源的构建明确显示「未配置更新源」，不能显示「已是最新」。
 
+## 扩展词库（0.5.0，2026-11-26 起）
+
+合同见[扩展词库](dictionaries.md)，裁决依据与许可红线见[扩展词库调研](research-dictionaries.md)。共享核心新增附加 C ABI（版本保持 4），Mac 完整实现，Windows 实现到交叉编译通过（运行验收记「未验收」），官方词库在公开仓库 `gomeen/gogaku-dicts` 分发。全程单人顺序施工，并发不超过 2（`cmake --build -j 2`、`swift build/test -j 2`、`compile-win-native.py --jobs 2`、`verify.py --jobs 2 --asan-shards 2`）；每个阶段结束跑一次 fast，改共享核心后加 ASan quick，release 全量只在 D6 后台跑一次。
+
+| 阶段 | 工作 | 验收标准 |
+| --- | --- | --- |
+| D0 合同与文档 | 新建 `docs/dictionaries.md`；`product.md` 新增「已确认的扩展词库」并修订设置页页数；本表；`feature-parity.md` 加行（状态计划中）；调研文档标注实施状态 | 文档之间无矛盾；不改代码 |
+| D1 转换与元数据（核心） | 五种格式解析、读音推断、过滤、元数据、挂载计划、清单解析、`gogaku_dict_tool` | ctest `dict_import`、`dict_catalog` 全部通过；向量覆盖每种格式、每个丢弃原因和错误码；合成 scel 入库脚本生成；ASan quick 无报错；解析器模糊冒烟 2000 例无崩溃；导入 170 万条 ≤30s |
+| D2 引擎挂载（核心） | 普通／学习会话挂载、组合中延迟生效、删词提示 | ctest `dict_mount` 覆盖挂载、停用释放、删除中间一本、空槽复用、组合中延迟、学习阈值、删词提示、权重 0、英文排序不变；release quality：120 例双场景首选 ≥109／前十 ≥112；zhwiki 新词 300 例前九 ≥90%、首选 ≥60%；出厂词首选下降 ≤1pp；逐键 p95 增量 ≤0.5ms、apply ≤5ms、内存增量 ≤2.2× |
+| D3 Mac | 设置页、导入线程、开关、删除、内存提示、外部链接；输入法重载链路；学习小词库挂载；官方渠道客户端；`GUI_PAGES` | fast 7/7；Swift 测试覆盖页面集合（9／6 页）、导入／取消／重复／错误、开关删除落盘与通知、EngineHub 重载、清单客户端失败路径（注入传输）；bundle-check 含新配置 |
+| D4 Windows | 新页面、代理重载与目录轮询、学习会话挂载、清单客户端、自检包并入 D1 向量 | `compile-win-native.py --jobs 2` 完整版与 Lite 编译通过，`build-win-app.py` 双形态暂存成功；功能对照表标「已编译，运行未验收」 |
+| D5 官方渠道 | sources 锁定、构建、签名、发布脚本；生成 catalog-1 | 两次构建字节一致；签名对拍向量（有效、篡改、未知 keyId、错误 kind）双端结论一致；dry-run 通过；Draft 人工审阅后发布 |
+| D6 定版 0.5.0 | `version.json`→0.5.0＋递增构建号；双端双形态构包；更新 CHANGELOG、第三方许可、README、验收记录 | fast 与 release 通过（release 后台一次，`--jobs 2 --asan-shards 2`）；构出 Mac 完整版、Lite pkg、Windows 完整版、Lite setup 并发布 Draft；host 只在授权空闲时段跑短档，未跑则记录豁免并保持「真实宿主未验收」 |
+
+不在本轮范围：百度 bdict、应用内浏览搜狗词库、分发萌娘百科词库、zhwikisource／zhwiktionary、Windows 运行验收、Windows 数据包拆分、词库导出、候选来源标识、自动检查词库更新。D5 前需要用户提供公开仓库 `gomeen/gogaku-dicts` 及有 Release 权限的 token；签名私钥复用现有发布环境。
+
 ## 七、安装、恢复与发布
 
 ### macOS：仅 PKG
@@ -211,3 +227,4 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 | P4 Windows Setup | b110 stable 双端安装包已发布；真实宿主、完整恢复／卸载未验收 | [b110 发布记录](validation/release-b110.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐；b94 默认升级证据保留为历史 |
 | P5 检查更新 | 两端客户端已实现；b110 stable 发布侧已完成；客户端真实旧版更新闭环未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本、[b110 发布记录](validation/release-b110.json) |
 | P6 最终验收 | b110 核心／fast／release 自动化检查通过；完整产品未验收，host 以用户豁免发布 | b110 发布记录；真实宿主、在线更新 E2E、完整升级恢复／卸载及真机矩阵未验收 |
+| 扩展词库 D0–D6 | 实施中（0.5.0），状态见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md) |
