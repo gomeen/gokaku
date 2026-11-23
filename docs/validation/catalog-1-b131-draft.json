@@ -1,0 +1,120 @@
+{
+  "id": 455141980,
+  "tag": "catalog-1",
+  "draft": true,
+  "url": "https://github.com/gomeen/gogaku-dicts/releases/tag/untagged-6b3e53382694dcf1393f",
+  "assets": [
+    {
+      "name": "catalog.json",
+      "id": 782480214,
+      "state": "uploaded",
+      "size": 6567,
+      "digest": "sha256:3187703f1030493fd6cb5da8ca5c1722020f975414097eb13a2a1086da358322"
+    },
+    {
+      "name": "catalog.json.sig",
+      "id": 782480253,
+      "state": "uploaded",
+      "size": 89,
+      "digest": "sha256:eb8405736b444266c3070c7a50d73680e6dd9c13a15a725f7e8cc0c87f6bf41b"
+    },
+    {
+      "name": "CC-BY-SA-4.0.txt",
+      "id": 782112566,
+      "state": "uploaded",
+      "size": 20138,
+      "digest": "sha256:28a9529c7d0bb4dc51f4bf5c116a3d16ef247a052f7591466768ddf563fd1cf5"
+    },
+    {
+      "name": "thuocl-animal.dict",
+      "id": 782130251,
+      "state": "uploaded",
+      "size": 241940,
+      "digest": "sha256:427304c29d0ca48b08ac218f953e32af6862b6699cbf39efa38facfcbbfe46d8"
+    },
+    {
+      "name": "thuocl-caijing.dict",
+      "id": 782129488,
+      "state": "uploaded",
+      "size": 28822,
+      "digest": "sha256:94be025a0351ed06caa80bc556bd7be429c2785aa01131aa6de76eeb5e5d8901"
+    },
+    {
+      "name": "thuocl-car.dict",
+      "id": 782130775,
+      "state": "uploaded",
+      "size": 33630,
+      "digest": "sha256:0a75cdcccbce6c008689452f7d18cec6c8de9b28b853964890f1b57ae915556d"
+    },
+    {
+      "name": "thuocl-diming.dict",
+      "id": 782130036,
+      "state": "uploaded",
+      "size": 403845,
+      "digest": "sha256:e092962a35257495bcec2b0d958389b21e6981e2215fbbc6e88fde2f8b64ecc8"
+    },
+    {
+      "name": "thuocl-food.dict",
+      "id": 782129899,
+      "state": "uploaded",
+      "size": 124227,
+      "digest": "sha256:ea9e4ac0b394fc1a744ae76b6181491b1683d793d0b62edeedbc70350ce30242"
+    },
+    {
+      "name": "thuocl-it.dict",
+      "id": 782129350,
+      "state": "uploaded",
+      "size": 189101,
+      "digest": "sha256:f94663c2c697e5be9ac2c4d5e9d897edc54228427b39ec9b9ef28c80893f0361"
+    },
+    {
+      "name": "thuocl-law.dict",
+      "id": 782129592,
+      "state": "uploaded",
+      "size": 242469,
+      "digest": "sha256:2dfcd77116b0e72cf5d842ebcc36ae765a548dcaf354e18a8d239dd05ac97666"
+    },
+    {
+      "name": "THUOCL-LICENSE.txt",
+      "id": 782112501,
+      "state": "uploaded",
+      "size": 1063,
+      "digest": "sha256:db4b8cca414db4cf487b933d07a0514f77caf44f9f3d392f2bc9d7ba0d511c58"
+    },
+    {
+      "name": "thuocl-lishimingren.dict",
+      "id": 782130457,
+      "state": "uploaded",
+      "size": 62844,
+      "digest": "sha256:8e1a86ccf12f359d5b75026e082e5e953edd45abfcad5c2ad817f7bff4754142"
+    },
+    {
+      "name": "thuocl-medical.dict",
+      "id": 782129778,
+      "state": "uploaded",
+      "size": 230345,
+      "digest": "sha256:a253a23032ca80dec7b145833b855fe61b91b35007f72213a69a2c7b3a33aea1"
+    },
+    {
+      "name": "thuocl-poem.dict",
+      "id": 782130560,
+      "state": "uploaded",
+      "size": 272590,
+      "digest": "sha256:32283d0fa8b170ff08cc713986047d3557beadde00fac15a83e8e2fb0b8f5ff1"
+    },
+    {
+      "name": "web-slang.dict",
+      "id": 782129280,
+      "state": "uploaded",
+      "size": 5815,
+      "digest": "sha256:3b23492e9031c15bcc2be1ab4a91043c9e3ec5146115cb93b622c0f7b15b6a12"
+    },
+    {
+      "name": "zhwiki.dict",
+      "id": 782121558,
+      "state": "uploaded",
+      "size": 26929569,
+      "digest": "sha256:2c465479555ca9c5a9646e3ef0990a22c218764634157fc8e58429cd0dd25b97"
+    }
+  ]
+}
