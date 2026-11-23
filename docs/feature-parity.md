@@ -88,9 +88,9 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 | 渲染引擎设置 | 普通输入页「自绘／系统」 | 普通输入页「自绘／系统」 | 共享 `candidateRenderer`，默认自绘，失败自动系统回退 |
 | 离屏回归 | 共享 C++ 向量＋`SharedPanelBitmapTests` | 同一 C++ 向量＋`appearance_test.cpp` 自检程序 | 运行与构建证据分列于[接入记录](validation/bitmap-rendering.md)，真实宿主仍待验 |
 
-## 扩展词库（0.5.0，实施中）
+## 扩展词库（0.5.0）
 
-合同见[扩展词库](dictionaries.md)；2026-11-26 起实施，状态随阶段表更新。共享核心层两端跑同一份源码（ctest dict_import／dict_catalog／dict_mount 全过；ASan quick 无错误）；Mac 侧有 Swift 回归（导入／取消／重复／错误、清单注入传输失败路径、页面集合）；Windows 侧已编译并暂存，**运行未验收**。
+构建 130 的 fast 和 release 均通过。Mac Swift 回归覆盖导入、取消、重复、错误提示、清单传输失败和页面集合，离屏探针通过 EngineHub 重载检查。Windows 完整版和 Lite 已交叉编译并构包，运行仍待验收。见[合同](dictionaries.md)及[验收记录](validation/dictionaries-0.5.0.md)。
 
 | 功能 | macOS 现状 | Windows 现状 | 合同／边界 |
 | --- | --- | --- | --- |
@@ -105,7 +105,7 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 | 项 | 状态 |
 | --- | --- |
 | 构建 | `scripts/build.py --flavor lite`（`GOGAKU_LITE`、核心学习桩、独立 bundle ID） |
-| 设置页 | macOS 侧栏四个功能页＋关于页（2026-11-19 裁决：关于页所有形态可见）＋快捷键裁学习项；Windows 按 `PageNames`/build-identity 裁功能页 |
+| 设置页 | macOS 侧栏五个功能页（含扩展词库）＋关于页，快捷键隐藏学习项；Windows 按 `PageNames`/build-identity 裁功能页 |
 | 更新清单 | `update-manifest-lite.json`（`make-update-manifest.py --product lite`；发布可 `--lite-macos-pkg` 同 Draft） |
 | Mac 打包 | 不随包 `GogakuTranslator`／`gloss.tsv`；`check-bundle.py --lite` |
 | Win 打包 | `compile-win-native.py --flavor lite` → `build-win-app.py --flavor lite`：**已验证可交叉编译并暂存**（隔离 AppId／`GogakuLiteDev` 目录／`GogakuLite-` 前缀，出厂数据不含 gloss）；agent 无学习会话，设置裁到功能页 |

@@ -161,10 +161,10 @@ int gc_learning_dicts_apply(GcLearningSession *session,
 
 ## 七、官方渠道
 
-- **配置**：`resources/dictionaries/catalog-config.json`（owner `gomeen`、repo `gogaku-dicts`），随设置应用打包。公钥复用检查更新的 trustedKeys（`gogaku-prod-2026`）。
+- **配置**：`resources/dictionaries/catalog-config.json`（owner `gomeen`、repo `gogaku-dicts`），随设置应用打包。公钥复用检查更新的 trustedKeys（`gogaku-prod-2026-11`）。
 - **清单**：`catalog.json`＋分离 Ed25519 签名 `catalog.json.sig`，从 `https://github.com/gomeen/gogaku-dicts/releases/latest/download/` 获取。字段：`schemaVersion: 1`、`kind: "gogaku-dictionary-catalog"`、`keyId`、单调递增的 `catalogVersion`、`dictionaries` 数组。数组每项：`id`、`name`、`category`、`description`、`version`、`license`、`attribution`、`sourceUrl`、`downloadUrl`、`size`、`sha256`、`entryCount`。
 - `downloadUrl` 必须在该仓库 `releases/download/` 前缀下，主机白名单与检查更新相同。防回滚：`catalogVersion` 不得小于本地记录（本地记录随目录里任一官方词库元数据持久化；导入词库不影响）。
-- **首批 13 本**：zhwiki（fcitx5-pinyin-zhwiki）与网络流行语各一本，CC BY-SA 4.0，署名维基百科贡献者与 fcitx5-pinyin-zhwiki，注明已过滤去重；THUOCL 11 个分类（IT、财经、法律、医学、饮食、地名、动物、成语、历史、古诗文、自然），MIT，按其 README 署名。
+- **首批 13 本**：zhwiki（fcitx5-pinyin-zhwiki）与网络流行语各一本，CC BY-SA 4.0，署名维基百科贡献者与 fcitx5-pinyin-zhwiki，注明已过滤去重；THUOCL 11 个分类（IT、财经、法律、医学、饮食、地名、动物、成语、历史、古诗文、汽车），MIT，按其 README 署名。
 - **发布侧**：
   - `resources/dictionaries/sources.json` 锁定上游版本与 SHA-256。
   - `scripts/prepare-dictionary-sources.py` 下载上游数据并校验，存入缓存目录。
