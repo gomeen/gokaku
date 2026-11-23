@@ -164,9 +164,9 @@ int gc_learning_dicts_apply(GcLearningSession *session,
 - **配置**：`resources/dictionaries/catalog-config.json`（owner `gomeen`、repo `gogaku-dicts`），随设置应用打包。公钥复用检查更新的 trustedKeys（`gogaku-prod-2026-11`）。
 - **清单**：`catalog.json`＋分离 Ed25519 签名 `catalog.json.sig`，从 `https://github.com/gomeen/gogaku-dicts/releases/latest/download/` 获取。字段：`schemaVersion: 1`、`kind: "gogaku-dictionary-catalog"`、`keyId`、单调递增的 `catalogVersion`、`dictionaries` 数组。数组每项：`id`、`name`、`category`、`description`、`version`、`license`、`attribution`、`sourceUrl`、`downloadUrl`、`size`、`sha256`、`entryCount`。
 - `downloadUrl` 必须在该仓库 `releases/download/` 前缀下，主机白名单与检查更新相同。防回滚：`catalogVersion` 不得小于本地记录（本地记录随目录里任一官方词库元数据持久化；导入词库不影响）。
-- **首批 13 本**：zhwiki（fcitx5-pinyin-zhwiki）与网络流行语各一本，CC BY-SA 4.0，署名维基百科贡献者与 fcitx5-pinyin-zhwiki，注明已过滤去重；THUOCL 11 个分类（IT、财经、法律、医学、饮食、地名、动物、成语、历史、古诗文、汽车），MIT，按其 README 署名。
+- **首批转换 13 个来源，上架 12 本非空词库**：zhwiki（fcitx5-pinyin-zhwiki）与网络流行语各一本，CC BY-SA 4.0，署名维基百科贡献者与 fcitx5-pinyin-zhwiki，注明已过滤去重；THUOCL 的 IT、财经、法律、医学、饮食、地名、动物、历史、古诗文、汽车十类，MIT，按其 README 署名。成语类转换后零条目，只保留转换报告与署名，不上架。
 - **发布侧**：
-  - `resources/dictionaries/sources.json` 锁定上游版本与 SHA-256。
+  - `resources/dictionaries/sources.json` 用 `upstreamRevision` 锁定上游 tag 或 Git 哈希，另锁定 SHA-256。每本词库的整数 `revision` 从 1 开始，发行内容有变时递增；清单现有字符串字段 `version` 写十进制修订号（例如 `"1"`），上游版本保留在发布说明，不用于排序。发布脚本拒绝非正整数修订和零条目词库。
   - `scripts/prepare-dictionary-sources.py` 下载上游数据并校验，存入缓存目录。
   - `scripts/build-dictionary-catalog.py` 调用核心工具 `gogaku_dict_tool`（与导入共用同一份转换实现）生成 `.dict` 与 `catalog.json`，并签名（复用发布签名环境）。
   - `scripts/publish-dictionaries.py` 先建 Draft、人工审阅后发布；支持 `--dry-run`。Release 正文附带署名与许可文本，并写明每本的丢弃计数。
@@ -183,4 +183,4 @@ int gc_learning_dicts_apply(GcLearningSession *session,
 
 ## 九、假设与默认值（常量集中在核心一处）
 
-内存提醒阈值 200MB；预计内存按 2×文件大小；学习引擎阈值单本 8MiB／累计 16MiB；间隔号条目丢弃；带拼音格式保留含字母数字条目、纯词表只保留汉字；复用生产签名密钥与 trustedKeys、以 `kind` 区分清单；停用即卸载；挂载顺序按 addedAt；重复导入拒绝；首批官方词库 13 本全部发布并在发布记录写明丢弃计数。
+内存提醒阈值 200MB；预计内存按 2×文件大小；学习引擎阈值单本 8MiB／累计 16MiB；间隔号条目丢弃；带拼音格式保留含字母数字条目、纯词表只保留汉字；复用生产签名密钥与 trustedKeys、以 `kind` 区分清单；停用即卸载；挂载顺序按 addedAt；重复导入拒绝；首批 13 个来源均转换并在发布记录写明丢弃计数，只上架非空词库。

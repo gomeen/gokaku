@@ -13,8 +13,8 @@
                                                  # 质量＋渲染＋数据可靠性＋十万序列
                                                  # ASan/UBSan（安装预检可选）
   python3 scripts/verify.py --profile host --yes # 短档真实宿主（每次 stable 定版）：一轮
-                                                 # 矩阵＋万次性能＋GUI 抽查（七页×默认
-                                                 # 尺寸×浅深）；仅在用户空闲时段执行
+                                                 # 矩阵＋万次性能＋默认尺寸浅深 GUI 抽查；
+                                                 # 仅在用户空闲时段执行
   python3 scripts/verify.py --profile host-full --yes
                                                  # 完整宿主：两轮矩阵＋Orca Shift＋性能＋
                                                  # 两小时浸泡＋GUI 全矩阵；核心／IMK
@@ -578,7 +578,8 @@ def check_host_plan(ctx):
         if not settings_app:
             missing.append('~/Applications/Gogaku Settings.app')
         return BLOCK, '输入法未安装（缺 ' + '、'.join(missing) + '）；先构建并安装', None
-    full = ctx.get('profile') == 'host-full'
+    profile = ctx.get('profile') or 'host'
+    full = profile == 'host-full'
     plan = (
         f"{ctx.get('profile') or 'host'} 档位需要 --yes 显式确认（将向系统注入真实按键并占用桌面）。确认后逐项执行：\n"
         '  - host-identity：安装件身份与 version.json 一致性核对\n'
@@ -586,7 +587,7 @@ def check_host_plan(ctx):
         + ('  - orca-shift：probes/first_key_regression.py --hosts orca-pty --iterations 200 --enable-validation（逐事件核对按下／释放、组合变化、插字次数、PTY 字节）\n' if full else '')
         + '  - performance：probes/measure-imk-latency.py --events 10000（约万次真实事件；计时期间不并行构建）\n'
         + ('  - stability：probes/stability-soak.py --minutes 120（两小时浸泡，逐轮报告＋内存趋势）\n' if full else '')
-        + '  - native-gui：设置七页 × ' + ('1000×620／1000×520' if full else '1000×620') + ' × 浅／深外观的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
+        + f'  - native-gui：{gui_matrix_summary(profile)}的真实点击／键盘导航验收（需人工核对后归档当前身份的逐项证据）'
     )
     if not ctx['yes']:
         return BLOCK, plan, None
@@ -908,9 +909,15 @@ GUI_APPEARANCES = ('light', 'dark')
 
 
 def gui_required_cells(profile):
-    """host 短档抽查默认尺寸（14 项）；host-full 为七页×两尺寸×浅深全矩阵（28 项）。"""
+    """host 短档抽查默认尺寸，host-full 覆盖所有尺寸。"""
     sizes = GUI_SIZES if profile != 'host' else GUI_SIZES[:1]
     return {(p, size, a) for p in GUI_PAGES for size in sizes for a in GUI_APPEARANCES}
+
+
+def gui_matrix_summary(profile):
+    cells = gui_required_cells(profile)
+    sizes = '／'.join(f'{w}×{h}' for w, h in GUI_SIZES if any(size == (w, h) for _, size, _ in cells))
+    return f'{len(GUI_PAGES)} 个功能页 × {sizes} × 浅／深外观（{len(cells)} 项）'
 
 
 def gui_problems(report, evidence_dir, expected, required=None, screenshots=True):
@@ -931,7 +938,7 @@ def gui_problems(report, evidence_dir, expected, required=None, screenshots=True
     seen = set()
     screens = report.get('screens')
     if not isinstance(screens, list):
-        return problems + ['GUI 缺少逐项 screens 矩阵（七页×两尺寸×浅深）']
+        return problems + [f'GUI 缺少逐项 screens 矩阵（须覆盖 {len(expected_cells)} 项）']
     for screen in screens:
         if not isinstance(screen, dict):
             problems.append('GUI 矩阵项不是对象')
@@ -967,8 +974,9 @@ def gui_problems(report, evidence_dir, expected, required=None, screenshots=True
 
 def check_native_gui(ctx):
     evidence = ROOT / 'docs/validation/verify' / f'native-gui-acceptance-{CHANNEL}.json'
+    profile = ctx.get('profile') or 'host-full'
     if not evidence.is_file():
-        return BLOCK, ('原生 GUI 未归档：七页×1000×620／1000×520×浅深，真实点击、键盘、'
+        return BLOCK, (f'原生 GUI 未归档：{gui_matrix_summary(profile)}，真实点击、键盘、'
                        '录制与应用选择并读回配置；逐项格式见 docs/release.md：' + str(evidence)), None
     # 绑定安装件哈希与 Mac 平台指纹；纯文档提交或只改 Windows 不使人工证据失效。
     mac = platform_fingerprints(ROOT)['macos']
@@ -977,7 +985,6 @@ def check_native_gui(ctx):
     if not expected['installedSHA256']:
         return BLOCK, '缺少当前安装件的已核验身份；先运行 host-identity', None
     try:
-        profile = ctx.get('profile') or 'host-full'
         problems = gui_problems(json.loads(evidence.read_text()), evidence.parent, expected,
                                 gui_required_cells(profile), screenshots=profile != 'host')
     except (OSError, ValueError, TypeError):

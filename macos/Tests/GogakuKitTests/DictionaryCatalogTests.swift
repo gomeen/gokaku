@@ -206,54 +206,80 @@ final class DictionaryCatalogTests: XCTestCase {
 
     // MARK: 拉取成功与安装
 
-    func testFetchAndInstallRoundtrip() async throws {
+    func testSignedRevisionUpdatePreservesDisabledStateAndRejectsRollback() async throws {
         // 词库资产：真实 libime 二进制（出厂词典截一份小词库内容——直接用出厂
         // 词典本身；size/sha256 由内容计算）。
         let dictBytes = try Data(contentsOf: engineDataDir.appendingPathComponent("sc.dict"))
         let sha = dictBytes.sha256Hex()
-        let escapedSHA = sha
-        let dictionaries = """
-        [{"id":"zhwiki","name":"维基百科词库","category":"综合","description":"词条",\
-        "version":"0.3.1","license":"CC BY-SA 4.0","attribution":"维基百科贡献者",\
-        "sourceUrl":"https://example.org",\
-        "downloadUrl":"https://github.com/gomeen/gogaku-dicts/releases/download/catalog-3/zhwiki.dict",\
-        "size":\(dictBytes.count),"sha256":"\(escapedSHA)","entryCount":300471}]
-        """
+        func catalog(_ version: Int, revision: Int, upstream: String) -> Data {
+            let dictionaries = """
+            [{"id":"zhwiki","name":"维基百科词库","category":"综合","description":"词条",\
+            "version":"\(revision)","license":"CC BY-SA 4.0","attribution":"维基百科贡献者",\
+            "sourceUrl":"https://example.org/commit/\(upstream)",\
+            "downloadUrl":"https://github.com/gomeen/gogaku-dicts/releases/download/catalog-\(version)/zhwiki.dict",\
+            "size":\(dictBytes.count),"sha256":"\(sha)","entryCount":300471}]
+            """
+            return Data(makeCatalogJSON(catalogVersion: version, dictionaries: dictionaries).utf8)
+        }
+        // 上游 Git 哈希字典序倒退，不影响发布修订号。
+        let original = catalog(1, revision: 1, upstream: String(repeating: "f", count: 40))
+        let update = catalog(2, revision: 2, upstream: String(repeating: "a", count: 40))
         let privateKey = Curve25519.Signing.PrivateKey()
         let trusted = [UpdateTrustedKey(
             keyId: "test-key",
             publicKey: privateKey.publicKey.rawRepresentation.base64EncodedString())]
         let transport = MockTransport()
         let base = "https://github.com/gomeen/gogaku-dicts/releases/latest/download/"
-        let manifest = makeCatalogJSON(dictionaries: dictionaries).data(using: .utf8)!
-        transport.routes[base + "catalog.json"] = .ok(manifest)
-        transport.routes[base + "catalog.json.sig"] = .ok(try privateKey.signature(for: manifest))
+        func serve(_ manifest: Data) throws {
+            transport.routes[base + "catalog.json"] = .ok(manifest)
+            transport.routes[base + "catalog.json.sig"] = .ok(try privateKey.signature(for: manifest))
+        }
         transport.downloaded = dictBytes
+        try serve(original)
 
         let snapshot = try await DictionaryCatalog.fetch(
             transport: transport, config: config, updateKeys: trusted, installed: [])
         XCTAssertEqual(snapshot.rejected.count, 0)
         XCTAssertEqual(snapshot.entries.count, 1)
-        XCTAssertEqual(snapshot.catalogVersion, 3)
+        XCTAssertEqual(snapshot.catalogVersion, 1)
         XCTAssertFalse(snapshot.entries[0].installed)
 
         // 安装（下载 → 核心 sha256 校验 → 落盘）。
-        try await DictionaryCatalog.install(snapshot.entries[0], catalogVersion: 3,
+        try await DictionaryCatalog.install(snapshot.entries[0], catalogVersion: snapshot.catalogVersion,
                                             transport: transport) { _ in }
         let listing = try DictionaryStore.list(learningAvailable: true)
         XCTAssertEqual(listing.entries.count, 1)
         let entry = try XCTUnwrap(listing.entries.first)
         XCTAssertEqual(entry.id, "zhwiki")
         XCTAssertEqual(entry.origin, "official")
-        XCTAssertEqual(entry.version, "0.3.1")
+        XCTAssertEqual(entry.version, "1")
         XCTAssertTrue(entry.enabled)
-
-        // 再拉取：显示已安装。
+        try DictionaryStore.setEnabled(false, id: entry.id)
+        try serve(update)
+        let disabled = try DictionaryStore.list(learningAvailable: true).entries
+        let available = try await DictionaryCatalog.fetch(
+            transport: transport, config: config, updateKeys: trusted, installed: disabled)
+        let next = try XCTUnwrap(available.entries.first)
+        XCTAssertTrue(next.installed)
+        XCTAssertTrue(next.updateAvailable)
+        XCTAssertEqual(next.version, "2")
+        try await DictionaryCatalog.install(next, catalogVersion: available.catalogVersion,
+                                            transport: transport) { _ in }
         let installed = try DictionaryStore.list(learningAvailable: true).entries
-        let snapshot2 = try await DictionaryCatalog.fetch(
+        let updated = try XCTUnwrap(installed.first)
+        XCTAssertEqual(updated.version, "2")
+        XCTAssertFalse(updated.enabled)
+        let current = try await DictionaryCatalog.fetch(
             transport: transport, config: config, updateKeys: trusted, installed: installed)
-        XCTAssertTrue(snapshot2.entries[0].installed)
-        XCTAssertFalse(snapshot2.entries[0].updateAvailable)
+        let currentEntry = try XCTUnwrap(current.entries.first)
+        XCTAssertTrue(currentEntry.installed)
+        XCTAssertFalse(currentEntry.updateAvailable)
+        try serve(original)
+        let rollback = await fetchError(transport, updateKeys: trusted, installed: installed)
+        guard case DictionaryCatalog.CatalogError.contract(let message) = try XCTUnwrap(rollback) else {
+            return XCTFail("期望拒绝签名有效的旧清单")
+        }
+        XCTAssertTrue(message.contains("回滚"))
     }
 
     func testInstallChecksumMismatchRejected() async throws {

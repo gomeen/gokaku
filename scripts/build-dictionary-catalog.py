@@ -14,6 +14,7 @@
    转换实现）产出 libime 二进制 .dict 与转换报告（entryCount／dropped）；
 3. 计算 .dict 的 SHA-256 与大小，生成 catalog.json（schema 1、kind
    "gogaku-dictionary-catalog"、keyId、单调递增 catalogVersion）；
+   每本使用数字修订，零条目来源只保留报告与署名；
 4. 用 Ed25519 私钥签名（复用 scripts/update-signing.swift 与发布环境密钥），
    产出 catalog.json.sig；
 5. `--verify-only` 重跑转换并逐字节比对（两次构建产出必须一致）。
@@ -121,6 +122,13 @@ def main() -> None:
         fail('catalogVersion 必须为正整数')
 
     sources = json.loads(SOURCES.read_text(encoding='utf-8'))
+    upstreams = sources['upstreams']
+    for upstream in upstreams:
+        revision = upstream.get('revision')
+        if type(revision) is not int or not 1 <= revision <= 2**63 - 1:
+            fail(f'{upstream["id"]} revision 必须为正整数（不超过 int64 上限）')
+        if not isinstance(upstream.get('upstreamRevision'), str) or not upstream['upstreamRevision'].strip():
+            fail(f'{upstream["id"]} 缺少 upstreamRevision')
     cache = Path(args.cache)
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -129,8 +137,9 @@ def main() -> None:
         fail(f'出厂词典缺失：{system_dict}（转换去重与读音推断的基准）')
 
     entries = []
-    reports = {}
-    for upstream in sources.get('upstreams', []):
+    conversions = []
+    tag = f'catalog-{args.catalog_version}'
+    for upstream in upstreams:
         name = upstream['sourceFileName']
         source = cache / name
         expected = upstream.get('sha256')
@@ -143,49 +152,51 @@ def main() -> None:
         if args.verify_only:
             with tempfile.TemporaryDirectory() as temporary:
                 trial = Path(temporary) / target.name
-                convert(source, system_dict, Path(temporary), trial, upstream['name'])
-                if not target.is_file() or sha256_of(target) != sha256_of(trial):
-                    fail(f'{target.name} 两次构建不一致')
-                print(f'✔ {target.name} 两次构建字节一致')
+                report = convert(source, system_dict, Path(temporary), trial, upstream['name'])
+                if report['entryCount'] == 0:
+                    if target.exists():
+                        fail(f'{target.name} 是空词库，不应作为资产存在')
+                    print(f'✔ {target.name} 再次转换为零条目，未上架')
+                else:
+                    if not target.is_file() or sha256_of(target) != sha256_of(trial):
+                        fail(f'{target.name} 两次构建不一致')
+                    print(f'✔ {target.name} 两次构建字节一致')
             continue
         report = convert(source, system_dict, out / 'work', target, upstream['name'])
-        if not report.get('entryCount'):
-            print(f'注意：{name} 的条目全部被过滤，详见转换报告。', file=sys.stderr)
-        reports[upstream['id']] = report
+        count = report['entryCount']
+        conversions.append((upstream, report))
+        if count == 0:
+            target.unlink()
+            print(f'注意：{name} 的条目全部被过滤，不上架，详见转换报告。', file=sys.stderr)
+            continue
         entries.append({
             'id': upstream['id'],
             'name': upstream['name'],
             'category': upstream['category'],
             'description': upstream['description'],
-            'version': upstream['version'],
+            'version': str(upstream['revision']),
             'license': upstream['license'],
             'attribution': upstream['attribution'],
             'sourceUrl': upstream['sourceUrl'],
-            'downloadUrl': '',   # 占位：发布后按 Release 资产地址回填
+            'downloadUrl': (f'https://github.com/gomeen/gogaku-dicts/releases/'
+                            f'download/{tag}/{target.name}'),
             'size': target.stat().st_size,
             'sha256': sha256_of(target),
-            'entryCount': report.get('entryCount', 0),
-            '_dropped': report.get('dropped', {}),
-            '_sourceFileName': name,
+            'entryCount': count,
         })
-        print(f'✔ {upstream["id"]}：{report.get("entryCount", 0)} 条'
-              f'（丢弃 {sum(report.get("dropped", {}).values())}）')
+        print(f'✔ {upstream["id"]}：{count} 条（丢弃 {sum(report["dropped"].values())}）')
 
     if args.verify_only:
         return
-
-    tag = f'catalog-{args.catalog_version}'
-    for entry in entries:
-        entry['downloadUrl'] = (f'https://github.com/gomeen/gogaku-dicts/releases/'
-                                f'download/{tag}/{entry["id"]}.dict')
+    if not entries:
+        fail('所有词库均为空，无法生成可安装清单')
 
     catalog = {
         'kind': 'gogaku-dictionary-catalog',
         'schemaVersion': 1,
         'keyId': args.key_id,
         'catalogVersion': args.catalog_version,
-        'dictionaries': [{k: v for k, v in entry.items() if not k.startswith('_')}
-                         for entry in entries],
+        'dictionaries': entries,
     }
     manifest = out / 'catalog.json'
     manifest.write_text(json.dumps(catalog, ensure_ascii=False, separators=(',', ':')),
@@ -197,19 +208,22 @@ def main() -> None:
 
     # 发布记录：每本的丢弃计数（合同要求随 Release 正文发布）。
     notes = out / 'release-notes.md'
-    lines = [f'# gogaku-dicts catalog-{args.catalog_version}', '',
-             '首批精选词库；许可与署名见清单各条目（CC BY-SA 4.0／MIT）。', '',
-             '| 词库 | 版本 | 条目 | 丢弃（invalidLine/middleDot/tooLong/duplicateFactory/duplicateEntry/nonHan/ambiguousReading） |',
-             '| --- | --- | --- | --- |']
-    for entry, raw in zip(entries, entries):
-        dropped = raw.get('_dropped', {})
+    lines = [f'# gogaku-dicts {tag}', '',
+             f'本轮转换 {len(conversions)} 个来源，上架 {len(entries)} 本非空词库。', '',
+             '| 词库 | 修订 | 上游版本 | 条目 | 状态 | 许可与署名 | 丢弃（invalidLine/middleDot/tooLong/duplicateFactory/duplicateEntry/nonHan/ambiguousReading） |',
+             '| --- | --- | --- | --- | --- | --- | --- |']
+    for upstream, report in conversions:
+        dropped = report['dropped']
         counts = '/'.join(str(dropped.get(key, 0)) for key in
                           ('invalidLine', 'middleDot', 'tooLong', 'duplicateFactory',
                            'duplicateEntry', 'nonHan', 'ambiguousReading'))
-        lines.append(f'| {entry["name"]}（{entry["id"]}） | {entry["version"]} | '
-                     f'{entry["entryCount"]} | {counts} |')
+        count = report['entryCount']
+        status = '上架' if count else '空库，不上架'
+        lines.append(f'| {upstream["name"]}（{upstream["id"]}） | {upstream["revision"]} | '
+                     f'`{upstream["upstreamRevision"]}` | {count} | {status} | '
+                     f'{upstream["license"]}：{upstream["attribution"]} | {counts} |')
     lines += ['',
-              'zhwiki 与网络流行语源自维基百科贡献者与 [fcitx5-pinyin-zhwiki](https://github.com/felixonmars/fcitx5-pinyin-zhwiki/releases/tag/0.3.1)。Gogaku 过滤并去重，全部权重归零，转换产物以 CC BY-SA 4.0 共享。', '',
+              'zhwiki 与网络流行语源自维基百科贡献者与 [fcitx5-pinyin-zhwiki](https://github.com/felixonmars/fcitx5-pinyin-zhwiki)。Gogaku 过滤并去重，全部权重归零，转换产物以 CC BY-SA 4.0 共享。', '',
               '韩世依、张钰晖、马云山、涂存超、郭志芃、刘知远、孙茂松。THUOCL：清华大学开放中文词库。2016。THUOCL 词库以 MIT 许可分发。', '',
               '完整许可随 Release 附件提供。']
     notes.write_text('\n'.join(lines) + '\n', encoding='utf-8')

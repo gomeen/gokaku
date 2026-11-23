@@ -27,6 +27,71 @@ def load(name, file):
 
 verify = load('verification_entry', 'verify.py')
 build = load('verification_build', 'build.py')
+catalog_build = load('dictionary_catalog_build', 'build-dictionary-catalog.py')
+catalog_publish = load('dictionary_catalog_publish', 'publish-dictionaries.py')
+
+
+class CatalogReleaseTests(unittest.TestCase):
+    def test_build_versions_and_keeps_empty_source_in_notes_only(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifest = root / 'sources.json'
+            source = root / 'fixture.txt'
+            source.write_bytes(b'fixture')
+            out = root / 'out'
+            upstreams = [dict(id=name, name=name, category='test', description='fixture',
+                              revision=revision, upstreamRevision=commit, license='MIT',
+                              attribution='fixture author', sourceUrl='https://example.org',
+                              sourceFileName=source.name, sha256=hashlib.sha256(b'fixture').hexdigest())
+                         for name, revision, commit in [('nonempty', 2, 'a' * 40), ('empty', 1, 'f' * 40)]]
+
+            def fake_convert(source, system_dict, work, output, name):
+                report = {'entryCount': int(name != 'empty'),
+                          'dropped': {'duplicateFactory': 8515, 'ambiguousReading': 4}}
+                output.write_bytes(b'fixture dictionary')
+                work.mkdir(exist_ok=True)
+                (work / f'{name}-report.json').write_text(json.dumps(report))
+                return report
+
+            def run(*extra):
+                manifest.write_text(json.dumps({'systemDict': {'path': str(source)}, 'upstreams': upstreams}))
+                with mock.patch.object(sys, 'argv', ['build-dictionary-catalog.py', '--catalog-version', '1',
+                        '--cache', tmp, '--out', str(out), '--unsigned', *extra]):
+                    catalog_build.main()
+
+            with mock.patch.object(catalog_build, 'SOURCES', manifest), \
+                    mock.patch.object(catalog_build, 'convert', side_effect=fake_convert), \
+                    contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                run()
+                run('--verify-only')
+                for invalid in ('2', 'f' * 40, 0, -1, True, 2**63):
+                    with self.subTest(revision=invalid), self.assertRaises(SystemExit):
+                        upstreams[0]['revision'] = invalid
+                        run()
+            catalog = catalog_publish.validate_catalog(out / 'catalog.json')
+            self.assertEqual([(e['id'], e['version']) for e in catalog['dictionaries']], [('nonempty', '2')])
+            self.assertFalse((out / 'empty.dict').exists())
+            self.assertTrue((out / 'work/empty-report.json').is_file())
+            notes = (out / 'release-notes.md').read_text()
+            self.assertIn(f'`{"f" * 40}` | 0 | 空库，不上架 | MIT：fixture author | 0/0/0/8515/0/0/4', notes)
+
+    def test_publish_rejects_invalid_revisions_and_empty_entries(self):
+        entry = dict(id='fixture', version='1', entryCount=1, size=123, sha256='a' * 64,
+                     downloadUrl='https://github.com/gomeen/gogaku-dicts/releases/download/catalog-1/fixture.dict')
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stderr(io.StringIO()):
+            path = Path(tmp) / 'catalog.json'
+
+            def validate(changes):
+                path.write_text(json.dumps(dict(kind='gogaku-dictionary-catalog', schemaVersion=1,
+                                                catalogVersion=1, dictionaries=[{**entry, **changes}])))
+                return catalog_publish.validate_catalog(path)
+
+            self.assertEqual(validate({})['dictionaries'], [entry])
+            for field, values in [('version', ('a' * 40, '0.3.1', '0', '-1', '01', 2, '２', str(2**63))),
+                                  ('entryCount', (0, -1, '1', True, None))]:
+                for value in values:
+                    with self.subTest(field=field, value=value), self.assertRaises(SystemExit):
+                        validate({field: value})
 
 
 class VerificationTests(unittest.TestCase):
@@ -89,6 +154,11 @@ class VerificationTests(unittest.TestCase):
         status, detail, _ = self.run_asan(3)
         self.assertEqual(status, verify.FAIL)
         self.assertIn('分片 1', detail)
+
+    def test_gui_hint_uses_profile_matrix(self):
+        self.assertIn('8 个功能页 × 1000×620 × 浅／深外观（16 项）', verify.gui_matrix_summary('host'))
+        self.assertIn('8 个功能页 × 1000×620／1000×520 × 浅／深外观（32 项）',
+                      verify.gui_matrix_summary('host-full'))
 
     def test_gui_short_profile_needs_default_size_only(self):
         report, expected = self.gui_fixture()

@@ -6,7 +6,7 @@
   python3 scripts/publish-dictionaries.py --dry-run \
       --catalog dist/dict-catalog/catalog.json --dir dist/dict-catalog
 
-  # 真实发布：先建 Draft（上传 13 本 .dict ＋ catalog.json ＋ .sig ＋ 发布说明），
+  # 真实发布：先建 Draft（上传非空 .dict ＋ catalog.json ＋ .sig 和许可附件，发布说明写入正文），
   # 人工审阅后在 GitHub 界面发布（stable 只接受正式 Release 的口径同样适用）：
   GITHUB_TOKEN=… python3 scripts/publish-dictionaries.py \
       --catalog dist/dict-catalog/catalog.json --dir dist/dict-catalog
@@ -110,6 +110,13 @@ def validate_catalog(catalog_path: Path) -> dict:
         if not re.fullmatch(r'[a-z0-9-]{1,64}', entry_id) or entry_id in ids:
             fail(f'id 非法或重复：{entry_id}')
         ids.add(entry_id)
+        version = entry.get('version')
+        if (not isinstance(version, str) or not re.fullmatch(r'[1-9][0-9]{0,18}', version)
+                or int(version) > 2**63 - 1):
+            fail(f'{entry_id} version 必须为正整数字符串（不超过 int64 上限）')
+        count = entry.get('entryCount')
+        if type(count) is not int or count <= 0:
+            fail(f'{entry_id} entryCount 必须为正整数，不能发布空库')
         url = entry.get('downloadUrl', '')
         prefix = f'https://github.com/{DEFAULT_REPO}/releases/download/'
         if not url.startswith(prefix) or '..' in url:
