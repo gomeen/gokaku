@@ -69,7 +69,7 @@ def compile_arch(args, arch):
     sources += [(tsf / 'src' / f'{name}.cpp', obj / f'{name}.o') for name in service]
     if arch == 'x64':
         sources += [(windows / f'{name}.cpp', obj / f'{name}.o')
-                    for name in ('agent', 'services', 'update', 'settings')]
+                    for name in ('agent', 'services', 'update', 'dictionaries', 'settings')]
 
     def compile_one(pair):
         source, target = pair
