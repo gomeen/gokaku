@@ -30,6 +30,7 @@
 
 #include <libime/core/userlanguagemodel.h>
 #include <libime/pinyin/pinyincontext.h>
+#include <libime/pinyin/pinyindecoder.h>
 #include <libime/pinyin/pinyindictionary.h>
 #include <libime/pinyin/pinyinencoder.h>
 #include <libime/pinyin/pinyinime.h>
@@ -497,56 +498,27 @@ void rebuild_custom_indexes(GcNormalSession &s) {
 // 合并结果与状态绑定：任何影响候选的变更都必须让它失效。
 void invalidate_merge(GcNormalSession &s) { s.mergedValid = false; }
 
-// 扩展词判定：候选词＋它的实际音节序列恰好出现在某本已挂载扩展词库的 trie 里。
-// 音节从候选的 lattice path 取（兼容全拼与双拼）；多词条句子不判定，仍按
-// 「出厂词」处理。出厂数据（槽 0）与用户词典（槽 1）不在遍历范围。
-bool is_extended_dict_word(GcNormalSession &s, size_t libimeIndex, const std::string &word) {
-    if (word.empty()) return false;
-    auto &c = *s.context;
-    const auto &chinese = c.candidatesToCursor();
-    if (libimeIndex >= chinese.size()) return false;
-    const auto &sentence = chinese[libimeIndex].sentence();
-    if (sentence.size() != 1) return false;
-    const auto &path = sentence.front()->path();
-    if (path.size() < 2) return false;
-    // 音节边界：path 相邻节点对；节点下标相对未消费部分，加已暂存长度还原。
-    const std::string raw = c.userInput();
-    const size_t stagedLen = c.selectedLength();
-    std::string span;
-    for (size_t k = 0; k + 1 < path.size(); ++k) {
-        const size_t begin = path[k]->index();
-        const size_t end = path[k + 1]->index();
-        if (begin >= end || stagedLen + end > raw.size()) return false;
-        if (!span.empty()) span.push_back('\'');
-        span += raw.substr(stagedLen + begin, end - begin);
-    }
-    // 双拼方案把原码转成全拼；全拼模式原样。编码可能拒绝非法音节（模糊
-    // 随机输入），一律按非扩展词处理。
-    std::string fullPinyin = span;
-    try {
-        if (s.shuangpin != nullptr) {
-            fullPinyin = libime::PinyinEncoder::shuangpinToPinyin(span, *s.shuangpin);
-        }
-        auto key = libime::PinyinEncoder::encodeFullPinyinWithFlags(
-            fullPinyin, libime::PinyinFuzzyFlag::VE_UE);
-        key.push_back('!');
-        key.insert(key.end(), word.begin(), word.end());
-        for (size_t i = 0; i < s.dictSlots.size(); ++i) {
-            if (s.dictSlots[i].disabled) continue;
-            const auto *trie = s.ime->dict()->trie(2 + i);
-            if (trie == nullptr) continue;
-            const float value = trie->exactMatchSearch(key.data(), key.size());
-            if (!std::isnan(value)) return true;
-        }
-    } catch (...) {
-        return false;
+// 用 libime 已选中的读音查挂载槽，避免按原键重新推断模糊音或双拼。
+bool is_mounted_extension(const GcNormalSession &s, const std::string &word,
+                          const std::string &encodedPinyin) {
+    if (s.dictSlots.empty() || word.empty() || encodedPinyin.empty()) return false;
+    std::string key = encodedPinyin + '!' + word;
+    for (size_t i = 0; i < s.dictSlots.size(); ++i) {
+        if (s.dictSlots[i].disabled) continue;
+        const auto *trie = s.ime->dict()->trie(2 + i);
+        if (trie && !std::isnan(trie->exactMatchSearch(key.data(), key.size()))) return true;
     }
     return false;
 }
 
-// 扩展词判定：候选词＋读音恰好出现在某本已挂载扩展词库的 trie 里。
-// 出厂词典（槽 0）与用户词典（槽 1）不在遍历范围；多词条句子不会恰好
-// 等于单词条键，仍按「出厂词」处理。
+bool is_extended_dict_word(GcNormalSession &s, size_t libimeIndex, const std::string &word) {
+    if (s.dictSlots.empty()) return false;
+    const auto &candidates = s.context->candidatesToCursor();
+    if (libimeIndex >= candidates.size()) return false;
+    const auto &sentence = candidates[libimeIndex].sentence();
+    return sentence.size() == 1 && is_mounted_extension(
+        s, word, sentence.front()->as<libime::PinyinLatticeNode>().encodedPinyin());
+}
 void sync_custom_dict(GcNormalSession &s) {
     std::vector<CustomEntry> want;
     for (const auto &w : s.customWords) {
@@ -956,9 +928,13 @@ void capture_pending_learn(GcNormalSession &s) {
         if (!pinyin.empty()) pinyin += '\'';
         pinyin += p;
     }
+    const bool alreadyInExtension = sentence.size() == 1 &&
+        is_mounted_extension(s, sentence.front().first, sentence.front().second);
     s.pendingContext = c.contextWordsWithPinyin();
     s.pendingSentence = std::move(sentence);
-    if (scalarCount >= 2 && !pinyin.empty()) {
+    // 扩展词往往在 libime 里只有一个节点。明确确认上屏后仍要写入用户词典，
+    // 否则删除扩展词库时，调频历史无法单独召回它。
+    if ((scalarCount >= 2 || alreadyInExtension) && !pinyin.empty()) {
         s.pendingJoined = joined;
         s.pendingPinyin = pinyin;
     }
@@ -1669,7 +1645,9 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                 const MaterializedCandidate &m = materialize_candidate(*s, ms, hi);
                 // 展示文本包含暂存前缀；词典和 learnedWords 的键只含裸词。
                 const std::string word = m.text.substr(ms.staged.size());
-                if (m.deletable) {
+                const bool extensionWord = (m.kind == GC_CAND_CHINESE || m.kind == GC_CAND_LEARNED) &&
+                    is_extended_dict_word(*s, ms.entries[hi].libimeIndex, word);
+                if (m.deletable && !extensionWord) {
                     s->ime->dict()->removeWord(kUserDictIdx, m.pinyin, word);
                     s->learnedWords.erase(word);
                     s->learnedDirty = true;
@@ -1683,8 +1661,7 @@ extern "C" int gc_normal_handle(GcNormalSession *s, const GcKeyEvent *event, GcS
                     status = "自定义词请在设置中删除";
                 } else if (m.kind == GC_CAND_ENGLISH) {
                     status = "英文候选不参与删词";
-                } else if (m.kind == GC_CAND_CHINESE &&
-                           is_extended_dict_word(*s, ms.entries[hi].libimeIndex, word)) {
+                } else if (extensionWord) {
                     status = "扩展词请到设置停用或删除词库";
                 } else {
                     status = "出厂词不能删除";

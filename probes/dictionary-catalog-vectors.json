@@ -1,0 +1,30 @@
+{
+  "keyId": "fixture-only",
+  "publicKey": "QjX+PzWisqlhTQ5KHCPHnts+QxhKaBPrHVu1HkVuW2o=",
+  "vectors": [
+    {
+      "name": "valid",
+      "manifest": "{\"kind\":\"gogaku-dictionary-catalog\",\"schemaVersion\":1,\"keyId\":\"fixture-only\",\"catalogVersion\":1,\"dictionaries\":[{\"id\":\"fixture\",\"name\":\"fixture\",\"category\":\"test\",\"description\":\"synthetic\",\"version\":\"1\",\"license\":\"MIT\",\"attribution\":\"Gogaku\",\"sourceUrl\":\"https://example.org\",\"downloadUrl\":\"https://github.com/gomeen/gogaku-dicts/releases/download/catalog-1/fixture.dict\",\"size\":32,\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"entryCount\":1}]}",
+      "signature": "SgITx/zz7iJL9yMQBJten1c14e46AZ2pzQ6X9TiXtenm6zF9exg3rUomEktprIYDII3AJOd3R9y0LvNO+3P/AA==",
+      "result": "accepted"
+    },
+    {
+      "name": "tampered",
+      "manifest": "{\"kind\":\"gogaku-dictionary-catalog\",\"schemaVersion\":1,\"keyId\":\"fixture-only\",\"catalogVersion\":2,\"dictionaries\":[{\"id\":\"fixture\",\"name\":\"fixture\",\"category\":\"test\",\"description\":\"synthetic\",\"version\":\"1\",\"license\":\"MIT\",\"attribution\":\"Gogaku\",\"sourceUrl\":\"https://example.org\",\"downloadUrl\":\"https://github.com/gomeen/gogaku-dicts/releases/download/catalog-1/fixture.dict\",\"size\":32,\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"entryCount\":1}]}",
+      "signature": "SgITx/zz7iJL9yMQBJten1c14e46AZ2pzQ6X9TiXtenm6zF9exg3rUomEktprIYDII3AJOd3R9y0LvNO+3P/AA==",
+      "result": "signature"
+    },
+    {
+      "name": "unknown-key",
+      "manifest": "{\"kind\":\"gogaku-dictionary-catalog\",\"schemaVersion\":1,\"keyId\":\"untrusted\",\"catalogVersion\":1,\"dictionaries\":[{\"id\":\"fixture\",\"name\":\"fixture\",\"category\":\"test\",\"description\":\"synthetic\",\"version\":\"1\",\"license\":\"MIT\",\"attribution\":\"Gogaku\",\"sourceUrl\":\"https://example.org\",\"downloadUrl\":\"https://github.com/gomeen/gogaku-dicts/releases/download/catalog-1/fixture.dict\",\"size\":32,\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"entryCount\":1}]}",
+      "signature": "w1PcJkVtGshEA0Hc4ZLYpqGXcpGbtoIrMBT0oZAPyDXabq1H73k7BCRylaj+Y8U2IoyiXS5+66fj80r8BpcQBw==",
+      "result": "signature"
+    },
+    {
+      "name": "wrong-kind",
+      "manifest": "{\"kind\":\"gogaku-update-manifest\",\"schemaVersion\":1,\"keyId\":\"fixture-only\",\"catalogVersion\":1,\"dictionaries\":[{\"id\":\"fixture\",\"name\":\"fixture\",\"category\":\"test\",\"description\":\"synthetic\",\"version\":\"1\",\"license\":\"MIT\",\"attribution\":\"Gogaku\",\"sourceUrl\":\"https://example.org\",\"downloadUrl\":\"https://github.com/gomeen/gogaku-dicts/releases/download/catalog-1/fixture.dict\",\"size\":32,\"sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"entryCount\":1}]}",
+      "signature": "EUFUNec98deUCx4w/SJ6VtNJzW5eDnDeJyyMSlD/Hc4XyLtfEfgtTj1298wesjnlUB9apWnwatDgjBT4ANe4Ag==",
+      "result": "contract"
+    }
+  ]
+}

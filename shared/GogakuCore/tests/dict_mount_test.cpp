@@ -6,6 +6,7 @@
 
 #include "../../third_party/json.hpp"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <filesystem>
@@ -186,7 +187,7 @@ std::vector<std::string> mounted_learning(const Case &c) {
 
 // 依次输入文本，返回最后一个快照的候选文本列表；结束后 Esc 清空组合，
 // 让后续的 dicts_apply 不落在组合中（组合中返回 3 是单独的场景）。
-std::vector<std::string> type_candidates(GcNormalSession *s, const std::string &keys) {
+std::vector<std::string> type_candidates(GcNormalSession *s, const std::string &keys, bool cancel = true) {
     std::vector<std::string> texts;
     for (char ch : keys) {
         char buf[2] = {ch, '\0'};
@@ -199,11 +200,13 @@ std::vector<std::string> type_candidates(GcNormalSession *s, const std::string &
         for (size_t i = 0; i < snap->count; ++i) texts.emplace_back(snap->candidates[i].text);
         gc_snapshot_free(snap);
     }
-    GcKeyEvent esc{};
-    esc.kind = GC_EV_ESC;
-    GcSnapshot *snap = nullptr;
-    gc_normal_handle(s, &esc, &snap);
-    gc_snapshot_free(snap);
+    if (cancel) {
+        GcKeyEvent esc{};
+        esc.kind = GC_EV_ESC;
+        GcSnapshot *snap = nullptr;
+        gc_normal_handle(s, &esc, &snap);
+        gc_snapshot_free(snap);
+    }
     return texts;
 }
 
@@ -477,6 +480,59 @@ int main() {
     gc_learning_session_destroy(c.learning);
 #endif
     gc_normal_session_destroy(c.normal);
+
+    // libime 把词库中的完整词作为单节点。实际提交并确认后，它也必须能独立重载。
+    const std::string word = "验收夹具词条";
+    const std::string keys = "yanshoujiajucitiao";
+    const auto extension = import_dict(c, "frequency.txt", word + " yan'shou'jia'ju'ci'tiao\n");
+    const std::string user = c.dir + "/learned-user";
+    GcNormalConfig cfg{};
+    cfg.dict_path = c.dictPath.c_str();
+    cfg.model_path = c.modelPath.c_str();
+    cfg.user_dir = user.c_str();
+    cfg.scheme = GC_SCHEME_FULLPINYIN;
+    cfg.freq_enabled = 1;
+    char error[512]{};
+    c.normal = nullptr;
+    for (int run = 0; run < 3; ++run) {
+        if (gc_normal_session_create(&cfg, &c.normal, error, sizeof(error)) != 0) {
+            check(false, "创建调频回归会话", error);
+            break;
+        }
+        auto key = [&](int32_t kind, const char *text = nullptr) {
+            GcKeyEvent event{};
+            event.kind = kind;
+            event.text = text;
+            GcSnapshot *snap = nullptr;
+            check(gc_normal_handle(c.normal, &event, &snap) == 0 && snap, "调频回归键盘事件", "");
+            return snap;
+        };
+        if (run == 0) {
+            check(apply_one(c, extension) == 0, "挂载调频夹具", extension);
+            const auto items = type_candidates(c.normal, keys, false);
+            const auto found = std::find(items.begin(), items.end(), word);
+            check(found != items.end(), "可从扩展词库选词", word);
+            if (found != items.end()) {
+                const char digit[] = {static_cast<char>('1' + (found - items.begin())), '\0'};
+                auto *snap = key(GC_EV_TEXT, digit);
+                check(snap && word == snap->commit, "扩展词完整上屏", word);
+                gc_snapshot_free(snap);
+                gc_normal_flush(c.normal);
+                check(read_file(user + "/learned.txt").empty(), "未确认上屏不学习", word);
+                gc_snapshot_free(key(GC_EV_COMMIT_CONFIRMED));
+                check(gc_normal_flush(c.normal) == 0, "调频落盘", word);
+                check(read_file(user + "/learned.txt").find(word + "\t") != std::string::npos,
+                      "确认上屏后写入扩展词", word);
+            }
+            check(gc_dict_remove(c.dictsDir.c_str(), extension.c_str(), error, sizeof(error)) == 0,
+                  "删除扩展词库", error);
+        } else {
+            check(candidates_contain(type_candidates(c.normal, keys), word) == (run == 1),
+                  run == 1 ? "删除词库后召回已学词" : "清空调频后不再召回", word);
+            if (run == 1) check(gc_normal_clear_user_data(c.normal) == 0, "清空调频", word);
+        }
+        gc_normal_session_destroy(c.normal);
+    }
 
     if (failures != 0) {
         std::fprintf(stderr, "dict_mount: %d 项失败\n", failures);

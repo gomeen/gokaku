@@ -237,11 +237,24 @@ std::string hex(const std::string &bytes) {
 std::string sha256(const std::string &bytes) { return hex(hashBytes(bytes,nullptr)); }
 std::string hmac256(const std::string &key, const std::string &bytes) { return hashBytes(bytes,&key); }
 std::string base64Decode(const std::string &value) {
+    std::string compact;
+    compact.reserve(value.size());
+    for (char c : value) {
+        if (c != ' ' && c != '\t' && c != '\r' && c != '\n') compact.push_back(c);
+    }
+    if (compact.empty()) return {};
     DWORD size = 0;
-    if (!CryptStringToBinaryA(value.c_str(), (DWORD)value.size(), CRYPT_STRING_BASE64 | CRYPT_STRING_STRICT, nullptr, &size, nullptr, nullptr)) ioError("非法 Base64");
+    const auto length = static_cast<DWORD>(compact.size());
+    if (!CryptStringToBinaryA(compact.c_str(), length, CRYPT_STRING_BASE64, nullptr, &size, nullptr, nullptr))
+        ioError("非法 Base64");
     std::string out(size, '\0');
-    if (!CryptStringToBinaryA(value.c_str(), (DWORD)value.size(), CRYPT_STRING_BASE64 | CRYPT_STRING_STRICT, (BYTE *)out.data(), &size, nullptr, nullptr)) ioError("非法 Base64");
-    out.resize(size); return out;
+    if (!CryptStringToBinaryA(compact.c_str(), length, CRYPT_STRING_BASE64,
+                             reinterpret_cast<BYTE *>(out.data()), &size, nullptr, nullptr))
+        ioError("非法 Base64");
+    out.resize(size);
+    // 重新编码检查填充和末尾位，避免依赖各版本 CryptoAPI 的 STRICT 实现。
+    if (base64Encode(out) != compact) ioError("非法 Base64");
+    return out;
 }
 std::string base64Encode(const std::string &value) {
     DWORD size = 0;
