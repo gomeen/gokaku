@@ -373,24 +373,26 @@ bool rename_file(const std::string &from, const std::string &to, std::error_code
     return !ec;
 }
 
-// 列出目录下 *.json（不含 .corrupt）；目录不存在返回空。
-std::vector<std::string> list_meta_files(const std::string &dir) {
+// 枚举元数据及已有备份；目录不存在返回空。
+std::vector<std::string> list_meta_files(const std::string &dir,
+                                         std::vector<std::string> *backups = nullptr) {
     std::vector<std::string> names;
+    std::error_code ec;
 #ifdef _WIN32
-    std::error_code ec;
-    for (const auto &entry : std::filesystem::directory_iterator(gogaku::windows_io::file_path(dir), ec)) {
-        if (ec) break;
-        const auto name = entry.path().filename().string();
-        if (name.size() > 5 && name.compare(name.size() - 5, 5, ".json") == 0) names.push_back(name);
-    }
+    const auto path = gogaku::windows_io::file_path(dir);
 #else
-    std::error_code ec;
-    for (const auto &entry : std::filesystem::directory_iterator(std::filesystem::path(dir), ec)) {
-        if (ec) break;
-        const std::string name = entry.path().filename().string();
-        if (name.size() > 5 && name.compare(name.size() - 5, 5, ".json") == 0) names.push_back(name);
-    }
+    const auto path = std::filesystem::path(dir);
 #endif
+    for (const auto &entry : std::filesystem::directory_iterator(path, ec)) {
+        std::error_code fileError;
+        if (!entry.is_regular_file(fileError)) continue;
+        const auto utf8 = entry.path().filename().u8string();
+        const std::string name(utf8.begin(), utf8.end());
+        if (name.size() > 5 && name.ends_with(".json")) names.push_back(name);
+        if (backups && name.size() > 13 && name.ends_with(".json.corrupt")) {
+            backups->push_back(name.substr(0, name.size() - 8));
+        }
+    }
     std::sort(names.begin(), names.end());
     return names;
 }
@@ -961,7 +963,35 @@ bool read_meta(const std::string &dir, const std::string &name, Json &meta) {
     std::string bytes;
     if (!read_file_bytes(dir + "/" + name, bytes, 4 * 1024 * 1024, nullptr)) return false;
     meta = Json::parse(bytes, nullptr, false);
-    return !meta.is_discarded() && meta.is_object();
+    if (!meta.is_object()) return false;
+    const auto schema = meta.find(kDictSchemaVersion);
+    const auto id = meta.find("id");
+    const auto size = meta.find("sizeBytes");
+    const auto added = meta.find("addedAt");
+    const auto enabled = meta.find("enabled");
+    const auto content = meta.find("contentId");
+    auto nonnegativeInteger = [](const Json &value, uint64_t upper) {
+        return value.is_number_unsigned() && value.get<uint64_t>() <= upper;
+    };
+    if (schema == meta.end() || !schema->is_number_integer() || *schema != 1 ||
+        id == meta.end() || !id->is_string() || !valid_dict_id(id->get_ref<const std::string &>()) ||
+        id->get_ref<const std::string &>() + ".json" != name ||
+        size == meta.end() || !nonnegativeInteger(*size, kMaxInputBytes) ||
+        added == meta.end() || !nonnegativeInteger(*added, INT64_MAX) ||
+        enabled == meta.end() || !enabled->is_boolean() ||
+        content == meta.end() || !content->is_string()) return false;
+    const auto &checksum = content->get_ref<const std::string &>();
+    if (checksum.size() != 16 || checksum.find_first_not_of("0123456789abcdef") != std::string::npos)
+        return false;
+    // 两端设置与版本比较直接消费的字段也要先校验。
+    for (const char *field : {"name", "origin", "sourceFormat", "sourceFileName", "version"}) {
+        const auto value = meta.find(field);
+        if (value == meta.end() || !value->is_string()) return false;
+    }
+    const auto count = meta.find("entryCount");
+    const auto version = meta.find("catalogVersion");
+    return count != meta.end() && nonnegativeInteger(*count, kMaxEntries) &&
+           (version == meta.end() || (nonnegativeInteger(*version, INT64_MAX) && *version != 0));
 }
 
 Json make_meta(const std::string &id, const std::string &name, const char *origin,
@@ -1150,18 +1180,19 @@ extern "C" int gc_dict_list(const char *dir, uint32_t flags, char **json) {
             bool enabled;
         };
         std::vector<Entry> list;
-        for (const std::string &name : list_meta_files(dir)) {
+        std::vector<std::string> backups;
+        const auto names = list_meta_files(dir, &backups);
+        for (const std::string &name : names) {
             Json meta;
-            std::string bytes;
-            std::string why;
-            if (!read_file_bytes(dir + std::string("/") + name, bytes, 4 * 1024 * 1024, &why) ||
-                (meta = Json::parse(bytes, nullptr, false)).is_discarded() || !meta.is_object() ||
-                meta.value("id", std::string()).empty()) {
-                // 损坏元数据：备份 .corrupt 并报告（与自定义词语同规范）。
-                std::error_code ec;
-                (void)rename_file(dir + std::string("/") + name, dir + std::string("/") + name + ".corrupt", ec);
-                corrupt.push_back(Json{{"file", name}, {"reason", "元数据损坏，已备份为 .corrupt"}});
-                continue;
+            if (!read_meta(dir, name, meta)) {
+                // 和写入者串行，锁内确认仍然损坏再隔离，避免移动刚写入的有效记录。
+                DirectoryWriteLock lock(dir);
+                if (!read_meta(dir, name, meta)) {
+                    const std::string path = dir + std::string("/") + name;
+                    std::error_code ec;
+                    if (rename_file(path, path + ".corrupt", ec)) backups.push_back(name);
+                    continue;
+                }
             }
             Entry e;
             e.meta = meta;
@@ -1187,6 +1218,11 @@ extern "C" int gc_dict_list(const char *dir, uint32_t flags, char **json) {
             item["learning"] = learningAvailable && fits;
             item["estimatedBytes"] = e.size * kEstimateFactor;
             dicts.push_back(std::move(item));
+        }
+        std::sort(backups.begin(), backups.end());
+        backups.erase(std::unique(backups.begin(), backups.end()), backups.end());
+        for (const auto &name : backups) {
+            corrupt.push_back(Json{{"file", name}, {"reason", "元数据损坏，已备份为 .corrupt"}});
         }
         const Json out{{"dictionaries", dicts},
                        {"enabledEstimatedBytes", enabledBytes},

@@ -2,7 +2,7 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
-## 0.5.0（构建 129，本地候选）
+## 0.5.0（构建 130，本地候选）
 
 - 完整版与 Lite 新增「扩展词库」。支持本地导入、启停、删除及内存估算。启用或停用后，挂载变更在组合结束后生效。
 - 官方词库入口由用户点击后联网，客户端核验签名清单与资产哈希。渠道发布进度与测试证据见 [扩展词库验收](docs/validation/dictionaries-0.5.0.md)。

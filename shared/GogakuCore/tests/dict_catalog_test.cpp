@@ -286,19 +286,46 @@ int main() {
 
     {   // ── 损坏元数据备份；孤立 .dict 忽略 ──
         write_file(dicts + "/broken.json", "{not json");
+        const std::string source = dir + "/after-corruption.txt";
+        write_file(source, "网络热词 wang'luo're'ci\n");
+        GcDictImportRequest request{source.c_str(), dicts.c_str(), factoryDict.c_str(), nullptr};
+        char *imported = nullptr;
+        char error[512]{};
+        if (gc_dict_import(&request, nullptr, nullptr, &imported, error, sizeof(error)) != 0) {
+            std::fprintf(stderr, "FATAL 生成损坏恢复夹具失败：%s\n", error);
+            return 2;
+        }
+        const auto id = parse_list(imported).at("id").get<std::string>();
+        gc_contract_free(imported);
+        std::ifstream valid(dicts + "/" + id + ".json", std::ios::binary);
+        auto malformed = Json::parse(valid);
+        malformed["id"] = "wrong-type";
+        malformed["enabled"] = "true";
+        write_file(dicts + "/wrong-type.json", malformed.dump());
+        malformed["id"] = "other-id";
+        malformed["enabled"] = true;
+        write_file(dicts + "/wrong-id.json", malformed.dump());
         // 孤立 .dict（无元数据）。
         const std::string bin = make_binary_dict(dir, "网络 wang'luo\n");
         write_file(dicts + "/orphan.dict", bin);
         char *list = nullptr;
         check(gc_dict_list(dicts.c_str(), 1, &list) == 0, "list（损坏场景）", "");
         const Json l = parse_list(list);
-        check(l.value("dictionaries", Json::array()).empty(), "孤立 .dict 不显示", list);
-        check(l.value("corrupt", Json::array()).size() == 1, "损坏元数据报告", list);
+        const auto entries = l.value("dictionaries", Json::array());
+        check(entries.size() == 1 && entries[0]["id"] == id, "损坏与孤立文件不影响有效词库", list);
+        check(l.value("corrupt", Json::array()).size() == 3, "损坏元数据报告", list);
         gc_contract_free(list);
-        check(std::filesystem::exists(std::filesystem::path(dicts + "/broken.json.corrupt")),
-              "损坏元数据已备份", "");
-        check(!std::filesystem::exists(std::filesystem::path(dicts + "/broken.json")),
-              "原损坏文件已改名", "");
+        for (const std::string name : {"broken.json", "wrong-type.json", "wrong-id.json"}) {
+            check(std::filesystem::exists(std::filesystem::path(dicts + "/" + name + ".corrupt")),
+                  "损坏元数据已备份", name);
+            check(!std::filesystem::exists(std::filesystem::path(dicts + "/" + name)),
+                  "原损坏文件已改名", name);
+        }
+        check(gc_dict_list(dicts.c_str(), 1, &list) == 0, "再次读取已隔离的目录", "");
+        check(parse_list(list).value("corrupt", Json::array()).size() == 3,
+              "后打开设置也能看到损坏记录", list);
+        gc_contract_free(list);
+        (void)gc_dict_remove(dicts.c_str(), id.c_str(), nullptr, 0);
         (void)gc_dict_remove(dicts.c_str(), "orphan", nullptr, 0);  // 清理孤立文件
     }
 
