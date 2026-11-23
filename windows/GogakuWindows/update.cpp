@@ -722,6 +722,13 @@ void savePreferences(const Json &value) {
 }
 } // namespace
 
+std::string getReleaseAsset(const std::string &url, uint64_t limit, std::atomic_bool *cancel,
+                            const std::function<void(const char *, DWORD)> &sink) {
+    auto response = get(url, limit, cancel, {}, sink, sink ? 300 : 20);
+    statusOK(response);
+    return std::move(response.body);
+}
+
 Json checkUpdate(std::atomic_bool *cancel) {
     std::unique_lock<std::mutex> lock(checkMutex, std::try_to_lock);
     if (!lock.owns_lock()) return failed(UpdateError("busy"));

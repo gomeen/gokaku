@@ -75,13 +75,14 @@ void put32_of(std::string &s, size_t off, uint32_t v) {
 
 // 合成 scel：拼音表（索引 i → 音节）＋ 词表。按社区逆向布局写出，
 // 音节来自本测试自造的拼音集合，不含任何搜狗数据。
-// 拼音表区域固定填充到 0x2628−0x1540（解析器按固定偏移读词表）。
 std::string make_scel(const std::vector<std::string> &syllables,
                       const std::vector<std::vector<size_t>> &pyIndexGroups,
                       const std::vector<std::vector<std::string>> &words) {
     std::string header(0x1540, '\0');
-    put32_of(header, 0, 0x54504741u);
-    put32_of(header, 0x1240, static_cast<uint32_t>(words.size()));
+    put32_of(header, 0, 0x1540);
+    put32_of(header, 4, 0x01534344);
+    put32_of(header, 8, 1);
+    put32_of(header, 0x120, static_cast<uint32_t>(words.size()));
     auto utf16 = [&](const std::string &utf8) {
         std::string out;
         // 测试音节都是 ASCII；UTF-16LE 直接逐字节。
@@ -91,16 +92,14 @@ std::string make_scel(const std::vector<std::string> &syllables,
         }
         return out;
     };
-    std::string table;
-    put16_of(table, static_cast<uint16_t>(syllables.size()));
+    std::string table(4, '\0');
+    put32_of(table, 0, static_cast<uint32_t>(syllables.size()));
     for (size_t i = 0; i < syllables.size(); ++i) {
         const std::string py = utf16(syllables[i]);
+        put16_of(table, static_cast<uint16_t>(i + 1));
         put16_of(table, static_cast<uint16_t>(py.size()));
         table += py;
-        put16_of(table, static_cast<uint16_t>(i + 1));
-        table.append(2, '\0');  // 索引为 uint16 ＋ 2 字节保留
     }
-    table.resize(0x2628 - 0x1540, '\0');
     std::string body;
     for (size_t g = 0; g < pyIndexGroups.size(); ++g) {
         put16_of(body, static_cast<uint16_t>(words[g].size()));
@@ -112,6 +111,7 @@ std::string make_scel(const std::vector<std::string> &syllables,
             const std::string enc = utf16(w);
             put16_of(body, static_cast<uint16_t>(enc.size()));
             body += enc;
+            put16_of(body, 2);
             put16_of(body, 1);  // 词频（转换时统一丢弃）
         }
     }
@@ -244,7 +244,7 @@ int main() {
             "ABC\n"       // nonHan
             "行\n"        // ambiguousReading（出厂两个读音）
             "不存在的字\n"  // ambiguousReading（无读音）
-            "星河\n"      // 切分 xing'he → 存活
+            "星河 \t 11\r" // 切分 xing'he → 存活
             "中国\n";     // duplicateFactory
         const std::string code = import(dir, factoryDict, "pure.txt", content, &result);
         check(code == "0", "纯词表导入", code);
@@ -417,6 +417,30 @@ int main() {
         char err[512] = {0};
         const std::string code = import(dir, factoryDict, "empty.txt", "\n\n", nullptr, err, sizeof(err));
         check(code == "2", "空文件码 2", code + " " + err);
+    }
+
+    {
+        const auto seed = make_scel({"xin", "pin"}, {{0, 1}}, {{"new"}});
+        const std::string path = dir + "/fuzz.scel";
+        const std::string output = dir + "/fuzz-out";
+        const GcDictImportRequest request{path.c_str(), output.c_str(), factoryDict.c_str(), nullptr};
+        uint32_t state = 20261126;
+        auto next = [&] { return state = state * 1664525u + 1013904223u; };
+        for (int i = 0; i < 2000; ++i) {
+            auto sample = seed;
+            if (i % 2 == 0) sample.resize(next() % sample.size());
+            else {
+                const size_t first = i % 4 == 1 ? 0x1540 : 0;
+                for (int j = 0; j < 3; ++j) {
+                    const auto offset = first + next() % (sample.size() - first);
+                    sample[offset] = static_cast<char>(next() >> 24);
+                }
+            }
+            write_file(path, sample);
+            const int code = gc_dict_import(&request, [](void *, size_t, size_t) { return 1; },
+                                             nullptr, nullptr, nullptr, 0);
+            check(code == 2 || code == 3, "SCEL 解析模糊冒烟", std::to_string(code));
+        }
     }
 
     if (failures != 0) {

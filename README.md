@@ -16,7 +16,11 @@
 
 中文引擎和前端路线已选定。普通输入已在独立 AppKit 宿主和 Orca 终端通过限定的上屏与切换检查；完整宿主安全矩阵和学习并发尚未验收。学习翻译只保留用户配置的火山 NMT（默认关闭），不再随包或下载本地模型。需求边界、建议方案和待验证事项以[产品方向](docs/product.md)为准；双端逐项状态见[功能对照](docs/feature-parity.md)。
 
-## 当前状态（2026-11-10）
+## 0.5.0 扩展词库
+
+完整版和 Lite 的设置侧栏新增「扩展词库」，可导入本地词表并控制挂载。候选构建 127 的专项验证、渠道发布进度和宿主验收状态见[扩展词库验收](docs/validation/dictionaries-0.5.0.md)。最近公开版本见[0.4.1 发布记录](docs/validation/release-0.4.1.json)。
+
+## 历史工程基线（2026-11-10）
 
 **双端工程已进入 b110 stable 发布基线。** 版本来源为 `0.1.3 / build 110`；Mac pkg 与 Windows Setup 均已发布，公开更新清单的签名已验证。b110 的 fast／release 自动化验证通过，真实 host 未运行且已记录用户豁免，因此 Mac 真实输入源、Windows 当前包宿主、客户端在线更新 E2E、完整升级恢复／卸载仍未验收。详细证据与边界见[原生开发验收](docs/validation/native-development.md)，逐功能状态见[双端功能对照](docs/feature-parity.md)。
 

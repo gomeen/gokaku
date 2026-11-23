@@ -199,10 +199,18 @@ public enum DictionaryCatalog {
         guard let url = URL(string: entry.downloadUrl) else {
             throw CatalogError.contract("下载地址非法")
         }
-        let (tempURL, _) = try await transport.download(url, timeout: 300) { bytes in
-            if entry.size > 0 { progress(min(1, Double(bytes) / Double(entry.size))) }
+        let tempURL: URL
+        let response: UpdateHTTPResponse
+        do {
+            (tempURL, response) = try await transport.download(url, timeout: 300) { bytes in
+                if entry.size > 0 { progress(min(1, Double(bytes) / Double(entry.size))) }
+            }
+        } catch let error as UpdateTransportError {
+            throw CatalogError.transfer(error)
         }
         defer { try? FileManager.default.removeItem(at: tempURL) }
+        guard response.status == 200 else { throw CatalogError.transfer(.http(response.status)) }
+        try Task.checkCancellation()
         try FileManager.default.createDirectory(at: DictionaryStore.dictionariesDirectory,
                                                 withIntermediateDirectories: true)
         let entryJSON = """
@@ -230,6 +238,7 @@ public enum DictionaryCatalog {
 
     /// 页面错误文案：离线／超时／404／验签失败／哈希不符／URL 越界分别可辨。
     public static func failureMessage(_ error: Error) -> String {
+        if error is CancellationError { return "已取消" }
         if let catalogError = error as? CatalogError {
             if case .transfer(let transport) = catalogError {
                 switch transport {

@@ -46,6 +46,7 @@ struct DictionariesPage: View {
     @State private var importCancelFlag = ImportCancelFlag()
     @State private var catalog = CatalogState()
     @State private var catalogSheet = false
+    @State private var downloadTask: Task<Void, Never>?
     @State private var confirmRemoval: DictionaryStore.Entry?
 
     private let importQueue = DispatchQueue(label: "org.gogaku.settings.dictionaries", qos: .userInitiated)
@@ -79,7 +80,7 @@ struct DictionariesPage: View {
             // 本应用的变更也回到本页：直接重读（核心是唯一解析实现）。
             reload()
         }
-        .sheet(isPresented: $catalogSheet) { catalogSheetView }
+        .sheet(isPresented: $catalogSheet, onDismiss: { downloadTask?.cancel() }) { catalogSheetView }
         .alert("删除词库「\(confirmRemoval?.name ?? "")」？",
                isPresented: Binding(get: { confirmRemoval != nil }, set: { if !$0 { confirmRemoval = nil } })) {
             Button("取消", role: .cancel) { confirmRemoval = nil }
@@ -236,7 +237,11 @@ struct DictionariesPage: View {
                 HStack(spacing: 10) {
                     ProgressView(value: catalog.progress)
                     Text("\(Int(catalog.progress * 100))%").font(.callout).foregroundStyle(.secondary)
+                    Button("取消下载") { downloadTask?.cancel() }
                 }
+            }
+            if !catalog.failedMessage.isEmpty {
+                Text(catalog.failedMessage).foregroundStyle(SettingsPalette.danger)
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
@@ -417,11 +422,12 @@ struct DictionariesPage: View {
     }
 
     private func installCatalogEntry(_ entry: DictionaryCatalog.Entry) {
-        guard let snapshot = catalog.snapshot else { return }
+        guard let snapshot = catalog.snapshot, catalog.installingID == nil else { return }
+        catalog.failedMessage = ""
         catalog.installingID = entry.id
         catalog.progress = 0
         let version = snapshot.catalogVersion
-        Task.detached(priority: .userInitiated) {
+        downloadTask = Task.detached(priority: .userInitiated) {
             do {
                 try await DictionaryCatalog.install(entry, catalogVersion: version,
                                                     transport: URLSessionUpdateTransport()) { fraction in

@@ -10,6 +10,7 @@
 
 #include <unistd.h>
 #include "quality_cases.inc"
+#include "../../third_party/json.hpp"
 
 #include <cstdio>
 #include <cstdlib>
@@ -117,13 +118,13 @@ struct DelSnap {
 };
 
 // 平台确认宿主插入成功（ABI 版本 4）：确认后才调频学习。
-void confirm(GcNormalSession *s, int64_t t) { GcSnapshot *p = send(s, GC_EV_COMMIT_CONFIRMED, "", t); delete p; }
+void confirm(GcNormalSession *s, int64_t t) { GcSnapshot *p = send(s, GC_EV_COMMIT_CONFIRMED, "", t); gc_snapshot_free(p); }
 
 // 只键入按键，返回最后一个按键事件的候选快照（调用方释放）。
 GcSnapshot *type_keys(GcNormalSession *s, const char *keys, int64_t t = 0) {
     GcSnapshot *snap = nullptr;
     for (const char *p = keys; *p != '\0'; ++p) {
-        delete snap;
+        gc_snapshot_free(snap);
         snap = send(s, GC_EV_TEXT, std::string(1, *p), t);
     }
     return snap;
@@ -164,7 +165,7 @@ std::vector<std::string> top_chinese(const GcSnapshot *snap, size_t n) {
     return out;
 }
 
-void clear_composition(GcNormalSession *s) { do { GcSnapshot *p = send(s, GC_EV_ESC, ""); delete p; } while (0); }
+void clear_composition(GcNormalSession *s) { do { GcSnapshot *p = send(s, GC_EV_ESC, ""); gc_snapshot_free(p); } while (0); }
 
 }  // namespace
 
@@ -185,7 +186,7 @@ int main() {
             if (is_target(snap, 0, c)) ++firstHit;
             if (hit_within10(snap, c) >= 0) ++top10Hit;
             baselineTop10[ci] = top_chinese(snap, 10);
-            delete snap;
+            gc_snapshot_free(snap);
             clear_composition(s);
         }
         gc_normal_session_destroy(s);
@@ -193,6 +194,47 @@ int main() {
     fprintf(stderr, "质量基线：首选 %d／120，前十 %d／120（历史基准 109／112）\n", firstHit, top10Hit);
     check(firstHit >= 109, "首选命中 ≥109");
     check(top10Hit >= 112, "前十命中 ≥112");
+
+    // 扩展资产与出厂基线共用同一组质量向量。
+    if (const char *source = getenv("GOGAKU_QUALITY_EXTENSION_DICT"); source && *source) {
+        const std::string dir = env.dir + "/dictionaries";
+        GcDictImportRequest request{source, dir.c_str(), env.dictPath.c_str(), nullptr};
+        char *metadata = nullptr;
+        char err[256]{};
+        if (gc_dict_import(&request, nullptr, nullptr, &metadata, err, sizeof(err)) != 0) {
+            fprintf(stderr, "扩展词库转换失败：%s\n", err);
+            return 1;
+        }
+        const auto item = nlohmann::json::parse(metadata);
+        gc_contract_free(metadata);
+        const auto id = item.at("id").get<std::string>();
+        auto *session = make_session(env);
+        if (!session) return 1;
+        GcDictHandle *handle = nullptr;
+        if (gc_dict_load(dir.c_str(), id.c_str(), &handle, err, sizeof(err)) != 0) {
+            fprintf(stderr, "扩展词库加载失败：%s\n", err);
+            gc_normal_session_destroy(session);
+            return 1;
+        }
+        const char *ids[] = {id.c_str()};
+        if (gc_normal_dicts_apply(session, ids, &handle, 1) != 0) {
+            gc_normal_session_destroy(session);
+            return 1;
+        }
+        int mountedFirst = 0, mountedTop10 = 0;
+        for (size_t i = 0; i < kQualityCaseCount; ++i) {
+            const auto &c = kQualityCases[i];
+            DelSnap snap{type_keys(session, c.keys, i)};
+            mountedFirst += is_target(snap.p, 0, c);
+            mountedTop10 += hit_within10(snap.p, c) >= 0;
+            clear_composition(session);
+        }
+        gc_normal_session_destroy(session);
+        gc_dict_remove(dir.c_str(), id.c_str(), nullptr, 0);
+        fprintf(stderr, "扩展词库：首选 %d／120，前十 %d／120\n", mountedFirst, mountedTop10);
+        check(mountedFirst >= 109, "挂载扩展词库后首选命中 ≥109");
+        check(mountedTop10 >= 112, "挂载扩展词库后前十命中 ≥112");
+    }
 
     // ── 空格确认与候选一致（首选命中的用例）──────────────────────────
     {
@@ -204,7 +246,7 @@ int main() {
             const QualityCase &c = kQualityCases[ci];
             GcSnapshot *snap = type_keys(s, c.keys, ++t);
             const bool first = is_target(snap, 0, c);
-            delete snap;
+            gc_snapshot_free(snap);
             if (!first) { clear_composition(s); continue; }
             DelSnap commit{send(s, GC_EV_SPACE, "", ++t)};
             confirm(s, ++t);   // 空格上屏成功→确认→调频
@@ -230,7 +272,7 @@ int main() {
         for (size_t ci = 0; ci < kQualityCaseCount; ++ci) {
             GcSnapshot *snap = type_keys(s, kQualityCases[ci].keys, ++t);
             if (top_chinese(snap, 10) != baselineTop10[ci]) ++disturbed;
-            delete snap;
+            gc_snapshot_free(snap);
             clear_composition(s);
         }
         check_eq(disturbed, 0, "调频关闭与开启（无历史）排序一致");
@@ -248,7 +290,7 @@ int main() {
             const QualityCase &c = kQualityCases[ci];
             GcSnapshot *snap = type_keys(s, c.keys, ++t);
             involved[ci] = is_target(snap, 0, c);
-            delete snap;
+            gc_snapshot_free(snap);
             if (involved[ci]) {
                 DelSnap commit{send(s, GC_EV_SPACE, "", ++t)};  // 确认目标＝调频学习
                 confirm(s, ++t);   // 平台确认上屏成功后才学习
@@ -261,7 +303,7 @@ int main() {
             if (involved[ci]) continue;
             GcSnapshot *snap = type_keys(s, kQualityCases[ci].keys, ++t);
             if (top_chinese(snap, 10) != baselineTop10[ci]) ++disturbed;
-            delete snap;
+            gc_snapshot_free(snap);
             clear_composition(s);
         }
         check_eq(disturbed, 0, "调频学习后未涉及用例排序不变");
@@ -288,7 +330,7 @@ int main() {
         for (size_t ci = 0; ci < kQualityCaseCount; ++ci) {
             GcSnapshot *snap = type_keys(s, kQualityCases[ci].keys, ++t);
             if (top_chinese(snap, 10) != baselineTop10[ci]) ++disturbed;
-            delete snap;
+            gc_snapshot_free(snap);
             clear_composition(s);
         }
         check_eq(disturbed, 0, "无关自定义词不改变任何用例排序");
@@ -305,7 +347,7 @@ int main() {
             const char *keys = "compa";
             GcSnapshot *snap = nullptr;
             for (const char *p = keys; *p != '\0'; ++p) {
-                delete snap;
+                gc_snapshot_free(snap);
                 snap = send(s, GC_EV_TEXT, std::string(1, *p), 0);
             }
             check(snap != nullptr && snap->count > 0 && is_chinese(snap->candidates[0]),
@@ -321,14 +363,14 @@ int main() {
                 if (snap->candidates[i].kind == GC_CAND_ENGLISH) ++englishCount;
             }
             check(englishCount == 3, "前缀补全 ≤3");
-            delete snap;
+            gc_snapshot_free(snap);
             clear_composition(s);
         }
         {   // 整词一致（≥3 字）出现在中文首位之后；3 字输入无前缀补全。
             const char *keys = "min";
             GcSnapshot *snap = nullptr;
             for (const char *p = keys; *p != '\0'; ++p) {
-                delete snap;
+                gc_snapshot_free(snap);
                 snap = send(s, GC_EV_TEXT, std::string(1, *p), 0);
             }
             check(snap != nullptr && snap->count > 1 && snap->candidates[1].kind == GC_CAND_ENGLISH
@@ -339,7 +381,7 @@ int main() {
                 if (snap->candidates[i].kind == GC_CAND_ENGLISH) noPrefix = false;
             }
             check(noPrefix, "3 字输入不出现前缀补全");
-            delete snap;
+            gc_snapshot_free(snap);
             clear_composition(s);
         }
         gc_normal_session_destroy(s);

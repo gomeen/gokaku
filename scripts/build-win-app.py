@@ -291,6 +291,7 @@ def resource_plan(args):
     for name in manifest_files:
         result.append((resources / name, Path('data') / name))
     result.append((resources / 'update/config.json', Path('resources/update/windows.json')))
+    result.append((resources / 'dictionaries/catalog-config.json', Path('resources/dictionaries/catalog-config.json')))
     # 仅从指定许可目录复制；保留目录结构，避免同名 LICENSE/COPYING 互相覆盖。
     license_dirs = [Path(value) for value in (args.license_dir or [ROOT / 'shared/licenses'])]
     license_dirs += [resources / 'licenses']
@@ -562,7 +563,8 @@ def self_test(iscc=None):
         args.third_party_dir = str(root / 'third_party')
         args.license_dir = [str(root / 'licenses')]
         paths = ['resources/english-wordlist-sources.json', 'resources/gloss-sources.json',
-                 'resources/update/config.json', 'resources/licenses/DATA.txt', 'licenses/COPYING',
+                 'resources/update/config.json', 'resources/dictionaries/catalog-config.json',
+                 'resources/licenses/DATA.txt', 'licenses/COPYING',
                  'licenses/THIRD-PARTY.md',
                  'deps/libime/LICENSES/LGPL-2.1-or-later.txt',
                  'deps/fcitx5/LICENSES/LGPL-2.1-or-later.txt', 'deps/fcitx5/LICENSES/Unicode-DFS-2016.txt']

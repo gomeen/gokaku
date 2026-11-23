@@ -773,13 +773,15 @@ char *learning_copy_cstr(const std::string &s) {
 extern "C" int gc_learning_dicts_apply(GcLearningSession *s, const char *const *ids,
                                        GcDictHandle *const *handles, size_t n) {
     if (s == nullptr || (n > 0 && (ids == nullptr || handles == nullptr))) return 1;
-    std::unordered_set<std::string> seen;
-    for (size_t i = 0; i < n; ++i) {
-        if (ids[i] == nullptr) return 1;
-        if (!seen.insert(ids[i]).second) return 1;
-    }
-    // 组合进行中不接受挂载变更；等组合结束后的下一个事件前生效。
-    if (!s->core.context.empty()) return 3;
+    if (!s->raw.empty() || !s->core.context.empty()) return 3;
+    try {
+        std::unordered_set<std::string_view> seen;
+        std::unordered_set<GcDictHandle *> seenHandles;
+        for (size_t i = 0; i < n; ++i) {
+            if (ids[i] == nullptr || !seen.insert(ids[i]).second) return 1;
+            if (handles[i] && (handles[i]->id != ids[i] || !seenHandles.insert(handles[i]).second)) return 1;
+        }
+    } catch (...) { return 1; }
     try {
         // 先累计保留槽（NULL 句柄）的大小，再按挂载顺序过滤新挂载项。
         std::unordered_map<std::string, uint64_t> keptSizes;
@@ -816,6 +818,7 @@ extern "C" int gc_learning_dicts_apply(GcLearningSession *s, const char *const *
         if (rc != 0) return 2;
         return 0;
     } catch (...) {
+        for (size_t i = 0; i < n; ++i) delete handles[i];
         return 2;
     }
 }

@@ -2,13 +2,17 @@
 // 合同见 docs/dictionaries.md §七：字段与合同校验只有共享核心一份实现
 // （gc_dict_catalog_parse／gc_dict_install 由调用方传入函数指针）；
 // 本模块只做 WinHTTP 传输与 monocypher Ed25519 验签。
-#ifndef GOGAKU_DICTINARIES_H
-#define GOGAKU_DICTINARIES_H
+#ifndef GOGAKU_DICTIONARIES_H
+#define GOGAKU_DICTIONARIES_H
 #include "platform.h"
 #include <atomic>
 #include <functional>
 
 namespace gw {
+// 与应用更新共用 HTTPS、重定向白名单、超时及取消。
+std::string getReleaseAsset(const std::string &url, uint64_t limit, std::atomic_bool *cancel,
+                            const std::function<void(const char *, DWORD)> &sink = {});
+
 
 // 核心侧函数指针（由调用方从 libgogaku_core.dll 解析后传入；本文件不加载 DLL）。
 struct DictCoreApis {

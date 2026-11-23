@@ -15,7 +15,7 @@ public enum DictionaryStore {
 
     /// 词库目录（stable／dev、完整版／Lite 共用）。
     public static var dictionariesDirectory: URL {
-        Settings.chineseDirectory.appendingPathComponent("dictionaries", isDirectory: true)
+        Paths.support.appendingPathComponent("dictionaries", isDirectory: true)
     }
 
     /// 一本词库的展示信息（gc_dict_list 结果的 Swift 形状）。
@@ -151,8 +151,8 @@ public enum DictionaryStore {
         defer { freeConst(idCopy) }
         let rc = gc_dict_set_enabled(dictionariesDirectory.path, idCopy, enabled ? 1 : 0,
                                      &err, err.count)
-        notifyChanged()
         guard rc == 0 else { throw StoreError.io(String(cString: err)) }
+        notifyChanged()
     }
 
     public static func remove(id: String) throws {
@@ -160,8 +160,8 @@ public enum DictionaryStore {
         let idCopy = id.unsafeConstUTF8Copy()
         defer { freeConst(idCopy) }
         let rc = gc_dict_remove(dictionariesDirectory.path, idCopy, &err, err.count)
-        notifyChanged()
         guard rc == 0 else { throw StoreError.io(String(cString: err)) }
+        notifyChanged()
     }
 
     /// 写盘后通知输入法（组合中由核心延迟到组合结束）。

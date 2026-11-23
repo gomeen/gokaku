@@ -462,7 +462,8 @@ def check_asan_ubsan(ctx):
     if result.returncode != 0:
         return FAIL, 'ASan 配置失败：' + result.stderr[-300:], None
     result = sh(['cmake', '--build', asan_dir, '-j', str(ctx['jobs']), '--target',
-                 'gogaku_core_fuzz', 'gogaku_core_panel_render_test'],
+                 'gogaku_core_fuzz', 'gogaku_core_panel_render_test',
+                 'gogaku_core_dict_import_test', 'gogaku_core_dict_catalog_test', 'gogaku_core_dict_mount_test'],
                 timeout=1800)
     if result.returncode != 0:
         return FAIL, 'ASan 构建失败', None
@@ -477,6 +478,11 @@ def check_asan_ubsan(ctx):
     panel_evidence = ctx.evidence('asan-panel-render.log', panel.stdout + panel.stderr)
     if panel.returncode != 0:
         return FAIL, '共享渲染器 ASan＋UBSan 回归失败（缺字体跳过亦不算通过）', panel_evidence
+    dict_tests = sh(['ctest', '--test-dir', asan_dir, '-R', '^dict_', '--output-on-failure'],
+                    env=env, timeout=300)
+    dict_evidence = ctx.evidence('asan-dictionaries.log', dict_tests.stdout + dict_tests.stderr)
+    if dict_tests.returncode != 0 or 'No tests' in dict_tests.stderr:
+        return FAIL, '扩展词库 ASan＋UBSan 回归失败', dict_evidence
     total = 2000 if ctx['quick'] else 100000
     # 分片：第 k 片用种子 20261031+k，各自独立临时目录；总序列数不变。
     shards = max(1, min(ctx.get('asan_shards') or 1, total))

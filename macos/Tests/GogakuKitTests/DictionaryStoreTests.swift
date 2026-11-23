@@ -49,7 +49,7 @@ final class DictionaryStoreTests: XCTestCase {
     }
 
     private var dictionariesDir: URL {
-        Settings.chineseDirectory.appendingPathComponent("dictionaries", isDirectory: true)
+        supportDir.appendingPathComponent("dictionaries", isDirectory: true)
     }
 
     private func writeSource(_ name: String, _ content: String) throws -> URL {

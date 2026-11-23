@@ -35,6 +35,7 @@ using gogaku::kLearningTotalMax;
 #include <shellapi.h>
 #else
 #include <fcntl.h>
+#include <sys/file.h>
 #include <unistd.h>
 #include <filesystem>
 #endif
@@ -316,6 +317,41 @@ bool ensure_dir(const std::string &path) {
 #endif
 }
 
+// 锁住读改写及两文件提交，同一用户的 stable／dev 也使用同一把锁。
+class DirectoryWriteLock {
+public:
+    explicit DirectoryWriteLock(const std::string &dir) {
+#ifdef _WIN32
+        auto path = gogaku::windows_io::file_path(dir + "/.write-lock");
+        handle_.value = CreateFileW(path.c_str(), GENERIC_READ | GENERIC_WRITE,
+                                   FILE_SHARE_READ | FILE_SHARE_WRITE, nullptr,
+                                   OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+        OVERLAPPED range{};
+        if (handle_.value == INVALID_HANDLE_VALUE || !LockFileEx(handle_.value, LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &range))
+            throw std::runtime_error("无法锁定词库目录");
+#else
+        fd_ = ::open((dir + "/.write-lock").c_str(), O_CREAT | O_RDWR | O_CLOEXEC, 0600);
+        if (fd_ < 0 || flock(fd_, LOCK_EX) != 0) {
+            if (fd_ >= 0) ::close(fd_);
+            throw std::runtime_error("无法锁定词库目录");
+        }
+#endif
+    }
+    DirectoryWriteLock(const DirectoryWriteLock &) = delete;
+    DirectoryWriteLock &operator=(const DirectoryWriteLock &) = delete;
+    ~DirectoryWriteLock() {
+#ifndef _WIN32
+        ::close(fd_);
+#endif
+    }
+private:
+#ifdef _WIN32
+    gogaku::windows_io::Handle handle_;
+#else
+    int fd_ = -1;
+#endif
+};
+
 bool remove_file_quiet(const std::string &path) {
 #ifdef _WIN32
     std::error_code ec;
@@ -435,7 +471,8 @@ public:
                     continue;
                 }
                 auto it = readings_.find(word.substr(pos, len));
-                if (it == readings_.end() || it->second.size() != 1) continue;
+                if (it == readings_.end()) continue;
+                if (it->second.size() != 1) return false;
                 parts.push_back(*it->second.begin());
                 pos += len;
                 matched = true;
@@ -509,61 +546,72 @@ uint32_t le_u32(const uint8_t *p) {
            (static_cast<uint32_t>(p[2]) << 16) | (static_cast<uint32_t>(p[3]) << 24);
 }
 
-/* 搜狗 .scel：社区逆向的数据布局（合成样本由入库脚本按同一布局生成）。
- * 0x1240 词数；0x1540 拼音表；0x2628 起词表（同音词数｜拼音索引字节数｜
- * 索引(uint16)…｜每词：词长(uint16)｜UTF-16LE 词｜词频(uint16)）。 */
+// SCEL 字段布局参考 fcitx5-chinese-addons 的工具说明。这里独立处理长度与偏移。
 void parse_scel(const std::string &bytes, std::vector<RawEntry> &entries) {
-    const auto *d = reinterpret_cast<const uint8_t *>(bytes.data());
-    if (bytes.size() < 0x2628 || le_u32(d) != 0x54504741u) {
+    constexpr size_t tableOffset = 0x1540;
+    const auto *data = reinterpret_cast<const uint8_t *>(bytes.data());
+    if (bytes.size() < tableOffset + 4 || le_u32(data) != tableOffset || le_u32(data + 8) != 1) {
         throw ParseFailure("不是有效的搜狗词库文件");
     }
-    std::unordered_map<uint16_t, std::string> pyTable;
-    {
-        size_t off = 0x1540;
-        if (off + 2 > bytes.size()) throw ParseFailure("搜狗词库拼音表损坏");
-        const uint16_t pyCount = le_u16(d + off);
-        off += 2;
-        for (uint16_t i = 0; i < pyCount && off + 2 <= bytes.size(); ++i) {
-            const uint16_t pyLen = le_u16(d + off);
-            off += 2;
-            if (off + pyLen + 4 > bytes.size()) throw ParseFailure("搜狗词库拼音表损坏");
-            std::string py;
-            if (!utf16le_to_utf8(d + off, pyLen, py)) throw ParseFailure("搜狗词库拼音表含非法 UTF-16");
-            off += pyLen;
-            const uint16_t index = le_u16(d + off);
-            off += 4;  // 2 字节索引 ＋ 2 字节保留
-            pyTable[index] = py;
+    const auto signature = le_u32(data + 4);
+    if (signature != 0x01534344 && signature != 0x01534345 && signature != 0x01536dd2) {
+        throw ParseFailure("不支持的搜狗词库版本");
+    }
+    size_t offset = tableOffset + 4;
+    auto take = [&](size_t length) {
+        if (length > bytes.size() - offset) throw ParseFailure("搜狗词库字段不完整");
+        auto start = data + offset;
+        offset += length;
+        return start;
+    };
+    auto read16 = [&] { return le_u16(take(2)); };
+    auto text = [&] {
+        const auto length = read16();
+        std::string value;
+        if (!utf16le_to_utf8(take(length), length, value)) value.clear();
+        return value;
+    };
+    std::unordered_map<uint16_t, std::string> syllables;
+    const auto tableSize = le_u32(data + tableOffset);
+    if (tableSize == 0 || tableSize > 65536) throw ParseFailure("搜狗词库缺少可用的拼音表");
+    for (uint32_t i = 0; i < tableSize; ++i) {
+        const auto index = read16();
+        auto syllable = text();
+        if (syllable.empty() || !syllables.emplace(index, std::move(syllable)).second)
+            throw ParseFailure("搜狗词库拼音表损坏");
+    }
+    auto readPinyin = [&] {
+        const size_t length = read16();
+        if (length % 2 != 0) throw ParseFailure("搜狗词库拼音索引损坏");
+        const auto *indices = take(length);
+        std::string result;
+        for (size_t i = 0; i < length; i += 2) {
+            const auto found = syllables.find(le_u16(indices + i));
+            if (found == syllables.end()) return std::string();
+            if (!result.empty()) result += '\'';
+            result += found->second;
+        }
+        return result;
+    };
+    const auto groups = le_u32(data + 0x120);
+    for (uint32_t group = 0; group < groups; ++group) {
+        const auto count = read16();
+        const auto pinyin = readPinyin();
+        for (uint16_t i = 0; i < count; ++i) {
+            entries.push_back({text(), pinyin, true});
+            const auto extra = read16();
+            take(extra);
         }
     }
-    size_t off = 0x2628;
-    while (off + 4 <= bytes.size()) {
-        const uint16_t sameCount = le_u16(d + off);
-        const uint16_t pyIdxBytes = le_u16(d + off + 2);
-        off += 4;
-        if (off + pyIdxBytes > bytes.size()) throw ParseFailure("搜狗词库词表损坏");
-        std::string pinyin;
-        bool pinyinOk = pyIdxBytes >= 2 && pyIdxBytes % 2 == 0;
-        for (size_t k = 0; k + 2 <= pyIdxBytes; k += 2) {
-            const uint16_t idx = le_u16(d + off + k);
-            auto it = pyTable.find(idx);
-            if (it == pyTable.end()) pinyinOk = false;
-            if (!pinyin.empty()) pinyin.push_back('\'');
-            pinyin += it == pyTable.end() ? "" : it->second;
-        }
-        off += pyIdxBytes;
-        for (uint16_t w = 0; w < sameCount && off + 2 <= bytes.size(); ++w) {
-            const uint16_t wordLen = le_u16(d + off);
-            off += 2;
-            if (off + wordLen + 2 > bytes.size()) throw ParseFailure("搜狗词库词表损坏");
-            std::string word;
-            if (!utf16le_to_utf8(d + off, wordLen, word)) word.clear();
-            off += wordLen;
-            off += 2;  // 词频（丢弃，统一权重 0）
-            RawEntry e;
-            e.text = std::move(word);
-            e.pinyin = pinyinOk ? ascii_lower(pinyin) : "";
-            e.hasPinyin = pinyinOk;
-            entries.push_back(std::move(e));
+    const auto phraseCount = le_u32(data + 0x5c);
+    if (phraseCount) {
+        const auto start = le_u32(data + 0x60);
+        if (start < offset || start > bytes.size()) throw ParseFailure("搜狗词库短语偏移非法");
+        offset = start;
+        for (uint32_t i = 0; i < phraseCount; ++i) {
+            const bool hasPinyin = take(17)[2] == 1;
+            auto code = hasPinyin ? readPinyin() : text();
+            entries.push_back({text(), hasPinyin ? std::move(code) : std::string(), true});
         }
     }
 }
@@ -715,31 +763,22 @@ void parse_libime_text(const std::string &bytes, std::vector<RawEntry> &entries)
     }
 }
 
-// 纯词表：只取第一列（制表符或空白分隔）。
+// 纯词表：只取第一列（制表符或空白分隔），兼容 CR、LF 和 CRLF。
 void parse_plain_text(const std::string &bytes, std::vector<RawEntry> &entries) {
-    std::istringstream in(bytes);
-    std::string line;
-    while (std::getline(in, line)) {
-        if (!line.empty() && line.back() == '\r') line.pop_back();
-        // 去行首 BOM（逐行处理时可能出现在首行）。
-        if (line.size() >= 3 && static_cast<unsigned char>(line[0]) == 0xEF &&
-            static_cast<unsigned char>(line[1]) == 0xBB && static_cast<unsigned char>(line[2]) == 0xBF) {
-            line.erase(0, 3);
-        }
-        if (line.empty()) continue;
-        const size_t tab = line.find('\t');
-        std::string word = tab == std::string::npos ? std::string() : line.substr(0, tab);
-        if (tab == std::string::npos) {
-            // 空白分隔：取第一个记号。
-            size_t start = line.find_first_not_of(" \t\f\v");
-            if (start == std::string::npos) continue;
-            size_t end = line.find_first_of(" \t\f\v", start);
-            word = line.substr(start, end == std::string::npos ? std::string::npos : end - start);
-        }
-        if (word.empty()) continue;
-        RawEntry e;
-        e.text = std::move(word);
-        entries.push_back(std::move(e));
+    std::string_view remaining(bytes);
+    if (remaining.starts_with("\xef\xbb\xbf")) remaining.remove_prefix(3);
+    while (!remaining.empty()) {
+        const auto end = remaining.find_first_of("\r\n");
+        auto line = remaining.substr(0, end);
+        remaining.remove_prefix(end == std::string_view::npos ? remaining.size() : end + 1);
+        if (end != std::string_view::npos && remaining.starts_with('\n')) remaining.remove_prefix(1);
+        auto field = line.substr(0, line.find('\t'));
+        const auto first = field.find_first_not_of(' ');
+        if (first == std::string_view::npos) continue;
+        const auto last = field.find_last_not_of(' ');
+        field = field.substr(first, last - first + 1);
+        if (line.find('\t') == std::string_view::npos) field = field.substr(0, field.find(' '));
+        entries.push_back({std::string(field), {}, false});
     }
 }
 
@@ -883,11 +922,9 @@ std::vector<RawEntry> filter_entries(std::vector<RawEntry> &entries, bool pureTe
         if (factory.hasEntry(e.text, pinyin)) { ++drops.duplicateFactory; continue; }
         const std::string key = e.text + '\x1f' + pinyin;
         if (!seen.insert(key).second) { ++drops.duplicateEntry; continue; }
+        if (kept.size() == kMaxEntries) throw ParseFailure("输出词库超过 500 万条上限");
+        e.pinyin = std::move(pinyin);
         kept.push_back(std::move(e));
-    }
-    // 纯词表读音来自出厂词典（小写规范形）；带拼音条目保留源写法（libime 兼容大写）。
-    if (kept.size() > kMaxEntries) {
-        kept.resize(kMaxEntries);
     }
     return kept;
 }
@@ -910,7 +947,9 @@ std::string build_binary_dict(const std::vector<RawEntry> &entries) {
 constexpr const char *kDictSchemaVersion = "schemaVersion";
 
 bool valid_dict_id(const std::string &id) {
-    if (id.rfind("import-", 0) == 0) return id.size() == 7 + 16;
+    if (id.starts_with("import-")) {
+        return id.size() == 23 && id.find_first_not_of("0123456789abcdef", 7) == std::string::npos;
+    }
     if (id.empty() || id.size() > 64) return false;
     for (char c : id) {
         if (!((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-')) return false;
@@ -1026,6 +1065,17 @@ extern "C" int gc_dict_import(const GcDictImportRequest *req,
             return 2;
         }
 
+        const std::string binary = build_binary_dict(kept);
+        if (progress && progress(ctx, entries.size(), entries.size()) != 0) throw Cancelled();
+        DirectoryWriteLock lock(req->dictionaries_dir);
+        for (const auto &name : list_meta_files(req->dictionaries_dir)) {
+            Json meta;
+            if (read_meta(req->dictionaries_dir, name, meta) &&
+                meta.contains("sourceContentId") && meta["sourceContentId"] == sourceContentId) {
+                set_error(err, err_len, "同一源文件已导入过");
+                return 4;
+            }
+        }
         // 生成 id 并写出（先 .dict 后 .json；元数据是提交点）。
         std::random_device rd;
         std::mt19937_64 gen(rd());
@@ -1036,7 +1086,6 @@ extern "C" int gc_dict_import(const GcDictImportRequest *req,
             id = std::string("import-") + hex;
         } while (read_meta(req->dictionaries_dir, id + ".json", selfCheck));
 
-        const std::string binary = build_binary_dict(kept);
         if (atomic_write_bytes(std::string(req->dictionaries_dir) + "/" + id + ".dict", binary) != 0) {
             set_error(err, err_len, "写盘失败");
             return 2;
@@ -1153,10 +1202,11 @@ extern "C" int gc_dict_list(const char *dir, uint32_t flags, char **json) {
 extern "C" int gc_dict_set_enabled(const char *dir, const char *id, int32_t enabled, char *err,
                                    size_t err_len) {
     try {
-        if (dir == nullptr || id == nullptr) {
+        if (dir == nullptr || id == nullptr || !valid_dict_id(id)) {
             set_error(err, err_len, "参数错误");
             return 1;
         }
+        DirectoryWriteLock lock(dir);
         Json meta;
         if (!read_meta(dir, std::string(id) + ".json", meta)) {
             set_error(err, err_len, "未找到词库元数据");
@@ -1180,6 +1230,7 @@ extern "C" int gc_dict_remove(const char *dir, const char *id, char *err, size_t
             set_error(err, err_len, "参数错误");
             return 1;
         }
+        DirectoryWriteLock lock(dir);
         // 先删元数据（提交点），再删 .dict；残留孤立 .dict 会被 list 忽略。
         const std::string metaPath = dir + std::string("/") + id + ".json";
         if (!remove_file_quiet(metaPath)) {
@@ -1198,7 +1249,7 @@ extern "C" int gc_dict_verify(const char *dir, const char *id, char **json, char
                               size_t err_len) {
     if (json != nullptr) *json = nullptr;
     try {
-        if (dir == nullptr || id == nullptr) {
+        if (dir == nullptr || id == nullptr || !valid_dict_id(id)) {
             set_error(err, err_len, "参数错误");
             return 1;
         }
@@ -1343,6 +1394,10 @@ extern "C" int gc_dict_catalog_parse(const uint8_t *bytes, size_t len, const cha
             prefix = p->get<std::string>();
         }
 
+        if (prefix.empty() || !prefix.starts_with("https://github.com/")) {
+            set_error(err, err_len, "下载前缀未配置");
+            return 1;
+        }
         std::unordered_map<std::string, std::string> installedVersions;
         for (const auto &entry : installed) {
             if (entry.is_object() && entry.contains("id") && entry["id"].is_string()) {
@@ -1468,11 +1523,17 @@ extern "C" int gc_dict_install(const char *dir, const char *downloaded_path,
                 return 2;
             }
         }
-        ensure_dir(dir);
+        if (!ensure_dir(dir)) throw std::runtime_error("无法创建词库目录");
+        DirectoryWriteLock lock(dir);
 
         // 更新已有词库时保留 enabled 与用户不可见的其他未知字段。
         Json existing;
         const bool updating = read_meta(dir, id + ".json", existing);
+        if (updating && (existing.value("origin", std::string()) != "official" ||
+                         compare_versions(strField("version"), existing.value("version", std::string())) < 0 ||
+                         entry.value("catalogVersion", 0ll) < existing.value("catalogVersion", 0ll))) {
+            throw std::runtime_error("拒绝词库版本回滚");
+        }
         const bool enabled = updating ? existing.value("enabled", true) : true;
         const Json meta = make_meta(
             id, strField("name"), "official",
@@ -1490,11 +1551,18 @@ extern "C" int gc_dict_install(const char *dir, const char *downloaded_path,
         if (entry.contains("catalogVersion") && entry["catalogVersion"].is_number_integer()) {
             metaOut["catalogVersion"] = entry["catalogVersion"];
         }
-        if (atomic_write_bytes(dir + std::string("/") + id + ".dict", bytes) != 0) {
+        const std::string dictPath = std::string(dir) + "/" + id + ".dict";
+        const auto encodedMeta = metaOut.dump();
+        std::string previous;
+        if (updating && !read_file_bytes(dictPath, previous, kMaxInputBytes, nullptr))
+            throw std::runtime_error("原词库读取失败");
+        if (atomic_write_bytes(dictPath, bytes) != 0) {
             set_error(err, err_len, "写盘失败");
             return 2;
         }
-        if (atomic_write_bytes(dir + std::string("/") + id + ".json", metaOut.dump()) != 0) {
+        if (atomic_write_bytes(dir + std::string("/") + id + ".json", encodedMeta) != 0) {
+            if (updating) (void)atomic_write_bytes(dictPath, previous);
+            else remove_file_quiet(dictPath);
             set_error(err, err_len, "写盘失败");
             return 2;
         }
@@ -1513,7 +1581,7 @@ extern "C" int gc_dict_load(const char *dir, const char *id, GcDictHandle **hand
                            char *err, size_t err_len) {
     if (handle != nullptr) *handle = nullptr;
     try {
-        if (dir == nullptr || id == nullptr || handle == nullptr) {
+        if (dir == nullptr || id == nullptr || handle == nullptr || !valid_dict_id(id)) {
             set_error(err, err_len, "参数错误");
             return 1;
         }

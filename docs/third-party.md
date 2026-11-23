@@ -31,6 +31,12 @@ Gogaku 自身代码以 MIT 许可发布（仓库根 `LICENSE`）；MIT 不改变
 
 `shared/licenses/Boost-LICENSE.txt` 对照Boost官方 `https://www.boost.org/LICENSE_1_0.txt`；libintl声明对照本机gettext 1.0的 `libintl.h`，LGPL-2.1全文取本机XZ随附的同一标准许可文本。实际包内共享库、可执行文件及资源的最终哈希在 `dist/bundle-manifest.json`，运行依赖闭包实测见[包检查结果](validation/bundle-smoke.json)。没有复制Homebrew命令行工具；构建时可使用Homebrew，运行时只引用系统或包内库。
 
+### 扩展词库（0.5.0）
+
+- zhwiki 与网络流行语取自 `fcitx5-pinyin-zhwiki` 0.3.1。数据源锁定见 `resources/dictionaries/sources.json`。分发转换产物时按 CC BY-SA 4.0 提供许可，署名维基百科贡献者与 fcitx5-pinyin-zhwiki，并说明过滤、去重及权重归零。
+- THUOCL 的 11 类词表固定在 `a30ce79d895d01ab5132a5c74c29703ff7efb4cc`，使用 MIT 许可及上游署名。词库 Release 附许可全文与转换计数。萌娘百科仅提供上游链接，内容为 CC BY-NC-SA。
+- 应用安装包只含渠道配置。下载词库保留其数据许可，发布证据见[扩展词库验收](validation/dictionaries-0.5.0.md)。
+
 ### 本轮翻译与更新的第三方边界
 
 - **不随包本地翻译模型**：small100／quickmt 权重、CT2、SentencePiece、PyTorch、tokenizer 均不进入安装包，也不提供下载入口；旧实验工具与结果已退役，历史可从 Git 追溯；通用考题保留，不代表引入模型分发义务。

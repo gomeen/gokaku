@@ -1814,12 +1814,13 @@ namespace {
 // 把 ids/handles 变成挂载目标集合；id 为 NULL 或重复时返回 false（未吞任何句柄）。
 bool collect_mount_targets(const char *const *ids, GcDictHandle *const *handles, size_t n,
                            std::vector<std::pair<std::string, GcDictHandle *>> &wanted) {
-    std::unordered_set<std::string> seen;
+    std::unordered_set<std::string_view> seen;
+    std::unordered_set<GcDictHandle *> seenHandles;
     wanted.reserve(n);
     for (size_t i = 0; i < n; ++i) {
-        if (ids[i] == nullptr) return false;
-        if (!seen.insert(ids[i]).second) return false;
-        wanted.emplace_back(ids[i], handles == nullptr ? nullptr : handles[i]);
+        if (ids[i] == nullptr || !seen.insert(ids[i]).second) return false;
+        if (handles[i] && (handles[i]->id != ids[i] || !seenHandles.insert(handles[i]).second)) return false;
+        wanted.emplace_back(ids[i], handles[i]);
     }
     return true;
 }
@@ -1831,7 +1832,9 @@ extern "C" int gc_normal_dicts_apply(GcNormalSession *s, const char *const *ids,
     // 组合进行中不接受挂载变更（合同：组合结束后的下一个事件前生效）。
     if (s->context->selectedLength() > 0 || !s->context->empty()) return 3;
     std::vector<std::pair<std::string, GcDictHandle *>> wanted;
-    if (!collect_mount_targets(ids, handles, n, wanted)) return 1;
+    try {
+        if (!collect_mount_targets(ids, handles, n, wanted)) return 1;
+    } catch (...) { return 1; }
     try {
         std::vector<size_t> consumed;
         const int rc = gogaku::dict_mount_apply(*s->ime->dict(), s->dictSlots, wanted, consumed);

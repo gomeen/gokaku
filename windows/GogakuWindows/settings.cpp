@@ -303,7 +303,7 @@ struct App {
     // 扩展词库页状态：列表来自 gc_dict_list（核心唯一解析实现）；导入在后台线程。
     std::vector<Json> dicts; std::vector<Json> catalogEntries; Json catalogState=Json::object();
     std::vector<std::wstring> corruptDicts;
-    std::atomic_bool dictImportCancel{false}; bool dictBusy=false; bool dictReady=false;
+    std::atomic_bool dictImportCancel{false}, dictDownloadCancel{false}; bool dictBusy=false; bool dictReady=false;
     void *activeCatalogDialog=nullptr;   // CatalogDialog*（类型在其定义之后）
     std::unique_ptr<gw::CandidateRenderer> renderer;
     std::string wordBaseline; int currentPage=0,scroll=0,contentHeight=0,themeIndex=0,wordKind=0,recording=-1;
@@ -323,7 +323,7 @@ struct App {
         }catch(...){}
 #endif
     }
-    ~App(){cancel=true;for(auto &job:jobs)if(job.joinable())job.join();if(icons)ImageList_Destroy(icons);if(font)DeleteObject(font);if(titleFont)DeleteObject(titleFont);if(helperFont)DeleteObject(helperFont);if(sideBrush)DeleteObject(sideBrush);}
+    ~App(){dictImportCancel=true;dictDownloadCancel=true;cancel=true;for(auto &job:jobs)if(job.joinable())job.join();if(icons)ImageList_Destroy(icons);if(font)DeleteObject(font);if(titleFont)DeleteObject(titleFont);if(helperFont)DeleteObject(helperFont);if(sideBrush)DeleteObject(sideBrush);}
     int px(int value)const{return MulDiv(value,int(dpi),96);}
     HWND get(int id)const{return GetDlgItem(pageWindow,id);}
     void status(const std::wstring &s,bool failed=false){SetWindowTextW(footer,s.c_str());SetWindowLongPtrW(footer,GWLP_USERDATA,failed?1:0);InvalidateRect(footer,nullptr,TRUE);ShowWindow(retry,failed && retryAction?SW_SHOW:SW_HIDE);}
@@ -635,7 +635,7 @@ void App::saveWords(std::vector<Word> value){
 // 渠道错误码 → 可读文案（离线／超时／404／验签失败／哈希不符／URL 越界分别可辨）。
 std::wstring dictCatalogErrorText(const std::string &error) {
     if (error == "blocked_url" || error == "blocked_host") return L"下载地址不受支持（URL 越界）";
-    if (error == "network_error") return L"无法连接词库渠道（离线或网络错误）";
+    if (error == "offline" || error == "network_error") return L"无法连接词库渠道（离线或网络错误）";
     if (error == "timeout") return L"连接词库渠道超时";
     if (error == "not_found") return L"词库渠道还没有发布清单（404）";
     if (error == "http_error" || error == "server_error") return L"词库渠道返回错误（HTTP）";
@@ -646,11 +646,11 @@ std::wstring dictCatalogErrorText(const std::string &error) {
     if (error == "invalid_manifest") return L"清单不合格式";
     if (error == "checksum_mismatch" || error == "size_mismatch") return L"下载的词库与清单校验值不符";
     if (error == "not_configured") return L"未配置词库渠道";
-    if (error == "已取消") return L"已取消";
+    if (error == "cancelled") return L"已取消";
     return gw::wide(error);
 }
 
-std::optional<gw::fs::path> pickDictFile(HWND owner) {
+std::vector<gw::fs::path> pickDictFiles(HWND owner) {
     const DWORD size = 32 * 1024;
     std::wstring buffer(size, L'\0');
     OPENFILENAMEW ofn{};
@@ -661,17 +661,17 @@ std::optional<gw::fs::path> pickDictFile(HWND owner) {
     ofn.nMaxFile = DWORD(buffer.size());
     ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER | OFN_HIDEREADONLY;
     ofn.lpstrTitle = L"选择词库文件";
-    if (!GetOpenFileNameW(&ofn)) return std::nullopt;
+    if (!GetOpenFileNameW(&ofn)) return {};
     auto directory = std::wstring(buffer.data());
-    std::vector<std::wstring> names;
+    std::vector<gw::fs::path> files;
     const wchar_t *cursor = buffer.data() + directory.size() + 1;
     while (*cursor) {
-        names.emplace_back(cursor);
-        cursor += names.back().size() + 1;
+        auto name = std::wstring(cursor);
+        files.push_back(gw::fs::path(directory) / name);
+        cursor += name.size() + 1;
     }
-    if (names.empty()) return gw::fs::path(directory);
-    // 多选文件顺序导入：逐个返回第一个，剩余由用户继续选择。
-    return gw::fs::path(directory) / names.front();
+    if (files.empty()) files.emplace_back(directory);
+    return files;
 }
 
 std::wstring dictBytesText(long long value) {
@@ -710,7 +710,7 @@ void App::fillDicts() {
         if (!learningGate) mode = L"—";
         else if (!d.value("learning", false)) mode = L"仅普通模式";
         else mode = L"学习可用";
-        row(get(321), int(i), {name, source, dictBytesText(d.value("estimatedBytes", 0ll)), mode,
+        row(get(321), int(i), {name, std::to_wstring(d.value("entryCount", 0ll)), source, dictBytesText(d.value("estimatedBytes", 0ll)), mode,
                                d.value("enabled", false) ? L"启用" : L"停用"});
     }
     refreshDictSummary();
@@ -720,13 +720,14 @@ void App::fillDicts() {
 
 void App::loadDicts() {
     try {
+        core.load();
         auto dir = gw::utf8((gw::userRoot() / L"dictionaries").wstring());
         const bool learningGate = settings.value("learningTranslationEnabled", false)
             && !liteInstall && !settings.value("liteModeEnabled", false);
         char *json = nullptr;
         if (core.gc_dict_list(dir.c_str(), learningGate ? 1u : 0u, &json))
             throw std::runtime_error("词库目录读取失败；请检查权限后重试。");
-        std::unique_ptr<char, std::function<void(void *)>> holder(json, [](void *p) { gc_contract_free(p); });
+        std::unique_ptr<char, decltype(core.gc_contract_free)> holder(json, core.gc_contract_free);
         auto value = Json::parse(json ? json : "{}", nullptr, false);
         if (!value.is_object()) throw std::runtime_error("词库列表解析失败");
         dicts = value.value("dictionaries", Json::array());
@@ -734,7 +735,6 @@ void App::loadDicts() {
         for (const auto &c : value.value("corrupt", Json::array()))
             corruptDicts.push_back(gw::wide(c.value("file", std::string())));
         dictReady = true;
-        dictBusy = false;
         EnableWindow(get(320), TRUE);
         EnableWindow(get(329), TRUE);
         fillDicts();
@@ -752,50 +752,56 @@ void App::dictionariesPage() {
     button(L"启用／停用", 322, 304, 56, 120);
     button(L"删除…", 323, 436, 56, 110);
     button(L"重新读取", 324, 558, 56, 110);
-    list(321, 96, 220, {{L"名称", 300}, {L"来源／许可", 210}, {L"内存估算", 90}, {L"学习", 100}, {L"状态", 70}});
-    label(L"", 331, 28, 20, 790);
-    label(L"扩展词默认全部参与排序，权重为 0；停用立即释放内存；对扩展词按 Ctrl＋Backspace 会提示到设置处理。", 332, 40, 20, 790);
-    label(L"打开搜狗细胞词库（pinyin.sogou.com/dict，下载 .scel 后本地导入；Gogaku 不做站内浏览）：", 333, 28, 20, 790);
+    EnableWindow(button(L"取消导入", 325, 680, 56, 100), FALSE);
+    actions[325] = [this](int) { dictImportCancel = true; };
+    list(321, 96, 220, {{L"名称", 225}, {L"条目", 70}, {L"来源／许可", 175}, {L"内存估算", 90}, {L"学习", 100}, {L"状态", 70}});
+    add(L"STATIC", L"", 0, 20, 328, 790, 36, 331);
+    label(L"扩展词默认全部参与排序，权重为 0；停用立即释放内存；对扩展词按 Ctrl＋Backspace 会提示到设置处理。", 366, 40, 20, 790);
+    label(L"打开搜狗细胞词库（pinyin.sogou.com/dict，下载 .scel 后本地导入；Gogaku 不做站内浏览）：", 406, 28, 20, 790);
     button(L"打开搜狗词库", 334, 20, 434, 140);
-    label(L"萌娘百科词库（mw2fcitx 发布页；内容为 CC BY-NC-SA，只能非商业使用，Gogaku 不分发）：", 335, 28, 20, 790);
+    label(L"萌娘百科词库（mw2fcitx 发布页；内容为 CC BY-NC-SA，只能非商业使用，Gogaku 不分发）：", 478, 28, 20, 790);
     button(L"打开萌娘百科发布页", 336, 20, 506, 180);
     if (dictReady && !corruptDicts.empty()) {
         std::wstring names;
         for (size_t i = 0; i < corruptDicts.size(); ++i) { if (i) names += L"、"; names += corruptDicts[i]; }
-        label(L"有词库元数据损坏，已备份为 .corrupt：" + names + L"。重新导入同一文件即可恢复。", 337, 40, 20, 790);
+        label(L"有词库元数据损坏，已备份为 .corrupt：" + names + L"。重新导入同一文件即可恢复。", 542, 40, 20, 790);
     }
     actions[320] = [this](int) {
         if (dictBusy) return;
-        auto file = pickDictFile(window);
-        if (!file) return;
+        auto files = pickDictFiles(window);
+        if (files.empty()) return;
+        core.load();
         dictBusy = true;
         dictImportCancel = false;
         EnableWindow(get(320), FALSE);
         EnableWindow(get(329), FALSE);
         status(L"正在导入…");
-        auto path = gw::utf8(file->wstring());
+        EnableWindow(get(325), TRUE);
         auto dictPath = gw::utf8((gw::installRoot() / L"data/sc.dict").wstring());
         auto dir = gw::utf8((gw::userRoot() / L"dictionaries").wstring());
         auto cancelFlag = &dictImportCancel;
-        job("dict-import", [this, path, dir, dictPath, cancelFlag]() {
-            GcDictImportRequest req{};
-            req.input_path = path.c_str();
-            req.dictionaries_dir = dir.c_str();
-            req.system_dict_path = dictPath.c_str();
-            req.display_name = nullptr;
-            char *result = nullptr;
-            char error[512]{};
-            const int rc = core.gc_dict_import(&req, [](void *ctx, size_t, size_t) -> int {
-                return reinterpret_cast<std::atomic_bool *>(ctx)->load() ? 1 : 0;
-            }, cancelFlag, &result, error, sizeof(error));
-            std::unique_ptr<char, std::function<void(void *)>> holder(
-                result, [](void *p) { if (p) gc_contract_free(p); });
-            if (rc == 3) return Json{{"cancelled", true}};
-            if (rc == 4) throw std::runtime_error(error[0] ? error : "同一源文件已导入过");
-            if (rc != 0) throw std::runtime_error(error[0] ? error : "导入失败：文件格式或读取失败");
-            auto value = Json::parse(result ? result : "{}", nullptr, false);
-            if (!value.is_object()) throw std::runtime_error("导入结果解析失败");
-            return value;
+        job("dict-import", [this, files = std::move(files), dir, dictPath, cancelFlag]() {
+            Json results = Json::array();
+            bool changed = false;
+            for (const auto &file : files) {
+                if (cancelFlag->load()) break;
+                const auto path = gw::utf8(file.wstring());
+                GcDictImportRequest req{path.c_str(), dir.c_str(), dictPath.c_str(), nullptr};
+                char *raw = nullptr;
+                char error[512]{};
+                const int code = core.gc_dict_import(&req, [](void *ctx, size_t, size_t) -> int {
+                    return static_cast<std::atomic_bool *>(ctx)->load() ? 1 : 0;
+                }, cancelFlag, &raw, error, sizeof(error));
+                std::unique_ptr<char, decltype(core.gc_contract_free)> holder(raw, core.gc_contract_free);
+                if (code == 3) break;
+                if (code != 0) {
+                    results.push_back({{"name", gw::utf8(file.filename().wstring())}, {"error", error}});
+                    continue;
+                }
+                results.push_back(Json::parse(raw));
+                changed = true;
+            }
+            return Json{{"files", results}, {"changed", changed}, {"cancelled", cancelFlag->load()}};
         }, generation);
     };
     actions[322] = [this](int) {
@@ -848,25 +854,26 @@ void App::fetchDictionaryCatalog() {
     EnableWindow(get(320), FALSE);
     EnableWindow(get(329), FALSE);
     status(L"正在获取官方清单…");
+    core.load();
     job("dict-catalog", [this]() {
         Json catalogConfig;
         try {
-            catalogConfig = Json::parse(gw::readFile(gw::installRoot() / L"dictionary-catalog-config.json", 65536));
+            catalogConfig = Json::parse(gw::readFile(gw::installRoot() / L"resources/dictionaries/catalog-config.json", 65536));
         } catch (...) { throw std::runtime_error("未配置词库渠道"); }
         if (!catalogConfig.is_object() || catalogConfig.value("schema", 0) != 1)
             throw std::runtime_error("未配置词库渠道");
         Json updateKeys = Json::array();
         try {
-            auto updateConfig = Json::parse(gw::readFile(gw::installRoot() / L"update-config.json", 65536));
+            auto updateConfig = Json::parse(gw::readFile(gw::installRoot() / L"resources/update/windows.json", 65536));
             updateKeys = updateConfig.value("trustedKeys", Json::array());
         } catch (...) {}
         auto dir = gw::utf8((gw::userRoot() / L"dictionaries").wstring());
         char *list = nullptr;
         if (core.gc_dict_list(dir.c_str(), 0, &list)) throw std::runtime_error("词库目录读取失败");
-        std::unique_ptr<char, std::function<void(void *)>> holder(list, [](void *p) { gc_contract_free(p); });
+        std::unique_ptr<char, decltype(core.gc_contract_free)> holder(list, core.gc_contract_free);
         auto local = Json::parse(list ? list : "{}", nullptr, false);
         gw::DictCoreApis apis{core.gc_dict_catalog_parse, core.gc_dict_install,
-                              [](void *p) { if (p) gc_contract_free(p); }};
+                              core.gc_contract_free};
         return gw::fetchDictionaryCatalog(apis, catalogConfig, updateKeys,
                                           local.value("dictionaries", Json::array()), &cancel);
     }, generation);
@@ -876,12 +883,14 @@ void App::installCatalogEntry(int index) {
     if (index < 0 || size_t(index) >= catalogEntries.size()) return;
     auto entry = catalogEntries[size_t(index)];
     const long long version = catalogState.value("catalogVersion", 0ll);
+    dictBusy = true;
+    dictDownloadCancel = false;
     status(L"正在下载并安装…");
     job("dict-install", [this, entry, version]() {
         gw::DictCoreApis apis{core.gc_dict_catalog_parse, core.gc_dict_install,
-                              [](void *p) { if (p) gc_contract_free(p); }};
+                              core.gc_contract_free};
         gw::installDictionary(apis, gw::utf8((gw::userRoot() / L"dictionaries").wstring()),
-                              entry, version, &cancel, [](double) {});
+                              entry, version, &dictDownloadCancel);
         return Json{{"ok", true}};
     }, generation);
 }
@@ -895,6 +904,7 @@ struct CatalogDialog {
     const std::vector<Json> &entries;
     int selected=-1; bool done=false,installing=false;
     std::function<void(int)> onInstall;
+    std::function<void()> onCancel;
     static CatalogDialog *self(HWND h){return reinterpret_cast<CatalogDialog *>(GetWindowLongPtrW(h,GWLP_USERDATA));}
     static LRESULT CALLBACK proc(HWND h,UINT m,WPARAM w,LPARAM l) {
         if(m==WM_NCCREATE)SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(reinterpret_cast<CREATESTRUCTW *>(l)->lpCreateParams));
@@ -906,7 +916,8 @@ struct CatalogDialog {
                     int index=(int)SendMessageW(dialog->list,LB_GETCURSEL,0,0);
                     if(index>=0 && size_t(index)<dialog->entries.size()){dialog->installing=true;EnableWindow(GetDlgItem(h,301),FALSE);SetWindowTextW(dialog->status,L"正在下载并安装…");dialog->onInstall(index);}
                 }
-                if(LOWORD(w)==302){dialog->done=true;}
+                if(LOWORD(w)==302){dialog->done=true;return 0;}
+                if(LOWORD(w)==303){dialog->onCancel();return 0;}
             }
             if(m==WM_CLOSE||m==WM_DESTROY){dialog->done=true;}
             if(m==WM_CTLCOLORSTATIC){SetBkMode(reinterpret_cast<HDC>(w),TRANSPARENT);return reinterpret_cast<LRESULT>(GetStockObject(WHITE_BRUSH));}
@@ -946,6 +957,7 @@ struct CatalogDialog {
         }
         child(L"BUTTON",L"安装",BS_DEFPUSHBUTTON|WS_TABSTOP,16,316,110,30,301);
         child(L"BUTTON",L"关闭",BS_PUSHBUTTON|WS_TABSTOP,136,316,110,30,302);
+        child(L"BUTTON",L"取消下载",BS_PUSHBUTTON|WS_TABSTOP,256,316,110,30,303);
         status=child(L"STATIC",L"",0,16,356,600,40,-1);
         EnableWindow(owner,FALSE);
         ShowWindow(window,SW_SHOWNORMAL);
@@ -960,7 +972,9 @@ void App::openCatalogDialog() {
     CatalogDialog dialog{instance,window,nullptr,nullptr,nullptr,nullptr,catalogEntries};
     activeCatalogDialog=&dialog;
     dialog.onInstall=[this](int index){installCatalogEntry(index);};
+    dialog.onCancel=[this]{dictDownloadCancel=true;};
     dialog.run();
+    if (dialog.installing) dictDownloadCancel = true;
     activeCatalogDialog=nullptr;
     // 安装后的列表刷新由 job 结果回调处理；弹层关闭后重读一次。
     if(onPage(L"扩展词库")) loadDicts();
@@ -1300,23 +1314,32 @@ LRESULT App::result(Result &r){
     // 扩展词库任务（docs/dictionaries.md；核心返回后统一重读列表并通知输入法）。
     if(r.type=="dict-import"||r.type=="dict-toggle"||r.type=="dict-remove"||r.type=="dict-install"){
         dictBusy=false;
-        if(r.type=="dict-toggle"||r.type=="dict-remove"||r.type=="dict-install")notifyDict();
         if(onPage(L"扩展词库"))loadDicts();
-        if(!r.error.empty()){status(L"失败："+r.error,true);return 0;}
-        if(r.type=="dict-import"){
-            if(r.value.value("cancelled",false)) status(L"导入已取消；未留下半成品文件。");
-            else{
-                auto dropped=r.value.value("dropped",Json::object());
-                std::wstring detail;
-                for(auto it=dropped.begin();it!=dropped.end();++it)
-                    if(it.value().is_number_integer()&&it.value().get<long long>()>0)
-                        detail+=(detail.empty()?L"":L"、")+gw::wide(it.key())+L" "+gw::wide(std::to_string(it.value().get<long long>()));
-                auto name=r.value.value("name",std::string());
-                auto count=r.value.value("entryCount",0);
-                std::wstring text=L"已导入「"+gw::wide(name)+L"」："+gw::wide(std::to_string(count))+L" 条";
-                if(!detail.empty()) text+=L"；丢弃 "+detail;
-                status(text);
+        if(!r.error.empty()){
+            const auto error = dictCatalogErrorText(gw::utf8(r.error));
+            if (activeCatalogDialog && r.type=="dict-install")
+                static_cast<CatalogDialog *>(activeCatalogDialog)->installFinished(error.c_str());
+            status(L"失败："+error,true);
+            return 0;
+        }
+        if (r.type != "dict-import" || r.value.value("changed", false)) notifyDict();
+        if (r.type == "dict-import") {
+            EnableWindow(get(325), FALSE);
+            std::wstring summary;
+            for (const auto &item : r.value.at("files")) {
+                summary += gw::wide(item.value("name", std::string())) + L"：";
+                if (item.contains("error")) {
+                    summary += gw::wide(item.at("error").get<std::string>()) + L"\n";
+                    continue;
+                }
+                summary += L"导入 " + std::to_wstring(item.value("entryCount", 0)) + L" 条";
+                for (const auto &[reason, count] : item.at("dropped").items())
+                    if (count.get<int>() > 0) summary += L" · " + gw::wide(reason) + L" " + std::to_wstring(count.get<int>());
+                summary += L"\n";
             }
+            if (r.value.value("cancelled", false)) summary += L"已取消剩余文件。";
+            MessageBoxW(window, summary.c_str(), L"词库导入结果", MB_OK);
+            status(L"词库导入结束");
         } else if(r.type=="dict-toggle") status(L"已更新启用状态；输入法将自动重载。");
         else if(r.type=="dict-remove") status(L"已删除词库；输入法将自动重载。");
         else if(r.type=="dict-install") status(L"已安装官方词库；输入法将自动重载。");

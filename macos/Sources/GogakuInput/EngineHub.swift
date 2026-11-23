@@ -37,6 +37,7 @@ final class EngineHub {
             NSLog("Gogaku EngineHub: 共享核心创建失败（词库缺失或损坏）")
         }
         normal = engine
+        if engine != nil { scheduleDictionaryReload() }
         return engine
     }
 
@@ -61,6 +62,7 @@ final class EngineHub {
                 modelPath: Paths.engineData.appendingPathComponent("zh_CN.lm").path))
             learning = session
             learningLogged = false
+            scheduleDictionaryReload()
             return session
         } catch {
             // 词库缺失时每次学习键入重试（与共享普通引擎同策略），但只记一次日志。
@@ -107,144 +109,86 @@ final class EngineHub {
     }
 
     /// 引擎队列上同步执行（普通模式逐键路径）。
-    func sync<T>(_ body: () -> T) -> T { queue.sync(execute: body) }
+    func sync<T>(_ body: () -> T) -> T {
+        queue.sync {
+            flushPendingDictApply()
+            return body()
+        }
+    }
 
     /// 引擎队列上异步执行。
-    func async(_ body: @escaping () -> Void) { queue.async(execute: body) }
+    func async(_ body: @escaping () -> Void) {
+        queue.async {
+            self.flushPendingDictApply()
+            body()
+        }
+    }
 
     // MARK: - 扩展词库挂载（docs/dictionaries.md §六：后台串行队列解析，
     // 回引擎队列 apply；组合中核心返回 3，在组合结束后的下一个事件前重试）
 
-    /// 有待重试的挂载（输入侧在每个事件后查询，非组合状态时冲刷）。引擎队列
-    /// 上写入，主线程只读存在性（与 existingLearningSession 同口径）。
-    var hasPendingDictApply: Bool {
-        pendingNormalApply != nil || pendingLearningApply != nil
+    private typealias DictBatch = (ids: [String], handles: [OpaquePointer?])
+    private var dictionaryGeneration = 0
+
+    func reloadDictionaries() {
+        queue.async { self.scheduleDictionaryReload() }
     }
 
-    /// 设置应用写盘后的通知入口：后台解析全部启用词库，回引擎队列应用。
-    /// 普通会话与学习会话各自独立解析加载（句柄所有权不能跨会话共享）。
-    func reloadDictionaries(learningEnabled: Bool) {
+    private func scheduleDictionaryReload() {
+        dictionaryGeneration += 1
+        let generation = dictionaryGeneration
+        let loadNormal = normal != nil
+        let loadLearning = learning != nil
         dictQueue.async { [weak self] in
-            guard let self else { return }
-            let (ids, handles) = self.loadEnabledDictHandles(learningAvailable: learningEnabled)
-            self.queue.async { [weak self] in
-                self?.applyDictionaries(ids: ids, handles: handles)
-            }
-        }
-    }
-
-    /// dictQueue：加载全部启用词库；返回的句柄所有权随集合移交。
-    private func loadEnabledDictHandles(learningAvailable: Bool) -> ([String], [OpaquePointer?]) {
-        do {
-            let listing = try DictionaryStore.list(learningAvailable: learningAvailable)
-            var ids: [String] = []
-            var handles: [OpaquePointer?] = []
-            for entry in listing.entries where entry.enabled {
-                var handle: OpaquePointer?
-                var err = [CChar](repeating: 0, count: 256)
-                let idCopy = entry.id.unsafeConstUTF8Copy()
-                defer { freeConst(idCopy) }
-                let rc = gc_dict_load(DictionaryStore.dictionariesDirectory.path,
-                                      idCopy, &handle, &err, err.count)
-                if rc == 0, let handle {
-                    ids.append(entry.id)
-                    handles.append(handle)
-                } else {
-                    NSLog("Gogaku EngineHub: 词库 %@ 加载失败（%d）",
-                          entry.id as NSString, rc)
+            guard let self, let listing = try? DictionaryStore.list(learningAvailable: loadLearning) else { return }
+            let normalBatch = loadNormal ? Self.loadBatch(listing.entries, learningOnly: false) : nil
+            let learningBatch = loadLearning ? Self.loadBatch(listing.entries, learningOnly: true) : nil
+            self.queue.async {
+                guard generation == self.dictionaryGeneration else {
+                    Self.freeBatch(normalBatch)
+                    Self.freeBatch(learningBatch)
+                    return
                 }
-            }
-            return (ids, handles)
-        } catch {
-            NSLog("Gogaku EngineHub: 词库列表读取失败")
-            return ([], [])
-        }
-    }
-
-    /// 引擎队列上应用挂载集合。组合中把句柄存为待重试；替换待重试集合时
-    /// 释放旧句柄（未被核心消费）。学习会话独立解析加载（阈值过滤在核心）。
-    private func applyDictionaries(ids: [String], handles: [OpaquePointer?]) {
-        if let pending = pendingNormalApply { freeHandles(pending.handles) }
-        pendingNormalApply = nil
-        if let pending = pendingLearningApply { freeHandles(pending.handles) }
-        pendingLearningApply = nil
-
-        if let normal {
-            if normal.applyDicts(ids: ids, handles: handles) == 3 {
-                pendingNormalApply = (ids: ids, handles: handles)
-            }
-            // 返回 0／2：非空句柄已由核心释放（含内部错误路径）。
-        } else {
-            freeHandles(handles)
-        }
-        // 学习会话独立加载；无会话（学习关闭或未创建）不加载。
-        if existingLearningSession != nil, !ids.isEmpty {
-            let target = ids
-            dictQueue.async { [weak self] in
-                self?.loadAndApplyLearning(ids: target)
+                Self.freeBatch(self.pendingNormalApply)
+                Self.freeBatch(self.pendingLearningApply)
+                self.pendingNormalApply = normalBatch
+                self.pendingLearningApply = learningBatch
+                self.flushPendingDictApply()
             }
         }
     }
 
-    /// 学习会话的独立加载（组合中返回 3 转待重试）。
-    private func loadAndApplyLearning(ids: [String]) {
-        var handles: [OpaquePointer?] = []
-        for id in ids {
+    private static func loadBatch(_ entries: [DictionaryStore.Entry], learningOnly: Bool) -> DictBatch {
+        var batch: DictBatch = ([], [])
+        for entry in entries where entry.enabled && (!learningOnly || entry.learning) {
             var handle: OpaquePointer?
-            var err = [CChar](repeating: 0, count: 256)
-            let idCopy = id.unsafeConstUTF8Copy()
-            defer { freeConst(idCopy) }
-            if gc_dict_load(DictionaryStore.dictionariesDirectory.path, idCopy,
-                            &handle, &err, err.count) == 0, let handle {
-                handles.append(handle)
+            let code = gc_dict_load(DictionaryStore.dictionariesDirectory.path, entry.id, &handle, nil, 0)
+            if code == 0, let handle {
+                batch.ids.append(entry.id)
+                batch.handles.append(handle)
             }
         }
-        queue.async { [weak self] in
-            guard let self else {
-                handles.forEach { gc_dict_handle_free($0) }
-                return
-            }
-            if let learning = self.existingLearningSession {
-                if learning.applyDicts(ids: ids, handles: handles) == 3 {
-                    if let pending = self.pendingLearningApply { self.freeHandles(pending.handles) }
-                    self.pendingLearningApply = (ids: ids, handles: handles)
-                }
-            } else {
-                handles.forEach { gc_dict_handle_free($0) }
-            }
-        }
+        return batch
     }
 
-    private func freeHandles(_ handles: [OpaquePointer?]) {
-        for handle in handles where handle != nil {
-            gc_dict_handle_free(handle)
-        }
+    private static func freeBatch(_ batch: DictBatch?) {
+        batch?.handles.forEach { gc_dict_handle_free($0) }
     }
 
-    /// 组合结束后的下一个事件前调用（输入侧在非组合状态的事件后触发）：
-    /// 冲刷待重试挂载。
+    /// 与输入事件在同一串行队列执行。组合未结束时让核心保留原挂载。
     func flushPendingDictApply() {
-        queue.async { [weak self] in
-            guard let self else { return }
-            if let pending = self.pendingNormalApply {
-                self.pendingNormalApply = nil
-                if let normal = self.normal {
-                    if normal.applyDicts(ids: pending.ids, handles: pending.handles) == 3 {
-                        self.pendingNormalApply = pending
-                    }
-                } else {
-                    self.freeHandles(pending.handles)
-                }
+        if let batch = pendingNormalApply {
+            let code = normal?.applyDicts(ids: batch.ids, handles: batch.handles) ?? 1
+            if code != 3 {
+                if code == 1 { Self.freeBatch(batch) }
+                pendingNormalApply = nil
             }
-            if let pending = self.pendingLearningApply {
-                self.pendingLearningApply = nil
-                if let learning = self.existingLearningSession {
-                    if learning.applyDicts(ids: pending.ids, handles: pending.handles) == 3 {
-                        self.pendingLearningApply = pending
-                    }
-                } else {
-                    self.freeHandles(pending.handles)
-                }
+        }
+        if let batch = pendingLearningApply {
+            let code = learning?.applyDicts(ids: batch.ids, handles: batch.handles) ?? 1
+            if code != 3 {
+                if code == 1 { Self.freeBatch(batch) }
+                pendingLearningApply = nil
             }
         }
     }

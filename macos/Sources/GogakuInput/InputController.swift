@@ -803,7 +803,7 @@ final class GogakuInputController: IMKInputController {
 
     /// 扩展词库变更：后台串行队列（QoS utility）加载词库，回引擎队列挂载。
     @objc private func reloadDictionaries() {
-        EngineHub.shared.reloadDictionaries(learningEnabled: learningEnabled)
+        EngineHub.shared.reloadDictionaries()
     }
 
     @objc private func reloadSettings() {
@@ -1065,10 +1065,6 @@ final class GogakuInputController: IMKInputController {
         applyNormal(snap, target: target, swapTranslation: swapTranslation)
         if !snap.consumed {
             if snap.composing { suspend() } else { panel.dismiss() }
-        }
-        // 组合结束后的下一个事件前重试挂载（docs/dictionaries.md §六）。
-        if EngineHub.shared.hasPendingDictApply, !snap.composing {
-            EngineHub.shared.flushPendingDictApply()
         }
         return snap.consumed
     }

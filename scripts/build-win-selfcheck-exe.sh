@@ -99,7 +99,7 @@ EOF
 cmake -S ecm -B ecm-build -G Ninja -DCMAKE_MAKE_PROGRAM=$NINJA \
   -DCMAKE_TOOLCHAIN_FILE=$SC/toolchain-static.cmake -DCMAKE_INSTALL_PREFIX=$SC/prefix \
   -DBUILD_TESTING=OFF -DBUILD_DOC=OFF >/dev/null
-cmake --build ecm-build -j 8 >/dev/null
+cmake --build ecm-build -j 2 >/dev/null
 cmake --install ecm-build >/dev/null
 
 FCITX_OPTS=(-DENABLE_TEST=OFF -DENABLE_TESTING_ADDONS=OFF -DENABLE_X11=OFF
@@ -109,7 +109,7 @@ FCITX_OPTS=(-DENABLE_TEST=OFF -DENABLE_TESTING_ADDONS=OFF -DENABLE_X11=OFF
 cmake -S fcitx5 -B fcitx5-build -G Ninja -DCMAKE_MAKE_PROGRAM=$NINJA \
   -DCMAKE_TOOLCHAIN_FILE=$SC/toolchain-static.cmake -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=$SC/prefix -DCMAKE_PREFIX_PATH=$SC/prefix "${FCITX_OPTS[@]}" >/dev/null
-cmake --build fcitx5-build --target Fcitx5Utils -j 8 >/dev/null
+cmake --build fcitx5-build --target Fcitx5Utils -j 2 >/dev/null
 cmake --install fcitx5-build/src/lib/fcitx-utils >/dev/null
 
 LIBIME_OPTS=(-DENABLE_TEST=OFF -DENABLE_DATA=OFF -DENABLE_DOC=OFF -DENABLE_TOOLS=ON
@@ -119,7 +119,7 @@ cmake -S libime -B libime-build -G Ninja -DCMAKE_MAKE_PROGRAM=$NINJA \
   -DCMAKE_PROJECT_INCLUDE=$SC/consumer-prelude.cmake \
   -DCMAKE_TOOLCHAIN_FILE=$SC/toolchain-static.cmake -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_INSTALL_PREFIX=$SC/prefix -DCMAKE_PREFIX_PATH=$SC/prefix "${LIBIME_OPTS[@]}" >/dev/null
-cmake --build libime-build --target IMEPinyin libime_pinyindict libime_slm_build_binary -j 8 >/dev/null
+cmake --build libime-build --target IMEPinyin libime_pinyindict libime_slm_build_binary -j 2 >/dev/null
 # 静态库落位到 core 的 link_directories（deps-root/build/bin＋prefix/lib）
 mkdir -p $SC/deps-root/build/bin
 find libime-build -name 'lib*.a' -exec cp -f {} $SC/deps-root/build/bin/ \; 2>/dev/null || true
@@ -290,7 +290,7 @@ BOOST_INCLUDE=/usr/local/opt/boost/include \
 cmake -S core-src -B core-build -G Ninja -DCMAKE_MAKE_PROGRAM=$NINJA \
   -DCMAKE_TOOLCHAIN_FILE=$SC/toolchain-static.cmake -DCMAKE_BUILD_TYPE=Release \
   -DGOGAKU_DEPS=$SC/deps-root -DGOGAKU_PANEL_EXPORTS=OFF >/dev/null
-cmake --build core-build -j 8 > /tmp/static-core-build.log 2>&1 || {
+cmake --build core-build -j 2 > /tmp/static-core-build.log 2>&1 || {
   grep -E "error|FAILED" /tmp/static-core-build.log | head -10; exit 1; }
 
 # 静态产物位置动态定位（exe 可能在构建根或 bin/）
