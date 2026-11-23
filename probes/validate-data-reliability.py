@@ -11,12 +11,19 @@
    （corrupt_userlm、custom_store）覆盖，不在此重复。
 3. 删除不复活：学习→flush→Control＋Backspace 删词→flush→重载，学习词
    标记必须消失。
+4. 两个进程同时启停同一本词库，读取一致的终态，元数据及词库字节保持完整。
 
 用法：python3 probes/validate-data-reliability.py [--rounds 40]
 前提：.build/core 已构建（gogaku_data_reliability_worker）；
 GOGAKU_CORE_TEST_DATA 或默认缓存提供出厂词典／模型。
 """
 import argparse
+from concurrent.futures import ProcessPoolExecutor
+import ctypes
+from functools import lru_cache
+import json
+import multiprocessing
+import os
 import random
 import shutil
 import signal
@@ -140,6 +147,77 @@ def delete_not_resurrected() -> None:
     shutil.rmtree(user_dir, ignore_errors=True)
 
 
+@lru_cache(maxsize=1)
+def dictionary_core():
+    lib = ctypes.CDLL(str(ROOT / '.build/core/libgogaku_core.dylib'))
+    string, size = ctypes.c_char_p, ctypes.c_size_t
+    lib.gc_dict_set_enabled.argtypes = [string, string, ctypes.c_int32, string, size]
+    lib.gc_dict_list.argtypes = [string, ctypes.c_uint32, ctypes.POINTER(string)]
+    lib.gc_dict_verify.argtypes = [string, string, ctypes.POINTER(string), string, size]
+    lib.gc_contract_free.argtypes = [ctypes.c_void_p]
+    lib.gc_contract_free.restype = None
+    return lib
+
+
+def read_dictionary_metadata(directory):
+    lib = dictionary_core()
+    payload = ctypes.c_char_p()
+    try:
+        if lib.gc_dict_list(directory, 0, ctypes.byref(payload)) != 0 or not payload.value:
+            raise RuntimeError('词库目录无法读取')
+        listing = json.loads(payload.value)
+    finally:
+        if payload:
+            lib.gc_contract_free(payload)
+    if listing['corrupt'] or len(listing['dictionaries']) != 1:
+        raise RuntimeError('词库元数据损坏或条目丢失')
+    return listing['dictionaries'][0]
+
+
+def set_dictionary_enabled(directory, dictionary_id, enabled):
+    error = ctypes.create_string_buffer(512)
+    result = dictionary_core().gc_dict_set_enabled(directory, dictionary_id, enabled, error, len(error))
+    if result != 0:
+        raise RuntimeError(f'启停写入失败（{result}）：{error.value.decode(errors="replace")}')
+
+
+def dictionary_toggle_contention(rounds):
+    print('场景 4：两个设置写入方并发启停扩展词库')
+    factory = Path(os.environ.get('GOGAKU_CORE_TEST_DATA',
+                   Path.home() / 'Library/Caches/Gogaku/libime-1.1.17/data')) / 'sc.dict'
+    tool = ROOT / '.build/core/gogaku_dict_tool'
+    with tempfile.TemporaryDirectory(prefix='gogaku-rel-dicts-') as work:
+        root = Path(work)
+        source = root / 'sample.txt'
+        source.write_text("验收夹具词条 yan'shou'jia'ju'ci'tiao\n", encoding='utf-8')
+        directory = root / 'dicts'
+        result = run([tool, 'convert', '--input', source, '--system-dict', factory,
+                      '--name', '验收词库', '--work', directory, '--output', root / 'converted.dict',
+                      '--report', root / 'report.json'], timeout=60)
+        if result.returncode != 0:
+            check(False, '扩展词库准备失败：' + result.stderr.strip())
+            return
+        path = os.fsencode(directory)
+        baseline = read_dictionary_metadata(path)
+        dictionary_id = baseline['id'].encode('ascii')
+        del baseline['enabled']
+        spawn = multiprocessing.get_context('spawn')
+        with ProcessPoolExecutor(max_workers=2, mp_context=spawn) as writers:
+            for i in range(rounds):
+                writes = [writers.submit(set_dictionary_enabled, path, dictionary_id, enabled)
+                          for enabled in (i % 2, 1 - i % 2)]
+                for write in writes:
+                    write.result(timeout=20)
+                reads = [writers.submit(read_dictionary_metadata, path) for _ in range(2)]
+                left, right = (read.result(timeout=20) for read in reads)
+                enabled = left.get('enabled')
+                check(left == right and type(enabled) is bool and
+                      {key: value for key, value in left.items() if key != 'enabled'} == baseline,
+                      f'第{i + 1}轮双方读回相同终态且元数据完整')
+        check(dictionary_core().gc_dict_verify(path, dictionary_id, None, None, 0) == 0,
+              '并发启停后词库内容哈希一致')
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rounds", type=int, default=40)
@@ -150,6 +228,7 @@ def main() -> None:
     kill_during_write(args.rounds)
     corrupt_injection()
     delete_not_resurrected()
+    dictionary_toggle_contention(args.rounds)
     if failures:
         print(f"数据可靠性：{len(failures)} 项失败 — FAIL")
         return 2

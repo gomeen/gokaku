@@ -377,6 +377,8 @@ def check_quality(ctx):
     if not binary.exists():
         return BLOCK, '质量测试二进制缺失（核心未构建？）', None
     env = {'GOGAKU_CORE_TEST_DATA': str(CACHE / 'data')} if (CACHE / 'data').exists() else {}
+    if os.environ.get('GOGAKU_QUALITY_EXTENSION_DICT'):
+        env['GOGAKU_QUALITY_EXTENSION_DICT'] = os.environ['GOGAKU_QUALITY_EXTENSION_DICT']
     result = sh([binary], env=env, timeout=600)
     evidence = ctx.evidence('quality.log', result.stdout + result.stderr)
     if 'SKIP:' in result.stderr or 'SKIP:' in result.stdout:
@@ -387,7 +389,13 @@ def check_quality(ctx):
     first, top10 = int(baseline.group(1)), int(baseline.group(2))
     if first < 109 or top10 < 112:
         return FAIL, f'质量下降：首选 {first}/120、前十 {top10}/120（门槛 109／112）', evidence
-    return PASS, f'首选 {first}/120、前十 {top10}/120（≥109／112）', evidence
+    mounted = re.search(r'扩展词库：首选 (\d+)／120，前十 (\d+)／120', result.stderr)
+    if env.get('GOGAKU_QUALITY_EXTENSION_DICT') and not mounted:
+        return FAIL, '缺少扩展词库质量结果', evidence
+    detail = f'出厂首选 {first}/120、前十 {top10}/120（≥109／112）'
+    if mounted:
+        detail += f'，挂载后首选 {mounted[1]}/120、前十 {mounted[2]}/120'
+    return PASS, detail, evidence
 
 
 def check_render(ctx):
@@ -439,7 +447,7 @@ def check_render(ctx):
 
 
 def check_data_reliability(ctx):
-    """数据可靠性 40 轮：强杀、损坏恢复、删除不复活。"""
+    """数据可靠性 40 轮，覆盖强杀、损坏恢复、删除不复活及词库并发启停。"""
     worker = Path(ctx['core_dir']) / 'gogaku_data_reliability_worker'
     if not worker.exists():
         return BLOCK, '可靠性 worker 缺失（核心未构建？）', None
@@ -447,7 +455,7 @@ def check_data_reliability(ctx):
     evidence = ctx.evidence('data-reliability.log', result.stdout + result.stderr)
     if result.returncode != 0:
         return FAIL, f'数据可靠性失败（exit={result.returncode}）', evidence
-    return PASS, '40 轮强杀／损坏恢复／删词不复活通过', evidence
+    return PASS, '40 轮强杀恢复和扩展词库并发启停通过，损坏恢复与删词不复活通过', evidence
 
 
 def check_asan_ubsan(ctx):
