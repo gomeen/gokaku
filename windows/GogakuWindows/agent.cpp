@@ -559,12 +559,14 @@ void serve(HANDLE pipe) {
         } catch(...) {}
         std::lock_guard<std::mutex> lock(core.mutex);
         if(core.active==session.id) {try {core.normalEvent(GC_EV_FOCUS_SYNC);} catch(...) {} core.active.clear();}
+#if !GOGAKU_LITE
         // 学习会话即将销毁：从挂载注册表移除（连接结束，不再挂载）。
         auto unregister=[&](std::vector<GcLearningSession *> &list) {
             list.erase(std::remove(list.begin(),list.end(),session.learning),list.end());
         };
         unregister(core.learningDictLive);
         unregister(core.learningDictPending);
+#endif
     }
     DisconnectNamedPipe(pipe);CloseHandle(pipe);CoUninitialize();--clients;
 }
