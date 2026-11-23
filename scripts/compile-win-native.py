@@ -100,7 +100,7 @@ def compile_arch(args, arch):
         settings_resource = obj / 'settings-resource.o'
         run([windres, '-I', windows, '-i', windows / 'settings.rc', '-o', settings_resource])
         run([cxx, '-static', '-municode', '-mwindows', '-o', out / 'GogakuSettings.exe',
-             *[obj / f'{name}.o' for name in ('settings', 'services', 'update',
+             *[obj / f'{name}.o' for name in ('settings', 'services', 'update', 'dictionaries',
                  'platform', 'appearance', 'themes', 'enable', 'monocypher', 'monocypher-ed25519')],
              obj / 'settings_contract.o', obj / 'theme_contract.o', settings_resource,
              *panel_libs, *libs, '-lwinhttp', '-lcomctl32', '-lcomdlg32', '-luxtheme'])

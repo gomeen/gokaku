@@ -26,6 +26,9 @@ struct Core {
     API(gc_normal_update) API(gc_normal_set_layout) API(gc_normal_set_vertical_page_size)
     API(gc_normal_flush) API(gc_normal_reload_custom_words)
     API(gc_normal_clear_user_data) API(gc_snapshot_free)
+    // 扩展词库挂载（docs/dictionaries.md §五；普通会话挂载在 Lite 同样可用）。
+    API(gc_dict_load) API(gc_dict_handle_free) API(gc_normal_dicts_apply)
+    API(gc_learning_dicts_apply) API(gc_learning_dicts_mounted)
 #if !GOGAKU_LITE
     API(gc_learning_session_create) API(gc_learning_session_destroy)
     API(gc_learning_handle) API(gc_learning_snapshot_free)
@@ -37,6 +40,13 @@ struct Core {
     uint64_t revision = 1, credentialsGeneration = 1;
     std::string active;
     bool preferencesDirty = false;
+    // 扩展词库（docs/dictionaries.md §六）：组合中 apply 返回 3 时保留目标
+    // 集合，watcher 每个.tick 在非组合状态重试（handles 为 NULL＝保留现状）。
+    std::vector<std::string> pendingDictIds;
+    std::vector<GcDictHandle *> pendingDictHandles;
+    uint64_t dictGeneration = 0;
+    std::vector<GcLearningSession *> learningDictPending;   // 需要挂载/重试的学习会话
+    std::vector<GcLearningSession *> learningDictLive;      // 存活学习会话注册表
     bool load() {
         auto path = gw::installRoot()/L"bin"/L"x64"/L"libgogaku_core.dll";
         library = LoadLibraryExW(path.c_str(),nullptr,LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR|LOAD_LIBRARY_SEARCH_SYSTEM32);
@@ -118,10 +128,134 @@ std::atomic<unsigned> clients{0}, workers{0};
 std::atomic<ULONGLONG> lastRequestMs{0};
 std::atomic_bool stopping{false};
 std::string str(const char *s) { return s?s:""; }
+// 启用的扩展词库 id（按 addedAt 挂载顺序）。元数据解析只在代理进程内做
+// 路径与开关读取；加载与校验仍走核心 gc_dict_load（contentId 校验在核心）。
+std::vector<std::string> enabledDictIds() {
+    auto dir = gw::userRoot() / L"dictionaries";
+    std::vector<std::pair<long long, std::string>> entries;
+    std::error_code ec;
+    for (const auto &file : gw::fs::directory_iterator(dir, ec)) {
+        if (ec) break;
+        auto name = file.path().filename().wstring();
+        if (name.size() < 6 || name.compare(name.size() - 5, 5, L".json") != 0) continue;
+        try {
+            auto meta = Json::parse(gw::readFile(file.path(), 1024 * 1024), nullptr, false);
+            if (!meta.is_object()) continue;
+            auto id = meta.value("id", std::string());
+            if (id.empty()) continue;
+            entries.emplace_back(meta.value("addedAt", 0ll), std::move(id));
+        } catch (...) {}
+    }
+    std::sort(entries.begin(), entries.end());
+    std::vector<std::string> ids;
+    for (auto &entry : entries) ids.push_back(std::move(entry.second));
+    return ids;
+}
+
+// dictionaries 目录的“最新变化”时间戳（文件级 mtime 取最大值）。
+long long dictionariesStamp() {
+    auto dir = gw::userRoot() / L"dictionaries";
+    long long stamp = 0;
+    std::error_code ec;
+    for (const auto &file : gw::fs::directory_iterator(dir, ec)) {
+        if (ec) break;
+        const long long time = static_cast<long long>(file.last_write_time(ec).time_since_epoch().count());
+        stamp = std::max(stamp, time);
+    }
+    return stamp;
+}
+
 struct Task {
     Json request, result;
     std::atomic_bool cancel{false}, done{false};
 };
+
+// ── 扩展词库（docs/dictionaries.md §六） ─────────────────────────────
+// 加载在 watcher 线程执行（不占 core.mutex）；句柄所有权随集合移交：
+// gc_normal／gc_learning_dicts_apply 的非空句柄一律由核心释放（含内部错误
+// 路径）；组合中（rc==3）句柄未被消费，普通侧保留待重试，学习侧直接释放、
+// 下个 tick 重试。
+
+// 需要 core.mutex：应用目标集合到普通会话。
+void applyNormalDictsLocked(const std::vector<std::string> &ids,
+                            std::vector<GcDictHandle *> handles) {
+    if (ids.empty()) {
+        core.gc_normal_dicts_apply(core.normal, nullptr, nullptr, 0);
+        for (auto *handle : handles) core.gc_dict_handle_free(handle);
+        return;
+    }
+    std::vector<const char *> idPointers;
+    for (const auto &id : ids) idPointers.push_back(id.c_str());
+    const int rc = core.gc_normal_dicts_apply(core.normal, idPointers.data(),
+                                              handles.data(), ids.size());
+    if (rc == 3) {
+        // 组合进行中：句柄未被消费，与目标集合一起保留，组合结束后重试。
+        if (!core.pendingDictHandles.empty()) {
+            for (auto *handle : core.pendingDictHandles) core.gc_dict_handle_free(handle);
+        }
+        core.pendingDictIds = ids;
+        core.pendingDictHandles = std::move(handles);
+        return;
+    }
+    // rc 0／2：非空句柄已由核心释放（含内部错误路径）。
+    core.pendingDictIds.clear();
+    if (!core.pendingDictHandles.empty()) {
+        for (auto *handle : core.pendingDictHandles) core.gc_dict_handle_free(handle);
+        core.pendingDictHandles.clear();
+    }
+}
+
+// 需要 core.mutex：应用到单个学习会话。
+void applyLearningDictsLocked(GcLearningSession *session,
+                              const std::vector<std::string> &ids,
+                              std::vector<GcDictHandle *> handles) {
+    if (ids.empty()) {
+        core.gc_learning_dicts_apply(session, nullptr, nullptr, 0);
+        for (auto *handle : handles) core.gc_dict_handle_free(handle);
+        return;
+    }
+    std::vector<const char *> idPointers;
+    for (const auto &id : ids) idPointers.push_back(id.c_str());
+    const int rc = core.gc_learning_dicts_apply(session, idPointers.data(),
+                                                handles.data(), ids.size());
+    if (rc == 3) for (auto *handle : handles) core.gc_dict_handle_free(handle);
+}
+
+// watcher 线程：解析＋应用一轮挂载（加载不持锁；apply 持 core.mutex）。
+void reloadDictionariesTick(bool force) {
+    std::vector<std::string> ids;
+    {
+        std::lock_guard<std::mutex> lock(core.mutex);
+        ids = core.pendingDictIds.empty() ? enabledDictIds() : core.pendingDictIds;
+        if (!force && ids.empty() && core.learningDictPending.empty()) return;
+    }
+    auto dir = gw::utf8((gw::userRoot() / L"dictionaries").wstring());
+    auto load = [&dir](const std::vector<std::string> &loadIds) {
+        std::vector<GcDictHandle *> handles;
+        for (const auto &id : loadIds) {
+            GcDictHandle *handle = nullptr;
+            char error[256]{};
+            if (core.gc_dict_load(dir.c_str(), id.c_str(), &handle, error, sizeof(error)) == 0 && handle)
+                handles.push_back(handle);
+        }
+        return handles;
+    };
+    auto handles = load(ids);
+    std::vector<GcLearningSession *> learningTargets;
+    {
+        std::lock_guard<std::mutex> lock(core.mutex);
+        applyNormalDictsLocked(ids, std::move(handles));
+        ++core.dictGeneration;
+        learningTargets = core.learningDictPending;
+        core.learningDictPending.clear();
+    }
+    for (auto *session : learningTargets) {
+        // 每个学习会话需要独立句柄集合（所有权随 apply 移交核心）。
+        auto learningHandles = load(ids);
+        std::lock_guard<std::mutex> lock(core.mutex);
+        applyLearningDictsLocked(session, ids, std::move(learningHandles));
+    }
+}
 struct Session {
 #if !GOGAKU_LITE
     GcLearningSession *learning=nullptr;
@@ -177,6 +311,10 @@ struct Session {
             auto dict=gw::utf8((gw::installRoot()/L"data/sc.dict").wstring()), model=gw::utf8((gw::installRoot()/L"data/zh_CN.lm").wstring());
             GcLearningConfig config{dict.c_str(),model.c_str()}; char error[256]{};
             if(core.gc_learning_session_create(&config,&learning,error,sizeof(error))) throw std::runtime_error("学习核心不可用");
+            // 新学习会话注册进挂载清单（docs/dictionaries.md §六：学习会话创建后
+            // 异步挂载符合条件的小词库；阈值过滤在核心）。
+            core.learningDictLive.push_back(learning);
+            core.learningDictPending.push_back(learning);
         }
         GcLearningEvent ev{}; ev.kind=GC_LEV_CONFIGURE; ev.arg0=(int64_t)focus; ev.arg1=1; ev.arg2=direction;
         learn(ev);
@@ -395,6 +533,7 @@ void serve(HANDLE pipe) {
                     if(op=="hello") { if(request.value("abi",4)!=GOGAKU_CORE_ABI_VERSION) throw std::runtime_error("核心 ABI 不匹配"); }
                     else if(op=="open" || op=="focus") session.focusTo(request);
                     else if(op=="reload") {core.settings=gw::readSettings();core.applySettings();core.gc_normal_reload_custom_words(core.normal);++core.revision;}
+                    else if(op=="reload-dictionaries") {std::thread([]{try{reloadDictionariesTick(false);}catch(...){}}).detach();}
                     else if(op=="clear") { if(core.gc_normal_clear_user_data(core.normal)) throw std::runtime_error("清空失败"); }
                     else if(op=="settings") response["settings"]=core.settings;
                     else if(op=="close") { if(core.active==session.id) {core.normalEvent(GC_EV_FOCUS_SYNC);core.active.clear();} break; }
@@ -420,6 +559,12 @@ void serve(HANDLE pipe) {
         } catch(...) {}
         std::lock_guard<std::mutex> lock(core.mutex);
         if(core.active==session.id) {try {core.normalEvent(GC_EV_FOCUS_SYNC);} catch(...) {} core.active.clear();}
+        // 学习会话即将销毁：从挂载注册表移除（连接结束，不再挂载）。
+        auto unregister=[&](std::vector<GcLearningSession *> &list) {
+            list.erase(std::remove(list.begin(),list.end(),session.learning),list.end());
+        };
+        unregister(core.learningDictLive);
+        unregister(core.learningDictPending);
     }
     DisconnectNamedPipe(pipe);CloseHandle(pipe);CoUninitialize();--clients;
 }
@@ -515,12 +660,23 @@ int WINAPI wWinMain(HINSTANCE,HINSTANCE,PWSTR args,int) {
         // The first watcher tick must not reapply the loaded Shuangpin profile
         // to an input that has already started.
         auto initialSettings=modified(L"settings.json"),initialCustom=modified(L"custom-words.tsv");
+        auto initialDicts=dictionariesStamp();
         std::thread(runTray).detach();
-        std::thread([initialSettings,initialCustom] {
+        std::thread([initialSettings,initialCustom,initialDicts] {
             ULONGLONG lastFlush=GetTickCount64();auto lastSettings=initialSettings,lastCustom=initialCustom;
+            long long lastDictStamp=initialDicts;
             while(!stopping) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 try {
+                    // 扩展词库：目录 mtime 轮询兜底（设置应用还会发
+                    // reload-dictionaries）；组合中 apply 返回 3，pending 在
+                    // 组合结束后的 tick 里重试（docs/dictionaries.md §六）。
+                    const bool dictPending=(!core.pendingDictIds.empty())||(!core.learningDictPending.empty());
+                    auto dictStamp=dictionariesStamp();
+                    if(dictStamp!=lastDictStamp||dictPending) {
+                        lastDictStamp=dictStamp;
+                        try {reloadDictionariesTick(false);} catch(...) {}
+                    }
                     auto path=gw::userRoot()/L"settings.json",custom=gw::userRoot()/L"custom-words.tsv";
                     std::error_code ec;auto modified=gw::fs::last_write_time(path,ec);bool changed=!ec&&modified!=lastSettings;
                     std::error_code customEc;auto customTime=gw::fs::last_write_time(custom,customEc);bool customChanged=!customEc&&customTime!=lastCustom;

@@ -322,6 +322,10 @@ $CXX $INC -Dmain=test_main_settings  -c $CORE_SRC/tests/settings_contract_test.c
 # 主题契约向量：内置调色板数据冻结（共享数据源）。
 $CXX $INC -Dmain=test_main_themes    -c $CORE_SRC/tests/theme_contract_test.cpp   -o themes.o
 $CXX $INC -Dmain=test_main_panel     -c $CORE_SRC/tests/panel_render_test.cpp     -o panel.o
+# 扩展词库向量（0.5.0 D1/D2）：导入转换、清单合同、会话挂载——两端跑同一份源码。
+$CXX $INC -Dmain=test_main_dict_import  -c $CORE_SRC/tests/dict_import_test.cpp  -o dict_import.o
+$CXX $INC -Dmain=test_main_dict_catalog -c $CORE_SRC/tests/dict_catalog_test.cpp -o dict_catalog.o
+$CXX $INC -Dmain=test_main_dict_mount   -c $CORE_SRC/tests/dict_mount_test.cpp   -o dict_mount.o
 
 # 数据内嵌（短文件名控制符号名）
 cp "$DATA/sc.dict"  embed_sc_dict.bin
@@ -348,6 +352,9 @@ int test_main_quality(void);
 int test_main_settings(void);
 int test_main_themes(void);
 int test_main_panel(void);
+int test_main_dict_import(void);
+int test_main_dict_catalog(void);
+int test_main_dict_mount(void);
 int test_main_fuzz(int argc, char** argv);
 
 extern const unsigned char _binary_embed_sc_dict_bin_start[];
@@ -403,6 +410,9 @@ int main() {
         {"设置契约向量",     [] { return test_main_settings(); }},
         {"主题契约向量",     [] { return test_main_themes(); }},
         {"共享位图契约",     [] { return test_main_panel(); }},
+        {"扩展词库导入转换", [] { return test_main_dict_import(); }},
+        {"扩展词库清单合同", [] { return test_main_dict_catalog(); }},
+        {"扩展词库挂载",     [] { return test_main_dict_mount(); }},
         {"随机序列冒烟",       [] { char n0[] = "fuzz"; char s0[] = "20261031"; char c0[] = "2000";
                                    char* av[] = {n0, s0, c0}; return test_main_fuzz(3, av); }},
     };
@@ -422,6 +432,7 @@ int main() {
 EOF
 $CXX $INC -c runner.cpp -o runner.o
 $CXX -static runner.o abi.o safety.o normal.o learning.o quality.o settings.o themes.o panel.o fuzz.o \
+  dict_import.o dict_catalog.o dict_mount.o \
   embed_sc_dict.bin.o embed_zh_cn_lm.bin.o \
   $BIN/libgogaku_core.a \
   $BIN/panel_render/libGogakuPanelRender.a $BIN/panel_render/libgogaku_harfbuzz.a \
