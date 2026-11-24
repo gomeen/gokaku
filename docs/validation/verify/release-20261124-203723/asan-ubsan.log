@@ -1,0 +1,7 @@
+共享渲染器 ASan＋UBSan 回归通过：/Users/gomeen/code/gomeen/gogaku/docs/validation/verify/release-20261124-203723/asan-panel-render.log
+ASan＋UBSan 2 片并行，种子 20261031–20261032，完成 100000/100000 序列
+--- 分片 0 ---
+fuzz: 50000 序列 / 625854 事件，失败 0 — PASS
+
+--- 分片 1 ---
+fuzz: 50000 序列 / 624750 事件，失败 0 — PASS

@@ -1,6 +1,6 @@
 # 本机原生开发版
 
-当前发布基线为 0.5.0（b131）stable：Windows 与 macOS 安装包、双形态（完整版／Lite）已发布，官方词库渠道 catalog-1 已上架；发布、安装与启用见[Windows 使用说明](windows-testing.md)，资产与签名见[发布记录](validation/release-0.5.0.json)（历史 b110 见 [release-b110.json](validation/release-b110.json)）。[构包报告](validation/windows-setup-build.json)是 b91 的历史交叉编译／组件哈希证据。两轮定版的 fast／release 自动化验证和发布清单签名已完成，真实 Windows／macOS 宿主、客户端在线更新、完整升级恢复／卸载仍未验收（host 以书面豁免发布）；历史 b94–b99 VM 结果见[原生验收记录](validation/native-development.md)。构包流程仍不要求 VM，以下本机安装与宿主操作指 macOS。
+当前发布基线为 0.5.1（b132）stable：更新入口移入关于页、检查与下载安装分离；双形态（完整版／Lite）双端安装包已发布，官方词库渠道 catalog-1 在 `gomeen/gogaku-dicts` 上架；发布、安装与启用见[Windows 使用说明](windows-testing.md)，资产与签名见[发布记录](validation/release-0.5.1.json)（历史见 [release-0.5.0.json](validation/release-0.5.0.json)、[release-b110.json](validation/release-b110.json)）。[构包报告](validation/windows-setup-build.json)是 b91 的历史交叉编译／组件哈希证据。两轮定版的 fast／release 自动化验证和发布清单签名已完成，真实 Windows／macOS 宿主、客户端在线更新、完整升级恢复／卸载仍未验收（host 以书面豁免发布）；历史 b94–b99 VM 结果见[原生验收记录](validation/native-development.md)。构包流程仍不要求 VM，以下本机安装与宿主操作指 macOS。
 
 历史 dev b94 的双端包、Windows 默认升级、双架构冷／暖启动和七页设置回归仍作为对应构建证据保留，详见 [b94 记录](validation/dev-b94.json)。Mac b94 本轮未安装；Mac PKG 实装、安装后检查与 14 项 IMK 冒烟属于 [b93 历史记录](validation/dev-b93.json)。这些历史结果不代表 b110，完整宿主与升级失败恢复／卸载矩阵尚未验收。
 

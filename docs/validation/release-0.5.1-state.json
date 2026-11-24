@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "releaseId": 456812604,
+  "version": "0.5.1",
+  "buildNumber": 132,
+  "channel": "stable",
+  "sourceSha256": "7fb6d5af7e3b6c927730abaf6d68950ee36016f73f2d5e07609ce80a7b7a9f24",
+  "git": {
+    "commit": "db0e5ad5b33e30faec92e308271765faf636c381",
+    "dirty": false
+  },
+  "tag": "v0.5.1",
+  "keyId": "gogaku-prod-2026-11",
+  "hostWaiver": "按仓库惯例，真实宿主测试仅在用户授权的空闲时段运行；本轮未安排该时段，Mac 真实宿主仍待验收。欠账已登记于 .scratch/debt-backlog/issues/02。",
+  "assets": {
+    "Gogaku-0.5.1.pkg": {
+      "id": 787342278,
+      "name": "Gogaku-0.5.1.pkg",
+      "bytes": 11630305,
+      "sha256": "90992020fdf43bd7a9e4361d65a2489f6882842f83c648e3b0aabed34e82c16a"
+    },
+    "GogakuLite-0.5.1.pkg": {
+      "id": 787343040,
+      "name": "GogakuLite-0.5.1.pkg",
+      "bytes": 10843937,
+      "sha256": "ce0e7dfae1b7c4eae9a728c157b321aae3ff4f2f3b2730cda0a53ce670da4e18"
+    },
+    "Gogaku-Data-0.5.1.pkg": {
+      "id": 787343939,
+      "name": "Gogaku-Data-0.5.1.pkg",
+      "bytes": 36695318,
+      "sha256": "925a9a29769f0306c923314444741b30aeea524565b094e9755e8eea66c97f57"
+    },
+    "GogakuLite-Data-0.5.1.pkg": {
+      "id": 787345093,
+      "name": "GogakuLite-Data-0.5.1.pkg",
+      "bytes": 34121005,
+      "sha256": "6deb2456227a9e2cc0962c535cb28bdeab23b2a0d4fedf92ab29f4925979c786"
+    },
+    "Gogaku-0.5.1-windows-x64-setup.exe": {
+      "id": 787346213,
+      "name": "Gogaku-0.5.1-windows-x64-setup.exe",
+      "bytes": 58596729,
+      "sha256": "bdf1a1c74477aac42471db6a64f8720c1a3baa6b66f15f19df0c6d7031c72f44"
+    },
+    "GogakuLite-0.5.1-windows-x64-setup.exe": {
+      "id": 787346958,
+      "name": "GogakuLite-0.5.1-windows-x64-setup.exe",
+      "bytes": 56645982,
+      "sha256": "4dfcd1b3e1c2afd652c45a05f6f29243c20d2f3ef137790d0004f105fac56f61"
+    },
+    "update-manifest.json": {
+      "id": 787349152,
+      "name": "update-manifest.json",
+      "bytes": 1388,
+      "sha256": "c8f5b97e78efd1f87bbf7a36d054162cc422b304118b9b2e913c8fef6ad28f3c"
+    },
+    "update-manifest.json.sig": {
+      "id": 787349258,
+      "name": "update-manifest.json.sig",
+      "bytes": 89,
+      "sha256": "2f8de46b1e0cbb9f381977dd3c220da580301e5f82952f28321d44c62b3038f3"
+    },
+    "update-manifest-v2.json": {
+      "id": 787349335,
+      "name": "update-manifest-v2.json",
+      "bytes": 1642,
+      "sha256": "2d4f2c2115b2292cbfcd3dc1346c6e8dca9c5bf0ad3a5693e9ad43786d5aded5"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 787349377,
+      "name": "update-manifest-v2.json.sig",
+      "bytes": 89,
+      "sha256": "345bbf7384b451b3b10e1a9b769556876ca7bfcf3b6f9f67b2627511d5c0145d"
+    },
+    "update-manifest-lite.json": {
+      "id": 787349429,
+      "name": "update-manifest-lite.json",
+      "bytes": 1396,
+      "sha256": "0954571af3482d42cabdca313c3e462bbbbe00566482ef2f37c9258bc455fac7"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 787349485,
+      "name": "update-manifest-lite.json.sig",
+      "bytes": 89,
+      "sha256": "88316dd66c7d56c3c095b57a406a852d6875315c50d2cc3a39e1e57d2f65c99b"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 787349552,
+      "name": "update-manifest-lite-v2.json",
+      "bytes": 1654,
+      "sha256": "6135d46e88b4fa69809892a1e4163ca8aa9298af207b52896673dcc12ace776f"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 787349634,
+      "name": "update-manifest-lite-v2.json.sig",
+      "bytes": 89,
+      "sha256": "c20b8e39c6e03d891710fe2950b320a43593cf98a21a34280730edbe26164f46"
+    }
+  }
+}

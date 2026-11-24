@@ -2,6 +2,10 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 0.5.1（2026-11-24，stable 定版）
+
+更新交互关于页化：检查更新入口从独立窗口移入「关于」页，检查与下载安装分离——手动和自动检查都只读取并验签更新元数据，不静默预下载；发现新版后 macOS 点击「下载并更新」才下载并就地安装，Windows 由「下载更新」「安装更新」两步走系统安装向导；「查看更新说明」为只读窗口。Windows 设置应用新增「关于」页（完整版九页、Lite 六页）。检查失败或限流时清除旧的可操作候选；自动检查偏好保存失败回滚开关。发布记录见 [release-0.5.1.json](docs/validation/release-0.5.1.json)。
+
 ### 0.5.0（2026-11-24，stable 定版）
 
 扩展词库：引擎多词典挂载、本地导入转换与官方精选词库渠道一次发布。发布记录见 [release-0.5.0.json](docs/validation/release-0.5.0.json)，词库渠道见 [catalog-1.json](docs/validation/catalog-1.json)。

@@ -1,0 +1,97 @@
+{
+  "version": "0.5.1",
+  "buildNumber": 132,
+  "channel": "stable",
+  "tag": "v0.5.1",
+  "releaseId": 456812604,
+  "releaseUrl": "https://github.com/gomeen/gokaku/releases/tag/v0.5.1",
+  "commit": "db0e5ad5b33e30faec92e308271765faf636c381",
+  "keyId": "gogaku-prod-2026-11",
+  "publishedAt": "2026-11-24",
+  "notes": "0.5.1：更新入口移入关于页，检查与下载安装分离——检查只读取并验签元数据，macOS「下载并更新」一步安装，Windows「下载更新」「安装更新」两步走系统向导；自动检查不再静默预下载，检查失败/限流清除旧候选；Windows 设置新增「关于」页（完整版 9 页／Lite 6 页）。验证：fast 7/7（核心 ctest 全量、Swift 342 项含下载确认新回归）、release 14/14（含十万序列 ASan/UBSan 双片并行），报告绑定 b132 双端安装包哈希。host 未运行（豁免见 hostWaiver 与 release-state.json）；Mac 真实输入源、Windows 真机运行、在线更新 E2E 仍未验收，欠账见 .scratch/debt-backlog/。数据包与 0.5.0 同版本（dataVersion 未变，schema 2 复用引用，客户端缓存命中不重复下载）。tag v0.5.1 指向发布提交 db0e5ad5。",
+  "hostWaiver": "按仓库惯例，真实宿主测试仅在用户授权的空闲时段运行；本轮未安排该时段，Mac 真实宿主仍待验收。欠账已登记于 .scratch/debt-backlog/issues/02。",
+  "verification": {
+    "fast": {
+      "report": "verify/report-fast-0.5.1-b132.json",
+      "passed": 7,
+      "failed": 0
+    },
+    "release": {
+      "report": "verify/report-release-0.5.1-b132.json",
+      "passed": 14,
+      "failed": 0
+    }
+  },
+  "assets": {
+    "Gogaku-0.5.1.pkg": {
+      "id": 787342278,
+      "bytes": 11630305,
+      "sha256": "90992020fdf43bd7a9e4361d65a2489f6882842f83c648e3b0aabed34e82c16a"
+    },
+    "GogakuLite-0.5.1.pkg": {
+      "id": 787343040,
+      "bytes": 10843937,
+      "sha256": "ce0e7dfae1b7c4eae9a728c157b321aae3ff4f2f3b2730cda0a53ce670da4e18"
+    },
+    "Gogaku-Data-0.5.1.pkg": {
+      "id": 787343939,
+      "bytes": 36695318,
+      "sha256": "925a9a29769f0306c923314444741b30aeea524565b094e9755e8eea66c97f57"
+    },
+    "GogakuLite-Data-0.5.1.pkg": {
+      "id": 787345093,
+      "bytes": 34121005,
+      "sha256": "6deb2456227a9e2cc0962c535cb28bdeab23b2a0d4fedf92ab29f4925979c786"
+    },
+    "Gogaku-0.5.1-windows-x64-setup.exe": {
+      "id": 787346213,
+      "bytes": 58596729,
+      "sha256": "bdf1a1c74477aac42471db6a64f8720c1a3baa6b66f15f19df0c6d7031c72f44"
+    },
+    "GogakuLite-0.5.1-windows-x64-setup.exe": {
+      "id": 787346958,
+      "bytes": 56645982,
+      "sha256": "4dfcd1b3e1c2afd652c45a05f6f29243c20d2f3ef137790d0004f105fac56f61"
+    },
+    "update-manifest.json": {
+      "id": 787349152,
+      "bytes": 1388,
+      "sha256": "c8f5b97e78efd1f87bbf7a36d054162cc422b304118b9b2e913c8fef6ad28f3c"
+    },
+    "update-manifest.json.sig": {
+      "id": 787349258,
+      "bytes": 89,
+      "sha256": "2f8de46b1e0cbb9f381977dd3c220da580301e5f82952f28321d44c62b3038f3"
+    },
+    "update-manifest-v2.json": {
+      "id": 787349335,
+      "bytes": 1642,
+      "sha256": "2d4f2c2115b2292cbfcd3dc1346c6e8dca9c5bf0ad3a5693e9ad43786d5aded5"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 787349377,
+      "bytes": 89,
+      "sha256": "345bbf7384b451b3b10e1a9b769556876ca7bfcf3b6f9f67b2627511d5c0145d"
+    },
+    "update-manifest-lite.json": {
+      "id": 787349429,
+      "bytes": 1396,
+      "sha256": "0954571af3482d42cabdca313c3e462bbbbe00566482ef2f37c9258bc455fac7"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 787349485,
+      "bytes": 89,
+      "sha256": "88316dd66c7d56c3c095b57a406a852d6875315c50d2cc3a39e1e57d2f65c99b"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 787349552,
+      "bytes": 1654,
+      "sha256": "6135d46e88b4fa69809892a1e4163ca8aa9298af207b52896673dcc12ace776f"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 787349634,
+      "bytes": 89,
+      "sha256": "c20b8e39c6e03d891710fe2950b320a43593cf98a21a34280730edbe26164f46"
+    }
+  }
+}
