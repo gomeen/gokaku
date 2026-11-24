@@ -104,7 +104,7 @@ python3 scripts/package-macos-pkg.py --channel stable \
 | 共享核心 `libgogaku_core.dll`（x64） | Mac 交叉编译 | MinGW-w64 GCC 16.2；静态链接依赖 | 已编译；最终 DLL 只导入系统库 |
 | TSF `GogakuTsf.dll`（x64／x86） | Mac 交叉编译 | MinGW-w64，真实 COM 接口 | 两架构已编译，通过管道连 x64 代理 |
 | 每用户代理 `GogakuAgent.exe`（x64） | Mac 交叉编译 | MinGW-w64／WinHTTP／CNG | 已编译；核心、翻译、拼写与托盘入口已接通 |
-| 设置 `GogakuSettings.exe`（x64） | Mac 交叉编译 | Win32／Direct2D／DirectWrite／WIC | 七页设置与更新窗口已编译 |
+| 设置 `GogakuSettings.exe`（x64） | Mac 交叉编译 | Win32／Direct2D／DirectWrite／WIC | 八页设置（Lite 五页）与更新窗口已编译 |
 | 安装向导 | Mac 上运行编译器 | Wine＋官方 Inno Setup 6.7.4 | 实际构包；不启动生成的程序 |
 
 ```sh
