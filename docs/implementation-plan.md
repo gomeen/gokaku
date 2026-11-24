@@ -227,4 +227,4 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 | P4 Windows Setup | b110 stable 双端安装包已发布；真实宿主、完整恢复／卸载未验收 | [b110 发布记录](validation/release-b110.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐；b94 默认升级证据保留为历史 |
 | P5 检查更新 | 两端客户端已实现；b110 stable 发布侧已完成；客户端真实旧版更新闭环未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本、[b110 发布记录](validation/release-b110.json) |
 | P6 最终验收 | b110 核心／fast／release 自动化检查通过；完整产品未验收，host 以用户豁免发布 | b110 发布记录；真实宿主、在线更新 E2E、完整升级恢复／卸载及真机矩阵未验收 |
-| 扩展词库 D0–D6 | 实施中（0.5.0），状态见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md) |
+| 扩展词库 D0–D6 | 0.5.0（b131）已于 2026-11-24 发布；host 书面豁免，Windows 运行未验收，见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md) |

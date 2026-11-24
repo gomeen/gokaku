@@ -1,6 +1,6 @@
 # Gogaku 0.5.0 扩展词库验收
 
-最近公开应用版本为 0.4.1。0.5.0 构建 131 已完成双端构包和自动化验收，构建提交为 `ad7e8b846367`。
+0.5.0 构建 131 已于 2026-11-24 发布 stable，构建提交为 `ad7e8b846367`，发布记录见 [release-0.5.0.json](release-0.5.0.json)。
 
 ## 构建 131 的验收
 
@@ -10,11 +10,11 @@
 - `catalog-1` 转换了 13 个来源。12 本非空词库的两轮转换 SHA-256 逐本一致，签名清单均使用修订 `"1"`，逐本附许可和署名，生产验签及发布 dry-run 通过。成语的 8,515 条出厂重复及 4 条读音不唯一保留在发布说明中。Mac 与 Windows 的四项签名向量输出一致，Windows 离线自检通过 Wine 执行。
 - b130 的包、资产快照和收据已在本机归档到 `.build/dict-0.5-b131/b130/`，逐项对照历史收据复核了 SHA-256。
 
-应用 Draft 的 14 个资产和词库 Draft 的 16 个资产均已核对远端大小与 SHA-256。应用 Draft 的 `v0.5.0` 指向构建提交 `ad7e8b846367`，词库 Draft 使用 `catalog-1`。两份草稿待人工审阅后同次公开。[应用 Draft](https://github.com/gomeen/gokaku/releases/tag/untagged-bcfd275ef58f06109ba3) · [应用收据](release-0.5.0-b131-draft.json) · [词库 Draft](https://github.com/gomeen/gogaku-dicts/releases/tag/untagged-6b3e53382694dcf1393f) · [词库收据](catalog-1-b131-draft.json)
+应用的 14 个资产和词库的 16 个资产在公开前后各核对一次远端大小与 SHA-256。`v0.5.0` 指向构建提交 `ad7e8b846367`，`catalog-1` 的标签建在词库仓库的初始提交。[应用 Release](https://github.com/gomeen/gokaku/releases/tag/v0.5.0) · [应用发布记录](release-0.5.0.json) · [词库 Release](https://github.com/gomeen/gogaku-dicts/releases/tag/catalog-1) · [词库发布记录](catalog-1.json)；发布前的草稿收据保留为[应用草稿收据](release-0.5.0-b131-draft.json)与[词库草稿收据](catalog-1-b131-draft.json)。
 
-Mac 真实按键验收待安排授权时段，公开发布仍需适用的 host 报告或书面豁免。Windows 真实宿主与公开渠道的在线安装仍待验收。
+**2026-11-24 发布。** 当日先裁决暂缓发布，随后改为不运行 host、书面豁免后发布：词库 `catalog-1` 于 09:39 公开，应用 `v0.5.0` 于 09:40 公开。豁免理由见[发布记录](release-0.5.0.json)的 `hostWaiver`，应用内更新说明与 GitHub 正文均写明「本版未运行 host」。
 
-**2026-11-24 裁决：暂缓发布。** 暂不运行 host，两份草稿保持待审阅、不公开；构建 131 作为候选冻结，冻结期间不改源码、脚本与 `version.json`，否则须出 b132 重新构包并重跑 fast。
+公开后从无凭据地址核对：词库清单与签名哈希同本地一致，随包公钥验签通过，12 本词库的大小与 SHA-256 全部对上，共享核心按应用内参数解析返回 12 条、0 条被拒；应用四份更新清单验签通过，主包下载哈希一致。Mac 真实按键验收、Windows 真实宿主与公开渠道在真实应用里的在线安装仍待验收。
 
 ## 真实 SCEL 导入抽验
 

@@ -18,7 +18,7 @@
 
 ## 0.5.0 扩展词库
 
-完整版和 Lite 的设置侧栏新增「扩展词库」，可导入本地词表并控制挂载。构建 131 的专项验证、渠道发布进度和宿主验收状态见[扩展词库验收](docs/validation/dictionaries-0.5.0.md)。最近公开版本见[0.4.1 发布记录](docs/validation/release-0.4.1.json)。
+**0.5.0 构建 131 已于 2026-11-24 发布 stable**（Mac pkg 与 Windows Setup，完整版与 Lite）。完整版和 Lite 的设置侧栏新增「扩展词库」，可导入本地词表并控制挂载；官方精选词库首批 12 本已在 `gomeen/gogaku-dicts` 发布。发布记录见 [release-0.5.0.json](docs/validation/release-0.5.0.json)，专项验证与宿主验收状态见[扩展词库验收](docs/validation/dictionaries-0.5.0.md)。**host 未运行**（用户书面豁免），Mac 真实输入源与 Windows 运行仍待验收。
 
 ## 历史工程基线（2026-11-10）
 
@@ -60,7 +60,7 @@ Mac 开发版与 stable 的旧构建记录仍可从 Git 历史和发布记录追
 - [第三方许可](docs/third-party.md)：固定组件、实际打包许可和公开分发前义务。
 - [释义词性数据调研](docs/research-gloss-data.md)：候选窗「词性＋译文」注释的数据源选择、许可义务与落地路径。
 - [扩展词库调研](docs/research-dictionaries.md)：多本词典挂载、scel/Rime/libime 格式导入与转换、官方精选词库分发的三层方案与许可红线。
-- [扩展词库](docs/dictionaries.md)：存储与元数据格式、转换规则、C ABI、挂载计划、重载通知与官方渠道合同（0.5.0 实施中）。
+- [扩展词库](docs/dictionaries.md)：存储与元数据格式、转换规则、C ABI、挂载计划、重载通知与官方渠道合同（0.5.0 已发布）。
 - [双端实施计划](docs/implementation-plan.md)：P0–P6 执行顺序、共享合同、安装与更新门槛。
 - [技术选型决定](docs/input-selection-decision.md)：libime＋原生前端的采用理由、其他方案不选原因，以及自由句模型与完整产品的未通过结论。
 - [产品方向](docs/product.md)：已确认需求、建议方案、待验证问题与验收方向。

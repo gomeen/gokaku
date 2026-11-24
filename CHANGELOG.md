@@ -2,10 +2,13 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
-## 0.5.0（构建 131，待审阅）
+### 0.5.0（2026-11-24，stable 定版）
+
+扩展词库：引擎多词典挂载、本地导入转换与官方精选词库渠道一次发布。发布记录见 [release-0.5.0.json](docs/validation/release-0.5.0.json)，词库渠道见 [catalog-1.json](docs/validation/catalog-1.json)。
 
 - 完整版与 Lite 新增「扩展词库」。支持本地导入、启停、删除及内存估算。启用或停用后，挂载变更在组合结束后生效。
-- 官方词库入口由用户点击后联网，客户端核验签名清单与资产哈希。首批目录含 12 本非空词库，每本独立使用递增的数字修订号。渠道发布进度与测试证据见 [扩展词库验收](docs/validation/dictionaries-0.5.0.md)。
+- 官方词库入口由用户点击后联网，客户端核验签名清单与资产哈希。首批上架 12 本非空词库，每本独立使用递增的数字修订号。
+- 验证：fast 7/7（核心 ctest 14/14、Swift 341 项）、release 14/14（含十万序列 ASan／UBSan）；两本真实搜狗 `.scel` 样本经共享核心转换、召回与停用验证。**host 未运行**（用户 2026-11-24 书面豁免）；Mac 真实输入源、Windows 运行与在线更新 E2E 仍未验收。测试证据见 [扩展词库验收](docs/validation/dictionaries-0.5.0.md)。
 
 ### 0.4.1（2026-11-22，stable 定版）
 
@@ -98,7 +101,7 @@
 ### 变更（2026-11-18：侧栏版本标签不再把 stable 误标为开发版，工作区）
 
 - 用户报告：设置侧栏页脚无条件显示「本机开发版」与「0.1.7 构建118」，stable 用户会误读自己装的是开发版。根因是该标签是硬编码文案，从不判断实际通道。
-- 修复：页脚按 bundle ID 判断通道——dev 通道（Gogaku Dev，`.dev` 后缀）才显示「本机开发版」，stable 显示「Gogaku」；版本行去掉「构建 N」尾巴只留纯版本号。构建号仍保留在安装包文件名、检查更新页与诊断输出中（展示规则见[版本管理](versioning.md)）。
+- 修复：页脚按 bundle ID 判断通道——dev 通道（Gogaku Dev，`.dev` 后缀）才显示「本机开发版」，stable 显示「Gogaku」；版本行去掉「构建 N」尾巴只留纯版本号。构建号仍保留在安装包文件名、检查更新页与诊断输出中（展示规则见[版本管理](docs/versioning.md)）。
 - 验证：fast swift-tests 288 项通过；新增 `BuildIdentityLabelTests`；本机 stable 安装后辅助功能树实测侧栏显示「Gogaku／0.1.7」。
 
 ### 0.2.0（2026-11-19，stable 定版）

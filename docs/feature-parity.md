@@ -90,7 +90,7 @@ b110 当前只有发布侧和自动化验证证据；此前用户授权的 Windo
 
 ## 扩展词库（0.5.0）
 
-构建 131 的 fast 和 release 均通过。Mac Swift 回归覆盖导入、取消、重复、错误提示、清单传输失败和页面集合，离屏探针通过 EngineHub 重载检查。Windows 完整版和 Lite 已交叉编译并构包，运行仍待验收。见[合同](dictionaries.md)及[验收记录](validation/dictionaries-0.5.0.md)。
+0.5.0 构建 131 已于 2026-11-24 发布 stable（host 未运行，用户书面豁免），fast 和 release 均通过。Mac Swift 回归覆盖导入、取消、重复、错误提示、清单传输失败和页面集合，离屏探针通过 EngineHub 重载检查。Windows 完整版和 Lite 已交叉编译并构包，运行仍待验收。见[合同](dictionaries.md)及[验收记录](validation/dictionaries-0.5.0.md)。
 
 | 功能 | macOS 现状 | Windows 现状 | 合同／边界 |
 | --- | --- | --- | --- |

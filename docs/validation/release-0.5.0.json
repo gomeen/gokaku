@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "releaseId": 455157025,
+  "version": "0.5.0",
+  "buildNumber": 131,
+  "channel": "stable",
+  "sourceSha256": "7b0a1f9ce5ad104f37f8b56ddc500ee3108e7c4b31f4af678e3301f12c321534",
+  "git": {
+    "commit": "ad7e8b84636706fde64bd8f286dba8205c37fc33",
+    "dirty": false
+  },
+  "tag": "v0.5.0",
+  "keyId": "gogaku-prod-2026-11",
+  "hostWaiver": "用户 2026-11-24 裁决：不运行 host，直接发布。本版未在 Mac 真实输入源验证，扩展词库挂载的真实宿主表现仍待验收。",
+  "assets": {
+    "Gogaku-0.5.0.pkg": {
+      "id": 782444126,
+      "name": "Gogaku-0.5.0.pkg",
+      "bytes": 11650943,
+      "sha256": "40b9e3cdc0fa61bc254401f0ef23fe92b26d1851305e93759ea90c1213695232"
+    },
+    "Gogaku-0.5.0-windows-x64-setup.exe": {
+      "id": 782445937,
+      "name": "Gogaku-0.5.0-windows-x64-setup.exe",
+      "bytes": 58611368,
+      "sha256": "94703ed258f5aa2c8d3315cf1471b6c8c520e0f6c76db5272bb2d6fb3c5ec05f"
+    },
+    "GogakuLite-0.5.0.pkg": {
+      "id": 782454246,
+      "name": "GogakuLite-0.5.0.pkg",
+      "bytes": 10864973,
+      "sha256": "af30a00c71c48663dca7ac5b3590c78baf0b22cae5128d6cb5d8036af872f9a0"
+    },
+    "GogakuLite-0.5.0-windows-x64-setup.exe": {
+      "id": 782456029,
+      "name": "GogakuLite-0.5.0-windows-x64-setup.exe",
+      "bytes": 56657605,
+      "sha256": "660157d321945c7c80f5edc5bd4b27b34d70598f36533c7927e1a6a88425e078"
+    },
+    "Gogaku-Data-0.5.0.pkg": {
+      "id": 782463404,
+      "name": "Gogaku-Data-0.5.0.pkg",
+      "bytes": 36695316,
+      "sha256": "d406016e993f6ea6bbe48968adee55bac7b2c0cf94c43f2925af9a96641d394c"
+    },
+    "GogakuLite-Data-0.5.0.pkg": {
+      "id": 782469069,
+      "name": "GogakuLite-Data-0.5.0.pkg",
+      "bytes": 34121012,
+      "sha256": "82ea4c21ded56e2e190a797180424ee42c710f23698953f5349b0a2073553cf6"
+    },
+    "update-manifest.json": {
+      "id": 782474825,
+      "name": "update-manifest.json",
+      "bytes": 1467,
+      "sha256": "91f6e6be44f3501399827fd8f18a6ec971e37f90779990d4e25ae135a58bec1f"
+    },
+    "update-manifest.json.sig": {
+      "id": 782474862,
+      "name": "update-manifest.json.sig",
+      "bytes": 89,
+      "sha256": "f5ee61b520f280a05966387358ad51364daad2e3c34d1caa1cdbe633261effd8"
+    },
+    "update-manifest-v2.json": {
+      "id": 782474910,
+      "name": "update-manifest-v2.json",
+      "bytes": 1721,
+      "sha256": "3db62918696085a2a535ceaf41bde0a675db6d3cdbdf917c1aadf2f78e857ba0"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 782474977,
+      "name": "update-manifest-v2.json.sig",
+      "bytes": 89,
+      "sha256": "16e22942938f26e1579f2dfcc8012167fbb9d6d96a1ea47b2e643b4c28cb1c34"
+    },
+    "update-manifest-lite.json": {
+      "id": 782475037,
+      "name": "update-manifest-lite.json",
+      "bytes": 1475,
+      "sha256": "5401b3d706de70ad5e61924dce3249aa6da195fd7c05f18495c2a4d4660bdaba"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 782475082,
+      "name": "update-manifest-lite.json.sig",
+      "bytes": 89,
+      "sha256": "5b6dc93324f6bd486b3f8e8bf19df38d3534b359002d82513c95ad692b2ce229"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 782475133,
+      "name": "update-manifest-lite-v2.json",
+      "bytes": 1733,
+      "sha256": "f6c2e8f76e939852639d69fdcf53dc87c9cdb1c972c1ce3232f60f267567b723"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 782475202,
+      "name": "update-manifest-lite-v2.json.sig",
+      "bytes": 89,
+      "sha256": "d3ad204c283ae00ff52a8e5f916bc4e554325117531b5ad9761ace3f61b853d7"
+    },
+    "dataPackage": {
+      "platform": "macos",
+      "id": 782463404,
+      "name": "Gogaku-Data-0.5.0.pkg",
+      "bytes": 36695316,
+      "sha256": "d406016e993f6ea6bbe48968adee55bac7b2c0cf94c43f2925af9a96641d394c",
+      "dataVersion": "0740d56417e0d6d3"
+    },
+    "liteDataPackage": {
+      "platform": "macos",
+      "id": 782469069,
+      "name": "GogakuLite-Data-0.5.0.pkg",
+      "bytes": 34121012,
+      "sha256": "82ea4c21ded56e2e190a797180424ee42c710f23698953f5349b0a2073553cf6",
+      "dataVersion": "b81cc760128efd74"
+    }
+  },
+  "publishedAt": "2026-11-24",
+  "state": "published",
+  "commit": "ad7e8b84636706fde64bd8f286dba8205c37fc33",
+  "manifestKey": "gogaku-prod-2026-11",
+  "fastReport": "verify/report-fast-0.5.0-b131.json",
+  "releaseReport": "verify/report-release-0.5.0-b131.json",
+  "url": "https://github.com/gomeen/gokaku/releases/tag/v0.5.0",
+  "publishedAtIso": "2026-11-24T01:40:37Z",
+  "dictionaryCatalog": {
+    "repo": "gomeen/gogaku-dicts",
+    "releaseId": 455141980,
+    "tag": "catalog-1",
+    "publishedAtIso": "2026-11-24T01:39:23Z",
+    "url": "https://github.com/gomeen/gogaku-dicts/releases/tag/catalog-1",
+    "record": "catalog-1.json"
+  },
+  "notes": "0.5.0：扩展词库三层能力一次发布——引擎多词典挂载、本地导入转换（搜狗 .scel／Rime .dict.yaml／libime .txt·.dict／纯词表）与官方精选词库渠道；完整版与 Lite 设置新增「扩展词库」页。验证：fast 7/7（核心 ctest 14/14、Swift 341 项）、release 14/14（含十万序列 ASan/UBSan 两片并行），报告绑定 b131 完整版双端安装包哈希；两本真实搜狗 .scel 样本经共享核心转换、召回与停用验证。host 未运行（豁免见 hostWaiver）；Mac 真实输入源的扩展词库挂载、Windows 运行、在线更新 E2E 与公开词库渠道在真实应用内的安装均未验收。词库 catalog-1（12 本非空词库）先于应用约 1 分钟公开，公开地址的清单、签名与 12 本词库已逐项核对哈希并经随包公钥验签。tag v0.5.0 一次指向构建提交 ad7e8b84。"
+}
