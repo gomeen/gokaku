@@ -11,6 +11,8 @@
 # UpdateInstaller.installData（同一份清单格式）。
 set -uo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 HOME_DIR="${HOME:-/Users/$(id -un)}"
 IM_DIR="$HOME_DIR/Library/Input Methods"
 APPS_DIR="$HOME_DIR/Applications"
