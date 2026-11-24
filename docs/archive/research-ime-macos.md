@@ -4,7 +4,7 @@
 
 ## 范围与证据状态
 
-本文保留 2026-10-30 的 IMK 协议与宿主约束研究，文中的“未实现”仅指当时状态。当前需求见[产品方向](product.md)，实际实现与验收见[原生开发验收](validation/native-development.md)。旧青简／Rime／模型选型详报已退役，可从 Git 历史追溯；本文不再维护旧选型索引。
+本文保留 2026-10-30 的 IMK 协议与宿主约束研究，文中的“未实现”仅指当时状态。当前需求见[产品方向](../product.md)，实际实现与验收见[原生开发验收](../validation/native-development.md)。旧青简／Rime／模型选型详报已退役，可从 Git 历史追溯；本文不再维护旧选型索引。
 
 证据标识：**官方契约**=Apple公开API文档/本机公开SDK声明；**源码行为**=下述固定上游版本；**工程判断**=建议或风险假设，须实测。上游版本固定为 Squirrel `46962d2efae5be70389c778d0a6c52f669072827`，fcitx5-macos `3466612499c149d5002b1aab37b92bb257da1a75`。源码行为不代表 macOS 或其他 IMK 客户端保证。
 本轮只读公开资料、源码及SDK；未注册/启用输入源、启动GUI、运行模型、性能或宿主测试。Apple JS文档已通过公开 `tutorials/data/documentation/*.json` 核对 abstract/primaryContentSections；源码阅读不构成运行验收。文末 SDK 索引列出完整本机路径。
@@ -25,7 +25,7 @@
 - **权限区别**：Apple [`NSEvent`全局monitor](https://developer.apple.com/tutorials/data/documentation/appkit/nsevent/addglobalmonitorforevents(matching:handler:).json) 只观察、不能拦截，键盘监听要求辅助功能信任。`CGEventTapCreate` 有主动过滤/被动监听、创建失败及超时停用，`CGPreflight/RequestListenEventAccess` 与 `CGPreflight/RequestPostEventAccess` 分别检查监听/注入权限。[SDK-G] 旧注释仍写assistive-device access；[Apple DTS](https://developer.apple.com/forums/thread/789896) 说明现代被动CG监听走Input Monitoring，发事件权限在Accessibility界面展示，也不等于完整AX访问。读取/控制别的应用AX树另看 `AXIsProcessTrustedWithOptions` [SDK-A]。不要笼统写“event tap都免权限”或“输入法一律要AX”。
 - **官方边界**：[TN2150](https://developer.apple.com/library/archive/technotes/tn2150/_index.html) 与 [SDK-E] `EnableSecureEventInput` 保护按键免被全局interceptor获取；`IsSecureEventInputEnabled` 只说明任意进程启用，并不定位当前密码框。它不是可靠的逐字段分类器，也不能据此保证IMK始终收到/始终收不到密码按键。secure field是否选择输入法、停用组合或限制可用输入源，必须分别实测；禁止绕过保护或替其他进程关闭secure input。
 - **工程判断**：密码和不确定安全状态不做学习辅助、上下文采集、记录或模型调用；停用辅助不能吞键，应保留可用直接输入退路。公开IMK代理没有一个覆盖所有自绘字段的通用密码标签，应用排除/手动暂停只是补充，不能宣称防漏已验收。默认仅记录学习片段，避免原文日志、崩溃转储和模型错误上报泄露；[SDK-I] `length` 可能昂贵，周边文本按需限量读取、容忍nil，禁止每键取全文。
-- **特别边界**：输入法能控制仍处于 IME marked text 状态的组合及提交字符串；一旦 `insertText` 完成提交，普通 IMK 没有通用API让它重开宿主任意正文、附加自定义波浪线或持久跟踪字符。产品已确认波浪线先在 Gogaku 自有输入区，不承诺装饰其他应用已提交正文。[产品方向](product.md#已确认错误标记与翻译失败)
+- **特别边界**：输入法能控制仍处于 IME marked text 状态的组合及提交字符串；一旦 `insertText` 完成提交，普通 IMK 没有通用API让它重开宿主任意正文、附加自定义波浪线或持久跟踪字符。产品已确认波浪线先在 Gogaku 自有输入区，不承诺装饰其他应用已提交正文。[产品方向](../product.md#已确认错误标记与翻译失败)
 
 ## 焦点、模式与键盘语义
 
