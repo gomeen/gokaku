@@ -80,7 +80,7 @@ public final class UpdateEngine {
         guard let config, config.isConfigured else {
             return outcome(.unconfigured, "未配置更新源（缺少发布仓库或可信公钥）")
         }
-        if automatic, !preferences.isAutoCheckDue(channel: channel) {
+        if automatic, !isAutoCheckDue() {
             return outcome(.skipped, "今日已自动检查过")
         }
         defer {

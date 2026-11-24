@@ -29,7 +29,7 @@ constexpr uint64_t ListLimit = 2 * 1024 * 1024;
 constexpr uint64_t ReserveBytes = 64 * 1024 * 1024;
 constexpr UINT WorkCompleteMessage = WM_APP + 0x471;
 constexpr UINT AutoCheckMessage = WM_APP + 0x472;
-constexpr UINT ShowWindowMessage = WM_APP + 0x473;
+constexpr UINT_PTR AutoCheckTimer = 1;
 
 struct UpdateError : std::runtime_error {
     DWORD http = 0;
@@ -888,35 +888,46 @@ struct Job { std::atomic_bool cancel{false}; Work work; explicit Job(Work value)
 struct Completion { std::shared_ptr<Job> job; Json result; };
 struct UpdateUI {
     HWND controller = nullptr, window = nullptr, owner = nullptr;
-    HWND status = nullptr, current = nullptr, notes = nullptr, automatic = nullptr;
-    HWND check = nullptr, download = nullptr, install = nullptr, cancel = nullptr;
     HINSTANCE instance = nullptr;
     Json last = nullptr, offer = nullptr, downloaded = nullptr;
+    std::wstring current, preferenceError;
+    double lastAutoAttempt = 0;
     std::shared_ptr<Job> job;
     bool autoCheck = false;
 };
-HWND controllerWindow = nullptr;
+std::unique_ptr<UpdateUI> controllerState;
 
-void setText(HWND window, const std::string &text) { if (window) SetWindowTextW(window, wide(text).c_str()); }
-void refresh(UpdateUI &ui) {
-    const bool busy = static_cast<bool>(ui.job);
-    const bool ready = ui.downloaded.is_object() && ui.downloaded.value("ok", false);
-    if (ui.check) EnableWindow(ui.check, !busy);
-    if (ui.download) EnableWindow(ui.download, !busy && ui.offer.is_object());
-    if (ui.install) EnableWindow(ui.install, !busy && ready);
-    if (ui.cancel) EnableWindow(ui.cancel, busy && ui.job->work != Work::Install);
-    if (ui.automatic) SendMessageW(ui.automatic, BM_SETCHECK, ui.autoCheck ? BST_CHECKED : BST_UNCHECKED, 0);
-    if (ui.last.is_object()) setText(ui.status, ui.last.value("message", std::string()));
-    if (ui.offer.is_object()) {
-        // 清单 notes 是应用内短纯文本（发布侧已与 GitHub 正文分开）；不再拼构建号。
-        setText(ui.notes, "新版 " + ui.offer.value("version", std::string()) + "\r\n\r\n"
-            + ui.offer.value("notes", std::string()));
-    } else setText(ui.notes, "下载和安装分别由你点击触发。独立 Ed25519 清单签名不等于 Windows Authenticode；不会自动安装、重启或关闭输入应用。");
+void refresh(const UpdateUI &ui) { PostMessageW(ui.owner, UpdateStateMessage, 0, 0); }
+void clearOffer(UpdateUI &ui) {
+    if (IsWindow(ui.window)) DestroyWindow(ui.window);
+    ui.window = nullptr;
+    ui.offer = nullptr;
+    ui.downloaded = nullptr;
+}
+double lastAutoAttempt(const Json &prefs) {
+    const auto &attempts = prefs.at("lastAutoCheck");
+    const auto time = attempts.find(gw::channel());
+    return time != attempts.end() && time->is_number() ? time->get<double>() : 0;
+}
+std::wstring formatAutoAttempt(double timestamp) {
+    if (!(timestamp > 0 && timestamp < 253402300800.0)) return L"尚未自动尝试";
+    ULARGE_INTEGER ticks{};
+    ticks.QuadPart = (static_cast<ULONGLONG>(timestamp) + 11644473600ULL) * 10000000ULL;
+    FILETIME utcTicks{ticks.LowPart, ticks.HighPart};
+    SYSTEMTIME utc{}, local{};
+    wchar_t date[80]{}, time[80]{};
+    if (!FileTimeToSystemTime(&utcTicks, &utc) || !SystemTimeToTzSpecificLocalTime(nullptr, &utc, &local) ||
+        !GetDateFormatEx(LOCALE_NAME_USER_DEFAULT, DATE_SHORTDATE, &local, nullptr, date, 80, nullptr) ||
+        !GetTimeFormatEx(LOCALE_NAME_USER_DEFAULT, TIME_NOSECONDS, &local, nullptr, time, 80)) return {};
+    return std::wstring(L"上次自动尝试：") + date + L" " + time;
 }
 void begin(UpdateUI &ui, Work work) {
     if (ui.job) return;
     auto job = std::make_shared<Job>(work);
-    const auto payload = work == Work::Download ? ui.offer : ui.downloaded;
+    Json payload;
+    if (work == Work::Check) clearOffer(ui);
+    else if (work == Work::Download) payload = ui.offer;
+    else payload = ui.downloaded;
     ui.job = job;
     ui.last = outcome("working", work == Work::Check ? "正在检查更新…"
         : work == Work::Download ? "正在下载安装包（最多 5 分钟，可取消）…" : "正在重新校验安装包并启动安装向导…");
@@ -942,123 +953,73 @@ void begin(UpdateUI &ui, Work work) {
     }
 }
 void automaticCheck(UpdateUI &ui) {
-    if (ui.job) return;
+    // 不让定时检查覆盖用户已下载、正在等待手动安装的包。
+    if (ui.job || ui.downloaded.is_object()) return;
     try {
-        loadSource(); // Missing source does not generate daily network attempts.
         std::lock_guard<std::mutex> lock(preferencesMutex);
         auto prefs = preferences();
-        ui.autoCheck = prefs["autoCheck"].get<bool>();
-        if (!ui.autoCheck) return;
-        const auto key = gw::channel();
+        const bool enabled = prefs["autoCheck"].get<bool>();
+        const double last = lastAutoAttempt(prefs);
+        if (ui.autoCheck != enabled || ui.lastAutoAttempt != last) {
+            ui.autoCheck = enabled; ui.lastAutoAttempt = last; refresh(ui);
+        }
+        if (!enabled) return;
+        loadSource(); // Missing source does not generate daily network attempts.
         const double current = now();
-        double last = 0;
-        if (prefs["lastAutoCheck"].contains(key) && prefs["lastAutoCheck"][key].is_number())
-            last = prefs["lastAutoCheck"][key].get<double>();
-        if (last != 0 && current - last < 24 * 60 * 60) return;
+        if (last > 0 && last <= current && current - last < 24 * 60 * 60) return;
         // Record the ATTEMPT before starting it, including offline/failed checks.
-        prefs["lastAutoCheck"][key] = current;
+        prefs["lastAutoCheck"][gw::channel()] = current;
         savePreferences(prefs);
+        ui.lastAutoAttempt = current;
+        ui.preferenceError.clear();
         begin(ui, Work::Check);
     } catch (const UpdateError &error) {
-        if (std::string(error.what()) != "unconfigured") { ui.last = failed(error); refresh(ui); }
+        if (std::string(error.what()) == "preferences_error") {
+            ui.preferenceError = L"自动检查失败：无法保存检查时间。";
+        } else {
+            clearOffer(ui); ui.last = failed(error);
+        }
+        refresh(ui);
     } catch (...) {}
 }
-HWND control(UpdateUI &ui, const wchar_t *kind, const wchar_t *text, DWORD style, int id) {
-    HWND result = CreateWindowExW(0, kind, text, WS_CHILD | WS_VISIBLE | style,
-                                   0, 0, 10, 10, ui.window, reinterpret_cast<HMENU>(static_cast<INT_PTR>(id)), ui.instance, nullptr);
-    if (result) SendMessageW(result, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
-    return result;
-}
-void layout(UpdateUI &ui) {
-    if (!ui.window) return;
-    RECT rect{}; GetClientRect(ui.window, &rect);
-    const int width = std::max(360L, rect.right), height = std::max(320L, rect.bottom);
-    MoveWindow(ui.current, 20, 18, width - 40, 24, TRUE);
-    MoveWindow(ui.status, 20, 52, width - 40, 64, TRUE);
-    MoveWindow(ui.notes, 20, 120, width - 40, std::max(70, height - 292), TRUE);
-    MoveWindow(ui.automatic, 20, height - 158, width - 40, 28, TRUE);
-    const HWND detail = GetDlgItem(ui.window, 106);
-    MoveWindow(detail, 20, height - 126, width - 40, 48, TRUE);
-    const int buttonWidth = (width - 64) / 4;
-    MoveWindow(ui.check, 20, height - 58, buttonWidth, 32, TRUE);
-    MoveWindow(ui.download, 28 + buttonWidth, height - 58, buttonWidth, 32, TRUE);
-    MoveWindow(ui.install, 36 + 2 * buttonWidth, height - 58, buttonWidth, 32, TRUE);
-    MoveWindow(ui.cancel, 44 + 3 * buttonWidth, height - 58, buttonWidth, 32, TRUE);
-}
-LRESULT CALLBACK updateProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
-    auto ui = reinterpret_cast<UpdateUI *>(GetWindowLongPtrW(window, GWLP_USERDATA));
-    if (message == WM_NCCREATE) {
-        ui = static_cast<UpdateUI *>(reinterpret_cast<CREATESTRUCTW *>(lParam)->lpCreateParams);
-        SetWindowLongPtrW(window, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(ui));
+
+constexpr int NotesText = 101;
+LRESULT CALLBACK notesProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
+    const int margin = MulDiv(16, GetDpiForWindow(window), 96);
+    if (message == WM_CREATE) {
+        HWND notes = CreateWindowExW(WS_EX_CLIENTEDGE, L"EDIT", L"", WS_VISIBLE | WS_CHILD |
+            ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL, 0, 0, 1, 1, window,
+            reinterpret_cast<HMENU>(static_cast<INT_PTR>(NotesText)), GetModuleHandleW(nullptr), nullptr);
+        if (!notes) return -1;
+        SendMessageW(notes, WM_SETFONT, reinterpret_cast<WPARAM>(GetStockObject(DEFAULT_GUI_FONT)), TRUE);
+        SetWindowTextW(notes, static_cast<const wchar_t *>(reinterpret_cast<CREATESTRUCTW *>(lParam)->lpCreateParams));
+        return 0;
     }
-    if (!ui) return DefWindowProcW(window, message, wParam, lParam);
-    try {
-        switch (message) {
-        case WM_CREATE: {
-            ui->window = window;
-            ui->current = control(*ui, L"STATIC", L"检查更新", SS_LEFT, 100);
-            ui->status = control(*ui, L"STATIC", L"尚未检查。自动检查默认关闭。", SS_LEFT, 101);
-            ui->notes = control(*ui, L"EDIT", L"", ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | WS_BORDER | WS_TABSTOP, 102);
-            ui->automatic = control(*ui, L"BUTTON", L"自动检查更新（默认关闭）", BS_AUTOCHECKBOX | WS_TABSTOP, 103);
-            control(*ui, L"STATIC", L"仅在设置应用运行期间，每 24 小时最多尝试一次；只连接 GitHub，不携带输入内容、翻译凭据或学习记录。", SS_LEFT, 106);
-            ui->check = control(*ui, L"BUTTON", L"检查 / 重试", BS_PUSHBUTTON | WS_TABSTOP, 110);
-            ui->download = control(*ui, L"BUTTON", L"下载 / 重试", BS_PUSHBUTTON | WS_TABSTOP, 111);
-            ui->install = control(*ui, L"BUTTON", L"安装更新", BS_PUSHBUTTON | WS_TABSTOP, 112);
-            ui->cancel = control(*ui, L"BUTTON", L"取消任务", BS_PUSHBUTTON | WS_TABSTOP, 113);
-            try {
-                const auto current = installation();
-                setText(ui->current, "当前 " + current.version + " · " + current.channel);
-            } catch (...) { setText(ui->current, "无法读取当前安装版本身份"); }
-            if (ui->last.is_null()) {
-                try { loadSource(); } catch (const UpdateError &error) { ui->last = failed(error); }
-            }
-            layout(*ui); refresh(*ui);
-            return 0;
-        }
-        case WM_SIZE: layout(*ui); return 0;
-        case WM_GETMINMAXINFO: {
-            auto info = reinterpret_cast<MINMAXINFO *>(lParam);
-            info->ptMinTrackSize.x = 540; info->ptMinTrackSize.y = 460;
-            return 0;
-        }
-        case WM_CLOSE: ShowWindow(window, SW_HIDE); return 0;
-        case WM_COMMAND:
-            if (HIWORD(wParam) != BN_CLICKED) break;
-            switch (LOWORD(wParam)) {
-            case 110: begin(*ui, Work::Check); return 0;
-            case 111: if (ui->offer.is_object()) begin(*ui, Work::Download); return 0;
-            case 112: if (ui->downloaded.is_object()) begin(*ui, Work::Install); return 0;
-            case 113:
-                if (ui->job && ui->job->work != Work::Install) {
-                    ui->job->cancel = true; ui->last = outcome("cancelling", "正在取消并清理临时文件…"); refresh(*ui);
-                }
-                return 0;
-            case 103: {
-                const bool enabled = SendMessageW(ui->automatic, BM_GETCHECK, 0, 0) == BST_CHECKED;
-                try {
-                    std::lock_guard<std::mutex> lock(preferencesMutex);
-                    auto prefs = preferences(); prefs["autoCheck"] = enabled; savePreferences(prefs);
-                    ui->autoCheck = enabled;
-                } catch (...) { ui->last = failed(UpdateError("preferences_error")); }
-                refresh(*ui);
-                if (ui->autoCheck) PostMessageW(ui->controller, AutoCheckMessage, 0, 0);
-                return 0;
-            }
-            }
-            break;
-        }
-    } catch (const UpdateError &error) { ui->last = failed(error); refresh(*ui); return 0; }
-    catch (...) { return 0; } // Never unwind a C++ exception through User32.
+    if (message == WM_SIZE) {
+        MoveWindow(GetDlgItem(window, NotesText), margin, margin, std::max(1, int(LOWORD(lParam)) - 2 * margin),
+                   std::max(1, int(HIWORD(lParam)) - 2 * margin), TRUE);
+        return 0;
+    }
+    if (message == WM_SETFOCUS) { SetFocus(GetDlgItem(window, NotesText)); return 0; }
     return DefWindowProcW(window, message, wParam, lParam);
 }
-void show(UpdateUI &ui, HWND owner) {
-    if (owner) ui.owner = owner;
-    if (!ui.window) {
-        ui.window = CreateWindowExW(WS_EX_CONTROLPARENT, L"GogakuSignedUpdateWindow", L"Gogaku 检查更新",
-            WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, CW_USEDEFAULT, CW_USEDEFAULT, 660, 520,
-            owner, nullptr, ui.instance, &ui);
+void showNotes(UpdateUI &ui) {
+    if (!ui.offer.is_object()) return;
+    if (!IsWindow(ui.window)) {
+        const auto title = L"Gogaku " + wide(ui.offer.value("version", std::string())) + L" · 更新说明";
+        // Standard Win32 multiline EDIT uses CRLF; normalize the signed plain text for display only.
+        std::wstring text;
+        for (const auto ch : wide(ui.offer.value("notes", std::string()))) {
+            if (ch == L'\n' && (text.empty() || text.back() != L'\r')) text += L'\r';
+            text += ch;
+        }
+        if (text.empty()) text = L"此版本没有更新说明。";
+        const UINT dpi = GetDpiForWindow(ui.owner);
+        ui.window = CreateWindowExW(0, L"GogakuUpdateNotes", title.c_str(), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+            CW_USEDEFAULT, CW_USEDEFAULT, MulDiv(640, dpi, 96), MulDiv(450, dpi, 96),
+            ui.owner, nullptr, ui.instance, text.data());
     }
-    if (ui.window) { refresh(ui); ShowWindow(ui.window, SW_SHOWNORMAL); SetForegroundWindow(ui.window); }
+    if (ui.window) { ShowWindow(ui.window, SW_SHOWNORMAL); SetForegroundWindow(ui.window); }
 }
 LRESULT CALLBACK controllerProcedure(HWND window, UINT message, WPARAM wParam, LPARAM lParam) {
     auto ui = reinterpret_cast<UpdateUI *>(GetWindowLongPtrW(window, GWLP_USERDATA));
@@ -1069,28 +1030,21 @@ LRESULT CALLBACK controllerProcedure(HWND window, UINT message, WPARAM wParam, L
     }
     if (!ui) return DefWindowProcW(window, message, wParam, lParam);
     try {
-        if (message == WM_TIMER || message == AutoCheckMessage) { automaticCheck(*ui); return 0; }
-        if (message == ShowWindowMessage) { show(*ui, reinterpret_cast<HWND>(wParam)); return 0; }
+        if ((message == WM_TIMER && wParam == AutoCheckTimer) || message == AutoCheckMessage) {
+            automaticCheck(*ui); return 0;
+        }
         if (message == WorkCompleteMessage) {
             std::unique_ptr<Completion> completion(reinterpret_cast<Completion *>(lParam));
             if (!completion || completion->job != ui->job) return 0;
             const auto work = ui->job->work;
             ui->job.reset();
             const auto &result = completion->result;
-            if (work == Work::Check) {
-                if (result.value("status", "") == "available") {
-                    ui->offer = result["offer"]; ui->downloaded = nullptr;
-                    if (ui->owner) PostMessageW(ui->owner, UpdateAvailableMessage, 1, 0);
-                } else if (result.value("status", "") != "networkError" && result.value("status", "") != "rateLimited"
-                           && result.value("status", "") != "cancelled") {
-                    ui->offer = nullptr; ui->downloaded = nullptr;
-                    if (ui->owner) PostMessageW(ui->owner, UpdateAvailableMessage, 0, 0);
-                }
-            } else if (work == Work::Download) {
-                if (result.value("ok", false)) ui->downloaded = result;
-                else ui->downloaded = nullptr;
-            }
-            ui->last = result; refresh(*ui);
+            if (work == Work::Check && !completion->job->cancel && result.value("status", "") == "available")
+                ui->offer = result.at("offer");
+            if (work == Work::Download)
+                ui->downloaded = !completion->job->cancel && result.value("ok", false) ? result : Json(nullptr);
+            ui->last = completion->job->cancel ? outcome("cancelled", "已取消。") : result;
+            refresh(*ui);
             return 0;
         }
     } catch (...) { return 0; }
@@ -1099,33 +1053,98 @@ LRESULT CALLBACK controllerProcedure(HWND window, UINT message, WPARAM wParam, L
 } // namespace
 
 void startUpdateController(HWND owner, HINSTANCE instance) {
-    // Bind notifications to the settings main window even before the separate
-    // update UI is opened. Startup never shows a window or activates its owner.
-    // Never call from TSF or start a background updater outside settings lifetime.
-    if (!owner) return;
-    if (!controllerWindow) {
-        WNDCLASSW controller{}; controller.hInstance = instance;
-        controller.lpfnWndProc = controllerProcedure; controller.lpszClassName = L"GogakuUpdateController";
-        if (!RegisterClassW(&controller) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) return;
-        WNDCLASSW window{}; window.hInstance = instance; window.lpfnWndProc = updateProcedure;
-        window.lpszClassName = L"GogakuSignedUpdateWindow"; window.hCursor = LoadCursorW(nullptr, IDC_ARROW);
-        window.hbrBackground = reinterpret_cast<HBRUSH>(COLOR_BTNFACE + 1);
-        if (!RegisterClassW(&window) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) return;
-        // The controller lives exactly as long as this settings process. It has
-        // no worker service, scheduled task, Run key, or cross-process timer.
-        auto ui = std::make_unique<UpdateUI>(); ui->instance = instance; ui->owner = owner;
-        { std::lock_guard<std::mutex> lock(preferencesMutex); ui->autoCheck = preferences().value("autoCheck", false); }
-        controllerWindow = CreateWindowExW(0, controller.lpszClassName, L"", 0, 0, 0, 0, 0,
-                                           HWND_MESSAGE, nullptr, instance, ui.get());
-        if (!controllerWindow) return;
-        ui.release(); // Message-only controller is process-lifetime, not window-lifetime.
-        SetTimer(controllerWindow, 1, 60 * 60 * 1000, nullptr);
-        PostMessageW(controllerWindow, AutoCheckMessage, 0, 0);
+    if (!owner || controllerState) return;
+    WNDCLASSW controller{}; controller.hInstance = instance;
+    controller.lpfnWndProc = controllerProcedure; controller.lpszClassName = L"GogakuUpdateController";
+    if (!RegisterClassW(&controller) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) return;
+    WNDCLASSW notes{}; notes.hInstance = instance; notes.lpfnWndProc = notesProcedure;
+    notes.lpszClassName = L"GogakuUpdateNotes"; notes.hCursor = LoadCursorW(nullptr, IDC_ARROW);
+    notes.hbrBackground = GetSysColorBrush(COLOR_BTNFACE);
+    if (!RegisterClassW(&notes) && GetLastError() != ERROR_CLASS_ALREADY_EXISTS) return;
+    auto ui = std::make_unique<UpdateUI>(); ui->instance = instance; ui->owner = owner;
+    const auto prefs = preferences();
+    ui->autoCheck = prefs.value("autoCheck", false);
+    ui->lastAutoAttempt = lastAutoAttempt(prefs);
+    try {
+        const auto current = installation();
+        ui->current = wide("当前版本 " + current.version + (current.channel == "dev" ? " · 本机开发版" : ""));
+    } catch (...) { ui->current = L"无法读取当前安装版本身份"; }
+    try { loadSource(); } catch (const UpdateError &error) { ui->last = failed(error); }
+    if (!CreateWindowExW(0, controller.lpszClassName, L"", 0, 0, 0, 0, 0,
+                         HWND_MESSAGE, nullptr, instance, ui.get())) return;
+    if (!SetTimer(ui->controller, AutoCheckTimer, 60 * 60 * 1000, nullptr))
+        ui->preferenceError = L"无法启动自动检查定时器；仍可以手动检查。";
+    PostMessageW(ui->controller, AutoCheckMessage, 0, 0);
+    controllerState = std::move(ui);
+}
+
+void stopUpdateController() {
+    if (!controllerState) return;
+    auto ui = std::move(controllerState);
+    if (ui->job) ui->job->cancel = true;
+    if (IsWindow(ui->window)) DestroyWindow(ui->window);
+    KillTimer(ui->controller, AutoCheckTimer);
+    MSG pending{};
+    while (PeekMessageW(&pending, ui->controller, WorkCompleteMessage, WorkCompleteMessage, PM_REMOVE))
+        delete reinterpret_cast<Completion *>(pending.lParam);
+    DestroyWindow(ui->controller);
+}
+
+UpdateViewState updateViewState() {
+    UpdateViewState view;
+    if (!controllerState) {
+        view.status = L"无法启动更新检查。";
+        view.busy = true;
+        return view;
+    }
+    const auto &ui = *controllerState;
+    view.enabled = true;
+    view.current = ui.current;
+    view.status = ui.last.is_object() ? wide(ui.last.value("message", std::string())) : L"尚未检查。";
+    view.preferenceError = ui.preferenceError;
+    if (ui.autoCheck) view.lastAutoAttempt = formatAutoAttempt(ui.lastAutoAttempt);
+    view.automatic = ui.autoCheck;
+    view.busy = static_cast<bool>(ui.job);
+    view.hasNotes = ui.offer.is_object();
+    view.canInstall = !view.busy && ui.downloaded.is_object();
+    view.canDownload = !view.busy && view.hasNotes && !view.canInstall;
+    view.canCancel = view.busy && ui.job->work != Work::Install && !ui.job->cancel;
+    return view;
+}
+
+void performUpdateAction(UpdateAction action) {
+    if (!controllerState) return;
+    auto &ui = *controllerState;
+    const auto view = updateViewState();
+    switch (action) {
+    case UpdateAction::Check:
+        if (!view.busy) begin(ui, Work::Check);
+        break;
+    case UpdateAction::Download:
+        if (view.canDownload) begin(ui, Work::Download);
+        break;
+    case UpdateAction::Install:
+        if (view.canInstall) begin(ui, Work::Install);
+        break;
+    case UpdateAction::Cancel:
+        if (view.canCancel) {
+            ui.job->cancel = true;
+            ui.last = outcome("cancelling", "正在取消并清理临时文件…"); refresh(ui);
+        }
+        break;
+    case UpdateAction::ShowNotes: showNotes(ui); break;
     }
 }
 
-void showUpdateWindow(HWND owner, HINSTANCE instance) {
-    startUpdateController(owner, instance);
-    if (owner && controllerWindow) PostMessageW(controllerWindow, ShowWindowMessage, reinterpret_cast<WPARAM>(owner), 0);
+void setUpdateAutoCheck(bool enabled) {
+    if (!controllerState) return;
+    auto &ui = *controllerState;
+    try {
+        std::lock_guard<std::mutex> lock(preferencesMutex);
+        auto prefs = preferences(); prefs["autoCheck"] = enabled; savePreferences(prefs);
+        ui.autoCheck = enabled; ui.preferenceError.clear();
+    } catch (...) { ui.preferenceError = L"无法保存自动检查设置。"; }
+    refresh(ui);
+    if (ui.autoCheck) PostMessageW(ui.controller, AutoCheckMessage, 0, 0);
 }
 } // namespace gw

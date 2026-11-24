@@ -41,10 +41,6 @@ enum BuildIdentity {
             SettingsView().frame(minWidth: 1000, minHeight: 520, maxHeight: 800)
         }
         .defaultSize(width: 1100, height: 800)
-        Window("检查更新", id: "updates") {
-            UpdateView()
-        }
-        .defaultSize(width: 560, height: 480)
     }
 }
 
@@ -329,8 +325,10 @@ private struct SettingsView: View {
 // 所有安装形态（完整版／Lite 独立包／完整版内 Lite 模式）都有本页）
 
 private struct AboutPage: View {
-    @Environment(\.openWindow) private var openWindow
     @ObservedObject private var updates = UpdateController.shared
+    @State private var showUpdateNotes = false
+    @State private var notesVersion = ""
+    @State private var notesText = ""
 
     var body: some View {
         SettingsCard("关于 Gogaku") {
@@ -342,22 +340,40 @@ private struct AboutPage: View {
                         .accessibilityLabel("版本 \(BuildIdentity.displayVersion)")
                 }
                 SettingsRowDivider()
-                SettingsRow("检查更新") {
-                    Button {
-                        openWindow(id: "updates")
-                    } label: {
-                        HStack(spacing: 6) {
-                            Text("检查更新")
-                                .font(.system(size: 12))
-                            if updates.hasUpdate {
-                                Circle().fill(Color.green).frame(width: 6, height: 6)
-                                    .accessibilityLabel("有可用更新")
+                SettingsRow("检查更新", detail: updates.errorMessage ?? updates.statusLine) {
+                    HStack(spacing: 10) {
+                        Button("检查更新") { updates.checkNow() }
+                            .disabled(!updates.canCheck || !updates.isConfigured)
+                        if updates.phase == .downloading {
+                            ProgressView(value: updates.progress).frame(width: 80)
+                            Button("取消下载") { updates.cancelDownload() }
+                        } else if updates.phase == .awaitingSystemInstaller {
+                            Button("打开安装器") { updates.openSystemInstaller() }
+                        } else if updates.phase == .ready, updates.downloadedFile != nil {
+                            Button("安装更新") { updates.retryInstall() }
+                        } else if updates.canCheck, let candidate = updates.candidate {
+                            Button("查看更新说明") {
+                                notesVersion = candidate.manifest.version
+                                notesText = candidate.manifest.notes
+                                showUpdateNotes = true
                             }
+                            Button("下载并更新") { updates.downloadAndUpdate() }
+                                .buttonStyle(.borderedProminent)
                         }
-                        .foregroundStyle(SettingsPalette.accentText)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(updates.hasUpdate ? "检查更新，有可用更新" : "检查更新")
+                }
+                if let notice = updates.dataNotice {
+                    SettingsRowDivider()
+                    SettingsRow("出厂数据", detail: notice) { EmptyView() }
+                }
+                SettingsRowDivider()
+                SettingsRow("自动检查更新", detail: autoCheckDetail) {
+                    Toggle("自动检查更新", isOn: Binding(get: { updates.autoCheck },
+                                                       set: { updates.setAutoCheck($0) }))
+                        .labelsHidden()
+                        .toggleStyle(.switch)
+                        .controlSize(.small)
+                        .disabled(!updates.isConfigured)
                 }
                 if let detail = BuildIdentity.buildDetailLine {
                     SettingsRowDivider()
@@ -371,6 +387,16 @@ private struct AboutPage: View {
                 }
             }
         }
+        .sheet(isPresented: $showUpdateNotes) {
+            UpdateNotesView(version: notesVersion, notes: notesText)
+        }
+    }
+
+    private var autoCheckDetail: String {
+        if let error = updates.autoCheckPreferenceError { return error }
+        let policy = "仅在设置打开时每 24 小时最多尝试一次；不自动下载或安装。"
+        guard updates.autoCheck, let attempted = updates.lastAutoAttempt else { return policy }
+        return policy + "\n上次自动尝试：\(attempted.formatted(date: .abbreviated, time: .shortened))"
     }
 }
 

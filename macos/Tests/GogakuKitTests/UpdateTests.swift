@@ -1,6 +1,7 @@
 import XCTest
 import CryptoKit
 @testable import GogakuKit
+@testable import GogakuSettings
 
 /// 更新合同与检查器：签名、通道、构建号、兼容性、分页／ETag／限流、
 /// 下载校验与偏好节流。全部用注入传输，不访问真实网络。
@@ -491,6 +492,62 @@ final class UpdateTests: XCTestCase {
         XCTAssertTrue(prefs.isAutoCheckDue(channel: .stable, now: now.addingTimeInterval(86400)))
         // 通道独立。
         XCTAssertTrue(prefs.isAutoCheckDue(channel: .dev, now: now.addingTimeInterval(3600)))
+    }
+
+    @MainActor
+    func testControllerRequiresDownloadConsentForManualAndAutomaticChecks() async throws {
+        let transport = FakeTransport()
+        let (bytes, signature) = try signedRelease(manifest())
+        let releases = try releaseJSON(manifestData: bytes, signatureData: signature)
+        route(transport, manifestData: bytes, signatureData: signature, releasesJSON: releases)
+        transport.downloadHandler = { _ in throw UpdateTransportError.transport("安装包测试拦截") }
+        let prefs = UpdatePreferencesStore(url: preferencesURL)
+        let clock = Date(timeIntervalSince1970: 1_800_000_000)
+        let controller = UpdateController(installation: installation(), config: config(),
+                                          transport: transport,
+                                          downloader: UpdateDownloader(transport: transport, cacheRoot: root),
+                                          preferences: prefs, now: { clock })
+
+        XCTAssertNil(controller.runAutoCheckIfDue())
+        XCTAssertTrue(transport.requested.isEmpty)
+        // 用控制器开关模拟启用：应立即检查，不发出安装包请求。
+        let enabled = try XCTUnwrap(controller.setAutoCheck(true))
+        await enabled.value
+        XCTAssertEqual(controller.candidate?.manifest.version, "0.1.2")
+        XCTAssertEqual(controller.lastAutoAttempt, clock)
+        XCTAssertTrue(transport.downloadTimeouts.isEmpty)
+        let requestCount = transport.requested.count
+        XCTAssertNil(controller.runAutoCheckIfDue())
+        XCTAssertEqual(transport.requested.count, requestCount)
+
+        await controller.checkNow()?.value
+        XCTAssertEqual(controller.outcome?.kind, .available)
+        XCTAssertTrue(transport.downloadTimeouts.isEmpty)
+        await controller.downloadAndUpdate()?.value
+        XCTAssertEqual(transport.downloadTimeouts.count, 1)
+
+        try prefs.recordAutoCheck(channel: .stable, now: clock.addingTimeInterval(-86_400))
+        transport.handler = { url, _ in
+            UpdateHTTPResponse(status: 403, headers: ["x-ratelimit-remaining": "0"], body: Data(), finalURL: url)
+        }
+        let due = try XCTUnwrap(controller.runAutoCheckIfDue())
+        XCTAssertNil(controller.candidate, "检查期间旧候选不可操作")
+        await due.value
+        XCTAssertEqual(controller.outcome?.kind, .rateLimited)
+        XCTAssertEqual(controller.lastAutoAttempt, clock)
+        XCTAssertNil(controller.candidate)
+        XCTAssertNil(controller.downloadAndUpdate())
+        if let unexpected = controller.runAutoCheckIfDue() {
+            await unexpected.value
+            XCTFail("失败仍应节流")
+        }
+        XCTAssertEqual(transport.downloadTimeouts.count, 1)
+
+        let reopened = UpdateController(installation: installation(build: 10), config: config(),
+                                        transport: transport, downloader: UpdateDownloader(transport: transport),
+                                        preferences: UpdatePreferencesStore(url: preferencesURL))
+        XCTAssertNil(reopened.candidate, "持久化历史不是本次可安装候选")
+        XCTAssertEqual(reopened.lastAutoAttempt, clock)
     }
 
     // MARK: 下载校验

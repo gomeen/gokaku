@@ -2,11 +2,21 @@
 #include "platform.h"
 
 namespace gw {
-// Posted only to the settings owner. wParam: nonzero = available, zero = cleared;
-// lParam is unused. Receiving this message must not show or activate a window.
-inline constexpr UINT UpdateAvailableMessage = WM_APP + 0x470;
+// Posted to the settings owner when the in-memory view state changes.
+inline constexpr UINT UpdateStateMessage = WM_APP + 0x470;
 
-// Call on the settings UI thread with its main window; starts only the hidden
-// controller/timer. Manual checks still open the separate showUpdateWindow UI.
+struct UpdateViewState {
+    std::wstring current, status, preferenceError, lastAutoAttempt;
+    bool enabled = false, automatic = false, busy = false, canDownload = false, canInstall = false,
+        canCancel = false, hasNotes = false;
+};
+enum class UpdateAction { Check, Download, Install, Cancel, ShowNotes };
+
+// All UI calls run on the settings thread. The hidden controller/timer has no
+// lifetime outside this window; worker threads only post completed results.
 void startUpdateController(HWND owner, HINSTANCE instance);
+void stopUpdateController();
+UpdateViewState updateViewState();
+void performUpdateAction(UpdateAction action);
+void setUpdateAutoCheck(bool enabled);
 }

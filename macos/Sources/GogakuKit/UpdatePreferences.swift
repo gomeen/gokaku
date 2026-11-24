@@ -98,8 +98,10 @@ public final class UpdatePreferencesStore {
 
     public func setAutoCheck(_ enabled: Bool) throws {
         guard preferences.autoCheck != enabled else { return }
+        let previous = preferences
         preferences.autoCheck = enabled
-        try save()
+        do { try save() }
+        catch { preferences = previous; throw error }
     }
 
     public func isAutoCheckDue(channel: UpdateChannel, now: Date = Date()) -> Bool {

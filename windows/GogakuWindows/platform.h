@@ -53,7 +53,6 @@ Json spell(const std::string &source, const Json &ignoredWords);
 Json checkUpdate(std::atomic_bool *cancel = nullptr);
 Json downloadUpdate(const Json &offer, std::atomic_bool *cancel = nullptr);
 void launchUpdate(const Json &download); // 启动前再次核对哈希、大小和受控下载路径
-void showUpdateWindow(HWND owner, HINSTANCE instance);
 
 // 主题包纯数据；主题编辑与应用分别持久化。
 Json builtinThemes();

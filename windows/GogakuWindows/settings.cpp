@@ -32,8 +32,8 @@
 namespace {
 using gw::Json;
 constexpr UINT Completed = WM_APP + 17, DialogCompleted = WM_APP + 18;
-static const wchar_t *const FullPageNames[] = {L"学习翻译",L"普通输入",L"自定义词语",L"扩展词库",L"皮肤",L"快捷键",L"学习与隐私",L"学习片段"};
-static const wchar_t *const LitePageNames[] = {L"普通输入",L"自定义词语",L"扩展词库",L"皮肤",L"快捷键"};
+static const wchar_t *const FullPageNames[] = {L"学习翻译",L"普通输入",L"自定义词语",L"扩展词库",L"皮肤",L"快捷键",L"学习与隐私",L"学习片段",L"关于"};
+static const wchar_t *const LitePageNames[] = {L"普通输入",L"自定义词语",L"扩展词库",L"皮肤",L"快捷键",L"关于"};
 static const size_t kFullPageCount = sizeof(FullPageNames)/sizeof(FullPageNames[0]);
 static const size_t kLitePageCount = sizeof(LitePageNames)/sizeof(LitePageNames[0]);
 #if defined(GOGAKU_LITE)
@@ -288,7 +288,7 @@ struct Records {
 struct Result { std::string type; uint64_t generation=0; Json value; std::wstring error; };
 struct App {
     HINSTANCE instance; HWND window=nullptr,nav=nullptr,pageWindow=nullptr,footer=nullptr,retry=nullptr,preview=nullptr;
-    HWND heading=nullptr,brand=nullptr,versionLabel=nullptr;
+    HWND heading=nullptr,brand=nullptr;
     HFONT font=nullptr,titleFont=nullptr,helperFont=nullptr; HIMAGELIST icons=nullptr;
     HBRUSH sideBrush=CreateSolidBrush(SideColor);
     std::vector<Placement> placements;std::map<HWND,std::vector<int>> listColumns;
@@ -374,6 +374,7 @@ struct App {
     void bindBool(const wchar_t *labelText,int id,int y,const char *key){check(labelText,id,20,y,settings.value(key,false));actions[id]=[this,id,key](int n){if(n==BN_CLICKED)patch({{key,checked(id)}});};}
     void debounce(){SetTimer(window,2,300,nullptr);}
     void flushText();
+    void aboutPage();void refreshUpdateControls();
     void buildPage();void layout();void reflowControls();void setDpi(UINT next);void setScroll(int position);void drawNavigation(const DRAWITEMSTRUCT &item);void learningPage();void normalPage();void wordPage();void skinPage();void shortcutPage();void privacyPage();void recordsPage();void dictionariesPage();void fillDicts();void refreshDictSummary();void fetchDictionaryCatalog();void installCatalogEntry(int index);void loadDicts();void openCatalogDialog();
     void fillApps();void addApp(bool browse);void removeApp();void toggleApp(size_t index);void fillWords();void editWord(bool fresh);void saveWords(std::vector<Word> value);void fillThemes();void refreshThemeSelectionControls();void openTheme(Json theme,bool fresh);void readThemeControls();void refreshPreview();bool leaveTheme();void saveTheme();void fillShortcuts();void recordKey(WPARAM key);void applyShortcut(int target,const Json &binding);void loadRecords();
     LRESULT command(int id,int notification);LRESULT result(Result &r);LRESULT notifyControl(NMHDR *header);
@@ -1176,6 +1177,50 @@ void App::recordsPage(){label(L"学习片段",18);label(L"真实采集仍关闭�
 }
 void App::loadRecords(){if(get(801))EnableWindow(get(801),FALSE);if(get(805))SetWindowTextW(get(805),L"正在后台读取真实存储…");job("records",[]{Records store;return store.list();});}
 void App::flushText(){KillTimer(window,2);if(onPage(L"皮肤")&&themeEditing){readThemeControls();return;}if(onPage(L"学习与隐私")&&get(701)){std::wistringstream input(content(get(701)));std::wstring token;std::set<std::string> words;while(input>>token){if(token.size()>128)throw std::runtime_error("忽略词不能超过 128 字符");words.insert(gw::utf8(lower(token)));}Json list=Json::array();for(const auto &s:words)list.push_back(s);if(list!=settings.value("ignoredWords",Json::array()))patch({{"ignoredWords",list}});}}
+namespace AboutControl {
+constexpr int Current = 901, Status = 902, Check = 903, Download = 904, Install = 905,
+    Notes = 906, Cancel = 907, Automatic = 908, PreferenceError = 909, LastAutoAttempt = 910;
+}
+void App::aboutPage(){
+    namespace id = AboutControl;
+    label(L"关于",18);
+    add(L"STATIC",L"",SS_NOPREFIX,20,56,790,26,id::Current);
+    add(L"STATIC",L"",SS_NOPREFIX,20,96,790,46,id::Status);
+    button(L"检查更新",id::Check,20,148);
+    button(L"下载更新",id::Download,142,148);
+    button(L"安装更新",id::Install,264,148);
+    button(L"查看更新说明",id::Notes,386,148,128);
+    button(L"取消任务",id::Cancel,526,148);
+    check(L"自动检查更新",id::Automatic,20,207,false);
+    label(L"仅在设置应用运行期间，每 24 小时最多尝试一次；不会自动下载或安装。",241,42);
+    add(L"STATIC",L"",SS_NOPREFIX,20,282,790,26,id::LastAutoAttempt);
+    add(L"STATIC",L"",SS_NOPREFIX,20,312,790,40,id::PreferenceError);
+    for(const auto &[control, action]:std::initializer_list<std::pair<int,gw::UpdateAction>>{
+        {id::Check,gw::UpdateAction::Check},{id::Download,gw::UpdateAction::Download},
+        {id::Install,gw::UpdateAction::Install},{id::Notes,gw::UpdateAction::ShowNotes},
+        {id::Cancel,gw::UpdateAction::Cancel}}){
+        actions[control]=[this,action](int n){if(n==BN_CLICKED){gw::performUpdateAction(action);refreshUpdateControls();}};
+    }
+    actions[id::Automatic]=[this](int n){if(n==BN_CLICKED){gw::setUpdateAutoCheck(checked(AboutControl::Automatic));refreshUpdateControls();}};
+    refreshUpdateControls();
+}
+void App::refreshUpdateControls(){
+    if(!onPage(L"关于"))return;
+    namespace id = AboutControl;
+    const auto update=gw::updateViewState();
+    SetWindowTextW(get(id::Current),update.current.c_str());
+    SetWindowTextW(get(id::Status),update.status.c_str());
+    SetWindowTextW(get(id::PreferenceError),update.preferenceError.c_str());
+    SetWindowTextW(get(id::LastAutoAttempt),update.lastAutoAttempt.c_str());
+    SendMessageW(get(id::Automatic),BM_SETCHECK,update.automatic?BST_CHECKED:BST_UNCHECKED,0);
+    EnableWindow(get(id::Automatic),update.enabled);
+    EnableWindow(get(id::Check),update.enabled&&!update.busy);
+    EnableWindow(get(id::Download),update.canDownload);
+    EnableWindow(get(id::Install),update.canInstall);
+    EnableWindow(get(id::Notes),update.hasNotes);
+    EnableWindow(get(id::Cancel),update.canCancel);
+}
+
 void App::buildPage(){
     building=true;recording=-1;KillTimer(window,2);for(auto h:controls)DestroyWindow(h);controls.clear();placements.clear();listColumns.clear();actions.clear();contentHeight=0;scroll=0;ShowWindow(preview,SW_HIDE);
     try{
@@ -1188,6 +1233,7 @@ void App::buildPage(){
             else if(wcscmp(name,L"快捷键")==0)shortcutPage();
             else if(wcscmp(name,L"学习与隐私")==0)privacyPage();
             else if(wcscmp(name,L"学习片段")==0)recordsPage();
+            else if(wcscmp(name,L"关于")==0)aboutPage();
         };
         if(currentPage<0||size_t(currentPage)>=PageCount) throw std::runtime_error("页面索引非法");
         render(PageNames[currentPage]);
@@ -1256,9 +1302,9 @@ void App::setDpi(UINT next){
     if(!next)next=96;UINT previousDpi=dpi;dpi=next;scroll=MulDiv(scroll,int(dpi),int(previousDpi));
     auto oldFont=font,oldTitle=titleFont,oldHelper=helperFont;font=uiFont(dpi,15);titleFont=uiFont(dpi,22,FW_SEMIBOLD);helperFont=uiFont(dpi,13);
     for(const auto &p:placements)SendMessageW(p.window,WM_SETFONT,reinterpret_cast<WPARAM>(p.auxiliary?helperFont:font),TRUE);
-    for(auto h:{nav,retry,GetDlgItem(window,12)})if(h)SendMessageW(h,WM_SETFONT,reinterpret_cast<WPARAM>(font),TRUE);
+    for(auto h:{nav,retry})if(h)SendMessageW(h,WM_SETFONT,reinterpret_cast<WPARAM>(font),TRUE);
     for(auto h:{heading,brand})if(h)SendMessageW(h,WM_SETFONT,reinterpret_cast<WPARAM>(titleFont),TRUE);
-    for(auto h:{footer,versionLabel})if(h)SendMessageW(h,WM_SETFONT,reinterpret_cast<WPARAM>(helperFont),TRUE);
+    if(footer)SendMessageW(footer,WM_SETFONT,reinterpret_cast<WPARAM>(helperFont),TRUE);
     if(nav)SendMessageW(nav,LB_SETITEMHEIGHT,0,px(44));
     if(oldFont)DeleteObject(oldFont);if(oldTitle)DeleteObject(oldTitle);if(oldHelper)DeleteObject(oldHelper);
     if(window){
@@ -1280,9 +1326,7 @@ void App::drawNavigation(const DRAWITEMSTRUCT &item){
 void App::layout(){
     RECT client{};GetClientRect(window,&client);int width=client.right,height=client.bottom,sidebar=px(200),bottom=px(52),header=px(76);
     MoveWindow(brand,px(24),px(25),sidebar-px(40),px(34),TRUE);
-    MoveWindow(nav,px(10),px(87),sidebar-px(20),std::max(px(7*44),height-px(205)),TRUE);
-    MoveWindow(versionLabel,px(24),height-px(83),sidebar-px(40),px(22),TRUE);
-    MoveWindow(GetDlgItem(window,12),px(20),height-px(52),sidebar-px(40),px(30),TRUE);
+    MoveWindow(nav,px(10),px(87),sidebar-px(20),std::max(px(44),height-px(109)),TRUE);
     MoveWindow(heading,sidebar+px(24),px(23),std::max(1,width-sidebar-px(48)),px(34),TRUE);
     MoveWindow(footer,sidebar+px(24),height-bottom+px(13),std::max(1,width-sidebar-px(152)),px(32),TRUE);
     MoveWindow(retry,width-px(112),height-bottom+px(10),px(88),px(30),TRUE);
@@ -1295,7 +1339,7 @@ void App::layout(){
 }
 LRESULT App::command(int id,int notification){if(building)return 0;
     try{if(id==10&&notification==LBN_SELCHANGE){int requested=int(SendMessageW(nav,LB_GETCURSEL,0,0));flushText();if(requested!=currentPage&&!leaveTheme()){SendMessageW(nav,LB_SETCURSEL,currentPage,0);return 0;}if(requested!=currentPage){themeEditing=false;currentPage=requested;buildPage();}return 0;}
-        if(id==11){if(retryAction)retryAction();return 0;}if(id==12){gw::showUpdateWindow(window,instance);return 0;}
+        if(id==11){if(retryAction)retryAction();return 0;}
         auto it=actions.find(id);if(it!=actions.end())it->second(notification);
     }catch(const std::exception &e){fail(e);}return 0;
 }
@@ -1390,7 +1434,7 @@ LRESULT CALLBACK App::previewProc(HWND h,UINT m,WPARAM w,LPARAM l){if(m==WM_NCCR
         EndPaint(h,&paint);return 0;}return DefWindowProcW(h,m,w,l);}
 LRESULT CALLBACK App::proc(HWND h,UINT m,WPARAM w,LPARAM l){if(m==WM_NCCREATE)SetWindowLongPtrW(h,GWLP_USERDATA,reinterpret_cast<LONG_PTR>(reinterpret_cast<CREATESTRUCTW *>(l)->lpCreateParams));auto self=reinterpret_cast<App *>(GetWindowLongPtrW(h,GWLP_USERDATA));if(!self)return DefWindowProcW(h,m,w,l);
     try{switch(m){case WM_COMMAND:return self->command(LOWORD(w),HIWORD(w));case WM_NOTIFY:return self->notifyControl(reinterpret_cast<NMHDR *>(l));
-        case gw::UpdateAvailableMessage:SetWindowTextW(GetDlgItem(h,12),w?L"检查更新 · 新版":L"检查更新");return 0;
+        case gw::UpdateStateMessage:self->refreshUpdateControls();return 0;
         case WM_HSCROLL:
             if(reinterpret_cast<HWND>(l)==self->get(220)){int size=int(SendMessageW(self->get(220),TBM_GETPOS,0,0));SetWindowTextW(self->get(228),std::to_wstring(size).c_str());self->patch({{"candidateFontSize",size}});}
             else if(reinterpret_cast<HWND>(l)==self->get(230)){int size=int(SendMessageW(self->get(230),TBM_GETPOS,0,0));SetWindowTextW(self->get(2300),std::to_wstring(size).c_str());self->patch({{"horizontalPageSize",size}});}
@@ -1405,15 +1449,14 @@ LRESULT CALLBACK App::proc(HWND h,UINT m,WPARAM w,LPARAM l){if(m==WM_NCCREATE)Se
             auto pen=CreatePen(PS_SOLID,1,LineColor);auto old=SelectObject(dc,pen);MoveToEx(dc,side.right,0,nullptr);LineTo(dc,side.right,client.bottom);
             for(int y:{self->px(76),int(client.bottom)-self->px(52)}){MoveToEx(dc,side.right,y,nullptr);LineTo(dc,client.right,y);}
             SelectObject(dc,old);DeleteObject(pen);return TRUE;}
-        case WM_CTLCOLORSTATIC:case WM_CTLCOLORBTN:case WM_CTLCOLORLISTBOX:{auto child=reinterpret_cast<HWND>(l);auto dc=reinterpret_cast<HDC>(w);bool side=child==self->brand||child==self->versionLabel||child==self->nav;
+        case WM_CTLCOLORSTATIC:case WM_CTLCOLORBTN:case WM_CTLCOLORLISTBOX:{auto child=reinterpret_cast<HWND>(l);auto dc=reinterpret_cast<HDC>(w);bool side=child==self->brand||child==self->nav;
             SetBkMode(dc,TRANSPARENT);SetBkColor(dc,side?SideColor:GetSysColor(COLOR_WINDOW));SetTextColor(dc,TextColor);
             if(child==self->footer)SetTextColor(dc,GetWindowLongPtrW(child,GWLP_USERDATA)?RGB(184,48,48):MutedColor);
-            else if(child==self->versionLabel)SetTextColor(dc,MutedColor);
             else for(const auto &p:self->placements)if(p.window==child&&p.auxiliary){SetTextColor(dc,MutedColor);break;}
             return reinterpret_cast<LRESULT>(side?self->sideBrush:GetSysColorBrush(COLOR_WINDOW));}
         case Completed:{std::unique_ptr<Result> result(reinterpret_cast<Result *>(l));return self->result(*result);}
         case WM_CLOSE:{self->flushText();if(!self->leaveTheme())return 0;self->closed=true;self->cancel=true;EnableWindow(h,FALSE);for(auto &job:self->jobs)if(job.joinable())job.join();MSG pending{};while(PeekMessageW(&pending,h,Completed,Completed,PM_REMOVE))delete reinterpret_cast<Result *>(pending.lParam);DestroyWindow(h);return 0;}
-        case WM_DESTROY:PostQuitMessage(0);return 0;
+        case WM_DESTROY:gw::stopUpdateController();PostQuitMessage(0);return 0;
     }}catch(const std::exception &e){self->fail(e);return 0;}return DefWindowProcW(h,m,w,l);
 }
 bool App::create(int show){
@@ -1422,20 +1465,18 @@ bool App::create(int show){
     root.lpszClassName=L"GogakuSettingsPage";root.lpfnWndProc=pageProc;RegisterClassW(&root);root.lpszClassName=L"GogakuSettingsPreview";root.lpfnWndProc=previewProc;RegisterClassW(&root);
     window=CreateWindowExW(WS_EX_CONTROLPARENT,L"GogakuNativeSettings",L"Gogaku 设置",WS_OVERLAPPEDWINDOW|WS_CLIPCHILDREN,CW_USEDEFAULT,CW_USEDEFAULT,px(1000),px(700),nullptr,nullptr,instance,this);if(!window)return false;
     dpi=GetDpiForWindow(window);if(!dpi)dpi=96;setDpi(dpi);
-    nav=add(L"LISTBOX",L"",LBS_NOTIFY|LBS_OWNERDRAWFIXED|LBS_HASSTRINGS|LBS_NOINTEGRALHEIGHT|WS_TABSTOP,10,87,180,400,10,window);
+    nav=add(L"LISTBOX",L"",LBS_NOTIFY|LBS_OWNERDRAWFIXED|LBS_HASSTRINGS|LBS_NOINTEGRALHEIGHT|WS_VSCROLL|WS_TABSTOP,10,87,180,400,10,window);
     for(size_t i=0;i<PageCount;++i)SendMessageW(nav,LB_ADDSTRING,0,reinterpret_cast<LPARAM>(PageNames[i]));SendMessageW(nav,LB_SETITEMHEIGHT,0,px(44));SendMessageW(nav,LB_SETCURSEL,0,0);
     brand=add(L"STATIC",L"Gogaku",0,24,25,160,34,14,window);
     heading=add(L"STATIC",PageNames[0],0,224,23,700,34,15,window);
     pageWindow=CreateWindowExW(WS_EX_CONTROLPARENT,L"GogakuSettingsPage",L"",WS_CHILD|WS_VISIBLE|WS_VSCROLL|WS_CLIPCHILDREN,0,0,1,1,window,nullptr,instance,this);
     preview=CreateWindowExW(0,L"GogakuSettingsPreview",L"九条候选布局预览",WS_CHILD,0,0,1,1,window,nullptr,instance,this);
     footer=add(L"STATIC",L"",0,224,650,600,32,13,window);retry=add(L"BUTTON",L"重试",BS_PUSHBUTTON|WS_TABSTOP,880,650,88,30,11,window);ShowWindow(retry,SW_HIDE);
-    std::wstring version=L"版本未知";try{auto info=Json::parse(gw::readFile(gw::installRoot()/L"build-identity.json",1024*1024));version=gw::wide(info.value("fullVersion",std::string("?")))+L" b"+std::to_wstring(info.value("buildNumber",0));}catch(...){}
-    versionLabel=add(L"STATIC",version,0,24,600,160,22,16,window);
-    add(L"BUTTON",L"检查更新",BS_PUSHBUTTON|WS_TABSTOP,20,640,160,30,12,window);
     for(auto h:{brand,heading})SendMessageW(h,WM_SETFONT,reinterpret_cast<WPARAM>(titleFont),TRUE);
-    for(auto h:{footer,versionLabel})SendMessageW(h,WM_SETFONT,reinterpret_cast<WPARAM>(helperFont),TRUE);
+    SendMessageW(footer,WM_SETFONT,reinterpret_cast<WPARAM>(helperFont),TRUE);
+    gw::startUpdateController(window,instance);
     try{settings=gw::readSettings();buildPage();status(L"设置已载入");}catch(const std::exception &e){retryAction=[this](){settings=gw::readSettings();buildPage();status(L"设置已载入");};fail(e);}
-    layout();gw::startUpdateController(window,instance);ShowWindow(window,show);UpdateWindow(window);return true;
+    layout();ShowWindow(window,show);UpdateWindow(window);return true;
 }
 } // namespace
 
