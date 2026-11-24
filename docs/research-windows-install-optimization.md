@@ -1,5 +1,7 @@
 # Windows 安装体验优化调研
 
+> **实施状态（2026-11-26）**：P0 自动启用已随 0.5.0 发布（代码于 0.4.0/b123 工作区落地：`enable.cpp` ＋安装器 `ssPostInstall` 幂等登记，真机验收待做，详见[验收记录](validation/native-development.md)）；本文其余方案仍是工作项，不等于已实现。
+
 调研日期：2026-11-20。范围是 Windows 11 终端用户从获取安装包到能打出字的完整旅程：获取 → 信任 → 安装 → **启用** → 升级／卸载。开发机构包流水线（交叉编译、Wine/Inno、固定依赖）的复杂度不在本文范围。
 
 证据口径：与既有调研一致——「官方」指 Microsoft Learn、jrsoftware.org 等一手文档；「源码证据」指 Weasel／水杉等实现的可核对写法（已由两个独立来源交叉印证的结论会注明）；商店页标价为厂商自述。本文没有修改或运行任何代码，调研结论不等于宿主验收。
@@ -10,7 +12,7 @@
 
 | 优先级 | 方案 | 解决的痛点 | 一句话结论 |
 |---|---|---|---|
-| P0 | 安装后自动登记用户输入法列表（水杉式） | 手动六层设置路径 | `ShellExecAsOriginalUser` 以原用户身份幂等调 `InstallLayoutOrTip`；设置页/语言栏即时生效，任务栏需重启 explorer（提示即可） |
+| P0 | 安装后自动登记用户输入法列表（水杉式）✅ 已落地并随 0.5.0 发布（真机验收待做） | 手动六层设置路径 | `ShellExecAsOriginalUser` 以原用户身份幂等调 `InstallLayoutOrTip`；设置页/语言栏即时生效，任务栏需重启 explorer（提示即可） |
 | P0 | 代码签名 | SmartScreen 拦截、未知发布者、官方 IME 合规 | 作者在美/加则 Azure Artifact Signing（$9.99/月）；否则 Certum 开源证书（€49/年）；并行免费申请 SignPath Foundation |
 | P1 | 首启引导 | 自动启用失败/被剔除时的兜底；explorer 缓存 | 设置应用检测启用状态，未启用时深链 `ms-settings:regionlanguage`＋两步图文；无第三方 IME 直达深链 |
 | P1 | winget 分发 | 获取门槛 | 照 Git.Git／Weasel 模板提交 winget-pkgs：GitHub Releases 直链＋Inno 静默开关；不豁免 SmartScreen，与签名互补 |

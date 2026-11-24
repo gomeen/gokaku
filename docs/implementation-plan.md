@@ -1,6 +1,6 @@
 # 双端功能统一、安装包与检查更新计划
 
-状态：**已批准并实施中，当前发布基线为 `0.1.3 / b110 stable`。** Windows 初始范围为只交付最终 Setup.exe，后来保留历史 VM 限定运行记录；b110 已完成双端构包、fast／release 自动化验证和发布清单签名，真实 host 未运行且已记录用户豁免。构包或历史限定宿主通过不等同双端功能验收。本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载与检查更新；产品行为以[产品方向](product.md)为准，功能状态见[双端功能对照](feature-parity.md)，更新合同见[检查更新](update.md)，历史证据见[原生开发验收](validation/native-development.md)。
+状态：**已批准并实施中，当前发布基线为 `0.5.0 / b131 stable`（2026-11-24 定版，含扩展词库与 Lite 形态）。** Windows 初始范围为只交付最终 Setup.exe，后来保留历史 VM 限定运行记录；b110 已完成双端构包、fast／release 自动化验证和发布清单签名，真实 host 未运行且已记录用户豁免，b131 同样以书面豁免发布。构包或历史限定宿主通过不等同双端功能验收。本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载与检查更新；产品行为以[产品方向](product.md)为准，功能状态见[双端功能对照](feature-parity.md)，更新合同见[检查更新](update.md)，历史证据见[原生开发验收](validation/native-development.md)。
 
 ## 一、目标与范围
 
@@ -94,7 +94,7 @@ S2 共享实现与 S3／S4 平台接入已写入源码，验证进度见[接入�
 | P3 | 完整设置、主题、拼写、自定义词和云翻译 | 功能表无遗漏；主题双向互通；失败可恢复 |
 | P4 | Mac 仅 PKG、Windows 安装向导、双通道和恢复 | 干净机器无开发环境可安装；升级保留数据；失败恢复 |
 | P5 | 双端检查更新、可选自动检查、清单签名及 Draft 发布 | 下载校验与安装交接闭环；失败不影响输入 |
-| P6 | 双端最终回归、包检查及朋友真机验收 | 报告绑定最终提交与安装件；未测项明确列出 |
+| P6 | 双端最终回归、包检查及朋友真机验收 | 报告绑定最终提交与安装件；未测项明确列出。b110 起两轮定版均以书面豁免发布，真机验收仍是未还欠账 |
 
 P0 完成后可并行：Mac 收敛与 Windows 基础工作；更新开发可并行，但最终端到端验收依赖真实安装包。
 
@@ -223,8 +223,10 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 | P1 设置迁移 | 完成 | schema 2；本地模型旧配置迁移为关闭；已启用火山保留 |
 | P2 Windows TSF／代理 | x86／x64 TSF、x64 代理／核心已编译 | 私有管道、焦点／字段、提交确认、原子持久化已接通；b110 真实 Windows 运行验证未做，b94–b99 运行记录仅属历史 dev 包 |
 | P3 Windows 设置／主题／拼写 | 已编译，存在功能缺口 | Win32 七页、Direct2D／DirectWrite／WIC、主题 ZIP、自定义词、系统拼写；缺口见[对照表](feature-parity.md) |
-| P4 Mac PKG | b110 stable 已发布；历史真实 `installer -pkg` 单次安装与假 HOME 事务证据保留；Developer ID／公证未执行（无证书） | `scripts/package-macos-pkg.py`、`pkg-postinstall.sh`、`docs/validation/native-development.md`、[b110 发布记录](validation/release-b110.json) |
-| P4 Windows Setup | b110 stable 双端安装包已发布；真实宿主、完整恢复／卸载未验收 | [b110 发布记录](validation/release-b110.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐；b94 默认升级证据保留为历史 |
-| P5 检查更新 | 两端客户端已实现；b110 stable 发布侧已完成；客户端真实旧版更新闭环未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本、[b110 发布记录](validation/release-b110.json) |
-| P6 最终验收 | b110 核心／fast／release 自动化检查通过；完整产品未验收，host 以用户豁免发布 | b110 发布记录；真实宿主、在线更新 E2E、完整升级恢复／卸载及真机矩阵未验收 |
-| 扩展词库 D0–D6 | 0.5.0（b131）已于 2026-11-24 发布；host 书面豁免，Windows 运行未验收，见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md) |
+| P4 Mac PKG | 0.5.0（b131）stable 已发布；历史真实 `installer -pkg` 单次安装与假 HOME 事务证据保留；Developer ID／公证未执行（无证书） | `scripts/package-macos-pkg.py`、`pkg-postinstall.sh`、`docs/validation/native-development.md`、[b110 发布记录](validation/release-b110.json)、[0.5.0 发布记录](validation/release-0.5.0.json) |
+| P4 Windows Setup | 0.5.0 stable 双端双形态（完整版＋Lite）安装包已发布；真实宿主、完整恢复／卸载未验收 | [b110 发布记录](validation/release-b110.json)、[0.5.0 发布记录](validation/release-0.5.0.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐；b94 默认升级证据保留为历史 |
+| P5 检查更新 | 两端客户端已实现；b110 与 0.5.0 stable 发布侧已完成；客户端真实旧版更新闭环未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本、[b110 发布记录](validation/release-b110.json)、[0.5.0 发布记录](validation/release-0.5.0.json) |
+| P6 最终验收 | b110、0.5.0 核心／fast／release 自动化检查通过；完整产品未验收，host 两轮均以书面豁免发布 | 两轮发布记录；真实宿主、在线更新 E2E、完整升级恢复／卸载及真机矩阵未验收 |
+| 扩展词库 D0–D6 | 完成：0.5.0（b131）已于 2026-11-24 发布；host 书面豁免，Windows 运行未验收，见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md)、[验收记录](validation/dictionaries-0.5.0.md) |
+
+实施欠账（共享学习提交协调、Windows 真机验收矩阵、WebP 随包解码、旧设置写回迁移、跨通道调频、多候选预译等）已转入 `.scratch/debt-backlog/` 的 issue 文件，作为后续开发的工单队列。
