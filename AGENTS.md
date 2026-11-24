@@ -9,3 +9,17 @@
 - 验证节奏（详见 [docs/native-development.md](docs/native-development.md)「验证节奏」）：**平时开发只跑关键测试** `python3 scripts/verify.py --profile fast`（约 2 分钟），改动涉及共享核心／内存敏感路径时加 ASan 冒烟 `--profile release --only asan-ubsan --quick`（约 4 分钟）；**全量测试 `--profile release`（含十万序列插桩，分片并行后预计约 15 分钟）只在定版或排查疑难问题时后台运行**，不阻塞日常迭代；真实宿主用 `--profile host --yes`（每次定版的短档），核心／IMK 改动或里程碑用 `--profile host-full --yes`（会注入真实按键），仅在用户空闲时段执行。不要为等待长验证在会话里轮询空等。
 - 引入青简源码、数据或模型前，核对具体文件及组件的许可证；Gogaku 自身代码以 MIT 许可发布（根目录 LICENSE），第三方组件与随包数据保留各自原许可。
 - 交流和文档使用中文，代码标识符使用英文。
+
+## Agent skills
+
+### Issue tracker
+
+Issues 以 Markdown 文件形式存放在仓库内 `.scratch/<feature-slug>/`。见 `docs/agents/issue-tracker.md`。
+
+### Triage labels
+
+五个标准 triage 角色使用默认标签字符串（`needs-triage`、`needs-info`、`ready-for-agent`、`ready-for-human`、`wontfix`）。见 `docs/agents/triage-labels.md`。
+
+### Domain docs
+
+单上下文：仓库根 `GLOSSARY.md` + `docs/adr/`。见 `docs/agents/domain.md`。
