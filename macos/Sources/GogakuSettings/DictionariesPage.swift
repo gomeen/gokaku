@@ -35,6 +35,7 @@ struct DictionariesPage: View {
         var progress: Double = 0
         var message = ""
         var failedMessage = ""
+        var pendingRecommendationID: String?
     }
 
     @State private var entries: [DictionaryStore.Entry] = []
@@ -72,7 +73,14 @@ struct DictionariesPage: View {
             case .failed(let message): Text(message).foregroundStyle(SettingsPalette.danger)
             case .idle: EmptyView()
             }
+            if !catalog.message.isEmpty {
+                Text(catalog.message).foregroundStyle(.secondary)
+            }
+            if !catalog.failedMessage.isEmpty {
+                Text(catalog.failedMessage).foregroundStyle(SettingsPalette.danger)
+            }
             list
+            starterRecommendations
             linksSection
         }
         .onAppear { reload() }
@@ -109,7 +117,7 @@ struct DictionariesPage: View {
                     .foregroundStyle(.secondary)
             }
             Button("获取更多词库") { fetchCatalog() }
-                .disabled(catalog.loading)
+                .disabled(catalog.loading || catalog.installingID != nil)
             if catalog.loading {
                 ProgressView().controlSize(.small)
             }
@@ -134,8 +142,10 @@ struct DictionariesPage: View {
     private var list: some View {
         VStack(alignment: .leading, spacing: 0) {
             if entries.isEmpty {
-                Text("还没有扩展词库。导入本地词库文件，或从「获取更多词库」安装官方精选词库。")
+                Text("尚未添加扩展词库。")
                     .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
                     .padding(.vertical, 18)
             } else {
                 ForEach(entries) { entry in
@@ -188,6 +198,52 @@ struct DictionariesPage: View {
         .padding(.horizontal, 14).padding(.vertical, 10)
     }
 
+    private var starterRecommendations: some View {
+        let recommendations = DictionaryCatalog.loadConfig()?.recommendations ?? []
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack {
+                Text("入门推荐").font(.headline)
+                Spacer()
+                Text("官方词库 · 按需安装").font(.caption).foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 4)
+            ForEach(recommendations) { recommendation in
+                recommendationRow(recommendation)
+                Divider()
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func recommendationRow(_ recommendation: DictionaryCatalog.Recommendation) -> some View {
+        HStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(recommendation.name).fontWeight(.medium)
+                Text(recommendation.detail).font(.caption).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 12)
+            if catalog.pendingRecommendationID == recommendation.id {
+                HStack(spacing: 6) {
+                    ProgressView().controlSize(.small)
+                    Text("检查中…").font(.callout).foregroundStyle(.secondary)
+                }
+            } else if catalog.installingID == recommendation.id {
+                HStack(spacing: 6) {
+                    ProgressView(value: catalog.progress).frame(width: 48)
+                    Text("\(Int(catalog.progress * 100))%")
+                        .font(.caption).foregroundStyle(.secondary)
+                    Button("取消") { downloadTask?.cancel() }
+                }
+            } else if let installed = entries.first(where: { $0.id == recommendation.id }) {
+                Text("已安装 v\(installed.version)").font(.callout).foregroundStyle(.secondary)
+            } else {
+                Button("安装") { fetchCatalog(recommendedID: recommendation.id) }
+                    .disabled(catalog.loading || catalog.installingID != nil)
+            }
+        }
+        .padding(.vertical, 8)
+    }
+
     // MARK: - 链接与官方渠道入口
 
     private var linksSection: some View {
@@ -198,12 +254,6 @@ struct DictionariesPage: View {
             linkRow(title: "萌娘百科词库（mw2fcitx）",
                     detail: "打开上游发布页自行下载 .dict 导入。内容为 CC BY-NC-SA 授权，只能非商业使用，Gogaku 不分发。",
                     url: "https://github.com/outloudvi/mw2fcitx/releases")
-            if !catalog.message.isEmpty {
-                Text(catalog.message).foregroundStyle(.secondary)
-            }
-            if !catalog.failedMessage.isEmpty {
-                Text(catalog.failedMessage).foregroundStyle(SettingsPalette.danger)
-            }
             if let rejected = catalog.snapshot?.rejected, !rejected.isEmpty {
                 Text("清单里 \(rejected.count) 项不合格式未显示：\(rejected.joined(separator: "；"))")
                     .font(.caption).foregroundStyle(.secondary)
@@ -388,8 +438,9 @@ struct DictionariesPage: View {
         }
     }
 
-    private func fetchCatalog() {
+    private func fetchCatalog(recommendedID: String? = nil) {
         catalog.loading = true
+        catalog.pendingRecommendationID = recommendedID
         catalog.failedMessage = ""
         catalog.message = ""
         Task.detached(priority: .userInitiated) {
@@ -409,12 +460,22 @@ struct DictionariesPage: View {
                 await MainActor.run {
                     catalog.snapshot = snapshot
                     catalog.loading = false
-                    catalog.message = "清单版本 \(snapshot.catalogVersion)，共 \(snapshot.entries.count) 本"
-                    catalogSheet = true
+                    catalog.pendingRecommendationID = nil
+                    if let recommendedID {
+                        guard let entry = snapshot.entries.first(where: { $0.id == recommendedID }) else {
+                            catalog.failedMessage = "官方清单中暂未找到这本入门词库。"
+                            return
+                        }
+                        installCatalogEntry(entry)
+                    } else {
+                        catalog.message = "清单版本 \(snapshot.catalogVersion)，共 \(snapshot.entries.count) 本"
+                        catalogSheet = true
+                    }
                 }
             } catch {
                 await MainActor.run {
                     catalog.loading = false
+                    catalog.pendingRecommendationID = nil
                     catalog.failedMessage = DictionaryCatalog.failureMessage(error)
                 }
             }

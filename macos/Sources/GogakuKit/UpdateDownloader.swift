@@ -68,8 +68,8 @@ public final class UpdateDownloader {
         max(floor, TimeInterval(bytes) / 50_000)
     }
 
-    /// 下载并校验数据包（若 candidate 携带且本地缓存没有该数据版本）。
-    /// 返回已校验的数据包 zip 路径；清单无数据包时返回 nil。
+    /// 下载并校验数据包 `.pkg`（若 candidate 携带且本地缓存没有该数据版本）。
+    /// 返回已校验的 `.pkg` 路径；清单无数据包时返回 nil。
     /// - Parameters:
     ///   - dataPackage: 检查阶段得到的本平台数据包资产（schema 2；nil＝无）。
     ///   - resolved: 检查阶段记录的 (下载地址, sha256, size)；无记录时不下载。
@@ -201,19 +201,42 @@ public final class UpdateDownloader {
         try Self.verify(file: file, asset: candidate.asset)
     }
 
-    /// 就地热更新：客户端自己完成 pkg 解包→校验→事务替换→输入法交接，
-    /// 不打开系统 Installer（事务语义见 UpdateInstaller，与 pkg-postinstall.sh
-    /// 逐条对应）。数据包安装失败属部分成功态：主包已装好、数据保留旧版，
-    /// 返回给 UI 明示的说明（nil＝完全成功）。
+    /// 就地热更新：客户端自己完成 pkg 解包→校验→事务替换→输入法交接。
+    /// 数据包下载或安装失败属部分成功态：主包仍可安装，数据失败由 UI 明示。
     /// 工具链不可用时抛 `installerUnavailable`，调用方回落 open-installer。
     @discardableResult
     public func installInPlace(_ candidate: UpdateCandidate, file: URL,
-                               dataPackageZip: URL?,
+                               dataPackageFile: URL?, expectedDataVersion: String?,
                                progress: @escaping (UpdateInstallPhase) -> Void) throws -> String? {
         try Self.verify(file: file, asset: candidate.asset)
         let installer = UpdateInstaller(expectedBuild: String(candidate.manifest.buildNumber))
-        try installer.install(packageURL: file, dataPackageZip: dataPackageZip, progress: progress)
+        try installer.install(packageURL: file, dataPackageURL: dataPackageFile,
+                              expectedDataVersion: expectedDataVersion, progress: progress)
         return installer.lastDataNotice
+    }
+
+    /// 仅修复出厂数据，不重复下载／替换应用程序。数据包仍按签名清单核对外层哈希，
+    /// 包内 manifest 的 dataVersion 再与签名清单绑定。
+    @discardableResult
+    public func installDataInPlace(_ candidate: UpdateCandidate, dataPackageFile: URL,
+                                   expectedDataVersion: String,
+                                   progress: @escaping (UpdateInstallPhase) -> Void) throws -> String? {
+        guard let dataPackage = candidate.manifest.dataPackage,
+              dataPackage.dataVersion == expectedDataVersion else {
+            throw UpdateDownloadError.hashMismatch
+        }
+        let asset = UpdateAsset(platform: dataPackage.platform, arch: candidate.asset.arch,
+                                minOS: candidate.asset.minOS, assetId: dataPackage.assetId,
+                                name: dataPackage.name, size: dataPackage.size,
+                                sha256: dataPackage.sha256)
+        try Self.verify(file: dataPackageFile, asset: asset)
+        let installer = UpdateInstaller(expectedBuild: String(candidate.manifest.buildNumber))
+        _ = try installer.installDataPackage(fromPackage: dataPackageFile,
+                                             expectedDataVersion: expectedDataVersion,
+                                             progress: progress,
+                                             restartInputMethod: false)
+        UpdateInstaller.requestInputMethodRestart()
+        return nil
     }
 
     /// 打开系统安装器。Mac 交给 Installer（用户级 pkg 不需要提权）；

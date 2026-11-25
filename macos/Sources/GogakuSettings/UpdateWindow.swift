@@ -32,7 +32,7 @@ final class UpdateController: ObservableObject {
     @Published private(set) var dataNotice: String?
     /// 就地安装需要下载的数据包资产（schema 2；nil＝无数据包或 schema 1 清单）。
     @Published private(set) var pendingDataPackage: UpdateDataPackage?
-    /// 就地更新的已下载数据包 zip（跟随下载阶段填充）。
+    /// 就地更新的已下载数据包 `.pkg`（跟随下载阶段填充）。
     @Published private(set) var downloadedDataFile: URL?
     /// fallback 说明（转系统安装器的原因）；回到检查/空闲时清空。
     @Published private(set) var fallbackNotice: String?
@@ -95,7 +95,7 @@ final class UpdateController: ObservableObject {
     }
 
     var canCheck: Bool {
-        (phase == .idle || phase == .ready) && checkTask == nil && downloadTask == nil
+        (phase == .idle || phase == .ready || phaseIsInstalled) && checkTask == nil && downloadTask == nil
     }
 
     @discardableResult
@@ -128,7 +128,17 @@ final class UpdateController: ObservableObject {
 
     // MARK: - 用户确认后的下载与安装
 
-    var candidate: UpdateCandidate? { outcome?.kind == .available ? outcome?.candidate : nil }
+    var isDataRepair: Bool { outcome?.kind == .dataUpdateAvailable }
+
+    private var phaseIsInstalled: Bool {
+        if case .installed = phase { return true }
+        return false
+    }
+
+    var candidate: UpdateCandidate? {
+        guard outcome?.kind == .available || outcome?.kind == .dataUpdateAvailable else { return nil }
+        return outcome?.candidate
+    }
 
     @discardableResult
     func downloadAndUpdate() -> Task<Void, Never>? {
@@ -138,32 +148,46 @@ final class UpdateController: ObservableObject {
         errorMessage = nil
         dataNotice = nil
         let dataPackage = pendingDataPackage
+        let dataOnly = isDataRepair
         let task = Task { [weak self] in
             guard let self else { return }
             do {
-                let file = try await self.downloader.download(candidate) { fraction in
-                    Task { @MainActor in
-                        if self.phase == .downloading { self.progress = fraction }
+                var file: URL?
+                if !dataOnly {
+                    file = try await self.downloader.download(candidate) { fraction in
+                        Task { @MainActor in
+                            if self.phase == .downloading { self.progress = fraction }
+                        }
                     }
                 }
-                // 数据包：主包就绪后按需下载（本地已有该数据版本则复用缓存）。
                 var dataFile: URL?
+                var dataDownloadNotice: String?
                 if let dataPackage {
                     let resolved = UpdateEngine.dataPackageRegistry.lookup(
                         manifestVersion: candidate.manifest.version,
                         buildNumber: candidate.manifest.buildNumber,
-                        dataVersion: dataPackage.dataVersion)
-                    dataFile = try await self.downloader.downloadDataPackage(
-                        candidate: candidate, dataPackage: dataPackage, resolved: resolved) { fraction in
-                        Task { @MainActor in
-                            if case .downloading = self.phase { self.progress = fraction }
+                        dataPackage: dataPackage)
+                    do {
+                        let downloaded = try await self.downloader.downloadDataPackage(
+                            candidate: candidate, dataPackage: dataPackage, resolved: resolved) { fraction in
+                            Task { @MainActor in
+                                if case .downloading = self.phase { self.progress = fraction }
+                            }
                         }
+                        guard let downloaded else { throw UpdateDownloadError.notDownloaded }
+                        dataFile = downloaded
+                    } catch {
+                        if Task.isCancelled || dataOnly { throw error }
+                        dataDownloadNotice = "出厂数据下载失败；应用更新仍可继续：\(error.localizedDescription)"
                     }
+                } else if dataOnly {
+                    throw UpdateInstallError.dataPackageRejected("更新清单缺少出厂数据资产")
                 }
                 try Task.checkCancellation()
                 self.downloadTask = nil
                 self.downloadedFile = file
                 self.downloadedDataFile = dataFile
+                self.dataNotice = dataDownloadNotice
                 self.progress = 1
                 self.installDownloaded()
             } catch {
@@ -200,30 +224,58 @@ final class UpdateController: ObservableObject {
 
     /// 安装已通过校验的安装包（就地热更新；链路的最后一段）。
     private func installDownloaded() {
-        guard let candidate, let file = downloadedFile else { return }
+        guard let candidate else { return }
+        let dataOnly = isDataRepair
+        guard (dataOnly && downloadedDataFile != nil) || (!dataOnly && downloadedFile != nil) else { return }
         phase = .installing(.extracting)
         errorMessage = nil
-        dataNotice = nil
-        let dataZip = downloadedDataFile
+        let file = downloadedFile
+        let dataPackageFile = downloadedDataFile
+        let expectedDataVersion = pendingDataPackage?.dataVersion
+        let downloader = self.downloader
         installTask = Task { [weak self] in
             guard let self else { return }
             do {
                 let notice = try await Task.detached(priority: .userInitiated) {
-                    try self.downloader.installInPlace(candidate, file: file,
-                                                       dataPackageZip: dataZip) { phase in
+                    let reportProgress: (UpdateInstallPhase) -> Void = { phase in
                         Task { @MainActor in
                             if case .installing = self.phase { self.phase = .installing(phase) }
                         }
                     }
+                    if dataOnly {
+                        guard let dataPackageFile, let expectedDataVersion else {
+                            throw UpdateInstallError.dataPackageRejected("缺少待修复的数据包")
+                        }
+                        return try downloader.installDataInPlace(candidate, dataPackageFile: dataPackageFile,
+                                                                 expectedDataVersion: expectedDataVersion,
+                                                                 progress: reportProgress)
+                    }
+                    guard let file else { throw UpdateDownloadError.notDownloaded }
+                    return try downloader.installInPlace(candidate, file: file,
+                                                         dataPackageFile: dataPackageFile,
+                                                         expectedDataVersion: expectedDataVersion,
+                                                         progress: reportProgress)
                 }.value
                 await MainActor.run {
                     self.installTask = nil
                     self.phase = .installed(notice)
-                    self.dataNotice = notice
-                    let version = candidate.manifest.version
-                    self.lastInstallMessage = notice == nil
-                        ? "已更新到 \(version)，下次打字生效。"
-                        : "已更新到 \(version)，下次打字生效。\(notice!)"
+                    let installedDataVersion = notice == nil && dataPackageFile != nil
+                        ? expectedDataVersion : nil
+                    self.engine.recordInstalled(candidate, dataVersion: installedDataVersion)
+                    if dataOnly {
+                        self.dataNotice = notice
+                        self.lastInstallMessage = "出厂数据已修复，已通知输入法重启。"
+                    } else {
+                        let version = candidate.manifest.version
+                        self.lastInstallMessage = notice == nil
+                            ? "已更新到 \(version)，下次打字生效。"
+                            : "已更新到 \(version)，下次打字生效。\(notice!)"
+                        if let notice { self.dataNotice = notice }
+                    }
+                    self.outcome = nil
+                    self.pendingDataPackage = nil
+                    self.downloadedFile = nil
+                    self.downloadedDataFile = nil
                 }
             } catch is CancellationError {
                 await MainActor.run {
@@ -234,14 +286,17 @@ final class UpdateController: ObservableObject {
                 await MainActor.run {
                     self.installTask = nil
                     if case .ready = self.phase { return }
-                    // 回落：就地安装不可用（缺 xar/cpio 等）时保留旧路径。
-                    if (error as? UpdateDownloadError) == .installerUnavailable
+                    if !dataOnly,
+                       (error as? UpdateDownloadError) == .installerUnavailable
                         || (error as? UpdateInstallError) == .installerUnavailable {
+                        guard let file else { return }
                         self.fallbackToSystemInstaller(candidate, file: file)
                         return
                     }
                     self.phase = .ready
-                    self.errorMessage = "就地更新失败（可重试）：\(error.localizedDescription)"
+                    self.errorMessage = dataOnly
+                        ? "出厂数据修复失败（可重试）：\(error.localizedDescription)"
+                        : "就地更新失败（可重试）：\(error.localizedDescription)"
                 }
             }
         }

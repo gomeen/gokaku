@@ -101,6 +101,16 @@ final class DictionaryCatalogTests: XCTestCase {
 
     // MARK: 验签
 
+    func testConfigDecodesRecommendationsAndLegacyConfig() throws {
+        let legacy = Data(#"{"schema":1,"owner":"gomeen","repo":"gogaku-dicts","trustedKeyIds":["test-key"]}"#.utf8)
+        XCTAssertTrue(try JSONDecoder().decode(DictionaryCatalog.Config.self, from: legacy).recommendations.isEmpty)
+
+        let configured = Data(#"{"schema":1,"owner":"gomeen","repo":"gogaku-dicts","trustedKeyIds":["test-key"],"recommendations":[{"id":"thuocl-it","name":"IT 术语","detail":"THUOCL · MIT"}]}"#.utf8)
+        let config = try JSONDecoder().decode(DictionaryCatalog.Config.self, from: configured)
+        XCTAssertEqual(config.recommendations.map(\.id), ["thuocl-it"])
+        XCTAssertEqual(config.recommendations.first?.name, "IT 术语")
+    }
+
     func testSignatureVerifyAndTamper() throws {
         let privateKey = Curve25519.Signing.PrivateKey()
         let manifest = makeCatalogJSON().data(using: .utf8)!

@@ -391,7 +391,8 @@ def main() -> None:
         shutil.copyfile(source, destination)
     manifest_entries = [{'path': relative, 'sha256': data_files[relative]}
                         for relative in sorted(data_files)]
-    (data_stage / 'manifest.json').write_text(json.dumps(
+    data_manifest = data_stage / 'manifest.json'
+    data_manifest.write_text(json.dumps(
         {'schema': 1, 'dataVersion': data_version, 'files': manifest_entries},
         ensure_ascii=False, indent=2, sort_keys=True) + '\n')
     run(['zip', '-q', '-r', data_scripts / 'Gogaku-data.zip', '.'], cwd=data_stage)
@@ -399,11 +400,12 @@ def main() -> None:
     data_post.write_text(DATA_POSTINSTALL_TEMPLATE.read_text()
                          .replace('@INPUT_APP@', channel['input'])
                          .replace('@SETTINGS_APP@', channel['settings'])
+                         .replace('@INPUT_ID@', channel['input_id'])
                          .replace('@BUILD@', str(meta['buildNumber']))
                          .replace('@DATA_VERSION@', data_version)
-                         .replace('@DATA_MANIFEST@', json.dumps(
-                             {'schema': 1, 'dataVersion': data_version,
-                              'files': manifest_entries}, ensure_ascii=False)))
+                         .replace('@MANIFEST_SHA256@', sha256(data_manifest))
+                         .replace('@DATA_CHECKSUMS@', '\n'.join(
+                             f'{entry["sha256"]}  {entry["path"]}' for entry in manifest_entries)))
     data_post.chmod(0o755)
     data_core = work / f'gogaku-data-core{channel["suffix"]}.pkg'
     run(['pkgbuild', '--root', work / 'empty-payload',

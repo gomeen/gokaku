@@ -14,10 +14,9 @@ import AppKit
 /// - 任一步失败：恢复备份、记录 failed、抛 UpdateInstallError。
 ///
 /// 安全约束：绝不 rm 备份以外的唯一副本；绝不使用 SIGKILL；输入法只经
-/// Darwin 通知优雅退出（imklaunchagent 之后按需拉起新版）。数据包作为同一
-/// 事务的可选第二阶段安装：主包替换成功后解包数据 zip→逐文件哈希校验→
-/// 覆盖两个 App 的 EngineData；数据阶段失败不回滚已成功的主包（代码新版＋
-/// 数据旧版是受支持的部分成功态），由 UI 明示。
+/// Darwin 通知优雅退出（imklaunchagent 之后按需拉起新版）。数据包作为可选第二阶段安装：
+/// 从 `.pkg` 的 Scripts 归档取出内层 ZIP，绑定签名清单的数据指纹并逐文件哈希校验；
+/// 同构建号也可只安装数据包。代码更新成功后数据阶段失败不回滚主包，由 UI 明示。
 public enum UpdateInstallError: Error, Equatable {
     /// xar／gzip／cpio／ditto／codesign 等外部工具缺失或不可执行。
     case toolUnavailable(String)
@@ -42,7 +41,7 @@ public enum UpdateInstallError: Error, Equatable {
         case let .replacedFailed(detail): return "替换应用失败（已恢复原版本）：\(detail)"
         case let .dataPackageRejected(detail): return "数据包校验拒绝：\(detail)"
         case let .dataPackageFailed(detail): return "数据包安装失败：\(detail)"
-        case .installerUnavailable: return "本环境无法就地安装；将改用系统安装器"
+        case .installerUnavailable: return "本环境缺少就地安装工具"
         }
     }
 }
@@ -166,6 +165,7 @@ public final class UpdateInstaller {
     }
 
     var transactionURL: URL { stateDirectory.appendingPathComponent("transaction.txt") }
+    var dataVersionURL: URL { stateDirectory.appendingPathComponent("last-data-version.txt") }
 
     /// 运行方是设置应用：从其 bundle ID 派生产品／通道与输入法身份。
     /// org.gogaku.settings(.dev) ↔ org.gogaku.inputmethod(.dev)；
@@ -368,7 +368,8 @@ public final class UpdateInstaller {
 
     /// 完整就地安装。`progress` 上报 UI 阶段；失败已恢复备份并写 failed 状态。
     public func install(packageURL: URL,
-                        dataPackageZip: URL? = nil,
+                        dataPackageURL: URL? = nil,
+                        expectedDataVersion: String? = nil,
                         progress: @escaping (UpdateInstallPhase) -> Void = { _ in }) throws {
         recoverIncompleteInstallation()
         let work = try extractPackage(at: packageURL)
@@ -452,16 +453,20 @@ public final class UpdateInstaller {
         }
 
         // 可选数据包：主包已成功，数据失败不回滚主包（部分成功态）。
-        var dataNotice: String?
-        if let dataPackageZip {
+        lastDataNotice = nil
+        if let dataPackageURL {
             progress(.dataPackage)
             do {
-                let manifest = try installData(from: dataPackageZip)
-                dataNotice = "已更新数据到 \(manifest.dataVersion)"
-            } catch let error as UpdateInstallError {
-                dataNotice = error.errorDescription
+                guard let expectedDataVersion else {
+                    throw UpdateInstallError.dataPackageRejected("更新清单缺少预期数据指纹")
+                }
+                try installDataPackage(fromPackage: dataPackageURL,
+                                       expectedDataVersion: expectedDataVersion,
+                                       progress: progress, restartInputMethod: false)
+            } catch {
+                lastDataNotice = (error as? UpdateInstallError)?.errorDescription
+                    ?? "出厂数据未更新：\(error.localizedDescription)"
             }
-            lastDataNotice = dataNotice
         }
 
         if registerApps {
@@ -501,14 +506,69 @@ public final class UpdateInstaller {
 
     // MARK: - 数据包安装
 
-    /// 解包数据 zip（ditto -x -k）→ 读取并校验 manifest.json → 逐文件哈希 →
-    /// 依次替换各 App 的 Contents/Resources/EngineData。
-    ///
-    /// 签名相互作用：替换整包时 EngineData 属于旧签名密封，替换完成后按
-    /// postinstall 同款逐 Mach-O 校验（覆盖 Info.plist／二进制篡改；EngineData
-    /// 为运行时读取的资源）。本函数返回已安装的数据清单（fingerprint 可供 UI 显示）。
+    /// 展开数据 `.pkg` 中的 Scripts 归档，读取 `Gogaku-data.zip`，再按签名清单的数据指纹、
+    /// 包内 manifest 与逐文件 SHA-256 校验后替换两份 EngineData。
     @discardableResult
-    public func installData(from zip: URL, progress: @escaping (UpdateInstallPhase) -> Void = { _ in }) throws -> UpdateDataManifest {
+    public func installDataPackage(fromPackage packageURL: URL,
+                                   expectedDataVersion: String,
+                                   progress: @escaping (UpdateInstallPhase) -> Void = { _ in },
+                                   restartInputMethod: Bool = true) throws -> UpdateDataManifest {
+        try requireTool("/usr/bin/xar")
+        try requireTool("/usr/bin/gzip")
+        try requireTool("/usr/bin/cpio")
+        try requireTool("/usr/bin/ditto")
+        let cacheRoot = home.appendingPathComponent("Library/Caches/Gogaku", isDirectory: true)
+        try fileManager.createDirectory(at: cacheRoot, withIntermediateDirectories: true)
+        let work = try fileManager.url(for: .itemReplacementDirectory,
+                                       in: .userDomainMask,
+                                       appropriateFor: cacheRoot, create: true)
+        defer { try? fileManager.removeItem(at: work) }
+        progress(.extracting)
+
+        let xarDir = work.appendingPathComponent("data-xar", isDirectory: true)
+        try fileManager.createDirectory(at: xarDir, withIntermediateDirectories: true)
+        let (xarStatus, xarMessage) = try runTool("/usr/bin/xar", ["-xf", packageURL.path, "-C", xarDir.path])
+        guard xarStatus == 0 else {
+            throw UpdateInstallError.dataPackageFailed("数据 pkg 解包失败：\(xarMessage.suffix(200))")
+        }
+        let components = (try? fileManager.contentsOfDirectory(at: xarDir, includingPropertiesForKeys: nil)) ?? []
+        let scriptsFile = components.lazy
+            .filter { $0.pathExtension == "pkg" }
+            .map { $0.appendingPathComponent("Scripts") }
+            .first { url in
+                var isDirectory: ObjCBool = false
+                return fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory) && !isDirectory.boolValue
+            }
+        guard let scriptsFile else {
+            throw UpdateInstallError.dataPackageFailed("数据 pkg 缺少组件 Scripts 归档")
+        }
+        let scriptsDir = work.appendingPathComponent("data-scripts", isDirectory: true)
+        try fileManager.createDirectory(at: scriptsDir, withIntermediateDirectories: true)
+        let extractScripts = "gzip -dc \"$1\" | cpio -idm --quiet"
+        let (scriptsStatus, scriptsMessage) = try runTool(
+            "/bin/sh", ["-c", extractScripts, "data-scripts", scriptsFile.path], cwd: scriptsDir)
+        guard scriptsStatus == 0 else {
+            throw UpdateInstallError.dataPackageFailed("数据 pkg Scripts 解包失败：\(scriptsMessage.suffix(200))")
+        }
+        let dataZip = scriptsDir.appendingPathComponent("Gogaku-data.zip")
+        guard fileManager.fileExists(atPath: dataZip.path) else {
+            throw UpdateInstallError.dataPackageFailed("数据 pkg Scripts 缺少 Gogaku-data.zip")
+        }
+        let manifest = try installData(from: dataZip, expectedDataVersion: expectedDataVersion,
+                                       progress: progress)
+        if restartInputMethod {
+            progress(.done)
+            progress(.restartingInputMethod)
+            Self.requestInputMethodRestart()
+        }
+        return manifest
+    }
+
+    /// 解包数据 ZIP → 校验包内 manifest 与逐文件哈希 → 依次替换双 App 的 EngineData。
+    /// 此内部入口同时供已有测试夹具使用；生产下载路径必须通过 `installDataPackage`。
+    @discardableResult
+    public func installData(from zip: URL, expectedDataVersion: String? = nil,
+                            progress: @escaping (UpdateInstallPhase) -> Void = { _ in }) throws -> UpdateDataManifest {
         try requireTool("/usr/bin/ditto")
         let work = try fileManager.url(for: .itemReplacementDirectory,
                                        in: .userDomainMask,
@@ -518,14 +578,16 @@ public final class UpdateInstaller {
         try fileManager.createDirectory(at: extracted, withIntermediateDirectories: true)
         let (status, message) = try runTool("/usr/bin/ditto", ["-x", "-k", zip.path, extracted.path])
         guard status == 0 else {
-            throw UpdateInstallError.dataPackageFailed("数据 zip 解包失败：\(message.suffix(200))")
+            throw UpdateInstallError.dataPackageFailed("数据 ZIP 解包失败：\(message.suffix(200))")
         }
         let manifestFile = extracted.appendingPathComponent("manifest.json")
         guard let manifestData = try? Data(contentsOf: manifestFile) else {
             throw UpdateInstallError.dataPackageRejected("数据包缺少 manifest.json")
         }
         let manifest = try UpdateDataManifest.decode(from: manifestData)
-        // zip 内容与清单一致（缺文件／哈希错都拒绝）。
+        if let expectedDataVersion, manifest.dataVersion != expectedDataVersion {
+            throw UpdateInstallError.dataPackageRejected("数据指纹与已签名清单不符")
+        }
         for entry in manifest.files {
             let file = extracted.appendingPathComponent(entry.path)
             guard fileManager.fileExists(atPath: file.path) else {
@@ -537,36 +599,46 @@ public final class UpdateInstaller {
             }
         }
         progress(.validating)
-        // 依次替换各 App 的 EngineData：先建备份，全部校验通过才动第一个目标。
-        var backups: [(URL, URL)] = []
+        for site in sites {
+            guard fileManager.fileExists(atPath: site.targetURL.appendingPathComponent("Contents/Info.plist").path) else {
+                throw UpdateInstallError.dataPackageFailed("未找到已安装的 \(site.appName)")
+            }
+        }
+        var backups: [URL: URL] = [:]
+        var replaced: [URL] = []
         do {
             for site in sites {
                 let target = site.targetURL.appendingPathComponent("Contents/Resources/EngineData", isDirectory: true)
                 let saved = work.appendingPathComponent("backup-" + site.appName, isDirectory: true)
                 if fileManager.fileExists(atPath: target.path) {
                     try fileManager.copyItem(at: target, to: saved)
-                    backups.append((target, saved))
+                    backups[target] = saved
                 }
             }
             for site in sites {
                 let target = site.targetURL.appendingPathComponent("Contents/Resources/EngineData", isDirectory: true)
-                try fileManager.removeItem(at: target)
+                replaced.append(target)
+                if fileManager.fileExists(atPath: target.path) { try fileManager.removeItem(at: target) }
                 for entry in manifest.files {
                     let destination = target.appendingPathComponent(entry.path)
                     try fileManager.createDirectory(at: destination.deletingLastPathComponent(),
                                                     withIntermediateDirectories: true)
                     try fileManager.copyItem(at: extracted.appendingPathComponent(entry.path), to: destination)
                 }
+                try Data((manifest.dataVersion + "\n").utf8)
+                    .write(to: target.appendingPathComponent(".gogaku-data-version"), options: .atomic)
             }
+            try fileManager.createDirectory(at: stateDirectory, withIntermediateDirectories: true)
+            try Data((manifest.dataVersion + "\n").utf8).write(to: dataVersionURL, options: .atomic)
             progress(.dataPackage)
         } catch {
-            for (target, saved) in backups.reversed() {
+            for target in replaced.reversed() {
                 try? fileManager.removeItem(at: target)
-                try? fileManager.moveItem(at: saved, to: target)
+                if let saved = backups[target] {
+                    try? fileManager.moveItem(at: saved, to: target)
+                }
             }
-            if error is UpdateInstallError {
-                throw error
-            }
+            if error is UpdateInstallError { throw error }
             throw UpdateInstallError.dataPackageFailed("数据落位失败：\(error.localizedDescription)")
         }
         return manifest

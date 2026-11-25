@@ -11,7 +11,7 @@ Gogaku 的版本管理覆盖**双端开发测试版与 stable 定版**：本地 
 ```
 
 - `version`：完整 SemVer。三段数字，预发布段只允许 `dev.N`；2026-11-10 起不再使用 `rc.N`，构建脚本与发布门禁拒绝 rc。
-- `buildNumber`：单调递增整数，写入 `CFBundleVersion`；每次对外提供安装包都必须递增。更新判断只按构建号，不按版本字符串字典序；同版本更高构建号可更新，不自动降级。用途仅限内部对账（update-manifest 的 `buildNumber` 字段、客户端更新比较、包内 `build-identity.json`、收据与诊断输出），**不得出现在安装包文件名、tag 或面向用户的默认 UI**（2026-11-19 裁决）。
+- `buildNumber`：单调递增整数，写入 `CFBundleVersion`；每次对外提供安装包都必须递增。客户端按构建号判断代码升级，不按版本字符串字典序排序，也不自动降级；构建号相同仍核对当前 App 的 `EngineData/.gogaku-data-version`，数据缺失或过期时可单独修复数据包。用途仅限内部对账（update-manifest 的 `buildNumber` 字段、客户端更新比较、包内 `build-identity.json`、收据与诊断输出），**不得出现在安装包文件名、tag 或面向用户的默认 UI**（2026-11-19 裁决）。
 
 macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发布版本另存包内 `Contents/Resources/build-identity.json`。
 
@@ -54,7 +54,7 @@ macOS 限制 `CFBundleShortVersionString` 只能是三段数字，完整预发�
 ## 更新身份
 
 - 每个安装通道（stable／dev）使用自己的更新清单 `channel`；stable 只接受正式版本，dev 可接受 dev／正式（客户端仍兼容解析历史 rc 清单，发布侧不再产生）。
-- 更新清单的 `buildNumber` 必须大于已安装构建号才提示升级；`version` 不参与排序。
+- 更新清单的 `buildNumber` 大于已安装构建号时提示代码升级；构建号相同时仍比较当前 App 的数据指纹，避免代码已更新但出厂数据未安装成功后失去修复入口。
 - Ed25519 `keyId` 标识发布公钥；轮换时保留旧 keyId 直到所有受支持版本升级完成。
 - 更新偏好单独存 `update-preferences.json`（schema 1，自动检查默认 false，按通道节流与缓存 ETag）；升级应用不重置用户选择。
 - 设置数据 schema 2 起移除本地翻译后端／beam；旧本地模型配置迁移为关闭学习翻译，已启用火山配置保留凭据与用量。

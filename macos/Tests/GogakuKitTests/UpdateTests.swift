@@ -31,9 +31,11 @@ final class UpdateTests: XCTestCase {
     }
 
     func installation(channel: UpdateChannel = .stable, build: Int = 9,
-                      arch: String = "x86_64", os: String = "26.7.2") -> UpdateInstallation {
+                      arch: String = "x86_64", os: String = "26.7.2",
+                      installedDataVersion: String? = nil) -> UpdateInstallation {
         UpdateInstallation(version: "0.1.1", buildNumber: build, channel: channel,
-                           platform: "macos", arch: arch, osVersion: os)
+                           platform: "macos", arch: arch, osVersion: os,
+                           installedDataVersion: installedDataVersion)
     }
 
     func manifest(build: Int = 10, version: String = "0.1.2", channel: UpdateChannel = .stable,
@@ -43,6 +45,19 @@ final class UpdateTests: XCTestCase {
                        assets: assets ?? [UpdateAsset(platform: "macos", arch: "x86_64", minOS: "26.0",
                                                       assetId: 7, name: "Gogaku-0.1.2-b10.pkg",
                                                       size: 1_024, sha256: String(repeating: "a", count: 64))])
+    }
+
+    func manifestWithData(build: Int, version: String = "0.1.2",
+                          dataVersion: String = "ab12cd34ef56ab12") -> UpdateManifest {
+        let codeAsset = UpdateAsset(platform: "macos", arch: "x86_64", minOS: "26.0",
+                                    assetId: 7, name: "Gogaku-\(version).pkg", size: 1_024,
+                                    sha256: String(repeating: "a", count: 64))
+        let dataPackage = UpdateDataPackage(platform: "macos", name: "Gogaku-Data-\(version).pkg",
+                                            size: 2_048, sha256: String(repeating: "b", count: 64),
+                                            assetId: 8, dataVersion: dataVersion)
+        return UpdateManifest(schema: 2, keyId: "test-key", version: version, buildNumber: build,
+                             channel: .stable, notes: "修复出厂数据。", assets: [codeAsset],
+                             dataPackage: dataPackage)
     }
 
     func signedRelease(_ manifest: UpdateManifest, tag: String = "v0.1.2",
@@ -99,6 +114,22 @@ final class UpdateTests: XCTestCase {
             let (file, size) = try downloadHandler(url)
             progress(size)
             return (file, UpdateHTTPResponse(status: 200, headers: [:], body: Data(), finalURL: url))
+        }
+    }
+
+    func routeV2(_ transport: FakeTransport, manifestData: Data, signatureData: Data,
+                 releasesJSON: Data) {
+        transport.handler = { url, _ in
+            if url.path.hasPrefix("/repos/") {
+                return UpdateHTTPResponse(status: 200, headers: [:], body: releasesJSON, finalURL: url)
+            }
+            if url.lastPathComponent == UpdateEngine.v2ManifestName {
+                return UpdateHTTPResponse(status: 200, headers: [:], body: manifestData, finalURL: url)
+            }
+            if url.lastPathComponent == UpdateEngine.v2ManifestName + ".sig" {
+                return UpdateHTTPResponse(status: 200, headers: [:], body: signatureData, finalURL: url)
+            }
+            return UpdateHTTPResponse(status: 404, headers: [:], body: Data(), finalURL: url)
         }
     }
 
@@ -225,6 +256,59 @@ final class UpdateTests: XCTestCase {
             XCTAssertEqual(result.kind, .upToDate, "build \(build)")
             XCTAssertNil(result.candidate)
         }
+    }
+
+    func testSameBuildOffersDataRepairWhenFingerprintIsMissingOrStale() async throws {
+        let signed = manifestWithData(build: 9)
+        let (manifestData, signature) = try signedRelease(signed)
+        let release: [String: Any] = [
+            "id": 42, "tag_name": "v0.1.2", "name": "Gogaku 0.1.2", "body": "notes",
+            "draft": false, "prerelease": false, "published_at": "2026-11-06T10:00:00Z",
+            "assets": [
+                ["id": 3, "name": UpdateEngine.v2ManifestName, "size": manifestData.count,
+                 "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/v0.1.2/\(UpdateEngine.v2ManifestName)"],
+                ["id": 4, "name": UpdateEngine.v2ManifestName + ".sig", "size": signature.count,
+                 "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/v0.1.2/\(UpdateEngine.v2ManifestName).sig"],
+                ["id": 7, "name": signed.assets[0].name, "size": signed.assets[0].size,
+                 "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/v0.1.2/\(signed.assets[0].name)"],
+                ["id": 8, "name": signed.dataPackage!.name, "size": signed.dataPackage!.size,
+                 "browser_download_url": "https://github.com/gogaku/gogaku-releases/releases/download/v0.1.2/\(signed.dataPackage!.name)"],
+            ],
+        ]
+        let releasesJSON = try JSONSerialization.data(withJSONObject: [release])
+
+        for installedVersion in [nil, "stale-data-version"] as [String?] {
+            let transport = FakeTransport()
+            routeV2(transport, manifestData: manifestData, signatureData: signature,
+                    releasesJSON: releasesJSON)
+            let result = await engine(transport,
+                                      installation: installation(build: 9,
+                                                                 installedDataVersion: installedVersion))
+                .check(automatic: false)
+            XCTAssertEqual(result.kind, .dataUpdateAvailable)
+            XCTAssertEqual(result.candidate?.manifest.buildNumber, 9)
+            XCTAssertEqual(result.dataPackage?.dataVersion, signed.dataPackage?.dataVersion)
+        }
+
+        let repairedTransport = FakeTransport()
+        routeV2(repairedTransport, manifestData: manifestData, signatureData: signature,
+                releasesJSON: releasesJSON)
+        let updater = engine(repairedTransport, installation: installation(build: 9))
+        let needed = await updater.check(automatic: false)
+        XCTAssertEqual(needed.kind, .dataUpdateAvailable)
+        updater.recordInstalled(needed.candidate!, dataVersion: signed.dataPackage!.dataVersion)
+        let afterRepair = await updater.check(automatic: false)
+        XCTAssertEqual(afterRepair.kind, .upToDate)
+
+        let currentTransport = FakeTransport()
+        routeV2(currentTransport, manifestData: manifestData, signatureData: signature,
+                releasesJSON: releasesJSON)
+        let current = await engine(currentTransport,
+                                   installation: installation(build: 9,
+                                                              installedDataVersion: signed.dataPackage!.dataVersion))
+            .check(automatic: false)
+        XCTAssertEqual(current.kind, .upToDate)
+        XCTAssertNil(current.candidate)
     }
 
     func testInvalidSignatureIsNotUpToDate() async throws {
@@ -764,12 +848,22 @@ final class UpdateTests: XCTestCase {
                       releasesJSON: releases, v2ManifestData: v2Data, v2SignatureData: v2Sig,
                       v2Status: 200)
         _ = await engine(transport).check(automatic: false)
+        let expected = dataPackage()
         let resolved = UpdateEngine.dataPackageRegistry.lookup(
-            manifestVersion: "0.1.2", buildNumber: 10, dataVersion: "ab12cd34ef56ab12")
+            manifestVersion: "0.1.2", buildNumber: 10, dataPackage: expected)
         XCTAssertNotNil(resolved)
-        XCTAssertEqual(resolved?.sha256, dataPackage().sha256)
+        XCTAssertEqual(resolved?.sha256, expected.sha256)
+        let otherProductAsset = UpdateDataPackage(platform: expected.platform, name: "GogakuLite-Data.pkg",
+                                                  size: expected.size, sha256: expected.sha256,
+                                                  assetId: expected.assetId + 1,
+                                                  dataVersion: expected.dataVersion)
         XCTAssertNil(UpdateEngine.dataPackageRegistry.lookup(
-            manifestVersion: "0.1.2", buildNumber: 10, dataVersion: "other"))
+            manifestVersion: "0.1.2", buildNumber: 10, dataPackage: otherProductAsset))
+        XCTAssertNil(UpdateEngine.dataPackageRegistry.lookup(
+            manifestVersion: "0.1.2", buildNumber: 10,
+            dataPackage: UpdateDataPackage(platform: expected.platform, name: expected.name,
+                                           size: expected.size, sha256: expected.sha256,
+                                           assetId: expected.assetId, dataVersion: "other")))
     }
 
     func testDataPackageDownloadVerifiesHashAndCachesByVersion() async throws {

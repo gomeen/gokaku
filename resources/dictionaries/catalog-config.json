@@ -2,6 +2,28 @@
   "schema": 1,
   "owner": "gomeen",
   "repo": "gogaku-dicts",
+  "recommendations": [
+    {
+      "id": "thuocl-it",
+      "name": "IT 术语",
+      "detail": "THUOCL · MIT · 数据 2016–2017"
+    },
+    {
+      "id": "thuocl-caijing",
+      "name": "财经术语",
+      "detail": "THUOCL · MIT · 数据 2016–2017"
+    },
+    {
+      "id": "thuocl-medical",
+      "name": "医学术语",
+      "detail": "THUOCL · MIT · 数据 2016–2017"
+    },
+    {
+      "id": "thuocl-law",
+      "name": "法律术语",
+      "detail": "THUOCL · MIT · 数据 2016–2017"
+    }
+  ],
   "trustedKeyIds": [
     "gogaku-prod-2026-11"
   ]

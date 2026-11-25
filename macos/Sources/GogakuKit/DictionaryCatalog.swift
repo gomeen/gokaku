@@ -10,11 +10,41 @@ import CryptoKit
 public enum DictionaryCatalog {
 
     /// 随包配置：`Contents/Resources/dictionary-catalog-config.json`。
+    public struct Recommendation: Codable, Equatable, Identifiable {
+        public let id: String
+        public let name: String
+        public let detail: String
+    }
+
     public struct Config: Codable, Equatable {
         public let schema: Int
         public let owner: String
         public let repo: String
         public let trustedKeyIds: [String]
+        public let recommendations: [Recommendation]
+
+        public init(schema: Int, owner: String, repo: String, trustedKeyIds: [String],
+                    recommendations: [Recommendation] = []) {
+            self.schema = schema
+            self.owner = owner
+            self.repo = repo
+            self.trustedKeyIds = trustedKeyIds
+            self.recommendations = recommendations
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case schema, owner, repo, trustedKeyIds, recommendations
+        }
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            schema = try container.decode(Int.self, forKey: .schema)
+            owner = try container.decode(String.self, forKey: .owner)
+            repo = try container.decode(String.self, forKey: .repo)
+            trustedKeyIds = try container.decode([String].self, forKey: .trustedKeyIds)
+            recommendations = try container.decodeIfPresent([Recommendation].self,
+                                                               forKey: .recommendations) ?? []
+        }
     }
 
     public struct Entry: Identifiable, Equatable {

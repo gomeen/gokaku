@@ -170,7 +170,8 @@ int gc_learning_dicts_apply(GcLearningSession *session,
   - `scripts/prepare-dictionary-sources.py` 下载上游数据并校验，存入缓存目录。
   - `scripts/build-dictionary-catalog.py` 调用核心工具 `gogaku_dict_tool`（与导入共用同一份转换实现）生成 `.dict` 与 `catalog.json`，并签名（复用发布签名环境）。
   - `scripts/publish-dictionaries.py` 先建 Draft、人工审阅后发布；支持 `--dry-run`。Release 正文附带署名与许可文本，并写明每本的丢弃计数。
-- **客户端**：Mac 复用 `UpdateTransport` 与 CryptoKit；Windows 复用 WinHTTP、monocypher、CNG。只有用户点击「获取更多词库」才请求，不自动检查；离线、超时、404、验签失败、哈希不符、URL 越界分别给出不同提示，均不安装；下载可取消；请求不携带输入内容、凭据或设备标识。已安装词库显示版本，有新版显示「更新」。
+- **客户端**：Mac 复用 `UpdateTransport` 与 CryptoKit；Windows 复用 WinHTTP、monocypher、CNG。只有用户点击才联网；离线、超时、404、验签失败、哈希不符、URL 越界分别给出不同提示，均不安装；下载可取消；请求不携带输入内容、凭据或设备标识。已安装词库显示版本，有新版显示「更新」。
+- **入门推荐**：两端设置页共用 `resources/dictionaries/catalog-config.json` 的四本推荐（IT、财经、医学、法律，均为 THUOCL/MIT，数据更新于 2016–2017）。每本单独显示安装操作；用户点击后客户端拉取并验签官方清单，再安装对应词库。不会随安装包预置或自动下载；已安装项显示状态，完整目录仍可手动打开。
 
 ## 八、验收与测试
 

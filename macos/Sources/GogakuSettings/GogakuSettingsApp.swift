@@ -357,7 +357,9 @@ private struct AboutPage: View {
                                 notesText = candidate.manifest.notes
                                 showUpdateNotes = true
                             }
-                            Button("下载并更新") { updates.downloadAndUpdate() }
+                            Button(updates.isDataRepair ? "修复出厂数据" : "下载并更新") {
+                                updates.downloadAndUpdate()
+                            }
                                 .buttonStyle(.borderedProminent)
                         }
                     }

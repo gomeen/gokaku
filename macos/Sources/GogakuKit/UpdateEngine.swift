@@ -51,7 +51,7 @@ public final class UpdateEngine {
     public static let maxPages = 3
 
     private let config: UpdateSourceConfig?
-    private let installation: UpdateInstallation
+    private var installation: UpdateInstallation
     private let transport: UpdateTransport
     private let preferences: UpdatePreferencesStore
     private let now: () -> Date
@@ -75,6 +75,16 @@ public final class UpdateEngine {
     }
 
     public func preferencesStore() -> UpdatePreferencesStore { preferences }
+
+    public func recordInstalled(_ candidate: UpdateCandidate, dataVersion: String?) {
+        installation = UpdateInstallation(version: candidate.manifest.version,
+                                          buildNumber: candidate.manifest.buildNumber,
+                                          channel: installation.channel,
+                                          platform: installation.platform,
+                                          arch: installation.arch,
+                                          osVersion: installation.osVersion,
+                                          installedDataVersion: dataVersion ?? installation.installedDataVersion)
+    }
 
     public func check(automatic: Bool) async -> UpdateCheckOutcome {
         guard let config, config.isConfigured else {
@@ -203,9 +213,11 @@ public final class UpdateEngine {
                 sawWrongChannel = true
                 continue
             }
-            // 只按构建号判定升级；同版本更高构建号可更新，不自动降级。
+            // 只按构建号判定代码升级；同构建号但数据指纹缺失／不同时允许仅修复数据。
             // 用户可见文案不写构建号（2026-11-19 裁决：构建号是纯内部计数器）。
-            if manifest.buildNumber <= installation.buildNumber {
+            let dataRepairNeeded = manifest.buildNumber == installation.buildNumber
+                && dataPackage.map { installation.installedDataVersion != $0.dataVersion } == true
+            if manifest.buildNumber <= installation.buildNumber && !dataRepairNeeded {
                 return outcome(.upToDate, "已是最新（\(installation.version)）")
             }
             guard let asset = manifest.asset(platform: installation.platform,
@@ -239,8 +251,8 @@ public final class UpdateEngine {
                 manifest: manifest, asset: asset,
                 downloadURL: releaseAsset.browserDownloadURL,
                 publishedAt: release.publishedAt)
-            return outcome(.available,
-                           "发现新版本 \(manifest.version)",
+            return outcome(dataRepairNeeded ? .dataUpdateAvailable : .available,
+                           dataRepairNeeded ? "发现需要修复的出厂数据" : "发现新版本 \(manifest.version)",
                            candidate: candidate, dataPackage: dataPackage, checkedAt: now(),
                            dataDownloadURL: dataDownloadURL)
         }
@@ -273,7 +285,8 @@ public final class UpdateEngine {
                          dataPackage: UpdateDataPackage? = nil,
                          checkedAt: Date? = nil,
                          dataDownloadURL: URL? = nil) -> UpdateCheckOutcome {
-        if kind == .available, let candidate, let dataPackage, let url = dataDownloadURL {
+        if (kind == .available || kind == .dataUpdateAvailable),
+           let candidate, let dataPackage, let url = dataDownloadURL {
             Self.dataPackageRegistry.record(manifestVersion: candidate.manifest.version,
                                             buildNumber: candidate.manifest.buildNumber,
                                             dataPackage: dataPackage, url: url)
@@ -311,13 +324,12 @@ public final class UpdateEngine {
 
     /// 本进程内缓存的数据包下载记录（供下载阶段取地址）。
     private struct DataPackageRecord {
-        let dataVersion: String
         let sha256: String
         let size: Int64
         let url: URL
     }
     /// 数据包下载地址注册表：检查阶段把候选→数据包资产绑定写入，
-    /// 下载阶段按（版本＋构建号＋数据指纹）取出。进程内存态，不落盘。
+    /// 下载阶段按（版本＋构建号＋数据资产 ID／名称／指纹）取出。
     public final class DataPackageRegistry: @unchecked Sendable {
         private let lock = NSLock()
         private var records: [String: DataPackageRecord] = [:]
@@ -325,17 +337,22 @@ public final class UpdateEngine {
         func record(manifestVersion: String, buildNumber: Int,
                     dataPackage: UpdateDataPackage, url: URL) {
             lock.lock(); defer { lock.unlock() }
-            records["\(manifestVersion)#\(buildNumber)#\(dataPackage.dataVersion)"] =
-                DataPackageRecord(dataVersion: dataPackage.dataVersion,
-                                  sha256: dataPackage.sha256, size: dataPackage.size, url: url)
+            records[Self.key(manifestVersion: manifestVersion, buildNumber: buildNumber,
+                             dataPackage: dataPackage)] =
+                DataPackageRecord(sha256: dataPackage.sha256,
+                                  size: dataPackage.size, url: url)
         }
         public func lookup(manifestVersion: String, buildNumber: Int,
-                           dataVersion: String) -> (url: URL, sha256: String, size: Int64)? {
+                           dataPackage: UpdateDataPackage) -> (url: URL, sha256: String, size: Int64)? {
             lock.lock(); defer { lock.unlock() }
-            guard let record = records["\(manifestVersion)#\(buildNumber)#\(dataVersion)"] else {
-                return nil
-            }
+            guard let record = records[Self.key(manifestVersion: manifestVersion,
+                                                buildNumber: buildNumber,
+                                                dataPackage: dataPackage)] else { return nil }
             return (record.url, record.sha256, record.size)
+        }
+        private static func key(manifestVersion: String, buildNumber: Int,
+                                dataPackage: UpdateDataPackage) -> String {
+            "\(manifestVersion)#\(buildNumber)#\(dataPackage.assetId)#\(dataPackage.name)#\(dataPackage.dataVersion)"
         }
     }
 

@@ -1,6 +1,6 @@
 # 检查更新与发布清单
 
-状态：**Mac 客户端协议实现并有离屏测试；0.3.0 起支持就地热更新（不弹系统安装器）与数据／代码包分离（下载量 50MB→约 15MB，数据未变不重复下载）；Windows 原生客户端已交叉编译并随安装包提供，本轮继续读 schema 1 清单、安装整包（Windows 数据拆分与热更新待跟进）。发布侧已完成 `gomeen/gokaku` 的 GitHub Release、双端资产和清单签名验证；客户端从旧版点击检查、下载、安装并重开验证仍未完成。** 本文是更新合同、默认值和发布流程的唯一说明；功能状态见[双端功能对照](feature-parity.md)，安装流程见[发布与构建](release.md)。
+状态：**Mac 客户端协议实现并有离屏测试；0.3.0 起支持就地热更新与代码／数据包分离。数据下载资产是 `.pkg`，客户端通过 xar／gzip+cpio 取出内层 ZIP，再校验清单指纹与逐文件哈希；同构建号下检测到缺失或过期的数据指纹时，可只修复数据、不重复替换 App。Windows 原生客户端已交叉编译并随安装包提供，本轮继续读 schema 1 清单、安装整包（Windows 数据拆分与热更新待跟进）。发布侧已完成 `gomeen/gokaku` 的 GitHub Release、双端资产和清单签名验证；客户端从旧版点击检查、下载、安装并重开验证仍未完成。** 本文是更新合同、默认值和发布流程的唯一说明；功能状态见[双端功能对照](feature-parity.md)，安装流程见[发布与构建](release.md)。
 
 ## 一、范围与默认值
 
@@ -19,7 +19,7 @@
 
 ### 更新交互
 
-「关于」页是唯一的更新操作入口：手动「检查更新」只执行检查。发现新版后，macOS 由用户点击「下载并更新」触发下载、校验与安装；Windows 由用户分别点击「下载更新」和「安装更新」来启动交互式安装向导。自动检查只执行同一套检查，不下载、不安装、不打开窗口；启用时显示上次自动尝试的时间。检查失败或限流时清除旧的可操作候选，缓存的历史结果不能触发下载。两端的「查看更新说明」窗口只展示说明，不提供更新操作。
+「关于」页是唯一的更新操作入口：手动「检查更新」只执行检查。发现新版后，macOS 由用户点击「下载并更新」触发下载、校验与安装；若代码构建号相同而本机数据指纹缺失或过期，则显示「修复出厂数据」，只下载并安装数据包。Windows 由用户分别点击「下载更新」和「安装更新」来启动交互式安装向导。自动检查只执行同一套检查，不下载、不安装、不打开窗口；启用时显示上次自动尝试的时间。检查失败或限流时清除旧的可操作候选，缓存的历史结果不能触发下载。两端的「查看更新说明」窗口只展示说明，不提供更新操作。
 
 当前版本发现仍依赖 GitHub Releases API；限流会显示检查失败，不会显示为「已是最新」。绕开匿名 API 限流的更新入口是另一个待办。
 
@@ -99,7 +99,7 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 - **数据未变时清单复制上一版的数据包资产引用**（`assetId`／`name`／`size`／`sha256`／`dataVersion` 指向最近一次数据变化那个 Release 的资产）。客户端按 `dataVersion` 命中本地缓存时不下载；引用的资产随 GitHub 历史发布长期可下载，且客户端只在缓存未命中时才解析该引用。
 - `keyId` 必须命中随包 `Contents/Resources/update-config.json` 的 `trustedKeys`。
 - `version` 为 SemVer 三段数字，可带 `-dev.N`；2026-11-10 起不再使用 `rc.N`，构建脚本与发布门禁拒绝 rc。
-- `buildNumber` 为正整数，必须**单调递增**；客户端只按构建号判断升级。
+- `buildNumber` 为正整数，必须**单调递增**；客户端按构建号判断代码升级、不自动降级；构建号相同则比较本安装 App 内记录的数据指纹，发现数据包缺失或指纹不符时提供仅修复数据的操作。
 - `channel` 为 `stable`｜`dev`，必须与安装通道一致。
 - `assets` 至少一项；`platform` 为 `macos`｜`windows`，`arch` 为 `x86_64`（本轮范围）；同一 `platform/arch` 不得重复；`minOS` 为点分数字；客户端只选择 `minOS <= 当前系统版本` 的资产。
 - 本轮发布要求 macOS 与 Windows **主包**资产齐全才进入更新列表；客户端只下载自己平台／架构的资产。
@@ -113,7 +113,7 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 3. 用内置 Ed25519 公钥验证清单原始字节；签名失败、未知 keyId、未知 schema、字段非法都报「更新清单校验失败」。
 4. 校验通道、构建号、平台、架构、最低系统版本。
 5. 下载主包到当前用户可写的临时文件；校验长度与 SHA-256 后原子转为缓存文件；启动安装前再次校验。
-6. schema 2 且本平台声明了 `dataPackage` 时：本地缓存 `~/Library/Caches/Gogaku/updates/data/<dataVersion>/` 没有该数据版本才下载数据包（同样校验长度与 SHA-256；缓存命中不重复下载——数据未变的版本之间共用缓存）。数据包下载失败**不阻塞主包更新**：客户端照常就地安装主包并结转旧数据，UI 明示数据未更新。
+6. schema 2 且本平台声明了 `dataPackage` 时：本地缓存 `~/Library/Caches/Gogaku/updates/data/<dataVersion>/` 没有该数据版本才下载数据 `.pkg`（同样校验外层包长度与 SHA-256；缓存命中不重复下载——数据未变的版本之间共用缓存）。主包更新时，数据包下载或安装失败不回滚已安装代码，UI 明示；同构建号的数据包修复则不下载主包，失败可重试。
 7. 检查发现新版后等待用户确认；在 macOS 上点击「下载并更新」后才下载，校验通过后执行下文的热更新事务；不强杀宿主。
 8. 下载可取消；取消删除临时文件；磁盘不足在开始前明确报错。
 
@@ -128,7 +128,7 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 3. **校验 stage**：双 App 的 bundle ID、`CFBundleVersion` ＝ 期望构建号、输入法的 `TISInputSourceID`，以及 `codesign --verify --deep --strict`（代码包密封不覆盖 EngineData——数据由数据包按清单哈希另行校验）。
 4. **备份**：`ditto` 复制（不移动）现有双包到 `install/backups/<时间戳>/`，写 `transaction.txt` phase=installing。
 5. **替换**：`rm -rf` 旧包 → `mv` 新包到位；安装后复核身份；**EngineData 结转**——主包不再带出厂数据，schema 1 路径或数据包失败时从备份把旧词库结转进新包（核心兼容旧数据，输入法不因数据包缺失而不可用）。
-6. **数据包**（schema 2 且已下载）：解包数据 zip → `manifest.json` 逐文件 SHA-256 校验（缺文件、哈希错、路径越界都拒绝）→ 依次替换双 App 的 `Contents/Resources/EngineData`。数据阶段失败**不回滚主包**：保留新代码＋结转的旧数据（部分成功态），UI 明示。
+6. **数据包**（schema 2 且已下载）：校验外层 `.pkg` 哈希后，通过 `xar` 解开组件包、`gzip+cpio` 解开 Scripts 归档，取出 `Gogaku-data.zip`；校验其 `manifest.json` 的 `dataVersion` 与已签名清单一致，并逐文件 SHA-256 校验（缺文件、哈希错、路径越界都拒绝），再依次替换双 App 的 `Contents/Resources/EngineData`。数据阶段失败**不回滚主包**：保留新代码＋结转的旧数据，UI 明示；同构建号修复只运行数据阶段。
 7. **收尾**：`lsregister -f` 双 App；写 transaction.txt phase=success；保留最近两份备份；经 `org.gogaku.inputmethod.restart` 通知输入法优雅退出。
 
 输入法进程交接：GogakuInput 启动早期注册该通知监听，收到后结束在途组合（草稿落盘）、延迟 1.5 秒调 `NSApp.terminate` 正常退出（**绝不 SIGKILL**）；imklaunchagent 在连接断开后按需拉起新版进程。设置应用不需要重启（磁盘上已是新代码）。旧的 open-installer 路径保留为 fallback：`xar`／`cpio`／`ditto`／`codesign` 等工具缺失时更新窗口自动改走系统安装器。
@@ -137,7 +137,8 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 
 ### 数据包（0.3.0 起，Mac）
 
-- `Gogaku-Data-<版本>.pkg`（Lite：`GogakuLite-Data-<版本>.pkg`）只含双 App 的出厂数据（`Contents/Resources/EngineData`，逐文件清单见包内 `manifest.json`）。构包侧按同一 postinstall 机制落位，数据 postinstall 逐文件校验 SHA-256、备份替换、失败恢复，并把 `dataVersion` 写入 `install/last-data-version.txt`。
+- `Gogaku-Data-<版本>.pkg`（Lite：`GogakuLite-Data-<版本>.pkg`）只含双 App 的出厂数据；`Scripts/Gogaku-data.zip` 内含 `manifest.json` 与文件载荷。系统 postinstall 与客户端就地安装均校验逐文件 SHA-256、备份替换并失败恢复。
+- 成功安装后，每个 App 的 `Contents/Resources/EngineData/.gogaku-data-version` 记录该 App 的数据指纹；客户端读取当前设置 App 的标记。同构建号且标记缺失／不匹配时，关于页提供只修复数据的操作。兼容诊断收据仍写入 `~/Library/Application Support/Gogaku/install/last-data-version.txt`。
 - **数据内容指纹**：对排序后的 `(相对路径, sha256)` 清单文本（`path:sha256` 每行一条、`\n` 连接）再取一次 SHA-256，取前 16 位十六进制记作 `dataVersion`。同一数据集合在任何版本上指纹相同——这是「数据未变不重发、客户端跨版本复用缓存」的依据。发布侧（`_gogaku_delivery.data_fingerprint`）与客户端（`UpdateDataManifest.fingerprint`）逐字同算法，两侧测试绑定。
 - 数据包只覆盖**出厂**数据；用户词频、自定义词、设置等用户数据不受影响（安装/升级默认保留）。
 
@@ -228,8 +229,8 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 清单解析／字段校验 | 已实现（schema 1＋2） | `UpdateContract.swift`；`UpdateTests` 覆盖 schema、字段、版本、OS 比较、重复资产、dataPackage 字段与双清单结构 |
 | Ed25519 验签 | 已实现 | CryptoKit；有效／篡改／未知 keyId／base64 签名测试通过 |
 | GitHub 列表／分页／ETag／限流 | 已实现（注入传输与 URLProtocol 离线测试） | `UpdateEngine.swift`／`UpdateTransport.swift`；真实 URLSession GET 的主机边界、签名失败不缓存、逐页 304、升级后重比构建号已有测试；实际 GitHub 链路未验收 |
-| 下载／SHA-256／大小／缓存复用 | 已实现（本地文件） | `UpdateDownloader.swift`；测试覆盖复用、大小不符、哈希不符、数据包按 dataVersion 缓存 |
-| 就地热更新安装 | 已实现（离屏测试） | `UpdateInstaller.swift`：真 xar/cpio/ditto/codesign 的事务测试（校验拒绝、中断恢复、成功、数据包、部分成功）；**真实替换双 App 的宿主验收未做** |
+| 下载／SHA-256／大小／缓存复用 | 已实现（本地文件） | `UpdateDownloader.swift`；测试覆盖主包和数据 `.pkg` 的复用、大小不符、哈希不符、数据包按 dataVersion 缓存 |
+| 就地热更新与数据修复 | 已实现（离屏测试） | `UpdateInstaller.swift`：真实 xar/cpio/ditto/codesign 夹具覆盖数据 `.pkg` 解包、签名数据指纹绑定、逐文件校验、收据写入、同构建号缺失／过期指纹触发仅数据修复及部分成功；**真实双 App 安装和在线更新宿主验收未做** |
 | 输入法优雅退出交接 | 已实现（单元级） | 通知注册幂等；真实输入源里的交接（打字中更新→新进程接管）未验收 |
 | macOS 关于页检查与下载确认 | 单元测试已通过 | 真实设置窗口点击和在线更新闭环未验收 |
 | Windows 关于页检查与下载确认 | x64 语法检查已通过 | 保留 schema 1 清单；完整构建、真实窗口及在线更新未验收 |
@@ -250,7 +251,7 @@ python3 -m unittest scripts.test_delivery_pipeline
 真实链路回归（首发配置后进行）：
 
 1. 用两个构建验证旧版发现新版、下载、就地安装、重开显示新构建号、数据保留；覆盖 v2 清单路径与 v1 回落路径（0.2.0 旧客户端视角：只有 schema 1 清单的发布照常升级主包，EngineData 由 postinstall 结转保留）。
-2. 覆盖数据包：数据未变的连续两版更新，第二版不重新下载数据（dataVersion 缓存命中）；数据变化后更新词库生效；数据包哈希错时主包照常更新、UI 明示词库回退。
+2. 覆盖数据包：数据未变的连续两版更新，第二版不重新下载数据（dataVersion 缓存命中）；数据变化后更新词库生效；数据包哈希错时主包照常更新、UI 明示词库回退；同构建号且数据指纹缺失／过期时只下载并重装数据包，成功后重启输入法并更新收据。
 3. 覆盖 dev／rc／stable 隔离、同版更高构建号、旧版拒绝、错误签名、哈希不符、断网、限流、取消、磁盘不足。
 4. 记录 GitHub API 速率限制、资产 ID、清单与签名哈希。
 5. 失败恢复不影响输入法正常使用；就地更新中断（kill 安装进程）后再次更新先恢复旧版再装新版（transaction.txt recover）。
@@ -259,6 +260,6 @@ python3 -m unittest scripts.test_delivery_pipeline
 
 - **Windows 本轮不拆分**：Windows Setup 继续包含数据（Inno 模板与 TSF 注册深度耦合，数据包需要独立的 ActiveRoot 定位安装器与 update.cpp 的 schema 2／数据下载链路）。Windows 客户端继续读 `update-manifest.json`（schema 1，只含主包）——主包始终存在，旧路径不受双清单影响。跟进项：Windows 数据包（Inno 拆包）＋Windows 客户端 schema 2／热更新。
 - **就地更新的密封边界**：代码包的 App 密封不含 EngineData（构包时先剔除再签名）；数据包把 EngineData 装进已安装的 App 后，该 bundle 的资源密封相对安装时的原始签名是「超集」——`codesign --verify --deep --strict` 对已装且装过数据的 bundle 会报 file added。运行时不受影响（输入法经 imklaunchagent 启动、无 quarantine、Gatekeeper 评估只发生在 pkg 安装时）；代码完整性由安装前的严格校验＋主程序嵌入签名保证，数据完整性由清单逐文件哈希保证。若未来引入 Developer ID＋公证分发，需重新评估 EngineData 的落位（数据外置到用户目录是候选方向），在此之前以本模型如实交付。
-- **手动安装顺序**：系统 Installer 路径（双击 pkg）下必须先装主包再装 `Gogaku-Data` 数据包（数据 postinstall 要求双 App 已安装；顺序装反会如实报错退出，重装数据包即可）。客户端「检查更新」路径自动处理顺序。
+- **手动安装顺序**：系统 Installer 路径（双击 pkg）下必须先装主包再装同一产品的 `Gogaku-Data`／`GogakuLite-Data` 数据包。数据 postinstall 用构包时生成的哈希校验，不依赖 Python；事务按产品与通道分开，回滚只还原两份 `EngineData`。客户端「检查更新」路径自动处理顺序。
 - **旧客户端的升级数据**：0.2.0 及更早客户端经 schema 1 清单升级时只拿到主包；pkg postinstall 与就地安装器都会把备份里的旧 EngineData 结转进新包，词库回退到旧版（核心兼容旧数据）。旧客户端无法主动获取新数据包——这是发布侧用「数据未变不重发」前提下的已知边界：数据变化后，旧客户端要等下一次「代码也变化」的发布并在那时经 v2 清单补齐数据。
 - **就地更新的 TCC**：替换 `~/Library/Input Methods` 与 `~/Applications` 下的 bundle 是普通用户目录文件操作，不提权；真机上的系统提示与权限行为待宿主验收确认。

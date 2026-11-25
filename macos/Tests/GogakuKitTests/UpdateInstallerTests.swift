@@ -351,6 +351,29 @@ final class UpdateInstallerTests: XCTestCase {
         return zip
     }
 
+    func makeDataPackage(manifest: UpdateDataManifest,
+                         contents: [String: String]) throws -> URL {
+        let zip = try makeDataZip(manifest: manifest, contents: contents)
+        let work = root.appendingPathComponent("data-pkg-work-\(UUID().uuidString)", isDirectory: true)
+        let scriptsDir = work.appendingPathComponent("Scripts", isDirectory: true)
+        try FileManager.default.createDirectory(at: scriptsDir, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: zip, to: scriptsDir.appendingPathComponent("Gogaku-data.zip"))
+        try "echo data-postinstall".write(to: scriptsDir.appendingPathComponent("postinstall"),
+                                         atomically: true, encoding: .utf8)
+        let archive = work.appendingPathComponent("Scripts.cpio")
+        try runTool("/bin/sh", ["-c", "find . -print | cpio -o > \"$1\"", "cpio", archive.path], cwd: scriptsDir)
+        try runTool("/usr/bin/gzip", ["-f", archive.path])
+        let componentDir = work.appendingPathComponent("comp", isDirectory: true)
+        let inner = componentDir.appendingPathComponent("gogaku-data-core.pkg", isDirectory: true)
+        try FileManager.default.createDirectory(at: inner, withIntermediateDirectories: true)
+        try FileManager.default.copyItem(at: archive.appendingPathExtension("gz"),
+                                         to: inner.appendingPathComponent("Scripts"))
+        try Data().write(to: inner.appendingPathComponent("Payload"))
+        let package = work.appendingPathComponent("Gogaku-Data-test.pkg")
+        try runTool("/usr/bin/xar", ["-cf", package.path, "."], cwd: componentDir)
+        return package
+    }
+
     func dataManifest(contents: [String: String]) -> UpdateDataManifest {
         let files = contents.keys.sorted().map {
             UpdateDataManifest.Entry(path: $0,
@@ -377,20 +400,68 @@ final class UpdateInstallerTests: XCTestCase {
                                                           isDirectory: true)
             try FileManager.default.createDirectory(at: engineData, withIntermediateDirectories: true)
         }
-        let package = try makePackage(stage: stage)
-        try installer(expectedBuild: "121").install(packageURL: package)
+        let codePackage = try makePackage(stage: stage)
+        try installer(expectedBuild: "121").install(packageURL: codePackage)
         let contents = ["sc.dict": "dictionary-v2", "zh_CN.lm": "model-v2"]
-        let zip = try makeDataZip(manifest: dataManifest(contents: contents), contents: contents)
+        let manifest = dataManifest(contents: contents)
+        let dataPackage = try makeDataPackage(manifest: manifest, contents: contents)
         let target = installer(expectedBuild: "121")
-        let manifest = try target.installData(from: zip)
-        XCTAssertEqual(manifest.files.count, 2)
+        let installed = try target.installDataPackage(fromPackage: dataPackage,
+                                                      expectedDataVersion: manifest.dataVersion)
+        XCTAssertEqual(installed.dataVersion, manifest.dataVersion)
+        XCTAssertEqual(installed.files.count, 2)
+        let receipt = home.appendingPathComponent(
+            "Library/Application Support/Gogaku/install/last-data-version.txt")
+        XCTAssertEqual(try String(contentsOf: receipt, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines),
+                       manifest.dataVersion)
         for name in ["Gogaku.app", "Gogaku Settings.app"] {
             let installed = home.appendingPathComponent(
                 name == "Gogaku.app" ? "Library/Input Methods/\(name)" : "Applications/\(name)")
             let data = try String(contentsOf: installed.appendingPathComponent(
                 "Contents/Resources/EngineData/sc.dict"), encoding: .utf8)
             XCTAssertEqual(data, "dictionary-v2")
+            let marker = try String(contentsOf: installed.appendingPathComponent(
+                "Contents/Resources/EngineData/.gogaku-data-version"), encoding: .utf8)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            XCTAssertEqual(marker, manifest.dataVersion)
         }
+    }
+
+    func testDataInstallRejectsPackageFingerprintMismatch() throws {
+        let contents = ["sc.dict": "dictionary-v2"]
+        let manifest = dataManifest(contents: contents)
+        let package = try makeDataPackage(manifest: manifest, contents: contents)
+        XCTAssertThrowsError(try installer(expectedBuild: "121").installDataPackage(
+            fromPackage: package, expectedDataVersion: "ffffffffffffffff")) {
+            guard case UpdateInstallError.dataPackageRejected = $0 else { return XCTFail("\($0)") }
+        }
+        let target = home.appendingPathComponent(
+            "Library/Input Methods/Gogaku.app/Contents/Resources/EngineData/sc.dict")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: target.path))
+    }
+
+    func testCodeAndDataSuccessLeavesNoFailureNotice() throws {
+        let code = try makePackage(stage: validStage(build: "121"))
+        let contents = ["sc.dict": "dictionary-v2"]
+        let manifest = dataManifest(contents: contents)
+        let data = try makeDataPackage(manifest: manifest, contents: contents)
+        let target = installer(expectedBuild: "121")
+        try target.install(packageURL: code, dataPackageURL: data,
+                           expectedDataVersion: manifest.dataVersion)
+        XCTAssertNil(target.lastDataNotice)
+        XCTAssertEqual(try String(contentsOf: target.dataVersionURL, encoding: .utf8), manifest.dataVersion + "\n")
+    }
+
+    func testDataInstallDoesNotCreateMissingApps() throws {
+        let contents = ["sc.dict": "dictionary-v2"]
+        let manifest = dataManifest(contents: contents)
+        let data = try makeDataPackage(manifest: manifest, contents: contents)
+        let target = installer(expectedBuild: "121")
+        XCTAssertThrowsError(try target.installDataPackage(fromPackage: data,
+                                                           expectedDataVersion: manifest.dataVersion))
+        let input = home.appendingPathComponent("Library/Input Methods/Gogaku.app")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: input.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: target.dataVersionURL.path))
     }
 
     func testDataInstallRejectsHashMismatch() throws {
@@ -450,7 +521,8 @@ final class UpdateInstallerTests: XCTestCase {
         let badZip = try makeDataZip(manifest: manifest, contents: ["sc.dict": "different"])
         // 部分成功态不抛错：主包安装照常完成，数据阶段失败只在 lastDataNotice 明示。
         let target = installer(expectedBuild: "121")
-        try target.install(packageURL: package, dataPackageZip: badZip)
+        try target.install(packageURL: package, dataPackageURL: badZip,
+                           expectedDataVersion: manifest.dataVersion)
         XCTAssertNotNil(target.lastDataNotice, "数据失败必须有部分成功说明")
         // 主包已更新到新版。
         let info = try PropertyListSerialization.propertyList(
@@ -461,6 +533,8 @@ final class UpdateInstallerTests: XCTestCase {
         let data = (try? String(contentsOf: inputDir.appendingPathComponent(
             "Gogaku.app/Contents/Resources/EngineData/sc.dict"), encoding: .utf8)) ?? ""
         XCTAssertNotEqual(data, "declared")
+        XCTAssertFalse(FileManager.default.fileExists(atPath: home.appendingPathComponent(
+            "Library/Application Support/Gogaku/install/last-data-version.txt").path))
     }
 
     func testDataManifestRejectsUnsafePathsAndBadFingerprint() throws {

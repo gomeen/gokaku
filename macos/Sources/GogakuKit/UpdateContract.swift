@@ -340,11 +340,15 @@ public struct UpdateInstallation: Equatable, Sendable {
     public let platform: String
     public let arch: String
     public let osVersion: String
+    /// 已成功安装的数据指纹；缺失时同构建号的 schema 2 数据包需补装。
+    public let installedDataVersion: String?
 
     public init(version: String, buildNumber: Int, channel: UpdateChannel,
-                platform: String, arch: String, osVersion: String) {
+                platform: String, arch: String, osVersion: String,
+                installedDataVersion: String? = nil) {
         self.version = version; self.buildNumber = buildNumber; self.channel = channel
         self.platform = platform; self.arch = arch; self.osVersion = osVersion
+        self.installedDataVersion = installedDataVersion
     }
 
     public static func current(bundle: Bundle = .main) -> UpdateInstallation {
@@ -359,9 +363,13 @@ public struct UpdateInstallation: Equatable, Sendable {
         #else
         let arch = "unknown"
         #endif
+        let marker = bundle.resourceURL?.appendingPathComponent("EngineData/.gogaku-data-version")
+        let installedDataVersion = marker.flatMap { try? String(contentsOf: $0, encoding: .utf8) }?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
         return UpdateInstallation(version: version, buildNumber: build,
                                   channel: UpdateChannel.from(bundleIdentifier: bundle.bundleIdentifier),
-                                  platform: "macos", arch: arch, osVersion: osVersion)
+                                  platform: "macos", arch: arch, osVersion: osVersion,
+                                  installedDataVersion: installedDataVersion)
     }
 }
 
@@ -370,6 +378,7 @@ public struct UpdateCheckOutcome: Codable, Equatable, Sendable {
         case unconfigured
         case upToDate
         case available
+        case dataUpdateAvailable
         case unsupported
         case noManifest
         case invalidManifest
@@ -383,7 +392,7 @@ public struct UpdateCheckOutcome: Codable, Equatable, Sendable {
     public let message: String
     public let candidate: UpdateCandidate?
     public let checkedAt: Date
-    /// 发现新版本时携带（schema 2 且本平台有数据包；schema 1 或无数据包为 nil）。
+    /// 代码升级或数据修复时携带（schema 2 且本平台有数据包；schema 1 或无数据包为 nil）。
     /// Codable 兼容旧缓存：缺键解码为 nil。
     public let dataPackage: UpdateDataPackage?
 

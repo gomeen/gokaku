@@ -17,6 +17,7 @@
 #include <cmath>
 #include <cwctype>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <optional>
@@ -302,6 +303,7 @@ struct App {
     std::vector<int> visibleShortcuts;std::map<int,std::wstring> conflicts;std::map<int,Json> conflictDraft;
     // 扩展词库页状态：列表来自 gc_dict_list（核心唯一解析实现）；导入在后台线程。
     std::vector<Json> dicts; std::vector<Json> catalogEntries; Json catalogState=Json::object();
+    std::string recommendedInstallID; bool recommendedDownloadActive=false;
     std::vector<std::wstring> corruptDicts;
     std::atomic_bool dictImportCancel{false}, dictDownloadCancel{false}; bool dictBusy=false; bool dictReady=false;
     void *activeCatalogDialog=nullptr;   // CatalogDialog*（类型在其定义之后）
@@ -375,7 +377,7 @@ struct App {
     void debounce(){SetTimer(window,2,300,nullptr);}
     void flushText();
     void aboutPage();void refreshUpdateControls();
-    void buildPage();void layout();void reflowControls();void setDpi(UINT next);void setScroll(int position);void drawNavigation(const DRAWITEMSTRUCT &item);void learningPage();void normalPage();void wordPage();void skinPage();void shortcutPage();void privacyPage();void recordsPage();void dictionariesPage();void fillDicts();void refreshDictSummary();void fetchDictionaryCatalog();void installCatalogEntry(int index);void loadDicts();void openCatalogDialog();
+    void buildPage();void layout();void reflowControls();void setDpi(UINT next);void setScroll(int position);void drawNavigation(const DRAWITEMSTRUCT &item);void learningPage();void normalPage();void wordPage();void skinPage();void shortcutPage();void privacyPage();void recordsPage();void dictionariesPage();void fillDicts();void refreshRecommendedDictionaryButtons();void refreshDictSummary();void fetchDictionaryCatalog(std::string recommendedID = {});void installCatalogEntry(int index);void loadDicts();void openCatalogDialog();
     void fillApps();void addApp(bool browse);void removeApp();void toggleApp(size_t index);void fillWords();void editWord(bool fresh);void saveWords(std::vector<Word> value);void fillThemes();void refreshThemeSelectionControls();void openTheme(Json theme,bool fresh);void readThemeControls();void refreshPreview();bool leaveTheme();void saveTheme();void fillShortcuts();void recordKey(WPARAM key);void applyShortcut(int target,const Json &binding);void loadRecords();
     LRESULT command(int id,int notification);LRESULT result(Result &r);LRESULT notifyControl(NMHDR *header);
     static LRESULT CALLBACK proc(HWND,UINT,WPARAM,LPARAM);static LRESULT CALLBACK pageProc(HWND,UINT,WPARAM,LPARAM);static LRESULT CALLBACK previewProc(HWND,UINT,WPARAM,LPARAM);
@@ -694,6 +696,33 @@ void App::refreshDictSummary() {
     InvalidateRect(get(331), nullptr, TRUE);
 }
 
+void App::refreshRecommendedDictionaryButtons() {
+    if (!onPage(L"扩展词库")) return;
+    EnableWindow(get(341), recommendedDownloadActive && dictBusy);
+    Json recommendations = Json::array();
+    try {
+        auto config = Json::parse(gw::readFile(
+            gw::installRoot() / L"resources/dictionaries/catalog-config.json", 65536));
+        recommendations = config.value("recommendations", Json::array());
+    } catch (...) {}
+    if (!recommendations.is_array()) return;
+    for (size_t i = 0; i < 4; ++i) {
+        HWND control = get(337 + int(i));
+        if (!control) continue;
+        if (i >= recommendations.size()) { ShowWindow(control, SW_HIDE); continue; }
+        const auto &recommendation = recommendations[i];
+        const auto id = recommendation.value("id", std::string());
+        const auto name = recommendation.value("name", std::string());
+        const bool installed = std::any_of(dicts.begin(), dicts.end(), [&](const Json &entry) {
+            return entry.value("id", std::string()) == id;
+        });
+        const std::wstring label = (installed ? std::wstring(L"已安装 · ") : std::wstring(L"安装 · "))
+            + gw::wide(name);
+        SetWindowTextW(control, label.c_str());
+        EnableWindow(control, !dictBusy && !installed);
+    }
+}
+
 void App::fillDicts() {
     if (!get(321)) return;
     ListView_DeleteAllItems(get(321));
@@ -717,6 +746,7 @@ void App::fillDicts() {
     refreshDictSummary();
     EnableWindow(get(322), !dicts.empty() && !dictBusy);
     EnableWindow(get(323), !dicts.empty() && !dictBusy);
+    refreshRecommendedDictionaryButtons();
 }
 
 void App::loadDicts() {
@@ -736,8 +766,8 @@ void App::loadDicts() {
         for (const auto &c : value.value("corrupt", Json::array()))
             corruptDicts.push_back(gw::wide(c.value("file", std::string())));
         dictReady = true;
-        EnableWindow(get(320), TRUE);
-        EnableWindow(get(329), TRUE);
+        EnableWindow(get(320), !dictBusy);
+        EnableWindow(get(329), !dictBusy);
         fillDicts();
     } catch (const std::exception &e) {
         dictReady = false;
@@ -762,6 +792,32 @@ void App::dictionariesPage() {
     button(L"打开搜狗词库", 334, 20, 434, 140);
     label(L"萌娘百科词库（mw2fcitx 发布页；内容为 CC BY-NC-SA，只能非商业使用，Gogaku 不分发）：", 478, 28, 20, 790);
     button(L"打开萌娘百科发布页", 336, 20, 506, 180);
+    label(L"入门推荐 · THUOCL / MIT · 上游数据更新于 2016–2017；点击单本安装。", 590, 24, 20, 790);
+    button(L"取消下载", 341, 640, 620, 120);
+    EnableWindow(get(341), FALSE);
+    actions[341] = [this](int notification) {
+        if (notification == BN_CLICKED && recommendedDownloadActive) {
+            dictDownloadCancel = true;
+            status(L"正在取消词库下载…");
+        }
+    };
+    Json recommendations = Json::array();
+    try {
+        auto config = Json::parse(gw::readFile(
+            gw::installRoot() / L"resources/dictionaries/catalog-config.json", 65536));
+        recommendations = config.value("recommendations", Json::array());
+    } catch (...) {}
+    for (size_t i = 0; recommendations.is_array() && i < recommendations.size() && i < 4; ++i) {
+        const auto &recommendation = recommendations[i];
+        const auto id = recommendation.value("id", std::string());
+        const auto name = recommendation.value("name", std::string());
+        const int controlID = 337 + int(i);
+        const auto labelText = L"安装 · " + gw::wide(name);
+        button(labelText.c_str(), controlID, 20 + int(i) * 150, 620, 138);
+        actions[controlID] = [this, id](int notification) {
+            if (notification == BN_CLICKED && !dictBusy) fetchDictionaryCatalog(id);
+        };
+    }
     if (dictReady && !corruptDicts.empty()) {
         std::wstring names;
         for (size_t i = 0; i < corruptDicts.size(); ++i) { if (i) names += L"、"; names += corruptDicts[i]; }
@@ -850,11 +906,14 @@ void App::dictionariesPage() {
     loadDicts();
 }
 
-void App::fetchDictionaryCatalog() {
+void App::fetchDictionaryCatalog(std::string recommendedID) {
+    recommendedInstallID = std::move(recommendedID);
+    recommendedDownloadActive = false;
     dictBusy = true;
     EnableWindow(get(320), FALSE);
     EnableWindow(get(329), FALSE);
-    status(L"正在获取官方清单…");
+    refreshRecommendedDictionaryButtons();
+    status(recommendedInstallID.empty() ? L"正在获取官方清单…" : L"正在验证官方推荐词库…");
     core.load();
     job("dict-catalog", [this]() {
         Json catalogConfig;
@@ -885,6 +944,12 @@ void App::installCatalogEntry(int index) {
     auto entry = catalogEntries[size_t(index)];
     const long long version = catalogState.value("catalogVersion", 0ll);
     dictBusy = true;
+    recommendedDownloadActive = !recommendedInstallID.empty();
+    if (onPage(L"扩展词库")) {
+        EnableWindow(get(320), FALSE);
+        EnableWindow(get(329), FALSE);
+    }
+    refreshRecommendedDictionaryButtons();
     dictDownloadCancel = false;
     status(L"正在下载并安装…");
     job("dict-install", [this, entry, version]() {
@@ -1358,6 +1423,10 @@ LRESULT App::result(Result &r){
     // 扩展词库任务（docs/dictionaries.md；核心返回后统一重读列表并通知输入法）。
     if(r.type=="dict-import"||r.type=="dict-toggle"||r.type=="dict-remove"||r.type=="dict-install"){
         dictBusy=false;
+        if (r.type=="dict-install") {
+            recommendedInstallID.clear();
+            recommendedDownloadActive=false;
+        }
         if(onPage(L"扩展词库"))loadDicts();
         if(!r.error.empty()){
             const auto error = dictCatalogErrorText(gw::utf8(r.error));
@@ -1396,8 +1465,29 @@ LRESULT App::result(Result &r){
     if(r.type=="dict-catalog"){
         if(onPage(L"扩展词库")){EnableWindow(get(320),TRUE);EnableWindow(get(329),TRUE);}
         dictBusy=false;
-        if(!r.error.empty()){status(L"获取清单失败："+dictCatalogErrorText(gw::utf8(r.error)),true);return 0;}
+        if(!r.error.empty()){
+            recommendedInstallID.clear();
+            recommendedDownloadActive=false;
+            refreshRecommendedDictionaryButtons();
+            status(L"获取清单失败："+dictCatalogErrorText(gw::utf8(r.error)),true);
+            return 0;
+        }
         catalogState=r.value;catalogEntries=r.value.value("entries",Json::array());
+        if (!recommendedInstallID.empty()) {
+            const auto requestedID = recommendedInstallID;
+            const auto found = std::find_if(catalogEntries.begin(), catalogEntries.end(),
+                [&](const Json &entry) { return entry.value("id", std::string()) == requestedID; });
+            if (found == catalogEntries.end()) {
+                recommendedInstallID.clear();
+                recommendedDownloadActive=false;
+                refreshRecommendedDictionaryButtons();
+                status(L"官方清单中暂未找到这本入门词库。",true);
+                return 0;
+            }
+            installCatalogEntry(int(std::distance(catalogEntries.begin(), found)));
+            return 0;
+        }
+        refreshRecommendedDictionaryButtons();
         openCatalogDialog();
         return 0;
     }
