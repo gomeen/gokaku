@@ -2,6 +2,10 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 0.5.3
+
+- 提供从 0.5.2 检查更新的后续版本。沿用 0.5.2 修正的 macOS 出厂数据安装流程；更新完成后重新打开设置即可查看新版状态。
+
 ### 0.5.2（2026-11-25，stable 定版）
 
 - macOS「检查更新」正确解开并校验出厂数据 `.pkg`；同构建号数据指纹缺失或过期时，可只修复数据。手动数据包不再依赖 Python，回滚只还原数据目录。
