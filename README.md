@@ -16,9 +16,9 @@
 
 中文引擎和前端路线已选定。普通输入已在独立 AppKit 宿主和 Orca 终端通过限定的上屏与切换检查；完整宿主安全矩阵和学习并发尚未验收。学习翻译只保留用户配置的火山 NMT（默认关闭），不再随包或下载本地模型。需求边界、建议方案和待验证事项以[产品方向](docs/product.md)为准；双端逐项状态见[功能对照](docs/feature-parity.md)。
 
-## 当前版本 0.5.2
+## 当前版本 0.5.3
 
-**0.5.2 stable 已发布**，包含 macOS 与 Windows 的完整版和 Lite。macOS 可在「关于」页修复出厂数据，Lite 安装包已补齐输入源身份。两端「扩展词库」增加 IT、财经、医学、法律四本按需安装的推荐。macOS 已离屏验证公开更新检查、下载及数据修复。本轮 host 获书面豁免，macOS 真实输入源与 Windows 真机运行仍待验收。见[下载页](https://github.com/gomeen/gokaku/releases/tag/v0.5.2)及[发布记录](docs/validation/release-0.5.2.json)。
+**0.5.3 stable 已发布**，用于验证从 0.5.2 检查更新。macOS 0.5.2 的更新代码已在临时目录装好 0.5.3 的主包和数据包，覆盖完整版与 Lite。0.5.2 引入的「修复出厂数据」和四本入门词库保留。用户可从「关于 → 检查更新」开始。本轮 host 获书面豁免，真实设置窗口与输入源交接、Windows 真机运行仍待验收。见[下载页](https://github.com/gomeen/gokaku/releases/tag/v0.5.3)及[发布记录](docs/validation/release-0.5.3.json)。
 
 ## 历史工程基线（2026-11-10）
 

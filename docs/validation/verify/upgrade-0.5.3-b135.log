@@ -1,0 +1,41 @@
+0.5.1 b132 legacy extractor control against 0.5.2 signed packages
+Compiling unchanged db0e5ad5 updater source for Gogaku
+Compiling unchanged 82c108b5 updater source for Gogaku
+Gogaku seed 0.5.1 b132 seed-partial from the released PKG
+Negative control (expected): Gogaku 0.5.1 → 0.5.2: 数据包安装失败：数据 zip 解包失败：ditto: Couldn't read PKZip signature
+Gogaku seed 0.5.1 b132 seed-partial from the released PKG
+Gogaku 0.5.1 → 0.5.2: verified, installed both packages with no data warning
+Gogaku fresh 0.5.2 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.2）
+Installed data SHA-256 matches the package receipt in both bundles
+
+0.5.2 b134 → 0.5.3 b135 isolated installation (production signatures; replayed release metadata and asset bytes; restart suppressed)
+Compiling unchanged 82c108b5 updater source for Gogaku
+Compiling unchanged 985282a2 updater source for Gogaku
+Gogaku seed 0.5.2 b134 seed-partial from the released PKG
+Gogaku 0.5.2 → 0.5.3: verified, installed both packages with no data warning
+Gogaku fresh 0.5.3 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.3）
+Installed data SHA-256 matches the package receipt in both bundles
+Gogaku seed 0.5.2 b134 seed-healthy from the released PKG
+Gogaku 0.5.2 → 0.5.3: verified, installed both packages with no data warning
+Gogaku fresh 0.5.3 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.3）
+Installed data SHA-256 matches the package receipt in both bundles
+Compiling unchanged 82c108b5 updater source for GogakuLite
+Compiling unchanged 985282a2 updater source for GogakuLite
+GogakuLite seed 0.5.2 b134 seed-partial from the released PKG
+GogakuLite 0.5.2 → 0.5.3: verified, installed both packages with no data warning
+GogakuLite fresh 0.5.3 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.3）
+Installed data SHA-256 matches the package receipt in both bundles
+GogakuLite seed 0.5.2 b134 seed-healthy from the released PKG
+GogakuLite 0.5.2 → 0.5.3: verified, installed both packages with no data warning
+GogakuLite fresh 0.5.3 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.3）
+Installed data SHA-256 matches the package receipt in both bundles
+0.5.2 → 0.5.3: 4/4 previous-updater cases passed (two editions × partial/healthy data).
+
+0.5.2 b134 real GitHub update discovery (no host actions)
+Compiling unchanged 82c108b5 updater source for Gogaku
+Gogaku seed 0.5.2 b134 seed-partial from the released PKG
+Gogaku 0.5.2 live Check for Updates: 发现新版本 0.5.3, signed packages resolved
+Compiling unchanged 82c108b5 updater source for GogakuLite
+GogakuLite seed 0.5.2 b134 seed-partial from the released PKG
+GogakuLite 0.5.2 live Check for Updates: 发现新版本 0.5.3, signed packages resolved
+Actual 0.5.2 updater implementation discovered the public 0.5.3 release (both editions).

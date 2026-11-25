@@ -1,10 +1,10 @@
 # Windows 开发测试安装包
 
-当前发布包为 `0.5.2 / b134 stable`，包含完整版和 Lite。支持 Windows 11 x64，安装包同时包含 64 位和 32 位 TSF。b94–b99 的 VM 运行证据适用于对应的历史 dev 构建。见[下载页](https://github.com/gomeen/gokaku/releases/tag/v0.5.2)。
+当前发布包为 `0.5.3 / b135 stable`，包含完整版和 Lite。支持 Windows 11 x64，安装包同时包含 64 位和 32 位 TSF。b94–b99 的 VM 运行证据适用于对应的历史 dev 构建。见[下载页](https://github.com/gomeen/gokaku/releases/tag/v0.5.3)。
 
 历史 b98 修复三个真实输入缺陷并复测通过，b99 补挂起的恢复 Shift 点击；这些记录解释历史 dev 包的限定回归范围，完整验收仍未通过。b95–b99 的缺陷、切框／密码／记事本回归与受限宿主详情见[原生验收记录](validation/native-development.md)。
 
-双击 Inno Setup 安装向导即可安装。0.5.2 的文件名、大小和 SHA-256 见[发布记录](validation/release-0.5.2.json)。安装即启用的变更与待验收项见[原生验收记录](validation/native-development.md)。
+双击 Inno Setup 安装向导即可安装。0.5.3 的文件名、大小和 SHA-256 见[发布记录](validation/release-0.5.3.json)。安装即启用的变更与待验收项见[原生验收记录](validation/native-development.md)。
 
 ## 安装与启用
 
@@ -31,7 +31,7 @@
 
 学习翻译默认关闭。需要用户在“学习翻译”保存自己的火山 Access Key ID／Secret Access Key，点击连接测试，并显式启用学习翻译。普通输入不发送翻译请求。学习组合中 Ctrl+Enter 可明确原文上屏；失败保留源文，不自动改写正文。
 
-从设置的「关于」页点击「检查更新」。发现新版后，可先下载，再点击「安装更新」打开安装向导。自动检查默认关闭。应用读取 `gomeen/gokaku` 的签名清单。0.5.2 发布侧清单和签名已验证，Windows 应用内更新仍待真机验收。
+从设置的「关于」页点击「检查更新」。发现新版后，可先下载，再点击「安装更新」打开安装向导。自动检查默认关闭。应用读取 `gomeen/gokaku` 的签名清单。0.5.3 发布侧清单和签名已验证，Windows 应用内更新仍待真机验收。
 
 ## 升级与卸载
 
@@ -43,7 +43,7 @@
 
 ## 当前验证边界
 
-0.5.2 的双架构交叉编译、PE 架构和系统依赖检查、Inno Setup 编译、包内容核对及共享核心回归均已通过。Windows 真实宿主、在线更新、完整升级故障恢复／卸载和长时稳定性仍待验收。见[原生验收记录](validation/native-development.md)。
+0.5.3 的双架构交叉编译、PE 架构和系统依赖检查、Inno Setup 编译、包内容核对及共享核心回归均已通过。Windows 真实宿主、在线更新、完整升级故障恢复／卸载和长时稳定性仍待验收。见[原生验收记录](validation/native-development.md)。
 
 设置已改为七项侧栏、固定页头／保存状态栏、DPI 缩放与微软雅黑 UI；皮肤预览在最小窗口仍完整显示九条。安装器、设置、代理／托盘与 TSF 随包图标资源，开始菜单设置入口使用随包程序图标。构建 90 修复旧连接迟到失焦通知清空当前组合的问题。构建 91 修复记事本 `RichEditD2DPT` 缺少 InputScope 时被拒绝输入；兜底仍核对焦点／文档归属、密码字符、只读与禁用状态，未知控件不放行。
 

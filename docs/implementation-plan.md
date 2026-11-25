@@ -1,6 +1,6 @@
 # 双端功能统一、安装包与检查更新计划
 
-**已批准并实施中。当前发布基线为 `0.5.2 / b134 stable`。** 本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载和检查更新。两端双形态已构包发布，fast、release 与公开清单验签通过。macOS 两种形态通过离屏在线数据修复，真实宿主获用户书面豁免。见[产品方向](product.md)、[双端功能对照](feature-parity.md)、[更新合同](update.md)及[原生开发验收](validation/native-development.md)。
+**已批准并实施中。当前发布基线为 `0.5.3 / b135 stable`。** 本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载和检查更新。两端双形态已构包发布，fast、release 与公开清单验签通过。macOS 0.5.2 更新代码通过隔离安装验证，真实宿主获用户书面豁免。见[产品方向](product.md)、[双端功能对照](feature-parity.md)、[更新合同](update.md)及[原生开发验收](validation/native-development.md)。
 
 ## 一、目标与范围
 
@@ -223,10 +223,10 @@ Windows 完整版已构包九页，包括学习翻译、普通输入、自定义
 | P1 设置迁移 | 完成 | schema 2；本地模型旧配置迁移为关闭；已启用火山保留 |
 | P2 Windows TSF／代理 | x86／x64 TSF、x64 代理／核心已编译 | 私有管道、焦点／字段、提交确认、原子持久化已接通；b110 真实 Windows 运行验证未做，b94–b99 运行记录仅属历史 dev 包 |
 | P3 Windows 设置／主题／拼写 | 已构包，运行待验收 | Win32 完整版九页、Lite 六页，含 Direct2D／DirectWrite／WIC、主题 ZIP、自定义词及系统拼写。见[功能对照](feature-parity.md) |
-| P4 Mac PKG | 0.5.2 已发布，完整版与 Lite 数据安装和回滚通过临时目录检查 | 历史真实安装、当前实包检查及系统签名状态见[原生验收](validation/native-development.md) |
-| P4 Windows Setup | 0.5.2 两种形态已发布 | 真实宿主、完整故障恢复／卸载及旧版本清理待验收。见[发布记录](validation/release-0.5.2.json) |
-| P5 检查更新 | 公开清单验签与 macOS 离屏在线修复通过 | 旧版设置应用更新闭环与 Windows 在线更新待验收。见[更新合同](update.md) |
-| P6 最终验收 | 0.5.2 fast 与 release 通过，本轮 host 获书面豁免 | 完整宿主、旧版应用内升级与卸载矩阵待验收。见[原生验收](validation/native-development.md) |
+| P4 Mac PKG | 0.5.3 两种形态已发布，实包隔离升级通过 | 历史真实安装、当前实包检查及系统签名状态见[原生验收](validation/native-development.md) |
+| P4 Windows Setup | 0.5.3 两种形态已发布 | 真实宿主、完整故障恢复／卸载及旧版本清理待验收。见[发布记录](validation/release-0.5.3.json) |
+| P5 检查更新 | macOS 0.5.2 更新器发现公开 0.5.3 并通过两种形态的隔离升级 | macOS 真实设置窗口及输入源交接、Windows 在线更新待验收。见[更新合同](update.md) |
+| P6 最终验收 | 0.5.3 fast 与 release 通过，本轮 host 获书面豁免 | 完整宿主、真实设置窗口升级与卸载矩阵待验收。见[原生验收](validation/native-development.md) |
 | 扩展词库 D0–D6 | 完成：0.5.0（b131）已于 2026-11-24 发布；host 书面豁免，Windows 运行未验收，见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md)、[验收记录](validation/dictionaries-0.5.0.md) |
 
 实施欠账（共享学习提交协调、Windows 真机验收矩阵、WebP 随包解码、旧设置写回迁移、跨通道调频、多候选预译等）已转入 `.scratch/debt-backlog/` 的 issue 文件，作为后续开发的工单队列。
