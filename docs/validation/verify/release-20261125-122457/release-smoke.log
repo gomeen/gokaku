@@ -1,0 +1,26 @@
+[macOS package verification]
+Gogaku b134: signed App identities; 4 data files in each App; fingerprint 0740d56417e0d6d3
+GogakuLite b134: signed App identities; 3 data files in each App; fingerprint b81cc760128efd74
+
+[macOS data package postinstall]
+Gogaku b134: install passed
+Gogaku b134: rollback passed
+Gogaku b134: rollback-missing-old-data passed
+GogakuLite b134: install passed
+GogakuLite b134: rollback passed
+GogakuLite b134: rollback-missing-old-data passed
+
+[Public starter dictionaries]
+signature ok
+thuocl-caijing: 1285 条，公开下载与临时目录安装通过
+thuocl-it: 10407 条，公开下载与临时目录安装通过
+thuocl-law: 8826 条，公开下载与临时目录安装通过
+thuocl-medical: 10698 条，公开下载与临时目录安装通过
+
+[Public macOS update · full]
+Gogaku: public release check offered 0.5.2 for simulated 0.5.1
+Gogaku: public data package verified and installed in temporary apps; recheck is up to date
+
+[Public macOS update · Lite]
+GogakuLite: public release check offered 0.5.2 for simulated 0.5.1
+GogakuLite: public data package verified and installed in temporary apps; recheck is up to date

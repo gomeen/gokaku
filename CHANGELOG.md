@@ -2,11 +2,13 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
-### 0.5.2（目标版本）
+### 0.5.2（2026-11-25，stable 定版）
 
 - macOS「检查更新」正确解开并校验出厂数据 `.pkg`；同构建号数据指纹缺失或过期时，可只修复数据。手动数据包不再依赖 Python，回滚只还原数据目录。
 - 修复 macOS Lite 安装包遗漏输入源身份，导致主包无法通过安装校验的问题。
 - 扩展词库页调整留白，增加四本按需安装的 THUOCL/MIT 入门推荐（IT、财经、医学、法律）。两端共用推荐配置，词库不预装。
+
+发布记录见 [release-0.5.2.json](docs/validation/release-0.5.2.json)。
 
 ### 0.5.1（2026-11-24，stable 定版）
 

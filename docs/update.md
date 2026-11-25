@@ -158,7 +158,7 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 ```
 
 - `owner`／`repo` 留空＝本机构建未配置更新源；客户端明确显示未配置。
-- 当前仓库配置为 `gomeen/gokaku`；发布侧资产和清单签名已在 b110、b118 及 0.5.0（b131）三轮验证（b118 时资产名仍含构建号，见 [release-b118.json](validation/release-b118.json)；最新见 [release-0.5.0.json](validation/release-0.5.0.json)），客户端安装闭环仍待验证。2026-11-19 起资产名只用版本号，不再含构建号。
+- 配置指向 `gomeen/gokaku`。0.5.2 的 14 项公开资产与发布收据一致，完整版与 Lite 的两种清单均通过验签。2026-11-19 起公开资产名使用版本号。见[发布记录](validation/release-0.5.2.json)。
 - 公钥可轮换：保留旧 keyId 直到所有受支持版本升级完成；私钥只存发布环境，绝不入库。
 - 开发公钥 `gogaku-dev-2026-11` 仅用于协议回归；生产发布前替换为生产公钥。
   发布脚本会拒绝 `trustedKeys` 中不存在的 `keyId`，避免客户端无法验证的清单上线。
@@ -234,7 +234,7 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 输入法优雅退出交接 | 已实现（单元级） | 通知注册幂等；真实输入源里的交接（打字中更新→新进程接管）未验收 |
 | macOS 关于页检查与下载确认 | 单元测试已通过 | 真实设置窗口点击和在线更新闭环未验收 |
 | Windows 关于页检查与下载确认 | x64 语法检查已通过 | 保留 schema 1 清单；完整构建、真实窗口及在线更新未验收 |
-| 真实 GitHub Releases E2E | 部分 | 发布侧已通过：`gomeen/gokaku` 上 b110 至 0.5.0（b131）各轮发布的资产和公开清单签名已验证；客户端「旧版点更新→新版」端到端未做（见[欠账](../.scratch/debt-backlog/issues/03-update-e2e-real-releases.md)） |
+| 真实 GitHub Releases E2E | 部分 | 0.5.2 的公开资产及四份清单已核验。macOS 两种形态以模拟的 0.5.1 安装身份发现新版，下载并校验主包，在临时应用中修复数据，再次检查返回「已是最新」。旧版设置窗口点击更新、安装并重开的流程仍待验收。见[发布记录](validation/release-0.5.2.json)及[验收工单](../.scratch/debt-backlog/issues/03-update-e2e-real-releases.md) |
 
 已做的协议回归不访问真实网络：使用注入传输模拟 GitHub API 与资产下载；签名用临时 Ed25519 密钥。**未完成真实链路前不得把在线更新标为已验收。**
 

@@ -1,6 +1,6 @@
 # 双端功能统一、安装包与检查更新计划
 
-状态：**已批准并实施中，当前发布基线为 `0.5.1 / b132 stable`（2026-11-24 定版，更新交互关于页化；0.5.0 引入扩展词库与 Lite 形态）。** Windows 初始范围为只交付最终 Setup.exe，后来保留历史 VM 限定运行记录；b110 已完成双端构包、fast／release 自动化验证和发布清单签名，真实 host 未运行且已记录用户豁免，b131 同样以书面豁免发布。构包或历史限定宿主通过不等同双端功能验收。本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载与检查更新；产品行为以[产品方向](product.md)为准，功能状态见[双端功能对照](feature-parity.md)，更新合同见[检查更新](update.md)，历史证据见[原生开发验收](validation/native-development.md)。
+**已批准并实施中。当前发布基线为 `0.5.2 / b134 stable`。** 本计划覆盖 macOS 与 Windows 的功能一致、安装、升级、卸载和检查更新。两端双形态已构包发布，fast、release 与公开清单验签通过。macOS 两种形态通过离屏在线数据修复，真实宿主获用户书面豁免。见[产品方向](product.md)、[双端功能对照](feature-parity.md)、[更新合同](update.md)及[原生开发验收](validation/native-development.md)。
 
 ## 一、目标与范围
 
@@ -125,7 +125,7 @@ P0 完成后可并行：Mac 收敛与 Windows 基础工作；更新开发可并�
 
 ### 设置、皮肤与拼写
 
-Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自定义词语、快捷键、学习与隐私、学习片段；更新入口放在版本信息旁，打开独立更新窗口。
+Windows 完整版已构包九页，包括学习翻译、普通输入、自定义词语、扩展词库、皮肤、快捷键、学习与隐私、学习片段和关于。Lite 已构包六页。更新入口位于「关于」页，运行待验收。
 
 - 普通输入：小鹤／全拼、九组模糊音、英文候选与释义、输入字母显示、调频及清空、按应用默认英文。
 - 自定义词：短码／拼音词、自动读音、启停、搜索、排序、校验与失败重试，共用 TSV 格式。
@@ -138,10 +138,10 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 
 完整合同见[检查更新](update.md)。要点：
 
-- 两端版本信息旁「检查更新」；更新窗口显示当前版本／构建号、新版信息、发布说明、下载进度及错误，并提供「自动检查更新」开关。
-- 手动检查始终可用；区分已是最新、发现新版、当前系统不支持、无法连接、更新配置缺失和校验失败。
-- 自动检查默认关闭；开启后在设置窗口打开期间按 24 小时间隔检查（关闭窗口即退出设置应用，不驻留 Dock）；不另起常驻进程，不在输入按键路径检查。自动检查每天最多尝试一次；手动检查可立即重试。
-- 自动发现新版只在设置应用内提示，不抢焦点、不自动下载／安装／重启。下载可取消、重试；校验成功后才出现「安装更新」；点击后打开系统安装器。
+- 两端从「关于」页检查更新，显示版本号、检查结果、进度与错误。更新说明在只读窗口展示。
+- 手动检查可立即重试，区分已是最新、发现新版、系统不支持、无法连接、更新配置缺失和校验失败。
+- 自动检查默认关闭，开启后仅在设置窗口打开期间每 24 小时最多检查一次。
+- 用户确认后才下载。macOS 同页「下载并更新」，当前版本缺少出厂数据时可单独修复。Windows 校验下载后由用户点击「安装更新」打开向导。
 - 请求不携带输入内容、火山凭据、学习记录或设备唯一标识；开关旁说明会连接 GitHub。
 - 发布使用 GitHub Releases；每个 Release 附清单与 Ed25519 签名；先上传资产取得 ID，再生成清单、上传清单与签名，先形成 Draft，人工审阅后发布。stable／dev 互不自动切换；stable 只接受正式版本，dev 可接受 dev 与正式版；按构建号判断，不自动降级。
 - 未配置更新源的构建明确显示「未配置更新源」，不能显示「已是最新」。
@@ -222,11 +222,11 @@ Windows 完整覆盖七页：学习翻译／资源、普通输入、皮肤、自
 | P1 火山收敛 | Mac 完成主体；共享提交协调未完成 | `Volcengine.swift`＋`LearningTranslation`＋设置页；等待缓冲仍在 `InputController` |
 | P1 设置迁移 | 完成 | schema 2；本地模型旧配置迁移为关闭；已启用火山保留 |
 | P2 Windows TSF／代理 | x86／x64 TSF、x64 代理／核心已编译 | 私有管道、焦点／字段、提交确认、原子持久化已接通；b110 真实 Windows 运行验证未做，b94–b99 运行记录仅属历史 dev 包 |
-| P3 Windows 设置／主题／拼写 | 已编译，存在功能缺口 | Win32 七页、Direct2D／DirectWrite／WIC、主题 ZIP、自定义词、系统拼写；缺口见[对照表](feature-parity.md) |
-| P4 Mac PKG | 0.5.0（b131）stable 已发布；历史真实 `installer -pkg` 单次安装与假 HOME 事务证据保留；Developer ID／公证未执行（无证书） | `scripts/package-macos-pkg.py`、`pkg-postinstall.sh`、`docs/validation/native-development.md`、[b110 发布记录](validation/release-b110.json)、[0.5.0 发布记录](validation/release-0.5.0.json) |
-| P4 Windows Setup | 0.5.0 stable 双端双形态（完整版＋Lite）安装包已发布；真实宿主、完整恢复／卸载未验收 | [b110 发布记录](validation/release-b110.json)、[0.5.0 发布记录](validation/release-0.5.0.json)；版本目录／当前与上一根／注册失败恢复已实现，故障矩阵与旧版本清理待补齐；b94 默认升级证据保留为历史 |
-| P5 检查更新 | 两端客户端已实现；b110 与 0.5.0 stable 发布侧已完成；客户端真实旧版更新闭环未验证 | `Update*.swift`、`windows/GogakuWindows/update.cpp`、发布脚本、[b110 发布记录](validation/release-b110.json)、[0.5.0 发布记录](validation/release-0.5.0.json) |
-| P6 最终验收 | b110、0.5.0 核心／fast／release 自动化检查通过；完整产品未验收，host 两轮均以书面豁免发布 | 两轮发布记录；真实宿主、在线更新 E2E、完整升级恢复／卸载及真机矩阵未验收 |
+| P3 Windows 设置／主题／拼写 | 已构包，运行待验收 | Win32 完整版九页、Lite 六页，含 Direct2D／DirectWrite／WIC、主题 ZIP、自定义词及系统拼写。见[功能对照](feature-parity.md) |
+| P4 Mac PKG | 0.5.2 已发布，完整版与 Lite 数据安装和回滚通过临时目录检查 | 历史真实安装、当前实包检查及系统签名状态见[原生验收](validation/native-development.md) |
+| P4 Windows Setup | 0.5.2 两种形态已发布 | 真实宿主、完整故障恢复／卸载及旧版本清理待验收。见[发布记录](validation/release-0.5.2.json) |
+| P5 检查更新 | 公开清单验签与 macOS 离屏在线修复通过 | 旧版设置应用更新闭环与 Windows 在线更新待验收。见[更新合同](update.md) |
+| P6 最终验收 | 0.5.2 fast 与 release 通过，本轮 host 获书面豁免 | 完整宿主、旧版应用内升级与卸载矩阵待验收。见[原生验收](validation/native-development.md) |
 | 扩展词库 D0–D6 | 完成：0.5.0（b131）已于 2026-11-24 发布；host 书面豁免，Windows 运行未验收，见上文「扩展词库」阶段表 | [扩展词库](dictionaries.md)、[功能对照](feature-parity.md)、[验收记录](validation/dictionaries-0.5.0.md) |
 
 实施欠账（共享学习提交协调、Windows 真机验收矩阵、WebP 随包解码、旧设置写回迁移、跨通道调频、多候选预译等）已转入 `.scratch/debt-backlog/` 的 issue 文件，作为后续开发的工单队列。

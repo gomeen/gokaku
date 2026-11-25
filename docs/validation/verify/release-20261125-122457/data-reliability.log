@@ -1,0 +1,90 @@
+场景 1：写入中途 SIGKILL
+  ok   第1轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第2轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第3轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第4轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第5轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第6轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第7轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第8轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第9轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第10轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第11轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第12轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第13轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第14轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第15轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第16轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第17轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第18轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第19轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第20轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第21轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第22轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第23轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第24轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第25轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第26轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第27轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第28轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第29轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第30轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第31轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第32轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第33轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第34轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第35轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第36轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第37轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第38轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第39轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+  ok   第40轮强杀后可恢复（文件：['learned.txt', 'model.userlm']）
+场景 2：model.userlm 损坏注入
+  ok   损坏后会话可用（VERIFY-OK）
+  ok   损坏文件已备份为 .corrupt
+  ok   model.userlm 已重建（flush 写回）
+场景 3：删除学习词后不被迟到写入复活
+  ok   删除后重载不复活（VERIFY-OK）
+场景 4：两个设置写入方并发启停扩展词库
+  ok   第1轮双方读回相同终态且元数据完整
+  ok   第2轮双方读回相同终态且元数据完整
+  ok   第3轮双方读回相同终态且元数据完整
+  ok   第4轮双方读回相同终态且元数据完整
+  ok   第5轮双方读回相同终态且元数据完整
+  ok   第6轮双方读回相同终态且元数据完整
+  ok   第7轮双方读回相同终态且元数据完整
+  ok   第8轮双方读回相同终态且元数据完整
+  ok   第9轮双方读回相同终态且元数据完整
+  ok   第10轮双方读回相同终态且元数据完整
+  ok   第11轮双方读回相同终态且元数据完整
+  ok   第12轮双方读回相同终态且元数据完整
+  ok   第13轮双方读回相同终态且元数据完整
+  ok   第14轮双方读回相同终态且元数据完整
+  ok   第15轮双方读回相同终态且元数据完整
+  ok   第16轮双方读回相同终态且元数据完整
+  ok   第17轮双方读回相同终态且元数据完整
+  ok   第18轮双方读回相同终态且元数据完整
+  ok   第19轮双方读回相同终态且元数据完整
+  ok   第20轮双方读回相同终态且元数据完整
+  ok   第21轮双方读回相同终态且元数据完整
+  ok   第22轮双方读回相同终态且元数据完整
+  ok   第23轮双方读回相同终态且元数据完整
+  ok   第24轮双方读回相同终态且元数据完整
+  ok   第25轮双方读回相同终态且元数据完整
+  ok   第26轮双方读回相同终态且元数据完整
+  ok   第27轮双方读回相同终态且元数据完整
+  ok   第28轮双方读回相同终态且元数据完整
+  ok   第29轮双方读回相同终态且元数据完整
+  ok   第30轮双方读回相同终态且元数据完整
+  ok   第31轮双方读回相同终态且元数据完整
+  ok   第32轮双方读回相同终态且元数据完整
+  ok   第33轮双方读回相同终态且元数据完整
+  ok   第34轮双方读回相同终态且元数据完整
+  ok   第35轮双方读回相同终态且元数据完整
+  ok   第36轮双方读回相同终态且元数据完整
+  ok   第37轮双方读回相同终态且元数据完整
+  ok   第38轮双方读回相同终态且元数据完整
+  ok   第39轮双方读回相同终态且元数据完整
+  ok   第40轮双方读回相同终态且元数据完整
+  ok   并发启停后词库内容哈希一致
+数据可靠性：全部通过 — PASS

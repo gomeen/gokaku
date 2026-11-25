@@ -16,13 +16,13 @@
 
 中文引擎和前端路线已选定。普通输入已在独立 AppKit 宿主和 Orca 终端通过限定的上屏与切换检查；完整宿主安全矩阵和学习并发尚未验收。学习翻译只保留用户配置的火山 NMT（默认关闭），不再随包或下载本地模型。需求边界、建议方案和待验证事项以[产品方向](docs/product.md)为准；双端逐项状态见[功能对照](docs/feature-parity.md)。
 
-## 0.5.0 扩展词库
+## 当前版本 0.5.2
 
-**0.5.0 构建 131 已于 2026-11-24 发布 stable**（Mac pkg 与 Windows Setup，完整版与 Lite）。完整版和 Lite 的设置侧栏新增「扩展词库」，可导入本地词表并控制挂载；官方精选词库首批 12 本已在 `gomeen/gogaku-dicts` 发布。发布记录见 [release-0.5.0.json](docs/validation/release-0.5.0.json)，专项验证与宿主验收状态见[扩展词库验收](docs/validation/dictionaries-0.5.0.md)。**host 未运行**（用户书面豁免），Mac 真实输入源与 Windows 运行仍待验收。
+**0.5.2 stable 已发布**，包含 macOS 与 Windows 的完整版和 Lite。macOS 可在「关于」页修复出厂数据，Lite 安装包已补齐输入源身份。两端「扩展词库」增加 IT、财经、医学、法律四本按需安装的推荐。macOS 已离屏验证公开更新检查、下载及数据修复。本轮 host 获书面豁免，macOS 真实输入源与 Windows 真机运行仍待验收。见[下载页](https://github.com/gomeen/gokaku/releases/tag/v0.5.2)及[发布记录](docs/validation/release-0.5.2.json)。
 
 ## 历史工程基线（2026-11-10）
 
-**双端工程已进入 b110 stable 发布基线。** 版本来源为 `0.1.3 / build 110`；Mac pkg 与 Windows Setup 均已发布，公开更新清单的签名已验证。b110 的 fast／release 自动化验证通过，真实 host 未运行且已记录用户豁免，因此 Mac 真实输入源、Windows 当前包宿主、客户端在线更新 E2E、完整升级恢复／卸载仍未验收。详细证据与边界见[原生开发验收](docs/validation/native-development.md)，逐功能状态见[双端功能对照](docs/feature-parity.md)。
+**双端工程于 2026-11-10 达到 `0.1.3 / b110 stable` 发布基线。** Mac pkg 与 Windows Setup 均已发布，fast、release 与公开更新清单验签通过。该构建记录了 host 豁免，完整宿主、客户端在线更新与升级恢复／卸载仍待验收。见[原生开发验收](docs/validation/native-development.md)及[双端功能对照](docs/feature-parity.md)。
 
 - **普通输入**：小鹤双拼／全拼、模糊音、候选窗、标点／Shift／数字／编辑键、英文候选与释义、按应用默认英文、调频、自定义词、快捷键、完整皮肤已在共享核心与 Mac 前端实现；完整宿主安全矩阵与性能门槛未过。Windows 已交叉编译 x86／x64 TSF、x64 用户代理和设置应用；普通核心、配置、候选渲染与持久化已接通。历史 b94–b99 曾在 Windows VM 验证安装、七页设置、图标及限定的 64／32 位文本宿主；b110 当前宿主尚未验收。
 - **学习翻译**：2026-11-06 裁决后**只保留火山 NMT**，默认关闭；设置页保存凭据、连接测试、本机字符统计。本地模型、CT2、SentencePiece、PyTorch、后端选择、beam 与模型准备入口已移除；旧本地模型配置迁移为关闭云翻译，避免升级后自动上传输入。普通输入完全离线；翻译失败保留输入，可 ⌘Return 明确原文上屏。
@@ -37,7 +37,7 @@
 
 现行证据见 [工程化检查](docs/validation/engineering-readiness.md)、[皮肤验收](docs/validation/skin-native-status.md) 和 [清理与测试审查](docs/validation/testing-cleanup-audit.md)。旧引擎／本地模型选型工具、结果和研究已移出当前树，可从 Git 历史追溯；只保留 [采用理由](docs/input-selection-decision.md)、通用考题和当前产品测试。
 
-Mac 开发版与 stable 的旧构建记录仍可从 Git 历史和发布记录追溯；当前公开发布基线统一为 b110 stable。安装、恢复与卸载的实际边界见[原生开发验收](docs/validation/native-development.md)。
+Mac 开发版与 stable 的旧构建记录仍可从 Git 历史和发布记录追溯。安装、恢复与卸载的实际边界见[原生开发验收](docs/validation/native-development.md)。
 
 保留的三份浏览器定稿原型使用预设样例，只用于核对输入习惯、设置布局与皮肤；核心回归和真实宿主验收分别留证。[输入习惯原型](docs/prototype-input-habits.md)经六轮迭代定稿，其按键裁决已并入[产品方向](docs/product.md)；原型可能保留旧提示，实现与验证状态以产品文档及原生验收为准。
 

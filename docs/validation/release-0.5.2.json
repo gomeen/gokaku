@@ -1,0 +1,139 @@
+{
+  "version": "0.5.2",
+  "buildNumber": 134,
+  "channel": "stable",
+  "tag": "v0.5.2",
+  "releaseId": 457657142,
+  "keyId": "gogaku-prod-2026-11",
+  "hostWaiver": "用户书面确认本轮定版不运行会注入真实按键的 host 验收；macOS 真实输入源仍待验收。",
+  "releaseUrl": "https://github.com/gomeen/gokaku/releases/tag/v0.5.2",
+  "commit": "82c108b5f6760fa72f02435f270eec03f7feb046",
+  "publishedAtIso": "2026-11-25T04:37:04Z",
+  "publishedAt": "2026-11-25",
+  "notes": "· macOS 更新修复。应用内更新可解开并校验出厂数据包。当前版本缺少出厂数据时，可在「关于」页单独修复。\n· macOS Lite 安装修复。补齐通过安装校验所需的输入源身份。\n· 两端扩展词库。调整列表留白，新增四本可逐本安装的入门推荐（IT、财经、医学、法律，来自 THUOCL，采用 MIT 许可）。\n· 从 0.5.1 升级。升级后退出并重新打开设置，再点「关于 → 检查更新」。如果出现「修复出厂数据」，点击它补齐数据。\n本版未运行 host。macOS 真实输入源、Windows 真机运行与旧版应用内升级的完整流程仍待验收。",
+  "verification": {
+    "fast": {
+      "report": "verify/report-fast-0.5.2-b134.json",
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0
+    },
+    "release": {
+      "report": "verify/report-release-0.5.2-b134.json",
+      "passed": 14,
+      "failed": 0,
+      "skipped": 0,
+      "blocked": 0
+    }
+  },
+  "assets": {
+    "Gogaku-0.5.2.pkg": {
+      "id": 790062000,
+      "name": "Gogaku-0.5.2.pkg",
+      "bytes": 11680369,
+      "sha256": "a80fb4c4155ed3224c4114f5969a1167157034a4dff1021020750c9687572e76"
+    },
+    "Gogaku-0.5.2-windows-x64-setup.exe": {
+      "id": 790062096,
+      "name": "Gogaku-0.5.2-windows-x64-setup.exe",
+      "bytes": 58616210,
+      "sha256": "ce149dfe0bfe6e535306f65035ad5885e3917a60459ad815a7b6125805fd0fe4"
+    },
+    "GogakuLite-0.5.2.pkg": {
+      "id": 790062325,
+      "name": "GogakuLite-0.5.2.pkg",
+      "bytes": 10882601,
+      "sha256": "559965853d3e54251d6f2c8f5b791586dad72648e165915bd97175d06ce737b4"
+    },
+    "GogakuLite-0.5.2-windows-x64-setup.exe": {
+      "id": 790062470,
+      "name": "GogakuLite-0.5.2-windows-x64-setup.exe",
+      "bytes": 56665307,
+      "sha256": "7c55aa416e409751b8ffe8011bc85f82f7d3faf1931175a229e41df90a5b942a"
+    },
+    "Gogaku-Data-0.5.2.pkg": {
+      "id": 790062726,
+      "name": "Gogaku-Data-0.5.2.pkg",
+      "bytes": 36694647,
+      "sha256": "e4983f4918d62a58b4133784c88c379da59d6d0fe2b6bed4d599b134889dadd2"
+    },
+    "GogakuLite-Data-0.5.2.pkg": {
+      "id": 790062911,
+      "name": "GogakuLite-Data-0.5.2.pkg",
+      "bytes": 34120450,
+      "sha256": "1b8b891b844329aa88a962a0bb0fc522b58fc92451ff4765237f97bda9d3dcf0"
+    },
+    "update-manifest.json": {
+      "id": 790063333,
+      "name": "update-manifest.json",
+      "bytes": 1369,
+      "sha256": "56c3ad42e19431d45a6e7d372832da107616e797c96923bc8f9cb39d492413ac"
+    },
+    "update-manifest.json.sig": {
+      "id": 790063389,
+      "name": "update-manifest.json.sig",
+      "bytes": 89,
+      "sha256": "fe9a7cab70ac3b970791842fdde6be3b6d4f46967e87ba8775c48b5933e31d5e"
+    },
+    "update-manifest-v2.json": {
+      "id": 790063445,
+      "name": "update-manifest-v2.json",
+      "bytes": 1623,
+      "sha256": "2ea1d0124791148c9ebcbbc5d26d5a43890b4fb49cb102968d10b676f884553a"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 790063538,
+      "name": "update-manifest-v2.json.sig",
+      "bytes": 89,
+      "sha256": "73f15b2b5e8dbb1a1d96c8dd415f3768f7c438e58b5f3f3d330b0fecedd4a0d1"
+    },
+    "update-manifest-lite.json": {
+      "id": 790063622,
+      "name": "update-manifest-lite.json",
+      "bytes": 1377,
+      "sha256": "3e441257cc8b171bbe6ba576914537b4044c4d33449b248efdb176360a98e873"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 790063688,
+      "name": "update-manifest-lite.json.sig",
+      "bytes": 89,
+      "sha256": "cc6e9ee6c17498289cbdc601f6fd753e14bc882136bcd57d5186a1bd363076f6"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 790063746,
+      "name": "update-manifest-lite-v2.json",
+      "bytes": 1635,
+      "sha256": "20a711bd7b4377244d8777ee7314be9fa1816f7c05fe44f38b2bf5ab753ab762"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 790063805,
+      "name": "update-manifest-lite-v2.json.sig",
+      "bytes": 89,
+      "sha256": "0dee471cac6071d1beb53842630a8439c0c7b29404d36d0805fe5dfba0b82dd0"
+    }
+  },
+  "dataPackages": {
+    "full": {
+      "platform": "macos",
+      "id": 790062726,
+      "name": "Gogaku-Data-0.5.2.pkg",
+      "bytes": 36694647,
+      "sha256": "e4983f4918d62a58b4133784c88c379da59d6d0fe2b6bed4d599b134889dadd2",
+      "dataVersion": "0740d56417e0d6d3"
+    },
+    "lite": {
+      "platform": "macos",
+      "id": 790062911,
+      "name": "GogakuLite-Data-0.5.2.pkg",
+      "bytes": 34120450,
+      "sha256": "1b8b891b844329aa88a962a0bb0fc522b58fc92451ff4765237f97bda9d3dcf0",
+      "dataVersion": "b81cc760128efd74"
+    }
+  },
+  "publicVerification": {
+    "assetDigestsVerified": 14,
+    "updateManifestSignaturesVerified": 4
+  },
+  "smokeLog": "verify/release-20261125-122457/release-smoke.log"
+}

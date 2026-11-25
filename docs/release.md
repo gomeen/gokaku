@@ -67,7 +67,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 - 若当前输入源正选着 Gogaku 或旧进程仍在运行，只提示切换输入源／注销，不强杀宿主。
 - 工程坑：productbuild 手写 distribution 的 `choices-root` 结构会静默产出无组件的 2KB 空壳——必须 `--synthesize` 生成基线再补丁；脚本内置体积断言（<10MB 拒绝放行）。
 
-**当前状态**：0.5.0（b131）stable（含 Lite 形态）已于 2026-11-24 发布；发布记录中的公开清单签名已验证。b112 曾用 `installer -pkg … -target CurrentUserHomeDirectory` 真实安装并通过事务（`phase=success`），后续定版未重做安装冒烟；b110／b112／b113／b131 均未运行真实 host，用户已书面豁免该门槛。ad-hoc 包 `spctl` 仍拒绝，Developer ID／公证未跑（无证书）。
+**当前状态**。0.5.2（b134）stable 已发布完整版和 Lite。两种形态的主包通过离屏身份和签名核对，数据包通过临时目录安装和回滚检查。b112 有 `installer -pkg … -target CurrentUserHomeDirectory` 的真实事务记录。0.5.2 按用户授权豁免 host，系统安装向导与旧版应用内升级仍待验收。ad-hoc 构包的 `spctl`、Developer ID 与公证限制见下节。详见[发布记录](validation/release-0.5.2.json)。
 
 ### 2.3 签名与公证（正式分发）
 
@@ -98,14 +98,14 @@ python3 scripts/package-macos-pkg.py --channel stable \
 
 ## 3. Windows 构建（Setup.exe）
 
-构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。当前 stable 历史安装包名称见各[发布记录](validation/release-0.5.0.json)（2026-11-19 起文件名不再含构建号）；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为后续构建通过。
+构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。stable 安装包名称见[发布记录](validation/release-0.5.2.json)（2026-11-19 起文件名不再含构建号）；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为后续构建通过。
 
 | 部件 | 构建线 | 工具链 | 状态 |
 | --- | --- | --- | --- |
 | 共享核心 `libgogaku_core.dll`（x64） | Mac 交叉编译 | MinGW-w64 GCC 16.2；静态链接依赖 | 已编译；最终 DLL 只导入系统库 |
 | TSF `GogakuTsf.dll`（x64／x86） | Mac 交叉编译 | MinGW-w64，真实 COM 接口 | 两架构已编译，通过管道连 x64 代理 |
 | 每用户代理 `GogakuAgent.exe`（x64） | Mac 交叉编译 | MinGW-w64／WinHTTP／CNG | 已编译；核心、翻译、拼写与托盘入口已接通 |
-| 设置 `GogakuSettings.exe`（x64） | Mac 交叉编译 | Win32／Direct2D／DirectWrite／WIC | 八页设置（Lite 五页）与更新窗口已编译 |
+| 设置 `GogakuSettings.exe`（x64） | Mac 交叉编译 | Win32／Direct2D／DirectWrite／WIC | 九页设置（Lite 六页），含「关于」页更新入口 |
 | 安装向导 | Mac 上运行编译器 | Wine＋官方 Inno Setup 6.7.4 | 实际构包；不启动生成的程序 |
 
 ```sh
@@ -141,7 +141,7 @@ python3 scripts/build-win-app.py --channel dev \
 - 不设置默认输入法，不强杀宿主，不自动注销／重启，不安排锁定文件下次重启替换。
 - 未做 Authenticode 签名；不关闭系统安全机制。
 
-历史 b94–b99 Windows VM 的安装、限定文本宿主、设置和图标结果与编译、静态包检查分别记录；b110／b112／b113／b131 只保留构包、自动化验证和发布侧签名证据。完整宿主、升级／卸载、真实翻译与在线更新仍未验收；用户使用与反馈步骤见[Windows 使用说明](windows-testing.md)。
+Windows b94–b99 的安装、限定文本宿主、设置和图标有 VM 记录。0.5.2 的 Windows 证据覆盖构包、自动化验证与发布清单签名。完整宿主、升级／卸载、真实翻译与在线更新仍待验收。见[Windows 使用说明](windows-testing.md)。
 
 ## 4. 检查更新与 Draft Release
 
@@ -151,7 +151,7 @@ python3 scripts/build-win-app.py --channel dev \
 2. 使用与发布通道相同的验证报告：dev 至少 fast；定版要求 fast＋release＋host（或 host-full），或按版本规则记录用户书面 host 豁免。fast 绑定当前构建号、全量指纹和两个安装包哈希；release／host 绑定同一版本字符串与 Mac 平台指纹，同版本只递增构建号或只改 Windows 时可沿用（规则见[版本管理](versioning.md)「验证报告的绑定与沿用」）。测试期间身份改变、缺项、跳过或 blocked 均不能冒充完整通过。host 仅在用户空闲并授权时执行，目前探针只支持 stable，dev 的 host 明确阻塞。
 3. `python3 scripts/publish-release.py --dry-run ... --verification-report <fast报告> ...` 离线核对收据、许可、报告、文件名与哈希；定版同时传 `--verification-report <release报告> --verification-report <host 或 host-full 报告>`。
 4. `GITHUB_TOKEN=... python3 scripts/publish-release.py ...`：创建 Draft → 上传 pkg／setup → 取得 asset id → 生成并签名清单 → 上传清单与签名，生成 `release-state.json`。**不自动发布。**
-5. 人工审阅 Draft 后，用原参数与原 `--out` 目录，加 `--publish-existing <Draft ID>`。脚本重新验证本地收据、报告、清单签名和远端 Draft 的四份资产，再只对指定 ID 执行 PATCH；若审阅期间资产变化，拒绝发布。也可在 GitHub 手动发布，但不会经过这一门槛。
+5. 人工审阅 Draft 后，用原参数与原 `--out` 目录，加 `--publish-existing <Draft ID>`。脚本重新验证本地收据、报告、清单签名和远端 Draft 的全部资产，再只对指定 ID 执行 PATCH；若审阅期间资产变化，拒绝发布。也可在 GitHub 手动发布，但不会经过这一门槛。
 6. 用两个构建验证旧版发现新版、下载、校验、安装、重开显示新版本、保留数据；记录报告。
 
 发布脚本对缺失配置、私钥、许可材料或验证证据明确失败。`resources/update/config.json` 当前配置为 `gomeen/gokaku`；客户端若未配置更新源不得显示「已是最新」。生产发布前把 `trustedKeys` 换成生产公钥；脚本会拒绝配置中不存在的 `keyId`。私钥只存发布环境，绝不入库。
@@ -181,7 +181,7 @@ python3 scripts/build-win-app.py --channel dev \
 
 - `windows-core.yml`：远端 `gomeen/gokaku` 已于 11-08 首跑，因 action 名写错（`msys2/setup-action`）在准备阶段失败；已改为 `msys2/setup-msys2@v2`，修正后尚未重跑。后续可能还要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
 - Mac 侧 CI：无。候选 `mac-core.yml` 可后置。
-- 🚧 Windows b110／b131 定版仅有构包、自动化验证和发布侧证据；真实宿主、故障恢复／卸载与其它实现缺口见[功能对照](feature-parity.md)。
+- 🚧 Windows 0.5.2 已构包并发布。真实宿主、故障恢复／卸载仍待验收。见[功能对照](feature-parity.md)。
 - 🚧 Mac 双构建 pkg 升级／恢复复验（单次真实安装已有证据）。
 - 🚧 GitHub Releases 发布侧链路已通过；客户端从旧版发现、下载、安装并重开验证仍待完成。
 - ⬜ 朋友真机完整试用（走 dev 通道）。

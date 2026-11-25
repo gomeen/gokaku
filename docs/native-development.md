@@ -1,6 +1,6 @@
 # 本机原生开发版
 
-当前发布基线为 0.5.1（b132）stable：更新入口移入关于页、检查与下载安装分离；双形态（完整版／Lite）双端安装包已发布，官方词库渠道 catalog-1 在 `gomeen/gogaku-dicts` 上架；发布、安装与启用见[Windows 使用说明](windows-testing.md)，资产与签名见[发布记录](validation/release-0.5.1.json)（历史见 [release-0.5.0.json](validation/release-0.5.0.json)、[release-b110.json](validation/release-b110.json)）。[构包报告](validation/windows-setup-build.json)是 b91 的历史交叉编译／组件哈希证据。两轮定版的 fast／release 自动化验证和发布清单签名已完成，真实 Windows／macOS 宿主、客户端在线更新、完整升级恢复／卸载仍未验收（host 以书面豁免发布）；历史 b94–b99 VM 结果见[原生验收记录](validation/native-development.md)。构包流程仍不要求 VM，以下本机安装与宿主操作指 macOS。
+当前发布基线为 `0.5.2 / b134 stable`，包含 macOS 与 Windows 的完整版和 Lite。fast、release 与公开清单验签通过。macOS 通过实包数据安装、回滚及离屏在线修复检查。真实宿主、旧版设置应用在线升级及完整升级恢复／卸载仍待验收，本轮 host 获用户书面豁免。构包可在 macOS 完成，以下本机安装与宿主操作指 macOS。见[发布记录](validation/release-0.5.2.json)、[原生验收记录](validation/native-development.md)及[Windows 使用说明](windows-testing.md)。
 
 历史 dev b94 的双端包、Windows 默认升级、双架构冷／暖启动和七页设置回归仍作为对应构建证据保留，详见 [b94 记录](validation/dev-b94.json)。Mac b94 本轮未安装；Mac PKG 实装、安装后检查与 14 项 IMK 冒烟属于 [b93 历史记录](validation/dev-b93.json)。这些历史结果不代表 b110，完整宿主与升级失败恢复／卸载矩阵尚未验收。
 
@@ -66,7 +66,7 @@ python3 probes/validate-imk-host.py --channel dev --report local/imk-host-smoke-
 
 ## 设置页面
 
-设置窗口采用 200pt 左侧分类导航、右侧内容滚动区与固定底部状态栏布局，完整版九页：新增「扩展词库」（排在「自定义词语」之后），其余八页为“学习翻译”“普通输入”“自定义词语”“皮肤”“快捷键”“学习与隐私”“学习片段”“关于”（2026-11-19 裁决：侧栏不再显示顶部标题与底部版本页脚，版本号与「检查更新」移入「关于」页；所有安装形态都有关于页；0.5.0 起完整版 9 页、Lite 6 页，Windows 运行验收前页面以已编译为准），默认 1100×800、最小 1000×520，青绿强调色跟随系统明暗外观（视觉规格见[产品方向](product.md)「设置页面规格」）。「关于」页的「检查更新」按钮打开独立更新窗口；自动检查默认关闭。
+设置窗口采用 200pt 左侧分类导航、右侧内容滚动区与固定底部状态栏布局，完整版九页：新增「扩展词库」（排在「自定义词语」之后），其余八页为“学习翻译”“普通输入”“自定义词语”“皮肤”“快捷键”“学习与隐私”“学习片段”“关于”。Lite 共六页。设置窗口默认 1100×800，最小 1000×520，青绿强调色跟随系统明暗外观。自 0.5.1 起，「关于」页展示版本号，并在同页检查更新、确认下载与安装。自动检查默认关闭。见[设置页面规格](product.md)及[更新合同](update.md)。
 
 所有改动**立即保存**：普通选项、应用列表、有效快捷键改动即时提交；连续文本输入（如忽略词）合并 300 毫秒后提交，失焦或关闭窗口时提交剩余改动。底部状态栏显示保存中／已保存／失败，失败时改动保留并可点「重试」。添加应用通过可搜索弹层（索引 `/Applications`、`/System/Applications`、`~/Applications`），也可点「选择其他位置的 .app…」；未安装的应用保留在列表中并显示通用图标。
 
