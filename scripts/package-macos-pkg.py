@@ -29,6 +29,7 @@ import argparse
 import hashlib
 import json
 import os
+import plistlib
 import shutil
 import subprocess
 import sys
@@ -37,6 +38,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 from _gogaku_delivery import (DeliveryError, package_receipt_path, validate_macos_apps,
                               write_data_package_receipt, write_package_receipt)
+from _gogaku_dist import apply_tis_identity, deterministic_plist_bytes
 DIST = ROOT / 'dist'
 LSREGISTER = ('/System/Library/Frameworks/CoreServices.framework/Frameworks/'
               'LaunchServices.framework/Support/lsregister')
@@ -135,6 +137,20 @@ def sign_app(app: Path, identity: str) -> None:
         subprocess.run(['codesign', '--force', '--options', 'runtime', '--timestamp',
                         '--sign', identity, str(app)], check=True)
     subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], check=True)
+
+
+def stage_apps(dist: Path, staging: Path, channel: dict) -> None:
+    for role in ('input', 'settings'):
+        name = channel[role]
+        identifier = channel[role + '_id']
+        staged = staging / name
+        shutil.copytree(dist / name, staged, symlinks=True)
+        plist = staged / 'Contents/Info.plist'
+        info = plistlib.loads(plist.read_bytes())
+        if info.get('CFBundleIdentifier') != identifier:
+            raise SystemExit(f'{name} 身份不符：{info.get("CFBundleIdentifier")} ≠ {identifier}')
+        if role == 'input':
+            plist.write_bytes(deterministic_plist_bytes(apply_tis_identity(info, identifier)))
 
 
 def postinstall_script(channel: dict, build: int) -> str:
@@ -253,23 +269,9 @@ def main() -> None:
     # 在打包阶段注入输入源身份并签名（Developer ID 或 ad-hoc），再打成 zip。
     # zip 内的 .app 不会被 LaunchServices 扫描；安装时只解包，不再重签，
     # 因此 Developer ID 签名与公证能保留到安装后。dist 仍保持中立。
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from _gogaku_dist import apply_tis_identity, deterministic_plist_bytes
-    import plistlib
     staging = work / 'apps'
     staging.mkdir()
-    for source, name, identifier in [
-            (input_app, channel['input'], channel['input_id']),
-            (settings_app, channel['settings'], channel['settings_id'])]:
-        staged = staging / name
-        shutil.copytree(source, staged, symlinks=True)
-        info = plistlib.loads((staged / 'Contents/Info.plist').read_bytes())
-        if info.get('CFBundleIdentifier') != identifier:
-            raise SystemExit(f'{source.name} 身份不符：{info.get("CFBundleIdentifier")} ≠ {identifier}')
-        if identifier.startswith('org.gogaku.inputmethod'):
-            (staged / 'Contents/Info.plist').write_bytes(
-                deterministic_plist_bytes(apply_tis_identity(info, identifier)))
+    stage_apps(DIST, staging, channel)
     # 数据／代码包分离（2026-11 裁决）：数据清单先取（两个 App 的 EngineData
     # 同源同哈希），再从 staging 剔除 EngineData，然后才签名——代码包的
     # 密封不覆盖 EngineData，postinstall／就地安装器的 --deep --strict 校验

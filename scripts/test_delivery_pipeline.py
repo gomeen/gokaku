@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import plistlib
 import sys
 import subprocess
 import tempfile
@@ -18,6 +19,34 @@ import _gogaku_verification as verification
 spec = importlib.util.spec_from_file_location('publish_release', Path(__file__).with_name('publish-release.py'))
 publish = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(publish)
+
+
+class MacPackageIdentityTests(unittest.TestCase):
+    def test_staging_injects_tis_identity_only_into_input_app(self):
+        spec = importlib.util.spec_from_file_location('package_macos',
+                                                      Path(__file__).with_name('package-macos-pkg.py'))
+        package = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(package)
+        for (channel, flavor), identities in package.CHANNELS.items():
+            with self.subTest(channel=channel, flavor=flavor), tempfile.TemporaryDirectory() as temporary:
+                dist = Path(temporary) / 'dist'
+                staging = Path(temporary) / 'staging'
+                for role in ('input', 'settings'):
+                    plist = dist / identities[role] / 'Contents/Info.plist'
+                    plist.parent.mkdir(parents=True)
+                    plist.write_bytes(plistlib.dumps({'CFBundleIdentifier': identities[role + '_id']}))
+                package.stage_apps(dist, staging, identities)
+                input_path = Path(identities['input']) / 'Contents/Info.plist'
+                staged_input = plistlib.loads((staging / input_path).read_bytes())
+                input_id = identities['input_id']
+                self.assertEqual(staged_input.get('TISInputSourceID'), input_id)
+                mode_id = input_id + '.Hans'
+                staged_modes = staged_input['ComponentInputModeDict']['tsInputModeListKey']
+                self.assertEqual(staged_modes[mode_id]['TISInputSourceID'], mode_id)
+                settings_path = Path(identities['settings']) / 'Contents/Info.plist'
+                staged_settings = plistlib.loads((staging / settings_path).read_bytes())
+                self.assertNotIn('TISInputSourceID', staged_settings)
+                self.assertNotIn('TISInputSourceID', plistlib.loads((dist / input_path).read_bytes()))
 
 
 class DeliveryPipelineTests(unittest.TestCase):

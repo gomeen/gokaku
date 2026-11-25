@@ -61,6 +61,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 - 落位与 manage-install 一致：输入法 → `~/Library/Input Methods/`，设置 → `~/Applications/`；升级不删学习数据。
 - **事务式 postinstall**（`macos/packaging/pkg-postinstall.sh`）：解包 → 校验包内已注入身份／构建号／签名 → 备份旧包 → 替换 → 核对安装后身份／构建号 → 注册。任一步失败恢复两者；不先删除唯一可用副本。
 - **包内 App 的身份与签名在打包阶段完成**：`package-macos-pkg.py` 复制 dist 中立 App 到 staging、注入输入源身份、由内向外签名（Developer ID 或 ad-hoc），再打成 zip。postinstall 不再重签，因此 Developer ID 签名不会被降级。
+- **输入源身份按 App 角色注入**：完整版和 Lite 的输入法均须带正确身份，设置 App 不得带输入源身份。交付合同测试覆盖 stable／dev 四种组合，成品 `.pkg` 另做离屏身份与签名核对。
 - 安装器含欢迎页、说明页与**安装完成页**（添加输入源／打开设置／检查更新指引）。
 - 事务状态写入 `~/Library/Application Support/Gogaku/install/transaction.txt`；中断后下次 pkg 安装先恢复旧版本；备份保留最近两份（`.disabled` 后缀防 LaunchServices 误启动）。
 - 若当前输入源正选着 Gogaku 或旧进程仍在运行，只提示切换输入源／注销，不强杀宿主。
