@@ -2,7 +2,7 @@
 
 Gogaku 让用户在日常输入中学习另一种语言。本文是已确认需求的依据；实施路线、阶段状态和证据见[首阶段实施总计划](implementation-plan.md)及[原生开发验收](validation/native-development.md)。除完整版外，已确认新增精简版 **Gogaku Lite**（双端独立安装包，去学习功能与英文释义，保留皮肤与横竖排切换），裁决与边界见[产品矩阵与 Gogaku Lite](#已确认的产品矩阵与-gogaku-lite2026-11-13-裁决)一节。
 
-**当前发布基线为 `0.5.3 / b135 stable`。** macOS 与 Windows 的完整版和 Lite 均已发布，fast、release 和公开清单验签通过。macOS 0.5.2 更新代码在隔离目录通过新版主包及数据包的安装验证；真实设置窗口、输入源交接、Windows 真机、完整升级恢复／卸载及翻译凭据实测仍待验收。学习翻译使用火山 NMT，默认关闭，由用户保存凭据并启用。Windows 安装包包含 x86／x64 TSF、x64 每用户代理和设置应用，完整版九页、Lite 六页。见[发布记录](validation/release-0.5.3.json)及[双端功能对照](feature-parity.md)。
+**当前发布基线为 `0.5.4 / b136 stable`。** macOS 与 Windows 的完整版和 Lite 均已发布，fast、release 和公开清单验签通过。macOS 0.5.3 更新代码通过新版主包及数据包的隔离安装验证。真实设置窗口、输入源交接、Windows 真机、完整升级恢复／卸载及翻译凭据实测仍待验收。学习翻译使用火山 NMT，默认关闭，由用户保存凭据并启用。Windows 安装包包含 x86／x64 TSF、x64 每用户代理和设置应用，完整版九页，Lite 六页。见[发布记录](validation/release-0.5.4.json)及[双端功能对照](feature-parity.md)。
 
 **历史 b94 验收记录**。Chrome 字段切换时旧组合提交至新字段，扩大宿主验收失败，安装／回滚／卸载检查未执行。该构建的 fast、默认升级和限定宿主结果继续作为回归材料。浏览器原型使用预设样例。见[b94 宿主验收](validation/dev-b94-acceptance/README.md)、[机器汇总](validation/dev-b94-acceptance.json)及[浏览器原型](prototype-input-flow.md)。
 

@@ -1,0 +1,172 @@
+{
+  "x64": {
+    "checks": [
+      {
+        "name": "external-termination",
+        "passed": true
+      },
+      {
+        "name": "clear-failed-still-revokes",
+        "passed": true
+      },
+      {
+        "name": "cold-chinese-to-english-on-key",
+        "passed": true
+      },
+      {
+        "name": "cold-default-english-to-chinese-on-timer",
+        "passed": true
+      },
+      {
+        "name": "warm-shift-consumed",
+        "passed": true
+      },
+      {
+        "name": "warm-shift-unconsumed",
+        "passed": true
+      },
+      {
+        "name": "drop-on-expiry",
+        "passed": true
+      },
+      {
+        "name": "drop-on-context",
+        "passed": true
+      },
+      {
+        "name": "drop-on-foreground",
+        "passed": true
+      },
+      {
+        "name": "drop-on-private",
+        "passed": true
+      },
+      {
+        "name": "drop-on-document",
+        "passed": true
+      },
+      {
+        "name": "drop-on-keyboard",
+        "passed": true
+      },
+      {
+        "name": "reject-invalid-shift-taps",
+        "passed": true
+      },
+      {
+        "name": "recover-after-missed-shift-release",
+        "passed": true
+      },
+      {
+        "name": "no-replay-after-event-rpc-failure",
+        "passed": true
+      },
+      {
+        "name": "demoted-keyboard-sink",
+        "passed": true
+      },
+      {
+        "name": "deferred-context-ownership",
+        "passed": true
+      },
+      {
+        "name": "toast-caret",
+        "passed": true
+      },
+      {
+        "name": "unavailable-toast-caret",
+        "passed": true
+      },
+      {
+        "name": "empty-toast-caret",
+        "passed": true
+      }
+    ],
+    "ok": true
+  },
+  "x86": {
+    "checks": [
+      {
+        "name": "external-termination",
+        "passed": true
+      },
+      {
+        "name": "clear-failed-still-revokes",
+        "passed": true
+      },
+      {
+        "name": "cold-chinese-to-english-on-key",
+        "passed": true
+      },
+      {
+        "name": "cold-default-english-to-chinese-on-timer",
+        "passed": true
+      },
+      {
+        "name": "warm-shift-consumed",
+        "passed": true
+      },
+      {
+        "name": "warm-shift-unconsumed",
+        "passed": true
+      },
+      {
+        "name": "drop-on-expiry",
+        "passed": true
+      },
+      {
+        "name": "drop-on-context",
+        "passed": true
+      },
+      {
+        "name": "drop-on-foreground",
+        "passed": true
+      },
+      {
+        "name": "drop-on-private",
+        "passed": true
+      },
+      {
+        "name": "drop-on-document",
+        "passed": true
+      },
+      {
+        "name": "drop-on-keyboard",
+        "passed": true
+      },
+      {
+        "name": "reject-invalid-shift-taps",
+        "passed": true
+      },
+      {
+        "name": "recover-after-missed-shift-release",
+        "passed": true
+      },
+      {
+        "name": "no-replay-after-event-rpc-failure",
+        "passed": true
+      },
+      {
+        "name": "demoted-keyboard-sink",
+        "passed": true
+      },
+      {
+        "name": "deferred-context-ownership",
+        "passed": true
+      },
+      {
+        "name": "toast-caret",
+        "passed": true
+      },
+      {
+        "name": "unavailable-toast-caret",
+        "passed": true
+      },
+      {
+        "name": "empty-toast-caret",
+        "passed": true
+      }
+    ],
+    "ok": true
+  }
+}

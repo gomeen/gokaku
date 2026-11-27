@@ -67,7 +67,7 @@ python3 scripts/manage-install.py install    # 当前用户安装（可选 unins
 - 若当前输入源正选着 Gogaku 或旧进程仍在运行，只提示切换输入源／注销，不强杀宿主。
 - 工程坑：productbuild 手写 distribution 的 `choices-root` 结构会静默产出无组件的 2KB 空壳——必须 `--synthesize` 生成基线再补丁；脚本内置体积断言（<10MB 拒绝放行）。
 
-**当前状态**。0.5.3 stable 已发布完整版和 Lite。两种形态均用 0.5.2 发布源码的更新器，在临时目录验证 0.5.3 主包和数据包安装。0.5.2 的实包回滚证据和 b112 的 `installer -pkg … -target CurrentUserHomeDirectory` 真实事务仍分别归属对应版本。0.5.3 获用户书面 host 豁免，真实设置窗口及输入源交接仍待验收。详见[发布记录](validation/release-0.5.3.json)。
+**当前状态**。0.5.4 stable 已发布完整版和 Lite。两种形态均用 0.5.3 发布源码的更新器，在临时目录验证 0.5.4 主包和数据包安装。0.5.2 的实包回滚证据和 b112 的 `installer -pkg … -target CurrentUserHomeDirectory` 真实事务仍分别归属对应版本。0.5.4 获用户书面 host 豁免，真实设置窗口及输入源交接仍待验收。详见[发布记录](validation/release-0.5.4.json)。
 
 ### 2.3 签名与公证（正式分发）
 
@@ -98,7 +98,7 @@ python3 scripts/package-macos-pkg.py --channel stable \
 
 ## 3. Windows 构建（Setup.exe）
 
-构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。stable 安装包名称见[发布记录](validation/release-0.5.3.json)（2026-11-19 起文件名不再含构建号）；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为后续构建通过。
+构包流程只要求编译与静态检查，Windows 桌面不作为前置。**后续代码迭代**可用 `python3 scripts/prepare-win-setup.py --plan` 查看缺项；首次按 `--stage deps --download` 备齐固定依赖，缺出厂数据时按脚本提示运行 `scripts/prepare-dependencies.py`，再依据 `--tools-help` 手动准备 Wine／官方 Inno，最后执行 `--stage setup --download`（仅联网补齐缺失许可）生成安装输入。日常直接重编 x64、x86 后打包，不再手工猜测缓存路径。该准备器已做静态／自测验证，尚未在全新机器上完成网络拉取到最终安装包的端到端验收。stable 安装包名称见[发布记录](validation/release-0.5.4.json)（2026-11-19 起文件名不再含构建号）；Windows 真实宿主与完整安装／升级／卸载矩阵仍未验收。此前 b94–b99 的限定运行结果见[原生验收记录](validation/native-development.md)，不自动延伸为后续构建通过。
 
 | 部件 | 构建线 | 工具链 | 状态 |
 | --- | --- | --- | --- |
@@ -141,7 +141,7 @@ python3 scripts/build-win-app.py --channel dev \
 - 不设置默认输入法，不强杀宿主，不自动注销／重启，不安排锁定文件下次重启替换。
 - 未做 Authenticode 签名；不关闭系统安全机制。
 
-Windows b94–b99 的安装、限定文本宿主、设置和图标有 VM 记录。0.5.3 的 Windows 证据覆盖构包、自动化验证与发布清单签名。完整宿主、升级／卸载、真实翻译与在线更新仍待验收。见[Windows 使用说明](windows-testing.md)。
+Windows b94–b99 的安装、限定文本宿主、设置和图标有 VM 记录。0.5.4 的 Windows 证据覆盖构包、TSF 与更新选择离线回归及发布清单签名。完整宿主、升级／卸载、真实翻译与在线更新仍待验收。见[Windows 使用说明](windows-testing.md)。
 
 ## 4. 检查更新与 Draft Release
 
@@ -181,7 +181,7 @@ Windows b94–b99 的安装、限定文本宿主、设置和图标有 VM 记录�
 
 - `windows-core.yml`：远端 `gomeen/gokaku` 已于 11-08 首跑，因 action 名写错（`msys2/setup-action`）在准备阶段失败；已改为 `msys2/setup-msys2@v2`，修正后尚未重跑。后续可能还要修：MSYS2 工具链差异、libc++ 兼容开关、路径形态、tar zstd。
 - Mac 侧 CI：无。候选 `mac-core.yml` 可后置。
-- 🚧 Windows 0.5.3 已构包并发布。真实宿主、故障恢复／卸载仍待验收。见[功能对照](feature-parity.md)。
+- 🚧 Windows 0.5.4 已构包并发布。真实宿主、故障恢复／卸载仍待验收。见[功能对照](feature-parity.md)。
 - 🚧 Mac 双构建 pkg 升级／恢复复验（单次真实安装已有证据）。
 - 🚧 GitHub Releases 发布侧链路已通过；macOS 旧版更新代码已通过隔离升级，真实设置窗口、输入源交接和 Windows 在线更新仍待验收。
 - ⬜ 朋友真机完整试用（走 dev 通道）。

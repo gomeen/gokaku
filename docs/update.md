@@ -119,7 +119,7 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 
 只接受 HTTPS，主机白名单：`api.github.com`、`github.com`、`objects.githubusercontent.com`、`release-assets.githubusercontent.com`、`github-releases.githubusercontent.com`。重定向必须仍在白名单内。限流（403／429 且 `x-ratelimit-remaining: 0`）、超时、离线、404、5xx、未知 schema、签名失败、通道不符、缺资产分别显示不同状态；**未配置更新源不能显示「已是最新」**。
 
-### Windows 清单选择（修复尚未发布）
+### Windows 清单选择（0.5.4 起）
 
 Windows 只消费 schema 1。完整版只读取 `update-manifest.json`，Lite 只读取 `update-manifest-lite.json`；不回退到另一产品，并核对 Windows 安装包名称前缀。只在通过签名校验、且匹配当前通道的清单中比较构建号。未知 `keyId` 的历史清单不参与比较，也不否决已验签的结果；如果没有可信的同通道清单，则仍报告签名校验失败。可信密钥下的签名错误仍中止检查。下载和启动安装前仍执行原有的验签、资产匹配和哈希校验。
 
@@ -162,7 +162,7 @@ Windows 只消费 schema 1。完整版只读取 `update-manifest.json`，Lite �
 ```
 
 - `owner`／`repo` 留空＝本机构建未配置更新源；客户端明确显示未配置。
-- 配置指向 `gomeen/gokaku`。0.5.3 的 14 项公开资产与发布收据一致，完整版与 Lite 的两种清单均通过验签。2026-11-19 起公开资产名使用版本号。见[发布记录](validation/release-0.5.3.json)。
+- 配置指向 `gomeen/gokaku`。0.5.4 的 14 项公开资产与发布收据一致，完整版与 Lite 的两种清单均通过验签。2026-11-19 起公开资产名使用版本号。见[发布记录](validation/release-0.5.4.json)。
 - 公钥可轮换：保留旧 keyId 直到所有受支持版本升级完成；私钥只存发布环境，绝不入库。
 - 开发公钥 `gogaku-dev-2026-11` 仅用于协议回归；生产发布前替换为生产公钥。
   发布脚本会拒绝 `trustedKeys` 中不存在的 `keyId`，避免客户端无法验证的清单上线。
@@ -237,8 +237,8 @@ swift scripts/update-signing.swift verify --public <base64> --input update-manif
 | 就地热更新与数据修复 | 已实现（离屏测试） | `UpdateInstaller.swift`：真实 xar/cpio/ditto/codesign 夹具覆盖数据 `.pkg` 解包、签名数据指纹绑定、逐文件校验、收据写入、同构建号缺失／过期指纹触发仅数据修复及部分成功；**真实双 App 安装和在线更新宿主验收未做** |
 | 输入法优雅退出交接 | 已实现（单元级） | 通知注册幂等；真实输入源里的交接（打字中更新→新进程接管）未验收 |
 | macOS 关于页检查与下载确认 | 单元测试已通过 | 真实设置窗口点击和在线更新闭环未验收 |
-| Windows 关于页检查与下载确认 | x64 语法检查已通过 | 保留 schema 1 清单；完整构建、真实窗口及在线更新未验收 |
-| 真实 GitHub Releases E2E | 部分 | 0.5.2 发布源码的 macOS 更新器从 GitHub 发现了公开的 0.5.3。完整版与 Lite 均在临时目录完成主包和数据包安装（重放同一签名清单），新版进程复查为「已是最新」。真实设置窗口及输入源交接仍待验收。见[发布记录](validation/release-0.5.3.json)及[验收工单](../.scratch/debt-backlog/issues/03-update-e2e-real-releases.md) |
+| Windows 关于页检查与下载确认 | 构包及离线回归通过 | 以 schema 1 清单验证 Full 与 Lite 两种形态的选择与签名错误处理。真实窗口及在线更新待验收 |
+| 真实 GitHub Releases E2E | 部分 | macOS 0.5.3 更新器在临时目录通过 0.5.4 主包和数据包安装（重放本轮签名清单），新版进程复查为「已是最新」。0.5.3 的两种形态均已通过真实 GitHub 查询发现公开的 0.5.4。真实设置窗口及输入源交接仍待验收。见[发布记录](validation/release-0.5.4.json)及[验收工单](../.scratch/debt-backlog/issues/03-update-e2e-real-releases.md) |
 
 已做的协议回归不访问真实网络：使用注入传输模拟 GitHub API 与资产下载；签名用临时 Ed25519 密钥。**未完成真实链路前不得把在线更新标为已验收。**
 

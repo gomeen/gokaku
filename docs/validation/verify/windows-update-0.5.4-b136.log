@@ -1,0 +1,7 @@
+0.5.4 b136 offline Windows updater regressions under Wine
+Windows update selection: PASS
+Windows update selection: PASS
+
+Replay of public v0.5.4 and v0.1.3 GitHub metadata and digest-matched manifest bytes
+Gogaku resolved verified asset Gogaku-0.5.4-windows-x64-setup.exe with 4 manifest reads
+GogakuLite resolved verified asset GogakuLite-0.5.4-windows-x64-setup.exe with 2 manifest reads

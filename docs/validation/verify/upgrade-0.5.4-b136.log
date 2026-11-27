@@ -1,0 +1,37 @@
+0.5.3 b135 → 0.5.4 b136 isolated macOS upgrade
+Compiled unchanged 985282a2 Mac updater for Gogaku
+Compiled unchanged 576532f5 Mac updater for Gogaku
+Gogaku seed 0.5.3 b135 seed-partial from the released PKG
+Gogaku 0.5.3 → 0.5.4: verified, installed both packages with no data warning
+Gogaku fresh 0.5.4 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.4）
+Installed data SHA-256 matches the package receipt in both bundles
+Gogaku seed 0.5.3 b135 seed-healthy from the released PKG
+Gogaku 0.5.3 → 0.5.4: verified, installed both packages with no data warning
+Gogaku fresh 0.5.4 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.4）
+Installed data SHA-256 matches the package receipt in both bundles
+Compiled unchanged 985282a2 Mac updater for GogakuLite
+Compiled unchanged 576532f5 Mac updater for GogakuLite
+GogakuLite seed 0.5.3 b135 seed-partial from the released PKG
+GogakuLite 0.5.3 → 0.5.4: verified, installed both packages with no data warning
+GogakuLite fresh 0.5.4 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.4）
+Installed data SHA-256 matches the package receipt in both bundles
+GogakuLite seed 0.5.3 b135 seed-healthy from the released PKG
+GogakuLite 0.5.3 → 0.5.4: verified, installed both packages with no data warning
+GogakuLite fresh 0.5.4 process: both app builds and data receipts match; settings preserved; 已是最新（0.5.4）
+Installed data SHA-256 matches the package receipt in both bundles
+0.5.3 → 0.5.4: 4/4 isolated upgrades passed with the previous updater.
+
+0.5.3 b135 live metadata check against public 0.5.4
+First GitHub check
+Compiled unchanged 985282a2 Mac updater for Gogaku
+Gogaku seed 0.5.3 b135 seed-partial from the released PKG
+The operation couldn’t be completed. (main.Failure error 1.): Expected signed update including factory data: rateLimited, 更新服务请求受限；11-27 16:37 重置
+
+Retry after GitHub quota reset
+Compiled unchanged 985282a2 Mac updater for Gogaku
+Gogaku seed 0.5.3 b135 seed-partial from the released PKG
+Gogaku 0.5.3 live Check for Updates: 发现新版本 0.5.4, signed packages resolved
+Compiled unchanged 985282a2 Mac updater for GogakuLite
+GogakuLite seed 0.5.3 b135 seed-partial from the released PKG
+GogakuLite 0.5.3 live Check for Updates: 发现新版本 0.5.4, signed packages resolved
+0.5.3 updater discovered the public 0.5.4 release in both editions.

@@ -1,0 +1,118 @@
+{
+  "schema": 1,
+  "repo": "gomeen/gokaku",
+  "releaseId": 460335080,
+  "version": "0.5.4",
+  "buildNumber": 136,
+  "channel": "stable",
+  "sourceSha256": "3dd3cdb056d116606008704dd93ee3e4a373141c4b791301a6c3de0e2b55aab4",
+  "git": {
+    "commit": "576532f58d088291a7f5b89a9c0ce63d3caf1f4c",
+    "dirty": false
+  },
+  "tag": "v0.5.4",
+  "keyId": "gogaku-prod-2026-11",
+  "hostWaiver": "用户书面确认 0.5.4 豁免会替换本机输入源及注入真实按键的 host 验收，在完整自动化检查和隔离升级通过后发布。",
+  "assets": {
+    "Gogaku-0.5.4.pkg": {
+      "id": 799644561,
+      "name": "Gogaku-0.5.4.pkg",
+      "bytes": 11679836,
+      "sha256": "fe28b9a24b98d161c363c3f98cecc231f09219fe5cc46e45dd63a5b804c87aee"
+    },
+    "Gogaku-0.5.4-windows-x64-setup.exe": {
+      "id": 799644845,
+      "name": "Gogaku-0.5.4-windows-x64-setup.exe",
+      "bytes": 58617072,
+      "sha256": "e3b1f6bc239c920ba208f65866ef0ab330e4a037532a5a3a6e06b61f2209fe8f"
+    },
+    "GogakuLite-0.5.4.pkg": {
+      "id": 799646692,
+      "name": "GogakuLite-0.5.4.pkg",
+      "bytes": 10881289,
+      "sha256": "883c8d33d191a31e96abdb0d95394ecc0688aec4f71c5dfe3551512ecb7ff404"
+    },
+    "GogakuLite-0.5.4-windows-x64-setup.exe": {
+      "id": 799647102,
+      "name": "GogakuLite-0.5.4-windows-x64-setup.exe",
+      "bytes": 56665583,
+      "sha256": "31dfa7352d1b51466dadc1a691b4361b60df14368fe0189430b60dc4f9a71010"
+    },
+    "Gogaku-Data-0.5.4.pkg": {
+      "id": 799648764,
+      "name": "Gogaku-Data-0.5.4.pkg",
+      "bytes": 36694653,
+      "sha256": "c5cc437ba7a9defe65cc62c81721a96a07af18d83415b11d889c6ff853075939"
+    },
+    "GogakuLite-Data-0.5.4.pkg": {
+      "id": 799650238,
+      "name": "GogakuLite-Data-0.5.4.pkg",
+      "bytes": 34120481,
+      "sha256": "67d8faba83d89fa7b686226b79bbbe43cc015cf56b707bc783a183618ccecc37"
+    },
+    "update-manifest.json": {
+      "id": 799651957,
+      "name": "update-manifest.json",
+      "bytes": 1248,
+      "sha256": "fb2e209c3e66e74021e38596cc7098655681707ca89eea3ea68edb6d3d18bf0e"
+    },
+    "update-manifest.json.sig": {
+      "id": 799652025,
+      "name": "update-manifest.json.sig",
+      "bytes": 89,
+      "sha256": "702de7662561ae79d76ced763266eabd5967f7547ef8512f164e9f98a0653778"
+    },
+    "update-manifest-v2.json": {
+      "id": 799652089,
+      "name": "update-manifest-v2.json",
+      "bytes": 1502,
+      "sha256": "146fda34df6748a6827c47831ca4ec046f3201446d8ca74e21a9837b77406d66"
+    },
+    "update-manifest-v2.json.sig": {
+      "id": 799652179,
+      "name": "update-manifest-v2.json.sig",
+      "bytes": 89,
+      "sha256": "92dfa548e06a6a6cb9a2bd50d5dca5e1eae33ecbd31237877e80ac701927ebf7"
+    },
+    "update-manifest-lite.json": {
+      "id": 799652250,
+      "name": "update-manifest-lite.json",
+      "bytes": 1256,
+      "sha256": "bbe45f9e7cf47224d3e896f9a6f54d27548b9f8a18022469d2a171ffec67850e"
+    },
+    "update-manifest-lite.json.sig": {
+      "id": 799652340,
+      "name": "update-manifest-lite.json.sig",
+      "bytes": 89,
+      "sha256": "c8d6e5e34e647538405f8c31ab94188948f1032d86a06b9744671ec00a2ed1af"
+    },
+    "update-manifest-lite-v2.json": {
+      "id": 799652423,
+      "name": "update-manifest-lite-v2.json",
+      "bytes": 1514,
+      "sha256": "1d81cee575cfaa9ef5e313ef8da20be83b23b9707bd047d0e3267f72c1ae512d"
+    },
+    "update-manifest-lite-v2.json.sig": {
+      "id": 799652586,
+      "name": "update-manifest-lite-v2.json.sig",
+      "bytes": 89,
+      "sha256": "714d50fc3cc1bb48966a1979859c3b775928706c611a315dbd0c988f928dbc3e"
+    },
+    "dataPackage": {
+      "platform": "macos",
+      "id": 799648764,
+      "name": "Gogaku-Data-0.5.4.pkg",
+      "bytes": 36694653,
+      "sha256": "c5cc437ba7a9defe65cc62c81721a96a07af18d83415b11d889c6ff853075939",
+      "dataVersion": "0740d56417e0d6d3"
+    },
+    "liteDataPackage": {
+      "platform": "macos",
+      "id": 799650238,
+      "name": "GogakuLite-Data-0.5.4.pkg",
+      "bytes": 34120481,
+      "sha256": "67d8faba83d89fa7b686226b79bbbe43cc015cf56b707bc783a183618ccecc37",
+      "dataVersion": "b81cc760128efd74"
+    }
+  }
+}
