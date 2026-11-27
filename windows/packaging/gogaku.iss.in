@@ -72,6 +72,10 @@ Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\Gogak
 Filename: "{app}\versions\{#AppVersion}-b{#AppBuild}-{#AppChannel}\bin\x64\GogakuSettings.exe"; Description: "打开 Gogaku 设置"; Flags: postinstall runasoriginaluser nowait skipifsilent
 
 [Code]
+const
+  { 与 agent.cpp 中 GogakuAgentExitMessage 对应；旧代理会忽略。 }
+  GogakuAgentExitMessage = $8000 + 41;
+
 var
   Old64Dll, Old86Dll: String;
   OldActiveRoot, OldPreviousRoot: String;
@@ -471,14 +475,69 @@ begin
   if not Result then Detail := '删除 HKLM ' + ChannelRegistryKey() + ' 指针失败';
 end;
 
-function InitializeUninstall(): Boolean;
+function FindWindowExW(Parent, After: HWND; ClassName: String; WindowName: LongWord): HWND;
+  external 'FindWindowExW@user32.dll stdcall';
+function GetWindowThreadProcessId(Window: HWND; var ProcessId: LongWord): LongWord;
+  external 'GetWindowThreadProcessId@user32.dll stdcall';
+function OpenProcess(Access: LongWord; Inherit: Boolean; ProcessId: LongWord): THandle;
+  external 'OpenProcess@kernel32.dll stdcall';
+function QueryFullProcessImageNameW(Process: THandle; Flags: LongWord;
+  Buffer: String; var Size: LongWord): Boolean;
+  external 'QueryFullProcessImageNameW@kernel32.dll stdcall';
+function PostMessageW(Window: HWND; Message: LongWord; WParam, LParam: LongWord): Boolean;
+  external 'PostMessageW@user32.dll stdcall';
+function WaitForSingleObject(Handle: THandle; Milliseconds: LongWord): LongWord;
+  external 'WaitForSingleObject@kernel32.dll stdcall';
+
+function IsOwnAgentPath(const ImagePath: String): Boolean;
 var
-  MessageText: String;
+  Root, AppRoot, VersionsRoot: String;
 begin
-  CapturePreviousState();
-  MessageText := LockMessage(True);
-  Result := MessageText = '';
-  if not Result then MsgBox(MessageText, mbError, MB_OK);
+  Root := LegacyRoot(ImagePath);
+  AppRoot := ExpandConstant('{app}');
+  VersionsRoot := AppRoot + '\versions';
+  Result := (CompareText(ImagePath, Root + '\bin\x64\GogakuAgent.exe') = 0) and
+    ((CompareText(Root, AppRoot) = 0) or (CompareText(ExtractFileDir(Root), VersionsRoot) = 0));
+end;
+
+procedure RequestOwnAgentExit();
+var
+  Tray, NextTray: HWND;
+  ProcessId, ConfirmedId, PathLength: LongWord;
+  Process: THandle;
+  ImagePath: String;
+begin
+  { 同桌面的完整版、Lite、dev 托盘类名相同，必须核对进程的完整路径。 }
+  Tray := FindWindowExW(0, 0, 'GogakuAgentTray', 0);
+  while Tray <> 0 do
+  begin
+    NextTray := FindWindowExW(0, Tray, 'GogakuAgentTray', 0);
+    ProcessId := 0;
+    if GetWindowThreadProcessId(Tray, ProcessId) <> 0 then
+    begin
+      { PROCESS_QUERY_LIMITED_INFORMATION | SYNCHRONIZE；不请求终止权限。 }
+      Process := OpenProcess($00101000, False, ProcessId);
+      if Process <> 0 then
+      begin
+        try
+          PathLength := 32768;
+          SetLength(ImagePath, PathLength);
+          if QueryFullProcessImageNameW(Process, 0, ImagePath, PathLength) and
+             IsOwnAgentPath(Copy(ImagePath, 1, PathLength)) then
+          begin
+            ConfirmedId := 0;
+            if (GetWindowThreadProcessId(Tray, ConfirmedId) <> 0) and (ConfirmedId = ProcessId) and
+               PostMessageW(Tray, GogakuAgentExitMessage, 0, 0) then
+              if WaitForSingleObject(Process, 3000) <> 0 then
+                Log('输入代理未在期限内正常退出，将检查文件是否仍被占用。');
+          end;
+        finally
+          CloseFileHandle(Process);
+        end;
+      end;
+    end;
+    Tray := NextTray;
+  end;
 end;
 
 { 结束指定映像名的进程；没在跑时返回非 0，忽略。只结束本产品的 exe：
@@ -533,8 +592,9 @@ var
   MessageText, Detail, OtherDetail: String;
   Removed64, Removed86: Boolean;
 begin
-  { 用户确认卸载后、Inno 删除文件前才执行有副作用的清理；绝不强杀进程。 }
+  { 用户确认卸载后、Inno 删除文件前才请求代理退出；绝不强杀进程。 }
   CapturePreviousState();
+  RequestOwnAgentExit();
   MessageText := LockMessage(True);
   if MessageText <> '' then RaiseException(MessageText);
   Removed64 := UnregisterSaved('x64', Old64Dll, Detail);

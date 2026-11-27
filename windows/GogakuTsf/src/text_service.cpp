@@ -15,6 +15,8 @@
 extern LONG g_objects;
 namespace {
 using gw::Json;
+constexpr ULONGLONG ShiftTapMs=600;
+bool isShiftKey(WPARAM vk){return vk==VK_SHIFT||vk==VK_LSHIFT||vk==VK_RSHIFT;}
 bool sameObject(IUnknown *a,IUnknown *b) {
     if(!a||!b) return a==b;
     IUnknown *x=nullptr,*y=nullptr;
@@ -67,6 +69,7 @@ STDMETHODIMP TextService::Activate(ITfThreadMgr *manager,TfClientId client){
     if(!manager)return E_INVALIDARG;
     try {
         Deactivate();manager_=manager;manager_->AddRef();client_=client;
+        keyboardFocusLost_=false; // AdviseKeyEventSink installs this as the foreground sink.
         ITfKeystrokeMgr *keys=nullptr;HRESULT hr=manager_->QueryInterface(IID_PPV_ARGS(&keys));
         if(SUCCEEDED(hr)){hr=keys->AdviseKeyEventSink(client_,this,TRUE);keys->Release();}
         if(FAILED(hr)){Deactivate();return hr;}
@@ -84,12 +87,13 @@ STDMETHODIMP TextService::Activate(ITfThreadMgr *manager,TfClientId client){
         timer_=CreateWindowExW(0,wc.lpszClassName,L"",0,0,0,0,0,HWND_MESSAGE,nullptr,g_hInst,this);
         if(!timer_){Deactivate();return E_FAIL;}SetTimer(timer_,1,100,nullptr);
         // 冷启动词库在代理中加载。激活时先握手，不依赖此刻是否已有
-        // 安全编辑上下文；逐键回调不等待启动，也不暂存／重放宿主按键。
-        bridge_.warmUp();
+        // 安全编辑上下文；逐键回调不等待启动，也不重放宿主文本按键。
+        if(!keyboardFocusLost_)bridge_.warmUp();
         idle();return S_OK;
     } catch(...){Deactivate();return E_FAIL;}
 }
 STDMETHODIMP TextService::Deactivate(){
+    keyboardFocusLost_=true;
     if(timer_){KillTimer(timer_,1);DestroyWindow(timer_);timer_=nullptr;}
     loseFocus();window_.destroy();bridge_.close();opened_=false;
     if(manager_){
@@ -102,7 +106,7 @@ STDMETHODIMP TextService::Deactivate(){
     focusCookie_=TF_INVALID_COOKIE;return S_OK;
 }
 bool TextService::safe(ITfContext *context,TfEditCookie cookie) {
-    if(!context||!manager_)return false;
+    if(!context||!manager_||keyboardFocusLost_)return false;
     DWORD pid=0;GetWindowThreadProcessId(GetForegroundWindow(),&pid);
     if(pid!=GetCurrentProcessId())return false;
     ITfDocumentMgr *document=nullptr;ITfContext *focused=nullptr;
@@ -185,16 +189,20 @@ bool TextService::safe(ITfContext *context,TfEditCookie cookie) {
         }
         if(scopeResolved){
             if(scopeCache_.size()>64){for(auto &item:scopeCache_)item.first->Release();scopeCache_.clear();}
-            auto &slot=scopeCache_[identity];slot.valid=true;slot.allowed=scopeAllowed;
+            auto [slot,inserted]=scopeCache_.try_emplace(identity);
+            if(inserted)identity->AddRef();
+            slot->second={true,scopeAllowed};
         }
         identity->Release();
     }
-    return scopeAllowed;
+    return scopeAllowed&&!keyboardFocusLost_;
 }
-bool TextService::syncContext(ITfContext *context){
+bool TextService::syncContext(ITfContext *context,bool *shiftConsumed){
     if(!safe(context)) {loseFocus();return false;}
+    if(shiftContext_&&!sameObject(shiftContext_,context))clearShift();
     if(!sameObject(context_,context)){
-        loseFocus();context_=context;context_->AddRef();
+        if(context_)loseFocus();
+        context_=context;context_->AddRef();
         IUnknown *identity=nullptr;context_->QueryInterface(IID_IUnknown,(void **)&identity);
         auto it=fields_.find(identity);
         if(it==fields_.end()){
@@ -204,6 +212,7 @@ bool TextService::syncContext(ITfContext *context){
         field_=std::to_string(GetCurrentProcessId())+":"+std::to_string(it->second);
         app_=appIdentity();opened_=false;hasCaret_=false;
     }
+    if(shiftTapPending_&&GetTickCount64()-shiftTime_>=ShiftTapMs)clearShift();
     if(!bridge_.connect())return false;
     if(!opened_){
         Json view;if(!bridge_.request({{"op","open"},{"app",app_},{"field",field_}},view))return false;
@@ -211,7 +220,25 @@ bool TextService::syncContext(ITfContext *context){
         // restart must not mistake its first token for an older commit.
         lastCommit_.clear();opened_=true;apply(view);
     }
-    return true;
+    if(opened_&&shiftTapPending_){
+        const bool timely=GetTickCount64()-shiftTime_<ShiftTapMs;
+        // 一旦开始派发就不重试。管道超时前代理可能已经切换语言。
+        clearShift();
+        if(timely){
+            const bool consumed=dispatch({{"op","event"},{"kind",GC_EV_SHIFT_CLICK}});
+            if(shiftConsumed)*shiftConsumed=consumed;
+        }
+    }
+    return opened_;
+}
+bool TextService::validShiftTap(ITfContext *context){
+    return shiftContext_&&sameObject(shiftContext_,context)&&
+        GetTickCount64()-shiftTime_<ShiftTapMs&&safe(context);
+}
+void TextService::clearShift(){
+    auto context=shiftContext_;
+    shiftContext_=nullptr;shiftTapPending_=false;
+    if(context)context->Release();
 }
 bool TextService::shortcut(WPARAM vk,Json &event){
     uint32_t modifiers=0;
@@ -278,17 +305,20 @@ bool TextService::shouldClaim(ITfContext *context,WPARAM vk,LPARAM lp){
 STDMETHODIMP TextService::OnTestKeyDown(ITfContext *context,WPARAM vk,LPARAM lp,BOOL *eaten){
     if(!eaten)return E_POINTER;*eaten=FALSE;
     try {
-        // 默认英文应用的恢复 Shift 点击可能落在 TIP 完成激活之前而丢失；
-        // 下一次按键在 600ms 内补发，避免用户整组字母直通。
-        if(shiftTapPending_){shiftTapPending_=false;
-            if(vk!=VK_SHIFT&&vk!=VK_LSHIFT&&vk!=VK_RSHIFT&&GetTickCount64()-shiftTime_<600&&syncContext(context))
-                dispatch({{"op","event"},{"kind",GC_EV_SHIFT_CLICK}});
-        }
-        if(vk==VK_SHIFT||vk==VK_LSHIFT||vk==VK_RSHIFT){
-            if(!shiftDown_){shiftDown_=true;shiftValid_=!(GetKeyState(VK_CONTROL)&0x8000)&&!(GetKeyState(VK_MENU)&0x8000)&&!((GetKeyState(VK_LWIN)|GetKeyState(VK_RWIN))&0x8000);shiftTime_=GetTickCount64();}
+        if(isShiftKey(vk)){
+            const auto time=GetTickCount64();
+            // 忽略自动重复。新点击可取代未送达的点击或缺少释放沿的旧按下。
+            if(!(lp&(1L<<30))&&(!shiftContext_||shiftTapPending_||time-shiftTime_>=ShiftTapMs)){
+                clearShift();
+                if(!(GetKeyState(VK_CONTROL)&0x8000)&&!(GetKeyState(VK_MENU)&0x8000)&&
+                   !((GetKeyState(VK_LWIN)|GetKeyState(VK_RWIN))&0x8000)&&safe(context)){
+                    if(context_&&!sameObject(context_,context))loseFocus();
+                    shiftContext_=context;shiftContext_->AddRef();shiftTime_=time;
+                }
+            }
             return S_OK;
         }
-        shiftValid_=false;
+        if(!shiftTapPending_)clearShift();
         if(syncContext(context))*eaten=shouldClaim(context,vk,lp);return S_OK;
     }catch(...){return S_OK;}
 }
@@ -299,15 +329,26 @@ STDMETHODIMP TextService::OnKeyDown(ITfContext *context,WPARAM vk,LPARAM lp,BOOL
 }
 STDMETHODIMP TextService::OnTestKeyUp(ITfContext *context,WPARAM vk,LPARAM,BOOL *eaten){
     if(!eaten)return E_POINTER;*eaten=FALSE;
-    if(vk==VK_SHIFT||vk==VK_LSHIFT||vk==VK_RSHIFT){
-        *eaten=shiftDown_&&shiftValid_&&GetTickCount64()-shiftTime_<600&&safe(context)&&bridge_.connected();
-        if(!*eaten){shiftDown_=false;shiftValid_=false;}
-    }
+    try{
+        if(isShiftKey(vk)&&!shiftTapPending_){
+            // TSF 只有在测试接受后才会调用 OnKeyUp，冷代理也允许收下点击。
+            *eaten=validShiftTap(context);
+            if(!*eaten)clearShift();
+        }
+    }catch(...){clearShift();}
     return S_OK;
 }
 STDMETHODIMP TextService::OnKeyUp(ITfContext *context,WPARAM vk,LPARAM,BOOL *eaten){
     if(!eaten)return E_POINTER;*eaten=FALSE;
-    try{if(vk==VK_SHIFT||vk==VK_LSHIFT||vk==VK_RSHIFT){bool tap=shiftDown_&&shiftValid_&&GetTickCount64()-shiftTime_<600;shiftDown_=false;shiftValid_=false;if(tap){if(syncContext(context))dispatch({{"op","event"},{"kind",GC_EV_SHIFT_CLICK}});else shiftTapPending_=true;}}}catch(...){}
+    try{
+        if(isShiftKey(vk)&&!shiftTapPending_){
+            if(!validShiftTap(context)){clearShift();return S_OK;}
+            shiftTapPending_=true;
+            bool consumed=false;
+            syncContext(context,&consumed);
+            *eaten=consumed;
+        }
+    }catch(...){clearShift();}
     return S_OK;
 }
 bool TextService::dispatch(const Json &event){
@@ -376,14 +417,21 @@ HRESULT TextService::clearComposition(TfEditCookie cookie){
     }
     if(anchor_){anchor_->Release();anchor_=nullptr;}return hr;
 }
-void TextService::caret(TfEditCookie cookie){
+bool TextService::caret(TfEditCookie cookie){
+    bool fresh=false;
     ITfContextView *view=nullptr;ITfRange *range=nullptr;
     TF_SELECTION selection{};ULONG fetched=0;
     if(SUCCEEDED(context_->GetSelection(cookie,TF_DEFAULT_SELECTION,1,&selection,&fetched))&&fetched==1)range=selection.range;
-    if(range&&SUCCEEDED(context_->GetActiveView(&view))){BOOL clipped=FALSE;RECT rect{};
-        if(SUCCEEDED(view->GetTextExt(cookie,range,&rect,&clipped))){caret_=rect;hasCaret_=true;}view->Release();
+    if(range&&SUCCEEDED(context_->GetActiveView(&view))&&view){
+        BOOL clipped=FALSE;RECT rect{};
+        // GetTextExt 可以用 S_OK 加零矩形表示文本不可见。插入点可以没有宽度。
+        if(SUCCEEDED(view->GetTextExt(cookie,range,&rect,&clipped))&&rect.bottom>rect.top&&rect.right>=rect.left){
+            caret_=rect;hasCaret_=true;fresh=true;
+        }
+        view->Release();
     }
     if(range)range->Release();
+    return fresh;
 }
 void TextService::apply(const Json &view){
     view_=view;
@@ -400,23 +448,25 @@ void TextService::apply(const Json &view){
         window_.hide();return;
     }
     if(!context_)return;
+    bool freshCaret=false;
     editing_=true;
     if(view.value("composing",false)){
         // 学习文字只在自己的非激活候选窗，宿主中的预编辑仅用于普通输入。
         bool learning=view.value("learning",false);
-        bool good=edit(context_,true,[&](TfEditCookie cookie){HRESULT hr=setPreedit(cookie,learning?std::string():view.value("marked",std::string()));if(SUCCEEDED(hr))caret(cookie);return hr;});
+        bool good=edit(context_,true,[&](TfEditCookie cookie){HRESULT hr=setPreedit(cookie,learning?std::string():view.value("marked",std::string()));if(SUCCEEDED(hr))freshCaret=caret(cookie);return hr;});
         if(!good){editing_=false;loseFocus();return;}
         if(hasCaret_)window_.showView(view,caret_);else window_.hide();
     }else{
         if(composition_)edit(context_,true,[&](TfEditCookie cookie){return clearComposition(cookie);});
-        edit(context_,false,[&](TfEditCookie cookie){caret(cookie);return S_OK;});
+        edit(context_,false,[&](TfEditCookie cookie){freshCaret=caret(cookie);return S_OK;});
         if(view.value("draftAvailable",false)&&hasCaret_)window_.showView(view,caret_);else window_.hide();
     }
     editing_=false;
-    if(view.value("toast",0)==1)window_.showToast(L"中");else if(view.value("toast",0)==2)window_.showToast(L"英");
+    const int toast=view.value("toast",0);
+    if(freshCaret&&(toast==1||toast==2))window_.showView({{"toast",toast}},caret_);
 }
 void TextService::loseFocus(){
-    window_.hide();shiftValid_=false;shiftDown_=false;shiftTapPending_=false;
+    window_.hide();clearShift();
     if(context_){
         editing_=true;if(composition_)edit(context_,true,[&](TfEditCookie cookie){return clearComposition(cookie);});editing_=false;
         if(composition_){composition_->Release();composition_=nullptr;}if(anchor_){anchor_->Release();anchor_=nullptr;}
@@ -428,7 +478,8 @@ void TextService::loseFocus(){
 }
 void TextService::idle(){
     try{
-        if(!manager_)return;ITfDocumentMgr *document=nullptr;ITfContext *context=nullptr;
+        if(!manager_||keyboardFocusLost_)return;
+        ITfDocumentMgr *document=nullptr;ITfContext *context=nullptr;
         if(SUCCEEDED(manager_->GetFocus(&document))&&document){document->GetTop(&context);document->Release();}
         if(!context){loseFocus();return;}
         bool ready=syncContext(context);context->Release();
@@ -445,7 +496,11 @@ LRESULT CALLBACK TextService::timerProc(HWND hwnd,UINT msg,WPARAM wp,LPARAM lp){
     auto self=(TextService*)GetWindowLongPtrW(hwnd,GWLP_USERDATA);
     if(msg==WM_TIMER&&self){self->idle();return 0;}return DefWindowProcW(hwnd,msg,wp,lp);
 }
-STDMETHODIMP TextService::OnSetFocus(BOOL foreground){if(!foreground)loseFocus();else idle();return S_OK;}
+STDMETHODIMP TextService::OnSetFocus(BOOL foreground){
+    keyboardFocusLost_=!foreground;
+    if(keyboardFocusLost_)loseFocus();else idle();
+    return S_OK;
+}
 STDMETHODIMP TextService::OnSetFocus(ITfDocumentMgr *,ITfDocumentMgr *){loseFocus();idle();return S_OK;}
 STDMETHODIMP TextService::OnInitDocumentMgr(ITfDocumentMgr *){return S_OK;}
 STDMETHODIMP TextService::OnUninitDocumentMgr(ITfDocumentMgr *){return S_OK;}

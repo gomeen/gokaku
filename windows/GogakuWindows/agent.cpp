@@ -516,7 +516,22 @@ void serve(HANDLE pipe) {
     }
     DisconnectNamedPipe(pipe);CloseHandle(pipe);CoUninitialize();--clients;
 }
+// 与打包脚本的 GogakuAgentExitMessage 一致；卸载器先按完整路径匹配代理。
+constexpr UINT GogakuAgentExitMessage = WM_APP + 41;
+
+void exitAgent() {
+    Json settings;
+    {std::lock_guard<std::mutex> lock(core.mutex);if(core.gc_normal_flush(core.normal))throw std::runtime_error("调频保存失败，请重试退出");settings=core.settings;}
+    gw::saveSettings(settings);
+    PostQuitMessage(0);
+}
+
 LRESULT CALLBACK trayProcedure(HWND window,UINT message,WPARAM wParam,LPARAM lParam) {
+    if(message==GogakuAgentExitMessage){
+        // 卸载器会限时等待并复查锁；保存失败则留在运行状态，不弹窗或丢弃数据。
+        try {exitAgent();}catch(...){}
+        return 0;
+    }
     if(message!=WM_APP+40)return DefWindowProcW(window,message,wParam,lParam);
     if(lParam!=WM_RBUTTONUP&&lParam!=WM_LBUTTONDBLCLK)return 0;
     UINT selected=1;
@@ -557,9 +572,7 @@ LRESULT CALLBACK trayProcedure(HWND window,UINT message,WPARAM wParam,LPARAM lPa
             if(!configured)MessageBoxW(window,L"请先在设置中保存火山凭据，并显式开启学习翻译。",L"Gogaku",MB_OK|MB_ICONINFORMATION);
 #endif
         }else if(selected==4){
-            Json settings;
-            {std::lock_guard<std::mutex> lock(core.mutex);if(core.gc_normal_flush(core.normal))throw std::runtime_error("调频保存失败，请重试退出");settings=core.settings;}
-            gw::saveSettings(settings);PostQuitMessage(0);
+            exitAgent();
         }
     }catch(...){MessageBoxW(window,L"操作未完成，请检查设置或稍后重试。",L"Gogaku",MB_OK|MB_ICONWARNING);}
     return 0;

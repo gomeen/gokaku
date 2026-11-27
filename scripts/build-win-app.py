@@ -643,6 +643,17 @@ def self_test(iscc=None):
         assert 'Regsvr(Architecture: String; DllPath: String; Unregister: Boolean' in text
         assert '{A3C5D7E9-1B2F-4A6C-8E0D-2F4B6A8C0E13}' in text
         assert '\n[UninstallRun]\n' not in text and '@STAGE_DIR@' not in text
+        # 运行中的代理不能在卸载确认前拦截；确认后先正常退出，再探测锁、注销 TSF。
+        assert 'function InitializeUninstall' not in text
+        uninstall = text.split('procedure PrepareUninstall();', 1)[1].split('\nend;', 1)[0]
+        steps = ('RequestOwnAgentExit();', 'LockMessage(True)', "UnregisterSaved('x64'")
+        assert all(step in uninstall for step in steps)
+        assert [uninstall.index(step) for step in steps] == sorted(uninstall.index(step) for step in steps)
+        agent_exit = text.split('procedure RequestOwnAgentExit();', 1)[1].split('\nend;', 1)[0]
+        assert 'IsOwnAgentPath(Copy(ImagePath, 1, PathLength))' in agent_exit
+        assert 'PostMessageW(Tray, GogakuAgentExitMessage, 0, 0)' in agent_exit
+        assert 'WaitForSingleObject(Process, ' in agent_exit
+        assert 'KillImage' not in uninstall + agent_exit and 'TerminateProcess' not in uninstall + agent_exit
         assert 'Source: "' + inno_path(staged) + '\\*"' not in text
         def rejected(action, message):
             try:

@@ -15,6 +15,7 @@
 #include <regex>
 #include <set>
 #include <stdexcept>
+#include <string_view>
 #include <thread>
 
 // Monocypher 4.0.2's OPTIONAL Ed25519 is the RFC 8032 SHA-512 algorithm.
@@ -30,6 +31,13 @@ constexpr uint64_t ReserveBytes = 64 * 1024 * 1024;
 constexpr UINT WorkCompleteMessage = WM_APP + 0x471;
 constexpr UINT AutoCheckMessage = WM_APP + 0x472;
 constexpr UINT_PTR AutoCheckTimer = 1;
+#ifdef GOGAKU_LITE
+constexpr char ManifestName[] = "update-manifest-lite.json";
+constexpr char SetupPrefix[] = "gogakulite-";
+#else
+constexpr char ManifestName[] = "update-manifest.json";
+constexpr char SetupPrefix[] = "gogaku-";
+#endif
 
 struct UpdateError : std::runtime_error {
     DWORD http = 0;
@@ -412,7 +420,7 @@ Json windowsAsset(const Json &manifest, const Installation &current) {
     for (const auto &asset : manifest["assets"]) if (asset["platform"] == "windows" && asset["arch"] == "x86_64") {
         if (!atLeastOS(current.os, asset["minOS"].get<std::string>())) throw UpdateError("unsupported");
         const auto name = lower(asset["name"].get<std::string>());
-        if (name.size() < 5 || name.substr(name.size() - 4) != ".exe") throw UpdateError("invalid_manifest");
+        if (!name.starts_with(SetupPrefix) || !name.ends_with(".exe")) throw UpdateError("invalid_manifest");
         return asset;
     }
     throw UpdateError("unsupported");
@@ -720,6 +728,51 @@ void savePreferences(const Json &value) {
     try { atomicWrite(userRoot() / "update-preferences-windows.json", value.dump(2), true); }
     catch (...) { throw UpdateError("preferences_error"); }
 }
+template <typename ReadAsset>
+Json evaluateReleases(const Json &releases, const Source &source, const Installation &current,
+                      std::atomic_bool *cancel, ReadAsset readAsset) {
+    bool sawEligible = false, sawManifest = false, sawUnknownKey = false;
+    Json bestManifest, bestRelease;
+    std::string bestRaw, bestSignature;
+    uint64_t bestBuild = 0;
+    for (const auto &release : releases) {
+        cancelled(cancel);
+        if (boolean(release, "draft") || (current.channel == "stable" && boolean(release, "prerelease"))) continue;
+        eligibleRelease(release, current);
+        sawEligible = true;
+        const auto manifestAsset = releaseAsset(release, ManifestName);
+        const auto signatureAsset = releaseAsset(release, std::string(ManifestName) + ".sig");
+        if (!manifestAsset || !signatureAsset) continue;
+        sawManifest = true;
+        const auto raw = readAsset(*manifestAsset, ManifestLimit, cancel);
+        const auto signature = readAsset(*signatureAsset, SignatureLimit, cancel);
+        Json manifest;
+        try {
+            manifest = verifyManifest(raw, signature, source);
+        } catch (const UpdateError &error) {
+            if (std::string_view(error.what()) != "unknown_key") throw;
+            // 不读取未验签的构建号。旧密钥记录不能参与排序，也不能否决已验签的候选。
+            sawUnknownKey = true;
+            continue;
+        }
+        if (manifest["channel"] != current.channel) continue;
+        const auto build = positive(manifest, "buildNumber");
+        if (build > bestBuild) {
+            bestBuild = build; bestManifest = manifest; bestRelease = release;
+            bestRaw = raw; bestSignature = signature;
+        }
+    }
+    cancelled(cancel);
+    if (!sawEligible) return outcome("noRelease", "当前通道没有公开的正式 Release。");
+    if (!sawManifest) return outcome("noManifest", std::string("当前通道的发布没有完整的 ") + ManifestName + " 与独立签名。");
+    if (!bestBuild) throw UpdateError(sawUnknownKey ? "unknown_key" : "channel_mismatch");
+    if (bestBuild <= current.build) return outcome("upToDate", "已是最新（" + current.version + "）。");
+    const auto asset = windowsAsset(bestManifest, current);
+    const auto downloadURL = bindAssets(bestRelease, bestManifest, asset);
+    const auto offer = makeOffer(source, bestRelease, bestManifest, asset, bestRaw, bestSignature, downloadURL);
+    return outcome("available", "发现新版本 " + bestManifest["version"].get<std::string>() + "。", offer);
+}
+
 } // namespace
 
 std::string getReleaseAsset(const std::string &url, uint64_t limit, std::atomic_bool *cancel,
@@ -747,40 +800,7 @@ Json checkUpdate(std::atomic_bool *cancel) {
         // ETags cache each page's list, not an outcome that could conceal a
         // changed second/third page. Signed manifest assets are verified again.
         try { atomicWrite(cacheRoot() / "github-cache.json", cache.dump(), true); } catch (...) {}
-        bool sawEligible = false, sawManifest = false, sawChannel = false;
-        Json bestManifest, bestRelease;
-        std::string bestRaw, bestSignature;
-        uint64_t bestBuild = 0;
-        for (const auto &release : releases) {
-            cancelled(cancel);
-            if (boolean(release, "draft") || (current.channel == "stable" && boolean(release, "prerelease"))) continue;
-            eligibleRelease(release, current);
-            sawEligible = true;
-            const auto manifestAsset = releaseAsset(release, "update-manifest.json");
-            const auto signatureAsset = releaseAsset(release, "update-manifest.json.sig");
-            if (!manifestAsset || !signatureAsset) continue; // Never accept an unsigned release.
-            sawManifest = true;
-            const auto raw = smallAsset(*manifestAsset, ManifestLimit, cancel);
-            const auto signature = smallAsset(*signatureAsset, SignatureLimit, cancel);
-            const auto manifest = verifyManifest(raw, signature, source);
-            if (manifest["channel"] != current.channel) continue;
-            sawChannel = true;
-            const auto build = positive(manifest, "buildNumber");
-            if (build > bestBuild) {
-                bestBuild = build; bestManifest = manifest; bestRelease = release;
-                bestRaw = raw; bestSignature = signature;
-            }
-        }
-        cancelled(cancel);
-        if (!sawEligible) return outcome("noRelease", "当前通道没有公开的正式 Release。");
-        if (!sawManifest) return outcome("noManifest", "当前通道的发布没有完整的 update-manifest.json 与独立签名。");
-        if (!sawChannel) return failed(UpdateError("channel_mismatch"));
-        // 用户可见文案不写构建号（2026-11-19 裁决：构建号是纯内部计数器）。
-        if (bestBuild <= current.build) return outcome("upToDate", "已是最新（" + current.version + "）。");
-        const auto asset = windowsAsset(bestManifest, current);
-        const auto downloadURL = bindAssets(bestRelease, bestManifest, asset);
-        const auto offer = makeOffer(source, bestRelease, bestManifest, asset, bestRaw, bestSignature, downloadURL);
-        return outcome("available", "发现新版本 " + bestManifest["version"].get<std::string>() + "。", offer);
+        return evaluateReleases(releases, source, current, cancel, smallAsset);
     } catch (const UpdateError &error) { return failed(error); }
     catch (...) { return failed(UpdateError("internal_error")); }
 }

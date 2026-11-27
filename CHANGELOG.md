@@ -2,6 +2,13 @@
 
 人类可读的版本变更说明。版本规则见 [docs/versioning.md](docs/versioning.md)；验收状态以 [docs/validation/native-development.md](docs/validation/native-development.md) 为准，本文不重复验收结论。
 
+### 0.5.4
+
+- 修复普通模式下切换中英时可能漏掉 Shift 单击的问题。macOS 切换输入控制器时会收起旧提示。Windows 在同一安全输入上下文就绪后可补发有效的单击，并在当前光标旁显示提示。
+- 修复 Windows 检查更新时旧发布清单挡住有效更新的问题。完整版和 Lite 分别读取自己的清单。遇到此问题的旧版可手动覆盖安装。
+- 修复 macOS 下载入门词库时设置应用可能崩溃的问题。
+- Windows 卸载时，会请求支持退出指令的 Gogaku 代理保存数据后退出，再检查文件占用。
+
 ### 0.5.3（2026-11-25，stable 定版）
 
 - 提供从 0.5.2 检查更新的后续版本。沿用 0.5.2 修正的 macOS 出厂数据安装流程；更新完成后重新打开设置即可查看新版状态。

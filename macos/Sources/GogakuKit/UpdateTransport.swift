@@ -63,7 +63,7 @@ public extension UpdateTransport {
     }
 }
 
-public final class URLSessionUpdateTransport: NSObject, UpdateTransport, URLSessionTaskDelegate {
+public final class URLSessionUpdateTransport: NSObject, UpdateTransport {
     public static let apiHost = "api.github.com"
     public static let downloadHosts: Set<String> = [
         "github.com", "objects.githubusercontent.com",
@@ -71,25 +71,27 @@ public final class URLSessionUpdateTransport: NSObject, UpdateTransport, URLSess
     ]
     public static let allowedHosts = downloadHosts.union([apiHost])
 
-    private let configuration: URLSessionConfiguration
-    private lazy var session: URLSession = {
-        let config = configuration.copy() as! URLSessionConfiguration
-        config.httpMaximumConnectionsPerHost = 2
-        config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        config.timeoutIntervalForRequest = 30
-        config.timeoutIntervalForResource = 300
-        return URLSession(configuration: config, delegate: self, delegateQueue: nil)
-    }()
+    private let session: URLSession
 
     public override init() {
-        configuration = .ephemeral
+        session = Self.metadataSession(configuration: .ephemeral)
         super.init()
     }
 
     /// 测试可注入 URLProtocol；生产仍只用隔离的 ephemeral session。
     init(configuration: URLSessionConfiguration) {
-        self.configuration = configuration.copy() as! URLSessionConfiguration
+        session = Self.metadataSession(configuration: configuration)
         super.init()
+    }
+
+    private static func metadataSession(configuration: URLSessionConfiguration) -> URLSession {
+        let config = configuration.copy() as! URLSessionConfiguration
+        config.httpMaximumConnectionsPerHost = 2
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 300
+        // URLSession 强持有代理。使用独立代理，不在析构时创建会话或把 self 交给异步回调。
+        return URLSession(configuration: config, delegate: MetadataRedirectDelegate(), delegateQueue: nil)
     }
 
     deinit { session.invalidateAndCancel() }
@@ -156,14 +158,7 @@ public final class URLSessionUpdateTransport: NSObject, UpdateTransport, URLSess
         }
     }
 
-    // MARK: 重定向白名单（GET）
-
-    public func urlSession(_ session: URLSession, task: URLSessionTask,
-                           willPerformHTTPRedirection response: HTTPURLResponse,
-                           newRequest request: URLRequest,
-                           completionHandler: @escaping (URLRequest?) -> Void) {
-        completionHandler(Self.redirectAllowed(request) ? request : nil)
-    }
+    // MARK: 重定向白名单
 
     static func redirectAllowed(_ request: URLRequest) -> Bool {
         guard let url = request.url, url.scheme == "https", let host = url.host else { return false }
@@ -196,6 +191,15 @@ public final class URLSessionUpdateTransport: NSObject, UpdateTransport, URLSess
             result[String(describing: key).lowercased()] = String(describing: value)
         }
         return result
+    }
+}
+
+private final class MetadataRedirectDelegate: NSObject, URLSessionTaskDelegate {
+    func urlSession(_ session: URLSession, task: URLSessionTask,
+                    willPerformHTTPRedirection response: HTTPURLResponse,
+                    newRequest request: URLRequest,
+                    completionHandler: @escaping (URLRequest?) -> Void) {
+        completionHandler(URLSessionUpdateTransport.redirectAllowed(request) ? request : nil)
     }
 }
 

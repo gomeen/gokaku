@@ -43,12 +43,15 @@ private:
     HWND timer_=nullptr;
     RECT caret_{};
     bool hasCaret_=false,editing_=false,opened_=false;
-    bool shiftDown_=false,shiftValid_=false,shiftTapPending_=false;
+    bool keyboardFocusLost_=false,shiftTapPending_=false;
+    ITfContext *shiftContext_=nullptr;
     ULONGLONG shiftTime_=0;
     uint64_t settingsRevision_=0,nextField_=0;
     std::string field_,app_,lastCommit_;
     bool safe(ITfContext *,TfEditCookie = TF_INVALID_COOKIE);
-    bool syncContext(ITfContext *);
+    bool syncContext(ITfContext *,bool *shiftConsumed = nullptr);
+    bool validShiftTap(ITfContext *);
+    void clearShift();
     bool buildEvent(WPARAM,LPARAM,gw::Json &);
     bool shortcut(WPARAM,gw::Json &);
     bool shouldClaim(ITfContext *,WPARAM,LPARAM);
@@ -59,7 +62,7 @@ private:
     HRESULT commit(TfEditCookie,const std::string &);
     HRESULT clearComposition(TfEditCookie);
     bool selectionMatches(TfEditCookie) const;
-    void caret(TfEditCookie);
+    bool caret(TfEditCookie);
     void loseFocus();
     void idle();
     static LRESULT CALLBACK timerProc(HWND,UINT,WPARAM,LPARAM);

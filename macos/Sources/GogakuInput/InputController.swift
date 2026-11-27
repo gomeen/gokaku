@@ -40,35 +40,40 @@ enum ShiftHeldEnglishKey {
 }
 
 /// Shift 单击判定：按住期间无其他按键且按时长 <600ms（规格表）。
-private struct ShiftClickTracker {
-    private var pressTime: TimeInterval = 0
+struct ShiftClickTracker {
+    // 与共享核心按键规格一致。修饰键的边沿判定由宿主前端负责。
+    private static let maxDuration: TimeInterval = 0.6
+    private var pressTime: TimeInterval?
     private var side: Int64 = 0
     private var otherKeySeen = false
 
-    mutating func press(_ event: NSEvent) {
-        // 按下沿缺释放沿的宿主（2026-11 企业微信兼容）会让 pressing 卡死：
-        // !pressing 恒假 → 新按下沿永不注册，事件通路单击此后全部判死。超过
-        // 单击窗（600ms）的残留按下沿先自愈再注册；同边沿 2ms 内的重复投递
-        // （Orca 双投递）时长≈0，仍走幂等路径不受影响。
-        if pressTime > 0, event.timestamp - pressTime >= 0.6 { pressTime = 0 }
-        pressTime = event.timestamp
-        side = (event.keyCode == 60) ? 1 : 0   // 60 右 Shift，56 左 Shift
+    @discardableResult
+    mutating func press(at timestamp: TimeInterval, side: Int64) -> Bool {
+        if let pressTime, timestamp - pressTime < Self.maxDuration {
+            // Orca 可能重复投递同一边沿。保留起始时间，另一侧 Shift 算第二个键。
+            if self.side != side { markOtherKey() }
+            return !otherKeySeen
+        }
+        // 部分宿主会漏掉释放沿。过期的按下沿不能挡住下一次单击。
+        pressTime = timestamp
+        self.side = side
         otherKeySeen = false
+        return true
     }
 
-    mutating func release(_ event: NSEvent) -> Int64? {
-        defer { pressTime = 0 }
-        guard pressTime > 0, !otherKeySeen, event.timestamp - pressTime < 0.6 else { return nil }
+    mutating func release(at timestamp: TimeInterval, side: Int64) -> Int64? {
+        guard let pressTime, timestamp >= pressTime else { return nil }
+        defer { self.pressTime = nil }
+        guard !otherKeySeen, side == self.side, timestamp - pressTime < Self.maxDuration else { return nil }
         return side
     }
 
     mutating func markOtherKey() { otherKeySeen = true }
 
-    /// 轮询兜底代发后调用：失效残留按下沿，宿主把释放沿延迟到确认窗之后
-    /// 才投递时，事件通路的迟到单击不再二次触发（切两次＝没切）。
-    mutating func expirePress() { pressTime = 0; otherKeySeen = true }
+    /// 轮询代发后失效按下沿，宿主迟到的释放沿不能再次切换。
+    mutating func expirePress() { pressTime = nil; otherKeySeen = true }
 
-    var pressing: Bool { pressTime > 0 }
+    var pressing: Bool { pressTime != nil }
 }
 
 /// 修饰键事件依赖宿主投递；Orca（Chromium 系）会投递但每个过渡双投递
@@ -83,10 +88,7 @@ private final class ShiftTapPoller {
     private var shiftDown = false          // 上次采样的 Shift 状态
     private var pressTime: TimeInterval = 0
     private var otherKeySeen = false       // 按住期间出现过按键（含其他修饰键）
-    /// 事件通路最近一次处理「释放沿形态」flagsChanged（raw 无 Shift 位）的
-    /// 时刻。只有释放沿算证据：企业微信（2026-11 用户报告）投递按下沿但
-    /// 单击链无产出——旧守卫「press 以来无任何 flagsChanged 才代发」被按下沿
-    /// 事件满足，兜底与事件通路一起静默，Shift 单击彻底无提示。
+    /// 事件通路最近一次判定归属的 Shift 释放沿时刻。
     private var releaseEvidenceAt: TimeInterval = -10
     private var pendingFire: (press: TimeInterval, side: Int64)?
     private var pendingTimer: Timer?
@@ -106,13 +108,20 @@ private final class ShiftTapPoller {
 
     func stop() {
         timer?.invalidate(); timer = nil
-        pendingTimer?.invalidate(); pendingTimer = nil
-        pendingFire = nil
-        shiftDown = false; pressTime = 0
+        resetGesture()
     }
 
-    /// 事件通路处理「释放沿形态」flagsChanged（raw 无 Shift 位）时告知：
-    /// 这是释放沿已由事件通路负责的证据，确认期据此取消代发。
+    /// 失焦时撤销在途单击，重新采样基线。进入时已经按着的 Shift 不属于新目标。
+    func resetGesture() {
+        pendingTimer?.invalidate(); pendingTimer = nil
+        pendingFire = nil
+        shiftDown = timer != nil && Self.shiftNow()
+        pressTime = 0
+        otherKeySeen = false
+        releaseEvidenceAt = -10
+    }
+
+    /// 事件通路已接管单击或判定本轮无效，确认期据此取消代发。
     func noteReleaseHandled() { releaseEvidenceAt = ProcessInfo.processInfo.systemUptime }
 
     /// 按住期间出现按键（keyDown／其他修饰键事件）→ 取消单击资格。
@@ -169,7 +178,7 @@ final class GogakuInputController: IMKInputController {
     // hub.learningSession（创建）／existingLearningSession（读）访问。
     private var focus: UInt64 = 0
     private var target: FocusTarget?
-    private var active = false
+    private var active: Bool { Self.active === self }
     private var engineAvailable = false
     private var pendingEdits = 0
     private var displayed: CompositionView?
@@ -195,14 +204,25 @@ final class GogakuInputController: IMKInputController {
         toggleDirection(nil)
     }
     private lazy var shiftPoller = ShiftTapPoller { [weak self] side in
-        guard let self, self.active, self.engineAvailable else { return }
-        // 代发即失效事件通路的残留按下沿：宿主把释放沿延迟到确认窗之后才
-        // 投递时，事件通路的迟到单击不再二次触发（切两次＝没切）。
-        self.shiftTracker.expirePress()
-        if self.mode == .learning { self.handleShiftClickInLearning(); return }
-        if let current = self.currentTarget() {
-            _ = self.handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: self.target == nil)
-        } else { self.suspend() }
+        self?.handleShiftClick(side, deliveredByHost: false)
+    }
+
+    private func handleShiftClick(_ side: Int64, deliveredByHost: Bool) {
+        guard active, engineAvailable else { return }
+        if !deliveredByHost { shiftTracker.expirePress() }
+        if mode == .learning {
+            if deliveredByHost { shiftPoller.noteReleaseHandled() }
+            handleShiftClickInLearning()
+            return
+        }
+        guard let current = currentTarget() else {
+            // 读数如果只是暂时不可用，同一目标的轮询确认还可以再检查一次。
+            if !deliveredByHost { suspend() }
+            return
+        }
+        guard active else { return }
+        if deliveredByHost { shiftPoller.noteReleaseHandled() }
+        _ = handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: target == nil)
     }
     private var flushWork: DispatchWorkItem?
     /// 当前有效显示位置（宿主光标矩形）；nil＝面板隐藏但组合保留。
@@ -585,8 +605,11 @@ final class GogakuInputController: IMKInputController {
     }
 
     override func activateServer(_ sender: Any!) {
-        active = true
+        // IMK 可以先激活新控制器再停用旧控制器。先结束旧控制器的轮询与浮层。
+        if let previous = Self.active, previous !== self { previous.endActivation() }
         Self.active = self
+        shiftTracker.expirePress()
+        shiftPoller.resetGesture()
         shiftPoller.start()
         panel.choose = { [weak self] row in self?.panelChoose(row: row) }
         panel.pagePrevious = { [weak self] in self?.panelPage(-1) }
@@ -608,11 +631,16 @@ final class GogakuInputController: IMKInputController {
         configure()
     }
 
-    override func deactivateServer(_ sender: Any!) {
-        shiftPoller.stop(); stopPositionRefresh(); suspend(); active = false
+    private func endActivation() {
+        guard active else { return }
+        shiftPoller.stop()
+        suspend()
+        if active { Self.active = nil }
     }
+
+    override func deactivateServer(_ sender: Any!) { endActivation() }
     override func commitComposition(_ sender: Any!) { suspend() }
-    override func inputControllerWillClose() { shiftPoller.stop(); suspend(); active = false }
+    override func inputControllerWillClose() { endActivation() }
     override func hidePalettes() { panel.dismiss(); toast.hide() }
 
     override func recognizedEvents(_ sender: Any!) -> Int {
@@ -714,6 +742,7 @@ final class GogakuInputController: IMKInputController {
     }
 
     private func configure() {
+        guard active else { return }
         focus &+= 1; target = nil; displayed = nil; pendingEdits = 0
         displayRect = nil; carriedAnchorRect = nil; hiddenByFieldLoss = false
         anchorSuspectStreak = 0; anchorAgeReads = 0; stopPositionRefresh()
@@ -729,7 +758,9 @@ final class GogakuInputController: IMKInputController {
             guard let self else { return }
             self.hub.existingLearningSession?.configure(focus: generation, mode: selectedMode, direction: selectedDirection)
             // 焦点同步：核心按应用恢复默认英文状态并取消旧组合。
-            _ = self.hub.engine(self.settings)?.handle(.focusSync, app: app, field: field, timeMs: Self.nowMs())
+            if let normal = self.hub.engine(self.settings) {
+                self.hub.synchronizeNormalFocus(normal, app: app, field: field, timeMs: Self.nowMs())
+            }
         }
     }
 
@@ -743,6 +774,9 @@ final class GogakuInputController: IMKInputController {
     /// clearMarked=false：宿主状态无法确认（如组合中宿主自行清空了文本）时，
     /// 对宿主的任何写入（含清除 marked text）都可能崩掉宿主，跳过写入。
     private func suspend(clearMarked: Bool = true, rawOverride: String? = nil) {
+        guard active else { return }
+        shiftTracker.expirePress()
+        shiftPoller.resetGesture()
         let app = application, oldMode = mode, oldDirection = direction
         let raw = rawOverride ?? displayed?.raw ?? ""
         // 待插入译文未落地即失焦：原中文入草稿可恢复，缓冲与等待兜底丢弃。
@@ -781,7 +815,7 @@ final class GogakuInputController: IMKInputController {
             guard let self else { return }
             self.hub.existingLearningSession?.configure(focus: generation, mode: oldMode, direction: oldDirection)
             if let normal = self.hub.engine(self.settings) {
-                _ = normal.handle(.focusSync, app: app, field: "", timeMs: Self.nowMs())
+                self.hub.synchronizeNormalFocus(normal, app: app, field: "", timeMs: Self.nowMs())
                 normal.flush()
             }
         }
@@ -895,6 +929,7 @@ final class GogakuInputController: IMKInputController {
     }
 
     private func handleEvent(_ event: NSEvent) -> Bool {
+        guard active else { return false }
         guard engineAvailable else {
             panel.dismiss()
             return false
@@ -902,40 +937,29 @@ final class GogakuInputController: IMKInputController {
         // keyUp 不是新输入：一律透传（单字符原文提交竞态的历史修复）。
         if event.type == .keyUp { return false }
         if event.type == .flagsChanged {
-            // Shift 单击判定；其他修饰键变化不挂起组合（规格）。
-            // Hyper（fn／globe 修饰）不算 Shift 单击：fn 按住时 flags 含 .function，
-            // 与 Command／Control／Option 一样取消单击资格；长按（≥600ms）与
-            // 按住期间的其他按键已在 ShiftClickTracker 排除。
-            // Orca（Chromium 系）每个修饰键过渡双投递 flagsChanged（2026-11-02
-            // 侧车实测：同一边沿 2ms 内两条 raw 相同的事件）——重复的 Shift 按下
-            // 必须幂等，不得清除单击资格（此前正是它把每次 Orca Shift 单击判死）。
-            let flags = event.modifierFlags.intersection([.shift])
-            let hasShift = flags.rawValue != 0
-            let onlyShift = hasShift &&
-                event.modifierFlags.intersection([.command, .control, .option, .function]).rawValue == 0
-            if !hasShift {
-                // 释放沿（Shift 已松开；raw 里可能仍带其他修饰键）。
-                shiftPoller.noteReleaseHandled()
-                if shiftTracker.pressing {
-                    if let side = shiftTracker.release(event) {
-                        if mode == .learning {
-                            handleShiftClickInLearning()
-                        } else if let current = currentTarget() {
-                            _ = handleNormalSync(.shiftClick(side: side), at: current, fieldChanged: target == nil)
-                        } else { suspend() }
-                    } else {
-                        shiftTracker.markOtherKey(); shiftPoller.markOtherKey()
-                    }
-                } else if event.modifierFlags.intersection([.command, .control, .option, .function]).rawValue != 0 {
-                    // 无按下上下文的纯修饰键变化（如 Ctrl 单独按下）。
+            // 只用左右 Shift 的事件识别边沿。其他修饰键变化取消单击资格。
+            guard event.keyCode == 56 || event.keyCode == 60 else {
+                shiftTracker.markOtherKey()
+                shiftPoller.markOtherKey()
+                return false
+            }
+            let side: Int64 = event.keyCode == 60 ? 1 : 0
+            let modified = !event.modifierFlags.intersection([.command, .control, .option, .function]).isEmpty
+            if event.modifierFlags.contains(.shift) {
+                if modified {
+                    shiftTracker.markOtherKey()
+                    shiftPoller.markOtherKey()
+                } else if !shiftTracker.press(at: event.timestamp, side: side) {
                     shiftPoller.markOtherKey()
                 }
-            } else if onlyShift {
-                // Shift 按下沿（重复投递幂等：已按下时保持单击资格不变）。
-                if !shiftTracker.pressing { shiftTracker.press(event) }
             } else {
-                // Shift＋其他修饰键：取消单击资格。
-                shiftTracker.markOtherKey(); shiftPoller.markOtherKey()
+                let hadPress = shiftTracker.pressing
+                let click = shiftTracker.release(at: event.timestamp, side: side)
+                if let click, !modified {
+                    handleShiftClick(click, deliveredByHost: true)
+                } else if hadPress || modified {
+                    shiftPoller.noteReleaseHandled()
+                }
             }
             return false   // 修饰键事件本身交还宿主
         }
@@ -1028,6 +1052,7 @@ final class GogakuInputController: IMKInputController {
 
     private func handleNormalSync(_ normalEvent: NormalEvent, at target: FocusTarget, fieldChanged: Bool,
                                   swapTranslation: Bool = true) -> Bool {
+        guard active else { return false }
         self.target = target
         application = target.application
         let settings = self.settings
@@ -1048,14 +1073,12 @@ final class GogakuInputController: IMKInputController {
             defer { ValidationMonitor.shared.phase("coreExecNs", duration: DispatchTime.now().uptimeNanoseconds - innerStart) }
             #endif
             guard let engine = self.hub.engine(settings) else { return nil }
-            // 复查 B2：共享会话可能被其他控制器的 focusSync 切走；本控制器
-            // 未察觉字段变化（如 Shift 单击、面板点击）时以 hub 记录为准补发。
-            let stale = EngineHub.shared.lastAppField != (app, field)
-            var isFocusSync = false
-            if case .focusSync = normalEvent { isFocusSync = true }
-            let needSync = fieldChanged || (stale && !isFocusSync)
-            EngineHub.shared.lastAppField = (app, field)
-            if needSync { _ = engine.handle(.focusSync, app: app, field: field, timeMs: time) }
+            if case .focusSync = normalEvent {
+                return hub.synchronizeNormalFocus(engine, app: app, field: field, timeMs: time)
+            }
+            if fieldChanged || hub.lastAppField != (app, field) {
+                guard hub.synchronizeNormalFocus(engine, app: app, field: field, timeMs: time) != nil else { return nil }
+            }
             return engine.handle(normalEvent, app: app, field: field, timeMs: time)
         }
         #if GOGAKU_VALIDATION

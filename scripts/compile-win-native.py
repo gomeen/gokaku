@@ -116,6 +116,12 @@ def compile_arch(args, arch):
     run([cxx, *flags, ROOT / 'windows/tests/enable_test.cpp', obj / 'enable.o',
          obj / 'platform.o', obj / 'settings_contract.o',
          '-static', '-o', test_out / 'gogaku_windows_enable_test.exe', *libs])
+    if arch == 'x64':
+        # 使用内存资产和合成 Ed25519 签名，不联网、不安装；分别编译 Full／Lite。
+        run([cxx, *flags, ROOT / 'windows/tests/update_selection_test.cpp',
+             *[obj / f'{name}.o' for name in ('platform', 'settings_contract', 'monocypher', 'monocypher-ed25519')],
+             '-static', '-o', test_out / 'gogaku_windows_update_selection_test.exe',
+             *libs, '-lwinhttp', '-lcomctl32'])
     for artifact in sorted(out.glob('*')):
         if artifact.suffix.lower() in ('.dll', '.exe'):
             print(f'产物：{artifact} ({artifact.stat().st_size:,} bytes)', flush=True)

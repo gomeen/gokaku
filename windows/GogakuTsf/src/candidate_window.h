@@ -10,8 +10,6 @@ public:
     void destroy();
     bool valid() const { return m_hwnd != nullptr; }
     void hide();
-    void showToast(const wchar_t *text);
-    void showToast(const std::wstring &text) { showToast(text.c_str()); }
     void updateSettings(const gw::Json &settings);
     void showView(const gw::Json &view, const RECT &caret);
     // Compatibility only. The agent-backed TextService should use showView.

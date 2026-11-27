@@ -119,6 +119,10 @@ schema 2 清单在 schema 1 全部字段之上新增可选 `dataPackage` 对象�
 
 只接受 HTTPS，主机白名单：`api.github.com`、`github.com`、`objects.githubusercontent.com`、`release-assets.githubusercontent.com`、`github-releases.githubusercontent.com`。重定向必须仍在白名单内。限流（403／429 且 `x-ratelimit-remaining: 0`）、超时、离线、404、5xx、未知 schema、签名失败、通道不符、缺资产分别显示不同状态；**未配置更新源不能显示「已是最新」**。
 
+### Windows 清单选择（修复尚未发布）
+
+Windows 只消费 schema 1。完整版只读取 `update-manifest.json`，Lite 只读取 `update-manifest-lite.json`；不回退到另一产品，并核对 Windows 安装包名称前缀。只在通过签名校验、且匹配当前通道的清单中比较构建号。未知 `keyId` 的历史清单不参与比较，也不否决已验签的结果；如果没有可信的同通道清单，则仍报告签名校验失败。可信密钥下的签名错误仍中止检查。下载和启动安装前仍执行原有的验签、资产匹配和哈希校验。
+
 ### 就地热更新（0.3.0 起，Mac）
 
 主包安装不再调用 `/usr/bin/open` 交给系统 Installer，而是客户端自己完成与 pkg postinstall 逐条对应的事务（`UpdateInstaller`）：

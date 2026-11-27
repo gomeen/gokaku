@@ -129,8 +129,35 @@ extension UpdateTests {
         }
     }
 
+    func testUnusedTransportCanBeReleased() {
+        weak var released: URLSessionUpdateTransport?
+        autoreleasepool {
+            let transport = URLSessionUpdateTransport()
+            released = transport
+            withExtendedLifetime(transport) {}
+        }
+        XCTAssertNil(released)
+        // 给 CFNetwork 的异步失效回调时间，覆盖尚未拉取元数据就释放的下载路径。
+        RunLoop.current.run(until: Date(timeIntervalSinceNow: 0.25))
+    }
+
+    func testTransportIsReleasedAfterFetchingMetadata() async throws {
+        var transport: URLSessionUpdateTransport? = realTransport { request in
+            let url = try XCTUnwrap(request.url)
+            return (HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil,
+                                    headerFields: nil)!, Data())
+        }
+        defer { UpdateStubURLProtocol.setHandler(nil) }
+        weak var released = transport
+        let response = try await transport?.getAsset(URL(string: "https://github.com/asset")!,
+                                                     headers: [:], timeout: 1, maxBytes: 1)
+        XCTAssertEqual(response?.status, 200)
+        transport = nil
+        XCTAssertNil(released, "元数据会话的代理不能强引用传输对象")
+    }
+
     func testRealTransportRedirectDelegateKeepsHTTPSAllowlist() throws {
-        // Delegate 使用同一判定函数；这里直接测边界，避免未启动 URLSessionTask 的系统崩溃。
+        // 代理使用同一判定函数，直接验证重定向判定。
         let accepted = URLSessionUpdateTransport.allowedHosts.map { "https://\($0)/asset" }
         let rejected = ["http://github.com/asset", "https://evil.example/asset",
                         "https://github.com.evil.example/asset", "file:///tmp/asset"]

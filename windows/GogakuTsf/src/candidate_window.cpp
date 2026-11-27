@@ -59,14 +59,6 @@ void CandidateWindow::showCandidates(const GcSnapshot &snapshot,const RECT &care
     view.update(gw::panelPreeditOffsets(view["preedit"].get<std::string>(), snapshot.preedit_caret, snapshot.typed_prefix_len));
     showView(view,caret);
 }
-void CandidateWindow::showToast(const wchar_t *value) {
-    // Never use mouse position or an unrelated window as a synthetic anchor.
-    // The modern caller can show a first-use toast with showView + its caret.
-    if (!m_hwnd || !m_haveCaret || !value) return;
-    KillTimer(m_hwnd,1);
-    m_view={{"toast",gw::utf8(value)},{"candidates",gw::Json::array()}};
-    redraw(); SetTimer(m_hwnd,1,800,nullptr);
-}
 void CandidateWindow::redraw() {
     if (!m_renderer || !m_haveCaret) return;
     try {

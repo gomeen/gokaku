@@ -25,8 +25,15 @@ final class EngineHub {
     private var learning: CompositionSession?
     private var creationLogged = false
     private var learningLogged = false
-    /// 共享会话当前所在 (应用, 字段)：控制器检测自己是否已被切走（复查 B2）。
+    /// 共享会话当前所在的应用和字段，只在引擎队列上访问。
     var lastAppField: (app: String, field: String) = ("", "")
+
+    @discardableResult
+    func synchronizeNormalFocus(_ engine: NormalEngine, app: String, field: String, timeMs: Int64) -> NormalSnapshot? {
+        let snapshot = engine.handle(.focusSync, app: app, field: field, timeMs: timeMs)
+        lastAppField = snapshot == nil ? ("", "") : (app, field)
+        return snapshot
+    }
 
     /// 返回共享引擎；未创建时尝试创建（dict 缺失等返回 nil，下次再试）。
     func engine(_ settings: Settings) -> NormalEngine? {
@@ -44,6 +51,7 @@ final class EngineHub {
     /// 设置可能影响引擎可用性时调用（如语言资源安装后）。
     func invalidateEngine() {
         normal = nil
+        lastAppField = ("", "")
         creationLogged = false
     }
 
